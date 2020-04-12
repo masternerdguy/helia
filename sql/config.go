@@ -19,7 +19,11 @@ type dbConfig struct {
 
 func connect() (*sql.DB, error) {
 	//load config
-	config := loadConfiguration()
+	config, err := loadConfiguration()
+
+	if err != nil {
+		return nil, err
+	}
 
 	//create connection string
 	conn := fmt.Sprintf("host=%s port=%d user=%s "+
@@ -33,18 +37,18 @@ func connect() (*sql.DB, error) {
 	return db, err
 }
 
-func loadConfiguration() dbConfig {
+func loadConfiguration() (dbConfig, error) {
 	var config dbConfig
 
 	configFile, err := os.Open("configuration.json")
 	defer configFile.Close()
 
 	if err != nil {
-		fmt.Println(err.Error())
+		return dbConfig{}, err
 	}
 
 	jsonParser := json.NewDecoder(configFile)
 	jsonParser.Decode(&config)
 
-	return config
+	return config, nil
 }

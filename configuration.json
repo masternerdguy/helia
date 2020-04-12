@@ -1,7 +1,7 @@
 {
     "dbhost": "localhost",
-    "dbuser": "root",
+    "dbuser": "postgres",
     "dbpass": "thisiswherewefight",
-    "dbport": "5432",
+    "dbport": 5432,
     "dbname": "helia"
 }

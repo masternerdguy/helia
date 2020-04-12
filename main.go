@@ -1,16 +1,9 @@
-package helia
+package main
 
-import (
-	"fmt"
-	"net/http"
-	"time"
-)
-
-func greet(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World! %s", time.Now())
-}
+import "helia/engine"
 
 func main() {
-	http.HandleFunc("/", greet)
-	http.ListenAndServe(":8080", nil)
+	//initialize game engine
+	engine := engine.HeliaEngine{}
+	engine.Initialize()
 }
