@@ -1,0 +1,7 @@
+{
+    "dbhost": "localhost",
+    "dbuser": "root",
+    "dbpass": "thisiswherewefight",
+    "dbport": "5432",
+    "dbname": "helia"
+}
