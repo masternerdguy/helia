@@ -6,13 +6,12 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 )
 
-//UserService Facility for interacting with the universe_systems table in the database
+//UserService Facility for interacting with the users table in the database
 type UserService struct{}
 
-//GetUserService Returns a solar system service for interacting with solar systems in the database
+//GetUserService Returns a user service for interacting with users in the database
 func GetUserService() UserService {
 	return UserService{}
 }
@@ -29,22 +28,15 @@ type User struct {
 //Hashpass Hashes a user's password using their username and an internal constant as the salt
 func (s UserService) Hashpass(username string, pwd string) (hash *string, err error) {
 	const salt = "_4ppl3j4ck!_"
-	password := []byte(pwd + salt + username)
-
-	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
-
-	err = bcrypt.CompareHashAndPassword(hashedPassword, password)
+	token := []byte(fmt.Sprintf("%s-xiwmg-%s-dnjij-%s", username, pwd, salt))
 
 	if err != nil {
 		return nil, err
 	}
 
-	x := fmt.Sprintf("%x", sha256.Sum256(hashedPassword))
+	hp := fmt.Sprintf("%x", sha256.Sum256(token))
 
-	return &x, nil
+	return &hp, nil
 }
 
 //NewUser Creates a new user
