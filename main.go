@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"helia/engine"
+	"helia/listener"
 	"net/http"
 )
 
@@ -12,13 +12,9 @@ func main() {
 	engine.Initialize()
 
 	//start engine
-	engine.Start()
+	//engine.Start()
 
-	//listen an serve http (temporary block to prevent exit)
-	http.HandleFunc("/", HelloServer)
+	//listen an serve http
+	http.HandleFunc("/api/register", listener.HandleRegister)
 	http.ListenAndServe(":8080", nil)
-}
-
-func HelloServer(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, %s!", r.URL.Path[1:])
 }
