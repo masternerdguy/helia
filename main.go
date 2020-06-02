@@ -16,5 +16,7 @@ func main() {
 
 	//listen an serve http
 	http.HandleFunc("/api/register", listener.HandleRegister)
+	http.HandleFunc("/api/login", listener.HandleLogin)
+
 	http.ListenAndServe(":8080", nil)
 }

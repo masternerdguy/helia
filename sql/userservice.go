@@ -2,6 +2,8 @@ package sql
 
 import (
 	"crypto/sha256"
+	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -48,6 +50,9 @@ func (s UserService) NewUser(u string, p string) (*User, error) {
 		return nil, err
 	}
 
+	//defer close
+	defer db.Close()
+
 	//hash password
 	hp, err := s.Hashpass(u, p)
 
@@ -80,4 +85,42 @@ func (s UserService) NewUser(u string, p string) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+//GetUserByLogin Finds the user with the supplied credentials
+func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) {
+	//get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	//defer close
+	defer db.Close()
+
+	//hash password
+	hp, err := s.Hashpass(username, pwd)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//check for user with these credentials
+	user := User{}
+
+	sqlStatement := `SELECT id, username, hashpass, registered, banned
+					 FROM users
+					 WHERE username=$1 AND hashpass=$2`
+
+	row := db.QueryRow(sqlStatement, username, *hp)
+
+	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned); err {
+	case sql.ErrNoRows:
+		return nil, errors.New("User does not exist or invalid credentials")
+	case nil:
+		return &user, nil
+	default:
+		return nil, err
+	}
 }

@@ -60,3 +60,46 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	//success!
 	w.WriteHeader(200)
 }
+
+//HandleLogin Handles a user signing in
+func HandleLogin(w http.ResponseWriter, r *http.Request) {
+	//enable cors
+	enableCors(&w)
+
+	//get services
+	userSvc := sql.GetUserService()
+
+	//read body
+	b, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	//parse model
+	m := models.APILoginModel{}
+	err = json.Unmarshal(b, &m)
+
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	//attempt login
+	res := models.APILoginResponseModel{}
+	user, err := userSvc.GetUserByLogin(m.Username, m.Password)
+
+	if err != nil {
+		res.Success = false
+		res.Message = err.Error()
+	} else {
+		res.Success = true
+		res.UID = user.ID.String()
+	}
+
+	//return result
+	o, _ := json.Marshal(res)
+	w.Write(o)
+}

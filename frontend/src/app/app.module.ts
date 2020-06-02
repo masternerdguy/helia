@@ -7,11 +7,13 @@ import { SignupComponent } from './auth/signup/signup.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import {HttpClientModule } from '@angular/common/http';
+import { LoginComponent } from './auth/login/login.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    SignupComponent
+    SignupComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
