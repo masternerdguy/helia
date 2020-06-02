@@ -8,7 +8,8 @@ type APILoginModel struct {
 
 //APILoginResponseModel Outgoing result of user login attempt
 type APILoginResponseModel struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
-	UID     string `json:"uid"`
+	Success   bool   `json:"success"`
+	Message   string `json:"message"`
+	SessionID string `json:"sid"`
+	UID       string `json:"uid"`
 }

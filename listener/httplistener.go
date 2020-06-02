@@ -68,6 +68,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	//get services
 	userSvc := sql.GetUserService()
+	sessionSvc := sql.GetSessionService()
 
 	//read body
 	b, err := ioutil.ReadAll(r.Body)
@@ -95,8 +96,27 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		res.Success = false
 		res.Message = err.Error()
 	} else {
-		res.Success = true
 		res.UID = user.ID.String()
+
+		//delete old session
+		err := sessionSvc.DeleteSession(user.ID)
+
+		if err != nil {
+			res.Success = false
+			res.Message = err.Error()
+		} else {
+			//create session
+			s, err := sessionSvc.NewSession(user.ID)
+
+			if err != nil {
+				res.Success = false
+				res.Message = err.Error()
+			} else {
+				//store sessionid in result
+				res.SessionID = (&s.ID).String()
+				res.Success = true
+			}
+		}
 	}
 
 	//return result
