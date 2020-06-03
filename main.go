@@ -14,14 +14,9 @@ func main() {
 	//start engine
 	//engine.Start()
 
-	//listen an serve http
+	//listen an serve api requests
 	http.HandleFunc("/api/register", listener.HandleRegister)
 	http.HandleFunc("/api/login", listener.HandleLogin)
-
-	//initialize socket listener
-	sl := listener.SocketListener{}
-
-	http.HandleFunc("/ws/connect", sl.HandleConnect)
 
 	http.ListenAndServe(":8080", nil)
 }
