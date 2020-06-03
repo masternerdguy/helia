@@ -1,21 +1,42 @@
 import { Injectable } from '@angular/core';
 import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
 import { environment } from 'src/environments/environment';
+import { GameMessage, MessageTypes } from './wsModels/gameMessage';
+import { ClientJoinBody } from './wsModels/clientJoinBody';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WsService {
-  ws: WebSocketSubject<any>;
+  ws: WebSocketSubject<GameMessage>;
 
   constructor() { }
 
-  connect(sid: string, handler: (data: any) => void) {
-    this.ws = webSocket(environment.wsUrl + 'connect');
-    this.ws.asObservable().subscribe(data => {
-      handler(data);
+  connect(sid: string, handler: (data: GameMessage, s: WebSocketSubject<GameMessage>) => void) {
+    this.ws = webSocket({
+      url: environment.wsUrl + 'connect',
+      deserializer: (e: MessageEvent) => JSON.parse(e.data),
+      serializer: (value: GameMessage) => JSON.stringify(value)
     });
 
-    this.ws.next({sid});
+    this.ws.asObservable().subscribe((data) => {
+      handler(data, this.ws);
+    });
+
+    // send initial join message
+    const b = new ClientJoinBody();
+    b.sid = sid;
+
+    this.sendMessage(MessageTypes.Join, b);
+  }
+
+  sendMessage(type: number, body: any) {
+    // package body as GameMessage
+    const g = new GameMessage();
+    g.body = JSON.stringify(body);
+    g.type = type;
+
+    // send message to server
+    this.ws.next(g);
   }
 }
