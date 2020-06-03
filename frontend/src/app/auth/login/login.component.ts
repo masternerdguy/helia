@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AccountService } from '../account.service';
 import { WsService } from 'src/app/game/ws.service';
+import { ServerJoinBody } from 'src/app/game/wsModels/join';
 
 @Component({
   selector: 'app-login',
@@ -25,12 +26,13 @@ export class LoginComponent implements OnInit {
       password: this.password.nativeElement.value,
     });
 
-    console.log(s);
-
     if (s.success) {
       // test connect
-      this.wsService.connect(s.sid, (d) => {
-        console.log(d);
+      this.wsService.connect(s.sid, (d, ws) => {
+        console.log({
+          data: d,
+          body: JSON.parse(d.body) as ServerJoinBody
+        });
       });
     } else {
       alert('Login failed: ' + s.message);

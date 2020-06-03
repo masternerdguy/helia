@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"helia/listener/models"
+	"helia/sql"
 	"log"
 	"net/http"
 	"sync"
@@ -28,12 +29,13 @@ type SocketListener struct {
 //GameClient Structure representing a game client connected to the server
 type GameClient struct {
 	sid  *uuid.UUID
+	uid  *uuid.UUID
 	conn *websocket.Conn
 	lock sync.Mutex
 }
 
 //WriteMessage Writes a message to a client
-func (c *GameClient) WriteMessage(author uuid.UUID, msg *models.GameMessage) {
+func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -42,7 +44,7 @@ func (c *GameClient) WriteMessage(author uuid.UUID, msg *models.GameMessage) {
 
 	if err == nil {
 		//send message
-		c.conn.WriteMessage(0, json)
+		c.conn.WriteMessage(1, json)
 	} else {
 		//dump error message to console
 		log.Println(err)
@@ -66,15 +68,10 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 	//defer cleanup of connection
 	defer c.Close()
 
-	//return if uuid generation failed
-	if err != nil {
-		log.Print("uuid:", err)
-		return
-	}
-
 	//add client to pool
 	client := GameClient{
 		sid:  nil,
+		uid:  nil,
 		conn: c,
 	}
 
@@ -114,10 +111,43 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 func (l *SocketListener) handleClientJoin(client *GameClient, body *models.ClientJoinBody) {
 	//debug out
-	log.Println(fmt.Sprintf("client joined %v", &body.SessionID))
+	log.Println(fmt.Sprintf("join attempt: %v", &body.SessionID))
 
-	//store sid
+	//initialize services
+	sessionSvc := sql.GetSessionService()
+	msgRegistry := models.NewMessageRegistry()
+
+	//store sid on server
 	client.sid = &body.SessionID
+
+	//prepare welcome message to client
+	w := models.ServerJoinBody{}
+
+	//lookup user session
+	session, err := sessionSvc.GetSessionByID(body.SessionID)
+
+	if err == nil {
+		//store userid
+		client.uid = &session.UserID
+		w.UserID = session.UserID
+
+		//package message
+		b, _ := json.Marshal(&w)
+
+		msg := models.GameMessage{
+			MessageType: msgRegistry.Join,
+			MessageBody: string(b),
+		}
+
+		//send welcome message to client
+		client.WriteMessage(&msg)
+
+		//debug out
+		log.Println(fmt.Sprintf("joined: %v", &body.SessionID))
+	} else {
+		//dump error to console
+		log.Println(fmt.Sprintf("join error: %v", err))
+	}
 }
 
 //addClient Adds a client to the server

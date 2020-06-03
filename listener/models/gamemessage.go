@@ -24,3 +24,8 @@ type GameMessage struct {
 type ClientJoinBody struct {
 	SessionID uuid.UUID `json:"sid"`
 }
+
+//ServerJoinBody Body for the response to a ClientJoinBody request from the client
+type ServerJoinBody struct {
+	UserID uuid.UUID `json:"uid"`
+}
