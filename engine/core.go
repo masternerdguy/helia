@@ -12,7 +12,7 @@ import (
 //HeliaEngine Structure representing the core server-side game engine
 type HeliaEngine struct {
 	universe       *universe.Universe
-	socketListener *listener.SocketListener
+	socketListener *listener.SocketListener //global listener containing a list of all clients at all times
 }
 
 //Initialize Initializes a new instance of the game engine

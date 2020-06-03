@@ -2,6 +2,7 @@ package universe
 
 import (
 	"fmt"
+	"helia/listener"
 	"log"
 
 	"github.com/google/uuid"
@@ -12,6 +13,7 @@ type SolarSystem struct {
 	ID         uuid.UUID
 	SystemName string
 	RegionID   uuid.UUID
+	Clients    []*listener.GameClient //clients in this system
 }
 
 //PeriodicUpdate Processes the solar system for a current tick
