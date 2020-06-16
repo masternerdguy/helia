@@ -115,6 +115,8 @@ func (l *SocketListener) handleClientJoin(client *GameClient, body *models.Clien
 
 	//initialize services
 	sessionSvc := sql.GetSessionService()
+	shipSvc := sql.GetShipService()
+	userSvc := sql.GetUserService()
 	msgRegistry := models.NewMessageRegistry()
 
 	//store sid on server
@@ -130,6 +132,24 @@ func (l *SocketListener) handleClientJoin(client *GameClient, body *models.Clien
 		//store userid
 		client.uid = &session.UserID
 		w.UserID = session.UserID
+
+		//lookup user
+		u, _ := userSvc.GetUserByID(session.UserID)
+
+		//lookup current ship
+		currShip, _ := shipSvc.GetShipByID(*u.CurrentShipID)
+
+		shipInfo := models.CurrentShipInfo{
+			ID:       currShip.ID,
+			UserID:   currShip.UserID,
+			Created:  currShip.Created,
+			ShipName: currShip.ShipName,
+			PosX:     currShip.PosX,
+			PosY:     currShip.PosY,
+			SystemID: currShip.SystemID,
+		}
+
+		w.CurrentShipInfo = shipInfo
 
 		//package message
 		b, _ := json.Marshal(&w)

@@ -1,6 +1,8 @@
 package sql
 
 import (
+	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -56,6 +58,43 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 		return nil, err
 	}
 
+	//update id in model
+	e.ID = uid
+
 	//return pointer to inserted ship model
 	return &e, nil
+}
+
+//GetShipByID Finds and returns a ship by its id
+func (s ShipService) GetShipByID(shipID uuid.UUID) (*Ship, error) {
+	//get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	//defer close
+	defer db.Close()
+
+	//find ship with this id
+	ship := Ship{}
+
+	sqlStatement :=
+		`
+			SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname
+			FROM public.ships
+			WHERE id = $1
+			`
+
+	row := db.QueryRow(sqlStatement, shipID)
+
+	switch err := row.Scan(&ship.ID, &ship.SystemID, &ship.UserID, &ship.PosX, &ship.PosY, &ship.Created, &ship.ShipName); err {
+	case sql.ErrNoRows:
+		return nil, errors.New("Ship not found")
+	case nil:
+		return &ship, nil
+	default:
+		return nil, err
+	}
 }

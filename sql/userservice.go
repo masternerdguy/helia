@@ -106,7 +106,7 @@ func (s UserService) SetCurrentShipID(uid uuid.UUID, shipID *uuid.UUID) error {
 				UPDATE public.users SET current_shipid = $1 WHERE id = $2;
 			`
 
-	_, err = db.Query(sql, uid, shipID)
+	_, err = db.Query(sql, *shipID, uid)
 
 	if err != nil {
 		return err
@@ -142,6 +142,37 @@ func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) 
 					 WHERE username=$1 AND hashpass=$2`
 
 	row := db.QueryRow(sqlStatement, username, *hp)
+
+	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID); err {
+	case sql.ErrNoRows:
+		return nil, errors.New("User does not exist or invalid credentials")
+	case nil:
+		return &user, nil
+	default:
+		return nil, err
+	}
+}
+
+//GetUserByID Finds a user by its id
+func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
+	//get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	//defer close
+	defer db.Close()
+
+	//check for user with these credentials
+	user := User{}
+
+	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid
+					 FROM users
+					 WHERE id=$1`
+
+	row := db.QueryRow(sqlStatement, uid)
 
 	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID); err {
 	case sql.ErrNoRows:

@@ -1,6 +1,10 @@
 package models
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 //MessageRegistry Registry of game message types
 type MessageRegistry struct {
@@ -12,6 +16,23 @@ func NewMessageRegistry() *MessageRegistry {
 	return &MessageRegistry{
 		Join: 0,
 	}
+}
+
+//CurrentShipInfo Information about the user's current ship
+type CurrentShipInfo struct {
+	ID       uuid.UUID
+	UserID   uuid.UUID
+	Created  time.Time
+	ShipName string
+	PosX     float64
+	PosY     float64
+	SystemID uuid.UUID
+}
+
+//CurrentSystemInfo Information about the user's current location
+type CurrentSystemInfo struct {
+	ID         uuid.UUID
+	SystemName string
 }
 
 //GameMessage Message container exchanged between client and server
@@ -27,5 +48,7 @@ type ClientJoinBody struct {
 
 //ServerJoinBody Body for the response to a ClientJoinBody request from the client
 type ServerJoinBody struct {
-	UserID uuid.UUID `json:"uid"`
+	UserID            uuid.UUID         `json:"uid"`
+	CurrentShipInfo   CurrentShipInfo   `json:"currentShipInfo"`
+	CurrentSystemInfo CurrentSystemInfo `json:"currentSystemInfo"`
 }
