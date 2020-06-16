@@ -20,11 +20,12 @@ func GetUserService() UserService {
 
 //User Structure representing a row in the users table
 type User struct {
-	ID         uuid.UUID
-	Username   string
-	Hashpass   string
-	Registered time.Time
-	Banned     bool
+	ID            uuid.UUID
+	Username      string
+	Hashpass      string
+	Registered    time.Time
+	Banned        bool
+	CurrentShipID *uuid.UUID
 }
 
 //Hashpass Hashes a user's password using their username and an internal constant as the salt
@@ -77,11 +78,12 @@ func (s UserService) NewUser(u string, p string) (*User, error) {
 
 	//return user with inserted data
 	user := User{
-		ID:         uid,
-		Username:   u,
-		Hashpass:   *hp,
-		Registered: createdAt,
-		Banned:     false,
+		ID:            uid,
+		Username:      u,
+		Hashpass:      *hp,
+		Registered:    createdAt,
+		Banned:        false,
+		CurrentShipID: nil,
 	}
 
 	return &user, nil
@@ -109,13 +111,13 @@ func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) 
 	//check for user with these credentials
 	user := User{}
 
-	sqlStatement := `SELECT id, username, hashpass, registered, banned
+	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid
 					 FROM users
 					 WHERE username=$1 AND hashpass=$2`
 
 	row := db.QueryRow(sqlStatement, username, *hp)
 
-	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned); err {
+	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("User does not exist or invalid credentials")
 	case nil:
