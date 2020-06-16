@@ -2,10 +2,13 @@ package listener
 
 import (
 	"encoding/json"
+	"fmt"
 	"helia/listener/models"
 	"helia/sql"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 func enableCors(w *http.ResponseWriter) {
@@ -19,6 +22,7 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 
 	//get services
 	userSvc := sql.GetUserService()
+	shipSvc := sql.GetShipService()
 
 	//read body
 	b, err := ioutil.ReadAll(r.Body)
@@ -34,7 +38,7 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(b, &m)
 
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "parsemodel: "+err.Error(), 500)
 		return
 	}
 
@@ -50,10 +54,39 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//create user
-	_, err = userSvc.NewUser(m.Username, m.Password)
+	u, err := userSvc.NewUser(m.Username, m.Password)
 
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "createuser: "+err.Error(), 500)
+		return
+	}
+
+	//create starter ship
+	systemID, err := uuid.Parse("1d4e0a339f674f248b7b1af4d5aa2ef1")
+
+	if err != nil {
+		http.Error(w, "castsystemid: "+err.Error(), 500)
+		return
+	}
+
+	t := sql.Ship{
+		SystemID: systemID,
+		UserID:   u.ID,
+		ShipName: fmt.Sprintf("%s's Starter Ship", m.Username),
+	}
+
+	starterShip, err := shipSvc.NewShip(t)
+
+	if err != nil {
+		http.Error(w, "createstartership: "+err.Error(), 500)
+		return
+	}
+
+	//put user in starter ship
+	err = userSvc.SetCurrentShipID(u.ID, &starterShip.ID)
+
+	if err != nil {
+		http.Error(w, "putuserinstartership: "+err.Error(), 500)
 		return
 	}
 

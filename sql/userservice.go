@@ -89,6 +89,32 @@ func (s UserService) NewUser(u string, p string) (*User, error) {
 	return &user, nil
 }
 
+//SetCurrentShipID Sets current_shipid on a user in the database
+func (s UserService) SetCurrentShipID(uid uuid.UUID, shipID *uuid.UUID) error {
+	//get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	//defer close
+	defer db.Close()
+
+	//update user
+	sql := `
+				UPDATE public.users SET current_shipid = $1 WHERE id = $2;
+			`
+
+	_, err = db.Query(sql, uid, shipID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 //GetUserByLogin Finds the user with the supplied credentials
 func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) {
 	//get db handle

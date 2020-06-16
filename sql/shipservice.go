@@ -43,9 +43,8 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 
 	//insert ship
 	sql := `
-				INSERT INTO public.ships(
-				id, universe_systemid, userid, pos_x, pos_y, created, shipname)
-				VALUES (?, ?, ?, ?, ?, ?, ?);
+				INSERT INTO public.ships(id, universe_systemid, userid, pos_x, pos_y, created, shipname)
+				VALUES ($1, $2, $3, $4, $5, $6, $7);
 			`
 
 	uid := uuid.New()
