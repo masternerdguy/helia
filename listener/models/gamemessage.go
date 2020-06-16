@@ -20,19 +20,19 @@ func NewMessageRegistry() *MessageRegistry {
 
 //CurrentShipInfo Information about the user's current ship
 type CurrentShipInfo struct {
-	ID       uuid.UUID
-	UserID   uuid.UUID
-	Created  time.Time
-	ShipName string
-	PosX     float64
-	PosY     float64
-	SystemID uuid.UUID
+	ID       uuid.UUID `json:"id"`
+	UserID   uuid.UUID `json:"uid"`
+	Created  time.Time `json:"createdAt"`
+	ShipName string    `json:"shipName"`
+	PosX     float64   `json:"x"`
+	PosY     float64   `json:"y"`
+	SystemID uuid.UUID `json:"systemId"`
 }
 
 //CurrentSystemInfo Information about the user's current location
 type CurrentSystemInfo struct {
-	ID         uuid.UUID
-	SystemName string
+	ID         uuid.UUID `json:"id"`
+	SystemName string    `json:"systemId"`
 }
 
 //GameMessage Message container exchanged between client and server

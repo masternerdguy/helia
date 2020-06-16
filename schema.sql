@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2020-06-16 07:13:49
+-- Started on 2020-06-16 08:45:34
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -222,7 +222,7 @@ ALTER TABLE ONLY public.users
     ADD CONSTRAINT fk_users_ships FOREIGN KEY (current_shipid) REFERENCES public.ships(id);
 
 
--- Completed on 2020-06-16 07:13:49
+-- Completed on 2020-06-16 08:45:34
 
 --
 -- PostgreSQL database dump complete
