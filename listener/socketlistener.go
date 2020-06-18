@@ -137,7 +137,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 					es := universe.Ship{
 						ID:       currShip.ID,
-						UserID:   currShip.SystemID,
+						UserID:   currShip.UserID,
 						Created:  currShip.Created,
 						ShipName: currShip.ShipName,
 						PosX:     currShip.PosX,
