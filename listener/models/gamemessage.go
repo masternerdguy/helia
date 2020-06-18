@@ -8,18 +8,31 @@ import (
 
 //MessageRegistry Registry of game message types
 type MessageRegistry struct {
-	Join int
+	Join         int
+	GlobalUpdate int
 }
 
 //NewMessageRegistry Returns a MessageRegistry with correct enum values
 func NewMessageRegistry() *MessageRegistry {
 	return &MessageRegistry{
-		Join: 0,
+		Join:         0,
+		GlobalUpdate: 1,
 	}
 }
 
 //CurrentShipInfo Information about the user's current ship
 type CurrentShipInfo struct {
+	ID       uuid.UUID `json:"id"`
+	UserID   uuid.UUID `json:"uid"`
+	Created  time.Time `json:"createdAt"`
+	ShipName string    `json:"shipName"`
+	PosX     float64   `json:"x"`
+	PosY     float64   `json:"y"`
+	SystemID uuid.UUID `json:"systemId"`
+}
+
+//GlobalShipInfo Structure for passing non-secret information about a ship
+type GlobalShipInfo struct {
 	ID       uuid.UUID `json:"id"`
 	UserID   uuid.UUID `json:"uid"`
 	Created  time.Time `json:"createdAt"`
@@ -51,4 +64,10 @@ type ServerJoinBody struct {
 	UserID            uuid.UUID         `json:"uid"`
 	CurrentShipInfo   CurrentShipInfo   `json:"currentShipInfo"`
 	CurrentSystemInfo CurrentSystemInfo `json:"currentSystemInfo"`
+}
+
+//ServerGlobalUpdateBody Body for periodically updating clients with globally-known (non-secret) system info
+type ServerGlobalUpdateBody struct {
+	CurrentSystemInfo CurrentSystemInfo `json:"currentSystemInfo"`
+	Ships             []GlobalShipInfo  `json:"ships"`
 }

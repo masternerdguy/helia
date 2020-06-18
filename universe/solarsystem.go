@@ -1,6 +1,8 @@
 package universe
 
 import (
+	"encoding/json"
+	"helia/listener/models"
 	"helia/shared"
 	"sync"
 
@@ -22,9 +24,44 @@ func (s *SolarSystem) PeriodicUpdate() {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
+	//get message registry
+	msgRegistry := models.NewMessageRegistry()
+
 	//update ships
 	for _, e := range s.Ships {
 		e.PeriodicUpdate()
+	}
+
+	//build global update of non-secret info for clients
+	gu := models.ServerGlobalUpdateBody{}
+	gu.CurrentSystemInfo = models.CurrentSystemInfo{
+		ID:         s.ID,
+		SystemName: s.SystemName,
+	}
+
+	for _, d := range s.Ships {
+		gu.Ships = append(gu.Ships, models.GlobalShipInfo{
+			ID:       d.ID,
+			UserID:   d.UserID,
+			Created:  d.Created,
+			ShipName: d.ShipName,
+			PosX:     d.PosX,
+			PosY:     d.PosY,
+			SystemID: d.SystemID,
+		})
+	}
+
+	//serialize global update
+	b, _ := json.Marshal(&gu)
+
+	msg := models.GameMessage{
+		MessageType: msgRegistry.GlobalUpdate,
+		MessageBody: string(b),
+	}
+
+	//write global update to clients
+	for _, c := range s.Clients {
+		c.WriteMessage(&msg)
 	}
 }
 
@@ -33,6 +70,14 @@ func (s *SolarSystem) AddShip(c *Ship) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
+	//make sure we aren't adding a duplicate
+	for _, s := range s.Ships {
+		if s.ID == c.ID {
+			return
+		}
+	}
+
+	//add ship
 	s.Ships = append(s.Ships, c)
 }
 
