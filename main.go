@@ -11,8 +11,13 @@ func main() {
 	engine := engine.HeliaEngine{}
 	engine.Initialize()
 
+	//instantiate socket listener
+	socketListener := &listener.SocketListener{}
+	socketListener.Engine = &engine
+	http.HandleFunc("/ws/connect", socketListener.HandleConnect)
+
 	//start engine
-	//engine.Start()
+	engine.Start()
 
 	//listen an serve api requests
 	http.HandleFunc("/api/register", listener.HandleRegister)

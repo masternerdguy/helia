@@ -3,13 +3,15 @@ package listener
 import (
 	"encoding/json"
 	"fmt"
+	"helia/engine"
 	"helia/listener/models"
+	"helia/shared"
 	"helia/sql"
+	"helia/universe"
 	"log"
 	"net/http"
 	"sync"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -22,33 +24,9 @@ var upgrader = websocket.Upgrader{
 
 //SocketListener Listener for handling and dispatching incoming websocket messages
 type SocketListener struct {
-	clients []*GameClient
+	Engine  *engine.HeliaEngine
+	clients []*shared.GameClient
 	lock    sync.Mutex
-}
-
-//GameClient Structure representing a game client connected to the server
-type GameClient struct {
-	sid  *uuid.UUID
-	uid  *uuid.UUID
-	conn *websocket.Conn
-	lock sync.Mutex
-}
-
-//WriteMessage Writes a message to a client
-func (c *GameClient) WriteMessage(msg *models.GameMessage) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	//package message as json
-	json, err := json.Marshal(msg)
-
-	if err == nil {
-		//send message
-		c.conn.WriteMessage(1, json)
-	} else {
-		//dump error message to console
-		log.Println(err)
-	}
 }
 
 //HandleConnect Handles a client joining the server
@@ -69,10 +47,10 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 	defer c.Close()
 
 	//add client to pool
-	client := GameClient{
-		sid:  nil,
-		uid:  nil,
-		conn: c,
+	client := shared.GameClient{
+		SID:  nil,
+		UID:  nil,
+		Conn: c,
 	}
 
 	l.addClient(&client)
@@ -109,7 +87,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (l *SocketListener) handleClientJoin(client *GameClient, body *models.ClientJoinBody) {
+func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *models.ClientJoinBody) {
 	//debug out
 	log.Println(fmt.Sprintf("join attempt: %v", &body.SessionID))
 
@@ -120,7 +98,7 @@ func (l *SocketListener) handleClientJoin(client *GameClient, body *models.Clien
 	msgRegistry := models.NewMessageRegistry()
 
 	//store sid on server
-	client.sid = &body.SessionID
+	client.SID = &body.SessionID
 
 	//prepare welcome message to client
 	w := models.ServerJoinBody{}
@@ -130,7 +108,7 @@ func (l *SocketListener) handleClientJoin(client *GameClient, body *models.Clien
 
 	if err == nil {
 		//store userid
-		client.uid = &session.UserID
+		client.UID = &session.UserID
 		w.UserID = session.UserID
 
 		//lookup user
@@ -150,6 +128,30 @@ func (l *SocketListener) handleClientJoin(client *GameClient, body *models.Clien
 		}
 
 		w.CurrentShipInfo = shipInfo
+
+		//place ship and client into system
+		for _, r := range l.Engine.Universe.Regions {
+			for _, s := range r.Systems {
+				if s.ID == currShip.SystemID {
+					s.AddClient(client)
+
+					es := universe.Ship{
+						ID:       currShip.ID,
+						UserID:   currShip.SystemID,
+						Created:  currShip.Created,
+						ShipName: currShip.ShipName,
+						PosX:     currShip.PosX,
+						PosY:     currShip.PosY,
+						SystemID: currShip.SystemID,
+					}
+
+					s.AddShip(&es)
+					goto exitLoop
+				}
+			}
+		}
+
+	exitLoop:
 
 		//package message
 		b, _ := json.Marshal(&w)
@@ -171,7 +173,7 @@ func (l *SocketListener) handleClientJoin(client *GameClient, body *models.Clien
 }
 
 //addClient Adds a client to the server
-func (l *SocketListener) addClient(c *GameClient) {
+func (l *SocketListener) addClient(c *shared.GameClient) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
@@ -179,7 +181,7 @@ func (l *SocketListener) addClient(c *GameClient) {
 }
 
 //removeClient Removes a client from the server
-func (l *SocketListener) removeClient(c *GameClient) {
+func (l *SocketListener) removeClient(c *shared.GameClient) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 

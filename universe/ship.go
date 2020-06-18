@@ -1,6 +1,8 @@
 package universe
 
 import (
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,4 +17,9 @@ type Ship struct {
 	PosX     float64
 	PosY     float64
 	SystemID uuid.UUID
+}
+
+//PeriodicUpdate Processes the ship for a tick
+func (s Ship) PeriodicUpdate() {
+	log.Println(fmt.Sprintf("updating %v", s))
 }
