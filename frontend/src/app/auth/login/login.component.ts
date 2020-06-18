@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AccountService } from '../account.service';
 import { WsService } from 'src/app/game/ws.service';
 import { ServerJoinBody } from 'src/app/game/wsModels/join';
+import { clientStart } from 'src/app/game/clientEngine';
 
 @Component({
   selector: 'app-login',
@@ -11,6 +12,11 @@ import { ServerJoinBody } from 'src/app/game/wsModels/join';
 export class LoginComponent implements OnInit {
   @ViewChild('username') username: ElementRef;
   @ViewChild('password') password: ElementRef;
+
+  loginSuccess = false;
+
+  screenWidth = window.screen.width;
+  screenHeight = window.screen.height;
 
   constructor(
     private accountService: AccountService,
@@ -27,12 +33,22 @@ export class LoginComponent implements OnInit {
     });
 
     if (s.success) {
-      // test connect
-      this.wsService.connect(s.sid, (d, ws) => {
-        console.log({
-          data: d,
-          body: JSON.parse(d.body) as ServerJoinBody
-        });
+      // rewrite to canvas
+      this.loginSuccess = true;
+
+      setTimeout(() => {
+        // enter fullscreen
+        const canvas = document.getElementsByClassName('gameCanvas')[0] as any;
+        console.log(canvas);
+
+        if (canvas.webkitRequestFullScreen) {
+          canvas.webkitRequestFullScreen();
+        } else {
+          canvas.mozRequestFullScreen();
+        }
+
+        // transfer control to game engine
+        clientStart(this.wsService, canvas, s.sid);
       });
     } else {
       alert('Login failed: ' + s.message);

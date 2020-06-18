@@ -1,4 +1,4 @@
-<div>
+<div *ngIf="!loginSuccess">
     <h2>Login</h2>
     <form class="form">
         <div>
@@ -11,4 +11,9 @@
         </div>
         <button type="button" class="btn btn-primary" (click)="login()">Submit</button>
     </form>
+</div>
+<div *ngIf="loginSuccess">
+    <canvas class="gameCanvas" width="{{screenWidth}}" height="{{screenHeight}}">
+        A browser that supports HTML5 canvas is required to play Helia.
+    </canvas>
 </div>
