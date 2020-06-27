@@ -1,7 +1,7 @@
 export class WSShip {
     id: string;
     uid: string;
-    createdAt: Date;
+    createdAt: string;
     shipName: string;
     x: number;
     y: number;
