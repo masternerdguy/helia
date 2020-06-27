@@ -1,4 +1,3 @@
-import { WSShip } from '../wsModels/entities/wsShip';
 import { Ship } from './ship';
 import { System } from './system';
 

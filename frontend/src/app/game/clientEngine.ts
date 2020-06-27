@@ -2,6 +2,9 @@ import { WsService } from './ws.service';
 import { ServerJoinBody } from './wsModels/join';
 import { GameMessage, MessageTypes } from './wsModels/gameMessage';
 import { Player } from './engineModels/player';
+import { System } from './engineModels/system';
+import { Ship } from './engineModels/ship';
+import { Camera } from './engineModels/camera';
 
 class EngineSack {
   constructor() {}
@@ -9,8 +12,12 @@ class EngineSack {
   // player
   player: Player;
 
+  // camera
+  camera: Camera;
+
   // graphics and client-server communication
   gfx: any;
+  ctx: any;
   wsSvc: WsService;
 }
 
@@ -19,9 +26,11 @@ const engineSack: EngineSack = new EngineSack();
 export function clientStart(wsService: WsService, canvas: any, sid: string) {
   // initialize
   engineSack.player = new Player();
+  engineSack.camera = new Camera(canvas.width, canvas.height);
 
   // store globals
   engineSack.gfx = canvas;
+  engineSack.ctx = canvas.getContext('2d');
   engineSack.wsSvc = wsService;
   engineSack.player.sid = sid;
 
@@ -30,7 +39,7 @@ export function clientStart(wsService: WsService, canvas: any, sid: string) {
     if (d.type === MessageTypes.Join) {
       handleJoin(d);
     } else if (d.type === MessageTypes.Update) {
-      test(d);
+      //test(d);
     }
   });
 }
@@ -39,12 +48,15 @@ function handleJoin(d: GameMessage) {
   // parse body
   const msg = JSON.parse(d.body) as ServerJoinBody;
 
-  // stash userid
+  // stash world welcome
   engineSack.player.uid = msg.currentShipInfo.uid;
-  engineSack.player.currentShip = msg.currentShipInfo;
-  engineSack.player.currentSystem = msg.currentSystemInfo;
+  engineSack.player.currentShip = new Ship(msg.currentShipInfo);
+  engineSack.player.currentSystem = new System(msg.currentSystemInfo);
 
   console.log(engineSack);
+
+  // start game loop
+  setInterval(clientLoop, 20);
 }
 
 function test(d: any) {
@@ -52,15 +64,34 @@ function test(d: any) {
   gfxBlank();
 
   // debug out
-  const ctx = engineSack.gfx.getContext('2d');
-  ctx.fillStyle = 'red';
-  ctx.font = '8px Arial';
-  ctx.fillText(JSON.stringify(d), 10, 50);
+  engineSack.ctx.fillStyle = 'red';
+  engineSack.ctx.font = '8px Arial';
+  engineSack.ctx.fillText(JSON.stringify(d), 10, 50);
 }
 
 // clears the screen
 function gfxBlank() {
-  const ctx = engineSack.gfx.getContext('2d');
-  ctx.fillStyle = 'pink';
-  ctx.fillRect(0, 0, engineSack.gfx.width, engineSack.gfx.height);
+  engineSack.ctx.fillStyle = 'pink';
+  engineSack.ctx.fillRect(0, 0, engineSack.gfx.width, engineSack.gfx.height);
+}
+
+function clientLoop() {
+  // render
+  clientRender();
+
+}
+
+function clientRender() {
+  // blank screen
+  gfxBlank();
+
+  // todo: draw system backplate
+
+  // draw ships
+  for (const sh of engineSack.player.currentSystem.ships) {
+    sh.render(engineSack.ctx, engineSack.camera);
+  }
+
+  // draw player ship
+  engineSack.player.currentShip.render(engineSack.ctx, engineSack.camera);
 }
