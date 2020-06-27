@@ -145,6 +145,11 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 						SystemID: currShip.SystemID,
 					}
 
+					//stash current system info
+					w.CurrentSystemInfo = models.CurrentSystemInfo{}
+					w.CurrentSystemInfo.ID = s.ID
+					w.CurrentSystemInfo.SystemName = s.SystemName
+
 					s.AddShip(&es)
 					goto exitLoop
 				}
