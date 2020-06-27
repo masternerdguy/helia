@@ -102,16 +102,6 @@ function handleUpdate(d: GameMessage) {
   }
 }
 
-function test(d: any) {
-  // clear screen
-  gfxBlank();
-
-  // debug out
-  engineSack.ctx.fillStyle = 'red';
-  engineSack.ctx.font = '8px Arial';
-  engineSack.ctx.fillText(JSON.stringify(d), 10, 50);
-}
-
 // clears the screen
 function gfxBlank() {
   engineSack.ctx.fillStyle = 'pink';
