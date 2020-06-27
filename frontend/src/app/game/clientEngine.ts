@@ -20,6 +20,9 @@ class EngineSack {
   gfx: any;
   ctx: any;
   wsSvc: WsService;
+
+  lastFrameTime: number;
+  tpf: number;
 }
 
 const engineSack: EngineSack = new EngineSack();
@@ -40,7 +43,7 @@ export function clientStart(wsService: WsService, canvas: any, sid: string) {
     if (d.type === MessageTypes.Join) {
       handleJoin(d);
     } else if (d.type === MessageTypes.Update) {
-      handleUpdate(d);
+      handleGlobalUpdate(d);
     }
   });
 }
@@ -55,10 +58,13 @@ function handleJoin(d: GameMessage) {
   engineSack.player.currentSystem = new System(msg.currentSystemInfo);
 
   // start game loop
+  engineSack.lastFrameTime = Date.now();
+  engineSack.tpf = 0;
+
   setInterval(clientLoop, 20);
 }
 
-function handleUpdate(d: GameMessage) {
+function handleGlobalUpdate(d: GameMessage) {
   // parse body
   const msg = JSON.parse(d.body) as ServerGlobalUpdateBody;
 
@@ -111,6 +117,14 @@ function gfxBlank() {
 function clientLoop() {
   // render
   clientRender();
+
+  // calculate time since last frame
+  engineSack.tpf = Date.now() - engineSack.lastFrameTime;
+
+  // store frame time
+  engineSack.lastFrameTime = Date.now();
+
+  console.log(engineSack.tpf);
 }
 
 function clientRender() {
