@@ -45,7 +45,7 @@ type GlobalShipInfo struct {
 //CurrentSystemInfo Information about the user's current location
 type CurrentSystemInfo struct {
 	ID         uuid.UUID `json:"id"`
-	SystemName string    `json:"systemId"`
+	SystemName string    `json:"systemName"`
 }
 
 //GameMessage Message container exchanged between client and server

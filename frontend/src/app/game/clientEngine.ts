@@ -5,6 +5,7 @@ import { Player } from './engineModels/player';
 import { System } from './engineModels/system';
 import { Ship } from './engineModels/ship';
 import { Camera } from './engineModels/camera';
+import { ServerGlobalUpdateBody } from './wsModels/globalUpdate';
 
 class EngineSack {
   constructor() {}
@@ -39,7 +40,7 @@ export function clientStart(wsService: WsService, canvas: any, sid: string) {
     if (d.type === MessageTypes.Join) {
       handleJoin(d);
     } else if (d.type === MessageTypes.Update) {
-      //test(d);
+      handleUpdate(d);
     }
   });
 }
@@ -53,10 +54,52 @@ function handleJoin(d: GameMessage) {
   engineSack.player.currentShip = new Ship(msg.currentShipInfo);
   engineSack.player.currentSystem = new System(msg.currentSystemInfo);
 
-  console.log(engineSack);
-
   // start game loop
   setInterval(clientLoop, 20);
+}
+
+function handleUpdate(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerGlobalUpdateBody;
+
+  // update system
+  engineSack.player.currentSystem.id = msg.currentSystemInfo.id;
+  engineSack.player.currentSystem.systemName = msg.currentSystemInfo.systemName;
+
+  // update ships
+  for (const sh of msg.ships) {
+    let match = false;
+
+    // find ship in memory
+    for (const sm of engineSack.player.currentSystem.ships) {
+      if (sh.id === sm.id) {
+        match = true;
+
+        // sync ship in memory
+        sm.sync(sh);
+
+        // is this the player ship?
+        if (sm.id === engineSack.player.currentShip.id) {
+          // update player ship cache
+          engineSack.player.currentShip.sync(sh);
+
+          // update camera position to track player ship
+          engineSack.camera.x = sm.x;
+          engineSack.camera.y = sm.y;
+        }
+
+        // exit loop
+        break;
+      }
+    }
+
+    if (!match) {
+      // add ship to memory
+      engineSack.player.currentSystem.ships.push(new Ship(sh));
+    }
+
+    // todo: handle ship leaving or dying
+  }
 }
 
 function test(d: any) {
@@ -78,7 +121,6 @@ function gfxBlank() {
 function clientLoop() {
   // render
   clientRender();
-
 }
 
 function clientRender() {
@@ -91,7 +133,4 @@ function clientRender() {
   for (const sh of engineSack.player.currentSystem.ships) {
     sh.render(engineSack.ctx, engineSack.camera);
   }
-
-  // draw player ship
-  engineSack.player.currentShip.render(engineSack.ctx, engineSack.camera);
 }

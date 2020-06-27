@@ -24,4 +24,13 @@ export class Ship extends WSShip {
         ctx.fillStyle = 'blue';
         ctx.fillRect(sx, sy, 10, 10);
     }
+
+    sync(sh: WSShip) {
+        this.createdAt = sh.createdAt;
+        this.shipName = sh.shipName;
+        this.uid = sh.uid;
+        this.systemId = sh.systemId;
+        this.x = sh.x;
+        this.y = sh.y;
+    }
 }
