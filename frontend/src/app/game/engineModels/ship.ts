@@ -29,6 +29,16 @@ export class Ship extends WSShip {
         const sx = camera.projectX(this.x);
         const sy = camera.projectY(this.y);
 
+        // find radius
+        const r = Math.max(this.texture2d.width, this.texture2d.height) / 2;
+
+        // draw debug bounding circle
+        ctx.beginPath();
+        ctx.arc(sx, sy, r, 0, 2 * Math.PI, false);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'white';
+        ctx.stroke();
+
         // draw ship
         ctx.drawImage(this.texture2d, sx - (this.texture2d.width / 2), sy - (this.texture2d.height / 2));
     }
@@ -40,5 +50,11 @@ export class Ship extends WSShip {
         this.systemId = sh.systemId;
         this.x = sh.x;
         this.y = sh.y;
+
+        // reset texture if changed
+        if (this.texture !== sh.texture) {
+            this.texture = sh.texture;
+            this.texture2d = undefined;
+        }
     }
 }
