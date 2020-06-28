@@ -124,6 +124,30 @@ function gfxBlank() {
   engineSack.ctx.fillRect(0, 0, engineSack.gfx.width, engineSack.gfx.height);
 }
 
+// draws the backplate for the current system
+function gfxBackplate() {
+  if (!engineSack.player.currentSystem.backplateImg) {
+    // render backplate
+    engineSack.backplateRenderer.render(
+      {
+        renderPointStars: true,
+        renderStars: true,
+        renderSun: false,
+        renderNebulae: true,
+        shortScale: false,
+        seed: engineSack.player.currentSystem.id // quick way to get a different plate for each system
+      }
+    );
+
+    // get data url and convert to image
+    engineSack.player.currentSystem.backplateImg = new Image();
+    engineSack.player.currentSystem.backplateImg.src = engineSack.backplateCanvas.toDataURL('image/png');
+  }
+
+  // draw system backplate
+  engineSack.ctx.drawImage(engineSack.player.currentSystem.backplateImg, 0, 0);
+}
+
 function clientLoop() {
   // render
   clientRender();
@@ -141,26 +165,8 @@ function clientRender() {
   // blank screen
   gfxBlank();
 
-  if (!engineSack.player.currentSystem.backplateImg) {
-    // render backplate
-    engineSack.backplateRenderer.render(
-      {
-        renderPointStars: true,
-        renderStars: true,
-        renderSun: true,
-        renderNebulae: true,
-        shortScale: false,
-        seed: '11knhf439tyo'
-      }
-    );
-
-    // get data url
-    engineSack.player.currentSystem.backplateImg = new Image();
-    engineSack.player.currentSystem.backplateImg.src = engineSack.backplateCanvas.toDataURL('image/png');
-  }
-
   // draw system backplate
-  engineSack.ctx.drawImage(engineSack.player.currentSystem.backplateImg, 0, 0);
+  gfxBackplate();
 
   // draw ships
   for (const sh of engineSack.player.currentSystem.ships) {
