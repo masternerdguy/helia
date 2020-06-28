@@ -17,6 +17,7 @@ type Ship struct {
 	PosX     float64
 	PosY     float64
 	SystemID uuid.UUID
+	Texture  string
 }
 
 //PeriodicUpdate Processes the ship for a tick

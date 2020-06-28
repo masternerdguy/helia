@@ -25,6 +25,7 @@ type Ship struct {
 	PosX     float64
 	PosY     float64
 	SystemID uuid.UUID
+	Texture  string
 }
 
 //NewShip Creates a new ship
@@ -45,14 +46,14 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 
 	//insert ship
 	sql := `
-				INSERT INTO public.ships(id, universe_systemid, userid, pos_x, pos_y, created, shipname)
-				VALUES ($1, $2, $3, $4, $5, $6, $7);
+				INSERT INTO public.ships(id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 			`
 
 	uid := uuid.New()
 	createdAt := time.Now()
 
-	_, err = db.Query(sql, uid, e.SystemID, e.UserID, e.PosX, e.PosY, createdAt, e.ShipName)
+	_, err = db.Query(sql, uid, e.SystemID, e.UserID, e.PosX, e.PosY, createdAt, e.ShipName, e.Texture)
 
 	if err != nil {
 		return nil, err
@@ -82,14 +83,14 @@ func (s ShipService) GetShipByID(shipID uuid.UUID) (*Ship, error) {
 
 	sqlStatement :=
 		`
-			SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname
+			SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture
 			FROM public.ships
 			WHERE id = $1
 			`
 
 	row := db.QueryRow(sqlStatement, shipID)
 
-	switch err := row.Scan(&ship.ID, &ship.SystemID, &ship.UserID, &ship.PosX, &ship.PosY, &ship.Created, &ship.ShipName); err {
+	switch err := row.Scan(&ship.ID, &ship.SystemID, &ship.UserID, &ship.PosX, &ship.PosY, &ship.Created, &ship.ShipName, &ship.Texture); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("Ship not found")
 	case nil:

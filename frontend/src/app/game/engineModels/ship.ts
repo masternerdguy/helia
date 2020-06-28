@@ -2,6 +2,8 @@ import { WSShip } from '../wsModels/entities/wsShip';
 import { Camera } from './camera';
 
 export class Ship extends WSShip {
+    texture2d: HTMLImageElement;
+
     constructor(ws: WSShip) {
         super();
 
@@ -13,16 +15,22 @@ export class Ship extends WSShip {
         this.uid = ws.uid;
         this.x = ws.x;
         this.y = ws.y;
+        this.texture = ws.texture;
     }
 
     render(ctx: any, camera: Camera) {
+        // set up texture
+        if (!this.texture2d) {
+            this.texture2d = new Image();
+            this.texture2d.src = '/assets/ships/' + this.texture + '.png';
+        }
+
         // project to screen
         const sx = camera.projectX(this.x);
         const sy = camera.projectY(this.y);
 
         // draw ship
-        ctx.fillStyle = 'blue';
-        ctx.fillRect(sx, sy, 10, 10);
+        ctx.drawImage(this.texture2d, sx - (this.texture2d.width / 2), sy - (this.texture2d.height / 2));
     }
 
     sync(sh: WSShip) {

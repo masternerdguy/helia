@@ -73,6 +73,7 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 		SystemID: systemID,
 		UserID:   u.ID,
 		ShipName: fmt.Sprintf("%s's Starter Ship", m.Username),
+		Texture:  "Mass Testing Brick",
 	}
 
 	starterShip, err := shipSvc.NewShip(t)
