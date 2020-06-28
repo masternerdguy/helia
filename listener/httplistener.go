@@ -74,6 +74,7 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 		UserID:   u.ID,
 		ShipName: fmt.Sprintf("%s's Starter Ship", m.Username),
 		Texture:  "Mass Testing Brick",
+		Theta:    0,
 	}
 
 	starterShip, err := shipSvc.NewShip(t)

@@ -16,6 +16,7 @@ export class Ship extends WSShip {
         this.x = ws.x;
         this.y = ws.y;
         this.texture = ws.texture;
+        this.theta = ws.theta;
     }
 
     render(ctx: any, camera: Camera) {
@@ -40,7 +41,11 @@ export class Ship extends WSShip {
         ctx.stroke();
 
         // draw ship
-        ctx.drawImage(this.texture2d, sx - (this.texture2d.width / 2), sy - (this.texture2d.height / 2));
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.rotate(this.theta * (Math.PI / 180));
+        ctx.drawImage(this.texture2d, -(this.texture2d.width / 2), -(this.texture2d.height / 2));
+        ctx.restore();
     }
 
     sync(sh: WSShip) {
@@ -50,6 +55,7 @@ export class Ship extends WSShip {
         this.systemId = sh.systemId;
         this.x = sh.x;
         this.y = sh.y;
+        this.theta = sh.theta;
 
         // reset texture if changed
         if (this.texture !== sh.texture) {

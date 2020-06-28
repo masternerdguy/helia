@@ -126,6 +126,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			PosY:     currShip.PosY,
 			SystemID: currShip.SystemID,
 			Texture:  currShip.Texture,
+			Theta:    currShip.Theta,
 		}
 
 		w.CurrentShipInfo = shipInfo
@@ -145,6 +146,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 						PosY:     currShip.PosY,
 						SystemID: currShip.SystemID,
 						Texture:  currShip.Texture,
+						Theta:    currShip.Theta,
 					}
 
 					//stash current system info

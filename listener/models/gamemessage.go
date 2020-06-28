@@ -30,6 +30,7 @@ type CurrentShipInfo struct {
 	PosY     float64   `json:"y"`
 	SystemID uuid.UUID `json:"systemId"`
 	Texture  string    `json:"texture"`
+	Theta    int       `json:"theta"`
 }
 
 //GlobalShipInfo Structure for passing non-secret information about a ship
@@ -42,6 +43,7 @@ type GlobalShipInfo struct {
 	PosY     float64   `json:"y"`
 	SystemID uuid.UUID `json:"systemId"`
 	Texture  string    `json:"texture"`
+	Theta    int       `json:"theta"`
 }
 
 //CurrentSystemInfo Information about the user's current location

@@ -49,6 +49,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 			PosY:     d.PosY,
 			SystemID: d.SystemID,
 			Texture:  d.Texture,
+			Theta:    d.Theta,
 		})
 	}
 

@@ -18,9 +18,19 @@ type Ship struct {
 	PosY     float64
 	SystemID uuid.UUID
 	Texture  string
+	Theta    int
 }
 
 //PeriodicUpdate Processes the ship for a tick
-func (s Ship) PeriodicUpdate() {
+func (s *Ship) PeriodicUpdate() {
+	// ROTATION TEST!!!!!
+	s.Theta++
+
+	if s.Theta > 360 {
+		s.Theta -= 360
+	} else if s.Theta < 0 {
+		s.Theta += 360
+	}
+
 	log.Println(fmt.Sprintf("updating %v", s))
 }

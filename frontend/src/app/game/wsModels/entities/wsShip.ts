@@ -7,4 +7,5 @@ export class WSShip {
     y: number;
     systemId: string;
     texture: string;
+    theta: number;
 }
