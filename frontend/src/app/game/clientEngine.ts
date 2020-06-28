@@ -135,7 +135,7 @@ function gfxBackplate() {
         renderSun: false,
         renderNebulae: true,
         shortScale: false,
-        seed: engineSack.player.currentSystem.id // quick way to get a different plate for each system
+        seed: "reeeeeeeee!" // quick way to get a different plate for each system
       }
     );
 

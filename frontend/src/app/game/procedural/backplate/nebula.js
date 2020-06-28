@@ -2,11 +2,11 @@
 
 const vec2 = require('gl-vec2');
 
-export function generateNoiseTexture(regl, rng, size) {
+export function generateNoiseTexture(regl, rand, size) {
   let l = size * size * 2;
   let array = new Uint8Array(l);
   for (let i = 0; i < l; i++) {
-    let r = vec2.random([]);
+    let r = [rand.random(), rand.random()];
     array[i * 2 + 0] = Math.round(0.5 * (1.0 + r[0]) * 255);
     array[i * 2 + 1] = Math.round(0.5 * (1.0 + r[1]) * 255);
   }
@@ -20,9 +20,9 @@ export function generateNoiseTexture(regl, rng, size) {
   });
 }
 
-export function createRenderer(regl) {
+export function createRenderer(regl, rand) {
   let pgWidth = 256;
-  let pgTexture = generateNoiseTexture(regl, null, pgWidth);
+  let pgTexture = generateNoiseTexture(regl, rand, pgWidth);
 
   return regl({
     vert: `

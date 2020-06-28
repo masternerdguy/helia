@@ -29,7 +29,6 @@ export class Backplate {
     this.ping = regl.framebuffer({color: regl.texture(), depth: false, stencil: false, depthStencil: false});
     this.pong = regl.framebuffer({color: regl.texture(), depth: false, stencil: false, depthStencil: false});
     this.starRenderer = star.createRenderer(regl);
-    this.nebulaRenderer = nebula.createRenderer(regl);
     this.copyRenderer = copy.createRenderer(regl);
     this.lastWidth = null;
     this.lastHeight = null;
@@ -78,6 +77,10 @@ export class Backplate {
     }
 
     rand = random.rand(props.seed, 1000);
+
+    // recreate nebula renderer with known seed
+    this.nebulaRenderer = nebula.createRenderer(regl, rand);
+
     let nebulaCount = 0;
     if (props.renderNebulae) { nebulaCount = Math.round(rand.random() * 4 + 1); }
     const nebulaOut = pingPong(ping, ping, pong, nebulaCount, (source, destination) => {
