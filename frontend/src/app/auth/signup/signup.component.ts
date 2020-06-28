@@ -21,8 +21,6 @@ export class SignupComponent implements OnInit {
       username: this.username.nativeElement.value,
       password: this.password.nativeElement.value
     });
-
-    console.log(s);
   }
 
 }

@@ -22,7 +22,6 @@ export class Backplate {
   maxTextureSize: any;
 
   constructor(canvas: HTMLCanvasElement) {
-    console.log(canvas);
     this.canvas = canvas;
     const regl = this.regl = REGL(canvas);
     this.pointStarTexture = regl.texture();

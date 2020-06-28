@@ -1,8 +1,6 @@
 package universe
 
 import (
-	"fmt"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -31,6 +29,4 @@ func (s *Ship) PeriodicUpdate() {
 	} else if s.Theta < 0 {
 		s.Theta += 360
 	}
-
-	log.Println(fmt.Sprintf("updating %v", s))
 }

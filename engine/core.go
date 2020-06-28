@@ -3,7 +3,6 @@ package engine
 import (
 	"fmt"
 	"helia/universe"
-	"log"
 	"time"
 )
 
@@ -31,7 +30,6 @@ func (e *HeliaEngine) Initialize() *HeliaEngine {
 
 //Start Start the goroutines for each system
 func (e *HeliaEngine) Start() {
-	log.Println(fmt.Sprintf("fupdating %v", e))
 	for _, r := range e.Universe.Regions {
 		for _, s := range r.Systems {
 			go func(sol *universe.SolarSystem) {

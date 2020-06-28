@@ -135,7 +135,7 @@ function gfxBackplate() {
         renderSun: false,
         renderNebulae: true,
         shortScale: false,
-        seed: "reeeeeeeee!" // quick way to get a different plate for each system
+        seed: engineSack.player.currentSystem.id // quick way to get a different plate for each system
       }
     );
 
@@ -157,8 +157,6 @@ function clientLoop() {
 
   // store frame time
   engineSack.lastFrameTime = Date.now();
-
-  console.log(engineSack.tpf);
 }
 
 function clientRender() {

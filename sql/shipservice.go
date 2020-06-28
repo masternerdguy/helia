@@ -49,7 +49,7 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 	sql := `
 				INSERT INTO public.ships(id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture,
 				                         theta)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8,
 					    $9);
 			`
 

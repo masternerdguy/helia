@@ -42,7 +42,6 @@ export class LoginComponent implements OnInit {
 
         // enter fullscreen
         const gameCanvas = document.getElementsByClassName('gameCanvas')[0] as any;
-        console.log(gameCanvas);
 
         if (gameCanvas.webkitRequestFullScreen) {
           gameCanvas.webkitRequestFullScreen();
