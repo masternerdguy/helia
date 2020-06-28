@@ -10,7 +10,7 @@ import { LoginModel, LoginResultModel } from './models/login';
 export class AccountService {
   constructor(private http: HttpClient) { }
 
-  async register(a: RegisterModel): Promise<boolean> {
+  async register(a: RegisterModel): Promise<any> {
     return await this.http.post<any>(environment.apiUrl + 'register', JSON.stringify(a)).toPromise();
   }
 

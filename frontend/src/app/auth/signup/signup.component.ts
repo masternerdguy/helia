@@ -17,10 +17,12 @@ export class SignupComponent implements OnInit {
 
   async register() {
     // try to create account
-    const s = await this.accountService.register({
+    await this.accountService.register({
       username: this.username.nativeElement.value,
       password: this.password.nativeElement.value
     });
-  }
 
+    // redirect to login page
+    window.location.href = '/auth/signin';
+  }
 }
