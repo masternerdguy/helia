@@ -6,6 +6,7 @@ import { System } from './engineModels/system';
 import { Ship } from './engineModels/ship';
 import { Camera } from './engineModels/camera';
 import { ServerGlobalUpdateBody } from './wsModels/globalUpdate';
+import { Backplate } from './procedural/backplate/backplate';
 
 class EngineSack {
   constructor() {}
@@ -16,25 +17,34 @@ class EngineSack {
   // camera
   camera: Camera;
 
-  // graphics and client-server communication
-  gfx: any;
+  // foreground graphics
+  gfx: HTMLCanvasElement;
   ctx: any;
+
+  // backplate graphics
+  backplateCanvas: HTMLCanvasElement;
+  backplateRenderer: Backplate;
+
+  // client-server communication
   wsSvc: WsService;
 
+  // tpf
   lastFrameTime: number;
   tpf: number;
 }
 
 const engineSack: EngineSack = new EngineSack();
 
-export function clientStart(wsService: WsService, canvas: any, sid: string) {
+export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement, backCanvas: HTMLCanvasElement, sid: string) {
   // initialize
   engineSack.player = new Player();
-  engineSack.camera = new Camera(canvas.width, canvas.height);
+  engineSack.camera = new Camera(gameCanvas.width, gameCanvas.height);
+  engineSack.backplateRenderer = new Backplate(backCanvas);
 
   // store globals
-  engineSack.gfx = canvas;
-  engineSack.ctx = canvas.getContext('2d');
+  engineSack.gfx = gameCanvas;
+  engineSack.ctx = gameCanvas.getContext('2d');
+  engineSack.backplateCanvas = backCanvas;
   engineSack.wsSvc = wsService;
   engineSack.player.sid = sid;
 
@@ -131,7 +141,26 @@ function clientRender() {
   // blank screen
   gfxBlank();
 
-  // todo: draw system backplate
+  if (!engineSack.player.currentSystem.backplateImg) {
+    // render backplate
+    engineSack.backplateRenderer.render(
+      {
+        renderPointStars: true,
+        renderStars: true,
+        renderSun: true,
+        renderNebulae: true,
+        shortScale: false,
+        seed: '11knhf439tyo'
+      }
+    );
+
+    // get data url
+    engineSack.player.currentSystem.backplateImg = new Image();
+    engineSack.player.currentSystem.backplateImg.src = engineSack.backplateCanvas.toDataURL('image/png');
+  }
+
+  // draw system backplate
+  engineSack.ctx.drawImage(engineSack.player.currentSystem.backplateImg, 0, 0);
 
   // draw ships
   for (const sh of engineSack.player.currentSystem.ships) {

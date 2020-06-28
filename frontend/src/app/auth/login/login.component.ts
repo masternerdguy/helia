@@ -37,18 +37,21 @@ export class LoginComponent implements OnInit {
       this.loginSuccess = true;
 
       setTimeout(() => {
-        // enter fullscreen
-        const canvas = document.getElementsByClassName('gameCanvas')[0] as any;
-        console.log(canvas);
+        // get back canvas
+        const backCanvas = document.getElementsByClassName('backCanvas')[0] as any;
 
-        if (canvas.webkitRequestFullScreen) {
-          canvas.webkitRequestFullScreen();
+        // enter fullscreen
+        const gameCanvas = document.getElementsByClassName('gameCanvas')[0] as any;
+        console.log(gameCanvas);
+
+        if (gameCanvas.webkitRequestFullScreen) {
+          gameCanvas.webkitRequestFullScreen();
         } else {
-          canvas.mozRequestFullScreen();
+          gameCanvas.mozRequestFullScreen();
         }
 
         // transfer control to game engine
-        clientStart(this.wsService, canvas, s.sid);
+        clientStart(this.wsService, gameCanvas, backCanvas, s.sid);
       });
     } else {
       alert('Login failed: ' + s.message);

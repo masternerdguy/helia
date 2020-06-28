@@ -14,4 +14,5 @@ export class System extends WSSystem {
     }
 
     ships: Ship[];
+    backplateImg: any;
 }
