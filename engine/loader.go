@@ -19,7 +19,7 @@ func loadUniverse() (*universe.Universe, error) {
 		return nil, err
 	}
 
-	regions := make([]*universe.Region, 0)
+	regions := make(map[string]*universe.Region, 0)
 	for _, e := range rs {
 		//load basic region information
 		r := universe.Region{
@@ -34,7 +34,7 @@ func loadUniverse() (*universe.Universe, error) {
 			return nil, err
 		}
 
-		systems := make([]*universe.SolarSystem, 0)
+		systems := make(map[string]*universe.SolarSystem, 0)
 
 		for _, f := range ss {
 			s := universe.SolarSystem{
@@ -43,12 +43,14 @@ func loadUniverse() (*universe.Universe, error) {
 				RegionID:   f.RegionID,
 			}
 
-			systems = append(systems, &s)
+			//initialize and store system
+			s.Initialize()
+			systems[s.ID.String()] = &s
 		}
 
 		//store and append region
 		r.Systems = systems
-		regions = append(regions, &r)
+		regions[r.ID.String()] = &r
 	}
 
 	//link regions into universe

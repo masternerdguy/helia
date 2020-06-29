@@ -14,9 +14,19 @@ type SolarSystem struct {
 	ID         uuid.UUID
 	SystemName string
 	RegionID   uuid.UUID
-	Ships      []*Ship
-	Clients    []*shared.GameClient //clients in this system
+	ships      map[string]*Ship
+	clients    map[string]*shared.GameClient //clients in this system
 	Lock       sync.Mutex
+}
+
+//Initialize Initializes internal aspects of SolarSystem
+func (s *SolarSystem) Initialize() {
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//initialize maps
+	s.clients = make(map[string]*shared.GameClient)
+	s.ships = make(map[string]*Ship)
 }
 
 //PeriodicUpdate Processes the solar system for a tick
@@ -27,10 +37,35 @@ func (s *SolarSystem) PeriodicUpdate() {
 	//get message registry
 	msgRegistry := models.NewMessageRegistry()
 
-	//todo: need to process the next event on each client's event queue if it is relevant to this system
+	//process player current ship event queue
+	for _, c := range s.clients {
+		evt := c.PopShipEvent()
+
+		//skip if nothing to do
+		if evt == nil {
+			continue
+		}
+
+		//process event
+		if evt.Type == models.NewMessageRegistry().NavClick {
+			//find player ship
+			for _, sh := range s.ships {
+				if sh.ID == c.CurrentShipID {
+					//extract data
+					data := evt.Body.(models.ClientNavClickBody)
+
+					//apply effect to player's current ship
+					sh.ManualTurn(data.ScreenTheta, data.ScreenMagnitude)
+
+					//next client
+					break
+				}
+			}
+		}
+	}
 
 	//update ships
-	for _, e := range s.Ships {
+	for _, e := range s.ships {
 		e.PeriodicUpdate()
 	}
 
@@ -41,7 +76,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 		SystemName: s.SystemName,
 	}
 
-	for _, d := range s.Ships {
+	for _, d := range s.ships {
 		gu.Ships = append(gu.Ships, models.GlobalShipInfo{
 			ID:       d.ID,
 			UserID:   d.UserID,
@@ -66,7 +101,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 	}
 
 	//write global update to clients
-	for _, c := range s.Clients {
+	for _, c := range s.clients {
 		c.WriteMessage(&msg)
 	}
 }
@@ -76,15 +111,8 @@ func (s *SolarSystem) AddShip(c *Ship) {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	//make sure we aren't adding a duplicate
-	for _, s := range s.Ships {
-		if s.ID == c.ID {
-			return
-		}
-	}
-
 	//add ship
-	s.Ships = append(s.Ships, c)
+	s.ships[c.ID.String()] = c
 }
 
 //RemoveShip Removes a ship from the system
@@ -92,24 +120,8 @@ func (s *SolarSystem) RemoveShip(c *Ship) {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	//find the ship to remove
-	e := -1
-	for i, s := range s.Ships {
-		if s == c {
-			e = i
-			break
-		}
-	}
-
 	//remove ship
-	if e > -1 {
-		t := len(s.Ships)
-
-		x := s.Ships[t-1]
-		s.Ships[e] = x
-
-		s.Ships = s.Ships[:t-1]
-	}
+	delete(s.ships, c.ID.String())
 }
 
 //AddClient Adds a client to the server
@@ -117,7 +129,8 @@ func (s *SolarSystem) AddClient(c *shared.GameClient) {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	s.Clients = append(s.Clients, c)
+	//add client
+	s.clients[(*c.UID).String()] = c
 }
 
 //RemoveClient Removes a client from the server
@@ -125,22 +138,6 @@ func (s *SolarSystem) RemoveClient(c *shared.GameClient) {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	//find the client to remove
-	e := -1
-	for i, s := range s.Clients {
-		if s == c {
-			e = i
-			break
-		}
-	}
-
 	//remove client
-	if e > -1 {
-		t := len(s.Clients)
-
-		x := s.Clients[t-1]
-		s.Clients[e] = x
-
-		s.Clients = s.Clients[:t-1]
-	}
+	delete(s.clients, (*c.UID).String())
 }

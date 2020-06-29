@@ -53,6 +53,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		Conn: c,
 	}
 
+	client.Initialize()
 	l.addClient(&client)
 
 	//defer cleanup of client when they disconnect
@@ -95,6 +96,15 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 }
 
 func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *models.ClientJoinBody) {
+	//safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
 	//debug out
 	log.Println(fmt.Sprintf("join attempt: %v", &body.SessionID))
 
@@ -143,40 +153,41 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 		//place ship and client into system
 		for _, r := range l.Engine.Universe.Regions {
-			for _, s := range r.Systems {
-				if s.ID == currShip.SystemID {
-					s.AddClient(client)
+			//lookup system in region
+			s := r.Systems[currShip.SystemID.String()]
 
-					es := universe.Ship{
-						ID:       currShip.ID,
-						UserID:   currShip.UserID,
-						Created:  currShip.Created,
-						ShipName: currShip.ShipName,
-						PosX:     currShip.PosX,
-						PosY:     currShip.PosY,
-						SystemID: currShip.SystemID,
-						Texture:  currShip.Texture,
-						Theta:    currShip.Theta,
-						VelX:     currShip.VelX,
-						VelY:     currShip.VelY,
-					}
-
-					//build current system info for welcome message
-					w.CurrentSystemInfo = models.CurrentSystemInfo{}
-					w.CurrentSystemInfo.ID = s.ID
-					w.CurrentSystemInfo.SystemName = s.SystemName
-
-					//stash current ship and system ids for quick reference
-					client.CurrentShipID = &currShip.ID
-					client.CurrentSystemID = &currShip.SystemID
-
-					s.AddShip(&es)
-					goto exitLoop
-				}
+			if s == nil {
+				continue
 			}
-		}
 
-	exitLoop:
+			s.AddClient(client)
+
+			es := universe.Ship{
+				ID:       currShip.ID,
+				UserID:   currShip.UserID,
+				Created:  currShip.Created,
+				ShipName: currShip.ShipName,
+				PosX:     currShip.PosX,
+				PosY:     currShip.PosY,
+				SystemID: currShip.SystemID,
+				Texture:  currShip.Texture,
+				Theta:    currShip.Theta,
+				VelX:     currShip.VelX,
+				VelY:     currShip.VelY,
+			}
+
+			//build current system info for welcome message
+			w.CurrentSystemInfo = models.CurrentSystemInfo{}
+			w.CurrentSystemInfo.ID = s.ID
+			w.CurrentSystemInfo.SystemName = s.SystemName
+
+			//stash current ship and system ids for quick reference
+			client.CurrentShipID = currShip.ID
+			client.CurrentSystemID = currShip.SystemID
+
+			s.AddShip(&es)
+			break
+		}
 
 		//package message
 		b, _ := json.Marshal(&w)
@@ -198,6 +209,15 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 }
 
 func (l *SocketListener) handleClientNavClick(client *shared.GameClient, body *models.ClientNavClickBody) {
+	//safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
 	//debug out
 	log.Println(fmt.Sprintf("nav click: %v | %v %v", body.SessionID, body.ScreenTheta, body.ScreenMagnitude))
 
@@ -205,8 +225,12 @@ func (l *SocketListener) handleClientNavClick(client *shared.GameClient, body *m
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientNavClick: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//todo
-		log.Println(fmt.Sprintf("handleClientNavClick: todo find %v %v", client.CurrentShipID, client.CurrentSystemID))
+		//initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		//push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.NavClick)
 	}
 }
 

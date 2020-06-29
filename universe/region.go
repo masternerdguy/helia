@@ -6,5 +6,5 @@ import "github.com/google/uuid"
 type Region struct {
 	ID         uuid.UUID
 	RegionName string
-	Systems    []*SolarSystem
+	Systems    map[string]*SolarSystem
 }

@@ -43,15 +43,19 @@ func (s *Ship) PeriodicUpdate() {
 }
 
 //ManualTurn Test function for manual turn
-func (s *Ship) ManualTurn(t float64, m float64) {
+func (s *Ship) ManualTurn(screenT float64, screenM float64) {
+	// lock entity
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
 	//todo: redo this so that the player won't be able to spam events to turn faster, etc
-	const tmpMaxAccel = 10
+	const tmpMaxAccel = 1
 
 	// calculate dT
-	dT := s.Theta - t
+	dT := s.Theta - screenT
 
-	// accelerate along new angle for debugging
-	s.Theta = t
+	// accelerate along new angle for debugging (this whole function needs a redo)
+	s.Theta = screenT
 
 	s.VelX += math.Cos(dT*(math.Pi/180)) * tmpMaxAccel
 	s.VelY += math.Sin(dT*(math.Pi/180)) * tmpMaxAccel
