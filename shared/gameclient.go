@@ -17,6 +17,7 @@ type GameClient struct {
 	Conn *websocket.Conn
 	lock sync.Mutex
 
+	// todo: need to implement an event queue at the client level and process it in the system's periodic update
 	// keys for quick lookups
 	CurrentShipID   *uuid.UUID
 	CurrentSystemID *uuid.UUID

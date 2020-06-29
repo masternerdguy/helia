@@ -27,6 +27,8 @@ func (s *SolarSystem) PeriodicUpdate() {
 	//get message registry
 	msgRegistry := models.NewMessageRegistry()
 
+	//todo: need to process the next event on each client's event queue if it is relevant to this system
+
 	//update ships
 	for _, e := range s.Ships {
 		e.PeriodicUpdate()
