@@ -10,6 +10,7 @@ import (
 type MessageRegistry struct {
 	Join         int
 	GlobalUpdate int
+	NavClick     int
 }
 
 //NewMessageRegistry Returns a MessageRegistry with correct enum values
@@ -17,6 +18,7 @@ func NewMessageRegistry() *MessageRegistry {
 	return &MessageRegistry{
 		Join:         0,
 		GlobalUpdate: 1,
+		NavClick:     2,
 	}
 }
 
@@ -30,7 +32,9 @@ type CurrentShipInfo struct {
 	PosY     float64   `json:"y"`
 	SystemID uuid.UUID `json:"systemId"`
 	Texture  string    `json:"texture"`
-	Theta    int       `json:"theta"`
+	Theta    float64   `json:"theta"`
+	VelX     float64   `json:"velX"`
+	VelY     float64   `json:"velY"`
 }
 
 //GlobalShipInfo Structure for passing non-secret information about a ship
@@ -43,7 +47,9 @@ type GlobalShipInfo struct {
 	PosY     float64   `json:"y"`
 	SystemID uuid.UUID `json:"systemId"`
 	Texture  string    `json:"texture"`
-	Theta    int       `json:"theta"`
+	Theta    float64   `json:"theta"`
+	VelX     float64   `json:"velX"`
+	VelY     float64   `json:"velY"`
 }
 
 //CurrentSystemInfo Information about the user's current location
@@ -74,4 +80,11 @@ type ServerJoinBody struct {
 type ServerGlobalUpdateBody struct {
 	CurrentSystemInfo CurrentSystemInfo `json:"currentSystemInfo"`
 	Ships             []GlobalShipInfo  `json:"ships"`
+}
+
+//ClientNavClickBody Body containing a click-in-space move event from the client
+type ClientNavClickBody struct {
+	SessionID       uuid.UUID `json:"sid"`
+	ScreenTheta     float64   `json:"dT"`
+	ScreenMagnitude float64   `json:"m"`
 }

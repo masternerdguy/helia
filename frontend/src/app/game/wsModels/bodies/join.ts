@@ -1,5 +1,5 @@
-import { WSShip } from './entities/wsShip';
-import { WSSystem } from './entities/wsSystem';
+import { WSShip } from '../entities/wsShip';
+import { WSSystem } from '../entities/wsSystem';
 
 export class ClientJoinBody {
     sid: string;

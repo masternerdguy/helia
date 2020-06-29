@@ -8,4 +8,6 @@ export class WSShip {
     systemId: string;
     texture: string;
     theta: number;
+    velX: number;
+    velY: number;
 }

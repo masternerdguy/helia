@@ -1,12 +1,14 @@
 import { WsService } from './ws.service';
-import { ServerJoinBody } from './wsModels/join';
+import { ServerJoinBody } from './wsModels/bodies/join';
 import { GameMessage, MessageTypes } from './wsModels/gameMessage';
 import { Player } from './engineModels/player';
 import { System } from './engineModels/system';
 import { Ship } from './engineModels/ship';
 import { Camera } from './engineModels/camera';
-import { ServerGlobalUpdateBody } from './wsModels/globalUpdate';
+import { ServerGlobalUpdateBody } from './wsModels/bodies/globalUpdate';
 import { Backplate } from './procedural/backplate/backplate';
+import { ClientNavClick } from './wsModels/bodies/navClick';
+import { angleBetween, magnitude } from './engineMath';
 
 class EngineSack {
   constructor() {}
@@ -66,6 +68,12 @@ function handleJoin(d: GameMessage) {
   engineSack.player.uid = msg.currentShipInfo.uid;
   engineSack.player.currentShip = new Ship(msg.currentShipInfo);
   engineSack.player.currentSystem = new System(msg.currentSystemInfo);
+
+  // add click event handler
+  engineSack.gfx.addEventListener('click', (event) => {
+    // handle event
+    handleClick(event.x, event.y);
+  });
 
   // start game loop
   engineSack.lastFrameTime = Date.now();
@@ -170,4 +178,18 @@ function clientRender() {
   for (const sh of engineSack.player.currentSystem.ships) {
     sh.render(engineSack.ctx, engineSack.camera);
   }
+}
+
+function handleClick(x: number, y: number) {
+  // todo: check to see if we're clicking on any ui elements, ships, etc and handle that
+
+  // clicked on empty space - issue a nav order for that location
+  const b = new ClientNavClick();
+
+  // calculate cursor vector
+  b.dT = angleBetween(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y);
+  b.m = magnitude(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y);
+  b.sid = engineSack.player.sid;
+
+  engineSack.wsSvc.sendMessage(MessageTypes.NavClick, b);
 }

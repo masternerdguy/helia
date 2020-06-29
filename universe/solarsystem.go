@@ -16,13 +16,13 @@ type SolarSystem struct {
 	RegionID   uuid.UUID
 	Ships      []*Ship
 	Clients    []*shared.GameClient //clients in this system
-	lock       sync.Mutex
+	Lock       sync.Mutex
 }
 
 //PeriodicUpdate Processes the solar system for a tick
 func (s *SolarSystem) PeriodicUpdate() {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
 
 	//get message registry
 	msgRegistry := models.NewMessageRegistry()
@@ -50,6 +50,8 @@ func (s *SolarSystem) PeriodicUpdate() {
 			SystemID: d.SystemID,
 			Texture:  d.Texture,
 			Theta:    d.Theta,
+			VelX:     d.VelX,
+			VelY:     d.VelY,
 		})
 	}
 
@@ -69,8 +71,8 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 //AddShip Adds a ship to the system
 func (s *SolarSystem) AddShip(c *Ship) {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
 
 	//make sure we aren't adding a duplicate
 	for _, s := range s.Ships {
@@ -85,8 +87,8 @@ func (s *SolarSystem) AddShip(c *Ship) {
 
 //RemoveShip Removes a ship from the system
 func (s *SolarSystem) RemoveShip(c *Ship) {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
 
 	//find the ship to remove
 	e := -1
@@ -110,16 +112,16 @@ func (s *SolarSystem) RemoveShip(c *Ship) {
 
 //AddClient Adds a client to the server
 func (s *SolarSystem) AddClient(c *shared.GameClient) {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
 
 	s.Clients = append(s.Clients, c)
 }
 
 //RemoveClient Removes a client from the server
 func (s *SolarSystem) RemoveClient(c *shared.GameClient) {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
 
 	//find the client to remove
 	e := -1

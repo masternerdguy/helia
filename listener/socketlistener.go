@@ -83,6 +83,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			//handle message
 			l.handleClientJoin(&client, &b)
+		} else if m.MessageType == msgRegistry.NavClick {
+			//decode body as ClientNavBody
+			b := models.ClientNavClickBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			//handle message
+			l.handleClientNavClick(&client, &b)
 		}
 	}
 }
@@ -117,6 +124,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		//lookup current ship
 		currShip, _ := shipSvc.GetShipByID(*u.CurrentShipID)
 
+		//build current ship info data for welcome message
 		shipInfo := models.CurrentShipInfo{
 			ID:       currShip.ID,
 			UserID:   currShip.UserID,
@@ -127,6 +135,8 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			SystemID: currShip.SystemID,
 			Texture:  currShip.Texture,
 			Theta:    currShip.Theta,
+			VelX:     currShip.VelX,
+			VelY:     currShip.VelY,
 		}
 
 		w.CurrentShipInfo = shipInfo
@@ -147,12 +157,18 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 						SystemID: currShip.SystemID,
 						Texture:  currShip.Texture,
 						Theta:    currShip.Theta,
+						VelX:     currShip.VelX,
+						VelY:     currShip.VelY,
 					}
 
-					//stash current system info
+					//build current system info for welcome message
 					w.CurrentSystemInfo = models.CurrentSystemInfo{}
 					w.CurrentSystemInfo.ID = s.ID
 					w.CurrentSystemInfo.SystemName = s.SystemName
+
+					//stash current ship and system ids for quick reference
+					client.CurrentShipID = &currShip.ID
+					client.CurrentSystemID = &currShip.SystemID
 
 					s.AddShip(&es)
 					goto exitLoop
@@ -178,6 +194,19 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 	} else {
 		//dump error to console
 		log.Println(fmt.Sprintf("join error: %v", err))
+	}
+}
+
+func (l *SocketListener) handleClientNavClick(client *shared.GameClient, body *models.ClientNavClickBody) {
+	//debug out
+	log.Println(fmt.Sprintf("nav click: %v | %v %v", body.SessionID, body.ScreenTheta, body.ScreenMagnitude))
+
+	//verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientNavClick: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		//todo
+		log.Println(fmt.Sprintf("handleClientNavClick: todo find %v %v", client.CurrentShipID, client.CurrentSystemID))
 	}
 }
 

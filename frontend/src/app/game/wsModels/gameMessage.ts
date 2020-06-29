@@ -5,5 +5,6 @@ export class GameMessage {
 
 export enum MessageTypes {
     Join = 0,
-    Update = 1
+    Update = 1,
+    NavClick = 2
 }

@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AccountService } from '../account.service';
 import { WsService } from 'src/app/game/ws.service';
-import { ServerJoinBody } from 'src/app/game/wsModels/join';
+import { ServerJoinBody } from 'src/app/game/wsModels/bodies/join';
 import { clientStart } from 'src/app/game/clientEngine';
 
 @Component({

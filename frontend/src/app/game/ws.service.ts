@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
 import { environment } from 'src/environments/environment';
 import { GameMessage, MessageTypes } from './wsModels/gameMessage';
-import { ClientJoinBody } from './wsModels/join';
+import { ClientJoinBody } from './wsModels/bodies/join';
 
 @Injectable({
   providedIn: 'root'

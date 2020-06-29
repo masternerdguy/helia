@@ -43,7 +43,7 @@ export class Ship extends WSShip {
         // draw ship
         ctx.save();
         ctx.translate(sx, sy);
-        ctx.rotate(this.theta * (Math.PI / 180));
+        ctx.rotate((this.theta) * (Math.PI / 180));
         ctx.drawImage(this.texture2d, -(this.texture2d.width / 2), -(this.texture2d.height / 2));
         ctx.restore();
     }

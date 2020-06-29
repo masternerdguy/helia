@@ -16,6 +16,10 @@ type GameClient struct {
 	UID  *uuid.UUID
 	Conn *websocket.Conn
 	lock sync.Mutex
+
+	// keys for quick lookups
+	CurrentShipID   *uuid.UUID
+	CurrentSystemID *uuid.UUID
 }
 
 //WriteMessage Writes a message to a client
