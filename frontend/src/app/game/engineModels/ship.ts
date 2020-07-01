@@ -19,6 +19,10 @@ export class Ship extends WSShip {
         this.theta = ws.theta;
         this.velX = ws.velX;
         this.velY = ws.velY;
+
+        if (ws.accel) {
+            this.accel = ws.accel;
+        }
     }
 
     render(ctx: any, camera: Camera) {
@@ -65,6 +69,10 @@ export class Ship extends WSShip {
         if (this.texture !== sh.texture) {
             this.texture = sh.texture;
             this.texture2d = undefined;
+        }
+
+        if (sh.accel) {
+            this.accel = sh.accel;
         }
     }
 }

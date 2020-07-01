@@ -33,6 +33,8 @@ class EngineSack {
   // tpf
   lastFrameTime: number;
   tpf: number;
+
+  reloading = false;
 }
 
 const engineSack: EngineSack = new EngineSack();
@@ -159,6 +161,14 @@ function gfxBackplate() {
 function clientLoop() {
   // render
   clientRender();
+
+  // check if connection has been lost
+  if (engineSack.wsSvc.isStale() && !engineSack.reloading) {
+    engineSack.reloading = true;
+
+    alert('Connection lost.');
+    window.location.reload();
+  }
 
   // calculate time since last frame
   engineSack.tpf = Date.now() - engineSack.lastFrameTime;

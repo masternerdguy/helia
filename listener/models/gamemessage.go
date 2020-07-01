@@ -35,6 +35,7 @@ type CurrentShipInfo struct {
 	Theta    float64   `json:"theta"`
 	VelX     float64   `json:"velX"`
 	VelY     float64   `json:"velY"`
+	Accel    float64   `json:"accel"`
 }
 
 //GlobalShipInfo Structure for passing non-secret information about a ship

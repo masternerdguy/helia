@@ -38,8 +38,8 @@ func (e *HeliaEngine) Start() {
 					//update system
 					sol.PeriodicUpdate()
 
-					//sleep for 1/4 of a second (this is the server heartbeat)
-					time.Sleep(250)
+					//sleep for server heartbeat
+					time.Sleep(universe.Heartbeat)
 				}
 			}(s)
 		}

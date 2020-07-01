@@ -29,6 +29,7 @@ type Ship struct {
 	Theta    float64
 	VelX     float64
 	VelY     float64
+	Accel    float64
 }
 
 //NewShip Creates a new ship
@@ -50,16 +51,16 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 	//insert ship
 	sql := `
 				INSERT INTO public.ships(id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture,
-				                         theta, vel_x, vel_y)
+				                         theta, vel_x, vel_y, accel)
 				VALUES ($1, $2, $3, $4, $5, $6, $7, $8,
-					    $9, $10, $11);
+					    $9, $10, $11, $12);
 			`
 
 	uid := uuid.New()
 	createdAt := time.Now()
 
 	_, err = db.Query(sql, uid, e.SystemID, e.UserID, e.PosX, e.PosY, createdAt, e.ShipName, e.Texture,
-		e.Theta, e.VelX, e.VelY)
+		e.Theta, e.VelX, e.VelY, e.Accel)
 
 	if err != nil {
 		return nil, err
@@ -90,7 +91,7 @@ func (s ShipService) GetShipByID(shipID uuid.UUID) (*Ship, error) {
 	sqlStatement :=
 		`
 			SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture,
-		           theta, vel_x, vel_y
+		           theta, vel_x, vel_y, accel
 			FROM public.ships
 			WHERE id = $1
 			`
@@ -98,7 +99,7 @@ func (s ShipService) GetShipByID(shipID uuid.UUID) (*Ship, error) {
 	row := db.QueryRow(sqlStatement, shipID)
 
 	switch err := row.Scan(&ship.ID, &ship.SystemID, &ship.UserID, &ship.PosX, &ship.PosY, &ship.Created, &ship.ShipName, &ship.Texture,
-		&ship.Theta, &ship.VelX, &ship.VelY); err {
+		&ship.Theta, &ship.VelX, &ship.VelY, &ship.Accel); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("Ship not found")
 	case nil:
@@ -106,4 +107,46 @@ func (s ShipService) GetShipByID(shipID uuid.UUID) (*Ship, error) {
 	default:
 		return nil, err
 	}
+}
+
+//GetShipsBySolarSystem Retrieves all ships in a solar system from the database
+func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID) ([]Ship, error) {
+	systems := make([]Ship, 0)
+
+	//get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	//defer close
+	defer db.Close()
+
+	//load solar systems
+	sql := `
+				SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture,
+					theta, vel_x, vel_y, accel
+				FROM public.ships
+				WHERE universe_systemid = $1
+			`
+
+	rows, err := db.Query(sql, systemID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		s := Ship{}
+
+		//scan into ship structure
+		rows.Scan(&s.ID, &s.SystemID, &s.UserID, &s.PosX, &s.PosY, &s.Created, &s.ShipName, &s.Texture,
+			&s.Theta, &s.VelX, &s.VelY, &s.Accel)
+
+		//append to ship slice
+		systems = append(systems, s)
+	}
+
+	return systems, err
 }

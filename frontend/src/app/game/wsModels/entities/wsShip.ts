@@ -10,4 +10,5 @@ export class WSShip {
     theta: number;
     velX: number;
     velY: number;
+    accel: number;
 }

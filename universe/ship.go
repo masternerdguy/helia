@@ -21,6 +21,7 @@ type Ship struct {
 	Theta    float64
 	VelX     float64
 	VelY     float64
+	Accel    float64
 	Lock     sync.Mutex
 }
 
@@ -48,12 +49,9 @@ func (s *Ship) ManualTurn(screenT float64, screenM float64) {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	//todo: redo this so that the player won't be able to spam events to turn faster, etc
-	const tmpMaxAccel = 0.01
-
 	// accelerate along new angle for debugging (this whole function needs a redo)
 	s.Theta = screenT
 
-	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * tmpMaxAccel
-	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * tmpMaxAccel
+	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (s.Accel * TimeModifier)
+	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (s.Accel * TimeModifier)
 }

@@ -9,6 +9,7 @@ import { ClientJoinBody } from './wsModels/bodies/join';
 })
 export class WsService {
   ws: WebSocketSubject<GameMessage>;
+  lastMessageReceivedAt: number;
 
   constructor() { }
 
@@ -20,6 +21,7 @@ export class WsService {
     });
 
     this.ws.asObservable().subscribe((data) => {
+      this.lastMessageReceivedAt = Date.now();
       handler(data, this.ws);
     });
 
@@ -38,5 +40,9 @@ export class WsService {
 
     // send message to server
     this.ws.next(g);
+  }
+
+  isStale(): boolean {
+    return Date.now() - this.lastMessageReceivedAt > 5000;
   }
 }

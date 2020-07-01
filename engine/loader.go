@@ -9,6 +9,7 @@ func loadUniverse() (*universe.Universe, error) {
 	//get services
 	regionSvc := sql.GetRegionService()
 	systemSvc := sql.GetSolarSystemService()
+	shipSvc := sql.GetShipService()
 
 	u := universe.Universe{}
 
@@ -46,6 +47,32 @@ func loadUniverse() (*universe.Universe, error) {
 			//initialize and store system
 			s.Initialize()
 			systems[s.ID.String()] = &s
+
+			//load ships
+			ships, err := shipSvc.GetShipsBySolarSystem(s.ID)
+
+			if err != nil {
+				return nil, err
+			}
+
+			for _, currShip := range ships {
+				es := universe.Ship{
+					ID:       currShip.ID,
+					UserID:   currShip.UserID,
+					Created:  currShip.Created,
+					ShipName: currShip.ShipName,
+					PosX:     currShip.PosX,
+					PosY:     currShip.PosY,
+					SystemID: currShip.SystemID,
+					Texture:  currShip.Texture,
+					Theta:    currShip.Theta,
+					VelX:     currShip.VelX,
+					VelY:     currShip.VelY,
+					Accel:    currShip.Accel,
+				}
+
+				s.AddShip(&es)
+			}
 		}
 
 		//store and append region

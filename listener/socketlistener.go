@@ -7,7 +7,6 @@ import (
 	"helia/listener/models"
 	"helia/shared"
 	"helia/sql"
-	"helia/universe"
 	"log"
 	"net/http"
 	"sync"
@@ -110,7 +109,6 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 	//initialize services
 	sessionSvc := sql.GetSessionService()
-	shipSvc := sql.GetShipService()
 	userSvc := sql.GetUserService()
 	msgRegistry := models.NewMessageRegistry()
 
@@ -128,11 +126,19 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		client.UID = &session.UserID
 		w.UserID = session.UserID
 
-		//lookup user
+		//lookup user in database
 		u, _ := userSvc.GetUserByID(session.UserID)
 
-		//lookup current ship
-		currShip, _ := shipSvc.GetShipByID(*u.CurrentShipID)
+		//lookup current ship in memory
+		currShip := l.Engine.Universe.FindShip(*u.CurrentShipID)
+
+		if currShip == nil {
+			return
+		}
+
+		//obtain ship lock
+		currShip.Lock.Lock()
+		defer currShip.Lock.Unlock()
 
 		//build current ship info data for welcome message
 		shipInfo := models.CurrentShipInfo{
@@ -147,11 +153,12 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			Theta:    currShip.Theta,
 			VelX:     currShip.VelX,
 			VelY:     currShip.VelY,
+			Accel:    currShip.Accel,
 		}
 
 		w.CurrentShipInfo = shipInfo
 
-		//place ship and client into system
+		//place client into system
 		for _, r := range l.Engine.Universe.Regions {
 			//lookup system in region
 			s := r.Systems[currShip.SystemID.String()]
@@ -162,20 +169,6 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 			s.AddClient(client)
 
-			es := universe.Ship{
-				ID:       currShip.ID,
-				UserID:   currShip.UserID,
-				Created:  currShip.Created,
-				ShipName: currShip.ShipName,
-				PosX:     currShip.PosX,
-				PosY:     currShip.PosY,
-				SystemID: currShip.SystemID,
-				Texture:  currShip.Texture,
-				Theta:    currShip.Theta,
-				VelX:     currShip.VelX,
-				VelY:     currShip.VelY,
-			}
-
 			//build current system info for welcome message
 			w.CurrentSystemInfo = models.CurrentSystemInfo{}
 			w.CurrentSystemInfo.ID = s.ID
@@ -185,7 +178,6 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			client.CurrentShipID = currShip.ID
 			client.CurrentSystemID = currShip.SystemID
 
-			s.AddShip(&es)
 			break
 		}
 
