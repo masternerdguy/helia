@@ -7,6 +7,7 @@ import (
 	"helia/listener/models"
 	"helia/shared"
 	"helia/sql"
+	"helia/universe"
 	"log"
 	"net/http"
 	"sync"
@@ -111,6 +112,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 	sessionSvc := sql.GetSessionService()
 	userSvc := sql.GetUserService()
 	msgRegistry := models.NewMessageRegistry()
+	shipSvc := sql.GetShipService()
 
 	//store sid on server
 	client.SID = &body.SessionID
@@ -133,7 +135,28 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		currShip := l.Engine.Universe.FindShip(*u.CurrentShipID)
 
 		if currShip == nil {
-			return
+			// they must have registered today - get their ship from the db
+			dbShip, _ := shipSvc.GetShipByID(*u.CurrentShipID)
+
+			if dbShip == nil {
+				return
+			}
+
+			// build in-memory ship
+			currShip = &universe.Ship{
+				ID:       dbShip.ID,
+				UserID:   dbShip.UserID,
+				Created:  dbShip.Created,
+				ShipName: dbShip.ShipName,
+				PosX:     dbShip.PosX,
+				PosY:     dbShip.PosY,
+				SystemID: dbShip.SystemID,
+				Texture:  dbShip.Texture,
+				Theta:    dbShip.Theta,
+				VelX:     dbShip.VelX,
+				VelY:     dbShip.VelY,
+				Accel:    dbShip.Accel,
+			}
 		}
 
 		//obtain ship lock
@@ -158,7 +181,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 		w.CurrentShipInfo = shipInfo
 
-		//place client into system
+		//place player into system
 		for _, r := range l.Engine.Universe.Regions {
 			//lookup system in region
 			s := r.Systems[currShip.SystemID.String()]
@@ -168,6 +191,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			}
 
 			s.AddClient(client)
+			s.AddShip(currShip)
 
 			//build current system info for welcome message
 			w.CurrentSystemInfo = models.CurrentSystemInfo{}

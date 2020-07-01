@@ -108,6 +108,10 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 //AddShip Adds a ship to the system
 func (s *SolarSystem) AddShip(c *Ship) {
+	if c == nil {
+		return
+	}
+
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
@@ -117,6 +121,10 @@ func (s *SolarSystem) AddShip(c *Ship) {
 
 //RemoveShip Removes a ship from the system
 func (s *SolarSystem) RemoveShip(c *Ship) {
+	if c == nil {
+		return
+	}
+
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
@@ -126,6 +134,10 @@ func (s *SolarSystem) RemoveShip(c *Ship) {
 
 //AddClient Adds a client to the server
 func (s *SolarSystem) AddClient(c *shared.GameClient) {
+	if c == nil {
+		return
+	}
+
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
@@ -135,6 +147,10 @@ func (s *SolarSystem) AddClient(c *shared.GameClient) {
 
 //RemoveClient Removes a client from the server
 func (s *SolarSystem) RemoveClient(c *shared.GameClient) {
+	if c == nil {
+		return
+	}
+
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
