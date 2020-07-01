@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2020-06-28 20:07:47
+-- Started on 2020-07-01 09:22:34
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -51,7 +51,8 @@ CREATE TABLE public.ships (
     texture character varying(32) DEFAULT 'Mass Testing Brick'::character varying NOT NULL,
     theta integer DEFAULT 0 NOT NULL,
     vel_x double precision DEFAULT 0 NOT NULL,
-    vel_y double precision DEFAULT 0 NOT NULL
+    vel_y double precision DEFAULT 0 NOT NULL,
+    accel double precision DEFAULT 0 NOT NULL
 );
 
 
@@ -102,7 +103,7 @@ CREATE TABLE public.users (
 ALTER TABLE public.users OWNER TO postgres;
 
 --
--- TOC entry 2722 (class 2606 OID 24613)
+-- TOC entry 2723 (class 2606 OID 24613)
 -- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -111,7 +112,7 @@ ALTER TABLE ONLY public.sessions
 
 
 --
--- TOC entry 2726 (class 2606 OID 24620)
+-- TOC entry 2727 (class 2606 OID 24620)
 -- Name: ships ships_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -120,7 +121,7 @@ ALTER TABLE ONLY public.ships
 
 
 --
--- TOC entry 2709 (class 2606 OID 24589)
+-- TOC entry 2710 (class 2606 OID 24589)
 -- Name: universe_regions universe_regions_name_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -129,7 +130,7 @@ ALTER TABLE ONLY public.universe_regions
 
 
 --
--- TOC entry 2711 (class 2606 OID 24587)
+-- TOC entry 2712 (class 2606 OID 24587)
 -- Name: universe_regions universe_regions_pk_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -138,7 +139,7 @@ ALTER TABLE ONLY public.universe_regions
 
 
 --
--- TOC entry 2713 (class 2606 OID 24596)
+-- TOC entry 2714 (class 2606 OID 24596)
 -- Name: universe_systems universe_systems_name_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -147,7 +148,7 @@ ALTER TABLE ONLY public.universe_systems
 
 
 --
--- TOC entry 2715 (class 2606 OID 24594)
+-- TOC entry 2716 (class 2606 OID 24594)
 -- Name: universe_systems universe_systems_pk_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -156,7 +157,7 @@ ALTER TABLE ONLY public.universe_systems
 
 
 --
--- TOC entry 2724 (class 2606 OID 24615)
+-- TOC entry 2725 (class 2606 OID 24615)
 -- Name: sessions userid_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -165,7 +166,7 @@ ALTER TABLE ONLY public.sessions
 
 
 --
--- TOC entry 2718 (class 2606 OID 24606)
+-- TOC entry 2719 (class 2606 OID 24606)
 -- Name: users users_pk_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -174,7 +175,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 2720 (class 2606 OID 24608)
+-- TOC entry 2721 (class 2606 OID 24608)
 -- Name: users users_username_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -183,7 +184,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 2716 (class 1259 OID 24641)
+-- TOC entry 2717 (class 1259 OID 24641)
 -- Name: fki_fk_users_ships; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -191,7 +192,7 @@ CREATE INDEX fki_fk_users_ships ON public.users USING btree (current_shipid);
 
 
 --
--- TOC entry 2729 (class 2606 OID 24621)
+-- TOC entry 2730 (class 2606 OID 24621)
 -- Name: ships fk_ships_systems; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -200,7 +201,7 @@ ALTER TABLE ONLY public.ships
 
 
 --
--- TOC entry 2730 (class 2606 OID 24626)
+-- TOC entry 2731 (class 2606 OID 24626)
 -- Name: ships fk_ships_users; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -209,7 +210,7 @@ ALTER TABLE ONLY public.ships
 
 
 --
--- TOC entry 2727 (class 2606 OID 24597)
+-- TOC entry 2728 (class 2606 OID 24597)
 -- Name: universe_systems fk_system_region; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -218,7 +219,7 @@ ALTER TABLE ONLY public.universe_systems
 
 
 --
--- TOC entry 2728 (class 2606 OID 24636)
+-- TOC entry 2729 (class 2606 OID 24636)
 -- Name: users fk_users_ships; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -226,7 +227,7 @@ ALTER TABLE ONLY public.users
     ADD CONSTRAINT fk_users_ships FOREIGN KEY (current_shipid) REFERENCES public.ships(id);
 
 
--- Completed on 2020-06-28 20:07:47
+-- Completed on 2020-07-01 09:22:34
 
 --
 -- PostgreSQL database dump complete
