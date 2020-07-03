@@ -3,6 +3,7 @@ package universe
 import (
 	"encoding/json"
 	"helia/listener/models"
+	"helia/physics"
 	"helia/shared"
 	"sync"
 
@@ -67,6 +68,31 @@ func (s *SolarSystem) PeriodicUpdate() {
 	//update ships
 	for _, e := range s.ships {
 		e.PeriodicUpdate()
+	}
+
+	//collission test between ships
+	for _, sA := range s.ships {
+		for _, sB := range s.ships {
+			if sA.ID != sB.ID {
+				//get physics dummies
+				dummyA := sA.ToPhysicsDummy()
+				dummyB := sB.ToPhysicsDummy()
+
+				//get distance between ships
+				d := physics.Distance(dummyA, dummyB)
+
+				//check for radius intersection
+				if d <= sA.Radius || d <= sB.Radius {
+
+					//calculate collission results
+					physics.ElasticCollide(&dummyA, &dummyB, TimeModifier)
+
+					//update ships with results
+					sA.ApplyPhysicsDummy(dummyA)
+					sB.ApplyPhysicsDummy(dummyB)
+				}
+			}
+		}
 	}
 
 	//build global update of non-secret info for clients

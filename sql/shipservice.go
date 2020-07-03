@@ -30,6 +30,8 @@ type Ship struct {
 	VelX     float64
 	VelY     float64
 	Accel    float64
+	Radius   float64
+	Mass     float64
 }
 
 //NewShip Creates a new ship
@@ -51,16 +53,16 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 	//insert ship
 	sql := `
 				INSERT INTO public.ships(id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture,
-				                         theta, vel_x, vel_y, accel)
+				                         theta, vel_x, vel_y, accel, radius, mass)
 				VALUES ($1, $2, $3, $4, $5, $6, $7, $8,
-					    $9, $10, $11, $12);
+					    $9, $10, $11, $12, $13, $14);
 			`
 
 	uid := uuid.New()
 	createdAt := time.Now()
 
 	_, err = db.Query(sql, uid, e.SystemID, e.UserID, e.PosX, e.PosY, createdAt, e.ShipName, e.Texture,
-		e.Theta, e.VelX, e.VelY, e.Accel)
+		e.Theta, e.VelX, e.VelY, e.Accel, e.Radius, e.Mass)
 
 	if err != nil {
 		return nil, err
@@ -91,7 +93,7 @@ func (s ShipService) GetShipByID(shipID uuid.UUID) (*Ship, error) {
 	sqlStatement :=
 		`
 			SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture,
-		           theta, vel_x, vel_y, accel
+		           theta, vel_x, vel_y, accel, radius, mass
 			FROM public.ships
 			WHERE id = $1
 			`
@@ -99,7 +101,7 @@ func (s ShipService) GetShipByID(shipID uuid.UUID) (*Ship, error) {
 	row := db.QueryRow(sqlStatement, shipID)
 
 	switch err := row.Scan(&ship.ID, &ship.SystemID, &ship.UserID, &ship.PosX, &ship.PosY, &ship.Created, &ship.ShipName, &ship.Texture,
-		&ship.Theta, &ship.VelX, &ship.VelY, &ship.Accel); err {
+		&ship.Theta, &ship.VelX, &ship.VelY, &ship.Accel, &ship.Radius, &ship.Mass); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("Ship not found")
 	case nil:
@@ -126,7 +128,7 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID) ([]Ship, error) {
 	//load solar systems
 	sql := `
 				SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture,
-					theta, vel_x, vel_y, accel
+					theta, vel_x, vel_y, accel, radius, mass
 				FROM public.ships
 				WHERE universe_systemid = $1
 			`
@@ -142,7 +144,7 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID) ([]Ship, error) {
 
 		//scan into ship structure
 		rows.Scan(&s.ID, &s.SystemID, &s.UserID, &s.PosX, &s.PosY, &s.Created, &s.ShipName, &s.Texture,
-			&s.Theta, &s.VelX, &s.VelY, &s.Accel)
+			&s.Theta, &s.VelX, &s.VelY, &s.Accel, &s.Radius, &s.Mass)
 
 		//append to ship slice
 		systems = append(systems, s)

@@ -5,6 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"helia/physics"
+
 	"github.com/google/uuid"
 )
 
@@ -22,6 +24,8 @@ type Ship struct {
 	VelX     float64
 	VelY     float64
 	Accel    float64
+	Radius   float64
+	Mass     float64
 	Lock     sync.Mutex
 }
 
@@ -32,8 +36,8 @@ func (s *Ship) PeriodicUpdate() {
 	defer s.Lock.Unlock()
 
 	// update position
-	s.PosX += s.VelX
-	s.PosY += s.VelY
+	s.PosX += s.VelX * TimeModifier
+	s.PosY += s.VelY * TimeModifier
 
 	// clamp theta
 	if s.Theta > 360 {
@@ -54,4 +58,24 @@ func (s *Ship) ManualTurn(screenT float64, screenM float64) {
 
 	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (s.Accel * TimeModifier)
 	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (s.Accel * TimeModifier)
+}
+
+//ToPhysicsDummy Returns a new physics dummy structure representing this ship
+func (s *Ship) ToPhysicsDummy() physics.Dummy {
+	return physics.Dummy{
+		VelX: s.VelX,
+		VelY: s.VelY,
+		PosX: s.PosX,
+		PosY: s.PosY,
+		Mass: s.Mass,
+	}
+}
+
+//ApplyPhysicsDummy Applies the values of a physics dummy to this ship
+func (s *Ship) ApplyPhysicsDummy(dummy physics.Dummy) {
+	s.VelX = dummy.VelX
+	s.VelY = dummy.VelY
+	s.PosX = dummy.PosX
+	s.PosY = dummy.PosY
+	s.Mass = dummy.Mass
 }
