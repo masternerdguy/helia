@@ -42,7 +42,7 @@ const engineSack: EngineSack = new EngineSack();
 export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement, backCanvas: HTMLCanvasElement, sid: string) {
   // initialize
   engineSack.player = new Player();
-  engineSack.camera = new Camera(gameCanvas.width, gameCanvas.height, 0.1);
+  engineSack.camera = new Camera(gameCanvas.width, gameCanvas.height, 1);
   engineSack.backplateRenderer = new Backplate(backCanvas);
 
   // store globals
@@ -75,6 +75,15 @@ function handleJoin(d: GameMessage) {
   engineSack.gfx.addEventListener('click', (event) => {
     // handle event
     handleClick(event.x, event.y);
+  });
+
+  // add client scroll event handler
+  engineSack.gfx.addEventListener('wheel', event => {
+    // get scroll direction
+    const delta = Math.sign(event.deltaY);
+
+    // handle event
+    handleScroll(delta);
   });
 
   // start game loop
@@ -202,4 +211,17 @@ function handleClick(x: number, y: number) {
   b.sid = engineSack.player.sid;
 
   engineSack.wsSvc.sendMessage(MessageTypes.NavClick, b);
+}
+
+function handleScroll(dY: number) {
+  // todo: check to see if we're scrolling on any ui elements and handle that
+
+  // zoom camera
+  if (dY < 0) {
+    // zoom in
+    engineSack.camera.zoom *= 1.1;
+  } else {
+    // zoom out
+    engineSack.camera.zoom *= 0.9;
+  }
 }
