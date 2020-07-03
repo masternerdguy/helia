@@ -35,7 +35,10 @@ type CurrentShipInfo struct {
 	Theta    float64   `json:"theta"`
 	VelX     float64   `json:"velX"`
 	VelY     float64   `json:"velY"`
-	Accel    float64   `json:"accel"`
+	Mass     float64   `json:"mass"`
+	Radius   float64   `json:"radius"`
+	// secrets that should not be globally known
+	Accel float64 `json:"accel"`
 }
 
 //GlobalShipInfo Structure for passing non-secret information about a ship
@@ -51,6 +54,8 @@ type GlobalShipInfo struct {
 	Theta    float64   `json:"theta"`
 	VelX     float64   `json:"velX"`
 	VelY     float64   `json:"velY"`
+	Mass     float64   `json:"mass"`
+	Radius   float64   `json:"radius"`
 }
 
 //CurrentSystemInfo Information about the user's current location

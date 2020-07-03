@@ -42,7 +42,7 @@ const engineSack: EngineSack = new EngineSack();
 export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement, backCanvas: HTMLCanvasElement, sid: string) {
   // initialize
   engineSack.player = new Player();
-  engineSack.camera = new Camera(gameCanvas.width, gameCanvas.height);
+  engineSack.camera = new Camera(gameCanvas.width, gameCanvas.height, 0.1);
   engineSack.backplateRenderer = new Backplate(backCanvas);
 
   // store globals

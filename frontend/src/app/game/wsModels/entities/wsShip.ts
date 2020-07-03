@@ -11,4 +11,6 @@ export class WSShip {
     velX: number;
     velY: number;
     accel: number;
+    mass: number;
+    radius: number;
 }

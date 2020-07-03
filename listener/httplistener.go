@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"helia/listener/models"
+	"helia/physics"
 	"helia/sql"
 	"io/ioutil"
 	"net/http"
@@ -75,6 +76,11 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 		ShipName: fmt.Sprintf("%s's Starter Ship", m.Username),
 		Texture:  "Mass Testing Brick",
 		Theta:    0,
+		Accel:    1,
+		PosX:     float64(physics.RandInRange(-500, 500)),
+		PosY:     float64(physics.RandInRange(-500, 500)),
+		Radius:   12.5,
+		Mass:     100,
 	}
 
 	starterShip, err := shipSvc.NewShip(t)

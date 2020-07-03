@@ -1,6 +1,8 @@
 package physics
 
-import "math"
+import (
+	"math"
+)
 
 //Dummy Dummy structure used to pass key values in physics calculations
 type Dummy struct {

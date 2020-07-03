@@ -115,6 +115,8 @@ func (s *SolarSystem) PeriodicUpdate() {
 			Theta:    d.Theta,
 			VelX:     d.VelX,
 			VelY:     d.VelY,
+			Mass:     d.Mass,
+			Radius:   d.Radius,
 		})
 	}
 
