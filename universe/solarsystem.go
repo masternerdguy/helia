@@ -16,6 +16,7 @@ type SolarSystem struct {
 	SystemName string
 	RegionID   uuid.UUID
 	ships      map[string]*Ship
+	stars      map[string]*Star
 	clients    map[string]*shared.GameClient //clients in this system
 	Lock       sync.Mutex
 }
@@ -29,6 +30,7 @@ func (s *SolarSystem) Initialize() {
 	//initialize maps
 	s.clients = make(map[string]*shared.GameClient)
 	s.ships = make(map[string]*Ship)
+	s.stars = make(map[string]*Star)
 }
 
 //PeriodicUpdate Processes the solar system for a tick
@@ -122,6 +124,19 @@ func (s *SolarSystem) PeriodicUpdate() {
 		})
 	}
 
+	for _, d := range s.stars {
+		gu.Stars = append(gu.Stars, models.GlobalStarInfo{
+			ID:       d.ID,
+			SystemID: d.SystemID,
+			PosX:     d.PosX,
+			PosY:     d.PosY,
+			Texture:  d.Texture,
+			Radius:   d.Radius,
+			Mass:     d.Mass,
+			Theta:    d.Theta,
+		})
+	}
+
 	//serialize global update
 	b, _ := json.Marshal(&gu)
 
@@ -166,7 +181,22 @@ func (s *SolarSystem) RemoveShip(c *Ship) {
 	delete(s.ships, c.ID.String())
 }
 
-//AddClient Adds a client to the server
+//AddStar Adds a star to the system
+func (s *SolarSystem) AddStar(c *Star) {
+	//safety check
+	if c == nil {
+		return
+	}
+
+	//obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//add star
+	s.stars[c.ID.String()] = c
+}
+
+//AddClient Adds a client to the system
 func (s *SolarSystem) AddClient(c *shared.GameClient) {
 	//safety check
 	if c == nil {

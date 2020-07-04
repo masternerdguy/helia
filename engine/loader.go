@@ -13,6 +13,7 @@ func loadUniverse() (*universe.Universe, error) {
 	regionSvc := sql.GetRegionService()
 	systemSvc := sql.GetSolarSystemService()
 	shipSvc := sql.GetShipService()
+	starSvc := sql.GetStarService()
 
 	u := universe.Universe{}
 
@@ -78,6 +79,28 @@ func loadUniverse() (*universe.Universe, error) {
 				}
 
 				s.AddShip(&es)
+			}
+
+			//load stars
+			stars, err := starSvc.GetStarsBySolarSystem(s.ID)
+
+			if err != nil {
+				return nil, err
+			}
+
+			for _, currStar := range stars {
+				star := universe.Star{
+					ID:       currStar.ID,
+					SystemID: currStar.SystemID,
+					PosX:     currStar.PosX,
+					PosY:     currStar.PosY,
+					Texture:  currStar.Texture,
+					Radius:   currStar.Radius,
+					Mass:     currStar.Mass,
+					Theta:    currStar.Theta,
+				}
+
+				s.AddStar(&star)
 			}
 		}
 

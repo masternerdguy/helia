@@ -9,6 +9,7 @@ import { ServerGlobalUpdateBody } from './wsModels/bodies/globalUpdate';
 import { Backplate } from './procedural/backplate/backplate';
 import { ClientNavClick } from './wsModels/bodies/navClick';
 import { angleBetween, magnitude } from './engineMath';
+import { Star } from './engineModels/star';
 
 class EngineSack {
   constructor() {}
@@ -135,6 +136,29 @@ function handleGlobalUpdate(d: GameMessage) {
 
     // todo: handle ship leaving or dying
   }
+
+  // update stars
+  for (const st of msg.stars) {
+    let match = false;
+
+    // find star in memory
+    for (const sm of engineSack.player.currentSystem.stars) {
+      if (st.id === sm.id) {
+        match = true;
+
+        // sync star in memory
+        sm.sync(st);
+
+        // exit loop
+        break;
+      }
+    }
+
+    if (!match) {
+      // add star to memory
+      engineSack.player.currentSystem.stars.push(new Star(st));
+    }
+  }
 }
 
 // clears the screen
@@ -192,6 +216,11 @@ function clientRender() {
 
   // draw system backplate
   gfxBackplate();
+
+  // draw stars
+  for (const st of engineSack.player.currentSystem.stars) {
+    st.render(engineSack.ctx, engineSack.camera);
+  }
 
   // draw ships
   for (const sh of engineSack.player.currentSystem.ships) {
