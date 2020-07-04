@@ -53,6 +53,34 @@ type Ship struct {
 	Lock                    sync.Mutex
 }
 
+//CopyShip Returns a copy of the ship
+func (s *Ship) CopyShip() Ship {
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	return Ship{
+		ID:       s.ID,
+		UserID:   s.UserID,
+		Created:  s.Created,
+		ShipName: s.ShipName,
+		PosX:     s.PosX,
+		PosY:     s.PosY,
+		SystemID: s.SystemID,
+		Texture:  s.Texture,
+		Theta:    s.Theta,
+		VelX:     s.VelX,
+		VelY:     s.VelY,
+		Accel:    s.Accel,
+		Radius:   s.Radius,
+		Mass:     s.Mass,
+		Turn:     s.Turn,
+		//in-memory only
+		AutopilotMode:           s.AutopilotMode,
+		AutopilotSeekManualTurn: s.AutopilotSeekManualTurn,
+		Lock:                    sync.Mutex{},
+	}
+}
+
 //PeriodicUpdate Processes the ship for a tick
 func (s *Ship) PeriodicUpdate() {
 	// lock entity

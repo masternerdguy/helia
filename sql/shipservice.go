@@ -153,3 +153,30 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID) ([]Ship, error) {
 
 	return systems, err
 }
+
+//UpdateShip Updates a ship in the database
+func (s ShipService) UpdateShip(ship Ship) error {
+	//get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	//defer close
+	defer db.Close()
+
+	//update ship in database
+	sqlStatement :=
+		`
+			UPDATE public.ships
+				SET universe_systemid=$2, userid=$3, pos_x=$4, pos_y=$5, created=$6, shipname=$7, texture=$8,
+					theta=$9, vel_x=$10, vel_y=$11, accel=$12, radius=$13, mass=$14, turn=$15
+			WHERE id = $1
+		`
+
+	_, err = db.Exec(sqlStatement, ship.ID, ship.SystemID, ship.UserID, ship.PosX, ship.PosY, ship.Created, ship.ShipName, ship.Texture,
+		ship.Theta, ship.VelX, ship.VelY, ship.Accel, ship.Radius, ship.Mass, ship.Turn)
+
+	return err
+}

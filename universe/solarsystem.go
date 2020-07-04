@@ -22,6 +22,7 @@ type SolarSystem struct {
 
 //Initialize Initializes internal aspects of SolarSystem
 func (s *SolarSystem) Initialize() {
+	//obtain lock
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
@@ -32,6 +33,7 @@ func (s *SolarSystem) Initialize() {
 
 //PeriodicUpdate Processes the solar system for a tick
 func (s *SolarSystem) PeriodicUpdate() {
+	//obtain lock
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
@@ -136,10 +138,12 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 //AddShip Adds a ship to the system
 func (s *SolarSystem) AddShip(c *Ship) {
+	//safety check
 	if c == nil {
 		return
 	}
 
+	//obtain lock
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
@@ -149,10 +153,12 @@ func (s *SolarSystem) AddShip(c *Ship) {
 
 //RemoveShip Removes a ship from the system
 func (s *SolarSystem) RemoveShip(c *Ship) {
+	//safety check
 	if c == nil {
 		return
 	}
 
+	//obtain lock
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
@@ -162,10 +168,12 @@ func (s *SolarSystem) RemoveShip(c *Ship) {
 
 //AddClient Adds a client to the server
 func (s *SolarSystem) AddClient(c *shared.GameClient) {
+	//safety check
 	if c == nil {
 		return
 	}
 
+	//obtain lock
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
@@ -175,13 +183,34 @@ func (s *SolarSystem) AddClient(c *shared.GameClient) {
 
 //RemoveClient Removes a client from the server
 func (s *SolarSystem) RemoveClient(c *shared.GameClient) {
+	//safety check
 	if c == nil {
 		return
 	}
 
+	//obtain lock
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	//remove client
 	delete(s.clients, (*c.UID).String())
+}
+
+//CopyShips Returns a copy of the ships in the system
+func (s *SolarSystem) CopyShips() map[string]*Ship {
+	//obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//make map for copies
+	copy := make(map[string]*Ship)
+
+	//copy ships into copy map
+	for k, v := range s.ships {
+		c := v.CopyShip()
+		copy[k] = &c
+	}
+
+	//return copy map
+	return copy
 }

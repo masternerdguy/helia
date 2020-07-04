@@ -1,10 +1,13 @@
 package engine
 
 import (
+	"fmt"
 	"helia/sql"
 	"helia/universe"
+	"log"
 )
 
+//loadUniverse Loads the state of the universe from the database
 func loadUniverse() (*universe.Universe, error) {
 	//get services
 	regionSvc := sql.GetRegionService()
@@ -89,6 +92,47 @@ func loadUniverse() (*universe.Universe, error) {
 	return &u, nil
 }
 
-func saveUniverse() {
+//saveUniverse Saves the current state of dynamic entities in the simulation to the database
+func saveUniverse(u *universe.Universe) {
+	//get services
+	shipSvc := sql.GetShipService()
 
+	//iterate over systems
+	for _, r := range u.Regions {
+		for _, s := range r.Systems {
+			//get ships in system
+			ships := s.CopyShips()
+
+			//save ships to database
+			for _, ship := range ships {
+				//obtain lock on copy
+				ship.Lock.Lock()
+				defer ship.Lock.Unlock()
+
+				dbShip := sql.Ship{
+					ID:       ship.ID,
+					UserID:   ship.UserID,
+					Created:  ship.Created,
+					ShipName: ship.ShipName,
+					PosX:     ship.PosX,
+					PosY:     ship.PosY,
+					SystemID: ship.SystemID,
+					Texture:  ship.Texture,
+					Theta:    ship.Theta,
+					VelX:     ship.VelX,
+					VelY:     ship.VelY,
+					Accel:    ship.Accel,
+					Mass:     ship.Mass,
+					Radius:   ship.Radius,
+					Turn:     ship.Turn,
+				}
+
+				err := shipSvc.UpdateShip(dbShip)
+
+				if err != nil {
+					log.Println(fmt.Sprintf("Error saving ship: %v | %v", dbShip, err))
+				}
+			}
+		}
+	}
 }

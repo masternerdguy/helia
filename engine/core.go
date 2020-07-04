@@ -88,7 +88,7 @@ func (e *HeliaEngine) Shutdown() {
 
 	//save progress
 	log.Println("Saving world state...")
-	saveUniverse()
+	saveUniverse(e.Universe)
 	log.Println("World state saved!")
 
 	//end program
