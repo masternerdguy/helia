@@ -88,3 +88,7 @@ func loadUniverse() (*universe.Universe, error) {
 
 	return &u, nil
 }
+
+func saveUniverse() {
+
+}

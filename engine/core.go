@@ -3,6 +3,8 @@ package engine
 import (
 	"fmt"
 	"helia/universe"
+	"log"
+	"os"
 	"time"
 )
 
@@ -13,6 +15,8 @@ type HeliaEngine struct {
 
 //Initialize Initializes a new instance of the game engine
 func (e *HeliaEngine) Initialize() *HeliaEngine {
+	log.Println("Loading game universe from database...")
+
 	//load universe
 	u, err := loadUniverse()
 
@@ -23,6 +27,7 @@ func (e *HeliaEngine) Initialize() *HeliaEngine {
 	e.Universe = u
 
 	//instantiate engine
+	log.Println("Universe loaded!")
 	engine := HeliaEngine{}
 
 	return &engine
@@ -30,6 +35,8 @@ func (e *HeliaEngine) Initialize() *HeliaEngine {
 
 //Start Start the goroutines for each system
 func (e *HeliaEngine) Start() {
+	log.Println("Starting system goroutines...")
+
 	for _, r := range e.Universe.Regions {
 		for _, s := range r.Systems {
 			go func(sol *universe.SolarSystem) {
@@ -44,4 +51,16 @@ func (e *HeliaEngine) Start() {
 			}(s)
 		}
 	}
+
+	log.Println("System goroutines started!")
+}
+
+//Shutdown Saves the current state of the simulation and halts
+func (e *HeliaEngine) Shutdown() {
+	log.Println("Server shutdown initiated")
+
+	//end program
+
+	log.Println("Shutdown complete! Goodbye :)")
+	os.Exit(0)
 }

@@ -3,6 +3,7 @@ package listener
 import (
 	"encoding/json"
 	"fmt"
+	"helia/engine"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/sql"
@@ -12,12 +13,17 @@ import (
 	"github.com/google/uuid"
 )
 
+//HTTPListener Listener for handling and dispatching incoming http requests
+type HTTPListener struct {
+	Engine *engine.HeliaEngine
+}
+
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
 
 //HandleRegister Handles a user registering
-func HandleRegister(w http.ResponseWriter, r *http.Request) {
+func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	//enable cors
 	enableCors(&w)
 
@@ -103,7 +109,7 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 }
 
 //HandleLogin Handles a user signing in
-func HandleLogin(w http.ResponseWriter, r *http.Request) {
+func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	//enable cors
 	enableCors(&w)
 
@@ -163,4 +169,31 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	//return result
 	o, _ := json.Marshal(res)
 	w.Write(o)
+}
+
+//HandleShutdown Shuts down the server after saving the game state
+func (l *HTTPListener) HandleShutdown(w http.ResponseWriter, r *http.Request) {
+	//enable cors
+	enableCors(&w)
+
+	//get auth token
+	keys, ok := r.URL.Query()["key"]
+
+	if !ok || len(keys[0]) < 1 {
+		return
+	}
+
+	key := keys[0]
+
+	//load listener configuration
+	config, err := loadConfiguration()
+	if err != nil {
+		return
+	}
+
+	//validate auth token
+	if config.ShutdownToken == key {
+		//initiate shutdown
+		l.Engine.Shutdown()
+	}
 }

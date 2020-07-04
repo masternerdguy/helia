@@ -40,7 +40,7 @@ func connect() (*sql.DB, error) {
 func loadConfiguration() (dbConfig, error) {
 	var config dbConfig
 
-	configFile, err := os.Open("configuration.json")
+	configFile, err := os.Open("db-configuration.json")
 	defer configFile.Close()
 
 	if err != nil {
