@@ -39,7 +39,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 	//return if protocol change failed
 	if err != nil {
-		log.Print("upgrade:", err)
+		log.Print("ws protocol update error:", err)
 		return
 	}
 
@@ -72,7 +72,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 		//exit if read failed
 		if err != nil {
-			log.Println("read:", err)
+			log.Println("ws read error:", err)
 			break
 		}
 
@@ -106,7 +106,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 	}
 
 	//debug out
-	log.Println(fmt.Sprintf("join attempt: %v", &body.SessionID))
+	log.Println(fmt.Sprintf("player join attempt: %v", &body.SessionID))
 
 	//initialize services
 	sessionSvc := sql.GetSessionService()
@@ -223,10 +223,10 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		client.WriteMessage(&msg)
 
 		//debug out
-		log.Println(fmt.Sprintf("joined: %v", &body.SessionID))
+		log.Println(fmt.Sprintf("player joined: %v", &body.SessionID))
 	} else {
 		//dump error to console
-		log.Println(fmt.Sprintf("join error: %v", err))
+		log.Println(fmt.Sprintf("player join error: %v", err))
 	}
 }
 
@@ -239,9 +239,6 @@ func (l *SocketListener) handleClientNavClick(client *shared.GameClient, body *m
 	if client == nil {
 		return
 	}
-
-	//debug out
-	log.Println(fmt.Sprintf("nav click: %v | %v %v", body.SessionID, body.ScreenTheta, body.ScreenMagnitude))
 
 	//verify session id
 	if body.SessionID != *client.SID {
