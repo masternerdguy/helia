@@ -12,20 +12,20 @@ import (
 
 //AutopilotRegistry Autopilot states for ships
 type AutopilotRegistry struct {
-	None          int
-	SeekManualNav int
+	None       int
+	ManualTurn int
 }
 
 //NewAutopilotRegistry Returns a populated AutopilotRegistry struct for use as an enum
 func NewAutopilotRegistry() *AutopilotRegistry {
 	return &AutopilotRegistry{
-		None:          0,
-		SeekManualNav: 1,
+		None:       0,
+		ManualTurn: 1,
 	}
 }
 
-//SeekManualNavData Container structure for arguments of the SeekManualNav autopilot mode
-type SeekManualNavData struct {
+//ManualTurnData Container structure for arguments of the ManualTurn autopilot mode
+type ManualTurnData struct {
 	Magnitude float64
 	Theta     float64
 }
@@ -48,9 +48,9 @@ type Ship struct {
 	Mass     float64
 	Turn     float64
 	//in-memory only
-	AutopilotMode          int
-	AutopilotSeekManualNav SeekManualNavData
-	Lock                   sync.Mutex
+	AutopilotMode           int
+	AutopilotSeekManualTurn ManualTurnData
+	Lock                    sync.Mutex
 }
 
 //PeriodicUpdate Processes the ship for a tick
@@ -89,14 +89,14 @@ func (s *Ship) doAutopilot() {
 	switch s.AutopilotMode {
 	case registry.None:
 		return
-	case registry.SeekManualNav:
+	case registry.ManualTurn:
 		s.doAutopilotSeekManualNav()
 	}
 }
 
 //doAutopilotSeekManualNav Causes ship to turn to face a target angle while accelerating
 func (s *Ship) doAutopilotSeekManualNav() {
-	screenT := s.AutopilotSeekManualNav.Theta
+	screenT := s.AutopilotSeekManualTurn.Theta
 
 	//calculate magnitude of requested turn
 	turnMag := math.Sqrt((screenT - s.Theta) * (screenT - s.Theta))
@@ -112,10 +112,18 @@ func (s *Ship) doAutopilotSeekManualNav() {
 	}
 
 	//thrust forward
-	s.forwardThrust(s.AutopilotSeekManualNav.Magnitude)
+	s.forwardThrust(s.AutopilotSeekManualTurn.Magnitude)
+
+	//decrease magnitude (this is to allow this to expire and require another move order from the player)
+	s.AutopilotSeekManualTurn.Magnitude -= s.AutopilotSeekManualTurn.Magnitude * SpaceDrag * TimeModifier
+
+	//stop when magnitude is low
+	if s.AutopilotSeekManualTurn.Magnitude < 0.0001 {
+		s.AutopilotMode = NewAutopilotRegistry().None
+	}
 }
 
-//ManualTurn Test function for manual turn
+//ManualTurn Invokes manual turn autopilot on the ship
 func (s *Ship) ManualTurn(screenT float64, screenM float64) {
 	// get registry
 	registry := NewAutopilotRegistry()
@@ -125,12 +133,12 @@ func (s *Ship) ManualTurn(screenT float64, screenM float64) {
 	defer s.Lock.Unlock()
 
 	//stash manual turn and activate autopilot
-	s.AutopilotSeekManualNav = SeekManualNavData{
+	s.AutopilotSeekManualTurn = ManualTurnData{
 		Magnitude: screenM,
 		Theta:     screenT,
 	}
 
-	s.AutopilotMode = registry.SeekManualNav
+	s.AutopilotMode = registry.ManualTurn
 }
 
 //rotate Turn the ship
