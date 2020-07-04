@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+//Will cause all system goroutines to stop when true
+var shutdownSignal = false
+
 //HeliaEngine Structure representing the core server-side game engine
 type HeliaEngine struct {
 	Universe *universe.Universe
@@ -42,12 +45,19 @@ func (e *HeliaEngine) Start() {
 			go func(sol *universe.SolarSystem) {
 				//game loop
 				for {
+					//check for shutdown signal
+					if shutdownSignal {
+						break
+					}
+
 					//update system
 					sol.PeriodicUpdate()
 
 					//sleep for server heartbeat
 					time.Sleep(universe.Heartbeat)
 				}
+
+				log.Println(fmt.Sprintf("System %s has halted.", sol.SystemName))
 			}(s)
 		}
 	}
@@ -57,10 +67,31 @@ func (e *HeliaEngine) Start() {
 
 //Shutdown Saves the current state of the simulation and halts
 func (e *HeliaEngine) Shutdown() {
-	log.Println("Server shutdown initiated")
+	log.Println("! Server shutdown initiated")
+
+	//shut down simulation
+	log.Println("Stopping simulation...")
+	shutdownSignal = true
+
+	//wait for 30 seconds to give everything a chance to exit
+	sleepStart := time.Now()
+
+	for {
+		if time.Now().Sub(sleepStart).Seconds() > 30 {
+			break
+		}
+
+		time.Sleep(1000)
+	}
+
+	log.Println("Halt success assumed")
+
+	//save progress
+	log.Println("Saving world state...")
+	saveUniverse()
+	log.Println("World state saved!")
 
 	//end program
-
 	log.Println("Shutdown complete! Goodbye :)")
 	os.Exit(0)
 }
