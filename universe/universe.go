@@ -8,6 +8,9 @@ const Heartbeat = 250
 //TimeModifier Constant to multiply by to adjust for heartbeat
 const TimeModifier float64 = Heartbeat / 1000.0
 
+//SpaceDrag Space drag coefficient :)
+const SpaceDrag float64 = 0.025
+
 //Universe Structure representing the current game universe
 type Universe struct {
 	Regions map[string]*Region

@@ -158,6 +158,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				Accel:    dbShip.Accel,
 				Mass:     dbShip.Mass,
 				Radius:   dbShip.Radius,
+				Turn:     dbShip.Turn,
 			}
 		}
 
@@ -181,6 +182,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			Accel:    currShip.Accel,
 			Mass:     currShip.Mass,
 			Radius:   currShip.Radius,
+			Turn:     currShip.Turn,
 		}
 
 		w.CurrentShipInfo = shipInfo

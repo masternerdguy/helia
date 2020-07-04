@@ -10,6 +10,26 @@ import (
 	"github.com/google/uuid"
 )
 
+//AutopilotRegistry Autopilot states for ships
+type AutopilotRegistry struct {
+	None          int
+	SeekManualNav int
+}
+
+//NewAutopilotRegistry Returns a populated AutopilotRegistry struct for use as an enum
+func NewAutopilotRegistry() *AutopilotRegistry {
+	return &AutopilotRegistry{
+		None:          0,
+		SeekManualNav: 1,
+	}
+}
+
+//SeekManualNavData Container structure for arguments of the SeekManualNav autopilot mode
+type SeekManualNavData struct {
+	Magnitude float64
+	Theta     float64
+}
+
 //Ship Structure representing a player ship in the game universe
 type Ship struct {
 	ID       uuid.UUID
@@ -26,7 +46,11 @@ type Ship struct {
 	Accel    float64
 	Radius   float64
 	Mass     float64
-	Lock     sync.Mutex
+	Turn     float64
+	//in-memory only
+	AutopilotMode          int
+	AutopilotSeekManualNav SeekManualNavData
+	Lock                   sync.Mutex
 }
 
 //PeriodicUpdate Processes the ship for a tick
@@ -34,6 +58,9 @@ func (s *Ship) PeriodicUpdate() {
 	// lock entity
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
+
+	// check autopilot
+	s.doAutopilot()
 
 	// update position
 	s.PosX += s.VelX * TimeModifier
@@ -45,19 +72,96 @@ func (s *Ship) PeriodicUpdate() {
 	} else if s.Theta < 0 {
 		s.Theta += 360
 	}
+
+	// apply dampening
+	dampX := SpaceDrag * s.VelX * TimeModifier
+	dampY := SpaceDrag * s.VelY * TimeModifier
+
+	s.VelX -= dampX
+	s.VelY -= dampY
+}
+
+//doAutopilot Flies the ship for you
+func (s *Ship) doAutopilot() {
+	// get registry
+	registry := NewAutopilotRegistry()
+
+	switch s.AutopilotMode {
+	case registry.None:
+		return
+	case registry.SeekManualNav:
+		s.doAutopilotSeekManualNav()
+	}
+}
+
+//doAutopilotSeekManualNav Causes ship to turn to face a target angle while accelerating
+func (s *Ship) doAutopilotSeekManualNav() {
+	screenT := s.AutopilotSeekManualNav.Theta
+
+	//calculate magnitude of requested turn
+	turnMag := math.Sqrt((screenT - s.Theta) * (screenT - s.Theta))
+
+	a := screenT - s.Theta
+	a = physics.FMod(a+180, 360) - 180
+
+	//apply turn with ship limits
+	if a > 0 {
+		s.rotate(turnMag / s.Turn)
+	} else if a < 0 {
+		s.rotate(turnMag / -s.Turn)
+	}
+
+	//thrust forward
+	s.forwardThrust(s.AutopilotSeekManualNav.Magnitude)
 }
 
 //ManualTurn Test function for manual turn
 func (s *Ship) ManualTurn(screenT float64, screenM float64) {
+	// get registry
+	registry := NewAutopilotRegistry()
+
 	// lock entity
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	// accelerate along new angle for debugging (this whole function needs a redo)
-	s.Theta = screenT
+	//stash manual turn and activate autopilot
+	s.AutopilotSeekManualNav = SeekManualNavData{
+		Magnitude: screenM,
+		Theta:     screenT,
+	}
 
-	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (s.Accel * TimeModifier)
-	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (s.Accel * TimeModifier)
+	s.AutopilotMode = registry.SeekManualNav
+}
+
+//rotate Turn the ship
+func (s *Ship) rotate(scale float64) {
+	// bound requested turn magnitude
+	if scale > 1 {
+		scale = 1
+	}
+
+	if scale < -1 {
+		scale = -1
+	}
+
+	// turn
+	s.Theta += s.Turn * scale * TimeModifier
+}
+
+//forwardThrust Fire the ship's thrusters
+func (s *Ship) forwardThrust(scale float64) {
+	// bound requested thrust magnitude
+	if scale > 1 {
+		scale = 1
+	}
+
+	if scale < 0 {
+		scale = 0
+	}
+
+	// accelerate along theta using thrust proportional to bounded magnitude
+	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (s.Accel * scale * TimeModifier)
+	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (s.Accel * scale * TimeModifier)
 }
 
 //ToPhysicsDummy Returns a new physics dummy structure representing this ship

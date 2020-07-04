@@ -71,6 +71,7 @@ func loadUniverse() (*universe.Universe, error) {
 					Accel:    currShip.Accel,
 					Mass:     currShip.Mass,
 					Radius:   currShip.Radius,
+					Turn:     currShip.Turn,
 				}
 
 				s.AddShip(&es)

@@ -13,4 +13,5 @@ export class WSShip {
     accel: number;
     mass: number;
     radius: number;
+    turn: number;
 }

@@ -23,6 +23,10 @@ export class Ship extends WSShip {
         if (ws.accel) {
             this.accel = ws.accel;
         }
+
+        if (ws.turn) {
+            this.turn = ws.turn;
+        }
     }
 
     render(ctx: any, camera: Camera) {
@@ -73,6 +77,10 @@ export class Ship extends WSShip {
 
         if (sh.accel) {
             this.accel = sh.accel;
+        }
+
+        if (sh.turn) {
+            this.turn = sh.turn;
         }
     }
 }

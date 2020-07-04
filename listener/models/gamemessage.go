@@ -39,6 +39,7 @@ type CurrentShipInfo struct {
 	Radius   float64   `json:"radius"`
 	// secrets that should not be globally known
 	Accel float64 `json:"accel"`
+	Turn  float64 `json:"turn"`
 }
 
 //GlobalShipInfo Structure for passing non-secret information about a ship

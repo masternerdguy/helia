@@ -207,9 +207,12 @@ function handleClick(x: number, y: number) {
 
   // calculate cursor vector
   b.dT = angleBetween(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y);
-  b.m = magnitude(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y);
-  b.sid = engineSack.player.sid;
+  b.m = (magnitude(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y))
+    // half way across the shortest part of the screen is a full speed request
+    / Math.min(engineSack.gfx.width / 4, engineSack.gfx.height / 4);
 
+  // send nav click request
+  b.sid = engineSack.player.sid;
   engineSack.wsSvc.sendMessage(MessageTypes.NavClick, b);
 }
 
