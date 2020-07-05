@@ -88,8 +88,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 				d := physics.Distance(dummyA, dummyB)
 
 				//check for radius intersection
-				if d <= sA.Radius || d <= sB.Radius {
-
+				if d <= (sA.Radius + sB.Radius) {
 					//calculate collission results
 					physics.ElasticCollide(&dummyA, &dummyB, TimeModifier)
 
