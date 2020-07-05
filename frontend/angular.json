@@ -22,7 +22,8 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/assets/ships"
+              "src/assets/ships",
+              "src/assets/stars"
             ],
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
