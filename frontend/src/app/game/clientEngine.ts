@@ -10,6 +10,7 @@ import { Backplate } from './procedural/backplate/backplate';
 import { ClientNavClick } from './wsModels/bodies/navClick';
 import { angleBetween, magnitude } from './engineMath';
 import { Star } from './engineModels/star';
+import { Planet } from './engineModels/planet';
 
 class EngineSack {
   constructor() {}
@@ -159,6 +160,29 @@ function handleGlobalUpdate(d: GameMessage) {
       engineSack.player.currentSystem.stars.push(new Star(st));
     }
   }
+
+  // update planets
+  for (const p of msg.planets) {
+    let match = false;
+
+    // find planet in memory
+    for (const sm of engineSack.player.currentSystem.planets) {
+      if (p.id === sm.id) {
+        match = true;
+
+        // sync planet in memory
+        sm.sync(p);
+
+        // exit loop
+        break;
+      }
+    }
+
+    if (!match) {
+      // add planet to memory
+      engineSack.player.currentSystem.planets.push(new Planet(p));
+    }
+  }
 }
 
 // clears the screen
@@ -220,6 +244,11 @@ function clientRender() {
   // draw stars
   for (const st of engineSack.player.currentSystem.stars) {
     st.render(engineSack.ctx, engineSack.camera);
+  }
+
+  // draw planets
+  for (const p of engineSack.player.currentSystem.planets) {
+    p.render(engineSack.ctx, engineSack.camera);
   }
 
   // draw ships

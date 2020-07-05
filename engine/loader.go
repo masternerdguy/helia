@@ -14,6 +14,7 @@ func loadUniverse() (*universe.Universe, error) {
 	systemSvc := sql.GetSolarSystemService()
 	shipSvc := sql.GetShipService()
 	starSvc := sql.GetStarService()
+	planetSvc := sql.GetPlanetService()
 
 	u := universe.Universe{}
 
@@ -101,6 +102,29 @@ func loadUniverse() (*universe.Universe, error) {
 				}
 
 				s.AddStar(&star)
+			}
+
+			//load planets
+			planets, err := planetSvc.GetPlanetsBySolarSystem(s.ID)
+
+			if err != nil {
+				return nil, err
+			}
+
+			for _, currPlanet := range planets {
+				planet := universe.Planet{
+					ID:         currPlanet.ID,
+					SystemID:   currPlanet.SystemID,
+					PlanetName: currPlanet.PlanetName,
+					PosX:       currPlanet.PosX,
+					PosY:       currPlanet.PosY,
+					Texture:    currPlanet.Texture,
+					Radius:     currPlanet.Radius,
+					Mass:       currPlanet.Mass,
+					Theta:      currPlanet.Theta,
+				}
+
+				s.AddPlanet(&planet)
 			}
 		}
 

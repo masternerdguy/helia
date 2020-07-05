@@ -1,6 +1,7 @@
 import { WSSystem } from '../wsModels/entities/wsSystem';
 import { Ship } from './ship';
 import { Star } from './star';
+import { Planet } from './planet';
 
 export class System extends WSSystem {
     constructor(ws: WSSystem) {
@@ -13,9 +14,11 @@ export class System extends WSSystem {
         // initialize self
         this.ships = [];
         this.stars = [];
+        this.planets = [];
     }
 
     ships: Ship[];
     stars: Star[];
+    planets: Planet[];
     backplateImg: HTMLImageElement;
 }

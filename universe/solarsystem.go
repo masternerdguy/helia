@@ -17,6 +17,7 @@ type SolarSystem struct {
 	RegionID   uuid.UUID
 	ships      map[string]*Ship
 	stars      map[string]*Star
+	planets    map[string]*Planet
 	clients    map[string]*shared.GameClient //clients in this system
 	Lock       sync.Mutex
 }
@@ -31,6 +32,7 @@ func (s *SolarSystem) Initialize() {
 	s.clients = make(map[string]*shared.GameClient)
 	s.ships = make(map[string]*Ship)
 	s.stars = make(map[string]*Star)
+	s.planets = make(map[string]*Planet)
 }
 
 //PeriodicUpdate Processes the solar system for a tick
@@ -137,6 +139,20 @@ func (s *SolarSystem) PeriodicUpdate() {
 		})
 	}
 
+	for _, d := range s.planets {
+		gu.Planets = append(gu.Planets, models.GlobalPlanetInfo{
+			ID:         d.ID,
+			SystemID:   d.SystemID,
+			PlanetName: d.PlanetName,
+			PosX:       d.PosX,
+			PosY:       d.PosY,
+			Texture:    d.Texture,
+			Radius:     d.Radius,
+			Mass:       d.Mass,
+			Theta:      d.Theta,
+		})
+	}
+
 	//serialize global update
 	b, _ := json.Marshal(&gu)
 
@@ -194,6 +210,21 @@ func (s *SolarSystem) AddStar(c *Star) {
 
 	//add star
 	s.stars[c.ID.String()] = c
+}
+
+//AddPlanet Adds a planet to the system
+func (s *SolarSystem) AddPlanet(c *Planet) {
+	//safety check
+	if c == nil {
+		return
+	}
+
+	//obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//add planet
+	s.planets[c.ID.String()] = c
 }
 
 //AddClient Adds a client to the system
