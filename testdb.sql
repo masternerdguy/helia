@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2020-07-04 21:04:48
+-- Started on 2020-07-04 21:47:35
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -152,10 +152,11 @@ ALTER TABLE public.users OWNER TO postgres;
 
 COPY public.sessions (id, userid) FROM stdin;
 8a210e3d-766d-4eae-af42-4b2628e885c4	ec5c12e6-04b1-4ea3-b1c7-a8e5615b012a
-229a9af0-db46-4b41-8b23-a39310ca2373	502b5a79-f5d4-46ff-8e94-653c0778bb6e
-ce2f7901-8896-41a5-a641-4b24ddd212de	ded647c9-2799-4fb6-9887-a32ca11d0c4c
 38c95eda-861f-40ea-adb2-f023b14a9624	298011ef-0eb1-42d3-9aed-28e7166da350
-a9de6c9b-3d4b-4b8e-9d31-5dd96a57d086	57194133-619d-4239-bc10-ee4a2d9fdd62
+4af30de8-4272-4940-be80-32c6638e17a4	f1bb5c0c-d698-4e56-8cd8-c4b05a32f8b8
+bdd3feb4-ddf7-432a-953d-43554dd9f4d7	502b5a79-f5d4-46ff-8e94-653c0778bb6e
+1654a6c1-5fd4-48b3-b113-c479f2774040	ded647c9-2799-4fb6-9887-a32ca11d0c4c
+5fe560ee-2253-4e98-a742-0c7b4cefaf0f	57194133-619d-4239-bc10-ee4a2d9fdd62
 \.
 
 
@@ -166,9 +167,10 @@ a9de6c9b-3d4b-4b8e-9d31-5dd96a57d086	57194133-619d-4239-bc10-ee4a2d9fdd62
 --
 
 COPY public.ships (id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta, vel_x, vel_y, accel, radius, mass, turn) FROM stdin;
-272041ee-f373-49ea-8e37-379ed9fa84da	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	502b5a79-f5d4-46ff-8e94-653c0778bb6e	-1.4330223655533643	573.9666142622724	08:27:26.737175-04	nwiehoff's Starter Ship	Goanna	38.93751964251964	5.3854493871049e-36	-3.144057927553592e-36	0.1	167.5	10000	1
-a50c0ca6-004f-47c1-9447-c9b8cdea2e67	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	ded647c9-2799-4fb6-9887-a32ca11d0c4c	-95.26682399238562	-30.077679998955638	07:41:30.998232-04	masternerdguy's Starter Ship	Mass Testing Brick	225	1.3057592317242641e-208	9.068857015040889e-209	1	12.5	100	10
-390387f4-794b-4e28-b7e5-9be1c282bf80	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	57194133-619d-4239-bc10-ee4a2d9fdd62	-427.23521394489956	530.3861094507423	16:06:48.42982-04	asdf's Starter Ship	Mass Testing Brick	0	-4.975612916091584e-203	8.663208787828185e-202	1	12.5	100	10
+390387f4-794b-4e28-b7e5-9be1c282bf80	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	57194133-619d-4239-bc10-ee4a2d9fdd62	25074.016038279595	-9955.083902334594	16:06:48.42982-04	asdf's Starter Ship	Mass Testing Brick	257.3741631210926	-4.9e-322	4.9e-322	1	12.5	100	10
+272041ee-f373-49ea-8e37-379ed9fa84da	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	502b5a79-f5d4-46ff-8e94-653c0778bb6e	24911.98644929151	-9751.608018975618	08:27:26.737175-04	nwiehoff's Starter Ship	Goanna	355.4474119903515	-4.9e-322	4.9e-322	0.1	167.5	10000	1
+a50c0ca6-004f-47c1-9447-c9b8cdea2e67	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	ded647c9-2799-4fb6-9887-a32ca11d0c4c	208048.3872718393	-334189.81473172776	07:41:30.998232-04	masternerdguy's Starter Ship	Mass Testing Brick	302.89290001505447	1.9232051556107464e-25	3.011173691348238e-25	1	12.5	100	10
+3a8a43e7-508c-408c-b503-c8b1bab3b4e9	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	f1bb5c0c-d698-4e56-8cd8-c4b05a32f8b8	30712.267278515705	387	21:34:37.762497-04	lololol's Starter Ship	Mass Testing Brick	0	4.9e-322	0	1	12.5	100	0
 \.
 
 
@@ -179,8 +181,8 @@ a50c0ca6-004f-47c1-9447-c9b8cdea2e67	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	ded647
 --
 
 COPY public.universe_planets (id, universe_systemid, planetname, pos_x, pos_y, texture, radius, mass, theta) FROM stdin;
-695f28ec-941d-405c-b1ca-fbeace169d92	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Test Planet	-1000	-1000	vh_unshaded\\planet03	100000	1000000	23
-e20d3b80-f44f-4e16-91c7-d5489a95bf4a	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Another Planet	60000	450000	vh_unshaded\\planet09	8000	2000000	112
+695f28ec-941d-405c-b1ca-fbeace169d92	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Test Planet	207460	-335230	vh_unshaded\\planet03	3960	1000000	23
+e20d3b80-f44f-4e16-91c7-d5489a95bf4a	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Another Planet	-303350	-100230	vh_unshaded\\planet09	2352	2000000	112
 \.
 
 
@@ -202,8 +204,8 @@ bfca1f47-e182-4b4d-8632-48d8ead08647	The Core
 --
 
 COPY public.universe_stars (id, universe_systemid, pos_x, pos_y, texture, radius, mass, theta) FROM stdin;
-058618fc-1bb3-42a6-a240-14922782de41	edf08406-0879-4141-8af1-f68d32e31c8d	25	-25	vh_main_sequence\\star_yellow03	600000	30000000000	0
-42805a07-9f38-484c-9aaf-9ec55e74f725	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	10000000	-500000	vh_main_sequence\\star_red01	200000	1000000000	0
+058618fc-1bb3-42a6-a240-14922782de41	edf08406-0879-4141-8af1-f68d32e31c8d	10570	15130	vh_main_sequence\\star_yellow03	28380	30000000000	0
+42805a07-9f38-484c-9aaf-9ec55e74f725	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	32670	-11350	vh_main_sequence\\star_red01	15010	1000000000	0
 \.
 
 
@@ -229,6 +231,7 @@ COPY public.users (id, username, hashpass, registered, banned, current_shipid) F
 502b5a79-f5d4-46ff-8e94-653c0778bb6e	nwiehoff	02c4bf7d7e35c6bab999ac03ece60b8586a27f7ecd4830983b138b74262bf3f9	2020-06-16 08:27:26.545781-04	0	272041ee-f373-49ea-8e37-379ed9fa84da
 ded647c9-2799-4fb6-9887-a32ca11d0c4c	masternerdguy	71e58265a4cc0edc6b4654593ec35094222c88edbb51e9439b47ba86999b3f86	2020-06-18 07:41:30.776233-04	0	a50c0ca6-004f-47c1-9447-c9b8cdea2e67
 57194133-619d-4239-bc10-ee4a2d9fdd62	asdf	7ab518aea3a72084bf1f1e1ddeb7fa25563a47b73b643452960187b6405b72f1	2020-07-03 16:06:48.339821-04	0	390387f4-794b-4e28-b7e5-9be1c282bf80
+f1bb5c0c-d698-4e56-8cd8-c4b05a32f8b8	lololol	af1bf930bd9dbe551a03ed4ebfa9776eb591238333a7e994b5f047d9339b56bd	2020-07-04 21:34:37.662498-04	0	3a8a43e7-508c-408c-b503-c8b1bab3b4e9
 \.
 
 
@@ -393,7 +396,7 @@ ALTER TABLE ONLY public.universe_stars
     ADD CONSTRAINT star_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
 
 
--- Completed on 2020-07-04 21:04:48
+-- Completed on 2020-07-04 21:47:35
 
 --
 -- PostgreSQL database dump complete

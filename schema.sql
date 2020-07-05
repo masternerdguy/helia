@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2020-07-04 21:04:27
+-- Started on 2020-07-04 21:47:50
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -305,7 +305,7 @@ ALTER TABLE ONLY public.universe_stars
     ADD CONSTRAINT star_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
 
 
--- Completed on 2020-07-04 21:04:28
+-- Completed on 2020-07-04 21:47:50
 
 --
 -- PostgreSQL database dump complete
