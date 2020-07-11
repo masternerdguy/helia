@@ -1,5 +1,5 @@
 import { GDIComponent } from './gdiComponent';
-import { Rectangle } from './rectangle';
+import { GDIRectangle } from './gdiRectangle';
 
 export class GDIBase implements GDIComponent {
     private x: number;
@@ -52,7 +52,7 @@ export class GDIBase implements GDIComponent {
     }
 
     containsPoint(x: number, y: number): boolean {
-        const rect = new Rectangle(this.getX(), this.getY(), this.getWidth(), this.getHeight());
+        const rect = new GDIRectangle(this.getX(), this.getY(), this.getWidth(), this.getHeight());
         return rect.containsPoint(x, y);
     }
 

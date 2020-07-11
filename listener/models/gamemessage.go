@@ -84,6 +84,19 @@ type GlobalPlanetInfo struct {
 	Theta      float64   `json:"theta"`
 }
 
+//GlobalStationInfo Structure for passing non-secret information about an NPC station
+type GlobalStationInfo struct {
+	ID          uuid.UUID `json:"id"`
+	SystemID    uuid.UUID `json:"systemId"`
+	StationName string    `json:"stationName"`
+	PosX        float64   `json:"x"`
+	PosY        float64   `json:"y"`
+	Texture     string    `json:"texture"`
+	Radius      float64   `json:"radius"`
+	Mass        float64   `json:"mass"`
+	Theta       float64   `json:"theta"`
+}
+
 //CurrentSystemInfo Information about the user's current location
 type CurrentSystemInfo struct {
 	ID         uuid.UUID `json:"id"`
@@ -110,10 +123,11 @@ type ServerJoinBody struct {
 
 //ServerGlobalUpdateBody Body for periodically updating clients with globally-known (non-secret) system info
 type ServerGlobalUpdateBody struct {
-	CurrentSystemInfo CurrentSystemInfo  `json:"currentSystemInfo"`
-	Ships             []GlobalShipInfo   `json:"ships"`
-	Stars             []GlobalStarInfo   `json:"stars"`
-	Planets           []GlobalPlanetInfo `json:"planets"`
+	CurrentSystemInfo CurrentSystemInfo   `json:"currentSystemInfo"`
+	Ships             []GlobalShipInfo    `json:"ships"`
+	Stars             []GlobalStarInfo    `json:"stars"`
+	Planets           []GlobalPlanetInfo  `json:"planets"`
+	Stations          []GlobalStationInfo `json:"stations"`
 }
 
 //ClientNavClickBody Body containing a click-in-space move event from the client

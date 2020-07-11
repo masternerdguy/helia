@@ -18,6 +18,7 @@ type SolarSystem struct {
 	ships      map[string]*Ship
 	stars      map[string]*Star
 	planets    map[string]*Planet
+	stations   map[string]*Station
 	clients    map[string]*shared.GameClient //clients in this system
 	Lock       sync.Mutex
 }
@@ -33,6 +34,7 @@ func (s *SolarSystem) Initialize() {
 	s.ships = make(map[string]*Ship)
 	s.stars = make(map[string]*Star)
 	s.planets = make(map[string]*Planet)
+	s.stations = make(map[string]*Station)
 }
 
 //PeriodicUpdate Processes the solar system for a tick
@@ -73,6 +75,11 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	//update ships
 	for _, e := range s.ships {
+		e.PeriodicUpdate()
+	}
+
+	//update npc stations
+	for _, e := range s.stations {
 		e.PeriodicUpdate()
 	}
 
@@ -152,6 +159,20 @@ func (s *SolarSystem) PeriodicUpdate() {
 		})
 	}
 
+	for _, d := range s.stations {
+		gu.Stations = append(gu.Stations, models.GlobalStationInfo{
+			ID:          d.ID,
+			SystemID:    d.SystemID,
+			StationName: d.StationName,
+			PosX:        d.PosX,
+			PosY:        d.PosY,
+			Texture:     d.Texture,
+			Radius:      d.Radius,
+			Mass:        d.Mass,
+			Theta:       d.Theta,
+		})
+	}
+
 	//serialize global update
 	b, _ := json.Marshal(&gu)
 
@@ -226,6 +247,21 @@ func (s *SolarSystem) AddPlanet(c *Planet) {
 	s.planets[c.ID.String()] = c
 }
 
+//AddStation Adds an NPC station to the system
+func (s *SolarSystem) AddStation(c *Station) {
+	//safety check
+	if c == nil {
+		return
+	}
+
+	//obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//add planet
+	s.stations[c.ID.String()] = c
+}
+
 //AddClient Adds a client to the system
 func (s *SolarSystem) AddClient(c *shared.GameClient) {
 	//safety check
@@ -268,6 +304,25 @@ func (s *SolarSystem) CopyShips() map[string]*Ship {
 	//copy ships into copy map
 	for k, v := range s.ships {
 		c := v.CopyShip()
+		copy[k] = &c
+	}
+
+	//return copy map
+	return copy
+}
+
+//CopyStations Returns a copy of the stations in the system
+func (s *SolarSystem) CopyStations() map[string]*Station {
+	//obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//make map for copies
+	copy := make(map[string]*Station)
+
+	//copy stations into copy map
+	for k, v := range s.stations {
+		c := v.CopyStation()
 		copy[k] = &c
 	}
 

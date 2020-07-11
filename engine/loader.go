@@ -15,6 +15,7 @@ func loadUniverse() (*universe.Universe, error) {
 	shipSvc := sql.GetShipService()
 	starSvc := sql.GetStarService()
 	planetSvc := sql.GetPlanetService()
+	stationSvc := sql.GetStationService()
 
 	u := universe.Universe{}
 
@@ -126,6 +127,29 @@ func loadUniverse() (*universe.Universe, error) {
 
 				s.AddPlanet(&planet)
 			}
+
+			//load npc stations
+			stations, err := stationSvc.GetStationsBySolarSystem(s.ID)
+
+			if err != nil {
+				return nil, err
+			}
+
+			for _, currStation := range stations {
+				station := universe.Station{
+					ID:          currStation.ID,
+					SystemID:    currStation.SystemID,
+					StationName: currStation.StationName,
+					PosX:        currStation.PosX,
+					PosY:        currStation.PosY,
+					Texture:     currStation.Texture,
+					Radius:      currStation.Radius,
+					Mass:        currStation.Mass,
+					Theta:       currStation.Theta,
+				}
+
+				s.AddStation(&station)
+			}
 		}
 
 		//store and append region
@@ -143,6 +167,7 @@ func loadUniverse() (*universe.Universe, error) {
 func saveUniverse(u *universe.Universe) {
 	//get services
 	shipSvc := sql.GetShipService()
+	stationSvc := sql.GetStationService()
 
 	//iterate over systems
 	for _, r := range u.Regions {
@@ -178,6 +203,34 @@ func saveUniverse(u *universe.Universe) {
 
 				if err != nil {
 					log.Println(fmt.Sprintf("Error saving ship: %v | %v", dbShip, err))
+				}
+			}
+
+			//get npc stations in system
+			stations := s.CopyStations()
+
+			//save npc stations to database
+			for _, station := range stations {
+				//obtain lock on copy
+				station.Lock.Lock()
+				defer station.Lock.Unlock()
+
+				dbStation := sql.Station{
+					ID:          station.ID,
+					StationName: station.StationName,
+					PosX:        station.PosX,
+					PosY:        station.PosY,
+					SystemID:    station.SystemID,
+					Texture:     station.Texture,
+					Theta:       station.Theta,
+					Mass:        station.Mass,
+					Radius:      station.Radius,
+				}
+
+				err := stationSvc.UpdateStation(dbStation)
+
+				if err != nil {
+					log.Println(fmt.Sprintf("Error saving station: %v | %v", dbStation, err))
 				}
 			}
 		}

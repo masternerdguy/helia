@@ -13,6 +13,7 @@ import { Star } from './engineModels/star';
 import { Planet } from './engineModels/planet';
 import { TestWindow } from './gdi/windows/testWindow';
 import { GDIWindow } from './gdi/base/gdiWindow';
+import { Station } from './engineModels/station';
 
 class EngineSack {
   constructor() {}
@@ -200,6 +201,31 @@ function handleGlobalUpdate(d: GameMessage) {
       engineSack.player.currentSystem.planets.push(new Planet(p));
     }
   }
+
+  // update npc stations
+  for (const p of msg.stations) {
+    let match = false;
+
+    // find station in memory
+    for (const sm of engineSack.player.currentSystem.stations) {
+      if (p.id === sm.id) {
+        match = true;
+
+        // sync station in memory
+        sm.sync(p);
+
+        // exit loop
+        break;
+      }
+    }
+
+    if (!match) {
+      // add station to memory
+      engineSack.player.currentSystem.stations.push(new Station(p));
+    }
+
+    // todo: handle npc station dying
+  }
 }
 
 // clears the screen
@@ -276,6 +302,11 @@ function clientRender() {
   // draw planets
   for (const p of engineSack.player.currentSystem.planets) {
     p.render(engineSack.ctx, engineSack.camera);
+  }
+
+  // draw npc stations
+  for (const st of engineSack.player.currentSystem.stations) {
+    st.render(engineSack.ctx, engineSack.camera);
   }
 
   // draw ships

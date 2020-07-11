@@ -1,4 +1,4 @@
-export class Rectangle {
+export class GDIRectangle {
     x: number;
     y: number;
     w: number;

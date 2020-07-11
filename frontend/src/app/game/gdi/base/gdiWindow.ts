@@ -1,7 +1,6 @@
 import { GDIBase } from './gdiBase';
 import { GDIComponent } from './gdiComponent';
 import { GDIStyle } from './gdiStyle';
-import { Rectangle } from './rectangle';
 
 export class GDIWindow extends GDIBase {
     private components: GDIComponent[];
