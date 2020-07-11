@@ -11,6 +11,8 @@ import { ClientNavClick } from './wsModels/bodies/navClick';
 import { angleBetween, magnitude } from './engineMath';
 import { Star } from './engineModels/star';
 import { Planet } from './engineModels/planet';
+import { TestWindow } from './gdi/testWindow';
+import { GDIWindow } from './gdi/base/gdiWindow';
 
 class EngineSack {
   constructor() {}
@@ -29,6 +31,11 @@ class EngineSack {
   backplateCanvas: HTMLCanvasElement;
   backplateRenderer: Backplate;
 
+  // ui elements
+  testWindow: TestWindow;
+
+  windows: GDIWindow[];
+
   // client-server communication
   wsSvc: WsService;
 
@@ -46,6 +53,15 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.player = new Player();
   engineSack.camera = new Camera(gameCanvas.width, gameCanvas.height, 1);
   engineSack.backplateRenderer = new Backplate(backCanvas);
+
+  // initialize ui
+  engineSack.testWindow = new TestWindow();
+  engineSack.testWindow.setX(100);
+  engineSack.testWindow.setY(100);
+  engineSack.testWindow.initialize();
+
+  // cache windows for simpler updating and rendering
+  engineSack.windows = [engineSack.testWindow];
 
   // store globals
   engineSack.gfx = gameCanvas;
@@ -219,6 +235,9 @@ function clientLoop() {
   // render
   clientRender();
 
+  // periodic update
+  periodicUpdate();
+
   // check if connection has been lost
   if (engineSack.wsSvc.isStale() && !engineSack.reloading) {
     engineSack.reloading = true;
@@ -232,6 +251,13 @@ function clientLoop() {
 
   // store frame time
   engineSack.lastFrameTime = Date.now();
+}
+
+function periodicUpdate() {
+  // update ui
+  for (const w of engineSack.windows) {
+    w.periodicUpdate();
+  }
 }
 
 function clientRender() {
@@ -254,6 +280,12 @@ function clientRender() {
   // draw ships
   for (const sh of engineSack.player.currentSystem.ships) {
     sh.render(engineSack.ctx, engineSack.camera);
+  }
+
+  // draw ui elements
+  for (const w of engineSack.windows) {
+    const bmp = w.render();
+    engineSack.ctx.drawImage(bmp, w.getX(), w.getY());
   }
 }
 
