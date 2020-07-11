@@ -11,7 +11,7 @@ import { ClientNavClick } from './wsModels/bodies/navClick';
 import { angleBetween, magnitude } from './engineMath';
 import { Star } from './engineModels/star';
 import { Planet } from './engineModels/planet';
-import { TestWindow } from './gdi/testWindow';
+import { TestWindow } from './gdi/windows/testWindow';
 import { GDIWindow } from './gdi/base/gdiWindow';
 
 class EngineSack {

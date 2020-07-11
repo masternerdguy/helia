@@ -1,4 +1,4 @@
-import { GDIWindow } from './base/gdiWindow';
+import { GDIWindow } from '../base/gdiWindow';
 
 export class TestWindow extends GDIWindow {
     initialize() {

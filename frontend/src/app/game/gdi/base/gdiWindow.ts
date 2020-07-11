@@ -1,5 +1,6 @@
 import { GDIBase } from './gdiBase';
 import { GDIComponent } from './gdiComponent';
+import { GDIStyle } from './gdiStyle';
 
 export class GDIWindow extends GDIBase {
     private components: GDIComponent[];
@@ -23,11 +24,12 @@ export class GDIWindow extends GDIBase {
     }
 
     render(): ImageBitmap {
-        // render self
-        this.ctx.lineWidth = 1;
-        this.ctx.fillStyle = '#00091a';
-        this.ctx.strokeStyle = '#001b4d';
+        // set up window style
+        this.ctx.lineWidth = GDIStyle.windowBorderSize;
+        this.ctx.fillStyle = GDIStyle.windowFillColor;
+        this.ctx.strokeStyle = GDIStyle.windowBorderColor;
 
+        // render self
         this.ctx.fillRect(0, 0, this.getWidth(), this.getHeight());
         this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight());
 
