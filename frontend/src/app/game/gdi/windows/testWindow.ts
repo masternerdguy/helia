@@ -1,5 +1,7 @@
 import { GDIWindow } from '../base/gdiWindow';
-import { GDIButton, FontSize } from '../components/gdiButton';
+import { GDIButton } from '../components/gdiButton';
+import { FontSize } from '../base/gdiStyle';
+import { GDILabel } from '../components/gdiLabel';
 
 export class TestWindow extends GDIWindow {
     initialize() {
@@ -19,7 +21,7 @@ export class TestWindow extends GDIWindow {
         testBtn.initialize();
 
         testBtn.setX(10);
-        testBtn.setY(10);
+        testBtn.setY(50);
 
         testBtn.setFont(FontSize.normal);
         testBtn.setText('Hello test button!');
@@ -29,5 +31,19 @@ export class TestWindow extends GDIWindow {
         });
 
         this.addComponent(testBtn);
+
+        // test label
+        const testLbl = new GDILabel();
+        testLbl.setWidth(200);
+        testLbl.setHeight(20);
+        testLbl.initialize();
+
+        testLbl.setX(10);
+        testLbl.setY(10);
+
+        testLbl.setFont(FontSize.large);
+        testLbl.setText('Hello test label!');
+
+        this.addComponent(testLbl);
     }
 }

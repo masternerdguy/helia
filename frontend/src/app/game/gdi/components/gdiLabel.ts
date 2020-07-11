@@ -1,14 +1,12 @@
 import { GDIBase } from '../base/gdiBase';
 import { GDIStyle, FontSize } from '../base/gdiStyle';
 
-export class GDIButton extends GDIBase {
+export class GDILabel extends GDIBase {
     private canvas: OffscreenCanvas;
     private ctx: any;
 
     private text = '';
     private font: FontSize =  FontSize.normal;
-
-    private onClick: (x: number, y: number) => void;
 
     initialize() {
         // initialize offscreen canvas
@@ -22,7 +20,7 @@ export class GDIButton extends GDIBase {
 
     render(): ImageBitmap {
         // render background
-        this.ctx.fillStyle = GDIStyle.buttonFillColor;
+        this.ctx.fillStyle = GDIStyle.labelFillColor;
         this.ctx.fillRect(0, 0, this.getWidth(), this.getHeight());
 
         // style text
@@ -36,19 +34,15 @@ export class GDIButton extends GDIBase {
         // render text
         this.ctx.fillText(this.getText(), this.getWidth() / 2, this.getHeight() / 2);
 
-        if (GDIStyle.buttonBorderSize > 0) {
+        if (GDIStyle.labelBorderSize > 0) {
             // render border
-            this.ctx.lineWidth = GDIStyle.buttonBorderSize;
-            this.ctx.strokeStyle = GDIStyle.buttonBorderColor;
+            this.ctx.lineWidth = GDIStyle.labelBorderSize;
+            this.ctx.strokeStyle = GDIStyle.labelBorderColor;
             this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight());
         }
 
         // convert to image and return
         return this.canvas.transferToImageBitmap();
-    }
-
-    handleClick(x: number, y: number) {
-        this.onClick(x, y);
     }
 
     setText(text: string) {
@@ -66,9 +60,4 @@ export class GDIButton extends GDIBase {
     getFont(): FontSize {
         return this.font;
     }
-
-    setOnClick(h: (x: number, y: number) => void) {
-        this.onClick = h;
-    }
 }
-
