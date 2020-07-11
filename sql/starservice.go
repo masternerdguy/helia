@@ -33,9 +33,6 @@ func (s StarService) GetAllStars() ([]Star, error) {
 		return nil, err
 	}
 
-	//defer close
-	defer db.Close()
-
 	//load stars
 	sql := `
 				SELECT id, universe_systemid, pos_x, pos_y, texture, radius, mass, theta
@@ -71,9 +68,6 @@ func (s StarService) GetStarsBySolarSystem(systemID uuid.UUID) ([]Star, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	//defer close
-	defer db.Close()
 
 	//load stars
 	sql := `

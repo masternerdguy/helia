@@ -27,9 +27,6 @@ func (s RegionService) GetAllRegions() ([]Region, error) {
 		return nil, err
 	}
 
-	//defer close
-	defer db.Close()
-
 	//load regions
 	sql := "select id, regionname from universe_regions"
 

@@ -30,9 +30,6 @@ func (s SessionService) NewSession(userid uuid.UUID) (*Session, error) {
 		return nil, err
 	}
 
-	//defer close
-	defer db.Close()
-
 	if err != nil {
 		return nil, err
 	}
@@ -68,9 +65,6 @@ func (s SessionService) GetSessionByID(sessionid uuid.UUID) (*Session, error) {
 		return nil, err
 	}
 
-	//defer close
-	defer db.Close()
-
 	if err != nil {
 		return nil, err
 	}
@@ -98,13 +92,6 @@ func (s SessionService) GetSessionByID(sessionid uuid.UUID) (*Session, error) {
 func (s SessionService) DeleteSession(userid uuid.UUID) error {
 	//get db handle
 	db, err := connect()
-
-	if err != nil {
-		return err
-	}
-
-	//defer close
-	defer db.Close()
 
 	if err != nil {
 		return err

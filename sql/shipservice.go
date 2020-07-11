@@ -44,13 +44,6 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 		return nil, err
 	}
 
-	//defer close
-	defer db.Close()
-
-	if err != nil {
-		return nil, err
-	}
-
 	//insert ship
 	sql := `
 				INSERT INTO public.ships(id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture,
@@ -84,9 +77,6 @@ func (s ShipService) GetShipByID(shipID uuid.UUID) (*Ship, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	//defer close
-	defer db.Close()
 
 	//find ship with this id
 	ship := Ship{}
@@ -122,9 +112,6 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID) ([]Ship, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	//defer close
-	defer db.Close()
 
 	//load solar systems
 	sql := `
@@ -162,9 +149,6 @@ func (s ShipService) UpdateShip(ship Ship) error {
 	if err != nil {
 		return err
 	}
-
-	//defer close
-	defer db.Close()
 
 	//update ship in database
 	sqlStatement :=

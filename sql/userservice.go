@@ -51,9 +51,6 @@ func (s UserService) NewUser(u string, p string) (*User, error) {
 		return nil, err
 	}
 
-	//defer close
-	defer db.Close()
-
 	//hash password
 	hp, err := s.Hashpass(u, p)
 
@@ -98,9 +95,6 @@ func (s UserService) SetCurrentShipID(uid uuid.UUID, shipID *uuid.UUID) error {
 		return err
 	}
 
-	//defer close
-	defer db.Close()
-
 	//update user
 	sql := `
 				UPDATE public.users SET current_shipid = $1 WHERE id = $2;
@@ -123,9 +117,6 @@ func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) 
 	if err != nil {
 		return nil, err
 	}
-
-	//defer close
-	defer db.Close()
 
 	//hash password
 	hp, err := s.Hashpass(username, pwd)
@@ -161,9 +152,6 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	//defer close
-	defer db.Close()
 
 	//check for user with these credentials
 	user := User{}

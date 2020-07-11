@@ -34,9 +34,6 @@ func (s PlanetService) GetAllPlanets() ([]Planet, error) {
 		return nil, err
 	}
 
-	//defer close
-	defer db.Close()
-
 	//load planets
 	sql := `
 				SELECT id, universe_systemid, planetname, pos_x, pos_y, texture, radius, mass, theta
@@ -72,9 +69,6 @@ func (s PlanetService) GetPlanetsBySolarSystem(systemID uuid.UUID) ([]Planet, er
 	if err != nil {
 		return nil, err
 	}
-
-	//defer close
-	defer db.Close()
 
 	//load planets
 	sql := `

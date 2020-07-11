@@ -28,9 +28,6 @@ func (s SolarSystemService) GetSolarSystemsByRegion(regionID uuid.UUID) ([]Solar
 		return nil, err
 	}
 
-	//defer close
-	defer db.Close()
-
 	//load solar systems
 	sql := "select id, systemname, regionid from universe_systems where regionid = $1"
 
