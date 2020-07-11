@@ -59,6 +59,7 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.testWindow.setX(100);
   engineSack.testWindow.setY(100);
   engineSack.testWindow.initialize();
+  engineSack.testWindow.pack();
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [engineSack.testWindow];

@@ -29,9 +29,8 @@ export class GDIWindow extends GDIBase {
         this.ctx.fillStyle = GDIStyle.windowFillColor;
         this.ctx.strokeStyle = GDIStyle.windowBorderColor;
 
-        // render self
+        // render background
         this.ctx.fillRect(0, 0, this.getWidth(), this.getHeight());
-        this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight());
 
         // render components
         for (const c of this.components) {
@@ -39,7 +38,18 @@ export class GDIWindow extends GDIBase {
             this.ctx.drawImage(b, c.getX(), c.getY());
         }
 
+        // render border
+        this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight());
+
         // convert to image and return
         return this.canvas.transferToImageBitmap();
+    }
+
+    pack() {
+        throw new Error('Must override in derived class.');
+    }
+
+    addComponent(component: GDIComponent) {
+        this.components.push(component);
     }
 }
