@@ -76,6 +76,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//obviously this is temporary code - we'd want to read the ship from a ship template instead of hard coding it...
 	t := sql.Ship{
 		SystemID: systemID,
 		UserID:   u.ID,
@@ -87,6 +88,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		PosY:     float64(physics.RandInRange(-500, 500)),
 		Radius:   12.5,
 		Mass:     100,
+		Turn:     10,
 	}
 
 	starterShip, err := shipSvc.NewShip(t)
