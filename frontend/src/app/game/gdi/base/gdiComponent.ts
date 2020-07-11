@@ -13,4 +13,7 @@ export interface GDIComponent {
 
     periodicUpdate();
     render(): ImageBitmap;
+
+    containsPoint(x: number, y: number): boolean;
+    handleClick(x: number, y: number);
 }

@@ -291,7 +291,14 @@ function clientRender() {
 }
 
 function handleClick(x: number, y: number) {
-  // todo: check to see if we're clicking on any ui elements, ships, etc and handle that
+  // check to see if we're clicking on any windows
+  for (const w of engineSack.windows) {
+    if (w.containsPoint(x, y)) {
+      // allow window to handle click
+      w.handleClick(x, y);
+      return;
+    }
+  }
 
   // clicked on empty space - issue a nav order for that location
   const b = new ClientNavClick();

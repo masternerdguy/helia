@@ -1,6 +1,5 @@
 import { GDIWindow } from '../base/gdiWindow';
 import { GDIButton, FontSize } from '../components/gdiButton';
-import { GDIStyle } from '../base/gdiStyle';
 
 export class TestWindow extends GDIWindow {
     initialize() {
@@ -24,6 +23,10 @@ export class TestWindow extends GDIWindow {
 
         testBtn.setFont(FontSize.normal);
         testBtn.setText('Hello test button!');
+
+        testBtn.setOnClick((x, y) => {
+            console.log('click! ' + (x - testBtn.getX()) + ' ' + (y - testBtn.getY()));
+        });
 
         this.addComponent(testBtn);
     }

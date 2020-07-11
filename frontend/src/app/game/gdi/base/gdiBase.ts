@@ -1,4 +1,5 @@
 import { GDIComponent } from './gdiComponent';
+import { Rectangle } from './rectangle';
 
 export class GDIBase implements GDIComponent {
     private x: number;
@@ -48,5 +49,14 @@ export class GDIBase implements GDIComponent {
 
     render(): ImageBitmap {
         throw new Error('Must override in derived class.');
+    }
+
+    containsPoint(x: number, y: number): boolean {
+        const rect = new Rectangle(this.getX(), this.getY(), this.getWidth(), this.getHeight());
+        return rect.containsPoint(x, y);
+    }
+
+    handleClick(x: number, y: number) {
+        //
     }
 }

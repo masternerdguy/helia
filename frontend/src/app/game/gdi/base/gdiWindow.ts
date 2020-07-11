@@ -1,6 +1,7 @@
 import { GDIBase } from './gdiBase';
 import { GDIComponent } from './gdiComponent';
 import { GDIStyle } from './gdiStyle';
+import { Rectangle } from './rectangle';
 
 export class GDIWindow extends GDIBase {
     private components: GDIComponent[];
@@ -43,6 +44,26 @@ export class GDIWindow extends GDIBase {
 
         // convert to image and return
         return this.canvas.transferToImageBitmap();
+    }
+
+    handleClick(x: number, y: number) {
+        // make sure this is a real click
+        if (!this.containsPoint(x, y)) {
+            return;
+        }
+
+        // adjust input to be relative to window origin
+        const rX = x - this.getX();
+        const rY = y - this.getY();
+
+        // find the component that is being clicked on within this window
+        for (const c of this.components) {
+            if (c.containsPoint(rX, rY)) {
+                // send click event
+                c.handleClick(rX, rY);
+                break;
+            }
+        }
     }
 
     pack() {

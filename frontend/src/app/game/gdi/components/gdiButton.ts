@@ -8,6 +8,8 @@ export class GDIButton extends GDIBase {
     private text = '';
     private font: FontSize =  FontSize.normal;
 
+    private onClick;
+
     initialize() {
         // initialize offscreen canvas
         this.canvas = new OffscreenCanvas(this.getWidth(), this.getHeight());
@@ -51,6 +53,10 @@ export class GDIButton extends GDIBase {
         return this.canvas.transferToImageBitmap();
     }
 
+    handleClick(x: number, y: number) {
+        this.onClick(x, y);
+    }
+
     setText(text: string) {
         this.text = text;
     }
@@ -65,6 +71,10 @@ export class GDIButton extends GDIBase {
 
     getFont(): FontSize {
         return this.font;
+    }
+
+    setOnClick(h: (x: number, y: number) => void) {
+        this.onClick = h;
     }
 }
 
