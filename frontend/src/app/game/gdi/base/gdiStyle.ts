@@ -16,6 +16,12 @@ export class GDIStyle {
     static labelTextColor = 'white';
     static labelBorderSize = 0;
 
+    // bar
+    static barBorderColor = 'white';
+    static barFillColor = '#0099ff';
+    static barTextColor = 'white';
+    static barBorderSize = 2;
+
     // underlying font sizes
     static smallFont =  '8px monospace';
     static normalFont =  '12px monospace';

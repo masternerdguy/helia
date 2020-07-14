@@ -2,8 +2,11 @@ import { GDIWindow } from '../base/gdiWindow';
 import { GDIButton } from '../components/gdiButton';
 import { FontSize } from '../base/gdiStyle';
 import { GDILabel } from '../components/gdiLabel';
+import { GDIBar } from '../components/gdiBar';
 
 export class TestWindow extends GDIWindow {
+    testBar2 = new GDIBar();
+
     initialize() {
         // set dimensions
         this.setWidth(400);
@@ -45,5 +48,41 @@ export class TestWindow extends GDIWindow {
         testLbl.setText('Hello test label!');
 
         this.addComponent(testLbl);
+
+        // test bar
+        const testBar = new GDIBar();
+        testBar.setWidth(200);
+        testBar.setHeight(20);
+        testBar.initialize();
+
+        testBar.setX(10);
+        testBar.setY(100);
+        testBar.setPercentage(75);
+
+        testBar.setFont(FontSize.small);
+        testBar.setText('Hello test bar!');
+
+        this.addComponent(testBar);
+
+        // test bar
+        this.testBar2 = new GDIBar();
+        this.testBar2.setWidth(200);
+        this.testBar2.setHeight(20);
+        this.testBar2.initialize();
+
+        this.testBar2.setX(10);
+        this.testBar2.setY(140);
+        this.testBar2.setPercentage(25);
+        this.testBar2.setColor('green');
+
+        this.addComponent(this.testBar2);
+    }
+
+    periodicUpdate() {
+        this.testBar2.setPercentage(this.testBar2.getPercentage() + 1);
+
+        if (this.testBar2.getPercentage() === 100) {
+            this.testBar2.setPercentage(0);
+        }
     }
 }
