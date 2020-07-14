@@ -22,11 +22,23 @@ export class GDIStyle {
     static barTextColor = 'white';
     static barBorderSize = 2;
 
+    // list
+    static listBorderColor = 'white';
+    static listFillColor = '#00091a';
+    static listTextColor = 'white';
+    static listBorderSize = 2;
+
     // underlying font sizes
-    static smallFont =  '8px monospace';
-    static normalFont =  '12px monospace';
-    static largeFont =  '16px monospace';
-    static giantFont =  '24px monospace';
+    static smallFontSize =  8;
+    static normalFontSize =  12;
+    static largeFontSize =  16;
+    static giantFontSize =  24;
+
+    // underlying fonts
+    static smallFont =  GDIStyle.smallFontSize + 'px monospace';
+    static normalFont =  GDIStyle.normalFontSize + 'px monospace';
+    static largeFont =  GDIStyle.normalFontSize + 'px monospace';
+    static giantFont =  GDIStyle.giantFontSize + 'px monospace';
 
     // helpers
     static getUnderlyingFont(font: FontSize): string {
@@ -43,6 +55,22 @@ export class GDIStyle {
         }
 
         return f;
+    }
+
+    static getUnderlyingFontSize(font: FontSize): number {
+        let px = 0;
+
+        if (font === FontSize.small) {
+            px = GDIStyle.smallFontSize;
+        } else if (font === FontSize.normal) {
+            px = GDIStyle.normalFontSize;
+        } else if (font === FontSize.large) {
+            px = GDIStyle.largeFontSize;
+        } else if (font === FontSize.giant) {
+            px = GDIStyle.giantFontSize;
+        }
+
+        return px;
     }
 }
 

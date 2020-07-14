@@ -3,6 +3,7 @@ import { GDIButton } from '../components/gdiButton';
 import { FontSize } from '../base/gdiStyle';
 import { GDILabel } from '../components/gdiLabel';
 import { GDIBar } from '../components/gdiBar';
+import { GDIList } from '../components/gdiList';
 
 export class TestWindow extends GDIWindow {
     testBar2 = new GDIBar();
@@ -76,6 +77,20 @@ export class TestWindow extends GDIWindow {
         this.testBar2.setColor('green');
 
         this.addComponent(this.testBar2);
+
+        // test list
+        const testLst = new GDIList();
+        testLst.setWidth(200);
+        testLst.setHeight(50);
+        testLst.initialize();
+
+        testLst.setX(10);
+        testLst.setY(200);
+
+        testLst.setFont(FontSize.large);
+        testLst.setItems([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
+
+        this.addComponent(testLst);
     }
 
     periodicUpdate() {
