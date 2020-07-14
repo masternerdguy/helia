@@ -59,4 +59,8 @@ export class GDIBase implements GDIComponent {
     handleClick(x: number, y: number) {
         //
     }
+
+    handleScroll(x: number, y: number, d: number) {
+        //
+    }
 }

@@ -65,6 +65,26 @@ export class GDIWindow extends GDIBase {
         }
     }
 
+    handleScroll(x: number, y: number, d: number) {
+        // make sure this is a real click
+        if (!this.containsPoint(x, y)) {
+            return;
+        }
+
+        // adjust input to be relative to window origin
+        const rX = x - this.getX();
+        const rY = y - this.getY();
+
+        // find the component that is being clicked on within this window
+        for (const c of this.components) {
+            if (c.containsPoint(rX, rY)) {
+                // send scroll event
+                c.handleScroll(rX, rY, d);
+                break;
+            }
+        }
+    }
+
     pack() {
         throw new Error('Must override in derived class.');
     }

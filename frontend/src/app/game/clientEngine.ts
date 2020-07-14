@@ -45,6 +45,10 @@ class EngineSack {
   tpf: number;
 
   reloading = false;
+
+  // mouse cache
+  mouseX = 0;
+  mouseY = 0;
 }
 
 const engineSack: EngineSack = new EngineSack();
@@ -95,6 +99,12 @@ function handleJoin(d: GameMessage) {
   engineSack.gfx.addEventListener('click', (event) => {
     // handle event
     handleClick(event.x, event.y);
+  });
+
+  // add mouse move event handler
+  engineSack.gfx.addEventListener('mousemove', (event) => {
+    // handle event
+    handleMouseMove(event.x, event.y);
   });
 
   // add client scroll event handler
@@ -345,8 +355,24 @@ function handleClick(x: number, y: number) {
   engineSack.wsSvc.sendMessage(MessageTypes.NavClick, b);
 }
 
+function handleMouseMove(x: number, y: number) {
+  // cache last known mouse position
+  engineSack.mouseX = x;
+  engineSack.mouseY = y;
+}
+
 function handleScroll(dY: number) {
-  // todo: check to see if we're scrolling on any ui elements and handle that
+  // check to see if we're scrolling in any windows
+  const x = engineSack.mouseX;
+  const y = engineSack.mouseY;
+
+  for (const w of engineSack.windows) {
+    if (w.containsPoint(x, y)) {
+      // allow window to handle click
+      w.handleScroll(x, y, dY);
+      return;
+    }
+  }
 
   // zoom camera
   if (dY < 0) {

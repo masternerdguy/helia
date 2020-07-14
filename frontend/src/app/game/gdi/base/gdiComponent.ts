@@ -16,4 +16,5 @@ export interface GDIComponent {
 
     containsPoint(x: number, y: number): boolean;
     handleClick(x: number, y: number);
+    handleScroll(x: number, y: number, d: number);
 }

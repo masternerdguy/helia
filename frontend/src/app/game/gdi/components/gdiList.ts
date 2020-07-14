@@ -16,6 +16,10 @@ export class GDIList extends GDIBase {
     }
 
     periodicUpdate() {
+        this.boundCheck();
+    }
+
+    boundCheck() {
         if (this.scroll > this.items.length) {
             this.scroll = this.items.length;
         } else if (this.scroll < 0) {
@@ -39,9 +43,14 @@ export class GDIList extends GDIBase {
         // get font size
         const px = GDIStyle.getUnderlyingFontSize(this.getFont());
 
+        // border offset
+        const bx = GDIStyle.listBorderSize + 3;
+
         // iterate over items and draw text
-        const stop = Math.round(this.getHeight() / px);
-        for (let i = this.scroll; i < stop; i++) {
+        let r = 0;
+        const stop = Math.round((this.getHeight() - bx) / px);
+
+        for (let i = this.scroll; i < (this.scroll + stop); i++) {
             // exit if out of bounds
             if (i >= this.items.length) {
                 break;
@@ -57,11 +66,26 @@ export class GDIList extends GDIBase {
                 t = JSON.stringify(item);
             }
 
-            // border offset
-            const bx = GDIStyle.listBorderSize + 3;
-
             // render text
-            this.ctx.fillText(t, bx, (px * i) + bx);
+            this.ctx.fillText(t, bx, (px * r) + bx);
+
+            r++;
+        }
+
+        const sw = GDIStyle.listScrollWidth;
+
+        // render scroll bar
+        this.ctx.fillStyle = GDIStyle.listFillColor;
+        this.ctx.fillRect(this.getWidth() - sw, 0, sw, this.getHeight());
+
+        this.ctx.fillStyle = GDIStyle.listScrollColor;
+        if (stop >= this.items.length) {
+            this.ctx.fillRect(this.getWidth() - sw, 0, sw, this.getHeight());
+        } else {
+            const scale = stop / this.items.length;
+            const percent = this.scroll / this.items.length;
+
+            this.ctx.fillRect(this.getWidth() - sw, (percent * this.getHeight()), sw, (scale * this.getHeight()) + 2);
         }
 
         if (GDIStyle.listBorderSize > 0) {
@@ -73,6 +97,16 @@ export class GDIList extends GDIBase {
 
         // convert to image and return
         return this.canvas.transferToImageBitmap();
+    }
+
+    handleScroll(x: number, y: number, d: number) {
+        if (d > 0) {
+            this.scrollPlus();
+        } else if (d < 0) {
+            this.scrollMinus();
+        }
+
+        this.boundCheck();
     }
 
     setItems(items: any[]) {
@@ -97,5 +131,13 @@ export class GDIList extends GDIBase {
 
     setScroll(s: number) {
         this.scroll = Math.round(s);
+    }
+
+    scrollPlus() {
+        this.scroll += 1;
+    }
+
+    scrollMinus() {
+        this.scroll -= 1;
     }
 }
