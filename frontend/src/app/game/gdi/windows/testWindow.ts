@@ -81,7 +81,7 @@ export class TestWindow extends GDIWindow {
         // test list
         const testLst = new GDIList();
         testLst.setWidth(200);
-        testLst.setHeight(50);
+        testLst.setHeight(100);
         testLst.initialize();
 
         testLst.setX(10);

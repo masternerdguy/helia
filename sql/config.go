@@ -42,6 +42,9 @@ func connect() (*sql.DB, error) {
 	//connect to the db
 	db, err := sql.Open("postgres", conn)
 
+	//stash config for reuse across goroutines
+	sharedConfig = db
+
 	//return handle to db
 	return db, err
 }

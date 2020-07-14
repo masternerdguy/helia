@@ -53,6 +53,7 @@ export class GDIList extends GDIBase {
         for (let i = this.scroll; i < (this.scroll + stop); i++) {
             // exit if out of bounds
             if (i >= this.items.length) {
+                this.scroll = i - (stop);
                 break;
             }
 
