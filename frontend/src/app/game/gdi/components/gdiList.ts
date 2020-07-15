@@ -1,5 +1,6 @@
 import { GDIBase } from '../base/gdiBase';
 import { GDIStyle, FontSize } from '../base/gdiStyle';
+import { GDIRectangle } from '../base/gdiRectangle';
 
 export class GDIList extends GDIBase {
     private canvas: OffscreenCanvas;
@@ -8,6 +9,8 @@ export class GDIList extends GDIBase {
     private items: any[] = [];
     private scroll = 0;
     private font: FontSize =  FontSize.normal;
+
+    private onClick: (item: any) => void;
 
     initialize() {
         // initialize offscreen canvas
@@ -100,6 +103,45 @@ export class GDIList extends GDIBase {
         return this.canvas.transferToImageBitmap();
     }
 
+    handleClick(x: number, y: number) {
+        // make sure this is a real click
+        if (!this.containsPoint(x, y)) {
+            return;
+        }
+
+        // adjust input to be relative to control origin
+        const rX = x - this.getX();
+        const rY = y - this.getY();
+
+        // get font size
+        const px = GDIStyle.getUnderlyingFontSize(this.getFont());
+
+        // border offset
+        const bx = GDIStyle.listBorderSize + 3;
+
+        // find item being clicked on
+        let r = 0;
+        const stop = Math.round((this.getHeight() - bx) / px);
+
+        for (let i = this.scroll; i < (this.scroll + stop); i++) {
+            // exit if out of bounds
+            if (i >= this.items.length) {
+                break;
+            }
+
+            // test for click
+            const itemRect = new GDIRectangle(bx, (px * r) + bx, this.getWidth() - GDIStyle.listScrollWidth, px);
+            const item = this.items[i];
+
+            if (itemRect.containsPoint(rX, rY)) {
+                this.onClick(item);
+                break;
+            }
+
+            r++;
+        }
+    }
+
     handleScroll(x: number, y: number, d: number) {
         if (d > 0) {
             this.scrollPlus();
@@ -108,6 +150,10 @@ export class GDIList extends GDIBase {
         }
 
         this.boundCheck();
+    }
+
+    setOnClick(h: (item: any) => void) {
+        this.onClick = h;
     }
 
     setItems(items: any[]) {
