@@ -46,7 +46,7 @@ export class GDIWindow extends GDIBase {
     }
 
     handleClick(x: number, y: number) {
-        // make sure this is a real click
+        // make sure this is a relevant click
         if (!this.containsPoint(x, y)) {
             return;
         }
@@ -55,7 +55,7 @@ export class GDIWindow extends GDIBase {
         const rX = x - this.getX();
         const rY = y - this.getY();
 
-        // find the component that is being clicked on within this window
+        // find the component that is being scrolled on within this window
         for (const c of this.components) {
             if (c.containsPoint(rX, rY)) {
                 // send click event
@@ -66,7 +66,7 @@ export class GDIWindow extends GDIBase {
     }
 
     handleScroll(x: number, y: number, d: number) {
-        // make sure this is a real click
+        // make sure this is a relevant scroll
         if (!this.containsPoint(x, y)) {
             return;
         }
@@ -75,11 +75,31 @@ export class GDIWindow extends GDIBase {
         const rX = x - this.getX();
         const rY = y - this.getY();
 
-        // find the component that is being clicked on within this window
+        // find the component that is being scrolled on within this window
         for (const c of this.components) {
             if (c.containsPoint(rX, rY)) {
                 // send scroll event
                 c.handleScroll(rX, rY, d);
+                break;
+            }
+        }
+    }
+
+    handleKeyDown(x: number, y: number, key: string) {
+        // make sure this is a relevant key press
+        if (!this.containsPoint(x, y)) {
+            return;
+        }
+
+        // adjust input to be relative to window origin
+        const rX = x - this.getX();
+        const rY = y - this.getY();
+
+        // find the component that is being typed on within this window
+        for (const c of this.components) {
+            if (c.containsPoint(rX, rY)) {
+                // send key event
+                c.handleKeyDown(rX, rY, key);
                 break;
             }
         }

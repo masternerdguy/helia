@@ -31,6 +31,12 @@ export class GDIStyle {
     static listBorderSize = 2;
     static listScrollWidth = 15;
 
+    // input
+    static inputBorderColor = 'white';
+    static inputFillColor = '#00091a';
+    static inputTextColor = 'white';
+    static inputBorderSize = 2;
+
     // underlying font sizes
     static smallFontSize =  8;
     static normalFontSize =  12;

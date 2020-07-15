@@ -107,7 +107,7 @@ function handleJoin(d: GameMessage) {
     handleMouseMove(event.x, event.y);
   });
 
-  // add client scroll event handler
+  // add mouse scroll event handler
   engineSack.gfx.addEventListener('wheel', event => {
     // get scroll direction
     const delta = Math.sign(event.deltaY);
@@ -115,6 +115,22 @@ function handleJoin(d: GameMessage) {
     // handle event
     handleScroll(delta);
   });
+
+  // add key down event handler
+  document.addEventListener('keydown', (event) => {
+    // handle event
+    handleKeydown(event.key);
+  });
+
+  // detect fullscreen loss
+  const exitHandler = () => {
+    window.location.href = '/auth/signin';
+  };
+
+  document.addEventListener('fullscreenchange', exitHandler, false);
+  document.addEventListener('mozfullscreenchange', exitHandler, false);
+  document.addEventListener('MSFullscreenChange', exitHandler, false);
+  document.addEventListener('webkitfullscreenchange', exitHandler, false);
 
   // start game loop
   engineSack.lastFrameTime = Date.now();
@@ -368,7 +384,7 @@ function handleScroll(dY: number) {
 
   for (const w of engineSack.windows) {
     if (w.containsPoint(x, y)) {
-      // allow window to handle click
+      // allow window to handle scroll
       w.handleScroll(x, y, dY);
       return;
     }
@@ -381,5 +397,19 @@ function handleScroll(dY: number) {
   } else {
     // zoom out
     engineSack.camera.zoom *= 0.9;
+  }
+}
+
+function handleKeydown(key: string) {
+  // check to see if we're typing in any windows
+  const x = engineSack.mouseX;
+  const y = engineSack.mouseY;
+
+  for (const w of engineSack.windows) {
+    if (w.containsPoint(x, y)) {
+      // allow window to handle key press
+      w.handleKeyDown(x, y, key);
+      return;
+    }
   }
 }

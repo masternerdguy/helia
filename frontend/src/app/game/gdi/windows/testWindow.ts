@@ -4,6 +4,7 @@ import { FontSize } from '../base/gdiStyle';
 import { GDILabel } from '../components/gdiLabel';
 import { GDIBar } from '../components/gdiBar';
 import { GDIList } from '../components/gdiList';
+import { GDIInput } from '../components/gdiInput';
 
 export class TestWindow extends GDIWindow {
     testBar2 = new GDIBar();
@@ -94,6 +95,22 @@ export class TestWindow extends GDIWindow {
         });
 
         this.addComponent(testLst);
+
+        // test input
+        const testIpt = new GDIInput();
+        testIpt.setWidth(200);
+        testIpt.setHeight(20);
+        testIpt.initialize();
+
+        testIpt.setX(10);
+        testIpt.setY(320);
+
+        testIpt.setFont(FontSize.small);
+        testIpt.setOnReturn((txt) => {
+            console.log(txt);
+        });
+
+        this.addComponent(testIpt);
     }
 
     periodicUpdate() {
