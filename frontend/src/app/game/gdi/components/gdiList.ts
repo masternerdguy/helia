@@ -8,6 +8,7 @@ export class GDIList extends GDIBase {
 
     private items: any[] = [];
     private scroll = 0;
+    private selectedRow = -1;
     private font: FontSize =  FontSize.normal;
 
     private onClick: (item: any) => void;
@@ -37,10 +38,7 @@ export class GDIList extends GDIBase {
 
         // style text
         this.ctx.textAlign = 'left';
-        this.ctx.textBaseline = 'top';
-
-        this.ctx.fillStyle = GDIStyle.listTextColor;
-        this.ctx.strokeStyle = GDIStyle.listTextColor;
+        this.ctx.textBaseline = 'bottom';
         this.ctx.font = GDIStyle.getUnderlyingFont(this.getFont());
 
         // get font size
@@ -60,6 +58,13 @@ export class GDIList extends GDIBase {
                 break;
             }
 
+            // draw selected background if selected
+            if (i === this.selectedRow) {
+                this.ctx.fillStyle = GDIStyle.listSelectedColor;
+                this.ctx.fillRect(bx, (px * r) + bx, this.getWidth() - GDIStyle.listScrollWidth, px);
+            }
+
+            // get item
             const item = this.items[i];
 
             // get text from item
@@ -71,8 +76,12 @@ export class GDIList extends GDIBase {
             }
 
             // render text
-            this.ctx.fillText(t, bx, (px * r) + bx);
+            this.ctx.fillStyle = GDIStyle.listTextColor;
+            this.ctx.strokeStyle = GDIStyle.listTextColor;
 
+            this.ctx.fillText(t, bx, (px * (r + 1)) + bx);
+
+            // iterate row counter
             r++;
         }
 
@@ -134,6 +143,7 @@ export class GDIList extends GDIBase {
             const item = this.items[i];
 
             if (itemRect.containsPoint(rX, rY)) {
+                this.selectedRow = i;
                 this.onClick(item);
                 break;
             }
@@ -157,6 +167,7 @@ export class GDIList extends GDIBase {
     }
 
     setItems(items: any[]) {
+        this.selectedRow = -1;
         this.items = items;
     }
 
@@ -186,5 +197,9 @@ export class GDIList extends GDIBase {
 
     scrollMinus() {
         this.scroll -= 1;
+    }
+
+    getSelectedItem(): any {
+        return this.items[this.selectedRow];
     }
 }
