@@ -7,6 +7,8 @@ export class GDIWindow extends GDIBase {
     private canvas: OffscreenCanvas;
     private ctx: any;
 
+    private dragMode = false;
+
     initialize() {
         // initialize offscreen canvas
         this.canvas = new OffscreenCanvas(this.getWidth(), this.getHeight() + GDIStyle.windowHandleHeight);
@@ -25,7 +27,12 @@ export class GDIWindow extends GDIBase {
 
     render(): ImageBitmap {
         // render handle background
-        this.ctx.fillStyle = GDIStyle.windowHandleColor;
+        if (this.dragMode) {
+            this.ctx.fillStyle = GDIStyle.windowHandleDraggingColor;
+        } else {
+            this.ctx.fillStyle = GDIStyle.windowHandleColor;
+        }
+
         this.ctx.fillRect(0, 0, this.getWidth(), GDIStyle.windowHandleHeight);
 
         // render background
@@ -50,6 +57,15 @@ export class GDIWindow extends GDIBase {
     handleClick(x: number, y: number) {
         // make sure this is a relevant click
         if (!this.containsPoint(x, y)) {
+            return;
+        }
+
+        // check for click in handle
+        const hY = y - this.getY();
+
+        if (hY < GDIStyle.windowHandleHeight) {
+            // toggle drag mode
+            this.dragMode = !this.dragMode;
             return;
         }
 
@@ -113,5 +129,9 @@ export class GDIWindow extends GDIBase {
 
     addComponent(component: GDIComponent) {
         this.components.push(component);
+    }
+
+    isDragging(): boolean {
+        return this.dragMode;
     }
 }

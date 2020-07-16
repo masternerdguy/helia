@@ -14,6 +14,7 @@ import { Planet } from './engineModels/planet';
 import { TestWindow } from './gdi/windows/testWindow';
 import { GDIWindow } from './gdi/base/gdiWindow';
 import { Station } from './engineModels/station';
+import { GDIStyle } from './gdi/base/gdiStyle';
 
 class EngineSack {
   constructor() {}
@@ -372,6 +373,24 @@ function handleClick(x: number, y: number) {
 }
 
 function handleMouseMove(x: number, y: number) {
+  // handle dragging window
+  for (const w of engineSack.windows) {
+    if (w.isDragging()) {
+      // prevent boundary crossing
+      if ((x + w.getWidth() > engineSack.gfx.width)
+          || (y + (w.getHeight() + GDIStyle.windowHandleHeight) > engineSack.gfx.height)) {
+        return;
+      }
+
+      // move window following cursor
+      w.setX(x);
+      w.setY(y);
+
+      // only allow one window to drag at a time
+      return;
+    }
+  }
+
   // cache last known mouse position
   engineSack.mouseX = x;
   engineSack.mouseY = y;
