@@ -1,6 +1,6 @@
 import { GDIBase } from './gdiBase';
 import { GDIComponent } from './gdiComponent';
-import { GDIStyle } from './gdiStyle';
+import { GDIStyle, FontSize } from './gdiStyle';
 
 export class GDIWindow extends GDIBase {
     private components: GDIComponent[];
@@ -8,6 +8,7 @@ export class GDIWindow extends GDIBase {
     private ctx: any;
 
     private dragMode = false;
+    private title = '';
 
     initialize() {
         // initialize offscreen canvas
@@ -34,6 +35,14 @@ export class GDIWindow extends GDIBase {
         }
 
         this.ctx.fillRect(0, 0, this.getWidth(), GDIStyle.windowHandleHeight);
+
+        // render handle text
+        this.ctx.fillStyle = GDIStyle.windowHandleTextColor;
+        this.ctx.textAlign = 'left';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.font = GDIStyle.getUnderlyingFont(FontSize.large);
+
+        this.ctx.fillText(this.title, GDIStyle.windowBorderSize + 2, (GDIStyle.windowHandleHeight / 2));
 
         // render background
         this.ctx.fillStyle = GDIStyle.windowFillColor;
@@ -133,5 +142,13 @@ export class GDIWindow extends GDIBase {
 
     isDragging(): boolean {
         return this.dragMode;
+    }
+
+    getTitle(): string {
+        return this.title;
+    }
+
+    setTitle(title: string) {
+        this.title = title;
     }
 }

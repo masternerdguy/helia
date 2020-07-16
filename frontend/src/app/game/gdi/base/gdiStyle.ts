@@ -6,6 +6,7 @@ export class GDIStyle {
     static windowHandleHeight = 20;
     static windowHandleColor = '#336699';
     static windowHandleDraggingColor = '#0099ff';
+    static windowHandleTextColor = 'white';
 
     // button
     static buttonBorderColor = 'white';

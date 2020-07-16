@@ -19,6 +19,8 @@ export class TestWindow extends GDIWindow {
     }
 
     pack() {
+        this.setTitle('Test Window Please Ignore');
+
         // test button
         const testBtn = new GDIButton();
         testBtn.setWidth(140);
