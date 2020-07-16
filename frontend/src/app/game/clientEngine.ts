@@ -376,15 +376,18 @@ function handleMouseMove(x: number, y: number) {
   // handle dragging window
   for (const w of engineSack.windows) {
     if (w.isDragging()) {
-      // prevent boundary crossing
-      if ((x + w.getWidth() > engineSack.gfx.width)
-          || (y + (w.getHeight() + GDIStyle.windowHandleHeight) > engineSack.gfx.height)) {
-        return;
-      }
-
       // move window following cursor
       w.setX(x);
       w.setY(y);
+
+      // fix boundary crossing
+      if ((w.getX() + w.getWidth()) > engineSack.gfx.width) {
+        w.setX(engineSack.gfx.width - w.getWidth());
+      }
+
+      if ((w.getY() + (w.getHeight() + GDIStyle.windowHandleHeight)) > engineSack.gfx.height) {
+        w.setY(engineSack.gfx.height - (w.getHeight() + GDIStyle.windowHandleHeight));
+      }
 
       // only allow one window to drag at a time
       return;
