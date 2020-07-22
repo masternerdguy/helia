@@ -196,8 +196,8 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				continue
 			}
 
-			s.AddClient(client)
-			s.AddShip(currShip)
+			s.AddClient(client, true)
+			s.AddShip(currShip, true)
 
 			//build current system info for welcome message
 			w.CurrentSystemInfo = models.CurrentSystemInfo{}

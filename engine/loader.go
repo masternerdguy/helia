@@ -88,7 +88,7 @@ func loadUniverse() (*universe.Universe, error) {
 					Turn:     sh.Turn,
 				}
 
-				s.AddShip(&es)
+				s.AddShip(&es, true)
 			}
 
 			//load stars

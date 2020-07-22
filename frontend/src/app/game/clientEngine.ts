@@ -145,6 +145,33 @@ function handleGlobalUpdate(d: GameMessage) {
   // parse body
   const msg = JSON.parse(d.body) as ServerGlobalUpdateBody;
 
+  // system switch
+  if (msg.currentSystemInfo.id !== engineSack.player.currentSystem.id) {
+    // stash new system info
+    engineSack.player.currentSystem.id = msg.currentSystemInfo.id;
+    engineSack.player.currentSystem.systemName = msg.currentSystemInfo.systemName;
+
+    // empty arrays
+    engineSack.player.currentSystem.ships = [];
+    engineSack.player.currentSystem.stations = [];
+    engineSack.player.currentSystem.jumpholes = [];
+    engineSack.player.currentSystem.stations = [];
+    engineSack.player.currentSystem.planets = [];
+    engineSack.player.currentSystem.stars = [];
+
+    // invalidate backplate
+    delete engineSack.player.currentSystem.backplateImg;
+  }
+
+  // fix empty arrays in incoming data
+  if (!msg.planets || msg.planets == null) {
+    msg.planets = [];
+  }
+
+  if (!msg.stations || msg.stations == null) {
+    msg.stations = [];
+  }
+
   // update system
   engineSack.player.currentSystem.id = msg.currentSystemInfo.id;
   engineSack.player.currentSystem.systemName = msg.currentSystemInfo.systemName;

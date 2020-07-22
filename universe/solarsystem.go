@@ -2,6 +2,7 @@ package universe
 
 import (
 	"encoding/json"
+	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
@@ -120,7 +121,26 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 			//check for radius intersection
 			if d <= (sA.Radius + jB.Radius) {
+				//find client
+				c := s.clients[sA.UserID.String()]
 
+				if c != nil {
+					//check if this was the current ship of a player
+					if sA.ID == c.CurrentShipID {
+						//move player to destination system
+						c.CurrentSystemID = jB.OutSystemID
+
+						jB.OutSystem.AddClient(c, true)
+						defer s.RemoveClient(c, false)
+					}
+				}
+
+				//move ship to destination system
+				sA.SystemID = jB.OutSystemID
+				jB.OutSystem.AddShip(sA, true)
+				defer s.RemoveShip(sA, false)
+
+				break
 			}
 		}
 	}
@@ -221,30 +241,35 @@ func (s *SolarSystem) PeriodicUpdate() {
 }
 
 //AddShip Adds a ship to the system
-func (s *SolarSystem) AddShip(c *Ship) {
+func (s *SolarSystem) AddShip(c *Ship, lock bool) {
 	//safety check
 	if c == nil {
 		return
 	}
 
-	//obtain lock
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+	if lock {
+		//obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	//add ship
+	fmt.Println(fmt.Sprintf("%v >>>>>>> %v", c, s))
 	s.ships[c.ID.String()] = c
 }
 
 //RemoveShip Removes a ship from the system
-func (s *SolarSystem) RemoveShip(c *Ship) {
+func (s *SolarSystem) RemoveShip(c *Ship, lock bool) {
 	//safety check
 	if c == nil {
 		return
 	}
 
-	//obtain lock
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+	if lock {
+		//obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	//remove ship
 	delete(s.ships, c.ID.String())
@@ -311,30 +336,34 @@ func (s *SolarSystem) AddStation(c *Station) {
 }
 
 //AddClient Adds a client to the system
-func (s *SolarSystem) AddClient(c *shared.GameClient) {
+func (s *SolarSystem) AddClient(c *shared.GameClient, lock bool) {
 	//safety check
 	if c == nil {
 		return
 	}
 
-	//obtain lock
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+	if lock {
+		//obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	//add client
 	s.clients[(*c.UID).String()] = c
 }
 
 //RemoveClient Removes a client from the server
-func (s *SolarSystem) RemoveClient(c *shared.GameClient) {
+func (s *SolarSystem) RemoveClient(c *shared.GameClient, lock bool) {
 	//safety check
 	if c == nil {
 		return
 	}
 
-	//obtain lock
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+	if lock {
+		//obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	//remove client
 	delete(s.clients, (*c.UID).String())
