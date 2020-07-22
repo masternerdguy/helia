@@ -2,6 +2,7 @@ package universe
 
 import (
 	"encoding/json"
+	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
@@ -85,8 +86,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 		e.PeriodicUpdate()
 	}
 
-	//collission test between ships
+	//ship collission testing
 	for _, sA := range s.ships {
+		//between ships
 		for _, sB := range s.ships {
 			if sA.ID != sB.ID {
 				//get physics dummies
@@ -105,6 +107,21 @@ func (s *SolarSystem) PeriodicUpdate() {
 					sA.ApplyPhysicsDummy(dummyA)
 					sB.ApplyPhysicsDummy(dummyB)
 				}
+			}
+		}
+
+		//between jumpholes
+		for _, jB := range s.jumpholes {
+			//get physics dummies
+			dummyA := sA.ToPhysicsDummy()
+			dummyB := jB.ToPhysicsDummy()
+
+			//get distance between ship and jumphole
+			d := physics.Distance(dummyA, dummyB)
+
+			//check for radius intersection
+			if d <= (sA.Radius + jB.Radius) {
+				fmt.Println("ship touching jh")
 			}
 		}
 	}
