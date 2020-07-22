@@ -2,7 +2,6 @@ package universe
 
 import (
 	"encoding/json"
-	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
@@ -88,7 +87,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	//ship collission testing
 	for _, sA := range s.ships {
-		//between ships
+		//with other ships
 		for _, sB := range s.ships {
 			if sA.ID != sB.ID {
 				//get physics dummies
@@ -110,7 +109,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 			}
 		}
 
-		//between jumpholes
+		//with jumpholes
 		for _, jB := range s.jumpholes {
 			//get physics dummies
 			dummyA := sA.ToPhysicsDummy()
@@ -121,7 +120,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 			//check for radius intersection
 			if d <= (sA.Radius + jB.Radius) {
-				fmt.Println("ship touching jh")
+
 			}
 		}
 	}
@@ -372,6 +371,25 @@ func (s *SolarSystem) CopyStations() map[string]*Station {
 	//copy stations into copy map
 	for k, v := range s.stations {
 		c := v.CopyStation()
+		copy[k] = &c
+	}
+
+	//return copy map
+	return copy
+}
+
+//CopyJumpholes Returns a copy of the jumpholes in the system
+func (s *SolarSystem) CopyJumpholes() map[string]*Jumphole {
+	//obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//make map for copies
+	copy := make(map[string]*Jumphole)
+
+	//copy jumpholes into copy map
+	for k, v := range s.jumpholes {
+		c := v.CopyJumphole()
 		copy[k] = &c
 	}
 

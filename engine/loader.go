@@ -20,6 +20,10 @@ func loadUniverse() (*universe.Universe, error) {
 
 	u := universe.Universe{}
 
+	//for linking jumpholes later
+	jhMap := make(map[string]*universe.Jumphole)
+	sMap := make(map[string]*universe.SolarSystem)
+
 	//load regions
 	rs, err := regionSvc.GetAllRegions()
 
@@ -54,6 +58,9 @@ func loadUniverse() (*universe.Universe, error) {
 			//initialize and store system
 			s.Initialize()
 			systems[s.ID.String()] = &s
+
+			//for jumphole linking later
+			sMap[s.ID.String()] = &s
 
 			//load ships
 			ships, err := shipSvc.GetShipsBySolarSystem(s.ID)
@@ -151,6 +158,9 @@ func loadUniverse() (*universe.Universe, error) {
 				}
 
 				s.AddJumphole(&jumphole)
+
+				//for jumphole linking later
+				jhMap[j.ID.String()] = &jumphole
 			}
 
 			//load npc stations
@@ -180,6 +190,29 @@ func loadUniverse() (*universe.Universe, error) {
 		//store and append region
 		r.Systems = systems
 		regions[r.ID.String()] = &r
+	}
+
+	//link jumpholes
+	for _, j := range jhMap {
+		//get out system
+		o := sMap[j.OutSystemID.String()]
+
+		//copy jumpholes
+		jhs := o.CopyJumpholes()
+
+		//find and link destination jumphole into jumphole
+		for _, k := range jhs {
+			if k.OutSystemID == j.SystemID {
+				//get real jumphole pointer from map
+				j.OutJumphole = jhMap[k.ID.String()]
+
+				//link destination system into jumphole
+				j.OutSystem = o
+
+				fmt.Println("jumphole linked")
+				break
+			}
+		}
 	}
 
 	//link regions into universe
