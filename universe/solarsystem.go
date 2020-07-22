@@ -18,6 +18,7 @@ type SolarSystem struct {
 	ships      map[string]*Ship
 	stars      map[string]*Star
 	planets    map[string]*Planet
+	jumpholes  map[string]*Jumphole
 	stations   map[string]*Station
 	clients    map[string]*shared.GameClient //clients in this system
 	Lock       sync.Mutex
@@ -34,6 +35,7 @@ func (s *SolarSystem) Initialize() {
 	s.ships = make(map[string]*Ship)
 	s.stars = make(map[string]*Star)
 	s.planets = make(map[string]*Planet)
+	s.jumpholes = make(map[string]*Jumphole)
 	s.stations = make(map[string]*Station)
 }
 
@@ -159,6 +161,21 @@ func (s *SolarSystem) PeriodicUpdate() {
 		})
 	}
 
+	for _, d := range s.jumpholes {
+		gu.Jumpholes = append(gu.Jumpholes, models.GlobalJumpholeInfo{
+			ID:           d.ID,
+			SystemID:     d.SystemID,
+			OutSystemID:  d.OutSystemID,
+			JumpholeName: d.JumpholeName,
+			PosX:         d.PosX,
+			PosY:         d.PosY,
+			Texture:      d.Texture,
+			Radius:       d.Radius,
+			Mass:         d.Mass,
+			Theta:        d.Theta,
+		})
+	}
+
 	for _, d := range s.stations {
 		gu.Stations = append(gu.Stations, models.GlobalStationInfo{
 			ID:          d.ID,
@@ -245,6 +262,21 @@ func (s *SolarSystem) AddPlanet(c *Planet) {
 
 	//add planet
 	s.planets[c.ID.String()] = c
+}
+
+//AddJumphole Adds a jumphole to the system
+func (s *SolarSystem) AddJumphole(c *Jumphole) {
+	//safety check
+	if c == nil {
+		return
+	}
+
+	//obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//add jumphole
+	s.jumpholes[c.ID.String()] = c
 }
 
 //AddStation Adds an NPC station to the system

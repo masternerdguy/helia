@@ -16,6 +16,7 @@ func loadUniverse() (*universe.Universe, error) {
 	starSvc := sql.GetStarService()
 	planetSvc := sql.GetPlanetService()
 	stationSvc := sql.GetStationService()
+	jumpholeSvc := sql.GetJumpholeService()
 
 	u := universe.Universe{}
 
@@ -61,23 +62,23 @@ func loadUniverse() (*universe.Universe, error) {
 				return nil, err
 			}
 
-			for _, currShip := range ships {
+			for _, sh := range ships {
 				es := universe.Ship{
-					ID:       currShip.ID,
-					UserID:   currShip.UserID,
-					Created:  currShip.Created,
-					ShipName: currShip.ShipName,
-					PosX:     currShip.PosX,
-					PosY:     currShip.PosY,
-					SystemID: currShip.SystemID,
-					Texture:  currShip.Texture,
-					Theta:    currShip.Theta,
-					VelX:     currShip.VelX,
-					VelY:     currShip.VelY,
-					Accel:    currShip.Accel,
-					Mass:     currShip.Mass,
-					Radius:   currShip.Radius,
-					Turn:     currShip.Turn,
+					ID:       sh.ID,
+					UserID:   sh.UserID,
+					Created:  sh.Created,
+					ShipName: sh.ShipName,
+					PosX:     sh.PosX,
+					PosY:     sh.PosY,
+					SystemID: sh.SystemID,
+					Texture:  sh.Texture,
+					Theta:    sh.Theta,
+					VelX:     sh.VelX,
+					VelY:     sh.VelY,
+					Accel:    sh.Accel,
+					Mass:     sh.Mass,
+					Radius:   sh.Radius,
+					Turn:     sh.Turn,
 				}
 
 				s.AddShip(&es)
@@ -90,16 +91,16 @@ func loadUniverse() (*universe.Universe, error) {
 				return nil, err
 			}
 
-			for _, currStar := range stars {
+			for _, st := range stars {
 				star := universe.Star{
-					ID:       currStar.ID,
-					SystemID: currStar.SystemID,
-					PosX:     currStar.PosX,
-					PosY:     currStar.PosY,
-					Texture:  currStar.Texture,
-					Radius:   currStar.Radius,
-					Mass:     currStar.Mass,
-					Theta:    currStar.Theta,
+					ID:       st.ID,
+					SystemID: st.SystemID,
+					PosX:     st.PosX,
+					PosY:     st.PosY,
+					Texture:  st.Texture,
+					Radius:   st.Radius,
+					Mass:     st.Mass,
+					Theta:    st.Theta,
 				}
 
 				s.AddStar(&star)
@@ -112,20 +113,44 @@ func loadUniverse() (*universe.Universe, error) {
 				return nil, err
 			}
 
-			for _, currPlanet := range planets {
+			for _, p := range planets {
 				planet := universe.Planet{
-					ID:         currPlanet.ID,
-					SystemID:   currPlanet.SystemID,
-					PlanetName: currPlanet.PlanetName,
-					PosX:       currPlanet.PosX,
-					PosY:       currPlanet.PosY,
-					Texture:    currPlanet.Texture,
-					Radius:     currPlanet.Radius,
-					Mass:       currPlanet.Mass,
-					Theta:      currPlanet.Theta,
+					ID:         p.ID,
+					SystemID:   p.SystemID,
+					PlanetName: p.PlanetName,
+					PosX:       p.PosX,
+					PosY:       p.PosY,
+					Texture:    p.Texture,
+					Radius:     p.Radius,
+					Mass:       p.Mass,
+					Theta:      p.Theta,
 				}
 
 				s.AddPlanet(&planet)
+			}
+
+			//load jumpholes
+			jumpholes, err := jumpholeSvc.GetJumpholesBySolarSystem(s.ID)
+
+			if err != nil {
+				return nil, err
+			}
+
+			for _, j := range jumpholes {
+				jumphole := universe.Jumphole{
+					ID:           j.ID,
+					SystemID:     j.SystemID,
+					OutSystemID:  j.OutSystemID,
+					JumpholeName: j.JumpholeName,
+					PosX:         j.PosX,
+					PosY:         j.PosY,
+					Texture:      j.Texture,
+					Radius:       j.Radius,
+					Mass:         j.Mass,
+					Theta:        j.Theta,
+				}
+
+				s.AddJumphole(&jumphole)
 			}
 
 			//load npc stations

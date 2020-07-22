@@ -15,6 +15,7 @@ import { TestWindow } from './gdi/windows/testWindow';
 import { GDIWindow } from './gdi/base/gdiWindow';
 import { Station } from './engineModels/station';
 import { GDIStyle } from './gdi/base/gdiStyle';
+import { Jumphole } from './engineModels/jumphole';
 
 class EngineSack {
   constructor() {}
@@ -229,6 +230,29 @@ function handleGlobalUpdate(d: GameMessage) {
     }
   }
 
+  // update jumpholes
+  for (const j of msg.jumpholes) {
+    let match = false;
+
+    // find jumphole in memory
+    for (const sm of engineSack.player.currentSystem.jumpholes) {
+      if (j.id === sm.id) {
+        match = true;
+
+        // sync jumphole in memory
+        sm.sync(j);
+
+        // exit loop
+        break;
+      }
+    }
+
+    if (!match) {
+      // add jumphole to memory
+      engineSack.player.currentSystem.jumpholes.push(new Jumphole(j));
+    }
+  }
+
   // update npc stations
   for (const p of msg.stations) {
     let match = false;
@@ -329,6 +353,11 @@ function clientRender() {
   // draw planets
   for (const p of engineSack.player.currentSystem.planets) {
     p.render(engineSack.ctx, engineSack.camera);
+  }
+
+  // draw jumpholes
+  for (const j of engineSack.player.currentSystem.jumpholes) {
+    j.render(engineSack.ctx, engineSack.camera);
   }
 
   // draw npc stations

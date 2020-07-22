@@ -3,6 +3,7 @@ import { Ship } from './ship';
 import { Star } from './star';
 import { Planet } from './planet';
 import { Station } from './station';
+import { Jumphole } from './jumphole';
 
 export class System extends WSSystem {
     constructor(ws: WSSystem) {
@@ -16,12 +17,14 @@ export class System extends WSSystem {
         this.ships = [];
         this.stars = [];
         this.planets = [];
+        this.jumpholes = [];
         this.stations = [];
     }
 
     ships: Ship[];
     stars: Star[];
     planets: Planet[];
+    jumpholes: Jumphole[];
     stations: Station[];
     backplateImg: HTMLImageElement;
 }

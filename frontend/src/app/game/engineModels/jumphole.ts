@@ -1,16 +1,17 @@
 import { Camera } from './camera';
-import { WSPlanet } from '../wsModels/entities/wsPlanet';
+import { WSJumphole } from '../wsModels/entities/wsJumphole';
 
-export class Planet extends WSPlanet {
+export class Jumphole extends WSJumphole {
     texture2d: HTMLImageElement;
 
-    constructor(ws: WSPlanet) {
+    constructor(ws: WSJumphole) {
         super();
 
         // copy from ws model
         this.id = ws.id;
         this.systemId = ws.systemId;
-        this.planetName = ws.planetName;
+        this.outSystemId = ws.outSystemId;
+        this.jumpholeName = ws.jumpholeName;
         this.x = ws.x;
         this.y = ws.y;
         this.texture = ws.texture;
@@ -23,7 +24,7 @@ export class Planet extends WSPlanet {
         // set up texture
         if (!this.texture2d) {
             this.texture2d = new Image();
-            this.texture2d.src = '/assets/planets/' + this.texture + '.png';
+            this.texture2d.src = '/assets/jumpholes/' + this.texture + '.png';
         }
 
         // project to screen
@@ -35,10 +36,10 @@ export class Planet extends WSPlanet {
         ctx.beginPath();
         ctx.arc(sx, sy, sr, 0, 2 * Math.PI, false);
         ctx.lineWidth = 2;
-        ctx.strokeStyle = 'cyan';
+        ctx.strokeStyle = 'orange';
         ctx.stroke();
 
-        // draw planet
+        // draw jumphole
         ctx.save();
         ctx.translate(sx, sy);
         ctx.rotate(((this.theta) * (Math.PI / -180)) + (Math.PI / 2));
@@ -46,10 +47,11 @@ export class Planet extends WSPlanet {
         ctx.restore();
     }
 
-    sync(ws: WSPlanet) {
+    sync(ws: WSJumphole) {
         this.id = ws.id;
         this.systemId = ws.systemId;
-        this.planetName = ws.planetName;
+        this.outSystemId = ws.outSystemId;
+        this.jumpholeName = ws.jumpholeName;
         this.x = ws.x;
         this.y = ws.y;
         this.texture = ws.texture;
