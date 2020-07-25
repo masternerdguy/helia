@@ -171,7 +171,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 			Theta:    d.Theta,
 			VelX:     d.VelX,
 			VelY:     d.VelY,
-			Mass:     d.TemplateData.BaseMass,
+			Mass:     d.GetRealMass(),
 			Radius:   d.TemplateData.Radius,
 		})
 	}

@@ -154,9 +154,9 @@ func (s *Ship) doAutopilotSeekManualNav() {
 
 	//apply turn with ship limits
 	if a > 0 {
-		s.rotate(turnMag / s.TemplateData.BaseTurn)
+		s.rotate(turnMag / s.GetRealTurn())
 	} else if a < 0 {
-		s.rotate(turnMag / -s.TemplateData.BaseTurn)
+		s.rotate(turnMag / -s.GetRealTurn())
 	}
 
 	//thrust forward
@@ -201,7 +201,7 @@ func (s *Ship) rotate(scale float64) {
 	}
 
 	// turn
-	s.Theta += s.TemplateData.BaseTurn * scale * TimeModifier
+	s.Theta += s.GetRealTurn() * scale * TimeModifier
 }
 
 //forwardThrust Fire the ship's thrusters
@@ -216,8 +216,8 @@ func (s *Ship) forwardThrust(scale float64) {
 	}
 
 	// accelerate along theta using thrust proportional to bounded magnitude
-	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (s.TemplateData.BaseAccel * scale * TimeModifier)
-	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (s.TemplateData.BaseAccel * scale * TimeModifier)
+	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (s.GetRealAccel() * scale * TimeModifier)
+	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (s.GetRealAccel() * scale * TimeModifier)
 }
 
 //ToPhysicsDummy Returns a new physics dummy structure representing this ship
@@ -227,7 +227,7 @@ func (s *Ship) ToPhysicsDummy() physics.Dummy {
 		VelY: s.VelY,
 		PosX: s.PosX,
 		PosY: s.PosY,
-		Mass: s.TemplateData.BaseMass,
+		Mass: s.GetRealMass(),
 	}
 }
 
@@ -237,4 +237,19 @@ func (s *Ship) ApplyPhysicsDummy(dummy physics.Dummy) {
 	s.VelY = dummy.VelY
 	s.PosX = dummy.PosX
 	s.PosY = dummy.PosY
+}
+
+//GetRealAccel Returns the real acceleration capability of a ship after modifiers
+func (s *Ship) GetRealAccel() float64 {
+	return s.TemplateData.BaseAccel / 10
+}
+
+//GetRealTurn Returns the real turning capability of a ship after modifiers
+func (s *Ship) GetRealTurn() float64 {
+	return s.TemplateData.BaseTurn
+}
+
+//GetRealMass Returns the real mass of a ship after modifiers
+func (s *Ship) GetRealMass() float64 {
+	return s.TemplateData.BaseMass
 }

@@ -233,8 +233,6 @@ func loadUniverse() (*universe.Universe, error) {
 
 				//link destination system into jumphole
 				j.OutSystem = o
-
-				fmt.Println("jumphole linked")
 				break
 			}
 		}
