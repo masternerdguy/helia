@@ -26,5 +26,7 @@ export class System extends WSSystem {
     planets: Planet[];
     jumpholes: Jumphole[];
     stations: Station[];
+
     backplateImg: HTMLImageElement;
+    backplateValid = false;
 }

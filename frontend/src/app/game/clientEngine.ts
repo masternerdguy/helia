@@ -305,7 +305,7 @@ function gfxBlank() {
 
 // draws the backplate for the current system
 function gfxBackplate() {
-  if (!engineSack.player.currentSystem.backplateImg) {
+  if (!engineSack.player.currentSystem.backplateImg || !engineSack.player.currentSystem.backplateValid) {
     // render backplate
     engineSack.backplateRenderer.render(
       {
@@ -321,6 +321,9 @@ function gfxBackplate() {
     // get data url and convert to image
     engineSack.player.currentSystem.backplateImg = new Image();
     engineSack.player.currentSystem.backplateImg.src = engineSack.backplateCanvas.toDataURL('image/png');
+
+    // mark as valid
+    engineSack.player.currentSystem.backplateValid = true;
   }
 
   // draw system backplate
