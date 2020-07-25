@@ -276,7 +276,12 @@ func saveUniverse(u *universe.Universe) {
 					Theta:          ship.Theta,
 					VelX:           ship.VelX,
 					VelY:           ship.VelY,
-					ShipTemplateID: ship.ShipTemplateID,
+					Shield:         ship.Shield,
+					Armor:          ship.Armor,
+					Hull:           ship.Hull,
+					Fuel:           ship.Fuel,
+					Heat:           ship.Heat,
+					ShipTemplateID: ship.TemplateData.ID,
 				}
 
 				err := shipSvc.UpdateShip(dbShip)

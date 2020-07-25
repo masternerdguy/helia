@@ -162,6 +162,12 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				Theta:    dbShip.Theta,
 				VelX:     dbShip.VelX,
 				VelY:     dbShip.VelY,
+				Shield:   dbShip.Shield,
+				Armor:    dbShip.Armor,
+				Hull:     dbShip.Hull,
+				Fuel:     dbShip.Fuel,
+				Heat:     dbShip.Heat,
+				Energy:   dbShip.Energy,
 				TemplateData: universe.ShipTemplate{
 					ID:               dbTemp.ID,
 					Created:          dbTemp.Created,

@@ -32,23 +32,23 @@ type ManualTurnData struct {
 
 //Ship Structure representing a player ship in the game universe
 type Ship struct {
-	ID             uuid.UUID
-	UserID         uuid.UUID
-	Created        time.Time
-	ShipName       string
-	PosX           float64
-	PosY           float64
-	SystemID       uuid.UUID
-	Texture        string
-	Theta          float64
-	VelX           float64
-	VelY           float64
-	Shield         float64
-	Armor          float64
-	Hull           float64
-	Heat           float64
-	Energy         float64
-	ShipTemplateID uuid.UUID
+	ID       uuid.UUID
+	UserID   uuid.UUID
+	Created  time.Time
+	ShipName string
+	PosX     float64
+	PosY     float64
+	SystemID uuid.UUID
+	Texture  string
+	Theta    float64
+	VelX     float64
+	VelY     float64
+	Shield   float64
+	Armor    float64
+	Hull     float64
+	Fuel     float64
+	Heat     float64
+	Energy   float64
 	//cache of base template
 	TemplateData ShipTemplate
 	//in-memory only
