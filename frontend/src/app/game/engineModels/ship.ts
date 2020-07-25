@@ -3,6 +3,7 @@ import { Camera } from './camera';
 
 export class Ship extends WSShip {
     texture2d: HTMLImageElement;
+    lastSeen: number;
 
     constructor(ws: WSShip) {
         super();
@@ -19,6 +20,8 @@ export class Ship extends WSShip {
         this.theta = ws.theta;
         this.velX = ws.velX;
         this.velY = ws.velY;
+        this.radius = ws.radius;
+        this.lastSeen = Date.now();
 
         if (ws.accel) {
             this.accel = ws.accel;
@@ -68,6 +71,7 @@ export class Ship extends WSShip {
         this.velY = sh.velY;
         this.mass = sh.mass;
         this.radius = sh.radius;
+        this.lastSeen = Date.now();
 
         // reset texture if changed
         if (this.texture !== sh.texture) {

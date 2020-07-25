@@ -2,7 +2,6 @@ package universe
 
 import (
 	"encoding/json"
-	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
@@ -254,7 +253,6 @@ func (s *SolarSystem) AddShip(c *Ship, lock bool) {
 	}
 
 	//add ship
-	fmt.Println(fmt.Sprintf("%v >>>>>>> %v", c, s))
 	s.ships[c.ID.String()] = c
 }
 

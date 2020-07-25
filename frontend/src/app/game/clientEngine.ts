@@ -44,6 +44,7 @@ class EngineSack {
 
   // tpf
   lastFrameTime: number;
+  lastSyncTime: number;
   tpf: number;
 
   reloading = false;
@@ -136,173 +137,163 @@ function handleJoin(d: GameMessage) {
 
   // start game loop
   engineSack.lastFrameTime = Date.now();
+  engineSack.lastSyncTime = Date.now();
   engineSack.tpf = 0;
 
   setInterval(clientLoop, 20);
 }
 
 function handleGlobalUpdate(d: GameMessage) {
+  // store sync time
+  engineSack.lastSyncTime = Date.now();
+
   // parse body
   const msg = JSON.parse(d.body) as ServerGlobalUpdateBody;
 
-  // system switch
+  // system switch or update check
   if (msg.currentSystemInfo.id !== engineSack.player.currentSystem.id) {
-    // stash new system info
+    // reinitialize system cache
+    engineSack.player.currentSystem = new System(msg.currentSystemInfo);
+  } else {
+    // fix empty arrays in incoming data
+    if (!msg.planets || msg.planets == null) {
+      msg.planets = [];
+    }
+
+    if (!msg.stations || msg.stations == null) {
+      msg.stations = [];
+    }
+
+    // update system
     engineSack.player.currentSystem.id = msg.currentSystemInfo.id;
     engineSack.player.currentSystem.systemName = msg.currentSystemInfo.systemName;
 
-    // empty arrays
-    engineSack.player.currentSystem.ships = [];
-    engineSack.player.currentSystem.stations = [];
-    engineSack.player.currentSystem.jumpholes = [];
-    engineSack.player.currentSystem.stations = [];
-    engineSack.player.currentSystem.planets = [];
-    engineSack.player.currentSystem.stars = [];
+    // update ships
+    for (const sh of msg.ships) {
+      let match = false;
 
-    // invalidate backplate
-    delete engineSack.player.currentSystem.backplateImg;
-  }
+      // find ship in memory
+      for (const sm of engineSack.player.currentSystem.ships) {
+        if (sh.id === sm.id) {
+          match = true;
 
-  // fix empty arrays in incoming data
-  if (!msg.planets || msg.planets == null) {
-    msg.planets = [];
-  }
+          // sync ship in memory
+          sm.sync(sh);
 
-  if (!msg.stations || msg.stations == null) {
-    msg.stations = [];
-  }
+          // is this the player ship?
+          if (sm.id === engineSack.player.currentShip.id) {
+            // update player ship cache
+            engineSack.player.currentShip.sync(sh);
 
-  // update system
-  engineSack.player.currentSystem.id = msg.currentSystemInfo.id;
-  engineSack.player.currentSystem.systemName = msg.currentSystemInfo.systemName;
+            // update camera position to track player ship
+            engineSack.camera.x = sm.x;
+            engineSack.camera.y = sm.y;
+          }
 
-  // update ships
-  for (const sh of msg.ships) {
-    let match = false;
-
-    // find ship in memory
-    for (const sm of engineSack.player.currentSystem.ships) {
-      if (sh.id === sm.id) {
-        match = true;
-
-        // sync ship in memory
-        sm.sync(sh);
-
-        // is this the player ship?
-        if (sm.id === engineSack.player.currentShip.id) {
-          // update player ship cache
-          engineSack.player.currentShip.sync(sh);
-
-          // update camera position to track player ship
-          engineSack.camera.x = sm.x;
-          engineSack.camera.y = sm.y;
+          // exit loop
+          break;
         }
+      }
 
-        // exit loop
-        break;
+      if (!match) {
+        // add ship to memory
+        engineSack.player.currentSystem.ships.push(new Ship(sh));
       }
     }
 
-    if (!match) {
-      // add ship to memory
-      engineSack.player.currentSystem.ships.push(new Ship(sh));
-    }
+    // update stars
+    for (const st of msg.stars) {
+      let match = false;
 
-    // todo: handle ship leaving or dying
-  }
+      // find star in memory
+      for (const sm of engineSack.player.currentSystem.stars) {
+        if (st.id === sm.id) {
+          match = true;
 
-  // update stars
-  for (const st of msg.stars) {
-    let match = false;
+          // sync star in memory
+          sm.sync(st);
 
-    // find star in memory
-    for (const sm of engineSack.player.currentSystem.stars) {
-      if (st.id === sm.id) {
-        match = true;
+          // exit loop
+          break;
+        }
+      }
 
-        // sync star in memory
-        sm.sync(st);
-
-        // exit loop
-        break;
+      if (!match) {
+        // add star to memory
+        engineSack.player.currentSystem.stars.push(new Star(st));
       }
     }
 
-    if (!match) {
-      // add star to memory
-      engineSack.player.currentSystem.stars.push(new Star(st));
-    }
-  }
+    // update planets
+    for (const p of msg.planets) {
+      let match = false;
 
-  // update planets
-  for (const p of msg.planets) {
-    let match = false;
+      // find planet in memory
+      for (const sm of engineSack.player.currentSystem.planets) {
+        if (p.id === sm.id) {
+          match = true;
 
-    // find planet in memory
-    for (const sm of engineSack.player.currentSystem.planets) {
-      if (p.id === sm.id) {
-        match = true;
+          // sync planet in memory
+          sm.sync(p);
 
-        // sync planet in memory
-        sm.sync(p);
+          // exit loop
+          break;
+        }
+      }
 
-        // exit loop
-        break;
+      if (!match) {
+        // add planet to memory
+        engineSack.player.currentSystem.planets.push(new Planet(p));
       }
     }
 
-    if (!match) {
-      // add planet to memory
-      engineSack.player.currentSystem.planets.push(new Planet(p));
-    }
-  }
+    // update jumpholes
+    for (const j of msg.jumpholes) {
+      let match = false;
 
-  // update jumpholes
-  for (const j of msg.jumpholes) {
-    let match = false;
+      // find jumphole in memory
+      for (const sm of engineSack.player.currentSystem.jumpholes) {
+        if (j.id === sm.id) {
+          match = true;
 
-    // find jumphole in memory
-    for (const sm of engineSack.player.currentSystem.jumpholes) {
-      if (j.id === sm.id) {
-        match = true;
+          // sync jumphole in memory
+          sm.sync(j);
 
-        // sync jumphole in memory
-        sm.sync(j);
+          // exit loop
+          break;
+        }
+      }
 
-        // exit loop
-        break;
+      if (!match) {
+        // add jumphole to memory
+        engineSack.player.currentSystem.jumpholes.push(new Jumphole(j));
       }
     }
 
-    if (!match) {
-      // add jumphole to memory
-      engineSack.player.currentSystem.jumpholes.push(new Jumphole(j));
-    }
-  }
+    // update npc stations
+    for (const p of msg.stations) {
+      let match = false;
 
-  // update npc stations
-  for (const p of msg.stations) {
-    let match = false;
+      // find station in memory
+      for (const sm of engineSack.player.currentSystem.stations) {
+        if (p.id === sm.id) {
+          match = true;
 
-    // find station in memory
-    for (const sm of engineSack.player.currentSystem.stations) {
-      if (p.id === sm.id) {
-        match = true;
+          // sync station in memory
+          sm.sync(p);
 
-        // sync station in memory
-        sm.sync(p);
-
-        // exit loop
-        break;
+          // exit loop
+          break;
+        }
       }
-    }
 
-    if (!match) {
-      // add station to memory
-      engineSack.player.currentSystem.stations.push(new Station(p));
-    }
+      if (!match) {
+        // add station to memory
+        engineSack.player.currentSystem.stations.push(new Station(p));
+      }
 
-    // todo: handle npc station dying
+      // todo: handle npc station dying
+    }
   }
 }
 
@@ -337,11 +328,11 @@ function gfxBackplate() {
 }
 
 function clientLoop() {
-  // render
-  clientRender();
-
   // periodic update
   periodicUpdate();
+
+  // render
+  clientRender();
 
   // check if connection has been lost
   if (engineSack.wsSvc.isStale() && !engineSack.reloading) {
@@ -393,9 +384,17 @@ function clientRender() {
   }
 
   // draw ships
+  const keepShips: Ship[] = [];
   for (const sh of engineSack.player.currentSystem.ships) {
-    sh.render(engineSack.ctx, engineSack.camera);
+    // only draw ships we've recently seen
+    if (sh.lastSeen > engineSack.lastSyncTime - (engineSack.tpf - 2)) {
+      sh.render(engineSack.ctx, engineSack.camera);
+      keepShips.push(sh);
+    }
   }
+
+  // keep only ships that were drawable in-memory
+  engineSack.player.currentSystem.ships = keepShips;
 
   // draw ui elements
   for (const w of engineSack.windows) {
