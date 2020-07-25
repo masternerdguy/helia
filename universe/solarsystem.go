@@ -131,13 +131,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 						jB.OutSystem.AddClient(c, true)
 						defer s.RemoveClient(c, false)
-
-						//on the opposite side of the hole
-						riX := jB.PosX - sA.PosX
-						riY := jB.PosY - sA.PosY
-
-						sA.PosX = (jB.OutJumphole.PosX + (riX * 1.25))
-						sA.PosY = (jB.OutJumphole.PosY + (riY * 1.25))
 					}
 				}
 
@@ -145,6 +138,13 @@ func (s *SolarSystem) PeriodicUpdate() {
 				sA.SystemID = jB.OutSystemID
 				jB.OutSystem.AddShip(sA, true)
 				defer s.RemoveShip(sA, false)
+
+				//on the opposite side of the hole
+				riX := jB.PosX - sA.PosX
+				riY := jB.PosY - sA.PosY
+
+				sA.PosX = (jB.OutJumphole.PosX + (riX * 1.25))
+				sA.PosY = (jB.OutJumphole.PosY + (riY * 1.25))
 
 				break
 			}
