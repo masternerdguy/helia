@@ -118,8 +118,8 @@ func (s *SolarSystem) PeriodicUpdate() {
 			//get distance between ship and jumphole
 			d := physics.Distance(dummyA, dummyB)
 
-			//check for radius intersection
-			if d <= (sA.Radius + jB.Radius) {
+			//check for deep radius intersection
+			if d <= ((sA.Radius + jB.Radius) * 0.75) {
 				//find client
 				c := s.clients[sA.UserID.String()]
 
