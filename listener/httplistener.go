@@ -30,6 +30,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	//get services
 	userSvc := sql.GetUserService()
 	shipSvc := sql.GetShipService()
+	shipTmpSvc := sql.GetShipTemplateService()
 
 	//read body
 	b, err := ioutil.ReadAll(r.Body)
@@ -76,19 +77,36 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//obviously this is temporary code - we'd want to read the ship from a ship template instead of hard coding it...
+	//sparrow is the hard-coded starter ship temporarily - we'll want this to be selectable as part of character creation eventually and something less powerful
+	tempID, err := uuid.Parse("8d9e032cd9b14a368bbf1448fa60a09a")
+
+	if err != nil {
+		http.Error(w, "parsestartertemplateid: "+err.Error(), 500)
+		return
+	}
+
+	temp, err := shipTmpSvc.GetShipTemplateByID(tempID)
+
+	if err != nil {
+		http.Error(w, "getstartertemplate: "+err.Error(), 500)
+		return
+	}
+
 	t := sql.Ship{
-		SystemID: systemID,
-		UserID:   u.ID,
-		ShipName: fmt.Sprintf("%s's Starter Ship", m.Username),
-		Texture:  "Mass Testing Brick",
-		Theta:    0,
-		Accel:    1,
-		PosX:     float64(physics.RandInRange(-500, 500)),
-		PosY:     float64(physics.RandInRange(-500, 500)),
-		Radius:   12.5,
-		Mass:     100,
-		Turn:     10,
+		SystemID:       systemID,
+		UserID:         u.ID,
+		ShipName:       fmt.Sprintf("%s's Starter Ship", m.Username),
+		Texture:        temp.Texture,
+		Theta:          0,
+		Shield:         temp.BaseShield,
+		Armor:          temp.BaseArmor,
+		Hull:           temp.BaseHull,
+		Fuel:           temp.BaseFuel,
+		Heat:           temp.BaseHeatCap,
+		Energy:         temp.BaseEnergy,
+		ShipTemplateID: temp.ID,
+		PosX:           float64(physics.RandInRange(-500, 500)),
+		PosY:           float64(physics.RandInRange(-500, 500)),
 	}
 
 	starterShip, err := shipSvc.NewShip(t)

@@ -113,6 +113,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 	userSvc := sql.GetUserService()
 	msgRegistry := models.NewMessageRegistry()
 	shipSvc := sql.GetShipService()
+	shipTmpSvc := sql.GetShipTemplateService()
 
 	//store sid on server
 	client.SID = &body.SessionID
@@ -142,6 +143,12 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				return
 			}
 
+			dbTemp, _ := shipTmpSvc.GetShipTemplateByID(dbShip.ShipTemplateID)
+
+			if dbTemp == nil {
+				return
+			}
+
 			// build in-memory ship
 			currShip = &universe.Ship{
 				ID:       dbShip.ID,
@@ -155,10 +162,26 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				Theta:    dbShip.Theta,
 				VelX:     dbShip.VelX,
 				VelY:     dbShip.VelY,
-				Accel:    dbShip.Accel,
-				Mass:     dbShip.Mass,
-				Radius:   dbShip.Radius,
-				Turn:     dbShip.Turn,
+				TemplateData: universe.ShipTemplate{
+					ID:               dbTemp.ID,
+					Created:          dbTemp.Created,
+					ShipTemplateName: dbTemp.ShipTemplateName,
+					Texture:          dbTemp.Texture,
+					Radius:           dbTemp.Radius,
+					BaseAccel:        dbTemp.BaseAccel,
+					BaseMass:         dbTemp.BaseMass,
+					BaseTurn:         dbTemp.BaseTurn,
+					BaseShield:       dbTemp.BaseShield,
+					BaseShieldRegen:  dbTemp.BaseShieldRegen,
+					BaseArmor:        dbTemp.BaseArmor,
+					BaseHull:         dbTemp.BaseHull,
+					BaseFuel:         dbTemp.BaseFuel,
+					BaseHeatCap:      dbTemp.BaseHeatCap,
+					BaseHeatSink:     dbTemp.BaseHeatSink,
+					BaseEnergy:       dbTemp.BaseEnergy,
+					BaseEnergyRegen:  dbTemp.BaseEnergyRegen,
+					ShipTypeID:       dbTemp.ShipTypeID,
+				},
 			}
 		}
 
@@ -179,10 +202,10 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			Theta:    currShip.Theta,
 			VelX:     currShip.VelX,
 			VelY:     currShip.VelY,
-			Accel:    currShip.Accel,
-			Mass:     currShip.Mass,
-			Radius:   currShip.Radius,
-			Turn:     currShip.Turn,
+			Accel:    currShip.TemplateData.BaseAccel,
+			Mass:     currShip.TemplateData.BaseMass,
+			Radius:   currShip.TemplateData.Radius,
+			Turn:     currShip.TemplateData.BaseTurn,
 		}
 
 		w.CurrentShipInfo = shipInfo

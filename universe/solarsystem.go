@@ -98,7 +98,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 				d := physics.Distance(dummyA, dummyB)
 
 				//check for radius intersection
-				if d <= (sA.Radius + sB.Radius) {
+				if d <= (sA.TemplateData.Radius + sB.TemplateData.Radius) {
 					//calculate collission results
 					physics.ElasticCollide(&dummyA, &dummyB, TimeModifier)
 
@@ -119,7 +119,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 			d := physics.Distance(dummyA, dummyB)
 
 			//check for deep radius intersection
-			if d <= ((sA.Radius + jB.Radius) * 0.75) {
+			if d <= ((sA.TemplateData.Radius + jB.Radius) * 0.75) {
 				//find client
 				c := s.clients[sA.UserID.String()]
 
@@ -171,8 +171,8 @@ func (s *SolarSystem) PeriodicUpdate() {
 			Theta:    d.Theta,
 			VelX:     d.VelX,
 			VelY:     d.VelY,
-			Mass:     d.Mass,
-			Radius:   d.Radius,
+			Mass:     d.TemplateData.BaseMass,
+			Radius:   d.TemplateData.Radius,
 		})
 	}
 

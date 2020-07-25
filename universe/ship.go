@@ -32,21 +32,25 @@ type ManualTurnData struct {
 
 //Ship Structure representing a player ship in the game universe
 type Ship struct {
-	ID       uuid.UUID
-	UserID   uuid.UUID
-	Created  time.Time
-	ShipName string
-	PosX     float64
-	PosY     float64
-	SystemID uuid.UUID
-	Texture  string
-	Theta    float64
-	VelX     float64
-	VelY     float64
-	Accel    float64
-	Radius   float64
-	Mass     float64
-	Turn     float64
+	ID             uuid.UUID
+	UserID         uuid.UUID
+	Created        time.Time
+	ShipName       string
+	PosX           float64
+	PosY           float64
+	SystemID       uuid.UUID
+	Texture        string
+	Theta          float64
+	VelX           float64
+	VelY           float64
+	Shield         float64
+	Armor          float64
+	Hull           float64
+	Heat           float64
+	Energy         float64
+	ShipTemplateID uuid.UUID
+	//cache of base template
+	TemplateData ShipTemplate
 	//in-memory only
 	AutopilotMode           int
 	AutopilotSeekManualTurn ManualTurnData
@@ -70,10 +74,26 @@ func (s *Ship) CopyShip() Ship {
 		Theta:    s.Theta,
 		VelX:     s.VelX,
 		VelY:     s.VelY,
-		Accel:    s.Accel,
-		Radius:   s.Radius,
-		Mass:     s.Mass,
-		Turn:     s.Turn,
+		TemplateData: ShipTemplate{
+			ID:               s.TemplateData.ID,
+			Created:          s.TemplateData.Created,
+			ShipTemplateName: s.TemplateData.ShipTemplateName,
+			Texture:          s.TemplateData.Texture,
+			Radius:           s.TemplateData.Radius,
+			BaseAccel:        s.TemplateData.BaseAccel,
+			BaseMass:         s.TemplateData.BaseMass,
+			BaseTurn:         s.TemplateData.BaseTurn,
+			BaseShield:       s.TemplateData.BaseShield,
+			BaseShieldRegen:  s.TemplateData.BaseShieldRegen,
+			BaseArmor:        s.TemplateData.BaseArmor,
+			BaseHull:         s.TemplateData.BaseHull,
+			BaseFuel:         s.TemplateData.BaseFuel,
+			BaseHeatCap:      s.TemplateData.BaseHeatCap,
+			BaseHeatSink:     s.TemplateData.BaseHeatSink,
+			BaseEnergy:       s.TemplateData.BaseEnergy,
+			BaseEnergyRegen:  s.TemplateData.BaseEnergyRegen,
+			ShipTypeID:       s.TemplateData.ShipTypeID,
+		},
 		//in-memory only
 		AutopilotMode:           s.AutopilotMode,
 		AutopilotSeekManualTurn: s.AutopilotSeekManualTurn,
@@ -134,9 +154,9 @@ func (s *Ship) doAutopilotSeekManualNav() {
 
 	//apply turn with ship limits
 	if a > 0 {
-		s.rotate(turnMag / s.Turn)
+		s.rotate(turnMag / s.TemplateData.BaseTurn)
 	} else if a < 0 {
-		s.rotate(turnMag / -s.Turn)
+		s.rotate(turnMag / -s.TemplateData.BaseTurn)
 	}
 
 	//thrust forward
@@ -181,7 +201,7 @@ func (s *Ship) rotate(scale float64) {
 	}
 
 	// turn
-	s.Theta += s.Turn * scale * TimeModifier
+	s.Theta += s.TemplateData.BaseTurn * scale * TimeModifier
 }
 
 //forwardThrust Fire the ship's thrusters
@@ -196,8 +216,8 @@ func (s *Ship) forwardThrust(scale float64) {
 	}
 
 	// accelerate along theta using thrust proportional to bounded magnitude
-	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (s.Accel * scale * TimeModifier)
-	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (s.Accel * scale * TimeModifier)
+	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (s.TemplateData.BaseAccel * scale * TimeModifier)
+	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (s.TemplateData.BaseAccel * scale * TimeModifier)
 }
 
 //ToPhysicsDummy Returns a new physics dummy structure representing this ship
@@ -207,7 +227,7 @@ func (s *Ship) ToPhysicsDummy() physics.Dummy {
 		VelY: s.VelY,
 		PosX: s.PosX,
 		PosY: s.PosY,
-		Mass: s.Mass,
+		Mass: s.TemplateData.BaseMass,
 	}
 }
 
@@ -217,5 +237,4 @@ func (s *Ship) ApplyPhysicsDummy(dummy physics.Dummy) {
 	s.VelY = dummy.VelY
 	s.PosX = dummy.PosX
 	s.PosY = dummy.PosY
-	s.Mass = dummy.Mass
 }

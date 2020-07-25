@@ -18,21 +18,24 @@ func GetShipService() ShipService {
 
 //Ship Structure representing a row in the ships table
 type Ship struct {
-	ID       uuid.UUID
-	UserID   uuid.UUID
-	Created  time.Time
-	ShipName string
-	PosX     float64
-	PosY     float64
-	SystemID uuid.UUID
-	Texture  string
-	Theta    float64
-	VelX     float64
-	VelY     float64
-	Accel    float64
-	Radius   float64
-	Mass     float64
-	Turn     float64
+	ID             uuid.UUID
+	UserID         uuid.UUID
+	Created        time.Time
+	ShipName       string
+	PosX           float64
+	PosY           float64
+	SystemID       uuid.UUID
+	Texture        string
+	Theta          float64
+	VelX           float64
+	VelY           float64
+	Shield         float64
+	Armor          float64
+	Hull           float64
+	Fuel           float64
+	Heat           float64
+	Energy         float64
+	ShipTemplateID uuid.UUID
 }
 
 //NewShip Creates a new ship
@@ -46,17 +49,17 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 
 	//insert ship
 	sql := `
-				INSERT INTO public.ships(id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture,
-				                         theta, vel_x, vel_y, accel, radius, mass, turn)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8,
-					    $9, $10, $11, $12, $13, $14, $15);
+				INSERT INTO public.ships(
+					id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta,
+					vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18);
 			`
 
 	uid := uuid.New()
 	createdAt := time.Now()
 
-	_, err = db.Query(sql, uid, e.SystemID, e.UserID, e.PosX, e.PosY, createdAt, e.ShipName, e.Texture,
-		e.Theta, e.VelX, e.VelY, e.Accel, e.Radius, e.Mass, e.Turn)
+	_, err = db.Query(sql, uid, e.SystemID, e.UserID, e.PosX, e.PosY, createdAt, e.ShipName, e.Texture, e.Theta,
+		e.VelX, e.VelY, e.Shield, e.Armor, e.Hull, e.Fuel, e.Heat, e.Energy, e.ShipTemplateID)
 
 	if err != nil {
 		return nil, err
@@ -83,8 +86,8 @@ func (s ShipService) GetShipByID(shipID uuid.UUID) (*Ship, error) {
 
 	sqlStatement :=
 		`
-			SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture,
-		           theta, vel_x, vel_y, accel, radius, mass, turn
+			SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
+				   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid
 			FROM public.ships
 			WHERE id = $1
 			`
@@ -92,7 +95,7 @@ func (s ShipService) GetShipByID(shipID uuid.UUID) (*Ship, error) {
 	row := db.QueryRow(sqlStatement, shipID)
 
 	switch err := row.Scan(&ship.ID, &ship.SystemID, &ship.UserID, &ship.PosX, &ship.PosY, &ship.Created, &ship.ShipName, &ship.Texture,
-		&ship.Theta, &ship.VelX, &ship.VelY, &ship.Accel, &ship.Radius, &ship.Mass, &ship.Turn); err {
+		&ship.Theta, &ship.VelX, &ship.VelY, &ship.Shield, &ship.Armor, &ship.Hull, &ship.Fuel, &ship.Heat, &ship.Energy, &ship.ShipTemplateID); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("Ship not found")
 	case nil:
@@ -115,8 +118,8 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID) ([]Ship, error) {
 
 	//load solar systems
 	sql := `
-				SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture,
-					theta, vel_x, vel_y, accel, radius, mass, turn
+				SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
+					   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid
 				FROM public.ships
 				WHERE universe_systemid = $1
 			`
@@ -132,7 +135,7 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID) ([]Ship, error) {
 
 		//scan into ship structure
 		rows.Scan(&s.ID, &s.SystemID, &s.UserID, &s.PosX, &s.PosY, &s.Created, &s.ShipName, &s.Texture,
-			&s.Theta, &s.VelX, &s.VelY, &s.Accel, &s.Radius, &s.Mass, &s.Turn)
+			&s.Theta, &s.VelX, &s.VelY, &s.Shield, &s.Armor, &s.Hull, &s.Fuel, &s.Heat, &s.Energy, &s.ShipTemplateID)
 
 		//append to ship slice
 		systems = append(systems, s)
@@ -154,13 +157,13 @@ func (s ShipService) UpdateShip(ship Ship) error {
 	sqlStatement :=
 		`
 			UPDATE public.ships
-				SET universe_systemid=$2, userid=$3, pos_x=$4, pos_y=$5, created=$6, shipname=$7, texture=$8,
-					theta=$9, vel_x=$10, vel_y=$11, accel=$12, radius=$13, mass=$14, turn=$15
+			SET universe_systemid=$2, userid=$3, pos_x=$4, pos_y=$5, created=$6, shipname=$7, texture=$8, theta=$9, vel_x=$10,
+				vel_y=$11, shield=$12, armor=$13, hull=$14, fuel=$15, heat=$16, energy=$17, shiptemplateid=$18	
 			WHERE id = $1
 		`
 
-	_, err = db.Exec(sqlStatement, ship.ID, ship.SystemID, ship.UserID, ship.PosX, ship.PosY, ship.Created, ship.ShipName, ship.Texture,
-		ship.Theta, ship.VelX, ship.VelY, ship.Accel, ship.Radius, ship.Mass, ship.Turn)
+	_, err = db.Exec(sqlStatement, ship.ID, ship.SystemID, ship.UserID, ship.PosX, ship.PosY, ship.Created, ship.ShipName, ship.Texture, ship.Theta, ship.VelX,
+		ship.VelY, ship.Shield, ship.Armor, ship.Hull, ship.Fuel, ship.Heat, ship.Energy, ship.ShipTemplateID)
 
 	return err
 }

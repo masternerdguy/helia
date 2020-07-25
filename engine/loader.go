@@ -13,6 +13,7 @@ func loadUniverse() (*universe.Universe, error) {
 	regionSvc := sql.GetRegionService()
 	systemSvc := sql.GetSolarSystemService()
 	shipSvc := sql.GetShipService()
+	shipTmpSvc := sql.GetShipTemplateService()
 	starSvc := sql.GetStarService()
 	planetSvc := sql.GetPlanetService()
 	stationSvc := sql.GetStationService()
@@ -70,6 +71,14 @@ func loadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, sh := range ships {
+				//get template
+				temp, err := shipTmpSvc.GetShipTemplateByID(sh.ShipTemplateID)
+
+				if err != nil {
+					return nil, err
+				}
+
+				//build in-memory ship
 				es := universe.Ship{
 					ID:       sh.ID,
 					UserID:   sh.UserID,
@@ -82,10 +91,26 @@ func loadUniverse() (*universe.Universe, error) {
 					Theta:    sh.Theta,
 					VelX:     sh.VelX,
 					VelY:     sh.VelY,
-					Accel:    sh.Accel,
-					Mass:     sh.Mass,
-					Radius:   sh.Radius,
-					Turn:     sh.Turn,
+					TemplateData: universe.ShipTemplate{
+						ID:               temp.ID,
+						Created:          temp.Created,
+						ShipTemplateName: temp.ShipTemplateName,
+						Texture:          temp.Texture,
+						Radius:           temp.Radius,
+						BaseAccel:        temp.BaseAccel,
+						BaseMass:         temp.BaseMass,
+						BaseTurn:         temp.BaseTurn,
+						BaseShield:       temp.BaseShield,
+						BaseShieldRegen:  temp.BaseShieldRegen,
+						BaseArmor:        temp.BaseArmor,
+						BaseHull:         temp.BaseHull,
+						BaseFuel:         temp.BaseFuel,
+						BaseHeatCap:      temp.BaseHeatCap,
+						BaseHeatSink:     temp.BaseHeatSink,
+						BaseEnergy:       temp.BaseEnergy,
+						BaseEnergyRegen:  temp.BaseEnergyRegen,
+						ShipTypeID:       temp.ShipTypeID,
+					},
 				}
 
 				s.AddShip(&es, true)
@@ -240,21 +265,18 @@ func saveUniverse(u *universe.Universe) {
 				defer ship.Lock.Unlock()
 
 				dbShip := sql.Ship{
-					ID:       ship.ID,
-					UserID:   ship.UserID,
-					Created:  ship.Created,
-					ShipName: ship.ShipName,
-					PosX:     ship.PosX,
-					PosY:     ship.PosY,
-					SystemID: ship.SystemID,
-					Texture:  ship.Texture,
-					Theta:    ship.Theta,
-					VelX:     ship.VelX,
-					VelY:     ship.VelY,
-					Accel:    ship.Accel,
-					Mass:     ship.Mass,
-					Radius:   ship.Radius,
-					Turn:     ship.Turn,
+					ID:             ship.ID,
+					UserID:         ship.UserID,
+					Created:        ship.Created,
+					ShipName:       ship.ShipName,
+					PosX:           ship.PosX,
+					PosY:           ship.PosY,
+					SystemID:       ship.SystemID,
+					Texture:        ship.Texture,
+					Theta:          ship.Theta,
+					VelX:           ship.VelX,
+					VelY:           ship.VelY,
+					ShipTemplateID: ship.ShipTemplateID,
 				}
 
 				err := shipSvc.UpdateShip(dbShip)
