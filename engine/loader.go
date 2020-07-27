@@ -91,6 +91,12 @@ func loadUniverse() (*universe.Universe, error) {
 					Theta:    sh.Theta,
 					VelX:     sh.VelX,
 					VelY:     sh.VelY,
+					Shield:   sh.Shield,
+					Armor:    sh.Armor,
+					Hull:     sh.Hull,
+					Fuel:     sh.Fuel,
+					Heat:     sh.Heat,
+					Energy:   sh.Energy,
 					TemplateData: universe.ShipTemplate{
 						ID:               temp.ID,
 						Created:          temp.Created,
@@ -279,6 +285,7 @@ func saveUniverse(u *universe.Universe) {
 					Hull:           ship.Hull,
 					Fuel:           ship.Fuel,
 					Heat:           ship.Heat,
+					Energy:         ship.Energy,
 					ShipTemplateID: ship.TemplateData.ID,
 				}
 
