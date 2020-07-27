@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2020-07-25 13:31:58
+-- Started on 2020-07-26 21:13:00
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -239,11 +239,16 @@ ALTER TABLE public.users OWNER TO postgres;
 COPY public.sessions (id, userid) FROM stdin;
 7b887091-b4db-4368-aa75-10f142510338	502b5a79-f5d4-46ff-8e94-653c0778bb6e
 9d95b925-106d-4eac-99c7-80257eebaae8	57194133-619d-4239-bc10-ee4a2d9fdd62
-b6b58c7a-cfae-414b-aa35-9a0a78a0bfa7	c21b1de6-e103-4335-aa6c-d652782b6bc5
 3a2f8402-47f6-45d3-9cd5-251f309605fb	90fe2d7d-a7f0-46d5-a4d4-0d5bb6edbbe0
 b910560f-fe99-4830-a3aa-a631d6ccd469	4d42a4ef-a84e-431f-a422-f5808aabee9f
 8a210e3d-766d-4eae-af42-4b2628e885c4	ec5c12e6-04b1-4ea3-b1c7-a8e5615b012a
+ef31917a-4d0c-429d-bfc1-dab75d3667ee	c21b1de6-e103-4335-aa6c-d652782b6bc5
+d0d7272e-1096-47e0-88a4-5b788ca24f23	49011544-cb64-4aef-9bd3-02557c73dc8c
+0a796888-ff32-4d4c-bdd2-5036e951f663	b73e441e-be0f-40f2-af2b-6fe2de883736
+f2315fc2-28cf-4c46-975f-b7c52dfe0c4c	a9e82098-3de1-43c7-a008-1484f4239530
+5c027a4c-50a9-4b95-86be-71c79a0e2110	35096539-5278-4c6f-b83f-3af7abc5a60d
 d9cbbe7b-3c68-4554-b97c-71c66d67d4f1	ded647c9-2799-4fb6-9887-a32ca11d0c4c
+c55319f7-a440-49c1-a745-89cb7dca7869	b03baaf2-e331-421f-9d78-09faece0bc07
 38c95eda-861f-40ea-adb2-f023b14a9624	298011ef-0eb1-42d3-9aed-28e7166da350
 4af30de8-4272-4940-be80-32c6638e17a4	f1bb5c0c-d698-4e56-8cd8-c4b05a32f8b8
 \.
@@ -256,7 +261,8 @@ d9cbbe7b-3c68-4554-b97c-71c66d67d4f1	ded647c9-2799-4fb6-9887-a32ca11d0c4c
 --
 
 COPY public.ships (id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid) FROM stdin;
-409645d5-c0b2-4491-82c0-4a26f0e40984	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	c21b1de6-e103-4335-aa6c-d652782b6bc5	-419	387	13:29:41.442715-04	asdf's Starter Ship	Sparrow	0	0	0	12500	4800	2400	26500	1000	1000	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a
+cf8fe6a6-4976-4a80-b3fa-a571da84f59c	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	b03baaf2-e331-421f-9d78-09faece0bc07	24422.662351799412	-9507.419257592446	21:07:33.371547-04	nwiehoff's Starter Ship	Sparrow	60.94539590092285	2.0325532616038374e-145	-3.1237200704942994e-145	12500	4800	2400	26500	1000	1000	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a
+50323a86-fd72-4d6d-baaa-963ec8d59b15	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	35096539-5278-4c6f-b83f-3af7abc5a60d	24563.27146515195	-9501.420076229044	21:08:08.048472-04	asdf's Starter Ship	Sparrow	162.34987578006985	-2.8095440834218472e-70	-9.033825231899631e-71	12500	4800	2400	26500	1000	1000	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a
 \.
 
 
@@ -365,8 +371,8 @@ edf08406-0879-4141-8af1-f68d32e31c8d	Another System	bfca1f47-e182-4b4d-8632-48d8
 --
 
 COPY public.users (id, username, hashpass, registered, banned, current_shipid) FROM stdin;
-7f0f4d45-1f5d-4fe5-bf0e-3da6226fd782	lololol	af1bf930bd9dbe551a03ed4ebfa9776eb591238333a7e994b5f047d9339b56bd	2020-07-25 13:27:29.495575-04	0	\N
-c21b1de6-e103-4335-aa6c-d652782b6bc5	asdf	7ab518aea3a72084bf1f1e1ddeb7fa25563a47b73b643452960187b6405b72f1	2020-07-25 13:29:41.359742-04	0	409645d5-c0b2-4491-82c0-4a26f0e40984
+b03baaf2-e331-421f-9d78-09faece0bc07	nwiehoff	02c4bf7d7e35c6bab999ac03ece60b8586a27f7ecd4830983b138b74262bf3f9	2020-07-26 21:07:33.288548-04	0	cf8fe6a6-4976-4a80-b3fa-a571da84f59c
+35096539-5278-4c6f-b83f-3af7abc5a60d	asdf	7ab518aea3a72084bf1f1e1ddeb7fa25563a47b73b643452960187b6405b72f1	2020-07-26 21:08:07.955473-04	0	50323a86-fd72-4d6d-baaa-963ec8d59b15
 \.
 
 
@@ -621,7 +627,7 @@ ALTER TABLE ONLY public.universe_stations
     ADD CONSTRAINT station_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
 
 
--- Completed on 2020-07-25 13:31:58
+-- Completed on 2020-07-26 21:13:01
 
 --
 -- PostgreSQL database dump complete
