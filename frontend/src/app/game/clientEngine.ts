@@ -16,6 +16,8 @@ import { GDIWindow } from './gdi/base/gdiWindow';
 import { Station } from './engineModels/station';
 import { GDIStyle } from './gdi/base/gdiStyle';
 import { Jumphole } from './engineModels/jumphole';
+import { ShipStatusWindow } from './gdi/windows/shipStatusWindow';
+import { ServerCurrentShipUpdate } from './wsModels/bodies/currentShipUpdate';
 
 class EngineSack {
   constructor() {}
@@ -35,7 +37,7 @@ class EngineSack {
   backplateRenderer: Backplate;
 
   // ui elements
-  testWindow: TestWindow;
+  shipStatusWindow: ShipStatusWindow;
 
   windows: GDIWindow[];
 
@@ -63,14 +65,14 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.backplateRenderer = new Backplate(backCanvas);
 
   // initialize ui
-  engineSack.testWindow = new TestWindow();
-  engineSack.testWindow.setX(100);
-  engineSack.testWindow.setY(100);
-  engineSack.testWindow.initialize();
-  engineSack.testWindow.pack();
+  engineSack.shipStatusWindow = new ShipStatusWindow();
+  engineSack.shipStatusWindow.setX(100);
+  engineSack.shipStatusWindow.setY(100);
+  engineSack.shipStatusWindow.initialize();
+  engineSack.shipStatusWindow.pack();
 
   // cache windows for simpler updating and rendering
-  engineSack.windows = [engineSack.testWindow];
+  engineSack.windows = [engineSack.shipStatusWindow];
 
   // store globals
   engineSack.gfx = gameCanvas;
@@ -85,6 +87,8 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
       handleJoin(d);
     } else if (d.type === MessageTypes.Update) {
       handleGlobalUpdate(d);
+    } else if (d.type === MessageTypes.CurrentShipUpdate) {
+      handleCurrentShipUpdate(d);
     }
   });
 }
@@ -295,6 +299,17 @@ function handleGlobalUpdate(d: GameMessage) {
       // todo: handle npc station dying
     }
   }
+}
+
+function handleCurrentShipUpdate(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerCurrentShipUpdate;
+
+  // update current ship cache
+  engineSack.player.currentShip.sync(msg.currentShipInfo);
+
+  // update status window
+  engineSack.shipStatusWindow.setShip(engineSack.player.currentShip);
 }
 
 // clears the screen

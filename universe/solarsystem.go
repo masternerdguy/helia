@@ -173,6 +173,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 			VelY:     d.VelY,
 			Mass:     d.GetRealMass(),
 			Radius:   d.TemplateData.Radius,
+			ShieldP:  (d.Shield / d.GetRealMaxShield()) * 100,
+			ArmorP:   (d.Armor / d.GetRealMaxArmor()) * 100,
+			HullP:    (d.Hull / d.GetRealMaxHull()) * 100,
 		})
 	}
 
@@ -243,6 +246,54 @@ func (s *SolarSystem) PeriodicUpdate() {
 	//write global update to clients
 	for _, c := range s.clients {
 		c.WriteMessage(&msg)
+	}
+
+	//write secret current ship updates to individual clients
+	for _, c := range s.clients {
+		//find current ship
+		d := s.ships[c.CurrentShipID.String()]
+
+		if d == nil {
+			continue
+		}
+
+		//build current ship info message
+		si := models.ServerCurrentShipUpdate{
+			CurrentShipInfo: models.CurrentShipInfo{
+				//global stuff
+				ID:       d.ID,
+				UserID:   d.UserID,
+				Created:  d.Created,
+				ShipName: d.ShipName,
+				PosX:     d.PosX,
+				PosY:     d.PosY,
+				SystemID: d.SystemID,
+				Texture:  d.Texture,
+				Theta:    d.Theta,
+				VelX:     d.VelX,
+				VelY:     d.VelY,
+				Mass:     d.GetRealMass(),
+				Radius:   d.TemplateData.Radius,
+				ShieldP:  (d.Shield / d.GetRealMaxShield()) * 100,
+				ArmorP:   (d.Armor / d.GetRealMaxArmor()) * 100,
+				HullP:    (d.Hull / d.GetRealMaxHull()) * 100,
+				//secret stuff
+				EnergyP: (d.Energy / d.GetRealMaxEnergy()) * 100,
+				HeatP:   (d.Heat / d.GetRealMaxHeat()) * 100,
+				FuelP:   (d.Fuel / d.GetRealMaxFuel()) * 100,
+			},
+		}
+
+		//serialize secret current ship update
+		b, _ := json.Marshal(&si)
+
+		sct := models.GameMessage{
+			MessageType: msgRegistry.CurrentShipUpdate,
+			MessageBody: string(b),
+		}
+
+		//write message to client
+		c.WriteMessage(&sct)
 	}
 }
 

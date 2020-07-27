@@ -197,6 +197,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 		//build current ship info data for welcome message
 		shipInfo := models.CurrentShipInfo{
+			//global stuff
 			ID:       currShip.ID,
 			UserID:   currShip.UserID,
 			Created:  currShip.Created,
@@ -212,6 +213,13 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			Mass:     currShip.GetRealMass(),
 			Radius:   currShip.TemplateData.Radius,
 			Turn:     currShip.GetRealTurn(),
+			ShieldP:  (currShip.Shield / currShip.GetRealMaxShield()) * 100,
+			ArmorP:   (currShip.Armor / currShip.GetRealMaxArmor()) * 100,
+			HullP:    (currShip.Hull / currShip.GetRealMaxHull()) * 100,
+			//secret stuff
+			EnergyP: (currShip.Energy / currShip.GetRealMaxEnergy()) * 100,
+			HeatP:   (currShip.Heat / currShip.GetRealMaxHeat()) * 100,
+			FuelP:   (currShip.Fuel / currShip.GetRealMaxFuel()) * 100,
 		}
 
 		w.CurrentShipInfo = shipInfo

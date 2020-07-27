@@ -74,6 +74,12 @@ func (s *Ship) CopyShip() Ship {
 		Theta:    s.Theta,
 		VelX:     s.VelX,
 		VelY:     s.VelY,
+		Shield:   s.Shield,
+		Armor:    s.Armor,
+		Hull:     s.Hull,
+		Fuel:     s.Fuel,
+		Heat:     s.Heat,
+		Energy:   s.Energy,
 		TemplateData: ShipTemplate{
 			ID:               s.TemplateData.ID,
 			Created:          s.TemplateData.Created,
@@ -252,4 +258,34 @@ func (s *Ship) GetRealTurn() float64 {
 //GetRealMass Returns the real mass of a ship after modifiers
 func (s *Ship) GetRealMass() float64 {
 	return s.TemplateData.BaseMass
+}
+
+//GetRealMaxShield Returns the real max shield of the ship after modifiers
+func (s *Ship) GetRealMaxShield() float64 {
+	return s.TemplateData.BaseShield
+}
+
+//GetRealMaxArmor Returns the real max armor of the ship after modifiers
+func (s *Ship) GetRealMaxArmor() float64 {
+	return s.TemplateData.BaseArmor
+}
+
+//GetRealMaxHull Returns the real max hull of the ship after modifiers
+func (s *Ship) GetRealMaxHull() float64 {
+	return s.TemplateData.BaseHull
+}
+
+//GetRealMaxEnergy Returns the real max energy of the ship after modifiers
+func (s *Ship) GetRealMaxEnergy() float64 {
+	return s.TemplateData.BaseEnergy
+}
+
+//GetRealMaxHeat Returns the real max heat of the ship after modifiers
+func (s *Ship) GetRealMaxHeat() float64 {
+	return s.TemplateData.BaseHeatCap
+}
+
+//GetRealMaxFuel Returns the real max fuel of the ship after modifiers
+func (s *Ship) GetRealMaxFuel() float64 {
+	return s.TemplateData.BaseFuel
 }

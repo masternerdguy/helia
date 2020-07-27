@@ -30,6 +30,30 @@ export class Ship extends WSShip {
         if (ws.turn) {
             this.turn = ws.turn;
         }
+
+        if (ws.shieldP) {
+            this.shieldP = ws.shieldP;
+        }
+
+        if (ws.armorP) {
+            this.armorP = ws.armorP;
+        }
+
+        if (ws.hullP) {
+            this.hullP = ws.hullP;
+        }
+
+        if (ws.energyP) {
+            this.energyP = ws.energyP;
+        }
+
+        if (ws.heatP) {
+            this.heatP = ws.heatP;
+        }
+
+        if (ws.fuelP) {
+            this.fuelP = ws.fuelP;
+        }
     }
 
     render(ctx: any, camera: Camera) {
@@ -85,6 +109,30 @@ export class Ship extends WSShip {
 
         if (sh.turn) {
             this.turn = sh.turn;
+        }
+
+        if (sh.shieldP) {
+            this.shieldP = sh.shieldP;
+        }
+
+        if (sh.armorP) {
+            this.armorP = sh.armorP;
+        }
+
+        if (sh.hullP) {
+            this.hullP = sh.hullP;
+        }
+
+        if (sh.energyP) {
+            this.energyP = sh.energyP;
+        }
+
+        if (sh.heatP) {
+            this.heatP = sh.heatP;
+        }
+
+        if (sh.fuelP) {
+            this.fuelP = sh.fuelP;
         }
     }
 }

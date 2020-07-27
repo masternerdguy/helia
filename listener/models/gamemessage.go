@@ -8,17 +8,19 @@ import (
 
 //MessageRegistry Registry of game message types
 type MessageRegistry struct {
-	Join         int
-	GlobalUpdate int
-	NavClick     int
+	Join              int
+	GlobalUpdate      int
+	NavClick          int
+	CurrentShipUpdate int
 }
 
 //NewMessageRegistry Returns a MessageRegistry with correct enum values
 func NewMessageRegistry() *MessageRegistry {
 	return &MessageRegistry{
-		Join:         0,
-		GlobalUpdate: 1,
-		NavClick:     2,
+		Join:              0,
+		GlobalUpdate:      1,
+		NavClick:          2,
+		CurrentShipUpdate: 3,
 	}
 }
 
@@ -37,9 +39,15 @@ type CurrentShipInfo struct {
 	VelY     float64   `json:"velY"`
 	Mass     float64   `json:"mass"`
 	Radius   float64   `json:"radius"`
+	ShieldP  float64   `json:"shieldP"`
+	ArmorP   float64   `json:"armorP"`
+	HullP    float64   `json:"hullP"`
 	// secrets that should not be globally known
-	Accel float64 `json:"accel"`
-	Turn  float64 `json:"turn"`
+	Accel   float64 `json:"accel"`
+	Turn    float64 `json:"turn"`
+	EnergyP float64 `json:"energyP"`
+	HeatP   float64 `json:"heatP"`
+	FuelP   float64 `json:"fuelP"`
 }
 
 //GlobalShipInfo Structure for passing non-secret information about a ship
@@ -57,6 +65,9 @@ type GlobalShipInfo struct {
 	VelY     float64   `json:"velY"`
 	Mass     float64   `json:"mass"`
 	Radius   float64   `json:"radius"`
+	ShieldP  float64   `json:"shieldP"`
+	ArmorP   float64   `json:"armorP"`
+	HullP    float64   `json:"hullP"`
 }
 
 //GlobalStarInfo Structure for passing non-secret information about a star
@@ -150,4 +161,9 @@ type ClientNavClickBody struct {
 	SessionID       uuid.UUID `json:"sid"`
 	ScreenTheta     float64   `json:"dT"`
 	ScreenMagnitude float64   `json:"m"`
+}
+
+//ServerCurrentShipUpdate Body containing information about the player's current ship including secrets
+type ServerCurrentShipUpdate struct {
+	CurrentShipInfo CurrentShipInfo `json:"currentShipInfo"`
 }

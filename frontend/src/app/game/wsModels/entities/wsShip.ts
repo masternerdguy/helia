@@ -14,4 +14,10 @@ export class WSShip {
     mass: number;
     radius: number;
     turn: number;
+    shieldP: number;
+    armorP: number;
+    hullP: number;
+    energyP: number;
+    heatP: number;
+    fuelP: number;
 }
