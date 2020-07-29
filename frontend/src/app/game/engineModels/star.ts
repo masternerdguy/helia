@@ -34,7 +34,7 @@ export class Star extends WSStar {
         ctx.beginPath();
         ctx.arc(sx, sy, sr, 0, 2 * Math.PI, false);
         ctx.lineWidth = 2;
-        ctx.strokeStyle = 'yellow';
+        ctx.strokeStyle = 'cyan';
         ctx.stroke();
 
         // draw star
