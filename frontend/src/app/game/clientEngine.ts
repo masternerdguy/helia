@@ -38,6 +38,7 @@ class EngineSack {
 
   // ui elements
   shipStatusWindow: ShipStatusWindow;
+  lastShiftDown: number;
 
   windows: GDIWindow[];
 
@@ -294,12 +295,12 @@ function handleGlobalUpdate(d: GameMessage) {
         if (p.id === sm.id) {
           match = true;
 
-          sm.isTargeted = false;
-
           // sync station in memory
           sm.sync(p);
 
           // target check
+          sm.isTargeted = false;
+
           if (sm.id === engineSack.player.currentTargetID
               && engineSack.player.currentTargetType === TargetType.Station) {
             sm.isTargeted = true;
@@ -450,59 +451,62 @@ function handleClick(x: number, y: number) {
     }
   }
 
-  // check to see if we're clicking on any ships
-  for (const sh of engineSack.player.currentSystem.ships) {
-    // skip if player ship
-    if (sh.id === engineSack.player.currentShip.id) {
-      continue;
+  // shift down means targeting click instead of nav click
+  if (Date.now() - engineSack.lastShiftDown < 200) {
+    // check to see if we're clicking on any ships
+    for (const sh of engineSack.player.currentSystem.ships) {
+      // skip if player ship
+      if (sh.id === engineSack.player.currentShip.id) {
+        continue;
+      }
+
+      // project coordinates to screen
+      const sX = engineSack.camera.projectX(sh.x);
+      const sY = engineSack.camera.projectY(sh.y);
+      const sR = engineSack.camera.projectR(sh.radius);
+
+      // check for intersection
+      const m = magnitude(x, y, sX, sY);
+      if (m < sR) {
+        // set as target on client
+        engineSack.player.currentTargetID = sh.id;
+        engineSack.player.currentTargetType = TargetType.Ship;
+
+        return;
+      }
     }
 
-    // project coordinates to screen
-    const sX = engineSack.camera.projectX(sh.x);
-    const sY = engineSack.camera.projectY(sh.y);
-    const sR = engineSack.camera.projectR(sh.radius);
+    // check to see if we're clicking on any stations
+    for (const st of engineSack.player.currentSystem.stations) {
+      // project coordinates to screen
+      const sX = engineSack.camera.projectX(st.x);
+      const sY = engineSack.camera.projectY(st.y);
+      const sR = engineSack.camera.projectR(st.radius);
 
-    // check for intersection
-    const m = magnitude(x, y, sX, sY);
-    if (m < sR) {
-      // set as target on client
-      engineSack.player.currentTargetID = sh.id;
-      engineSack.player.currentTargetType = TargetType.Ship;
+      // check for intersection
+      const m = magnitude(x, y, sX, sY);
+      if (m < sR) {
+        // set as target on client
+        engineSack.player.currentTargetID = st.id;
+        engineSack.player.currentTargetType = TargetType.Station;
 
-      return;
+        return;
+      }
     }
+  } else {
+    // issue a nav order for that location in space
+    const b = new ClientNavClick();
+
+    // calculate cursor vector
+    b.dT = angleBetween(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y);
+    b.m = (magnitude(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y))
+      // half way across the shortest part of the screen is a full speed request
+      / Math.min(engineSack.gfx.width / 4, engineSack.gfx.height / 4);
+
+    // send nav click request
+    b.sid = engineSack.player.sid;
+    engineSack.wsSvc.sendMessage(MessageTypes.NavClick, b);
   }
-
-  // check to see if we're clicking on any stations
-  for (const st of engineSack.player.currentSystem.stations) {
-    // project coordinates to screen
-    const sX = engineSack.camera.projectX(st.x);
-    const sY = engineSack.camera.projectY(st.y);
-    const sR = engineSack.camera.projectR(st.radius);
-
-    // check for intersection
-    const m = magnitude(x, y, sX, sY);
-    if (m < sR) {
-      // set as target on client
-      engineSack.player.currentTargetID = st.id;
-      engineSack.player.currentTargetType = TargetType.Station;
-
-      return;
-    }
-  }
-
-  // clicked on empty space - issue a nav order for that location
-  const b = new ClientNavClick();
-
-  // calculate cursor vector
-  b.dT = angleBetween(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y);
-  b.m = (magnitude(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y))
-    // half way across the shortest part of the screen is a full speed request
-    / Math.min(engineSack.gfx.width / 4, engineSack.gfx.height / 4);
-
-  // send nav click request
-  b.sid = engineSack.player.sid;
-  engineSack.wsSvc.sendMessage(MessageTypes.NavClick, b);
 }
 
 function handleMouseMove(x: number, y: number) {
@@ -556,6 +560,11 @@ function handleScroll(dY: number) {
 }
 
 function handleKeydown(key: string) {
+  // check for shift key
+  if (key === 'Shift') {
+    engineSack.lastShiftDown = Date.now();
+  }
+
   // check to see if we're typing in any windows
   const x = engineSack.mouseX;
   const y = engineSack.mouseY;
