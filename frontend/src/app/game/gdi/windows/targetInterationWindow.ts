@@ -2,12 +2,14 @@ import { GDIWindow } from '../base/gdiWindow';
 import { TargetType } from '../../engineModels/player';
 import { GDIButton } from '../components/gdiButton';
 import { FontSize } from '../base/gdiStyle';
+import { WsService } from '../../ws.service';
 
 export class TargetInteractionWindow extends GDIWindow {
     private target: any;
     private targetType: TargetType;
 
     private gotoBtn = new GDIButton();
+    private wsSvc: WsService;
 
     initialize() {
         // set dimensions
@@ -51,5 +53,9 @@ export class TargetInteractionWindow extends GDIWindow {
     setTarget(target: any, targetType: TargetType) {
         this.target = target;
         this.targetType = targetType;
+    }
+
+    setWsSvc(wsSvc: WsService) {
+        this.wsSvc = wsSvc;
     }
 }

@@ -75,6 +75,7 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
 
   engineSack.targetInteractionWindow = new TargetInteractionWindow();
   engineSack.targetInteractionWindow.initialize();
+  engineSack.targetInteractionWindow.setWsSvc(wsService);
   engineSack.targetInteractionWindow.setX((gameCanvas.width - (100 + engineSack.targetInteractionWindow.getWidth())));
   engineSack.targetInteractionWindow.setY(50);
   engineSack.targetInteractionWindow.pack();
