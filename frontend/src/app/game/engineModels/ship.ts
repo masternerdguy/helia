@@ -4,6 +4,8 @@ import { Camera } from './camera';
 export class Ship extends WSShip {
     texture2d: HTMLImageElement;
     lastSeen: number;
+    isTargeted: boolean;
+    isPlayer: boolean;
 
     constructor(ws: WSShip) {
         super();
@@ -72,7 +74,16 @@ export class Ship extends WSShip {
         ctx.beginPath();
         ctx.arc(sx, sy, sr, 0, 2 * Math.PI, false);
         ctx.lineWidth = 2;
-        ctx.strokeStyle = 'white';
+
+        // select color by status and owner
+        if (this.isTargeted) {
+            ctx.strokeStyle = 'yellow';
+        } else if (this.isPlayer) {
+            ctx.strokeStyle = 'purple';
+        } else {
+            ctx.strokeStyle = 'white';
+        }
+
         ctx.stroke();
 
         // draw ship

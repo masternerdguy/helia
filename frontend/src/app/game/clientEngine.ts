@@ -1,7 +1,7 @@
 import { WsService } from './ws.service';
 import { ServerJoinBody } from './wsModels/bodies/join';
 import { GameMessage, MessageTypes } from './wsModels/gameMessage';
-import { Player } from './engineModels/player';
+import { Player, TargetType } from './engineModels/player';
 import { System } from './engineModels/system';
 import { Ship } from './engineModels/ship';
 import { Camera } from './engineModels/camera';
@@ -178,16 +178,27 @@ function handleGlobalUpdate(d: GameMessage) {
 
       // find ship in memory
       for (const sm of engineSack.player.currentSystem.ships) {
+        // todo: update this when players are eventually able to command multiple ships at once
+        sm.isPlayer = false;
+        sm.isTargeted = false;
+
         if (sh.id === sm.id) {
           match = true;
 
           // sync ship in memory
           sm.sync(sh);
 
+          // target check
+          if (sm.id === engineSack.player.currentTargetID
+              && engineSack.player.currentTargetType === TargetType.Ship) {
+            sm.isTargeted = true;
+          }
+
           // is this the player ship?
           if (sm.id === engineSack.player.currentShip.id) {
             // update player ship cache
             engineSack.player.currentShip.sync(sh);
+            engineSack.player.currentShip.isPlayer = true;
 
             // update camera position to track player ship
             engineSack.camera.x = sm.x;
@@ -427,6 +438,29 @@ function handleClick(x: number, y: number) {
     if (w.containsPoint(x, y)) {
       // allow window to handle click
       w.handleClick(x, y);
+      return;
+    }
+  }
+
+  // check to see if we're clicking on any ships
+  for (const sh of engineSack.player.currentSystem.ships) {
+    // skip if player ship
+    if (sh.id === engineSack.player.currentShip.id) {
+      continue;
+    }
+
+    // project coordinates to screen
+    const sX = engineSack.camera.projectX(sh.x);
+    const sY = engineSack.camera.projectY(sh.y);
+    const sR = engineSack.camera.projectR(sh.radius);
+
+    // check for intersection
+    const m = magnitude(x, y, sX, sY);
+    if (m < sR) {
+      // set as target on client
+      engineSack.player.currentTargetID = sh.id;
+      engineSack.player.currentTargetType = TargetType.Ship;
+
       return;
     }
   }
