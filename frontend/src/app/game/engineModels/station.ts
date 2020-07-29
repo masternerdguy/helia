@@ -1,9 +1,9 @@
 import { Camera } from './camera';
-import { WSPlanet } from '../wsModels/entities/wsPlanet';
 import { WSStation } from '../wsModels/entities/wsStation';
 
 export class Station extends WSStation {
     texture2d: HTMLImageElement;
+    isTargeted: boolean;
 
     constructor(ws: WSStation) {
         super();
@@ -36,7 +36,14 @@ export class Station extends WSStation {
         ctx.beginPath();
         ctx.arc(sx, sy, sr, 0, 2 * Math.PI, false);
         ctx.lineWidth = 2;
-        ctx.strokeStyle = 'cyan';
+
+        // select color by status and owner
+        if (this.isTargeted) {
+            ctx.strokeStyle = 'yellow';
+        } else {
+            ctx.strokeStyle = 'white';
+        }
+
         ctx.stroke();
 
         // draw station

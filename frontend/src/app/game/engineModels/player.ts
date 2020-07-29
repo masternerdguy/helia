@@ -13,5 +13,6 @@ export class Player {
 }
 
 export enum TargetType {
-    Ship = 1
+    Ship = 1,
+    Station = 2
 }

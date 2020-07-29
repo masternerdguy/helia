@@ -178,12 +178,12 @@ function handleGlobalUpdate(d: GameMessage) {
 
       // find ship in memory
       for (const sm of engineSack.player.currentSystem.ships) {
-        // todo: update this when players are eventually able to command multiple ships at once
-        sm.isPlayer = false;
-        sm.isTargeted = false;
-
         if (sh.id === sm.id) {
           match = true;
+
+          // todo: update this when players are eventually able to command multiple ships at once
+          sm.isPlayer = false;
+          sm.isTargeted = false;
 
           // sync ship in memory
           sm.sync(sh);
@@ -294,8 +294,16 @@ function handleGlobalUpdate(d: GameMessage) {
         if (p.id === sm.id) {
           match = true;
 
+          sm.isTargeted = false;
+
           // sync station in memory
           sm.sync(p);
+
+          // target check
+          if (sm.id === engineSack.player.currentTargetID
+              && engineSack.player.currentTargetType === TargetType.Station) {
+            sm.isTargeted = true;
+          }
 
           // exit loop
           break;
@@ -460,6 +468,24 @@ function handleClick(x: number, y: number) {
       // set as target on client
       engineSack.player.currentTargetID = sh.id;
       engineSack.player.currentTargetType = TargetType.Ship;
+
+      return;
+    }
+  }
+
+  // check to see if we're clicking on any stations
+  for (const st of engineSack.player.currentSystem.stations) {
+    // project coordinates to screen
+    const sX = engineSack.camera.projectX(st.x);
+    const sY = engineSack.camera.projectY(st.y);
+    const sR = engineSack.camera.projectR(st.radius);
+
+    // check for intersection
+    const m = magnitude(x, y, sX, sY);
+    if (m < sR) {
+      // set as target on client
+      engineSack.player.currentTargetID = st.id;
+      engineSack.player.currentTargetType = TargetType.Station;
 
       return;
     }
