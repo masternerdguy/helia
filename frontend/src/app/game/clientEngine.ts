@@ -206,6 +206,9 @@ function handleGlobalUpdate(d: GameMessage) {
 
           // is this the player ship?
           if (sm.id === engineSack.player.currentShip.id) {
+            // flag as player's ship
+            sm.isPlayer = true;
+
             // update player ship cache
             engineSack.player.currentShip.sync(sh);
             engineSack.player.currentShip.isPlayer = true;

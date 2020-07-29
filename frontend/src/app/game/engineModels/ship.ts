@@ -79,7 +79,7 @@ export class Ship extends WSShip {
         if (this.isTargeted) {
             ctx.strokeStyle = 'yellow';
         } else if (this.isPlayer) {
-            ctx.strokeStyle = 'purple';
+            ctx.strokeStyle = 'magenta';
         } else {
             ctx.strokeStyle = 'white';
         }
