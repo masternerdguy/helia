@@ -11,13 +11,13 @@ import { ClientNavClick } from './wsModels/bodies/navClick';
 import { angleBetween, magnitude } from './engineMath';
 import { Star } from './engineModels/star';
 import { Planet } from './engineModels/planet';
-import { TestWindow } from './gdi/windows/testWindow';
 import { GDIWindow } from './gdi/base/gdiWindow';
 import { Station } from './engineModels/station';
 import { GDIStyle } from './gdi/base/gdiStyle';
 import { Jumphole } from './engineModels/jumphole';
 import { ShipStatusWindow } from './gdi/windows/shipStatusWindow';
 import { ServerCurrentShipUpdate } from './wsModels/bodies/currentShipUpdate';
+import { TargetInteractionWindow } from './gdi/windows/targetInterationWindow';
 
 class EngineSack {
   constructor() {}
@@ -38,6 +38,7 @@ class EngineSack {
 
   // ui elements
   shipStatusWindow: ShipStatusWindow;
+  targetInteractionWindow: TargetInteractionWindow;
   lastShiftDown: number;
 
   windows: GDIWindow[];
@@ -65,15 +66,21 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.camera = new Camera(gameCanvas.width, gameCanvas.height, 1);
   engineSack.backplateRenderer = new Backplate(backCanvas);
 
-  // initialize ui
+  // initialize ui windows
   engineSack.shipStatusWindow = new ShipStatusWindow();
   engineSack.shipStatusWindow.setX(100);
-  engineSack.shipStatusWindow.setY(100);
+  engineSack.shipStatusWindow.setY(50);
   engineSack.shipStatusWindow.initialize();
   engineSack.shipStatusWindow.pack();
 
+  engineSack.targetInteractionWindow = new TargetInteractionWindow();
+  engineSack.targetInteractionWindow.initialize();
+  engineSack.targetInteractionWindow.setX((gameCanvas.width - (100 + engineSack.targetInteractionWindow.getWidth())));
+  engineSack.targetInteractionWindow.setY(50);
+  engineSack.targetInteractionWindow.pack();
+
   // cache windows for simpler updating and rendering
-  engineSack.windows = [engineSack.shipStatusWindow];
+  engineSack.windows = [engineSack.shipStatusWindow, engineSack.targetInteractionWindow];
 
   // store globals
   engineSack.gfx = gameCanvas;
@@ -434,8 +441,8 @@ function clientRender() {
   // keep only ships that were drawable in-memory
   engineSack.player.currentSystem.ships = keepShips;
 
-  // draw ui elements
-  for (const w of engineSack.windows) {
+  // draw ui windows (from bottom to top)
+  for (const w of engineSack.windows.slice().reverse()) {
     const bmp = w.render();
     engineSack.ctx.drawImage(bmp, w.getX(), w.getY());
   }
@@ -525,6 +532,9 @@ function handleMouseMove(x: number, y: number) {
       if ((w.getY() + (w.getHeight() + GDIStyle.windowHandleHeight)) > engineSack.gfx.height) {
         w.setY(engineSack.gfx.height - (w.getHeight() + GDIStyle.windowHandleHeight));
       }
+
+      // move dragged window to top
+      engineSack.windows = [w, ...engineSack.windows.filter(item => item !== w)];
 
       // only allow one window to drag at a time
       return;
