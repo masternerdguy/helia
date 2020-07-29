@@ -9,11 +9,13 @@ export class GDIButton extends GDIBase {
     private font: FontSize =  FontSize.normal;
 
     private onClick: (x: number, y: number) => void;
+    private enabled;
 
     initialize() {
         // initialize offscreen canvas
         this.canvas = new OffscreenCanvas(this.getWidth(), this.getHeight());
         this.ctx = this.canvas.getContext('2d');
+        this.enabled = true;
     }
 
     periodicUpdate() {
@@ -21,26 +23,39 @@ export class GDIButton extends GDIBase {
     }
 
     render(): ImageBitmap {
-        // render background
-        this.ctx.fillStyle = GDIStyle.buttonFillColor;
-        this.ctx.fillRect(0, 0, this.getWidth(), this.getHeight());
+        if (!this.enabled) {
+            // render background
+            this.ctx.fillStyle = GDIStyle.buttonFillColor;
+            this.ctx.fillRect(0, 0, this.getWidth(), this.getHeight());
 
-        // style text
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
+            if (GDIStyle.buttonBorderSize > 0) {
+                // render border
+                this.ctx.lineWidth = GDIStyle.buttonBorderSize;
+                this.ctx.strokeStyle = GDIStyle.buttonBorderColor;
+                this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight());
+            }
+        } else {
+            // render background
+            this.ctx.fillStyle = GDIStyle.buttonFillColor;
+            this.ctx.fillRect(0, 0, this.getWidth(), this.getHeight());
 
-        this.ctx.fillStyle = GDIStyle.buttonTextColor;
-        this.ctx.strokeStyle = GDIStyle.buttonTextColor;
-        this.ctx.font = GDIStyle.getUnderlyingFont(this.getFont());
+            // style text
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
 
-        // render text
-        this.ctx.fillText(this.getText(), this.getWidth() / 2, this.getHeight() / 2);
+            this.ctx.fillStyle = GDIStyle.buttonTextColor;
+            this.ctx.strokeStyle = GDIStyle.buttonTextColor;
+            this.ctx.font = GDIStyle.getUnderlyingFont(this.getFont());
 
-        if (GDIStyle.buttonBorderSize > 0) {
-            // render border
-            this.ctx.lineWidth = GDIStyle.buttonBorderSize;
-            this.ctx.strokeStyle = GDIStyle.buttonBorderColor;
-            this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight());
+            // render text
+            this.ctx.fillText(this.getText(), this.getWidth() / 2, this.getHeight() / 2);
+
+            if (GDIStyle.buttonBorderSize > 0) {
+                // render border
+                this.ctx.lineWidth = GDIStyle.buttonBorderSize;
+                this.ctx.strokeStyle = GDIStyle.buttonBorderColor;
+                this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight());
+            }
         }
 
         // convert to image and return
@@ -48,6 +63,10 @@ export class GDIButton extends GDIBase {
     }
 
     handleClick(x: number, y: number) {
+        if (!this.enabled) {
+            return;
+        }
+
         this.onClick(x, y);
     }
 
@@ -70,5 +89,8 @@ export class GDIButton extends GDIBase {
     setOnClick(h: (x: number, y: number) => void) {
         this.onClick = h;
     }
-}
 
+    setEnabled(enabled: boolean) {
+        this.enabled = enabled;
+    }
+}

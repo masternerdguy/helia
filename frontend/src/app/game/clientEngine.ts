@@ -196,10 +196,11 @@ function handleGlobalUpdate(d: GameMessage) {
           // sync ship in memory
           sm.sync(sh);
 
-          // target check
+          // current ship target check
           if (sm.id === engineSack.player.currentTargetID
               && engineSack.player.currentTargetType === TargetType.Ship) {
             sm.isTargeted = true;
+            engineSack.targetInteractionWindow.setTarget(sm, TargetType.Ship);
           }
 
           // is this the player ship?
@@ -305,12 +306,13 @@ function handleGlobalUpdate(d: GameMessage) {
           // sync station in memory
           sm.sync(p);
 
-          // target check
+          // current ship target check
           sm.isTargeted = false;
 
           if (sm.id === engineSack.player.currentTargetID
               && engineSack.player.currentTargetType === TargetType.Station) {
             sm.isTargeted = true;
+            engineSack.targetInteractionWindow.setTarget(sm, TargetType.Station);
           }
 
           // exit loop
