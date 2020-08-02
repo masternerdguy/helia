@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"helia/listener/models"
 	"helia/physics"
 
 	"github.com/google/uuid"
@@ -65,6 +66,7 @@ type Ship struct {
 	AutopilotMode      int
 	AutopilotManualNav ManualNavData
 	AutopilotGoto      GotoData
+	CurrentSystem      *SolarSystem
 	Lock               sync.Mutex
 }
 
@@ -193,7 +195,54 @@ func (s *Ship) doAutopilotSeekManualNav() {
 
 //doAutopilotGoto Causes ship to turn to move towards a target and stop when within range
 func (s *Ship) doAutopilotGoto() {
-	log.Println(fmt.Sprintf("goto: %v", s.AutopilotGoto))
+	// get registry
+	targetTypeReg := models.NewTargetTypeRegistry()
+
+	// target details
+	var tX float64 = 0
+	var tY float64 = 0
+
+	// get target
+	if s.AutopilotGoto.Type == targetTypeReg.Ship {
+		// find ship with id
+		tgt := s.CurrentSystem.ships[s.AutopilotGoto.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+	}
+
+	// get relative position of target to ship
+	rX := s.PosX - tX
+	rY := s.PosY - tY
+
+	// get angle between ship and target
+	pAngle := -physics.ToDegrees(math.Atan2(rY, rX)) + 180
+
+	//calculate magnitude of requested turn
+	turnMag := math.Sqrt((pAngle - s.Theta) * (pAngle - s.Theta))
+
+	a := pAngle - s.Theta
+	a = physics.FMod(a+180, 360) - 180
+
+	log.Println(fmt.Sprintf("%v", a))
+
+	//apply turn with ship limits
+	if a > 0 {
+		s.rotate(turnMag / s.GetRealTurn())
+	} else if a < 0 {
+		s.rotate(turnMag / -s.GetRealTurn())
+	}
+}
+
+//CmdAbort Abruptly ends the current autopilot mode
+func (s *Ship) CmdAbort() {
+	s.AutopilotMode = NewAutopilotRegistry().None
 }
 
 //CmdManualNav Invokes manual turn autopilot on the ship

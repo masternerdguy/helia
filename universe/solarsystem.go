@@ -324,6 +324,9 @@ func (s *SolarSystem) AddShip(c *Ship, lock bool) {
 		defer s.Lock.Unlock()
 	}
 
+	//store pointer to system
+	c.CurrentSystem = s
+
 	//add ship
 	s.ships[c.ID.String()] = c
 }
