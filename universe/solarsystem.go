@@ -66,7 +66,21 @@ func (s *SolarSystem) PeriodicUpdate() {
 					data := evt.Body.(models.ClientNavClickBody)
 
 					//apply effect to player's current ship
-					sh.ManualTurn(data.ScreenTheta, data.ScreenMagnitude)
+					sh.CmdManualNav(data.ScreenTheta, data.ScreenMagnitude)
+
+					//next client
+					break
+				}
+			}
+		} else if evt.Type == models.NewMessageRegistry().Goto {
+			//find player ship
+			for _, sh := range s.ships {
+				if sh.ID == c.CurrentShipID {
+					//extract data
+					data := evt.Body.(models.ClientGotoBody)
+
+					//apply effect to player's current ship
+					sh.CmdGoto(data.TargetID, data.Type)
 
 					//next client
 					break

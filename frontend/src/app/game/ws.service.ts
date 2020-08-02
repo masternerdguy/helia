@@ -10,6 +10,7 @@ import { ClientJoinBody } from './wsModels/bodies/join';
 export class WsService {
   ws: WebSocketSubject<GameMessage>;
   lastMessageReceivedAt: number;
+  sid: string;
 
   constructor() { }
 
@@ -28,6 +29,7 @@ export class WsService {
     // send initial join message
     const b = new ClientJoinBody();
     b.sid = sid;
+    this.sid = sid;
 
     this.sendMessage(MessageTypes.Join, b);
   }

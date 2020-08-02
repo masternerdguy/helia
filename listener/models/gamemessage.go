@@ -12,6 +12,13 @@ type MessageRegistry struct {
 	GlobalUpdate      int
 	NavClick          int
 	CurrentShipUpdate int
+	Goto              int
+}
+
+//TargetTypeRegistry Registry of target types
+type TargetTypeRegistry struct {
+	Ship    int
+	Station int
 }
 
 //NewMessageRegistry Returns a MessageRegistry with correct enum values
@@ -21,6 +28,15 @@ func NewMessageRegistry() *MessageRegistry {
 		GlobalUpdate:      1,
 		NavClick:          2,
 		CurrentShipUpdate: 3,
+		Goto:              4,
+	}
+}
+
+//NewTargetTypeRegistry Returns a TargetTypeRegistry with correct enum values
+func NewTargetTypeRegistry() *TargetTypeRegistry {
+	return &TargetTypeRegistry{
+		Ship:    1,
+		Station: 2,
 	}
 }
 
@@ -166,4 +182,11 @@ type ClientNavClickBody struct {
 //ServerCurrentShipUpdate Body containing information about the player's current ship including secrets
 type ServerCurrentShipUpdate struct {
 	CurrentShipInfo CurrentShipInfo `json:"currentShipInfo"`
+}
+
+//ClientGotoBody Body containing a go-to move order
+type ClientGotoBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	TargetID  uuid.UUID `json:"targetId"`
+	Type      int       `json:"type"`
 }

@@ -1,6 +1,8 @@
 package universe
 
 import (
+	"fmt"
+	"log"
 	"math"
 	"sync"
 	"time"
@@ -12,22 +14,30 @@ import (
 
 //AutopilotRegistry Autopilot states for ships
 type AutopilotRegistry struct {
-	None       int
-	ManualTurn int
+	None      int
+	ManualNav int
+	Goto      int
 }
 
 //NewAutopilotRegistry Returns a populated AutopilotRegistry struct for use as an enum
 func NewAutopilotRegistry() *AutopilotRegistry {
 	return &AutopilotRegistry{
-		None:       0,
-		ManualTurn: 1,
+		None:      0,
+		ManualNav: 1,
+		Goto:      2,
 	}
 }
 
-//ManualTurnData Container structure for arguments of the ManualTurn autopilot mode
-type ManualTurnData struct {
+//ManualNavData Container structure for arguments of the ManualTurn autopilot mode
+type ManualNavData struct {
 	Magnitude float64
 	Theta     float64
+}
+
+//GotoData Container structure for arguments of the Goto autopilot mode
+type GotoData struct {
+	TargetID uuid.UUID
+	Type     int
 }
 
 //Ship Structure representing a player ship in the game universe
@@ -52,9 +62,10 @@ type Ship struct {
 	//cache of base template
 	TemplateData ShipTemplate
 	//in-memory only
-	AutopilotMode           int
-	AutopilotSeekManualTurn ManualTurnData
-	Lock                    sync.Mutex
+	AutopilotMode      int
+	AutopilotManualNav ManualNavData
+	AutopilotGoto      GotoData
+	Lock               sync.Mutex
 }
 
 //CopyShip Returns a copy of the ship
@@ -101,9 +112,10 @@ func (s *Ship) CopyShip() Ship {
 			ShipTypeID:       s.TemplateData.ShipTypeID,
 		},
 		//in-memory only
-		AutopilotMode:           s.AutopilotMode,
-		AutopilotSeekManualTurn: s.AutopilotSeekManualTurn,
-		Lock:                    sync.Mutex{},
+		AutopilotMode:      s.AutopilotMode,
+		AutopilotManualNav: s.AutopilotManualNav,
+		AutopilotGoto:      s.AutopilotGoto,
+		Lock:               sync.Mutex{},
 	}
 }
 
@@ -143,14 +155,16 @@ func (s *Ship) doAutopilot() {
 	switch s.AutopilotMode {
 	case registry.None:
 		return
-	case registry.ManualTurn:
+	case registry.ManualNav:
 		s.doAutopilotSeekManualNav()
+	case registry.Goto:
+		s.doAutopilotGoto()
 	}
 }
 
 //doAutopilotSeekManualNav Causes ship to turn to face a target angle while accelerating
 func (s *Ship) doAutopilotSeekManualNav() {
-	screenT := s.AutopilotSeekManualTurn.Theta
+	screenT := s.AutopilotManualNav.Theta
 
 	//calculate magnitude of requested turn
 	turnMag := math.Sqrt((screenT - s.Theta) * (screenT - s.Theta))
@@ -166,19 +180,24 @@ func (s *Ship) doAutopilotSeekManualNav() {
 	}
 
 	//thrust forward
-	s.forwardThrust(s.AutopilotSeekManualTurn.Magnitude)
+	s.forwardThrust(s.AutopilotManualNav.Magnitude)
 
 	//decrease magnitude (this is to allow this to expire and require another move order from the player)
-	s.AutopilotSeekManualTurn.Magnitude -= s.AutopilotSeekManualTurn.Magnitude * SpaceDrag * TimeModifier
+	s.AutopilotManualNav.Magnitude -= s.AutopilotManualNav.Magnitude * SpaceDrag * TimeModifier
 
 	//stop when magnitude is low
-	if s.AutopilotSeekManualTurn.Magnitude < 0.0001 {
+	if s.AutopilotManualNav.Magnitude < 0.0001 {
 		s.AutopilotMode = NewAutopilotRegistry().None
 	}
 }
 
-//ManualTurn Invokes manual turn autopilot on the ship
-func (s *Ship) ManualTurn(screenT float64, screenM float64) {
+//doAutopilotGoto Causes ship to turn to move towards a target and stop when within range
+func (s *Ship) doAutopilotGoto() {
+	log.Println(fmt.Sprintf("goto: %v", s.AutopilotGoto))
+}
+
+//CmdManualNav Invokes manual turn autopilot on the ship
+func (s *Ship) CmdManualNav(screenT float64, screenM float64) {
 	// get registry
 	registry := NewAutopilotRegistry()
 
@@ -186,13 +205,31 @@ func (s *Ship) ManualTurn(screenT float64, screenM float64) {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	//stash manual turn and activate autopilot
-	s.AutopilotSeekManualTurn = ManualTurnData{
+	//stash manual nav and activate autopilot
+	s.AutopilotManualNav = ManualNavData{
 		Magnitude: screenM,
 		Theta:     screenT,
 	}
 
-	s.AutopilotMode = registry.ManualTurn
+	s.AutopilotMode = registry.ManualNav
+}
+
+//CmdGoto Invokes manual turn autopilot on the ship
+func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int) {
+	// get registry
+	registry := NewAutopilotRegistry()
+
+	// lock entity
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//stash goto and activate autopilot
+	s.AutopilotGoto = GotoData{
+		TargetID: targetID,
+		Type:     targetType,
+	}
+
+	s.AutopilotMode = registry.Goto
 }
 
 //rotate Turn the ship

@@ -3,6 +3,8 @@ import { TargetType } from '../../engineModels/player';
 import { GDIButton } from '../components/gdiButton';
 import { FontSize } from '../base/gdiStyle';
 import { WsService } from '../../ws.service';
+import { ClientGoto } from '../../wsModels/bodies/goto';
+import { MessageTypes } from '../../wsModels/gameMessage';
 
 export class TargetInteractionWindow extends GDIWindow {
     private target: any;
@@ -35,8 +37,13 @@ export class TargetInteractionWindow extends GDIWindow {
         this.gotoBtn.setText('⤒');
 
         this.gotoBtn.setOnClick((x, y) => {
-            console.log('goto clicked!');
-            console.log(this.target);
+            // issue a goto order for selected target
+            const b = new ClientGoto();
+            b.sid = this.wsSvc.sid;
+            b.targetId = this.target.id;
+            b.type = this.targetType;
+
+            this.wsSvc.sendMessage(MessageTypes.Goto, b);
         });
 
         this.addComponent(this.gotoBtn);

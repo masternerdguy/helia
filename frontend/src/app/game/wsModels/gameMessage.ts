@@ -7,5 +7,6 @@ export enum MessageTypes {
     Join = 0,
     Update = 1,
     NavClick = 2,
-    CurrentShipUpdate = 3
+    CurrentShipUpdate = 3,
+    Goto = 4
 }
