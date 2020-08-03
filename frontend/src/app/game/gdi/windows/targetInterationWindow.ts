@@ -5,12 +5,14 @@ import { FontSize } from '../base/gdiStyle';
 import { WsService } from '../../ws.service';
 import { ClientGoto } from '../../wsModels/bodies/goto';
 import { MessageTypes } from '../../wsModels/gameMessage';
+import { ClientOrbit } from '../../wsModels/bodies/orbit';
 
 export class TargetInteractionWindow extends GDIWindow {
     private target: any;
     private targetType: TargetType;
 
     private gotoBtn = new GDIButton();
+    private orbitBtn = new GDIButton();
     private wsSvc: WsService;
 
     initialize() {
@@ -46,14 +48,38 @@ export class TargetInteractionWindow extends GDIWindow {
             this.wsSvc.sendMessage(MessageTypes.Goto, b);
         });
 
+        // orbit button
+        this.orbitBtn.setWidth(30);
+        this.orbitBtn.setHeight(30);
+        this.orbitBtn.initialize();
+
+        this.orbitBtn.setX(40);
+        this.orbitBtn.setY(5);
+
+        this.orbitBtn.setFont(FontSize.giant);
+        this.orbitBtn.setText('⥁');
+
+        this.orbitBtn.setOnClick((x, y) => {
+            // issue an orbit order for selected target
+            const b = new ClientOrbit();
+            b.sid = this.wsSvc.sid;
+            b.targetId = this.target.id;
+            b.type = this.targetType;
+
+            this.wsSvc.sendMessage(MessageTypes.Orbit, b);
+        });
+
         this.addComponent(this.gotoBtn);
+        this.addComponent(this.orbitBtn);
     }
 
     periodicUpdate() {
         if (this.target !== undefined) {
             this.gotoBtn.setEnabled(true);
+            this.orbitBtn.setEnabled(true);
         } else {
             this.gotoBtn.setEnabled(false);
+            this.orbitBtn.setEnabled(false);
         }
     }
 

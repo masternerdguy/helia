@@ -13,6 +13,7 @@ type MessageRegistry struct {
 	NavClick          int
 	CurrentShipUpdate int
 	Goto              int
+	Orbit             int
 }
 
 //TargetTypeRegistry Registry of target types
@@ -29,6 +30,7 @@ func NewMessageRegistry() *MessageRegistry {
 		NavClick:          2,
 		CurrentShipUpdate: 3,
 		Goto:              4,
+		Orbit:             5,
 	}
 }
 
@@ -186,6 +188,13 @@ type ServerCurrentShipUpdate struct {
 
 //ClientGotoBody Body containing a go-to move order
 type ClientGotoBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	TargetID  uuid.UUID `json:"targetId"`
+	Type      int       `json:"type"`
+}
+
+//ClientOrbitBody Body containing an orbit move order
+type ClientOrbitBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	TargetID  uuid.UUID `json:"targetId"`
 	Type      int       `json:"type"`

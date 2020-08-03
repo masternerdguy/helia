@@ -16,6 +16,7 @@ type AutopilotRegistry struct {
 	None      int
 	ManualNav int
 	Goto      int
+	Orbit     int
 }
 
 //NewAutopilotRegistry Returns a populated AutopilotRegistry struct for use as an enum
@@ -24,6 +25,7 @@ func NewAutopilotRegistry() *AutopilotRegistry {
 		None:      0,
 		ManualNav: 1,
 		Goto:      2,
+		Orbit:     3,
 	}
 }
 
@@ -35,6 +37,12 @@ type ManualNavData struct {
 
 //GotoData Container structure for arguments of the Goto autopilot mode
 type GotoData struct {
+	TargetID uuid.UUID
+	Type     int
+}
+
+//OrbitData Container structure for arguments of the Orbit autopilot mode
+type OrbitData struct {
 	TargetID uuid.UUID
 	Type     int
 }
@@ -64,6 +72,7 @@ type Ship struct {
 	AutopilotMode      int
 	AutopilotManualNav ManualNavData
 	AutopilotGoto      GotoData
+	AutopilotOrbit     OrbitData
 	CurrentSystem      *SolarSystem
 	Lock               sync.Mutex
 }
@@ -115,6 +124,7 @@ func (s *Ship) CopyShip() Ship {
 		AutopilotMode:      s.AutopilotMode,
 		AutopilotManualNav: s.AutopilotManualNav,
 		AutopilotGoto:      s.AutopilotGoto,
+		AutopilotOrbit:     s.AutopilotOrbit,
 		Lock:               sync.Mutex{},
 	}
 }
@@ -159,6 +169,8 @@ func (s *Ship) doAutopilot() {
 		s.doAutopilotSeekManualNav()
 	case registry.Goto:
 		s.doAutopilotGoto()
+	case registry.Orbit:
+		s.doAutopilotOrbit()
 	}
 }
 
@@ -235,6 +247,50 @@ func (s *Ship) doAutopilotGoto() {
 	s.flyToPoint(tX, tY, hold)
 }
 
+//doAutopilotOrbit Causes ship to fly a circle around the target
+func (s *Ship) doAutopilotOrbit() {
+	// get registry
+	targetTypeReg := models.NewTargetTypeRegistry()
+
+	// target details
+	var tX float64 = 0
+	var tY float64 = 0
+	var tR float64 = 0
+
+	// get target
+	if s.AutopilotOrbit.Type == targetTypeReg.Ship {
+		// find ship with id
+		tgt := s.CurrentSystem.ships[s.AutopilotOrbit.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+		tR = tgt.TemplateData.Radius
+	} else if s.AutopilotOrbit.Type == targetTypeReg.Station {
+		// find station with id
+		tgt := s.CurrentSystem.stations[s.AutopilotOrbit.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+		tR = tgt.Radius
+	}
+
+	// fly towards target
+	hold := (s.TemplateData.Radius + tR)
+	s.flyToPoint(tX, tY, hold)
+}
+
 //flyToPoint Reusable function to fly a ship towards a point
 func (s *Ship) flyToPoint(tX float64, tY float64, hold float64) {
 	// get relative position of target to ship
@@ -271,7 +327,7 @@ func (s *Ship) CmdAbort() {
 	s.AutopilotMode = NewAutopilotRegistry().None
 }
 
-//CmdManualNav Invokes manual turn autopilot on the ship
+//CmdManualNav Invokes manual nav autopilot on the ship
 func (s *Ship) CmdManualNav(screenT float64, screenM float64) {
 	// get registry
 	registry := NewAutopilotRegistry()
@@ -289,7 +345,7 @@ func (s *Ship) CmdManualNav(screenT float64, screenM float64) {
 	s.AutopilotMode = registry.ManualNav
 }
 
-//CmdGoto Invokes manual turn autopilot on the ship
+//CmdGoto Invokes goto autopilot on the ship
 func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int) {
 	// get registry
 	registry := NewAutopilotRegistry()
@@ -305,6 +361,24 @@ func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int) {
 	}
 
 	s.AutopilotMode = registry.Goto
+}
+
+//CmdOrbit Invokes orbit autopilot on the ship
+func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int) {
+	// get registry
+	registry := NewAutopilotRegistry()
+
+	// lock entity
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//stash orbit and activate autopilot
+	s.AutopilotOrbit = OrbitData{
+		TargetID: targetID,
+		Type:     targetType,
+	}
+
+	s.AutopilotMode = registry.Orbit
 }
 
 //rotate Turn the ship

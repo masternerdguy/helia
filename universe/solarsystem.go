@@ -60,31 +60,36 @@ func (s *SolarSystem) PeriodicUpdate() {
 		//process event
 		if evt.Type == models.NewMessageRegistry().NavClick {
 			//find player ship
-			for _, sh := range s.ships {
-				if sh.ID == c.CurrentShipID {
-					//extract data
-					data := evt.Body.(models.ClientNavClickBody)
+			sh := s.ships[c.CurrentShipID.String()]
 
-					//apply effect to player's current ship
-					sh.CmdManualNav(data.ScreenTheta, data.ScreenMagnitude)
+			if sh != nil {
+				//extract data
+				data := evt.Body.(models.ClientNavClickBody)
 
-					//next client
-					break
-				}
+				//apply effect to player's current ship
+				sh.CmdManualNav(data.ScreenTheta, data.ScreenMagnitude)
 			}
 		} else if evt.Type == models.NewMessageRegistry().Goto {
 			//find player ship
-			for _, sh := range s.ships {
-				if sh.ID == c.CurrentShipID {
-					//extract data
-					data := evt.Body.(models.ClientGotoBody)
+			sh := s.ships[c.CurrentShipID.String()]
 
-					//apply effect to player's current ship
-					sh.CmdGoto(data.TargetID, data.Type)
+			if sh != nil {
+				//extract data
+				data := evt.Body.(models.ClientGotoBody)
 
-					//next client
-					break
-				}
+				//apply effect to player's current ship
+				sh.CmdGoto(data.TargetID, data.Type)
+			}
+		} else if evt.Type == models.NewMessageRegistry().Orbit {
+			//find player ship
+			sh := s.ships[c.CurrentShipID.String()]
+
+			if sh != nil {
+				//extract data
+				data := evt.Body.(models.ClientOrbitBody)
+
+				//apply effect to player's current ship
+				sh.CmdOrbit(data.TargetID, data.Type)
 			}
 		}
 	}
