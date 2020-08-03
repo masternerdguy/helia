@@ -157,6 +157,129 @@ func (s *Ship) PeriodicUpdate() {
 	s.VelY -= dampY
 }
 
+//CmdAbort Abruptly ends the current autopilot mode
+func (s *Ship) CmdAbort() {
+	s.AutopilotMode = NewAutopilotRegistry().None
+}
+
+//CmdManualNav Invokes manual nav autopilot on the ship
+func (s *Ship) CmdManualNav(screenT float64, screenM float64) {
+	// get registry
+	registry := NewAutopilotRegistry()
+
+	// lock entity
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//stash manual nav and activate autopilot
+	s.AutopilotManualNav = ManualNavData{
+		Magnitude: screenM,
+		Theta:     screenT,
+	}
+
+	s.AutopilotMode = registry.ManualNav
+}
+
+//CmdGoto Invokes goto autopilot on the ship
+func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int) {
+	// get registry
+	registry := NewAutopilotRegistry()
+
+	// lock entity
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//stash goto and activate autopilot
+	s.AutopilotGoto = GotoData{
+		TargetID: targetID,
+		Type:     targetType,
+	}
+
+	s.AutopilotMode = registry.Goto
+}
+
+//CmdOrbit Invokes orbit autopilot on the ship
+func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int) {
+	// get registry
+	registry := NewAutopilotRegistry()
+
+	// lock entity
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//stash orbit and activate autopilot
+	s.AutopilotOrbit = OrbitData{
+		TargetID: targetID,
+		Type:     targetType,
+	}
+
+	s.AutopilotMode = registry.Orbit
+}
+
+//ToPhysicsDummy Returns a new physics dummy structure representing this ship
+func (s *Ship) ToPhysicsDummy() physics.Dummy {
+	return physics.Dummy{
+		VelX: s.VelX,
+		VelY: s.VelY,
+		PosX: s.PosX,
+		PosY: s.PosY,
+		Mass: s.GetRealMass(),
+	}
+}
+
+//ApplyPhysicsDummy Applies the values of a physics dummy to this ship
+func (s *Ship) ApplyPhysicsDummy(dummy physics.Dummy) {
+	s.VelX = dummy.VelX
+	s.VelY = dummy.VelY
+	s.PosX = dummy.PosX
+	s.PosY = dummy.PosY
+}
+
+//GetRealAccel Returns the real acceleration capability of a ship after modifiers
+func (s *Ship) GetRealAccel() float64 {
+	return s.TemplateData.BaseAccel / 10
+}
+
+//GetRealTurn Returns the real turning capability of a ship after modifiers
+func (s *Ship) GetRealTurn() float64 {
+	return s.TemplateData.BaseTurn
+}
+
+//GetRealMass Returns the real mass of a ship after modifiers
+func (s *Ship) GetRealMass() float64 {
+	return s.TemplateData.BaseMass
+}
+
+//GetRealMaxShield Returns the real max shield of the ship after modifiers
+func (s *Ship) GetRealMaxShield() float64 {
+	return s.TemplateData.BaseShield
+}
+
+//GetRealMaxArmor Returns the real max armor of the ship after modifiers
+func (s *Ship) GetRealMaxArmor() float64 {
+	return s.TemplateData.BaseArmor
+}
+
+//GetRealMaxHull Returns the real max hull of the ship after modifiers
+func (s *Ship) GetRealMaxHull() float64 {
+	return s.TemplateData.BaseHull
+}
+
+//GetRealMaxEnergy Returns the real max energy of the ship after modifiers
+func (s *Ship) GetRealMaxEnergy() float64 {
+	return s.TemplateData.BaseEnergy
+}
+
+//GetRealMaxHeat Returns the real max heat of the ship after modifiers
+func (s *Ship) GetRealMaxHeat() float64 {
+	return s.TemplateData.BaseHeatCap
+}
+
+//GetRealMaxFuel Returns the real max fuel of the ship after modifiers
+func (s *Ship) GetRealMaxFuel() float64 {
+	return s.TemplateData.BaseFuel
+}
+
 //doAutopilot Flies the ship for you
 func (s *Ship) doAutopilot() {
 	// get registry
@@ -322,65 +445,6 @@ func (s *Ship) flyToPoint(tX float64, tY float64, hold float64) {
 	}
 }
 
-//CmdAbort Abruptly ends the current autopilot mode
-func (s *Ship) CmdAbort() {
-	s.AutopilotMode = NewAutopilotRegistry().None
-}
-
-//CmdManualNav Invokes manual nav autopilot on the ship
-func (s *Ship) CmdManualNav(screenT float64, screenM float64) {
-	// get registry
-	registry := NewAutopilotRegistry()
-
-	// lock entity
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
-
-	//stash manual nav and activate autopilot
-	s.AutopilotManualNav = ManualNavData{
-		Magnitude: screenM,
-		Theta:     screenT,
-	}
-
-	s.AutopilotMode = registry.ManualNav
-}
-
-//CmdGoto Invokes goto autopilot on the ship
-func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int) {
-	// get registry
-	registry := NewAutopilotRegistry()
-
-	// lock entity
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
-
-	//stash goto and activate autopilot
-	s.AutopilotGoto = GotoData{
-		TargetID: targetID,
-		Type:     targetType,
-	}
-
-	s.AutopilotMode = registry.Goto
-}
-
-//CmdOrbit Invokes orbit autopilot on the ship
-func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int) {
-	// get registry
-	registry := NewAutopilotRegistry()
-
-	// lock entity
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
-
-	//stash orbit and activate autopilot
-	s.AutopilotOrbit = OrbitData{
-		TargetID: targetID,
-		Type:     targetType,
-	}
-
-	s.AutopilotMode = registry.Orbit
-}
-
 //rotate Turn the ship
 func (s *Ship) rotate(scale float64) {
 	// bound requested turn magnitude
@@ -410,68 +474,4 @@ func (s *Ship) forwardThrust(scale float64) {
 	// accelerate along theta using thrust proportional to bounded magnitude
 	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (s.GetRealAccel() * scale * TimeModifier)
 	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (s.GetRealAccel() * scale * TimeModifier)
-}
-
-//ToPhysicsDummy Returns a new physics dummy structure representing this ship
-func (s *Ship) ToPhysicsDummy() physics.Dummy {
-	return physics.Dummy{
-		VelX: s.VelX,
-		VelY: s.VelY,
-		PosX: s.PosX,
-		PosY: s.PosY,
-		Mass: s.GetRealMass(),
-	}
-}
-
-//ApplyPhysicsDummy Applies the values of a physics dummy to this ship
-func (s *Ship) ApplyPhysicsDummy(dummy physics.Dummy) {
-	s.VelX = dummy.VelX
-	s.VelY = dummy.VelY
-	s.PosX = dummy.PosX
-	s.PosY = dummy.PosY
-}
-
-//GetRealAccel Returns the real acceleration capability of a ship after modifiers
-func (s *Ship) GetRealAccel() float64 {
-	return s.TemplateData.BaseAccel / 10
-}
-
-//GetRealTurn Returns the real turning capability of a ship after modifiers
-func (s *Ship) GetRealTurn() float64 {
-	return s.TemplateData.BaseTurn
-}
-
-//GetRealMass Returns the real mass of a ship after modifiers
-func (s *Ship) GetRealMass() float64 {
-	return s.TemplateData.BaseMass
-}
-
-//GetRealMaxShield Returns the real max shield of the ship after modifiers
-func (s *Ship) GetRealMaxShield() float64 {
-	return s.TemplateData.BaseShield
-}
-
-//GetRealMaxArmor Returns the real max armor of the ship after modifiers
-func (s *Ship) GetRealMaxArmor() float64 {
-	return s.TemplateData.BaseArmor
-}
-
-//GetRealMaxHull Returns the real max hull of the ship after modifiers
-func (s *Ship) GetRealMaxHull() float64 {
-	return s.TemplateData.BaseHull
-}
-
-//GetRealMaxEnergy Returns the real max energy of the ship after modifiers
-func (s *Ship) GetRealMaxEnergy() float64 {
-	return s.TemplateData.BaseEnergy
-}
-
-//GetRealMaxHeat Returns the real max heat of the ship after modifiers
-func (s *Ship) GetRealMaxHeat() float64 {
-	return s.TemplateData.BaseHeatCap
-}
-
-//GetRealMaxFuel Returns the real max fuel of the ship after modifiers
-func (s *Ship) GetRealMaxFuel() float64 {
-	return s.TemplateData.BaseFuel
 }
