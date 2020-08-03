@@ -1,8 +1,6 @@
 package universe
 
 import (
-	"fmt"
-	"log"
 	"math"
 	"sync"
 	"time"
@@ -201,6 +199,7 @@ func (s *Ship) doAutopilotGoto() {
 	// target details
 	var tX float64 = 0
 	var tY float64 = 0
+	var tR float64 = 0
 
 	// get target
 	if s.AutopilotGoto.Type == targetTypeReg.Ship {
@@ -215,8 +214,29 @@ func (s *Ship) doAutopilotGoto() {
 		// store target details
 		tX = tgt.PosX
 		tY = tgt.PosY
+		tR = tgt.TemplateData.Radius
+	} else if s.AutopilotGoto.Type == targetTypeReg.Station {
+		// find station with id
+		tgt := s.CurrentSystem.stations[s.AutopilotGoto.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+		tR = tgt.Radius
 	}
 
+	// fly towards target
+	hold := (s.TemplateData.Radius + tR)
+	s.flyToPoint(tX, tY, hold)
+}
+
+//flyToPoint Reusable function to fly a ship towards a point
+func (s *Ship) flyToPoint(tX float64, tY float64, hold float64) {
 	// get relative position of target to ship
 	rX := s.PosX - tX
 	rY := s.PosY - tY
@@ -224,19 +244,25 @@ func (s *Ship) doAutopilotGoto() {
 	// get angle between ship and target
 	pAngle := -physics.ToDegrees(math.Atan2(rY, rX)) + 180
 
-	//calculate magnitude of requested turn
+	// calculate magnitude of requested turn
 	turnMag := math.Sqrt((pAngle - s.Theta) * (pAngle - s.Theta))
 
 	a := pAngle - s.Theta
 	a = physics.FMod(a+180, 360) - 180
 
-	log.Println(fmt.Sprintf("%v", a))
-
-	//apply turn with ship limits
+	// apply turn with ship limits
 	if a > 0 {
 		s.rotate(turnMag / s.GetRealTurn())
 	} else if a < 0 {
 		s.rotate(turnMag / -s.GetRealTurn())
+	}
+
+	scale := (s.GetRealAccel() * (3 / SpaceDrag)) / TimeModifier
+	d := (physics.Distance(s.ToPhysicsDummy(), physics.Dummy{PosX: tX, PosY: tY}) - hold)
+
+	if turnMag < 1 && d > hold {
+		// thrust forward
+		s.forwardThrust(d / scale)
 	}
 }
 
