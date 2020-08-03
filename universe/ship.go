@@ -441,7 +441,7 @@ func (s *Ship) flyToPoint(tX float64, tY float64, hold float64) {
 	}
 }
 
-//facePoint Reusable function to turn a ship towards a point (returns the turn angle needed in degrees)
+//facePoint Reusable function to turn a ship towards a point (returns the turn magnitude needed in degrees)
 func (s *Ship) facePoint(tX float64, tY float64) float64 {
 	// get relative position of target to ship
 	rX := s.PosX - tX
@@ -463,7 +463,7 @@ func (s *Ship) facePoint(tX float64, tY float64) float64 {
 		s.rotate(turnMag / -s.GetRealTurn())
 	}
 
-	return a
+	return turnMag
 }
 
 //rotate Turn the ship
