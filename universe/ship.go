@@ -45,6 +45,7 @@ type GotoData struct {
 type OrbitData struct {
 	TargetID uuid.UUID
 	Type     int
+	Distance float64
 }
 
 //Ship Structure representing a player ship in the game universe
@@ -289,7 +290,7 @@ func (s *Ship) doAutopilot() {
 	case registry.None:
 		return
 	case registry.ManualNav:
-		s.doAutopilotSeekManualNav()
+		s.doAutopilotManualNav()
 	case registry.Goto:
 		s.doAutopilotGoto()
 	case registry.Orbit:
@@ -297,8 +298,8 @@ func (s *Ship) doAutopilot() {
 	}
 }
 
-//doAutopilotSeekManualNav Causes ship to turn to face a target angle while accelerating
-func (s *Ship) doAutopilotSeekManualNav() {
+//doAutopilotManualNav Causes ship to turn to face a target angle while accelerating
+func (s *Ship) doAutopilotManualNav() {
 	screenT := s.AutopilotManualNav.Theta
 
 	//calculate magnitude of requested turn
@@ -378,7 +379,6 @@ func (s *Ship) doAutopilotOrbit() {
 	// target details
 	var tX float64 = 0
 	var tY float64 = 0
-	var tR float64 = 0
 
 	// get target
 	if s.AutopilotOrbit.Type == targetTypeReg.Ship {
@@ -393,7 +393,6 @@ func (s *Ship) doAutopilotOrbit() {
 		// store target details
 		tX = tgt.PosX
 		tY = tgt.PosY
-		tR = tgt.TemplateData.Radius
 	} else if s.AutopilotOrbit.Type == targetTypeReg.Station {
 		// find station with id
 		tgt := s.CurrentSystem.stations[s.AutopilotOrbit.TargetID.String()]
@@ -406,16 +405,44 @@ func (s *Ship) doAutopilotOrbit() {
 		// store target details
 		tX = tgt.PosX
 		tY = tgt.PosY
-		tR = tgt.Radius
 	}
 
-	// fly towards target
-	hold := (s.TemplateData.Radius + tR)
-	s.flyToPoint(tX, tY, hold)
+	if s.AutopilotOrbit.Distance <= 0 {
+		// stash current distance
+		s.AutopilotOrbit.Distance = (physics.Distance(s.ToPhysicsDummy(), physics.Dummy{PosX: tX, PosY: tY}))
+	}
+
+	// get angle between ship and target
+	rX := s.PosX - tX
+	rY := s.PosY - tY
+	pAngle := physics.ToDegrees(math.Atan2(rY, rX))
+
+	// find point 5 degree ahead
+	pAngle += 5
+	nX := s.AutopilotOrbit.Distance * math.Cos(physics.ToRadians(pAngle))
+	nY := s.AutopilotOrbit.Distance * math.Sin(physics.ToRadians(pAngle))
+
+	// fly to that point
+	s.flyToPoint(nX+tX, nY+tY, 0)
 }
 
 //flyToPoint Reusable function to fly a ship towards a point
 func (s *Ship) flyToPoint(tX float64, tY float64, hold float64) {
+	// face towards target
+	turnMag := s.facePoint(tX, tY)
+
+	// determine whether to thrust forward and by how much
+	scale := (s.GetRealAccel() * (3 / SpaceDrag)) / TimeModifier
+	d := (physics.Distance(s.ToPhysicsDummy(), physics.Dummy{PosX: tX, PosY: tY}) - hold)
+
+	if turnMag < 1 && d > hold {
+		// thrust forward
+		s.forwardThrust(d / scale)
+	}
+}
+
+//facePoint Reusable function to turn a ship towards a point (returns the turn angle needed in degrees)
+func (s *Ship) facePoint(tX float64, tY float64) float64 {
 	// get relative position of target to ship
 	rX := s.PosX - tX
 	rY := s.PosY - tY
@@ -436,13 +463,7 @@ func (s *Ship) flyToPoint(tX float64, tY float64, hold float64) {
 		s.rotate(turnMag / -s.GetRealTurn())
 	}
 
-	scale := (s.GetRealAccel() * (3 / SpaceDrag)) / TimeModifier
-	d := (physics.Distance(s.ToPhysicsDummy(), physics.Dummy{PosX: tX, PosY: tY}) - hold)
-
-	if turnMag < 1 && d > hold {
-		// thrust forward
-		s.forwardThrust(d / scale)
-	}
+	return a
 }
 
 //rotate Turn the ship
