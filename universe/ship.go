@@ -92,11 +92,11 @@ type Ship struct {
 }
 
 //CopyShip Returns a copy of the ship
-func (s *Ship) CopyShip() Ship {
+func (s *Ship) CopyShip() *Ship {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	return Ship{
+	sc := Ship{
 		ID:       s.ID,
 		UserID:   s.UserID,
 		Created:  s.Created,
@@ -135,13 +135,19 @@ func (s *Ship) CopyShip() Ship {
 			ShipTypeID:       s.TemplateData.ShipTypeID,
 		},
 		//in-memory only
+		Lock:               sync.Mutex{},
 		AutopilotMode:      s.AutopilotMode,
 		AutopilotManualNav: s.AutopilotManualNav,
 		AutopilotGoto:      s.AutopilotGoto,
 		AutopilotOrbit:     s.AutopilotOrbit,
 		AutopilotDock:      s.AutopilotDock,
-		Lock:               sync.Mutex{},
 	}
+
+	if s.DockedAtStationID != nil {
+		sc.DockedAtStationID = *&s.DockedAtStationID
+	}
+
+	return &sc
 }
 
 //PeriodicUpdate Processes the ship for a tick
