@@ -78,6 +78,8 @@ type Ship struct {
 	Energy   float64
 	//cache of base template
 	TemplateData ShipTemplate
+	//docking
+	DockedAtStationID *uuid.UUID
 	//in-memory only
 	AutopilotMode      int
 	AutopilotManualNav ManualNavData

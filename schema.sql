@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2020-07-26 21:12:46
+-- Started on 2020-08-05 08:34:49
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -58,7 +58,8 @@ CREATE TABLE public.ships (
     fuel double precision NOT NULL,
     heat double precision NOT NULL,
     energy double precision NOT NULL,
-    shiptemplateid uuid NOT NULL
+    shiptemplateid uuid NOT NULL,
+    docketat_stationid uuid
 );
 
 
@@ -383,6 +384,15 @@ CREATE INDEX fki_fk_users_ships ON public.users USING btree (current_shipid);
 
 
 --
+-- TOC entry 2797 (class 2606 OID 49247)
+-- Name: ships fk_ships_dockstations; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ships
+    ADD CONSTRAINT fk_ships_dockstations FOREIGN KEY (docketat_stationid) REFERENCES public.universe_stations(id) NOT VALID;
+
+
+--
 -- TOC entry 2796 (class 2606 OID 49242)
 -- Name: ships fk_ships_shiptemplates; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -410,7 +420,7 @@ ALTER TABLE ONLY public.ships
 
 
 --
--- TOC entry 2802 (class 2606 OID 49237)
+-- TOC entry 2803 (class 2606 OID 49237)
 -- Name: shiptemplates fk_shiptemplates_shiptypes; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -437,7 +447,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 2801 (class 2606 OID 49205)
+-- TOC entry 2802 (class 2606 OID 49205)
 -- Name: universe_jumpholes jumphole_out_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -446,7 +456,7 @@ ALTER TABLE ONLY public.universe_jumpholes
 
 
 --
--- TOC entry 2800 (class 2606 OID 49200)
+-- TOC entry 2801 (class 2606 OID 49200)
 -- Name: universe_jumpholes jumphole_system_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -455,7 +465,7 @@ ALTER TABLE ONLY public.universe_jumpholes
 
 
 --
--- TOC entry 2798 (class 2606 OID 41027)
+-- TOC entry 2799 (class 2606 OID 41027)
 -- Name: universe_planets planet_system_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -464,7 +474,7 @@ ALTER TABLE ONLY public.universe_planets
 
 
 --
--- TOC entry 2797 (class 2606 OID 41010)
+-- TOC entry 2798 (class 2606 OID 41010)
 -- Name: universe_stars star_system_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -473,7 +483,7 @@ ALTER TABLE ONLY public.universe_stars
 
 
 --
--- TOC entry 2799 (class 2606 OID 41040)
+-- TOC entry 2800 (class 2606 OID 41040)
 -- Name: universe_stations station_system_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -481,7 +491,7 @@ ALTER TABLE ONLY public.universe_stations
     ADD CONSTRAINT station_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
 
 
--- Completed on 2020-07-26 21:12:46
+-- Completed on 2020-08-05 08:34:49
 
 --
 -- PostgreSQL database dump complete
