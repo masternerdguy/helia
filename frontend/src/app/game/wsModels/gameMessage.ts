@@ -9,5 +9,6 @@ export enum MessageTypes {
     NavClick = 2,
     CurrentShipUpdate = 3,
     Goto = 4,
-    Orbit = 5
+    Orbit = 5,
+    Dock = 6
 }

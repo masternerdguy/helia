@@ -91,6 +91,17 @@ func (s *SolarSystem) PeriodicUpdate() {
 				//apply effect to player's current ship
 				sh.CmdOrbit(data.TargetID, data.Type)
 			}
+		} else if evt.Type == models.NewMessageRegistry().Dock {
+			//find player ship
+			sh := s.ships[c.CurrentShipID.String()]
+
+			if sh != nil {
+				//extract data
+				data := evt.Body.(models.ClientDockBody)
+
+				//apply effect to player's current ship
+				sh.CmdDock(data.TargetID, data.Type)
+			}
 		}
 	}
 

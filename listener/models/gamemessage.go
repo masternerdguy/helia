@@ -14,6 +14,7 @@ type MessageRegistry struct {
 	CurrentShipUpdate int
 	Goto              int
 	Orbit             int
+	Dock              int
 }
 
 //TargetTypeRegistry Registry of target types
@@ -31,6 +32,7 @@ func NewMessageRegistry() *MessageRegistry {
 		CurrentShipUpdate: 3,
 		Goto:              4,
 		Orbit:             5,
+		Dock:              6,
 	}
 }
 
@@ -195,6 +197,13 @@ type ClientGotoBody struct {
 
 //ClientOrbitBody Body containing an orbit move order
 type ClientOrbitBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	TargetID  uuid.UUID `json:"targetId"`
+	Type      int       `json:"type"`
+}
+
+//ClientDockBody Body containing a dock move order
+type ClientDockBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	TargetID  uuid.UUID `json:"targetId"`
 	Type      int       `json:"type"`

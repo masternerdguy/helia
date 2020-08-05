@@ -6,6 +6,7 @@ import { WsService } from '../../ws.service';
 import { ClientGoto } from '../../wsModels/bodies/goto';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { ClientOrbit } from '../../wsModels/bodies/orbit';
+import { ClientDock } from '../../wsModels/bodies/dock';
 
 export class TargetInteractionWindow extends GDIWindow {
     private target: any;
@@ -13,6 +14,7 @@ export class TargetInteractionWindow extends GDIWindow {
 
     private gotoBtn = new GDIButton();
     private orbitBtn = new GDIButton();
+    private dockBtn = new GDIButton();
     private wsSvc: WsService;
 
     initialize() {
@@ -69,17 +71,46 @@ export class TargetInteractionWindow extends GDIWindow {
             this.wsSvc.sendMessage(MessageTypes.Orbit, b);
         });
 
+        // dock button
+        this.dockBtn.setWidth(30);
+        this.dockBtn.setHeight(30);
+        this.dockBtn.initialize();
+
+        this.dockBtn.setX(75);
+        this.dockBtn.setY(5);
+
+        this.dockBtn.setFont(FontSize.giant);
+        this.dockBtn.setText('⇴');
+
+        this.dockBtn.setOnClick((x, y) => {
+            // issue an dock order for selected target
+            const b = new ClientDock();
+            b.sid = this.wsSvc.sid;
+            b.targetId = this.target.id;
+            b.type = this.targetType;
+
+            this.wsSvc.sendMessage(MessageTypes.Dock, b);
+        });
+
         this.addComponent(this.gotoBtn);
         this.addComponent(this.orbitBtn);
+        this.addComponent(this.dockBtn);
     }
 
     periodicUpdate() {
         if (this.target !== undefined) {
             this.gotoBtn.setEnabled(true);
             this.orbitBtn.setEnabled(true);
+
+            if (this.targetType === TargetType.Station) {
+                this.dockBtn.setEnabled(true);
+            } else {
+                this.dockBtn.setEnabled(false);
+            }
         } else {
             this.gotoBtn.setEnabled(false);
             this.orbitBtn.setEnabled(false);
+            this.dockBtn.setEnabled(false);
         }
     }
 

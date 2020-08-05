@@ -17,6 +17,7 @@ type AutopilotRegistry struct {
 	ManualNav int
 	Goto      int
 	Orbit     int
+	Dock      int
 }
 
 //NewAutopilotRegistry Returns a populated AutopilotRegistry struct for use as an enum
@@ -26,6 +27,7 @@ func NewAutopilotRegistry() *AutopilotRegistry {
 		ManualNav: 1,
 		Goto:      2,
 		Orbit:     3,
+		Dock:      4,
 	}
 }
 
@@ -43,6 +45,13 @@ type GotoData struct {
 
 //OrbitData Container structure for arguments of the Orbit autopilot mode
 type OrbitData struct {
+	TargetID uuid.UUID
+	Type     int
+	Distance float64
+}
+
+//DockData Container structure for arguments of the Dock autopilot mode
+type DockData struct {
 	TargetID uuid.UUID
 	Type     int
 	Distance float64
@@ -74,6 +83,7 @@ type Ship struct {
 	AutopilotManualNav ManualNavData
 	AutopilotGoto      GotoData
 	AutopilotOrbit     OrbitData
+	AutopilotDock      DockData
 	CurrentSystem      *SolarSystem
 	Lock               sync.Mutex
 }
@@ -126,6 +136,7 @@ func (s *Ship) CopyShip() Ship {
 		AutopilotManualNav: s.AutopilotManualNav,
 		AutopilotGoto:      s.AutopilotGoto,
 		AutopilotOrbit:     s.AutopilotOrbit,
+		AutopilotDock:      s.AutopilotDock,
 		Lock:               sync.Mutex{},
 	}
 }
@@ -217,6 +228,24 @@ func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int) {
 	s.AutopilotMode = registry.Orbit
 }
 
+//CmdDock Invokes dock autopilot on the ship
+func (s *Ship) CmdDock(targetID uuid.UUID, targetType int) {
+	// get registry
+	registry := NewAutopilotRegistry()
+
+	// lock entity
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//stash dock and activate autopilot
+	s.AutopilotDock = DockData{
+		TargetID: targetID,
+		Type:     targetType,
+	}
+
+	s.AutopilotMode = registry.Dock
+}
+
 //ToPhysicsDummy Returns a new physics dummy structure representing this ship
 func (s *Ship) ToPhysicsDummy() physics.Dummy {
 	return physics.Dummy{
@@ -295,6 +324,8 @@ func (s *Ship) doAutopilot() {
 		s.doAutopilotGoto()
 	case registry.Orbit:
 		s.doAutopilotOrbit()
+	case registry.Dock:
+		s.doAutopilotDock()
 	}
 }
 
@@ -424,6 +455,11 @@ func (s *Ship) doAutopilotOrbit() {
 
 	// fly to that point
 	s.flyToPoint(nX+tX, nY+tY, 0)
+}
+
+//doAutopilotDock Causes ship to dock with a target
+func (s *Ship) doAutopilotDock() {
+
 }
 
 //flyToPoint Reusable function to fly a ship towards a point

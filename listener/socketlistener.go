@@ -105,6 +105,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			//handle message
 			l.handleClientOrbit(&client, &b)
+		} else if m.MessageType == msgRegistry.Dock {
+			//decode body as ClientDockBody
+			b := models.ClientDockBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			//handle message
+			l.handleClientDock(&client, &b)
 		}
 	}
 }
@@ -347,6 +354,29 @@ func (l *SocketListener) handleClientOrbit(client *shared.GameClient, body *mode
 		//push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.Orbit)
+	}
+}
+
+func (l *SocketListener) handleClientDock(client *shared.GameClient, body *models.ClientDockBody) {
+	//safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	//verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientDock: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		//initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		//push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.Dock)
 	}
 }
 
