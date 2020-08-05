@@ -59,7 +59,7 @@ CREATE TABLE public.ships (
     heat double precision NOT NULL,
     energy double precision NOT NULL,
     shiptemplateid uuid NOT NULL,
-    docketat_stationid uuid
+    dockedat_stationid uuid
 );
 
 
@@ -389,7 +389,7 @@ CREATE INDEX fki_fk_users_ships ON public.users USING btree (current_shipid);
 --
 
 ALTER TABLE ONLY public.ships
-    ADD CONSTRAINT fk_ships_dockstations FOREIGN KEY (docketat_stationid) REFERENCES public.universe_stations(id) NOT VALID;
+    ADD CONSTRAINT fk_ships_dockstations FOREIGN KEY (dockedat_stationid) REFERENCES public.universe_stations(id) NOT VALID;
 
 
 --

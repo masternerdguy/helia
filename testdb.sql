@@ -59,7 +59,7 @@ CREATE TABLE public.ships (
     heat double precision NOT NULL,
     energy double precision NOT NULL,
     shiptemplateid uuid NOT NULL,
-    docketat_stationid uuid
+    dockedat_stationid uuid
 );
 
 
@@ -261,7 +261,7 @@ d9cbbe7b-3c68-4554-b97c-71c66d67d4f1	ded647c9-2799-4fb6-9887-a32ca11d0c4c
 -- Data for Name: ships; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.ships (id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid, docketat_stationid) FROM stdin;
+COPY public.ships (id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid, dockedat_stationid) FROM stdin;
 50323a86-fd72-4d6d-baaa-963ec8d59b15	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	35096539-5278-4c6f-b83f-3af7abc5a60d	24563.27146515195	-9501.420076229044	21:08:08.048472-04	asdf's Starter Ship	Sparrow	162.34987578006985	-4.033542472103999e-176	-1.2969477138102839e-176	12500	4800	2400	26500	1000	1000	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N
 cf8fe6a6-4976-4a80-b3fa-a571da84f59c	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	b03baaf2-e331-421f-9d78-09faece0bc07	24661.423583511132	-10088.045464977677	21:07:33.371547-04	nwiehoff's Starter Ship	Sparrow	30.963756532073507	6.04373259548763e-48	-3.499646052982608e-48	12500	4800	2400	26500	1000	1000	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N
 \.
@@ -535,7 +535,7 @@ CREATE INDEX fki_fk_users_ships ON public.users USING btree (current_shipid);
 --
 
 ALTER TABLE ONLY public.ships
-    ADD CONSTRAINT fk_ships_dockstations FOREIGN KEY (docketat_stationid) REFERENCES public.universe_stations(id) NOT VALID;
+    ADD CONSTRAINT fk_ships_dockstations FOREIGN KEY (dockedat_stationid) REFERENCES public.universe_stations(id) NOT VALID;
 
 
 --

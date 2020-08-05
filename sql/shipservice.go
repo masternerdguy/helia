@@ -53,7 +53,7 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 				INSERT INTO public.ships(
 					id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta,
 					vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
-					docketat_stationid)
+					dockedat_stationid)
 				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19);
 			`
 
@@ -90,7 +90,7 @@ func (s ShipService) GetShipByID(shipID uuid.UUID) (*Ship, error) {
 		`
 			SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
 				   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
-				   docketat_stationid
+				   dockedat_stationid
 			FROM public.ships
 			WHERE id = $1
 			`
@@ -124,7 +124,7 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID) ([]Ship, error) {
 	sql := `
 				SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
 					   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
-					   docketat_stationid
+					   dockedat_stationid
 				FROM public.ships
 				WHERE universe_systemid = $1
 			`
@@ -164,7 +164,7 @@ func (s ShipService) UpdateShip(ship Ship) error {
 		`
 			UPDATE public.ships
 			SET universe_systemid=$2, userid=$3, pos_x=$4, pos_y=$5, created=$6, shipname=$7, texture=$8, theta=$9, vel_x=$10,
-				vel_y=$11, shield=$12, armor=$13, hull=$14, fuel=$15, heat=$16, energy=$17, shiptemplateid=$18, docketat_stationid=$19
+				vel_y=$11, shield=$12, armor=$13, hull=$14, fuel=$15, heat=$16, energy=$17, shiptemplateid=$18, dockedat_stationid=$19
 			WHERE id = $1
 		`
 
