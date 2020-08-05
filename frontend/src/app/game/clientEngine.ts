@@ -418,6 +418,9 @@ function clientLoop() {
     window.location.reload();
   }
 
+  // clamp player's ship to interaction window as host
+  engineSack.targetInteractionWindow.setHost(engineSack.player.currentShip);
+
   // calculate time since last frame
   engineSack.tpf = Date.now() - engineSack.lastFrameTime;
 

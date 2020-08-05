@@ -7,10 +7,12 @@ import { ClientGoto } from '../../wsModels/bodies/goto';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { ClientOrbit } from '../../wsModels/bodies/orbit';
 import { ClientDock } from '../../wsModels/bodies/dock';
+import { Ship } from '../../engineModels/ship';
 
 export class TargetInteractionWindow extends GDIWindow {
     private target: any;
     private targetType: TargetType;
+    private host: Ship;
 
     private gotoBtn = new GDIButton();
     private orbitBtn = new GDIButton();
@@ -83,13 +85,18 @@ export class TargetInteractionWindow extends GDIWindow {
         this.dockBtn.setText('⇴');
 
         this.dockBtn.setOnClick((x, y) => {
-            // issue an dock order for selected target
-            const b = new ClientDock();
-            b.sid = this.wsSvc.sid;
-            b.targetId = this.target.id;
-            b.type = this.targetType;
+            if (!this.host.dockedAtStationID) {
+                // issue an dock order for selected target
+                const b = new ClientDock();
+                b.sid = this.wsSvc.sid;
+                b.targetId = this.target.id;
+                b.type = this.targetType;
 
-            this.wsSvc.sendMessage(MessageTypes.Dock, b);
+                this.wsSvc.sendMessage(MessageTypes.Dock, b);
+            } else {
+                // todo: issue undock order
+                console.log('todo: issue undock order');
+            }
         });
 
         this.addComponent(this.gotoBtn);
@@ -98,25 +105,50 @@ export class TargetInteractionWindow extends GDIWindow {
     }
 
     periodicUpdate() {
-        if (this.target !== undefined) {
-            this.gotoBtn.setEnabled(true);
-            this.orbitBtn.setEnabled(true);
+        if (!this.host) {
+            return;
+        }
 
-            if (this.targetType === TargetType.Station) {
-                this.dockBtn.setEnabled(true);
+        if (!this.host.dockedAtStationID) {
+            // player is in space
+            if (this.target !== undefined) {
+                // global buttons
+                this.gotoBtn.setEnabled(true);
+                this.orbitBtn.setEnabled(true);
+
+                // station-specific buttons
+                if (this.targetType === TargetType.Station) {
+                    this.dockBtn.setEnabled(true);
+
+                    // use dock icon
+                    this.dockBtn.setText('⇴');
+                } else {
+                    this.dockBtn.setEnabled(false);
+                }
             } else {
+                // nothing selected
+                this.gotoBtn.setEnabled(false);
+                this.orbitBtn.setEnabled(false);
                 this.dockBtn.setEnabled(false);
             }
         } else {
+            // player is docked
             this.gotoBtn.setEnabled(false);
             this.orbitBtn.setEnabled(false);
-            this.dockBtn.setEnabled(false);
+            this.dockBtn.setEnabled(true);
+
+            // use undock icon
+            this.dockBtn.setText('⬰');
         }
     }
 
     setTarget(target: any, targetType: TargetType) {
         this.target = target;
         this.targetType = targetType;
+    }
+
+    setHost(host: Ship) {
+        this.host = host;
     }
 
     setWsSvc(wsSvc: WsService) {
