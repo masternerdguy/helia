@@ -87,6 +87,7 @@ type Ship struct {
 	AutopilotOrbit     OrbitData
 	AutopilotDock      DockData
 	CurrentSystem      *SolarSystem
+	DockedAtStation    *Station
 	Lock               sync.Mutex
 }
 
@@ -401,7 +402,7 @@ func (s *Ship) doAutopilotGoto() {
 
 	// fly towards target
 	hold := (s.TemplateData.Radius + tR)
-	s.flyToPoint(tX, tY, hold)
+	s.flyToPoint(tX, tY, hold, 30)
 }
 
 //doAutopilotOrbit Causes ship to fly a circle around the target
@@ -456,24 +457,44 @@ func (s *Ship) doAutopilotOrbit() {
 	nY := s.AutopilotOrbit.Distance * math.Sin(physics.ToRadians(pAngle))
 
 	// fly to that point
-	s.flyToPoint(nX+tX, nY+tY, 0)
+	s.flyToPoint(nX+tX, nY+tY, 0, 3)
 }
 
 //doAutopilotDock Causes ship to dock with a target
 func (s *Ship) doAutopilotDock() {
+	// get registry
+	targetTypeReg := models.NewTargetTypeRegistry()
 
+	if s.AutopilotDock.Type == targetTypeReg.Station {
+		// find station
+		station := s.CurrentSystem.stations[s.AutopilotDock.TargetID.String()]
+
+		if station == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// get distance to station
+		d := physics.Distance(s.ToPhysicsDummy(), station.ToPhysicsDummy())
+		hold := station.Radius * 0.75
+
+		if d > hold {
+			// get closer
+			s.flyToPoint(station.PosX, station.PosY, hold, 30)
+		}
+	}
 }
 
 //flyToPoint Reusable function to fly a ship towards a point
-func (s *Ship) flyToPoint(tX float64, tY float64, hold float64) {
+func (s *Ship) flyToPoint(tX float64, tY float64, hold float64, caution float64) {
 	// face towards target
 	turnMag := s.facePoint(tX, tY)
 
 	// determine whether to thrust forward and by how much
-	scale := (s.GetRealAccel() * (3 / SpaceDrag)) / TimeModifier
+	scale := (s.GetRealAccel() * (caution / SpaceDrag)) / TimeModifier
 	d := (physics.Distance(s.ToPhysicsDummy(), physics.Dummy{PosX: tX, PosY: tY}) - hold)
 
-	if turnMag < 1 && d > hold {
+	if turnMag < 1 {
 		// thrust forward
 		s.forwardThrust(d / scale)
 	}

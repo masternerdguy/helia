@@ -1,6 +1,7 @@
 package universe
 
 import (
+	"helia/physics"
 	"sync"
 
 	"github.com/google/uuid"
@@ -46,5 +47,16 @@ func (s *Station) CopyStation() Station {
 		Mass:        s.Mass,
 		//in-memory only
 		Lock: sync.Mutex{},
+	}
+}
+
+//ToPhysicsDummy Returns a new physics dummy structure representing this station
+func (s *Station) ToPhysicsDummy() physics.Dummy {
+	return physics.Dummy{
+		VelX: 0,
+		VelY: 0,
+		PosX: s.PosX,
+		PosY: s.PosY,
+		Mass: s.Mass,
 	}
 }

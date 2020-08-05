@@ -51,7 +51,7 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy, tpf float64) {
 	dummyB.VelY = bVy2
 }
 
-//Distance Calculates the distance between 2 physics dummies and returns the result
+//Distance Calculates the distance between the centers of 2 physics dummies and returns the result
 func Distance(dummyA Dummy, dummyB Dummy) float64 {
 	dx := dummyA.PosX - dummyB.PosX
 	dy := dummyA.PosY - dummyB.PosY
