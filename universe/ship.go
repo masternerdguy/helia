@@ -176,7 +176,7 @@ func (s *Ship) PeriodicUpdate() {
 		// validate station pointer
 		if s.DockedAtStation == nil {
 			// find station
-			station := s.CurrentSystem.stations[s.AutopilotDock.TargetID.String()]
+			station := s.CurrentSystem.stations[s.DockedAtStationID.String()]
 
 			// we aren't really docked i guess
 			if station == nil {
