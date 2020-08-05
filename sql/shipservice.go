@@ -61,7 +61,7 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 	createdAt := time.Now()
 
 	_, err = db.Query(sql, uid, e.SystemID, e.UserID, e.PosX, e.PosY, createdAt, e.ShipName, e.Texture, e.Theta,
-		e.VelX, e.VelY, e.Shield, e.Armor, e.Hull, e.Fuel, e.Heat, e.Energy, e.ShipTemplateID)
+		e.VelX, e.VelY, e.Shield, e.Armor, e.Hull, e.Fuel, e.Heat, e.Energy, e.ShipTemplateID, e.DockedAtStationID)
 
 	if err != nil {
 		return nil, err
