@@ -56,6 +56,10 @@ export class Ship extends WSShip {
         if (ws.fuelP) {
             this.fuelP = ws.fuelP;
         }
+
+        if (ws.dockedAtStationID) {
+            this.dockedAtStationID = ws.dockedAtStationID;
+        }
     }
 
     render(ctx: any, camera: Camera) {
@@ -144,6 +148,10 @@ export class Ship extends WSShip {
 
         if (sh.fuelP) {
             this.fuelP = sh.fuelP;
+        }
+
+        if (sh.dockedAtStationID) {
+            this.dockedAtStationID = sh.dockedAtStationID;
         }
     }
 }

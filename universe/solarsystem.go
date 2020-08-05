@@ -117,8 +117,18 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	//ship collission testing
 	for _, sA := range s.ships {
+		// skip docked ships
+		if sA.DockedAtStationID != nil {
+			continue
+		}
+
 		//with other ships
 		for _, sB := range s.ships {
+			// skip docked ships
+			if sB.DockedAtStationID != nil {
+				continue
+			}
+
 			if sA.ID != sB.ID {
 				//get physics dummies
 				dummyA := sA.ToPhysicsDummy()
@@ -189,6 +199,12 @@ func (s *SolarSystem) PeriodicUpdate() {
 	}
 
 	for _, d := range s.ships {
+		// skip docked ships
+		if d.DockedAtStationID != nil {
+			continue
+		}
+
+		//build ship info and append
 		gu.Ships = append(gu.Ships, models.GlobalShipInfo{
 			ID:       d.ID,
 			UserID:   d.UserID,
@@ -308,9 +324,10 @@ func (s *SolarSystem) PeriodicUpdate() {
 				ArmorP:   (d.Armor / d.GetRealMaxArmor()) * 100,
 				HullP:    (d.Hull / d.GetRealMaxHull()) * 100,
 				//secret stuff
-				EnergyP: (d.Energy / d.GetRealMaxEnergy()) * 100,
-				HeatP:   (d.Heat / d.GetRealMaxHeat()) * 100,
-				FuelP:   (d.Fuel / d.GetRealMaxFuel()) * 100,
+				EnergyP:           (d.Energy / d.GetRealMaxEnergy()) * 100,
+				HeatP:             (d.Heat / d.GetRealMaxHeat()) * 100,
+				FuelP:             (d.Fuel / d.GetRealMaxFuel()) * 100,
+				DockedAtStationID: d.DockedAtStationID,
 			},
 		}
 

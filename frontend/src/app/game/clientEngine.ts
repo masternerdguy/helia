@@ -341,6 +341,10 @@ function handleCurrentShipUpdate(d: GameMessage) {
   // update current ship cache
   engineSack.player.currentShip.sync(msg.currentShipInfo);
 
+  // update camera position to track player ship
+  engineSack.camera.x = msg.currentShipInfo.x;
+  engineSack.camera.y = msg.currentShipInfo.y;
+
   // update status window
   engineSack.shipStatusWindow.setShip(engineSack.player.currentShip);
 }
@@ -349,6 +353,19 @@ function handleCurrentShipUpdate(d: GameMessage) {
 function gfxBlank() {
   engineSack.ctx.fillStyle = 'pink';
   engineSack.ctx.fillRect(0, 0, engineSack.gfx.width, engineSack.gfx.height);
+}
+
+// indicator that the player is docked
+function gfxDockOverlay() {
+  // draw docked background
+  engineSack.ctx.fillStyle = 'black';
+  engineSack.ctx.strokeStyle = 'black';
+  engineSack.ctx.fillRect((engineSack.gfx.width / 2) - 100, (engineSack.gfx.height / 2) - 25, 200, 50);
+
+  // draw docked text
+  engineSack.ctx.fillStyle = 'gray';
+  engineSack.ctx.font = '30px monospace';
+  engineSack.ctx.fillText('Docked', (engineSack.gfx.width / 2) - 100, (engineSack.gfx.height / 2));
 }
 
 // draws the backplate for the current system
@@ -446,6 +463,11 @@ function clientRender() {
 
   // keep only ships that were drawable in-memory
   engineSack.player.currentSystem.ships = keepShips;
+
+  // draw overlay if docked
+  if (!!engineSack.player.currentShip.dockedAtStationID) {
+    gfxDockOverlay();
+  }
 
   // draw ui windows (from bottom to top)
   for (const w of engineSack.windows.slice().reverse()) {

@@ -150,26 +150,49 @@ func (s *Ship) PeriodicUpdate() {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	// check autopilot
-	s.doAutopilot()
+	// check if docked or undocked
+	if s.DockedAtStationID == nil {
+		// check autopilot
+		s.doAutopilot()
 
-	// update position
-	s.PosX += s.VelX * TimeModifier
-	s.PosY += s.VelY * TimeModifier
+		// update position
+		s.PosX += s.VelX * TimeModifier
+		s.PosY += s.VelY * TimeModifier
 
-	// clamp theta
-	if s.Theta > 360 {
-		s.Theta -= 360
-	} else if s.Theta < 0 {
-		s.Theta += 360
+		// clamp theta
+		if s.Theta > 360 {
+			s.Theta -= 360
+		} else if s.Theta < 0 {
+			s.Theta += 360
+		}
+
+		// apply dampening
+		dampX := SpaceDrag * s.VelX * TimeModifier
+		dampY := SpaceDrag * s.VelY * TimeModifier
+
+		s.VelX -= dampX
+		s.VelY -= dampY
+	} else {
+		// validate station pointer
+		if s.DockedAtStation == nil {
+			// find station
+			station := s.CurrentSystem.stations[s.AutopilotDock.TargetID.String()]
+
+			// we aren't really docked i guess
+			if station == nil {
+				s.DockedAtStationID = nil
+			} else {
+				s.DockedAtStation = station
+			}
+		}
+
+		// clamp to station
+		s.VelX = 0
+		s.VelY = 0
+		s.PosX = s.DockedAtStation.PosX
+		s.PosY = s.DockedAtStation.PosY
+
 	}
-
-	// apply dampening
-	dampX := SpaceDrag * s.VelX * TimeModifier
-	dampY := SpaceDrag * s.VelY * TimeModifier
-
-	s.VelX -= dampX
-	s.VelY -= dampY
 }
 
 //CmdAbort Abruptly ends the current autopilot mode
@@ -481,6 +504,11 @@ func (s *Ship) doAutopilotDock() {
 		if d > hold {
 			// get closer
 			s.flyToPoint(station.PosX, station.PosY, hold, 30)
+		} else {
+			// dock with station
+			s.DockedAtStation = station
+			s.DockedAtStationID = &station.ID
+			s.AutopilotMode = NewAutopilotRegistry().None
 		}
 	}
 }

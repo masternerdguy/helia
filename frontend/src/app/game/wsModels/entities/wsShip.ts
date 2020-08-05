@@ -20,4 +20,5 @@ export class WSShip {
     energyP: number;
     heatP: number;
     fuelP: number;
+    dockedAtStationID: string;
 }

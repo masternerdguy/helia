@@ -63,11 +63,12 @@ type CurrentShipInfo struct {
 	ArmorP   float64   `json:"armorP"`
 	HullP    float64   `json:"hullP"`
 	// secrets that should not be globally known
-	Accel   float64 `json:"accel"`
-	Turn    float64 `json:"turn"`
-	EnergyP float64 `json:"energyP"`
-	HeatP   float64 `json:"heatP"`
-	FuelP   float64 `json:"fuelP"`
+	Accel             float64    `json:"accel"`
+	Turn              float64    `json:"turn"`
+	EnergyP           float64    `json:"energyP"`
+	HeatP             float64    `json:"heatP"`
+	FuelP             float64    `json:"fuelP"`
+	DockedAtStationID *uuid.UUID `json:"dockedAtStationID"`
 }
 
 //GlobalShipInfo Structure for passing non-secret information about a ship
