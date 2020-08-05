@@ -197,11 +197,13 @@ function handleGlobalUpdate(d: GameMessage) {
           // sync ship in memory
           sm.sync(sh);
 
-          // current ship target check
-          if (sm.id === engineSack.player.currentTargetID
-              && engineSack.player.currentTargetType === TargetType.Ship) {
-            sm.isTargeted = true;
-            engineSack.targetInteractionWindow.setTarget(sm, TargetType.Ship);
+          // current ship target check if undocked
+          if (!engineSack.player.currentShip.dockedAtStationID) {
+            if (sm.id === engineSack.player.currentTargetID
+                && engineSack.player.currentTargetType === TargetType.Ship) {
+              sm.isTargeted = true;
+              engineSack.targetInteractionWindow.setTarget(sm, TargetType.Ship);
+            }
           }
 
           // is this the player ship?
@@ -344,6 +346,12 @@ function handleCurrentShipUpdate(d: GameMessage) {
   // update camera position to track player ship
   engineSack.camera.x = msg.currentShipInfo.x;
   engineSack.camera.y = msg.currentShipInfo.y;
+
+  // dock check
+  if (!!msg.currentShipInfo.dockedAtStationID) {
+    engineSack.player.currentTargetID = msg.currentShipInfo.dockedAtStationID;
+    engineSack.player.currentTargetType = TargetType.Station;
+  }
 
   // update status window
   engineSack.shipStatusWindow.setShip(engineSack.player.currentShip);
