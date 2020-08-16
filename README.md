@@ -10,7 +10,7 @@ Use the `testdb.sql` script to scaffold a test database.
 The database configuration is in `db-configuration.json`
 
 # Starting the backend
-Helia's backend is written in go (1.13).
+Helia's backend is written in go (1.15).
 
 To start the go backend, run `go run main.go` in the root of the project.
 
