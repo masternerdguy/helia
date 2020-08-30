@@ -43,6 +43,8 @@ func (e *HeliaEngine) Start() {
 	for _, r := range e.Universe.Regions {
 		for _, s := range r.Systems {
 			go func(sol *universe.SolarSystem) {
+				lastFrame := makeTimestamp()
+
 				//game loop
 				for {
 					//check for shutdown signal
@@ -53,8 +55,18 @@ func (e *HeliaEngine) Start() {
 					//update system
 					sol.PeriodicUpdate()
 
-					//sleep for server heartbeat
-					time.Sleep(universe.Heartbeat)
+					//get time of last frame
+					now := makeTimestamp()
+					tpf := int(now - lastFrame)
+
+					//find remaining portion of server heatbeat
+					if tpf < universe.Heartbeat {
+						//sleep for remainder of server heartbeat
+						time.Sleep(time.Duration(universe.Heartbeat-tpf) * time.Millisecond)
+					}
+
+					//update last frame time
+					lastFrame = makeTimestamp()
 				}
 
 				log.Println(fmt.Sprintf("System %s has halted.", sol.SystemName))

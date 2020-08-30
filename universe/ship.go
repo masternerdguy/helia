@@ -162,8 +162,8 @@ func (s *Ship) PeriodicUpdate() {
 		s.doAutopilot()
 
 		// update position
-		s.PosX += s.VelX * TimeModifier
-		s.PosY += s.VelY * TimeModifier
+		s.PosX += s.VelX
+		s.PosY += s.VelY
 
 		// clamp theta
 		if s.Theta > 360 {
@@ -173,8 +173,8 @@ func (s *Ship) PeriodicUpdate() {
 		}
 
 		// apply dampening
-		dampX := SpaceDrag * s.VelX * TimeModifier
-		dampY := SpaceDrag * s.VelY * TimeModifier
+		dampX := SpaceDrag * s.VelX
+		dampY := SpaceDrag * s.VelY
 
 		s.VelX -= dampX
 		s.VelY -= dampY
@@ -299,7 +299,7 @@ func (s *Ship) ApplyPhysicsDummy(dummy physics.Dummy) {
 
 //GetRealAccel Returns the real acceleration capability of a ship after modifiers
 func (s *Ship) GetRealAccel() float64 {
-	return s.TemplateData.BaseAccel / 10
+	return s.TemplateData.BaseAccel
 }
 
 //GetRealTurn Returns the real turning capability of a ship after modifiers
@@ -382,7 +382,7 @@ func (s *Ship) doAutopilotManualNav() {
 	s.forwardThrust(s.AutopilotManualNav.Magnitude)
 
 	//decrease magnitude (this is to allow this to expire and require another move order from the player)
-	s.AutopilotManualNav.Magnitude -= s.AutopilotManualNav.Magnitude * SpaceDrag * TimeModifier
+	s.AutopilotManualNav.Magnitude -= s.AutopilotManualNav.Magnitude * SpaceDrag
 
 	//stop when magnitude is low
 	if s.AutopilotManualNav.Magnitude < 0.0001 {
@@ -525,7 +525,7 @@ func (s *Ship) flyToPoint(tX float64, tY float64, hold float64, caution float64)
 	turnMag := s.facePoint(tX, tY)
 
 	// determine whether to thrust forward and by how much
-	scale := (s.GetRealAccel() * (caution / SpaceDrag)) / TimeModifier
+	scale := ((s.GetRealAccel() * (caution / SpaceDrag)) / 0.175)
 	d := (physics.Distance(s.ToPhysicsDummy(), physics.Dummy{PosX: tX, PosY: tY}) - hold)
 
 	if turnMag < 1 {
@@ -571,7 +571,7 @@ func (s *Ship) rotate(scale float64) {
 	}
 
 	// turn
-	s.Theta += s.GetRealTurn() * scale * TimeModifier
+	s.Theta += s.GetRealTurn() * scale
 }
 
 //forwardThrust Fire the ship's thrusters
@@ -586,6 +586,6 @@ func (s *Ship) forwardThrust(scale float64) {
 	}
 
 	// accelerate along theta using thrust proportional to bounded magnitude
-	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (s.GetRealAccel() * scale * TimeModifier)
-	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (s.GetRealAccel() * scale * TimeModifier)
+	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (s.GetRealAccel() * scale)
+	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (s.GetRealAccel() * scale)
 }

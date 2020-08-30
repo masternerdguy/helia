@@ -140,7 +140,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 				//check for radius intersection
 				if d <= (sA.TemplateData.Radius + sB.TemplateData.Radius) {
 					//calculate collission results
-					physics.ElasticCollide(&dummyA, &dummyB, TimeModifier)
+					physics.ElasticCollide(&dummyA, &dummyB)
 
 					//update ships with results
 					sA.ApplyPhysicsDummy(dummyA)

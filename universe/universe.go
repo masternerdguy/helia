@@ -3,10 +3,7 @@ package universe
 import "github.com/google/uuid"
 
 //Heartbeat Sleep interval between solar system periodic updates in ms
-const Heartbeat = 250
-
-//TimeModifier Constant to multiply by to adjust for heartbeat
-const TimeModifier float64 = Heartbeat / 1000.0
+const Heartbeat = 20
 
 //SpaceDrag Space drag coefficient :)
 const SpaceDrag float64 = 0.025
