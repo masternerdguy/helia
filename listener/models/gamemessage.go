@@ -15,6 +15,7 @@ type MessageRegistry struct {
 	Goto              int
 	Orbit             int
 	Dock              int
+	Undock            int
 }
 
 //TargetTypeRegistry Registry of target types
@@ -33,6 +34,7 @@ func NewMessageRegistry() *MessageRegistry {
 		Goto:              4,
 		Orbit:             5,
 		Dock:              6,
+		Undock:            7,
 	}
 }
 
@@ -208,4 +210,9 @@ type ClientDockBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	TargetID  uuid.UUID `json:"targetId"`
 	Type      int       `json:"type"`
+}
+
+//ClientUndockBody Body containing an undock move order
+type ClientUndockBody struct {
+	SessionID uuid.UUID `json:"sid"`
 }

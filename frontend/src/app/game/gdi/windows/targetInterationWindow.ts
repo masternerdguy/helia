@@ -8,6 +8,7 @@ import { MessageTypes } from '../../wsModels/gameMessage';
 import { ClientOrbit } from '../../wsModels/bodies/orbit';
 import { ClientDock } from '../../wsModels/bodies/dock';
 import { Ship } from '../../engineModels/ship';
+import { ClientUndock } from '../../wsModels/bodies/undock';
 
 export class TargetInteractionWindow extends GDIWindow {
     private target: any;
@@ -86,7 +87,7 @@ export class TargetInteractionWindow extends GDIWindow {
 
         this.dockBtn.setOnClick((x, y) => {
             if (!this.host.dockedAtStationID) {
-                // issue an dock order for selected target
+                // issue a dock order for selected target
                 const b = new ClientDock();
                 b.sid = this.wsSvc.sid;
                 b.targetId = this.target.id;
@@ -94,8 +95,11 @@ export class TargetInteractionWindow extends GDIWindow {
 
                 this.wsSvc.sendMessage(MessageTypes.Dock, b);
             } else {
-                // todo: issue undock order
-                console.log('todo: issue undock order');
+                // issue an undock order
+                const b = new ClientUndock();
+                b.sid = this.wsSvc.sid;
+
+                this.wsSvc.sendMessage(MessageTypes.Undock, b);
             }
         });
 

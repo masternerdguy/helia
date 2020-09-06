@@ -102,6 +102,17 @@ func (s *SolarSystem) PeriodicUpdate() {
 				//apply effect to player's current ship
 				sh.CmdDock(data.TargetID, data.Type)
 			}
+		} else if evt.Type == models.NewMessageRegistry().Undock {
+			//find player ship
+			sh := s.ships[c.CurrentShipID.String()]
+
+			if sh != nil {
+				//extract data (currently nothing to process)
+				//data := evt.Body.(models.ClientUndockBody)
+
+				//apply effect to player's current ship
+				sh.CmdUndock()
+			}
 		}
 	}
 

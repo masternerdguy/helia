@@ -18,6 +18,7 @@ type AutopilotRegistry struct {
 	Goto      int
 	Orbit     int
 	Dock      int
+	Undock    int
 }
 
 //NewAutopilotRegistry Returns a populated AutopilotRegistry struct for use as an enum
@@ -28,6 +29,7 @@ func NewAutopilotRegistry() *AutopilotRegistry {
 		Goto:      2,
 		Orbit:     3,
 		Dock:      4,
+		Undock:    5,
 	}
 }
 
@@ -54,7 +56,10 @@ type OrbitData struct {
 type DockData struct {
 	TargetID uuid.UUID
 	Type     int
-	Distance float64
+}
+
+//UndockData Container structure for arguments of the Undock autopilot mode
+type UndockData struct {
 }
 
 //Ship Structure representing a player ship in the game universe
@@ -86,6 +91,7 @@ type Ship struct {
 	AutopilotGoto      GotoData
 	AutopilotOrbit     OrbitData
 	AutopilotDock      DockData
+	AutopilotUndock    UndockData
 	CurrentSystem      *SolarSystem
 	DockedAtStation    *Station
 	Lock               sync.Mutex
@@ -141,6 +147,7 @@ func (s *Ship) CopyShip() *Ship {
 		AutopilotGoto:      s.AutopilotGoto,
 		AutopilotOrbit:     s.AutopilotOrbit,
 		AutopilotDock:      s.AutopilotDock,
+		AutopilotUndock:    s.AutopilotUndock,
 	}
 
 	if s.DockedAtStationID != nil {
@@ -156,10 +163,12 @@ func (s *Ship) PeriodicUpdate() {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	// check if docked or undocked
+	// check if docked or undocked at a station (docking with other objects not yet supported)
 	if s.DockedAtStationID == nil {
+		/* Is Undocked */
+
 		// check autopilot
-		s.doAutopilot()
+		s.doUndockedAutopilot()
 
 		// update position
 		s.PosX += s.VelX
@@ -179,6 +188,8 @@ func (s *Ship) PeriodicUpdate() {
 		s.VelX -= dampX
 		s.VelY -= dampY
 	} else {
+		/* Is Docked */
+
 		// validate station pointer
 		if s.DockedAtStation == nil {
 			// find station
@@ -198,6 +209,8 @@ func (s *Ship) PeriodicUpdate() {
 		s.PosX = s.DockedAtStation.PosX
 		s.PosY = s.DockedAtStation.PosY
 
+		// check autopilot
+		s.doDockedAutopilot()
 	}
 }
 
@@ -278,6 +291,21 @@ func (s *Ship) CmdDock(targetID uuid.UUID, targetType int) {
 	s.AutopilotMode = registry.Dock
 }
 
+//CmdUndock Invokes undock autopilot on the ship
+func (s *Ship) CmdUndock() {
+	// get registry
+	registry := NewAutopilotRegistry()
+
+	// lock entity
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//stash dock and activate autopilot
+	s.AutopilotUndock = UndockData{}
+
+	s.AutopilotMode = registry.Undock
+}
+
 //ToPhysicsDummy Returns a new physics dummy structure representing this ship
 func (s *Ship) ToPhysicsDummy() physics.Dummy {
 	return physics.Dummy{
@@ -342,8 +370,8 @@ func (s *Ship) GetRealMaxFuel() float64 {
 	return s.TemplateData.BaseFuel
 }
 
-//doAutopilot Flies the ship for you
-func (s *Ship) doAutopilot() {
+//doUndockedAutopilot Flies the ship for you
+func (s *Ship) doUndockedAutopilot() {
 	// get registry
 	registry := NewAutopilotRegistry()
 
@@ -358,6 +386,19 @@ func (s *Ship) doAutopilot() {
 		s.doAutopilotOrbit()
 	case registry.Dock:
 		s.doAutopilotDock()
+	}
+}
+
+//doUndockedAutopilot Flies the ship for you
+func (s *Ship) doDockedAutopilot() {
+	// get registry
+	registry := NewAutopilotRegistry()
+
+	switch s.AutopilotMode {
+	case registry.None:
+		return
+	case registry.Undock:
+		s.doAutopilotUndock()
 	}
 }
 
@@ -509,13 +550,29 @@ func (s *Ship) doAutopilotDock() {
 
 		if d > hold {
 			// get closer
-			s.flyToPoint(station.PosX, station.PosY, hold, 30)
+			s.flyToPoint(station.PosX, station.PosY, hold, 20)
 		} else {
 			// dock with station
 			s.DockedAtStation = station
 			s.DockedAtStationID = &station.ID
 			s.AutopilotMode = NewAutopilotRegistry().None
 		}
+	}
+}
+
+//doAutopilotUndock Causes ship to undock from a target
+func (s *Ship) doAutopilotUndock() {
+	// verify that we are docked (currently only supports stations)
+	if s.DockedAtStationID != nil && s.DockedAtStation != nil {
+		// remove references
+		s.DockedAtStationID = nil
+		s.DockedAtStation = nil
+
+		// not docked - cancel autopilot
+		s.AutopilotMode = NewAutopilotRegistry().None
+	} else {
+		// not docked - cancel autopilot
+		s.AutopilotMode = NewAutopilotRegistry().None
 	}
 }
 

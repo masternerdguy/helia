@@ -10,5 +10,6 @@ export enum MessageTypes {
     CurrentShipUpdate = 3,
     Goto = 4,
     Orbit = 5,
-    Dock = 6
+    Dock = 6,
+    Undock = 7
 }
