@@ -86,6 +86,7 @@ type Ship struct {
 	//docking
 	DockedAtStationID *uuid.UUID
 	//in-memory only
+	IsDocked           bool
 	AutopilotMode      int
 	AutopilotManualNav ManualNavData
 	AutopilotGoto      GotoData
@@ -142,6 +143,7 @@ func (s *Ship) CopyShip() *Ship {
 		},
 		//in-memory only
 		Lock:               sync.Mutex{},
+		IsDocked:           s.IsDocked,
 		AutopilotMode:      s.AutopilotMode,
 		AutopilotManualNav: s.AutopilotManualNav,
 		AutopilotGoto:      s.AutopilotGoto,
@@ -166,6 +168,7 @@ func (s *Ship) PeriodicUpdate() {
 	// check if docked or undocked at a station (docking with other objects not yet supported)
 	if s.DockedAtStationID == nil {
 		/* Is Undocked */
+		s.IsDocked = false
 
 		// check autopilot
 		s.doUndockedAutopilot()
@@ -189,6 +192,7 @@ func (s *Ship) PeriodicUpdate() {
 		s.VelY -= dampY
 	} else {
 		/* Is Docked */
+		s.IsDocked = true
 
 		// validate station pointer
 		if s.DockedAtStation == nil {
@@ -451,6 +455,12 @@ func (s *Ship) doAutopilotGoto() {
 			return
 		}
 
+		// abort if docked
+		if tgt.IsDocked {
+			s.CmdAbort()
+			return
+		}
+
 		// store target details
 		tX = tgt.PosX
 		tY = tgt.PosY
@@ -490,6 +500,12 @@ func (s *Ship) doAutopilotOrbit() {
 		tgt := s.CurrentSystem.ships[s.AutopilotOrbit.TargetID.String()]
 
 		if tgt == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// abort if docked
+		if tgt.IsDocked {
 			s.CmdAbort()
 			return
 		}
