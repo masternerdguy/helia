@@ -152,6 +152,8 @@ export class Ship extends WSShip {
 
         if (sh.dockedAtStationID) {
             this.dockedAtStationID = sh.dockedAtStationID;
+        } else {
+            this.dockedAtStationID = undefined;
         }
     }
 }
