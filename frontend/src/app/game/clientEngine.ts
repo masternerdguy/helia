@@ -177,6 +177,10 @@ function handleGlobalUpdate(d: GameMessage) {
       msg.stations = [];
     }
 
+    if (!msg.ships || msg.ships == null) {
+      msg.ships = [];
+    }
+
     // update system
     engineSack.player.currentSystem.id = msg.currentSystemInfo.id;
     engineSack.player.currentSystem.systemName = msg.currentSystemInfo.systemName;
