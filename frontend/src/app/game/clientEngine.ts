@@ -18,6 +18,7 @@ import { Jumphole } from './engineModels/jumphole';
 import { ShipStatusWindow } from './gdi/windows/shipStatusWindow';
 import { ServerCurrentShipUpdate } from './wsModels/bodies/currentShipUpdate';
 import { TargetInteractionWindow } from './gdi/windows/targetInterationWindow';
+import { OverviewWindow } from './gdi/windows/overviewWindow';
 
 class EngineSack {
   constructor() {}
@@ -39,6 +40,7 @@ class EngineSack {
   // ui elements
   shipStatusWindow: ShipStatusWindow;
   targetInteractionWindow: TargetInteractionWindow;
+  overviewWindow: OverviewWindow;
   lastShiftDown: number;
 
   windows: GDIWindow[];
@@ -68,7 +70,7 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
 
   // initialize ui windows
   engineSack.shipStatusWindow = new ShipStatusWindow();
-  engineSack.shipStatusWindow.setX(100);
+  engineSack.shipStatusWindow.setX(0);
   engineSack.shipStatusWindow.setY(50);
   engineSack.shipStatusWindow.initialize();
   engineSack.shipStatusWindow.pack();
@@ -76,12 +78,25 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.targetInteractionWindow = new TargetInteractionWindow();
   engineSack.targetInteractionWindow.initialize();
   engineSack.targetInteractionWindow.setWsSvc(wsService);
-  engineSack.targetInteractionWindow.setX((gameCanvas.width - (100 + engineSack.targetInteractionWindow.getWidth())));
+  engineSack.targetInteractionWindow.setX((gameCanvas.width - (engineSack.targetInteractionWindow.getWidth())));
   engineSack.targetInteractionWindow.setY(50);
   engineSack.targetInteractionWindow.pack();
 
+  engineSack.overviewWindow = new OverviewWindow();
+  engineSack.overviewWindow.setHeight(gameCanvas.height / 2);
+  engineSack.overviewWindow.initialize();
+  engineSack.overviewWindow.setX((gameCanvas.width - (engineSack.overviewWindow.getWidth())));
+  engineSack.overviewWindow.setY(engineSack.targetInteractionWindow.getY() +
+                                 engineSack.targetInteractionWindow.getHeight() +
+                                 GDIStyle.windowHandleHeight);
+  engineSack.overviewWindow.pack();
+
   // cache windows for simpler updating and rendering
-  engineSack.windows = [engineSack.shipStatusWindow, engineSack.targetInteractionWindow];
+  engineSack.windows = [
+    engineSack.shipStatusWindow,
+    engineSack.targetInteractionWindow,
+    engineSack.overviewWindow
+  ];
 
   // store globals
   engineSack.gfx = gameCanvas;
