@@ -51,6 +51,8 @@ export class GDIList extends GDIBase {
         let r = 0;
         const stop = Math.round((this.getHeight() - bx) / px);
 
+        this.boundCheck();
+
         for (let i = this.scroll; i < (this.scroll + stop); i++) {
             // exit if out of bounds
             if (i >= this.items.length) {
@@ -117,6 +119,8 @@ export class GDIList extends GDIBase {
         if (!this.containsPoint(x, y)) {
             return;
         }
+
+        this.boundCheck();
 
         // adjust input to be relative to control origin
         const rX = x - this.getX();

@@ -361,6 +361,9 @@ function handleGlobalUpdate(d: GameMessage) {
       // todo: handle npc station dying
     }
   }
+
+  // update overview window
+  engineSack.overviewWindow.sync(engineSack.player);
 }
 
 function handleCurrentShipUpdate(d: GameMessage) {
