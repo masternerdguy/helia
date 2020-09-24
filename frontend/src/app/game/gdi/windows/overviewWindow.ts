@@ -2,10 +2,10 @@ import { GDIWindow } from '../base/gdiWindow';
 import { GDIList } from '../components/gdiList';
 import { FontSize } from '../base/gdiStyle';
 import { Player } from '../../engineModels/player';
-import { GDITabList } from '../components/gdiTabList';
+import { GDITabPane } from '../components/gdiTabPane';
 
 export class OverviewWindow extends GDIWindow {
-    tabs = new GDITabList();
+    tabs = new GDITabPane();
     globalList = new GDIList();
     shipList = new GDIList();
 
@@ -41,7 +41,6 @@ export class OverviewWindow extends GDIWindow {
         this.globalList.setY(0);
 
         this.globalList.setFont(FontSize.large);
-        this.globalList.setItems([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
         this.globalList.setOnClick((item) => {
             console.log(item);
         });
@@ -57,7 +56,6 @@ export class OverviewWindow extends GDIWindow {
         this.shipList.setY(0);
 
         this.shipList.setFont(FontSize.large);
-        this.shipList.setItems(['a','s','d','f','l','o','l']);
         this.shipList.setOnClick((item) => {
             console.log(item);
         });

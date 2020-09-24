@@ -3,7 +3,7 @@ import { GDIComponent } from '../base/gdiComponent';
 import { GDIRectangle } from '../base/gdiRectangle';
 import { GDIStyle, FontSize } from '../base/gdiStyle';
 
-export class GDITabList extends GDIBase {
+export class GDITabPane extends GDIBase {
     private tabs: Map<string, Tab>
     private selectedTab: string;
 
