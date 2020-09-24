@@ -7,6 +7,7 @@ import { GDITabList } from '../components/gdiTabList';
 export class OverviewWindow extends GDIWindow {
     tabs = new GDITabList();
     globalList = new GDIList();
+    shipList = new GDIList();
 
     initialize() {
         // set dimensions
@@ -46,6 +47,22 @@ export class OverviewWindow extends GDIWindow {
         });
 
         this.tabs.addComponent(this.globalList, "Global");
+
+        // ship list
+        this.shipList.setWidth(this.getWidth());
+        this.shipList.setHeight(this.getHeight());
+        this.shipList.initialize();
+
+        this.shipList.setX(0);
+        this.shipList.setY(0);
+
+        this.shipList.setFont(FontSize.large);
+        this.shipList.setItems(['a','s','d','f','l','o','l']);
+        this.shipList.setOnClick((item) => {
+            console.log(item);
+        });
+
+        this.tabs.addComponent(this.shipList, "Ships");
     }
 
     periodicUpdate() {
