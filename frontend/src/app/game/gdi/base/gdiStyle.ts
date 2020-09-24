@@ -24,6 +24,7 @@ export class GDIStyle {
     static tabBorderColor = 'white';
     static tabFillColor = '#00091a';
     static tabTextColor = 'white';
+    static tabActiveTextColor = '#0099ff';
     static tabBorderSize = 0;
     static tabHandleHeight = 20;
 

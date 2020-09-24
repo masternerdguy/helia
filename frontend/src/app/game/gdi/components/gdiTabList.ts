@@ -25,7 +25,7 @@ export class GDITabList extends GDIBase {
 
     render(): ImageBitmap {
         // render background
-        this.ctx.fillStyle = 'red';
+        this.ctx.fillStyle = GDIStyle.tabFillColor;
         this.ctx.fillRect(0, 0, this.getWidth(), this.getHeight());
 
         // style text
@@ -41,6 +41,14 @@ export class GDITabList extends GDIBase {
         let handleI = 0;
 
         for (const t of this.tabs) {
+            if(t[0] !== this.selectedTab) {
+                this.ctx.fillStyle = GDIStyle.tabTextColor;
+                this.ctx.strokeStyle = GDIStyle.tabTextColor;
+            } else {
+                this.ctx.fillStyle = GDIStyle.tabActiveTextColor;
+                this.ctx.strokeStyle = GDIStyle.tabActiveTextColor;
+            }
+
             this.ctx.fillText(t[0], (handleWidth * handleI) + 2, (GDIStyle.tabHandleHeight / 2));
             handleI++;
         }
