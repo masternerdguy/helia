@@ -70,7 +70,8 @@ export class OverviewWindow extends GDIWindow {
     }
 
     sync(player: Player) {
-        /*const objects: OverviewRow[] = [];
+        const objects: OverviewRow[] = [];
+        const ships: OverviewRow[] = [];
 
         // include stars
         for (const i of player.currentSystem.stars) {
@@ -83,7 +84,7 @@ export class OverviewWindow extends GDIWindow {
                         i.x, 
                         i.y)}`
                 }
-            })
+            });
         }
 
         // include planets
@@ -97,7 +98,7 @@ export class OverviewWindow extends GDIWindow {
                         i.x, 
                         i.y)}`
                 }
-            })
+            });
         }
 
         // include stations
@@ -111,12 +112,12 @@ export class OverviewWindow extends GDIWindow {
                         i.x, 
                         i.y)}`
                 }
-            })
+            });
         }
 
         // include ships
         for (const i of player.currentSystem.ships) {
-            objects.push({
+            const d: OverviewRow = {
                 object: i,
                 listString: () => {
                     return `Ship ${i.shipName} - ${overviewDistance(
@@ -125,10 +126,14 @@ export class OverviewWindow extends GDIWindow {
                         i.x, 
                         i.y)}`
                 }
-            })
+            };
+
+            objects.push(d);
+            ships.push(d);
         }
 
-        this.objectList.setItems(objects);*/
+        this.globalList.setItems(objects);
+        this.shipList.setItems(ships);
     }
 }
 
