@@ -2,9 +2,11 @@ import { GDIWindow } from '../base/gdiWindow';
 import { GDIList } from '../components/gdiList';
 import { FontSize } from '../base/gdiStyle';
 import { Player } from '../../engineModels/player';
+import { GDITabList } from '../components/gdiTabList';
 
 export class OverviewWindow extends GDIWindow {
-    objectList = new GDIList();
+    tabs = new GDITabList();
+    globalList = new GDIList();
 
     initialize() {
         // set dimensions
@@ -18,21 +20,32 @@ export class OverviewWindow extends GDIWindow {
     pack() {
         this.setTitle('System Overview');
 
-        // object list
-        this.objectList.setWidth(this.getWidth());
-        this.objectList.setHeight(this.getHeight());
-        this.objectList.initialize();
+        // tab list
+        this.tabs.setWidth(this.getWidth());
+        this.tabs.setHeight(this.getHeight());
+        this.tabs.initialize();
 
-        this.objectList.setX(0);
-        this.objectList.setY(0);
+        this.tabs.setX(0);
+        this.tabs.setY(0);
+        this.tabs.setSelectedTab("Global");
 
-        this.objectList.setFont(FontSize.large);
-        this.objectList.setItems([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
-        this.objectList.setOnClick((item) => {
+        this.addComponent(this.tabs);
+
+        // all object list
+        this.globalList.setWidth(this.getWidth());
+        this.globalList.setHeight(this.getHeight());
+        this.globalList.initialize();
+
+        this.globalList.setX(0);
+        this.globalList.setY(0);
+
+        this.globalList.setFont(FontSize.large);
+        this.globalList.setItems([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
+        this.globalList.setOnClick((item) => {
             console.log(item);
         });
 
-        this.addComponent(this.objectList);
+        this.tabs.addComponent(this.globalList, "Global");
     }
 
     periodicUpdate() {
@@ -40,7 +53,7 @@ export class OverviewWindow extends GDIWindow {
     }
 
     sync(player: Player) {
-        const objects: OverviewRow[] = [];
+        /*const objects: OverviewRow[] = [];
 
         // include stars
         for (const i of player.currentSystem.stars) {
@@ -98,7 +111,7 @@ export class OverviewWindow extends GDIWindow {
             })
         }
 
-        this.objectList.setItems(objects);
+        this.objectList.setItems(objects);*/
     }
 }
 

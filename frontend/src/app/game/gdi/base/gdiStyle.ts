@@ -20,6 +20,13 @@ export class GDIStyle {
     static labelTextColor = 'white';
     static labelBorderSize = 0;
 
+    // tab
+    static tabBorderColor = 'white';
+    static tabFillColor = '#00091a';
+    static tabTextColor = 'white';
+    static tabBorderSize = 0;
+    static tabHandleHeight = 20;
+
     // bar
     static barBorderColor = 'white';
     static barFillColor = '#0099ff';
