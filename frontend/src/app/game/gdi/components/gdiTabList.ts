@@ -158,18 +158,11 @@ class Tab extends GDIBase {
             return;
         }
 
-        // check for click in handle
-        const hY = y - this.getY();
-
-        // adjust input to be relative to tab origin
-        const rX = x - this.getX();
-        const rY = y - this.getY();
-
         // find the component that is being scrolled on within this tab
         for (const c of this.components) {
-            if (c.containsPoint(rX, rY)) {
+            if (c.containsPoint(x, y)) {
                 // send click event
-                c.handleClick(rX, rY);
+                c.handleClick(x, y);
                 break;
             }
         }
@@ -181,15 +174,11 @@ class Tab extends GDIBase {
             return;
         }
 
-        // adjust input to be relative to tab origin
-        const rX = x - this.getX();
-        const rY = y - this.getY();
-
         // find the component that is being scrolled on within this tab
         for (const c of this.components) {
-            if (c.containsPoint(rX, rY)) {
+            if (c.containsPoint(x, y)) {
                 // send scroll event
-                c.handleScroll(rX, rY, d);
+                c.handleScroll(x, y, d);
                 break;
             }
         }
@@ -201,15 +190,11 @@ class Tab extends GDIBase {
             return;
         }
 
-        // adjust input to be relative to tab origin
-        const rX = x - this.getX();
-        const rY = y - this.getY();
-
         // find the component that is being typed on within this tab
         for (const c of this.components) {
-            if (c.containsPoint(rX, rY)) {
+            if (c.containsPoint(x, y)) {
                 // send key event
-                c.handleKeyDown(rX, rY, key);
+                c.handleKeyDown(x, y, key);
                 break;
             }
         }
