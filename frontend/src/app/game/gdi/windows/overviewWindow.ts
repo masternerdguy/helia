@@ -8,6 +8,7 @@ export class OverviewWindow extends GDIWindow {
     tabs = new GDITabPane();
     globalList = new GDIList();
     shipList = new GDIList();
+    selectedItemID: string;
 
     initialize() {
         // set dimensions
@@ -28,7 +29,7 @@ export class OverviewWindow extends GDIWindow {
 
         this.tabs.setX(0);
         this.tabs.setY(0);
-        this.tabs.setSelectedTab("Global");
+        this.tabs.setSelectedTab('Global');
 
         this.addComponent(this.tabs);
 
@@ -42,10 +43,10 @@ export class OverviewWindow extends GDIWindow {
 
         this.globalList.setFont(FontSize.large);
         this.globalList.setOnClick((item) => {
-            console.log(item);
+            this.selectedItemID = item.object.id;
         });
 
-        this.tabs.addComponent(this.globalList, "Global");
+        this.tabs.addComponent(this.globalList, 'Global');
 
         // ship list
         this.shipList.setWidth(this.getWidth());
@@ -57,10 +58,10 @@ export class OverviewWindow extends GDIWindow {
 
         this.shipList.setFont(FontSize.large);
         this.shipList.setOnClick((item) => {
-            console.log(item);
+            this.selectedItemID = item.object.id;
         });
 
-        this.tabs.addComponent(this.shipList, "Ships");
+        this.tabs.addComponent(this.shipList, 'Ships');
     }
 
     periodicUpdate() {
@@ -77,10 +78,10 @@ export class OverviewWindow extends GDIWindow {
                 object: i,
                 listString: () => {
                     return `${player.currentSystem.systemName} Star - ${overviewDistance(
-                        player.currentShip.x, 
-                        player.currentShip.y, 
-                        i.x, 
-                        i.y)}`
+                        player.currentShip.x,
+                        player.currentShip.y,
+                        i.x,
+                        i.y)}`;
                 }
             });
         }
@@ -91,10 +92,10 @@ export class OverviewWindow extends GDIWindow {
                 object: i,
                 listString: () => {
                     return `Planet ${i.planetName} - ${overviewDistance(
-                        player.currentShip.x, 
-                        player.currentShip.y, 
-                        i.x, 
-                        i.y)}`
+                        player.currentShip.x,
+                        player.currentShip.y,
+                        i.x,
+                        i.y)}`;
                 }
             });
         }
@@ -105,10 +106,10 @@ export class OverviewWindow extends GDIWindow {
                 object: i,
                 listString: () => {
                     return `Station ${i.stationName} - ${overviewDistance(
-                        player.currentShip.x, 
-                        player.currentShip.y, 
-                        i.x, 
-                        i.y)}`
+                        player.currentShip.x,
+                        player.currentShip.y,
+                        i.x,
+                        i.y)}`;
                 }
             });
         }
@@ -119,10 +120,10 @@ export class OverviewWindow extends GDIWindow {
                 object: i,
                 listString: () => {
                     return `Ship ${i.shipName} - ${overviewDistance(
-                        player.currentShip.x, 
-                        player.currentShip.y, 
-                        i.x, 
-                        i.y)}`
+                        player.currentShip.x,
+                        player.currentShip.y,
+                        i.x,
+                        i.y)}`;
                 }
             };
 
@@ -130,8 +131,33 @@ export class OverviewWindow extends GDIWindow {
             ships.push(d);
         }
 
+        // store on lists
         this.globalList.setItems(objects);
         this.shipList.setItems(ships);
+
+        // reselect row in global list
+        const gItems = this.globalList.getItems();
+
+        for (let x = 0; x < gItems.length; x++) {
+            const i = gItems[x].object;
+
+            if (i.id === this.selectedItemID) {
+                this.globalList.setSelectedIndex(x);
+                break;
+            }
+        }
+
+        // reselect row in ship list
+        const shItems = this.shipList.getItems();
+
+        for (let x = 0; x < shItems.length; x++) {
+            const i = shItems[x].object;
+
+            if (i.id === this.selectedItemID) {
+                this.shipList.setSelectedIndex(x);
+                break;
+            }
+        }
     }
 }
 
@@ -141,5 +167,5 @@ class OverviewRow {
 }
 
 function overviewDistance(px: number, py: number, x: number, y: number) {
-    return Math.round(Math.sqrt((px - x) * (px - x) + (py - y) * (py - y)))
+    return Math.round(Math.sqrt((px - x) * (px - x) + (py - y) * (py - y)));
 }

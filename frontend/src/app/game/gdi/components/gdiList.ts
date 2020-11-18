@@ -203,6 +203,14 @@ export class GDIList extends GDIBase {
         this.scroll -= 1;
     }
 
+    getSelectedIndex(): number {
+        return this.selectedRow;
+    }
+
+    setSelectedIndex(i: number) {
+        this.selectedRow = i;
+    }
+
     getSelectedItem(): any {
         return this.items[this.selectedRow];
     }
