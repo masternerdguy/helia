@@ -4,7 +4,7 @@ import { GDIRectangle } from '../base/gdiRectangle';
 import { GDIStyle, FontSize } from '../base/gdiStyle';
 
 export class GDITabPane extends GDIBase {
-    private tabs: Map<string, Tab>
+    private tabs: Map<string, Tab>;
     private selectedTab: string;
 
     private canvas: OffscreenCanvas;
@@ -40,8 +40,8 @@ export class GDITabPane extends GDIBase {
         const handleWidth = this.getWidth() / Math.max(this.tabs.size, 1);
         let handleI = 0;
 
-        for (const t of this.tabs) {
-            if(t[0] !== this.selectedTab) {
+        for (const tv of this.tabs) {
+            if (tv[0] !== this.selectedTab) {
                 this.ctx.fillStyle = GDIStyle.tabTextColor;
                 this.ctx.strokeStyle = GDIStyle.tabTextColor;
             } else {
@@ -49,14 +49,14 @@ export class GDITabPane extends GDIBase {
                 this.ctx.strokeStyle = GDIStyle.tabActiveTextColor;
             }
 
-            this.ctx.fillText(t[0], (handleWidth * handleI) + 2, (GDIStyle.tabHandleHeight / 2));
+            this.ctx.fillText(tv[0], (handleWidth * handleI) + 2, (GDIStyle.tabHandleHeight / 2));
             handleI++;
         }
 
         // get selected tab
         const t = this.tabs.get(this.selectedTab);
 
-        if(t) {
+        if (t) {
             // render selected tab
             const b = t.render();
             this.ctx.drawImage(b, t.getX(), t.getY());
@@ -83,18 +83,18 @@ export class GDITabPane extends GDIBase {
         const hY = y - this.getY();
         const hX = x - this.getX();
 
-        if (hY < GDIStyle.windowHandleHeight) {
+        if (hY < GDIStyle.tabHandleHeight) {
             // change tab selection
             const handleWidth = this.getWidth() / Math.max(this.tabs.size, 1);
 
-            for(let i = 0; i < this.tabs.size; i++) {
+            for (let i = 0; i < this.tabs.size; i++) {
                 const rect = new GDIRectangle(handleWidth * i, 0, handleWidth, GDIStyle.tabHandleHeight);
-                if(rect.containsPoint(hX, hY)) {
+                if (rect.containsPoint(hX, hY)) {
                     let u = 0;
 
-                    for(const t of this.tabs) {
-                        if(u == i) {
-                            this.setSelectedTab(t[0]);
+                    for (const tu of this.tabs) {
+                        if (u === i) {
+                            this.setSelectedTab(tu[0]);
                             break;
                         } else {
                             u++;
@@ -107,13 +107,13 @@ export class GDITabPane extends GDIBase {
         }
 
         // adjust input to be relative to tab
-        const rX = x - this.getX();
-        const rY = y - (this.getY() + GDIStyle.windowHandleHeight);
+        const rX = hX;
+        const rY = hY - GDIStyle.tabHandleHeight;
 
         // send event to selected tab
         const t = this.tabs.get(this.selectedTab);
 
-        if(t) {
+        if (t) {
             t.handleClick(rX, rY);
         }
     }
@@ -138,9 +138,9 @@ export class GDITabPane extends GDIBase {
         // get tab from map
         let t = this.tabs.get(tab);
 
-        if(!t) {
+        if (!t) {
             // initialize missing tab
-            t = new Tab;
+            t = new Tab();
             t.setWidth(this.getWidth());
             t.setHeight(this.getHeight() - GDIStyle.tabHandleHeight);
             t.setX(0);
@@ -162,11 +162,11 @@ class Tab extends GDIBase {
 
     handleClick(x: number, y: number) {
         // make sure this is a relevant click
-        if (!this.containsPoint(x, y)) {
+        if (!this.containsPoint(x, y + GDIStyle.tabHandleHeight)) {
             return;
         }
 
-        // find the component that is being scrolled on within this tab
+        // find the component that is being clicked on within this tab
         for (const c of this.components) {
             if (c.containsPoint(x, y)) {
                 // send click event
