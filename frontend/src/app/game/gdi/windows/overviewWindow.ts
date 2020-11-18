@@ -157,7 +157,7 @@ export class OverviewWindow extends GDIWindow {
         this.stationList.setItems(stations);
 
         // reselect row in global list
-        const gItems = this.globalList.getItems();
+        const gItems = this.globalList.getItems() as OverviewRow[];
 
         for (let x = 0; x < gItems.length; x++) {
             const i = gItems[x].object;
@@ -169,7 +169,7 @@ export class OverviewWindow extends GDIWindow {
         }
 
         // reselect row in ship list
-        const shItems = this.shipList.getItems();
+        const shItems = this.shipList.getItems() as OverviewRow[];
 
         for (let x = 0; x < shItems.length; x++) {
             const i = shItems[x].object;
@@ -181,7 +181,7 @@ export class OverviewWindow extends GDIWindow {
         }
 
         // reselect row in station list
-        const stItems = this.stationList.getItems();
+        const stItems = this.stationList.getItems() as OverviewRow[];
 
         for (let x = 0; x < stItems.length; x++) {
             const i = stItems[x].object;
