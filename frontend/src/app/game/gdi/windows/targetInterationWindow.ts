@@ -71,6 +71,8 @@ export class TargetInteractionWindow extends GDIWindow {
             b.targetId = this.target.id;
             b.type = this.targetType;
 
+            console.log(b);
+
             this.wsSvc.sendMessage(MessageTypes.Orbit, b);
         });
 

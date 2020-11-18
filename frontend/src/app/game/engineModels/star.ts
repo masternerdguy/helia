@@ -3,6 +3,7 @@ import { Camera } from './camera';
 
 export class Star extends WSStar {
     texture2d: HTMLImageElement;
+    isTargeted: boolean;
 
     constructor(ws: WSStar) {
         super();
@@ -31,10 +32,15 @@ export class Star extends WSStar {
         const sr = camera.projectR(this.radius);
 
         // draw debug bounding circle
+        if (this.isTargeted) {
+            ctx.strokeStyle = 'yellow';
+        } else {
+            ctx.strokeStyle = 'cyan';
+        }
+
         ctx.beginPath();
         ctx.arc(sx, sy, sr, 0, 2 * Math.PI, false);
         ctx.lineWidth = 2;
-        ctx.strokeStyle = 'cyan';
         ctx.stroke();
 
         // draw star

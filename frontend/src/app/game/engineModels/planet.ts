@@ -3,6 +3,7 @@ import { WSPlanet } from '../wsModels/entities/wsPlanet';
 
 export class Planet extends WSPlanet {
     texture2d: HTMLImageElement;
+    isTargeted: boolean;
 
     constructor(ws: WSPlanet) {
         super();
@@ -32,10 +33,15 @@ export class Planet extends WSPlanet {
         const sr = camera.projectR(this.radius);
 
         // draw debug bounding circle
+        if (this.isTargeted) {
+            ctx.strokeStyle = 'yellow';
+        } else {
+            ctx.strokeStyle = 'cyan';
+        }
+
         ctx.beginPath();
         ctx.arc(sx, sy, sr, 0, 2 * Math.PI, false);
         ctx.lineWidth = 2;
-        ctx.strokeStyle = 'cyan';
         ctx.stroke();
 
         // draw planet

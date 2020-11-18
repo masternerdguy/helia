@@ -3,6 +3,7 @@ import { WSJumphole } from '../wsModels/entities/wsJumphole';
 
 export class Jumphole extends WSJumphole {
     texture2d: HTMLImageElement;
+    isTargeted: boolean;
 
     constructor(ws: WSJumphole) {
         super();
@@ -33,10 +34,15 @@ export class Jumphole extends WSJumphole {
         const sr = camera.projectR(this.radius);
 
         // draw debug bounding circle
+        if (this.isTargeted) {
+            ctx.strokeStyle = 'yellow';
+        } else {
+            ctx.strokeStyle = 'orange';
+        }
+
         ctx.beginPath();
         ctx.arc(sx, sy, sr, 0, 2 * Math.PI, false);
         ctx.lineWidth = 2;
-        ctx.strokeStyle = 'orange';
         ctx.stroke();
 
         // draw jumphole

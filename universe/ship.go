@@ -220,7 +220,15 @@ func (s *Ship) PeriodicUpdate() {
 
 //CmdAbort Abruptly ends the current autopilot mode
 func (s *Ship) CmdAbort() {
+	//stop autopilot
 	s.AutopilotMode = NewAutopilotRegistry().None
+
+	//reset autopilot parameters
+	s.AutopilotManualNav = ManualNavData{}
+	s.AutopilotGoto = GotoData{}
+	s.AutopilotOrbit = OrbitData{}
+	s.AutopilotDock = DockData{}
+	s.AutopilotUndock = UndockData{}
 }
 
 //CmdManualNav Invokes manual nav autopilot on the ship
