@@ -8,6 +8,7 @@ export class OverviewWindow extends GDIWindow {
     tabs = new GDITabPane();
     globalList = new GDIList();
     shipList = new GDIList();
+    stationList = new GDIList();
     selectedItemID: string;
 
     initialize() {
@@ -62,6 +63,21 @@ export class OverviewWindow extends GDIWindow {
         });
 
         this.tabs.addComponent(this.shipList, 'Ships');
+
+        // station list
+        this.stationList.setWidth(this.getWidth());
+        this.stationList.setHeight(this.getHeight());
+        this.stationList.initialize();
+
+        this.stationList.setX(0);
+        this.stationList.setY(0);
+
+        this.stationList.setFont(FontSize.large);
+        this.stationList.setOnClick((item) => {
+            this.selectedItemID = item.object.id;
+        });
+
+        this.tabs.addComponent(this.stationList, 'Stations');
     }
 
     periodicUpdate() {
@@ -71,6 +87,7 @@ export class OverviewWindow extends GDIWindow {
     sync(player: Player) {
         const objects: OverviewRow[] = [];
         const ships: OverviewRow[] = [];
+        const stations: OverviewRow[] = [];
 
         // include stars
         for (const i of player.currentSystem.stars) {
@@ -102,7 +119,7 @@ export class OverviewWindow extends GDIWindow {
 
         // include stations
         for (const i of player.currentSystem.stations) {
-            objects.push({
+            const d: OverviewRow = {
                 object: i,
                 listString: () => {
                     return `Station ${i.stationName} - ${overviewDistance(
@@ -111,7 +128,10 @@ export class OverviewWindow extends GDIWindow {
                         i.x,
                         i.y)}`;
                 }
-            });
+            };
+
+            objects.push(d);
+            stations.push(d);
         }
 
         // include ships
@@ -134,6 +154,7 @@ export class OverviewWindow extends GDIWindow {
         // store on lists
         this.globalList.setItems(objects);
         this.shipList.setItems(ships);
+        this.stationList.setItems(stations);
 
         // reselect row in global list
         const gItems = this.globalList.getItems();
@@ -155,6 +176,18 @@ export class OverviewWindow extends GDIWindow {
 
             if (i.id === this.selectedItemID) {
                 this.shipList.setSelectedIndex(x);
+                break;
+            }
+        }
+
+        // reselect row in station list
+        const stItems = this.stationList.getItems();
+
+        for (let x = 0; x < stItems.length; x++) {
+            const i = stItems[x].object;
+
+            if (i.id === this.selectedItemID) {
+                this.stationList.setSelectedIndex(x);
                 break;
             }
         }
