@@ -478,6 +478,48 @@ func (s *Ship) doAutopilotGoto() {
 		tX = tgt.PosX
 		tY = tgt.PosY
 		tR = tgt.Radius
+	} else if s.AutopilotGoto.Type == targetTypeReg.Star {
+		// find star with id
+		tgt := s.CurrentSystem.stars[s.AutopilotGoto.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+		tR = tgt.Radius
+	} else if s.AutopilotGoto.Type == targetTypeReg.Planet {
+		// find planet with id
+		tgt := s.CurrentSystem.planets[s.AutopilotGoto.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+		tR = tgt.Radius
+	} else if s.AutopilotGoto.Type == targetTypeReg.Jumphole {
+		// find jumphole with id
+		tgt := s.CurrentSystem.jumpholes[s.AutopilotGoto.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+		tR = tgt.Radius
+	} else {
+		s.CmdAbort()
+		return
 	}
 
 	// fly towards target
@@ -525,6 +567,45 @@ func (s *Ship) doAutopilotOrbit() {
 		// store target details
 		tX = tgt.PosX
 		tY = tgt.PosY
+	} else if s.AutopilotOrbit.Type == targetTypeReg.Star {
+		// find star with id
+		tgt := s.CurrentSystem.stars[s.AutopilotOrbit.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+	} else if s.AutopilotOrbit.Type == targetTypeReg.Planet {
+		// find planet with id
+		tgt := s.CurrentSystem.planets[s.AutopilotOrbit.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+	} else if s.AutopilotGoto.Type == targetTypeReg.Jumphole {
+		// find jumphole with id
+		tgt := s.CurrentSystem.jumpholes[s.AutopilotGoto.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+	} else {
+		s.CmdAbort()
+		return
 	}
 
 	if s.AutopilotOrbit.Distance <= 0 {
@@ -573,6 +654,9 @@ func (s *Ship) doAutopilotDock() {
 			s.DockedAtStationID = &station.ID
 			s.AutopilotMode = NewAutopilotRegistry().None
 		}
+	} else {
+		s.CmdAbort()
+		return
 	}
 }
 

@@ -20,8 +20,11 @@ type MessageRegistry struct {
 
 //TargetTypeRegistry Registry of target types
 type TargetTypeRegistry struct {
-	Ship    int
-	Station int
+	Ship     int
+	Station  int
+	Star     int
+	Planet   int
+	Jumphole int
 }
 
 //NewMessageRegistry Returns a MessageRegistry with correct enum values
@@ -41,8 +44,11 @@ func NewMessageRegistry() *MessageRegistry {
 //NewTargetTypeRegistry Returns a TargetTypeRegistry with correct enum values
 func NewTargetTypeRegistry() *TargetTypeRegistry {
 	return &TargetTypeRegistry{
-		Ship:    1,
-		Station: 2,
+		Ship:     1,
+		Station:  2,
+		Star:     3,
+		Planet:   4,
+		Jumphole: 5,
 	}
 }
 

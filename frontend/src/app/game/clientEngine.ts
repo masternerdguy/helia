@@ -381,6 +381,10 @@ function handleCurrentShipUpdate(d: GameMessage) {
   if (!!msg.currentShipInfo.dockedAtStationID) {
     engineSack.player.currentTargetID = msg.currentShipInfo.dockedAtStationID;
     engineSack.player.currentTargetType = TargetType.Station;
+
+    // store target on overview window as well
+    engineSack.overviewWindow.selectedItemID = msg.currentShipInfo.dockedAtStationID;
+    engineSack.overviewWindow.selectedItemType = TargetType.Station;
   }
 
   // update status window
@@ -548,6 +552,10 @@ function handleClick(x: number, y: number) {
         engineSack.player.currentTargetID = sh.id;
         engineSack.player.currentTargetType = TargetType.Ship;
 
+        // store target on overview window as well
+        engineSack.overviewWindow.selectedItemID = sh.id;
+        engineSack.overviewWindow.selectedItemType = TargetType.Ship;
+
         return;
       }
     }
@@ -565,6 +573,10 @@ function handleClick(x: number, y: number) {
         // set as target on client
         engineSack.player.currentTargetID = st.id;
         engineSack.player.currentTargetType = TargetType.Station;
+
+        // store target on overview window as well
+        engineSack.overviewWindow.selectedItemID = st.id;
+        engineSack.overviewWindow.selectedItemType = TargetType.Station;
 
         return;
       }
