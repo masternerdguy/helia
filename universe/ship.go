@@ -215,6 +215,9 @@ func (s *Ship) PeriodicUpdate() {
 		s.PosX = s.DockedAtStation.PosX
 		s.PosY = s.DockedAtStation.PosY
 
+		// reset fuel
+		s.Fuel = math.Abs(s.GetRealMaxFuel())
+
 		// check autopilot
 		s.doDockedAutopilot()
 	}
@@ -728,6 +731,11 @@ func (s *Ship) facePoint(tX float64, tY float64) float64 {
 
 //rotate Turn the ship
 func (s *Ship) rotate(scale float64) {
+	// do nothing if out of fuel
+	if s.Fuel <= 0 {
+		return
+	}
+
 	// bound requested turn magnitude
 	if scale > 1 {
 		scale = 1
@@ -737,12 +745,23 @@ func (s *Ship) rotate(scale float64) {
 		scale = -1
 	}
 
+	// calculate burn
+	burn := s.GetRealTurn() * scale
+
 	// turn
-	s.Theta += s.GetRealTurn() * scale
+	s.Theta += burn
+
+	// expend fuel
+	s.Fuel -= math.Abs(burn)
 }
 
 //forwardThrust Fire the ship's thrusters
 func (s *Ship) forwardThrust(scale float64) {
+	// do nothing if out of fuel
+	if s.Fuel <= 0 {
+		return
+	}
+
 	// bound requested thrust magnitude
 	if scale > 1 {
 		scale = 1
@@ -752,7 +771,13 @@ func (s *Ship) forwardThrust(scale float64) {
 		scale = 0
 	}
 
+	// calculate burn
+	burn := s.GetRealAccel() * scale
+
 	// accelerate along theta using thrust proportional to bounded magnitude
-	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (s.GetRealAccel() * scale)
-	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (s.GetRealAccel() * scale)
+	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (burn)
+	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (burn)
+
+	// consume fuel
+	s.Fuel -= math.Abs(burn)
 }
