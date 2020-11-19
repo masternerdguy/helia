@@ -191,7 +191,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 				defer s.RemoveShip(sA, false)
 
 				//kill ship autopilot
-				sA.CmdAbort()
+				defer sA.CmdAbort()
 
 				//on the opposite side of the hole
 				riX := jB.PosX - sA.PosX

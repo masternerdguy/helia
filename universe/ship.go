@@ -599,9 +599,9 @@ func (s *Ship) doAutopilotOrbit() {
 		// store target details
 		tX = tgt.PosX
 		tY = tgt.PosY
-	} else if s.AutopilotGoto.Type == targetTypeReg.Jumphole {
+	} else if s.AutopilotOrbit.Type == targetTypeReg.Jumphole {
 		// find jumphole with id
-		tgt := s.CurrentSystem.jumpholes[s.AutopilotGoto.TargetID.String()]
+		tgt := s.CurrentSystem.jumpholes[s.AutopilotOrbit.TargetID.String()]
 
 		if tgt == nil {
 			s.CmdAbort()
