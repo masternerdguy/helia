@@ -11,6 +11,12 @@ import (
 	"github.com/google/uuid"
 )
 
+//ShipFuelTurn Scaler for the amount of fuel used turning
+const ShipFuelTurn = 0.1
+
+//ShipFuelBurn Scaler for the amount of fuel used thrusting
+const ShipFuelBurn = 0.3
+
 //AutopilotRegistry Autopilot states for ships
 type AutopilotRegistry struct {
 	None      int
@@ -752,7 +758,7 @@ func (s *Ship) rotate(scale float64) {
 	s.Theta += burn
 
 	// expend fuel
-	s.Fuel -= math.Abs(burn)
+	s.Fuel -= math.Abs(burn) * ShipFuelTurn
 }
 
 //forwardThrust Fire the ship's thrusters
@@ -779,5 +785,5 @@ func (s *Ship) forwardThrust(scale float64) {
 	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (burn)
 
 	// consume fuel
-	s.Fuel -= math.Abs(burn)
+	s.Fuel -= math.Abs(burn) * ShipFuelBurn
 }
