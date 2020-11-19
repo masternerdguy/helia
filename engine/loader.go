@@ -18,6 +18,7 @@ func loadUniverse() (*universe.Universe, error) {
 	planetSvc := sql.GetPlanetService()
 	stationSvc := sql.GetStationService()
 	jumpholeSvc := sql.GetJumpholeService()
+	userSvc := sql.GetUserService()
 
 	u := universe.Universe{}
 
@@ -78,12 +79,20 @@ func loadUniverse() (*universe.Universe, error) {
 					return nil, err
 				}
 
+				//get owner info
+				owner, err := userSvc.GetUserByID((sh.UserID))
+
+				if err != nil {
+					return nil, err
+				}
+
 				//build in-memory ship
 				es := universe.Ship{
 					ID:                sh.ID,
 					UserID:            sh.UserID,
 					Created:           sh.Created,
 					ShipName:          sh.ShipName,
+					OwnerName:         owner.Username,
 					PosX:              sh.PosX,
 					PosY:              sh.PosY,
 					SystemID:          sh.SystemID,

@@ -101,6 +101,7 @@ export class Ship extends WSShip {
     sync(sh: WSShip) {
         this.createdAt = sh.createdAt;
         this.shipName = sh.shipName;
+        this.ownerName = sh.ownerName;
         this.uid = sh.uid;
         this.systemId = sh.systemId;
         this.x = sh.x;

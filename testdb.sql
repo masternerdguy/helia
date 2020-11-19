@@ -221,7 +221,7 @@ ALTER TABLE public.universe_systems OWNER TO postgres;
 
 CREATE TABLE public.users (
     id uuid NOT NULL,
-    username character varying(32) NOT NULL,
+    username character varying(16) NOT NULL,
     hashpass character(64) NOT NULL,
     registered timestamp with time zone NOT NULL,
     banned bit(1) NOT NULL,

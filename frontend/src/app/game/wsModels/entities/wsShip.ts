@@ -3,6 +3,7 @@ export class WSShip {
     uid: string;
     createdAt: string;
     shipName: string;
+    ownerName: string;
     x: number;
     y: number;
     systemId: string;

@@ -64,23 +64,24 @@ type UndockData struct {
 
 //Ship Structure representing a player ship in the game universe
 type Ship struct {
-	ID       uuid.UUID
-	UserID   uuid.UUID
-	Created  time.Time
-	ShipName string
-	PosX     float64
-	PosY     float64
-	SystemID uuid.UUID
-	Texture  string
-	Theta    float64
-	VelX     float64
-	VelY     float64
-	Shield   float64
-	Armor    float64
-	Hull     float64
-	Fuel     float64
-	Heat     float64
-	Energy   float64
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	Created   time.Time
+	ShipName  string
+	OwnerName string
+	PosX      float64
+	PosY      float64
+	SystemID  uuid.UUID
+	Texture   string
+	Theta     float64
+	VelX      float64
+	VelY      float64
+	Shield    float64
+	Armor     float64
+	Hull      float64
+	Fuel      float64
+	Heat      float64
+	Energy    float64
 	//cache of base template
 	TemplateData ShipTemplate
 	//docking
@@ -104,23 +105,24 @@ func (s *Ship) CopyShip() *Ship {
 	defer s.Lock.Unlock()
 
 	sc := Ship{
-		ID:       s.ID,
-		UserID:   s.UserID,
-		Created:  s.Created,
-		ShipName: s.ShipName,
-		PosX:     s.PosX,
-		PosY:     s.PosY,
-		SystemID: s.SystemID,
-		Texture:  s.Texture,
-		Theta:    s.Theta,
-		VelX:     s.VelX,
-		VelY:     s.VelY,
-		Shield:   s.Shield,
-		Armor:    s.Armor,
-		Hull:     s.Hull,
-		Fuel:     s.Fuel,
-		Heat:     s.Heat,
-		Energy:   s.Energy,
+		ID:        s.ID,
+		UserID:    s.UserID,
+		Created:   s.Created,
+		ShipName:  s.ShipName,
+		OwnerName: s.OwnerName,
+		PosX:      s.PosX,
+		PosY:      s.PosY,
+		SystemID:  s.SystemID,
+		Texture:   s.Texture,
+		Theta:     s.Theta,
+		VelX:      s.VelX,
+		VelY:      s.VelY,
+		Shield:    s.Shield,
+		Armor:     s.Armor,
+		Hull:      s.Hull,
+		Fuel:      s.Fuel,
+		Heat:      s.Heat,
+		Energy:    s.Energy,
 		TemplateData: ShipTemplate{
 			ID:               s.TemplateData.ID,
 			Created:          s.TemplateData.Created,
