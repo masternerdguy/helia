@@ -161,6 +161,11 @@ export class OverviewWindow extends GDIWindow {
 
         // include ships
         for (const i of player.currentSystem.ships) {
+            // skip if player ship
+            if (i.id === player.currentShip.id) {
+                continue;
+            }
+
             const d: OverviewRow = {
                 object: i,
                 type: TargetType.Ship,
