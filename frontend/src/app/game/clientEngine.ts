@@ -410,8 +410,6 @@ function handleCurrentShipUpdate(d: GameMessage) {
   // update current ship cache
   engineSack.player.currentShip.sync(msg.currentShipInfo);
 
-  console.log(engineSack.player.currentShip.fitStatus);
-
   // update camera position to track player ship
   engineSack.camera.x = msg.currentShipInfo.x;
   engineSack.camera.y = msg.currentShipInfo.y;
