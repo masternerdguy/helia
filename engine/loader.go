@@ -126,6 +126,7 @@ func loadUniverse() (*universe.Universe, error) {
 						BaseEnergy:       temp.BaseEnergy,
 						BaseEnergyRegen:  temp.BaseEnergyRegen,
 						ShipTypeID:       temp.ShipTypeID,
+						SlotLayout:       SlotLayoutFromSQL(&temp.SlotLayout),
 					},
 				}
 
@@ -336,4 +337,57 @@ func saveUniverse(u *universe.Universe) {
 			}
 		}
 	}
+}
+
+//SlotLayoutFromSQL Converts a SlotLayout from the SQL type to the engine type
+func SlotLayoutFromSQL(value *sql.SlotLayout) universe.SlotLayout {
+	//set up empty layout
+	layout := universe.SlotLayout{}
+
+	// null check
+	if value == nil {
+		// return empty layout
+		return layout
+	}
+
+	//copy slot data into layout
+	for _, v := range value.ASlots {
+		slot := SlotFromSQL(&v)
+		layout.ASlots = append(layout.ASlots, slot)
+	}
+
+	for _, v := range value.BSlots {
+		slot := SlotFromSQL(&v)
+		layout.BSlots = append(layout.BSlots, slot)
+	}
+
+	for _, v := range value.CSlots {
+		slot := SlotFromSQL(&v)
+		layout.CSlots = append(layout.CSlots, slot)
+	}
+
+	log.Println(fmt.Sprintf("%v", layout))
+
+	//return filled layout
+	return layout
+}
+
+//SlotFromSQL Converts a Slot from the SQL type to the engine type
+func SlotFromSQL(value *sql.Slot) universe.Slot {
+	//set up empty slot
+	slot := universe.Slot{}
+
+	//null check
+	if value == nil {
+		// return empty slot
+		return slot
+	}
+
+	//copy slot data
+	slot.Family = value.Family
+	slot.Volume = value.Volume
+	slot.TexturePosition = value.TexturePosition
+
+	//return filled slot
+	return slot
 }

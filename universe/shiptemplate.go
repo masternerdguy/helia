@@ -26,4 +26,19 @@ type ShipTemplate struct {
 	BaseEnergy       float64
 	BaseEnergyRegen  float64
 	ShipTypeID       uuid.UUID
+	SlotLayout       SlotLayout
+}
+
+//SlotLayout Structure representing the slot layout available for fitting modules to this ship
+type SlotLayout struct {
+	ASlots []Slot
+	BSlots []Slot
+	CSlots []Slot
+}
+
+//Slot Structure representing a slot in a SlotLayout
+type Slot struct {
+	Family          string
+	Volume          int
+	TexturePosition []int
 }
