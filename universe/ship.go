@@ -122,6 +122,7 @@ type FittedSlot struct {
 	ItemTypeName   string
 	ItemMeta       Meta
 	ItemTypeMeta   Meta
+	IsCycling      bool
 }
 
 //CopyShip Returns a copy of the ship

@@ -93,8 +93,6 @@ func loadUniverse() (*universe.Universe, error) {
 					return nil, err
 				}
 
-				log.Println(fmt.Sprintf("%v", &fitting))
-
 				//build in-memory ship
 				es := universe.Ship{
 					ID:                sh.ID,
@@ -443,8 +441,6 @@ func FittingFromSQL(value *sql.Fitting) (*universe.Fitting, error) {
 		fitting.CRack = append(fitting.CRack, *slot)
 	}
 
-	log.Println(fmt.Sprintf("%v", fitting))
-
 	//return filled layout
 	return &fitting, nil
 }
@@ -518,8 +514,6 @@ func SQLFromFitting(value *universe.Fitting) sql.Fitting {
 		slot := SQLFromFittedSlot(&v)
 		fitting.CRack = append(fitting.CRack, slot)
 	}
-
-	log.Println(fmt.Sprintf("%v", fitting))
 
 	//return filled layout
 	return fitting

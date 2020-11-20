@@ -407,6 +407,8 @@ function handleCurrentShipUpdate(d: GameMessage) {
   // parse body
   const msg = JSON.parse(d.body) as ServerCurrentShipUpdate;
 
+  console.log(msg)
+
   // update current ship cache
   engineSack.player.currentShip.sync(msg.currentShipInfo);
 

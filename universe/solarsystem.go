@@ -318,6 +318,56 @@ func (s *SolarSystem) PeriodicUpdate() {
 			continue
 		}
 
+		//build fitting status info
+		fs := models.ServerFittingStatusBody{}
+
+		//rack a
+		rackA := models.ServerRackStatusBody{}
+
+		for _, v := range d.Fitting.ARack {
+			//build module statusinfo
+			module := models.ServerModuleStatusBody{}
+
+			module.Family = v.ItemTypeFamily
+			module.Type = v.ItemTypeName
+			module.IsCycling = v.IsCycling
+
+			rackA.Modules = append(rackA.Modules, module)
+		}
+
+		//rack b
+		rackB := models.ServerRackStatusBody{}
+
+		for _, v := range d.Fitting.BRack {
+			//build module statusinfo
+			module := models.ServerModuleStatusBody{}
+
+			module.Family = v.ItemTypeFamily
+			module.Type = v.ItemTypeName
+			module.IsCycling = v.IsCycling
+
+			rackB.Modules = append(rackB.Modules, module)
+		}
+
+		//rack c
+		rackC := models.ServerRackStatusBody{}
+
+		for _, v := range d.Fitting.CRack {
+			//build module statusinfo
+			module := models.ServerModuleStatusBody{}
+
+			module.Family = v.ItemTypeFamily
+			module.Type = v.ItemTypeName
+			module.IsCycling = v.IsCycling
+
+			rackC.Modules = append(rackC.Modules, module)
+		}
+
+		//store rack info on fitting info
+		fs.ARack = rackA
+		fs.BRack = rackB
+		fs.CRack = rackC
+
 		//build current ship info message
 		si := models.ServerCurrentShipUpdate{
 			CurrentShipInfo: models.CurrentShipInfo{
@@ -342,6 +392,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 				EnergyP:           (d.Energy / d.GetRealMaxEnergy()) * 100,
 				HeatP:             (d.Heat / d.GetRealMaxHeat()) * 100,
 				FuelP:             (d.Fuel / d.GetRealMaxFuel()) * 100,
+				FitStatus:         fs,
 				DockedAtStationID: d.DockedAtStationID,
 			},
 		}

@@ -71,12 +71,13 @@ type CurrentShipInfo struct {
 	ArmorP   float64   `json:"armorP"`
 	HullP    float64   `json:"hullP"`
 	// secrets that should not be globally known
-	Accel             float64    `json:"accel"`
-	Turn              float64    `json:"turn"`
-	EnergyP           float64    `json:"energyP"`
-	HeatP             float64    `json:"heatP"`
-	FuelP             float64    `json:"fuelP"`
-	DockedAtStationID *uuid.UUID `json:"dockedAtStationID"`
+	Accel             float64                 `json:"accel"`
+	Turn              float64                 `json:"turn"`
+	EnergyP           float64                 `json:"energyP"`
+	HeatP             float64                 `json:"heatP"`
+	FuelP             float64                 `json:"fuelP"`
+	FitStatus         ServerFittingStatusBody `json:"fitStatus"`
+	DockedAtStationID *uuid.UUID              `json:"dockedAtStationID"`
 }
 
 //GlobalShipInfo Structure for passing non-secret information about a ship
@@ -222,4 +223,23 @@ type ClientDockBody struct {
 //ClientUndockBody Body containing an undock move order
 type ClientUndockBody struct {
 	SessionID uuid.UUID `json:"sid"`
+}
+
+//ServerFittingStatusBody Body containing information about a ship's current fitting
+type ServerFittingStatusBody struct {
+	ARack ServerRackStatusBody `json:"aRack"`
+	BRack ServerRackStatusBody `json:"bRack"`
+	CRack ServerRackStatusBody `json:"cRack"`
+}
+
+//ServerModuleStatusBody Body containing information about a module fitted to a ship
+type ServerModuleStatusBody struct {
+	Family    string `json:"family"`
+	Type      string `json:"type"`
+	IsCycling bool   `json:"isCycling"`
+}
+
+//ServerRackStatusBody Body containing information about a ship's rack
+type ServerRackStatusBody struct {
+	Modules []ServerModuleStatusBody `json:"modules"`
 }
