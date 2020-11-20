@@ -86,6 +86,15 @@ func loadUniverse() (*universe.Universe, error) {
 					return nil, err
 				}
 
+				//get fitting
+				fitting, err := FittingFromSQL(&sh.Fitting)
+
+				if err != nil {
+					return nil, err
+				}
+
+				log.Println(fmt.Sprintf("%v", &fitting))
+
 				//build in-memory ship
 				es := universe.Ship{
 					ID:                sh.ID,
@@ -107,7 +116,7 @@ func loadUniverse() (*universe.Universe, error) {
 					Heat:              sh.Heat,
 					Energy:            sh.Energy,
 					DockedAtStationID: sh.DockedAtStationID,
-					Fitting:           FittingFromSQL(&sh.Fitting),
+					Fitting:           *fitting,
 					TemplateData: universe.ShipTemplate{
 						ID:               temp.ID,
 						Created:          temp.Created,
@@ -393,55 +402,94 @@ func SlotFromSQL(value *sql.Slot) universe.Slot {
 }
 
 //FittingFromSQL Converts a Fitting from the SQL type to the engine type
-func FittingFromSQL(value *sql.Fitting) universe.Fitting {
+func FittingFromSQL(value *sql.Fitting) (*universe.Fitting, error) {
 	//set up empty layout
 	fitting := universe.Fitting{}
 
 	// null check
 	if value == nil {
 		// return empty layout
-		return fitting
+		return &fitting, nil
 	}
 
 	//copy slot data into layout
 	for _, v := range value.ARack {
-		slot := FittedSlotFromSQL(&v)
-		fitting.ARack = append(fitting.ARack, slot)
+		slot, err := FittedSlotFromSQL(&v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		fitting.ARack = append(fitting.ARack, *slot)
 	}
 
 	for _, v := range value.BRack {
-		slot := FittedSlotFromSQL(&v)
-		fitting.BRack = append(fitting.BRack, slot)
+		slot, err := FittedSlotFromSQL(&v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		fitting.BRack = append(fitting.BRack, *slot)
 	}
 
 	for _, v := range value.CRack {
-		slot := FittedSlotFromSQL(&v)
-		fitting.CRack = append(fitting.CRack, slot)
+		slot, err := FittedSlotFromSQL(&v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		fitting.CRack = append(fitting.CRack, *slot)
 	}
 
 	log.Println(fmt.Sprintf("%v", fitting))
 
 	//return filled layout
-	return fitting
+	return &fitting, nil
 }
 
 //FittedSlotFromSQL Converts a FittedSlot from the SQL type to the engine type
-func FittedSlotFromSQL(value *sql.FittedSlot) universe.FittedSlot {
+func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
+	// get services
+	itemSvc := sql.GetItemService()
+	itemTypeSvc := sql.GetItemTypeService()
+
 	//set up empty slot
 	slot := universe.FittedSlot{}
 
 	//null check
 	if value == nil {
 		// return empty slot
-		return slot
+		return &slot, nil
 	}
 
 	//copy slot data
 	slot.ItemID = value.ItemID
 	slot.ItemTypeID = value.ItemTypeID
 
+	//load item data
+	item, err := itemSvc.GetItemByID(slot.ItemID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//load item type data
+	itemType, err := itemTypeSvc.GetItemTypeByID(item.ItemTypeID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//store on slot
+	slot.ItemMeta = MetaFromSQL(&item.Meta)
+	slot.ItemTypeMeta = MetaFromSQL(&itemType.Meta)
+	slot.ItemTypeFamily = itemType.Family
+	slot.ItemTypeName = itemType.Name
+
 	//return filled slot
-	return slot
+	return &slot, nil
 }
 
 //SQLFromFitting Converts a Fitting from the engine type to the SQL type
@@ -494,4 +542,44 @@ func SQLFromFittedSlot(value *universe.FittedSlot) sql.FittedSlot {
 
 	//return filled slot
 	return slot
+}
+
+//MetaFromSQL Converts generic metadata from the SQL type to the engine type
+func MetaFromSQL(value *sql.Meta) universe.Meta {
+	//set up empty metadata
+	meta := universe.Meta{}
+
+	//null check
+	if value == nil {
+		// return empty slot
+		return meta
+	}
+
+	//copy metadata
+	for k, v := range *value {
+		meta[k] = v
+	}
+
+	//return filled meta
+	return meta
+}
+
+//SQLFromMeta Converts generic metadata from the SQL type to the engine type
+func SQLFromMeta(value *universe.Meta) sql.Meta {
+	//set up empty metadata
+	meta := sql.Meta{}
+
+	//null check
+	if value == nil {
+		// return empty slot
+		return meta
+	}
+
+	//copy metadata
+	for k, v := range *value {
+		meta[k] = v
+	}
+
+	//return filled meta
+	return meta
 }

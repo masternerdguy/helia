@@ -177,6 +177,15 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				return
 			}
 
+			//get fitting
+			fitting, err := engine.FittingFromSQL(&dbShip.Fitting)
+
+			if err != nil {
+				//dump error to console
+				log.Println(fmt.Sprintf("player join error: %v", err))
+				return
+			}
+
 			// build in-memory ship
 			currShip = &universe.Ship{
 				ID:        dbShip.ID,
@@ -197,7 +206,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				Fuel:      dbShip.Fuel,
 				Heat:      dbShip.Heat,
 				Energy:    dbShip.Energy,
-				Fitting:   engine.FittingFromSQL(&dbShip.Fitting),
+				Fitting:   *fitting,
 				TemplateData: universe.ShipTemplate{
 					ID:               dbTemp.ID,
 					Created:          dbTemp.Created,

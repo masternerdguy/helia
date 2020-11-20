@@ -117,6 +117,11 @@ type Fitting struct {
 type FittedSlot struct {
 	ItemTypeID uuid.UUID
 	ItemID     uuid.UUID
+	//in-memory only
+	ItemTypeFamily string
+	ItemTypeName   string
+	ItemMeta       Meta
+	ItemTypeMeta   Meta
 }
 
 //CopyShip Returns a copy of the ship
