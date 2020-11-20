@@ -107,6 +107,7 @@ func loadUniverse() (*universe.Universe, error) {
 					Heat:              sh.Heat,
 					Energy:            sh.Energy,
 					DockedAtStationID: sh.DockedAtStationID,
+					Fitting:           FittingFromSQL(&sh.Fitting),
 					TemplateData: universe.ShipTemplate{
 						ID:               temp.ID,
 						Created:          temp.Created,
@@ -299,6 +300,7 @@ func saveUniverse(u *universe.Universe) {
 					Energy:            ship.Energy,
 					ShipTemplateID:    ship.TemplateData.ID,
 					DockedAtStationID: ship.DockedAtStationID,
+					Fitting:           SQLFromFitting(&ship.Fitting),
 				}
 
 				err := shipSvc.UpdateShip(dbShip)
@@ -366,8 +368,6 @@ func SlotLayoutFromSQL(value *sql.SlotLayout) universe.SlotLayout {
 		layout.CSlots = append(layout.CSlots, slot)
 	}
 
-	log.Println(fmt.Sprintf("%v", layout))
-
 	//return filled layout
 	return layout
 }
@@ -387,6 +387,110 @@ func SlotFromSQL(value *sql.Slot) universe.Slot {
 	slot.Family = value.Family
 	slot.Volume = value.Volume
 	slot.TexturePosition = value.TexturePosition
+
+	//return filled slot
+	return slot
+}
+
+//FittingFromSQL Converts a Fitting from the SQL type to the engine type
+func FittingFromSQL(value *sql.Fitting) universe.Fitting {
+	//set up empty layout
+	fitting := universe.Fitting{}
+
+	// null check
+	if value == nil {
+		// return empty layout
+		return fitting
+	}
+
+	//copy slot data into layout
+	for _, v := range value.ARack {
+		slot := FittedSlotFromSQL(&v)
+		fitting.ARack = append(fitting.ARack, slot)
+	}
+
+	for _, v := range value.BRack {
+		slot := FittedSlotFromSQL(&v)
+		fitting.BRack = append(fitting.BRack, slot)
+	}
+
+	for _, v := range value.CRack {
+		slot := FittedSlotFromSQL(&v)
+		fitting.CRack = append(fitting.CRack, slot)
+	}
+
+	log.Println(fmt.Sprintf("%v", fitting))
+
+	//return filled layout
+	return fitting
+}
+
+//FittedSlotFromSQL Converts a FittedSlot from the SQL type to the engine type
+func FittedSlotFromSQL(value *sql.FittedSlot) universe.FittedSlot {
+	//set up empty slot
+	slot := universe.FittedSlot{}
+
+	//null check
+	if value == nil {
+		// return empty slot
+		return slot
+	}
+
+	//copy slot data
+	slot.ItemID = value.ItemID
+	slot.ItemTypeID = value.ItemTypeID
+
+	//return filled slot
+	return slot
+}
+
+//SQLFromFitting Converts a Fitting from the engine type to the SQL type
+func SQLFromFitting(value *universe.Fitting) sql.Fitting {
+	//set up empty layout
+	fitting := sql.Fitting{}
+
+	// null check
+	if value == nil {
+		// return empty layout
+		return fitting
+	}
+
+	//copy slot data into layout
+	for _, v := range value.ARack {
+		slot := SQLFromFittedSlot(&v)
+		fitting.ARack = append(fitting.ARack, slot)
+	}
+
+	for _, v := range value.BRack {
+		slot := SQLFromFittedSlot(&v)
+		fitting.BRack = append(fitting.BRack, slot)
+	}
+
+	for _, v := range value.CRack {
+		slot := SQLFromFittedSlot(&v)
+		fitting.CRack = append(fitting.CRack, slot)
+	}
+
+	log.Println(fmt.Sprintf("%v", fitting))
+
+	//return filled layout
+	return fitting
+}
+
+//SQLFromFittedSlot Converts a FittedSlot from the engine type to the SQL type
+func SQLFromFittedSlot(value *universe.FittedSlot) sql.FittedSlot {
+	//set up empty slot
+	slot := sql.FittedSlot{}
+
+	//null check
+	if value == nil {
+		// return empty slot
+		return slot
+	}
+
+	//copy slot data
+	slot.ItemID = value.ItemID
+	slot.ItemTypeID = value.ItemTypeID
 
 	//return filled slot
 	return slot

@@ -197,6 +197,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				Fuel:      dbShip.Fuel,
 				Heat:      dbShip.Heat,
 				Energy:    dbShip.Energy,
+				Fitting:   engine.FittingFromSQL(&dbShip.Fitting),
 				TemplateData: universe.ShipTemplate{
 					ID:               dbTemp.ID,
 					Created:          dbTemp.Created,

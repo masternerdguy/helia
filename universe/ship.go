@@ -88,6 +88,7 @@ type Ship struct {
 	Fuel      float64
 	Heat      float64
 	Energy    float64
+	Fitting   Fitting
 	//cache of base template
 	TemplateData ShipTemplate
 	//docking
@@ -103,6 +104,19 @@ type Ship struct {
 	CurrentSystem      *SolarSystem
 	DockedAtStation    *Station
 	Lock               sync.Mutex
+}
+
+//Fitting Structure representing the module racks of a ship and what is fitted to them
+type Fitting struct {
+	ARack []FittedSlot
+	BRack []FittedSlot
+	CRack []FittedSlot
+}
+
+//FittedSlot Structure representing a slot within a ship's fitting rack
+type FittedSlot struct {
+	ItemTypeID uuid.UUID
+	ItemID     uuid.UUID
 }
 
 //CopyShip Returns a copy of the ship
@@ -129,6 +143,7 @@ func (s *Ship) CopyShip() *Ship {
 		Fuel:      s.Fuel,
 		Heat:      s.Heat,
 		Energy:    s.Energy,
+		Fitting:   s.Fitting,
 		TemplateData: ShipTemplate{
 			ID:               s.TemplateData.ID,
 			Created:          s.TemplateData.Created,

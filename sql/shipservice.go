@@ -2,6 +2,8 @@ package sql
 
 import (
 	"database/sql"
+	"database/sql/driver"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -37,6 +39,35 @@ type Ship struct {
 	Energy            float64
 	ShipTemplateID    uuid.UUID
 	DockedAtStationID *uuid.UUID
+	Fitting           Fitting
+}
+
+//Fitting JSON structure representing the module racks of a ship and what is fitted to them
+type Fitting struct {
+	ARack []FittedSlot `json:"a_rack"`
+	BRack []FittedSlot `json:"b_rack"`
+	CRack []FittedSlot `json:"c_rack"`
+}
+
+//FittedSlot JSON structure representing a slot within a ship's fitting rack
+type FittedSlot struct {
+	ItemTypeID uuid.UUID `json:"item_type_id"`
+	ItemID     uuid.UUID `json:"item_id"`
+}
+
+//Value Converts from a Fitting to JSON
+func (a Fitting) Value() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+//Scan Converts from JSON to a Fitting
+func (a *Fitting) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
 }
 
 //NewShip Creates a new ship
@@ -53,15 +84,16 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 				INSERT INTO public.ships(
 					id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta,
 					vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
-					dockedat_stationid)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19);
+					dockedat_stationid, fitting)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20);
 			`
 
 	uid := uuid.New()
 	createdAt := time.Now()
 
 	_, err = db.Query(sql, uid, e.SystemID, e.UserID, e.PosX, e.PosY, createdAt, e.ShipName, e.Texture, e.Theta,
-		e.VelX, e.VelY, e.Shield, e.Armor, e.Hull, e.Fuel, e.Heat, e.Energy, e.ShipTemplateID, e.DockedAtStationID)
+		e.VelX, e.VelY, e.Shield, e.Armor, e.Hull, e.Fuel, e.Heat, e.Energy, e.ShipTemplateID, e.DockedAtStationID,
+		e.Fitting)
 
 	if err != nil {
 		return nil, err
@@ -90,7 +122,7 @@ func (s ShipService) GetShipByID(shipID uuid.UUID) (*Ship, error) {
 		`
 			SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
 				   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
-				   dockedat_stationid
+				   dockedat_stationid, fitting
 			FROM public.ships
 			WHERE id = $1
 			`
@@ -99,7 +131,7 @@ func (s ShipService) GetShipByID(shipID uuid.UUID) (*Ship, error) {
 
 	switch err := row.Scan(&ship.ID, &ship.SystemID, &ship.UserID, &ship.PosX, &ship.PosY, &ship.Created, &ship.ShipName, &ship.Texture,
 		&ship.Theta, &ship.VelX, &ship.VelY, &ship.Shield, &ship.Armor, &ship.Hull, &ship.Fuel, &ship.Heat, &ship.Energy, &ship.ShipTemplateID,
-		&ship.DockedAtStationID); err {
+		&ship.DockedAtStationID, &ship.Fitting); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("Ship not found")
 	case nil:
@@ -124,7 +156,7 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID) ([]Ship, error) {
 	sql := `
 				SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
 					   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
-					   dockedat_stationid
+					   dockedat_stationid, fitting
 				FROM public.ships
 				WHERE universe_systemid = $1
 			`
@@ -141,7 +173,7 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID) ([]Ship, error) {
 		//scan into ship structure
 		rows.Scan(&s.ID, &s.SystemID, &s.UserID, &s.PosX, &s.PosY, &s.Created, &s.ShipName, &s.Texture,
 			&s.Theta, &s.VelX, &s.VelY, &s.Shield, &s.Armor, &s.Hull, &s.Fuel, &s.Heat, &s.Energy, &s.ShipTemplateID,
-			&s.DockedAtStationID)
+			&s.DockedAtStationID, &s.Fitting)
 
 		//append to ship slice
 		systems = append(systems, s)
@@ -164,12 +196,13 @@ func (s ShipService) UpdateShip(ship Ship) error {
 		`
 			UPDATE public.ships
 			SET universe_systemid=$2, userid=$3, pos_x=$4, pos_y=$5, created=$6, shipname=$7, texture=$8, theta=$9, vel_x=$10,
-				vel_y=$11, shield=$12, armor=$13, hull=$14, fuel=$15, heat=$16, energy=$17, shiptemplateid=$18, dockedat_stationid=$19
+				vel_y=$11, shield=$12, armor=$13, hull=$14, fuel=$15, heat=$16, energy=$17, shiptemplateid=$18, dockedat_stationid=$19,
+				fitting=$20
 			WHERE id = $1
 		`
 
 	_, err = db.Exec(sqlStatement, ship.ID, ship.SystemID, ship.UserID, ship.PosX, ship.PosY, ship.Created, ship.ShipName, ship.Texture, ship.Theta, ship.VelX,
-		ship.VelY, ship.Shield, ship.Armor, ship.Hull, ship.Fuel, ship.Heat, ship.Energy, ship.ShipTemplateID, ship.DockedAtStationID)
+		ship.VelY, ship.Shield, ship.Armor, ship.Hull, ship.Fuel, ship.Heat, ship.Energy, ship.ShipTemplateID, ship.DockedAtStationID, ship.Fitting)
 
 	return err
 }
