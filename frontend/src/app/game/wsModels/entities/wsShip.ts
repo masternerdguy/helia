@@ -21,5 +21,22 @@ export class WSShip {
     energyP: number;
     heatP: number;
     fuelP: number;
+    fitStatus: WSFitting;
     dockedAtStationID: string;
+}
+
+export class WSFitting {
+    aRack: WSRack;
+    bRack: WSRack;
+    cRack: WSRack;
+}
+
+export class WSRack {
+    modules: WSModule[];
+}
+
+export class WSModule {
+    family: string;
+    type: string;
+    isCycling: boolean;
 }

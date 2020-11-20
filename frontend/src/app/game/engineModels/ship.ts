@@ -156,5 +156,21 @@ export class Ship extends WSShip {
         } else {
             this.dockedAtStationID = undefined;
         }
+
+        if (sh.fitStatus) {
+            this.fitStatus = sh.fitStatus;
+
+            if (this.fitStatus.aRack.modules == null) {
+                this.fitStatus.aRack.modules = [];
+            }
+
+            if (this.fitStatus.bRack.modules == null) {
+                this.fitStatus.bRack.modules = [];
+            }
+
+            if (this.fitStatus.cRack.modules == null) {
+                this.fitStatus.cRack.modules = [];
+            }
+        }
     }
 }
