@@ -216,6 +216,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 					BaseEnergy:       dbTemp.BaseEnergy,
 					BaseEnergyRegen:  dbTemp.BaseEnergyRegen,
 					ShipTypeID:       dbTemp.ShipTypeID,
+					SlotLayout:       engine.SlotLayoutFromSQL(&dbTemp.SlotLayout),
 				},
 			}
 		}
