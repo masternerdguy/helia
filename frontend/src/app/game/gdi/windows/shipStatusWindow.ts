@@ -2,8 +2,10 @@ import { GDIWindow } from '../base/gdiWindow';
 import { FontSize } from '../base/gdiStyle';
 import { GDIBar } from '../components/gdiBar';
 import { Ship } from '../../engineModels/ship';
+import { GDIList } from '../components/gdiList';
 
 export class ShipStatusWindow extends GDIWindow {
+    // status bars
     shieldBar: GDIBar = new GDIBar();
     armorBar: GDIBar = new GDIBar();
     hullBar: GDIBar = new GDIBar();
@@ -11,6 +13,12 @@ export class ShipStatusWindow extends GDIWindow {
     energyBar: GDIBar = new GDIBar();
     fuelBar: GDIBar = new GDIBar();
 
+    // racks
+    rackA: GDIList = new GDIList();
+    rackB: GDIList = new GDIList();
+    rackC: GDIList = new GDIList();
+
+    // ship being monitored
     ship: Ship;
 
     initialize() {
@@ -97,6 +105,36 @@ export class ShipStatusWindow extends GDIWindow {
         this.fuelBar.setFont(FontSize.small);
         this.fuelBar.setText('Fuel');
 
+        // setup rack a
+        this.rackA.setWidth(200);
+        this.rackA.setHeight(200);
+        this.rackA.initialize();
+
+        this.rackA.setX(0);
+        this.rackA.setY(60);
+
+        this.rackA.setFont(FontSize.small);
+
+        // setup rack b
+        this.rackB.setWidth(200);
+        this.rackB.setHeight(200);
+        this.rackB.initialize();
+
+        this.rackB.setX(200);
+        this.rackB.setY(60);
+
+        this.rackB.setFont(FontSize.small);
+
+        // setup rack c
+        this.rackC.setWidth(200);
+        this.rackC.setHeight(200);
+        this.rackC.initialize();
+
+        this.rackC.setX(400);
+        this.rackC.setY(60);
+
+        this.rackC.setFont(FontSize.small);
+
         // add components
         this.addComponent(this.shieldBar);
         this.addComponent(this.armorBar);
@@ -104,16 +142,22 @@ export class ShipStatusWindow extends GDIWindow {
         this.addComponent(this.energyBar);
         this.addComponent(this.heatBar);
         this.addComponent(this.fuelBar);
+        this.addComponent(this.rackA);
+        this.addComponent(this.rackB);
+        this.addComponent(this.rackC);
     }
 
     periodicUpdate() {
         if (this.ship !== undefined && this.ship !== null) {
+            // update status bars
             this.shieldBar.setPercentage(this.ship.shieldP);
             this.armorBar.setPercentage(this.ship.armorP);
             this.hullBar.setPercentage(this.ship.hullP);
             this.energyBar.setPercentage(this.ship.energyP);
             this.heatBar.setPercentage(this.ship.heatP);
             this.fuelBar.setPercentage(this.ship.fuelP);
+
+            // todo: update fitted module display
         }
     }
 
