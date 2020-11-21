@@ -31,21 +31,6 @@ export class ShipStatusWindow extends GDIWindow {
     // ws
     private wsSvc: WsService;
 
-    shortNumberTable: string[] = [
-        '🕛',
-        '🕐',
-        '🕑',
-        '🕒',
-        '🕓',
-        '🕔',
-        '🕕',
-        '🕖',
-        '🕗',
-        '🕘',
-        '🕙',
-        '🕚'
-    ];
-
     initialize() {
         // set dimensions
         this.setWidth(600);
@@ -280,10 +265,7 @@ export class ShipStatusWindow extends GDIWindow {
     }
 
     private moduleStatusString(m: WSModule) {
-        // find short number in lookup table for cycle percentage
-        const pc = fixedString(
-            m.isCycling ? this.shortNumberTable[Math.round(m.cyclePercent / this.shortNumberTable.length)] : '',
-            1);
+        const pc = fixedString(m.isCycling ? `${m.cyclePercent}%` : '', 4);
 
         // build status string
         return `${fixedString(m.willRepeat ? '*' : '', 1)} ${fixedString(m.type, 24)} ${pc}~`;

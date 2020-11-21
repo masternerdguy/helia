@@ -378,6 +378,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 			module.ItemID = v.ItemID.String()
 			module.ItemTypeID = v.ItemTypeID.String()
 			module.WillRepeat = v.WillRepeat
+			module.CyclePercent = v.CyclePercent
 
 			rackA.Modules = append(rackA.Modules, module)
 		}
@@ -396,6 +397,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 			module.ItemID = v.ItemID.String()
 			module.ItemTypeID = v.ItemTypeID.String()
 			module.WillRepeat = v.WillRepeat
+			module.CyclePercent = v.CyclePercent
 
 			rackB.Modules = append(rackB.Modules, module)
 		}
@@ -413,6 +415,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 			module.ItemID = v.ItemID.String()
 			module.ItemTypeID = v.ItemTypeID.String()
 			module.WillRepeat = v.WillRepeat
+			module.CyclePercent = v.CyclePercent
 
 			rackC.Modules = append(rackC.Modules, module)
 		}

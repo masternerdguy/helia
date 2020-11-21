@@ -117,7 +117,7 @@ type Fitting struct {
 type FittedSlot struct {
 	ItemTypeID uuid.UUID
 	ItemID     uuid.UUID
-	//in-memory only
+	//in-memory only, exposable to player
 	ItemTypeFamily string
 	ItemTypeName   string
 	ItemMeta       Meta
@@ -125,6 +125,8 @@ type FittedSlot struct {
 	IsCycling      bool
 	WillRepeat     bool
 	CyclePercent   int
+	//in-memory only, secret
+	cooldownProgress int
 }
 
 //CopyShip Returns a copy of the ship
@@ -221,6 +223,19 @@ func (s *Ship) PeriodicUpdate() {
 
 		s.VelX -= dampX
 		s.VelY -= dampY
+
+		// update modules
+		for i := range s.Fitting.ARack {
+			s.Fitting.ARack[i].PeriodicUpdate()
+		}
+
+		for i := range s.Fitting.BRack {
+			s.Fitting.BRack[i].PeriodicUpdate()
+		}
+
+		for i := range s.Fitting.CRack {
+			s.Fitting.CRack[i].PeriodicUpdate()
+		}
 	} else {
 		/* Is Docked */
 		s.IsDocked = true
@@ -834,4 +849,39 @@ func (s *Ship) FindModule(id uuid.UUID, rack string) *FittedSlot {
 	}
 
 	return nil
+}
+
+//PeriodicUpdate Updates a fitted slot on a ship
+func (m *FittedSlot) PeriodicUpdate() {
+	if m.IsCycling {
+		//update cycle timer
+		cooldown, found := m.ItemTypeMeta.GetFloat64("cooldown")
+
+		if !found {
+			//module has no cooldown - deactivate
+			m.IsCycling = false
+			m.WillRepeat = false
+
+			return
+		}
+
+		cooldownMs := int(cooldown * 1000)
+		m.cooldownProgress += Heartbeat
+
+		if m.cooldownProgress > cooldownMs {
+			//cycle completed
+			m.IsCycling = false
+			m.cooldownProgress = 0
+			m.CyclePercent = 0
+		} else {
+			//update percentage
+			m.CyclePercent = ((m.cooldownProgress * 100) / cooldownMs)
+		}
+	} else {
+		//check for activation intent
+		if m.WillRepeat {
+			//activate module
+			m.IsCycling = true
+		}
+	}
 }

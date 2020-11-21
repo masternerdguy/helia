@@ -43,6 +43,7 @@ func (e *HeliaEngine) Start() {
 	for _, r := range e.Universe.Regions {
 		for _, s := range r.Systems {
 			go func(sol *universe.SolarSystem) {
+				var tpf int = 0
 				lastFrame := makeTimestamp()
 
 				//game loop
@@ -57,7 +58,7 @@ func (e *HeliaEngine) Start() {
 
 					//get time of last frame
 					now := makeTimestamp()
-					tpf := int(now - lastFrame)
+					tpf = int(now - lastFrame)
 
 					//find remaining portion of server heatbeat
 					if tpf < universe.Heartbeat {
