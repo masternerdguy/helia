@@ -370,16 +370,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 		for _, v := range d.Fitting.ARack {
 			//build module statusinfo
-			module := models.ServerModuleStatusBody{}
+			module := copyModuleInfo(v)
 
-			module.Family = v.ItemTypeFamily
-			module.Type = v.ItemTypeName
-			module.IsCycling = v.IsCycling
-			module.ItemID = v.ItemID.String()
-			module.ItemTypeID = v.ItemTypeID.String()
-			module.WillRepeat = v.WillRepeat
-			module.CyclePercent = v.CyclePercent
-
+			//store on message
 			rackA.Modules = append(rackA.Modules, module)
 		}
 
@@ -388,17 +381,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 		for _, v := range d.Fitting.BRack {
 			//build module statusinfo
-			module := models.ServerModuleStatusBody{}
+			module := copyModuleInfo(v)
 
-			module.Family = v.ItemTypeFamily
-			module.Type = v.ItemTypeName
-			module.IsCycling = v.IsCycling
-			module.CyclePercent = v.CyclePercent
-			module.ItemID = v.ItemID.String()
-			module.ItemTypeID = v.ItemTypeID.String()
-			module.WillRepeat = v.WillRepeat
-			module.CyclePercent = v.CyclePercent
-
+			//store on message
 			rackB.Modules = append(rackB.Modules, module)
 		}
 
@@ -407,16 +392,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 		for _, v := range d.Fitting.CRack {
 			//build module statusinfo
-			module := models.ServerModuleStatusBody{}
+			module := copyModuleInfo(v)
 
-			module.Family = v.ItemTypeFamily
-			module.Type = v.ItemTypeName
-			module.IsCycling = v.IsCycling
-			module.ItemID = v.ItemID.String()
-			module.ItemTypeID = v.ItemTypeID.String()
-			module.WillRepeat = v.WillRepeat
-			module.CyclePercent = v.CyclePercent
-
+			//store on message
 			rackC.Modules = append(rackC.Modules, module)
 		}
 
@@ -653,4 +631,18 @@ func (s *SolarSystem) CopyJumpholes() map[string]*Jumphole {
 
 	//return copy map
 	return copy
+}
+
+func copyModuleInfo(v FittedSlot) models.ServerModuleStatusBody {
+	module := models.ServerModuleStatusBody{}
+
+	module.Family = v.ItemTypeFamily
+	module.Type = v.ItemTypeName
+	module.IsCycling = v.IsCycling
+	module.ItemID = v.ItemID.String()
+	module.ItemTypeID = v.ItemTypeID.String()
+	module.WillRepeat = v.WillRepeat
+	module.CyclePercent = v.CyclePercent
+
+	return module
 }
