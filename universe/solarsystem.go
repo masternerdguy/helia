@@ -286,9 +286,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 			VelY:      d.VelY,
 			Mass:      d.GetRealMass(),
 			Radius:    d.TemplateData.Radius,
-			ShieldP:   (d.Shield / d.GetRealMaxShield()) * 100,
-			ArmorP:    (d.Armor / d.GetRealMaxArmor()) * 100,
-			HullP:     (d.Hull / d.GetRealMaxHull()) * 100,
+			ShieldP:   ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
+			ArmorP:    ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
+			HullP:     ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
 		})
 	}
 
@@ -428,13 +428,13 @@ func (s *SolarSystem) PeriodicUpdate() {
 				VelY:     d.VelY,
 				Mass:     d.GetRealMass(),
 				Radius:   d.TemplateData.Radius,
-				ShieldP:  (d.Shield / d.GetRealMaxShield()) * 100,
-				ArmorP:   (d.Armor / d.GetRealMaxArmor()) * 100,
-				HullP:    (d.Hull / d.GetRealMaxHull()) * 100,
+				ShieldP:  ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
+				ArmorP:   ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
+				HullP:    ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
 				//secret stuff
-				EnergyP:           (d.Energy / d.GetRealMaxEnergy()) * 100,
-				HeatP:             (d.Heat / d.GetRealMaxHeat()) * 100,
-				FuelP:             (d.Fuel / d.GetRealMaxFuel()) * 100,
+				EnergyP:           ((d.Energy / d.GetRealMaxEnergy()) * 100) + Epsilon,
+				HeatP:             ((d.Heat / d.GetRealMaxHeat()) * 100) + Epsilon,
+				FuelP:             ((d.Fuel / d.GetRealMaxFuel()) * 100) + Epsilon,
 				FitStatus:         fs,
 				DockedAtStationID: d.DockedAtStationID,
 			},

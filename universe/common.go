@@ -1,5 +1,8 @@
 package universe
 
+//Epsilon Approximate value of Number.Epsilon in JS
+const Epsilon float64 = 2.2204460492503130808472633361816e-16
+
 //Meta Structure for generic metadata
 type Meta map[string]interface{}
 
