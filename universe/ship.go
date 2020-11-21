@@ -137,6 +137,8 @@ type FittedSlot struct {
 	IsCycling      bool
 	WillRepeat     bool
 	CyclePercent   int
+	TargetID       *uuid.UUID
+	TargetType     *int
 	//in-memory only, secret
 	shipMountedOn    *Ship
 	cooldownProgress int
@@ -965,23 +967,162 @@ func (m *FittedSlot) PeriodicUpdate() {
 	} else {
 		//check for activation intent
 		if m.WillRepeat {
+			//check if a target is required
+			needsTarget, found := m.ItemTypeMeta.GetBool("needs_target")
+
+			if needsTarget {
+				//check for a target
+				if m.TargetID == nil || m.TargetType == nil {
+					//no target - can't activate
+					m.WillRepeat = false
+					return
+				}
+
+				//make sure the target actually exists in this solar system
+				tgtReg := models.NewTargetTypeRegistry()
+
+				if *m.TargetType == tgtReg.Ship {
+					// find ship
+					_, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+					if !f {
+						//target doesn't exist - can't activate
+						m.TargetID = nil
+						m.TargetType = nil
+
+						return
+					}
+				} else if *m.TargetType == tgtReg.Station {
+					// find station
+					_, f := m.shipMountedOn.CurrentSystem.stations[m.TargetID.String()]
+
+					if !f {
+						//target doesn't exist - can't activate
+						m.TargetID = nil
+						m.TargetType = nil
+
+						return
+					}
+				} else if *m.TargetType == tgtReg.Planet {
+					// find planet
+					_, f := m.shipMountedOn.CurrentSystem.planets[m.TargetID.String()]
+
+					if !f {
+						//target doesn't exist - can't activate
+						m.TargetID = nil
+						m.TargetType = nil
+
+						return
+					}
+				} else if *m.TargetType == tgtReg.Jumphole {
+					// find jumphole
+					_, f := m.shipMountedOn.CurrentSystem.jumpholes[m.TargetID.String()]
+
+					if !f {
+						//target doesn't exist - can't activate
+						m.TargetID = nil
+						m.TargetType = nil
+
+						return
+					}
+				} else if *m.TargetType == tgtReg.Star {
+					// find star
+					_, f := m.shipMountedOn.CurrentSystem.stars[m.TargetID.String()]
+
+					if !f {
+						//target doesn't exist - can't activate
+						m.TargetID = nil
+						m.TargetType = nil
+
+						return
+					}
+				} else {
+					// unsupported target type - can't activate
+					m.TargetID = nil
+					m.TargetType = nil
+
+					return
+				}
+			}
+
 			//check for sufficient activation energy
 			activationEnergy, found := m.ItemTypeMeta.GetFloat64("activation_energy")
 
 			if found {
-				if m.shipMountedOn.Energy-activationEnergy >= 0 {
-					//activate module
-					m.shipMountedOn.Energy -= activationEnergy
-					m.IsCycling = true
+				if m.shipMountedOn.Energy-activationEnergy < 0 {
+					//insufficient energy - can't activate
+					m.WillRepeat = false
+					return
+				}
+			}
 
-					//apply activation heating
-					activationHeat, found := m.ItemTypeMeta.GetFloat64("activation_heat")
+			//to determine whether activation succeeds later
+			canActivate := false
 
-					if found {
-						m.shipMountedOn.Heat += activationHeat
-					}
+			//handle module family effects
+			if m.ItemTypeFamily == "gun_turret" {
+				canActivate = m.activateAsGunTurret()
+			}
+
+			if canActivate {
+				//activate module
+				m.shipMountedOn.Energy -= activationEnergy
+				m.IsCycling = true
+
+				//apply activation heating
+				activationHeat, found := m.ItemTypeMeta.GetFloat64("activation_heat")
+
+				if found {
+					m.shipMountedOn.Heat += activationHeat
 				}
 			}
 		}
 	}
+}
+
+func (m *FittedSlot) activateAsGunTurret() bool {
+	//safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	//get target
+	tgtReg := models.NewTargetTypeRegistry()
+
+	if *m.TargetType == tgtReg.Ship {
+		// find ship
+		_, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+		if !f {
+			//target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+	} else if *m.TargetType == tgtReg.Station {
+		// find station
+		_, f := m.shipMountedOn.CurrentSystem.stations[m.TargetID.String()]
+
+		if !f {
+			//target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	return true
 }

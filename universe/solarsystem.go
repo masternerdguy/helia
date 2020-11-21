@@ -132,6 +132,10 @@ func (s *SolarSystem) PeriodicUpdate() {
 					if !mod.WillRepeat {
 						// set repeat to true
 						mod.WillRepeat = true
+
+						// store target
+						mod.TargetID = data.TargetID
+						mod.TargetType = data.TargetType
 					}
 				}
 			}
@@ -154,6 +158,10 @@ func (s *SolarSystem) PeriodicUpdate() {
 					if mod.WillRepeat {
 						// set repeat to false
 						mod.WillRepeat = false
+
+						// clear target
+						mod.TargetID = nil
+						mod.TargetType = nil
 					}
 				}
 			}

@@ -13,3 +13,14 @@ func (m Meta) GetFloat64(key string) (float64, bool) {
 
 	return v.(float64), e
 }
+
+//GetBool Gets a bool value from the metadata - returns a bool indicating whether it exists
+func (m Meta) GetBool(key string) (bool, bool) {
+	v, e := m[key]
+
+	if !e {
+		return false, e
+	}
+
+	return v.(bool), e
+}
