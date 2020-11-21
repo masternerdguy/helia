@@ -4,6 +4,7 @@ import { Star } from './star';
 import { Planet } from './planet';
 import { Station } from './station';
 import { Jumphole } from './jumphole';
+import { ModuleEffect } from './moduleEffect';
 
 export class System extends WSSystem {
     constructor(ws: WSSystem) {
@@ -19,6 +20,7 @@ export class System extends WSSystem {
         this.planets = [];
         this.jumpholes = [];
         this.stations = [];
+        this.moduleEffects = [];
     }
 
     ships: Ship[];
@@ -26,6 +28,7 @@ export class System extends WSSystem {
     planets: Planet[];
     jumpholes: Jumphole[];
     stations: Station[];
+    moduleEffects: ModuleEffect[];
 
     backplateImg: HTMLImageElement;
     backplateValid = false;

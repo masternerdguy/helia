@@ -19,6 +19,7 @@ import { ShipStatusWindow } from './gdi/windows/shipStatusWindow';
 import { ServerCurrentShipUpdate } from './wsModels/bodies/currentShipUpdate';
 import { TargetInteractionWindow } from './gdi/windows/targetInterationWindow';
 import { OverviewWindow } from './gdi/windows/overviewWindow';
+import { ModuleEffect } from './engineModels/moduleEffect';
 
 class EngineSack {
   constructor() {}
@@ -213,6 +214,10 @@ function handleGlobalUpdate(d: GameMessage) {
       msg.stars = [];
     }
 
+    if (!msg.newModuleEffects || msg.newModuleEffects == null) {
+      msg.newModuleEffects = [];
+    }
+
     // update system
     engineSack.player.currentSystem.id = msg.currentSystemInfo.id;
     engineSack.player.currentSystem.systemName = msg.currentSystemInfo.systemName;
@@ -398,6 +403,17 @@ function handleGlobalUpdate(d: GameMessage) {
       }
 
       // todo: handle npc station dying
+    }
+
+    // start new module effects
+    for (const ef of msg.newModuleEffects) {
+      // copy values
+      const effect = new ModuleEffect(ef);
+
+      console.log(effect);
+
+      // append
+      engineSack.player.currentSystem.moduleEffects.push(effect);
     }
   }
 

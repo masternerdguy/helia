@@ -183,12 +183,13 @@ type ServerJoinBody struct {
 
 //ServerGlobalUpdateBody Body for periodically updating clients with globally-known (non-secret) system info
 type ServerGlobalUpdateBody struct {
-	CurrentSystemInfo CurrentSystemInfo    `json:"currentSystemInfo"`
-	Ships             []GlobalShipInfo     `json:"ships"`
-	Stars             []GlobalStarInfo     `json:"stars"`
-	Planets           []GlobalPlanetInfo   `json:"planets"`
-	Jumpholes         []GlobalJumpholeInfo `json:"jumpholes"`
-	Stations          []GlobalStationInfo  `json:"stations"`
+	CurrentSystemInfo CurrentSystemInfo            `json:"currentSystemInfo"`
+	Ships             []GlobalShipInfo             `json:"ships"`
+	Stars             []GlobalStarInfo             `json:"stars"`
+	Planets           []GlobalPlanetInfo           `json:"planets"`
+	Jumpholes         []GlobalJumpholeInfo         `json:"jumpholes"`
+	Stations          []GlobalStationInfo          `json:"stations"`
+	NewModuleEffects  []GlobalPushModuleEffectBody `json:"newModuleEffects"`
 }
 
 //ClientNavClickBody Body containing a click-in-space move event from the client
@@ -266,4 +267,13 @@ type ClientDeactivateModuleBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	Rack      string    `json:"rack"`
 	ItemID    uuid.UUID `json:"itemID"`
+}
+
+//GlobalPushModuleEffectBody Body containing a module visual effect to be rendered by the client
+type GlobalPushModuleEffectBody struct {
+	GfxEffect    string     `json:"gfxEffect"`
+	ObjStartID   uuid.UUID  `json:"objStartID"`
+	ObjStartType int        `json:"objStartType"`
+	ObjEndID     *uuid.UUID `json:"objEndID"`
+	ObjEndType   *int       `json:"objEndType"`
 }

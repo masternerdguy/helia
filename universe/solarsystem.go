@@ -12,16 +12,17 @@ import (
 
 //SolarSystem Structure representing a solar system
 type SolarSystem struct {
-	ID         uuid.UUID
-	SystemName string
-	RegionID   uuid.UUID
-	ships      map[string]*Ship
-	stars      map[string]*Star
-	planets    map[string]*Planet
-	jumpholes  map[string]*Jumphole
-	stations   map[string]*Station
-	clients    map[string]*shared.GameClient //clients in this system
-	Lock       sync.Mutex
+	ID                uuid.UUID
+	SystemName        string
+	RegionID          uuid.UUID
+	ships             map[string]*Ship
+	stars             map[string]*Star
+	planets           map[string]*Planet
+	jumpholes         map[string]*Jumphole
+	stations          map[string]*Station
+	clients           map[string]*shared.GameClient       //clients in this system
+	pushModuleEffects []models.GlobalPushModuleEffectBody //module visual effect aggregation for tick
+	Lock              sync.Mutex
 }
 
 //Initialize Initializes internal aspects of SolarSystem
@@ -37,6 +38,9 @@ func (s *SolarSystem) Initialize() {
 	s.planets = make(map[string]*Planet)
 	s.jumpholes = make(map[string]*Jumphole)
 	s.stations = make(map[string]*Station)
+
+	//initialize slices
+	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
 }
 
 //PeriodicUpdate Processes the solar system for a tick
@@ -348,6 +352,10 @@ func (s *SolarSystem) PeriodicUpdate() {
 		})
 	}
 
+	for _, d := range s.pushModuleEffects {
+		gu.NewModuleEffects = append(gu.NewModuleEffects, d)
+	}
+
 	//serialize global update
 	b, _ := json.Marshal(&gu)
 
@@ -451,6 +459,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 		//write message to client
 		c.WriteMessage(&sct)
 	}
+
+	//reset new visual effects for next tick
+	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
 }
 
 //AddShip Adds a ship to the system
