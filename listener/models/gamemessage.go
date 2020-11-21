@@ -256,7 +256,7 @@ type ServerRackStatusBody struct {
 type ClientActivateModuleBody struct {
 	SessionID  uuid.UUID  `json:"sid"`
 	Rack       string     `json:"rack"`
-	ItemID     string     `json:"itemID"`
+	ItemID     uuid.UUID  `json:"itemID"`
 	TargetID   *uuid.UUID `json:"targetId"`
 	TargetType *int       `json:"targetType"`
 }
@@ -265,5 +265,5 @@ type ClientActivateModuleBody struct {
 type ClientDeactivateModuleBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	Rack      string    `json:"rack"`
-	ItemID    string    `json:"itemID"`
+	ItemID    uuid.UUID `json:"itemID"`
 }

@@ -810,3 +810,28 @@ func (s *Ship) forwardThrust(scale float64) {
 	// consume fuel
 	s.Fuel -= math.Abs(burn) * ShipFuelBurn
 }
+
+//FindModule Finds a module fitted on this ship
+func (s *Ship) FindModule(id uuid.UUID, rack string) *FittedSlot {
+	if rack == "A" {
+		for i, v := range s.Fitting.ARack {
+			if v.ItemID == id {
+				return &s.Fitting.ARack[i]
+			}
+		}
+	} else if rack == "B" {
+		for i, v := range s.Fitting.BRack {
+			if v.ItemID == id {
+				return &s.Fitting.BRack[i]
+			}
+		}
+	} else if rack == "C" {
+		for i, v := range s.Fitting.CRack {
+			if v.ItemID == id {
+				return &s.Fitting.CRack[i]
+			}
+		}
+	}
+
+	return nil
+}

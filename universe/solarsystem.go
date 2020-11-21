@@ -2,11 +2,9 @@ package universe
 
 import (
 	"encoding/json"
-	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"sync"
 
 	"github.com/google/uuid"
@@ -123,8 +121,19 @@ func (s *SolarSystem) PeriodicUpdate() {
 				//extract data
 				data := evt.Body.(models.ClientActivateModuleBody)
 
-				//debug out
-				log.Println(fmt.Sprintf("%v %v", data, sh))
+				//find module
+				mod := sh.FindModule(data.ItemID, data.Rack)
+
+				// make sure we found something
+				if mod == nil {
+					// do nothing
+					continue
+				} else {
+					if !mod.WillRepeat {
+						// set repeat to true
+						mod.WillRepeat = true
+					}
+				}
 			}
 		} else if evt.Type == models.NewMessageRegistry().DeactivateModule {
 			//find player ship
@@ -134,8 +143,19 @@ func (s *SolarSystem) PeriodicUpdate() {
 				//extract data
 				data := evt.Body.(models.ClientDeactivateModuleBody)
 
-				//debug out
-				log.Println(fmt.Sprintf("%v %v", data, sh))
+				//find module
+				mod := sh.FindModule(data.ItemID, data.Rack)
+
+				// make sure we found something
+				if mod == nil {
+					// do nothing
+					continue
+				} else {
+					if mod.WillRepeat {
+						// set repeat to false
+						mod.WillRepeat = false
+					}
+				}
 			}
 		}
 	}
