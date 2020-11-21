@@ -1,7 +1,7 @@
 import { WsPushModuleEffect } from '../wsModels/entities/wsPushModuleEffect';
 import { ModuleActivationEffectData, ModuleActivationEffectRepository } from '../data/moduleActivationEffectData';
 import { Camera } from './camera';
-import { Player } from './player';
+import { Player, TargetType } from './player';
 
 export class ModuleEffect extends WsPushModuleEffect {
     vfxData: ModuleActivationEffectData;
@@ -12,6 +12,9 @@ export class ModuleEffect extends WsPushModuleEffect {
 
     lastUpdateTime: number;
     finished = false;
+
+    objStart: any;
+    objEnd: any;
 
     constructor(b: WsPushModuleEffect, player: Player) {
         // assign values
@@ -27,6 +30,42 @@ export class ModuleEffect extends WsPushModuleEffect {
         }
 
         this.maxLifeTime = this.vfxData?.duration ?? 0;
+
+        // locate start object
+        if (this.objStartType === TargetType.Station) {
+            for (const st of this.player.currentSystem.stations) {
+                if (st.id === this.objStartID) {
+                    this.objStart = st;
+                    break;
+                }
+            }
+        } else if (this.objStartType === TargetType.Ship) {
+            for (const s of this.player.currentSystem.ships) {
+                if (s.id === this.objStartID) {
+                    this.objStart = s;
+                    break;
+                }
+            }
+        }
+
+        // locate end object if present
+        if (this.objEndID) {
+            if (this.objEndType === TargetType.Station) {
+                for (const st of this.player.currentSystem.stations) {
+                    if (st.id === this.objEndID) {
+                        this.objEnd = st;
+                        break;
+                    }
+                }
+            } else if (this.objEndType === TargetType.Ship) {
+                for (const s of this.player.currentSystem.ships) {
+                    if (s.id === this.objEndID) {
+                        this.objEnd = s;
+                        break;
+                    }
+                }
+            }
+        }
 
         // set frame time
         this.lastUpdateTime = Date.now();
