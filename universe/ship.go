@@ -286,6 +286,7 @@ func (s *Ship) PeriodicUpdate() {
 	}
 }
 
+//updateEnergy Updates the ship's energy level for a tick
 func (s *Ship) updateEnergy() {
 	// regenerate energy
 	energyRegenAmount := (s.GetRealEnergyRegen() / 1000) * Heartbeat
@@ -311,6 +312,7 @@ func (s *Ship) updateEnergy() {
 	}
 }
 
+//updateHeat Updates the ship's heat level for a tick
 func (s *Ship) updateHeat() {
 	// dissipate heat
 	s.Heat -= (s.GetRealHeatSink() / 1000) * Heartbeat
