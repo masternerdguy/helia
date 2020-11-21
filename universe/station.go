@@ -60,3 +60,8 @@ func (s *Station) ToPhysicsDummy() physics.Dummy {
 		Mass: s.Mass,
 	}
 }
+
+//DealDamage Deals damage to the station (not yet implemented!)
+func (s *Station) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) {
+	// todo
+}

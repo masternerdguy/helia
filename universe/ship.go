@@ -512,6 +512,35 @@ func (s *Ship) GetRealMaxFuel() float64 {
 	return s.TemplateData.BaseFuel
 }
 
+//DealDamage Deals damage to the ship
+func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) {
+	//check shield damage
+	if shieldDmg <= s.Shield {
+		s.Shield -= shieldDmg
+	} else {
+		//shields go down
+		s.Shield = 0
+
+		//check armor damage
+		if armorDmg <= s.Armor {
+			s.Armor -= armorDmg
+		} else {
+			//armor goes down
+			s.Armor = 0
+
+			//check hull damage
+			if hullDmg <= s.Hull {
+				s.Hull -= hullDmg
+			} else {
+				//hull goes down
+				s.Hull = 0
+
+				//todo: handle ship death
+			}
+		}
+	}
+}
+
 //doUndockedAutopilot Flies the ship for you
 func (s *Ship) doUndockedAutopilot() {
 	// get registry
@@ -1092,6 +1121,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 
 	//target details
 	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtI Any
 
 	if *m.TargetType == tgtReg.Ship {
 		//find ship
@@ -1108,6 +1138,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 
 		// store target details
 		tgtDummy = tgt.ToPhysicsDummy()
+		tgtI = tgt
 	} else if *m.TargetType == tgtReg.Station {
 		// find station
 		tgt, f := m.shipMountedOn.CurrentSystem.stations[m.TargetID.String()]
@@ -1123,6 +1154,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 
 		//store target details
 		tgtDummy = tgt.ToPhysicsDummy()
+		tgtI = tgt
 	} else {
 		//unsupported target type - can't activate
 		m.TargetID = nil
@@ -1151,5 +1183,20 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		}
 	}
 
+	//get damage values
+	shieldDmg, _ := m.ItemTypeMeta.GetFloat64("shield_damage")
+	armorDmg, _ := m.ItemTypeMeta.GetFloat64("armor_damage")
+	hullDmg, _ := m.ItemTypeMeta.GetFloat64("hull_damage")
+
+	//apply damage to target
+	if *m.TargetType == tgtReg.Ship {
+		c := tgtI.(*Ship)
+		c.DealDamage(shieldDmg, armorDmg, hullDmg)
+	} else if *m.TargetType == tgtReg.Ship {
+		c := tgtI.(*Station)
+		c.DealDamage(shieldDmg, armorDmg, hullDmg)
+	}
+
+	//module activates!
 	return true
 }
