@@ -216,6 +216,9 @@ func (s *Ship) PeriodicUpdate() {
 	// update energy
 	s.updateEnergy()
 
+	// update shields
+	s.updateShield()
+
 	// update heat
 	s.updateHeat()
 
@@ -317,6 +320,11 @@ func (s *Ship) updateEnergy() {
 	if s.Energy > maxEnergy {
 		s.Energy = maxEnergy
 	}
+}
+
+//UpdateShield Updates the ship's shield level for a tick
+func (s *Ship) updateShield() {
+
 }
 
 //updateHeat Updates the ship's heat level for a tick
@@ -514,30 +522,40 @@ func (s *Ship) GetRealMaxFuel() float64 {
 
 //DealDamage Deals damage to the ship
 func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) {
-	//check shield damage
-	if shieldDmg < s.Shield {
-		s.Shield -= shieldDmg
-	} else {
-		//shields go down
+	//apply shield damage
+	s.Shield -= shieldDmg
+
+	//clamp shield
+	if s.Shield < 0 {
 		s.Shield = 0
+	}
 
-		//check armor damage
-		if armorDmg < s.Armor {
-			s.Armor -= armorDmg
-		} else {
-			//armor goes down
-			s.Armor = 0
+	//determine shield percentage
+	shieldP := s.Shield / s.GetRealMaxShield()
 
-			//check hull damage
-			if hullDmg < s.Hull {
-				s.Hull -= hullDmg
-			} else {
-				//hull goes down
-				s.Hull = 0
+	//apply armor damage if shields below 25% scaling for remaining shields
+	if shieldP < 0.25 {
+		s.Armor -= armorDmg * (1 - shieldP)
+	}
 
-				//todo: handle ship death
-			}
-		}
+	//clamp armor
+	if s.Armor < 0 {
+		s.Armor = 0
+	}
+
+	//determine armor percentage
+	armorP := s.Armor / s.GetRealMaxArmor()
+
+	//apply hull damage if armor below 25% scaling for remaining shield and armor
+	if armorP < 0.25 {
+		s.Hull -= hullDmg * (1 - armorP) * (1 - shieldP)
+	}
+
+	//clamp hull
+	if s.Hull < 0 {
+		s.Hull = 0
+
+		//todo: handle death of player and respawn in noob ship at nearest station
 	}
 }
 
