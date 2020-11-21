@@ -2,9 +2,11 @@ package universe
 
 import (
 	"encoding/json"
+	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"sync"
 
 	"github.com/google/uuid"
@@ -112,6 +114,28 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 				//apply effect to player's current ship
 				sh.CmdUndock()
+			}
+		} else if evt.Type == models.NewMessageRegistry().ActivateModule {
+			//find player ship
+			sh := s.ships[c.CurrentShipID.String()]
+
+			if sh != nil {
+				//extract data
+				data := evt.Body.(models.ClientActivateModuleBody)
+
+				//debug out
+				log.Println(fmt.Sprintf("%v %v", data, sh))
+			}
+		} else if evt.Type == models.NewMessageRegistry().DeactivateModule {
+			//find player ship
+			sh := s.ships[c.CurrentShipID.String()]
+
+			if sh != nil {
+				//extract data
+				data := evt.Body.(models.ClientDeactivateModuleBody)
+
+				//debug out
+				log.Println(fmt.Sprintf("%v %v", data, sh))
 			}
 		}
 	}
@@ -331,6 +355,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 			module.Family = v.ItemTypeFamily
 			module.Type = v.ItemTypeName
 			module.IsCycling = v.IsCycling
+			module.ItemID = v.ItemID.String()
+			module.ItemTypeID = v.ItemTypeID.String()
+			module.WillRepeat = v.WillRepeat
 
 			rackA.Modules = append(rackA.Modules, module)
 		}
@@ -345,6 +372,10 @@ func (s *SolarSystem) PeriodicUpdate() {
 			module.Family = v.ItemTypeFamily
 			module.Type = v.ItemTypeName
 			module.IsCycling = v.IsCycling
+			module.CyclePercent = v.CyclePercent
+			module.ItemID = v.ItemID.String()
+			module.ItemTypeID = v.ItemTypeID.String()
+			module.WillRepeat = v.WillRepeat
 
 			rackB.Modules = append(rackB.Modules, module)
 		}
@@ -359,6 +390,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 			module.Family = v.ItemTypeFamily
 			module.Type = v.ItemTypeName
 			module.IsCycling = v.IsCycling
+			module.ItemID = v.ItemID.String()
+			module.ItemTypeID = v.ItemTypeID.String()
+			module.WillRepeat = v.WillRepeat
 
 			rackC.Modules = append(rackC.Modules, module)
 		}

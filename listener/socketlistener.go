@@ -119,6 +119,20 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			//handle message
 			l.handleClientUndock(&client, &b)
+		} else if m.MessageType == msgRegistry.ActivateModule {
+			//decode body as ClientUndockBody
+			b := models.ClientActivateModuleBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			//handle message
+			l.handleClientActivateModule(&client, &b)
+		} else if m.MessageType == msgRegistry.DeactivateModule {
+			//decode body as ClientUndockBody
+			b := models.ClientDeactivateModuleBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			//handle message
+			l.handleClientDeactivateModule(&client, &b)
 		}
 	}
 }
@@ -419,6 +433,52 @@ func (l *SocketListener) handleClientUndock(client *shared.GameClient, body *mod
 		//push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.Undock)
+	}
+}
+
+func (l *SocketListener) handleClientActivateModule(client *shared.GameClient, body *models.ClientActivateModuleBody) {
+	//safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	//verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientActivateModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		//initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		//push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.ActivateModule)
+	}
+}
+
+func (l *SocketListener) handleClientDeactivateModule(client *shared.GameClient, body *models.ClientDeactivateModuleBody) {
+	//safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	//verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientDeactivateModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		//initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		//push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.DeactivateModule)
 	}
 }
 

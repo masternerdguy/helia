@@ -36,7 +36,11 @@ export class WSRack {
 }
 
 export class WSModule {
+    itemID: string;
+    itemTypeID: string;
     family: string;
     type: string;
     isCycling: boolean;
+    willRepeat: boolean;
+    cyclePercent: number;
 }

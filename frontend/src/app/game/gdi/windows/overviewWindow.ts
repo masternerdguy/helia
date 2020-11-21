@@ -298,5 +298,9 @@ function overviewDistance(px: number, py: number, x: number, y: number): string 
 }
 
 function fixedString(str: string, width: number) {
-    return str.substr(0, width).padEnd(width);
+    if (str === undefined || str == null) {
+        return ''.padEnd(width);
+    }
+
+    return str?.substr(0, width)?.padEnd(width);
 }

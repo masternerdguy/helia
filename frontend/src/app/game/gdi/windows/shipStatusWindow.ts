@@ -3,23 +3,48 @@ import { FontSize } from '../base/gdiStyle';
 import { GDIBar } from '../components/gdiBar';
 import { Ship } from '../../engineModels/ship';
 import { GDIList } from '../components/gdiList';
+import { WSModule } from '../../wsModels/entities/wsShip';
+import { WsService } from '../../ws.service';
+import { ClientActivateModule } from '../../wsModels/bodies/activateModule';
+import { MessageTypes } from '../../wsModels/gameMessage';
+import { Player } from '../../engineModels/player';
+import { ClientDeactivateModule } from '../../wsModels/bodies/clientDeactivateModule';
 
 export class ShipStatusWindow extends GDIWindow {
     // status bars
-    shieldBar: GDIBar = new GDIBar();
-    armorBar: GDIBar = new GDIBar();
-    hullBar: GDIBar = new GDIBar();
-    heatBar: GDIBar = new GDIBar();
-    energyBar: GDIBar = new GDIBar();
-    fuelBar: GDIBar = new GDIBar();
+    private shieldBar: GDIBar = new GDIBar();
+    private armorBar: GDIBar = new GDIBar();
+    private hullBar: GDIBar = new GDIBar();
+    private heatBar: GDIBar = new GDIBar();
+    private energyBar: GDIBar = new GDIBar();
+    private fuelBar: GDIBar = new GDIBar();
 
     // racks
-    rackA: GDIList = new GDIList();
-    rackB: GDIList = new GDIList();
-    rackC: GDIList = new GDIList();
+    private rackA: GDIList = new GDIList();
+    private rackB: GDIList = new GDIList();
+    private rackC: GDIList = new GDIList();
 
     // ship being monitored
-    ship: Ship;
+    private ship: Ship;
+    private player: Player;
+
+    // ws
+    private wsSvc: WsService;
+
+    shortNumberTable: string[] = [
+        '🕛',
+        '🕐',
+        '🕑',
+        '🕒',
+        '🕓',
+        '🕔',
+        '🕕',
+        '🕖',
+        '🕗',
+        '🕘',
+        '🕙',
+        '🕚'
+    ];
 
     initialize() {
         // set dimensions
@@ -113,7 +138,16 @@ export class ShipStatusWindow extends GDIWindow {
         this.rackA.setX(0);
         this.rackA.setY(60);
 
-        this.rackA.setFont(FontSize.small);
+        this.rackA.setFont(FontSize.smallNormal);
+        this.rackA.setOnClick((module: RackRow) => {
+            if (!module.object.willRepeat) {
+                // issue order to activate module
+                this.activateModule(module, 'A');
+            } else {
+                // issue order to deactivate module
+                this.deactivateModule(module, 'A');
+            }
+        });
 
         // setup rack b
         this.rackB.setWidth(200);
@@ -124,6 +158,15 @@ export class ShipStatusWindow extends GDIWindow {
         this.rackB.setY(60);
 
         this.rackB.setFont(FontSize.small);
+        this.rackB.setOnClick((module: RackRow) => {
+            if (!module.object.willRepeat) {
+                // issue order to activate module
+                this.activateModule(module, 'B');
+            } else {
+                // issue order to deactivate module
+                this.deactivateModule(module, 'B');
+            }
+        });
 
         // setup rack c
         this.rackC.setWidth(200);
@@ -134,6 +177,15 @@ export class ShipStatusWindow extends GDIWindow {
         this.rackC.setY(60);
 
         this.rackC.setFont(FontSize.small);
+        this.rackC.setOnClick((module: RackRow) => {
+            if (!module.object.willRepeat) {
+                // issue order to activate module
+                this.activateModule(module, 'C');
+            } else {
+                // issue order to deactivate module
+                this.deactivateModule(module, 'C');
+            }
+        });
 
         // add components
         this.addComponent(this.shieldBar);
@@ -147,6 +199,28 @@ export class ShipStatusWindow extends GDIWindow {
         this.addComponent(this.rackC);
     }
 
+    private activateModule(module: RackRow, rack: string) {
+        const b = new ClientActivateModule();
+        b.rack = rack;
+
+        b.sid = this.wsSvc.sid;
+        b.itemID = module.object.itemID;
+        b.TargetID = this.player.currentTargetID;
+        b.TargetType = this.player.currentTargetType;
+
+        this.wsSvc.sendMessage(MessageTypes.ActivateModule, b);
+    }
+
+    private deactivateModule(module: RackRow, rack: string) {
+        const b = new ClientDeactivateModule();
+        b.rack = rack;
+
+        b.sid = this.wsSvc.sid;
+        b.itemID = module.object.itemID;
+
+        this.wsSvc.sendMessage(MessageTypes.DeactivateModule, b);
+    }
+
     periodicUpdate() {
         if (this.ship !== undefined && this.ship !== null) {
             // update status bars
@@ -157,11 +231,86 @@ export class ShipStatusWindow extends GDIWindow {
             this.heatBar.setPercentage(this.ship.heatP);
             this.fuelBar.setPercentage(this.ship.fuelP);
 
-            // todo: update fitted module display
+            if (this.ship.fitStatus !== undefined && this.ship.fitStatus !== null) {
+                // update fitted module display
+                const rackAMods: RackRow[] = [];
+                const rackBMods: RackRow[] = [];
+                const rackCMods: RackRow[] = [];
+
+                // build entries for modules on racks
+                for (const m of this.ship.fitStatus.aRack.modules) {
+                    const d: RackRow = {
+                        object: m,
+                        listString: () => {
+                            return this.moduleStatusString(m);
+                        }
+                    };
+
+                    rackAMods.push(d);
+                }
+
+                for (const m of this.ship.fitStatus.bRack.modules) {
+                    const d: RackRow = {
+                        object: m,
+                        listString: () => {
+                            return this.moduleStatusString(m);
+                        }
+                    };
+
+                    rackBMods.push(d);
+                }
+
+                for (const m of this.ship.fitStatus.cRack.modules) {
+                    const d: RackRow = {
+                        object: m,
+                        listString: () => {
+                            return this.moduleStatusString(m);
+                        }
+                    };
+
+                    rackCMods.push(d);
+                }
+
+                // save on lists
+                this.rackA.setItems(rackAMods);
+                this.rackB.setItems(rackBMods);
+                this.rackC.setItems(rackCMods);
+            }
         }
+    }
+
+    private moduleStatusString(m: WSModule) {
+        // find short number in lookup table for cycle percentage
+        const pc = fixedString(
+            m.isCycling ? this.shortNumberTable[Math.round(m.cyclePercent / this.shortNumberTable.length)] : '',
+            1);
+
+        // build status string
+        return `${fixedString(m.willRepeat ? '⦿' : '', 1)} ${fixedString(m.type, 24)} ${pc}~`;
     }
 
     setShip(ship: Ship) {
         this.ship = ship;
     }
+
+    setWsService(wsSvc: WsService) {
+        this.wsSvc = wsSvc;
+    }
+
+    setPlayer(player: Player) {
+        this.player = player;
+    }
+}
+
+class RackRow {
+    object: WSModule;
+    listString: () => string;
+}
+
+function fixedString(str: string, width: number) {
+    if (str === undefined || str == null) {
+        return ''.padEnd(width);
+    }
+
+    return str.substr(0, width).padEnd(width);
 }

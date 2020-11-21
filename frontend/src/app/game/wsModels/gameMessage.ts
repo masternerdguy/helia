@@ -11,5 +11,7 @@ export enum MessageTypes {
     Goto = 4,
     Orbit = 5,
     Dock = 6,
-    Undock = 7
+    Undock = 7,
+    ActivateModule = 8,
+    DeactivateModule = 9
 }

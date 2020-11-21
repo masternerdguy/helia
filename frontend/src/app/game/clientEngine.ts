@@ -74,6 +74,8 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.shipStatusWindow.setY(50);
   engineSack.shipStatusWindow.initialize();
   engineSack.shipStatusWindow.pack();
+  engineSack.shipStatusWindow.setWsService(wsService);
+  engineSack.shipStatusWindow.setPlayer(engineSack.player);
 
   engineSack.targetInteractionWindow = new TargetInteractionWindow();
   engineSack.targetInteractionWindow.initialize();

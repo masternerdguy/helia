@@ -51,12 +51,14 @@ export class GDIStyle {
 
     // underlying font sizes
     static smallFontSize =  8;
+    static smallNormalFontSize = 10;
     static normalFontSize =  12;
     static largeFontSize =  16;
     static giantFontSize =  24;
 
     // underlying fonts
     static smallFont =  GDIStyle.smallFontSize + 'px monospace';
+    static smallNormalFont =  GDIStyle.smallNormalFontSize + 'px monospace';
     static normalFont =  GDIStyle.normalFontSize + 'px monospace';
     static largeFont =  GDIStyle.normalFontSize + 'px monospace';
     static giantFont =  GDIStyle.giantFontSize + 'px monospace';
@@ -67,6 +69,8 @@ export class GDIStyle {
 
         if (font === FontSize.small) {
             f = GDIStyle.smallFont;
+        } else if (font === FontSize.smallNormal) {
+            f = GDIStyle.smallNormalFont;
         } else if (font === FontSize.normal) {
             f = GDIStyle.normalFont;
         } else if (font === FontSize.large) {
@@ -83,6 +87,8 @@ export class GDIStyle {
 
         if (font === FontSize.small) {
             px = GDIStyle.smallFontSize;
+        } else if (font === FontSize.smallNormal) {
+            px = GDIStyle.smallNormalFontSize;
         } else if (font === FontSize.normal) {
             px = GDIStyle.normalFontSize;
         } else if (font === FontSize.large) {
@@ -97,6 +103,7 @@ export class GDIStyle {
 
 export enum FontSize {
     small = 'small',
+    smallNormal = 'smallNormal',
     normal = 'normal',
     large = 'large',
     giant = 'giant'

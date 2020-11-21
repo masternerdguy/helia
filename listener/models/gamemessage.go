@@ -16,6 +16,8 @@ type MessageRegistry struct {
 	Orbit             int
 	Dock              int
 	Undock            int
+	ActivateModule    int
+	DeactivateModule  int
 }
 
 //TargetTypeRegistry Registry of target types
@@ -38,6 +40,8 @@ func NewMessageRegistry() *MessageRegistry {
 		Orbit:             5,
 		Dock:              6,
 		Undock:            7,
+		ActivateModule:    8,
+		DeactivateModule:  9,
 	}
 }
 
@@ -234,12 +238,32 @@ type ServerFittingStatusBody struct {
 
 //ServerModuleStatusBody Body containing information about a module fitted to a ship
 type ServerModuleStatusBody struct {
-	Family    string `json:"family"`
-	Type      string `json:"type"`
-	IsCycling bool   `json:"isCycling"`
+	ItemID       string `json:"itemID"`
+	ItemTypeID   string `json:"itemTypeID"`
+	Family       string `json:"family"`
+	Type         string `json:"type"`
+	IsCycling    bool   `json:"isCycling"`
+	WillRepeat   bool   `json:"willRepeat"`
+	CyclePercent int    `json:"cyclePercent"`
 }
 
 //ServerRackStatusBody Body containing information about a ship's rack
 type ServerRackStatusBody struct {
 	Modules []ServerModuleStatusBody `json:"modules"`
+}
+
+//ClientActivateModuleBody Body containing an order to activate a module
+type ClientActivateModuleBody struct {
+	SessionID  uuid.UUID  `json:"sid"`
+	Rack       string     `json:"rack"`
+	ItemID     string     `json:"itemID"`
+	TargetID   *uuid.UUID `json:"targetId"`
+	TargetType *int       `json:"targetType"`
+}
+
+//ClientDeactivateModuleBody Body containing an order to deactivate a module
+type ClientDeactivateModuleBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	Rack      string    `json:"rack"`
+	ItemID    string    `json:"itemID"`
 }

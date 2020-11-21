@@ -9,7 +9,7 @@ export class GDIList extends GDIBase {
     private items: any[] = [];
     private scroll = 0;
     private selectedRow = -1;
-    private font: FontSize =  FontSize.normal;
+    private font: FontSize = FontSize.normal;
 
     private onClick: (item: any) => void;
 

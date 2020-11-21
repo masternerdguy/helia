@@ -53,7 +53,7 @@ export class GDIBase implements GDIComponent {
     }
 
     containsPoint(x: number, y: number): boolean {
-        const rect = new GDIRectangle(this.getX(), this.getY(), this.getWidth(), this.getHeight() + GDIStyle.windowHandleHeight);
+        const rect = new GDIRectangle(this.getX(), this.getY(), this.getWidth(), this.getHeight());
         return rect.containsPoint(x, y);
     }
 
