@@ -102,7 +102,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		Armor:          temp.BaseArmor,
 		Hull:           temp.BaseHull,
 		Fuel:           temp.BaseFuel,
-		Heat:           temp.BaseHeatCap,
+		Heat:           0,
 		Energy:         temp.BaseEnergy,
 		ShipTemplateID: temp.ID,
 		PosX:           float64(physics.RandInRange(-500, 500)),
