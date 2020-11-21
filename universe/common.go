@@ -25,5 +25,16 @@ func (m Meta) GetBool(key string) (bool, bool) {
 	return v.(bool), e
 }
 
+//GetString Gets a string value from the metadata - returns a bool indicating whether it exists
+func (m Meta) GetString(key string) (string, bool) {
+	v, e := m[key]
+
+	if !e {
+		return "", e
+	}
+
+	return v.(string), e
+}
+
 //Any Alias for a generic interface for any type
 type Any interface{}

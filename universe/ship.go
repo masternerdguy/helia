@@ -515,21 +515,21 @@ func (s *Ship) GetRealMaxFuel() float64 {
 //DealDamage Deals damage to the ship
 func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) {
 	//check shield damage
-	if shieldDmg <= s.Shield {
+	if shieldDmg < s.Shield {
 		s.Shield -= shieldDmg
 	} else {
 		//shields go down
 		s.Shield = 0
 
 		//check armor damage
-		if armorDmg <= s.Armor {
+		if armorDmg < s.Armor {
 			s.Armor -= armorDmg
 		} else {
 			//armor goes down
 			s.Armor = 0
 
 			//check hull damage
-			if hullDmg <= s.Hull {
+			if hullDmg < s.Hull {
 				s.Hull -= hullDmg
 			} else {
 				//hull goes down
@@ -1167,10 +1167,11 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 
 	//check for max range
 	modRange, found := m.ItemTypeMeta.GetFloat64("range")
+	var d float64 = 0
 
 	if found {
 		//verify target is in range
-		d := physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
 
 		if d > modRange {
 			//out of range - can't activate
@@ -1187,6 +1188,21 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	shieldDmg, _ := m.ItemTypeMeta.GetFloat64("shield_damage")
 	armorDmg, _ := m.ItemTypeMeta.GetFloat64("armor_damage")
 	hullDmg, _ := m.ItemTypeMeta.GetFloat64("hull_damage")
+
+	//account for falloff if present
+	falloff, found := m.ItemTypeMeta.GetString("falloff")
+
+	if found {
+		//adjust damage based on falloff style
+		if falloff == "linear" {
+			//damage dealt is a proportion of the distance to target over max range (closer is higher)
+			rangeRatio := 1 - (d / modRange)
+
+			shieldDmg *= rangeRatio
+			armorDmg *= rangeRatio
+			hullDmg *= rangeRatio
+		}
+	}
 
 	//apply damage to target
 	if *m.TargetType == tgtReg.Ship {
