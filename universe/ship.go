@@ -1090,9 +1090,12 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	//get target
 	tgtReg := models.NewTargetTypeRegistry()
 
+	//target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+
 	if *m.TargetType == tgtReg.Ship {
-		// find ship
-		_, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+		//find ship
+		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
 
 		if !f {
 			//target doesn't exist - can't activate
@@ -1102,9 +1105,12 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 
 			return false
 		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
 	} else if *m.TargetType == tgtReg.Station {
 		// find station
-		_, f := m.shipMountedOn.CurrentSystem.stations[m.TargetID.String()]
+		tgt, f := m.shipMountedOn.CurrentSystem.stations[m.TargetID.String()]
 
 		if !f {
 			//target doesn't exist - can't activate
@@ -1114,14 +1120,35 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 
 			return false
 		}
+
+		//store target details
+		tgtDummy = tgt.ToPhysicsDummy()
 	} else {
-		// unsupported target type - can't activate
+		//unsupported target type - can't activate
 		m.TargetID = nil
 		m.TargetType = nil
 		m.WillRepeat = false
 		m.IsCycling = false
 
 		return false
+	}
+
+	//check for max range
+	modRange, found := m.ItemTypeMeta.GetFloat64("range")
+
+	if found {
+		//verify target is in range
+		d := physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		if d > modRange {
+			//out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
 	}
 
 	return true

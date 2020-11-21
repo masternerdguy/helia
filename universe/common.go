@@ -24,3 +24,8 @@ func (m Meta) GetBool(key string) (bool, bool) {
 
 	return v.(bool), e
 }
+
+//Damageable An interface yielding the ability to damage an object
+type Damageable interface {
+	DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64)
+}
