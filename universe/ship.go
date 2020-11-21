@@ -126,6 +126,7 @@ type FittedSlot struct {
 	WillRepeat     bool
 	CyclePercent   int
 	//in-memory only, secret
+	shipMountedOn    *Ship
 	cooldownProgress int
 }
 
@@ -217,6 +218,20 @@ func (s *Ship) PeriodicUpdate() {
 			s.Theta += 360
 		}
 
+		// regenerate energy
+		s.Energy += (s.GetRealEnergyRegen() / 1000) * Heartbeat
+
+		// clamp energy
+		maxEnergy := s.GetRealMaxEnergy()
+
+		if s.Energy < 0 {
+			s.Energy = 0
+		}
+
+		if s.Energy > maxEnergy {
+			s.Energy = maxEnergy
+		}
+
 		// apply dampening
 		dampX := SpaceDrag * s.VelX
 		dampY := SpaceDrag * s.VelY
@@ -226,14 +241,17 @@ func (s *Ship) PeriodicUpdate() {
 
 		// update modules
 		for i := range s.Fitting.ARack {
+			s.Fitting.ARack[i].shipMountedOn = s
 			s.Fitting.ARack[i].PeriodicUpdate()
 		}
 
 		for i := range s.Fitting.BRack {
+			s.Fitting.ARack[i].shipMountedOn = s
 			s.Fitting.BRack[i].PeriodicUpdate()
 		}
 
 		for i := range s.Fitting.CRack {
+			s.Fitting.ARack[i].shipMountedOn = s
 			s.Fitting.CRack[i].PeriodicUpdate()
 		}
 	} else {
@@ -419,6 +437,11 @@ func (s *Ship) GetRealMaxHull() float64 {
 //GetRealMaxEnergy Returns the real max energy of the ship after modifiers
 func (s *Ship) GetRealMaxEnergy() float64 {
 	return s.TemplateData.BaseEnergy
+}
+
+//GetRealEnergyRegen Returns the real energy regeneration rate of the ship after modifiers
+func (s *Ship) GetRealEnergyRegen() float64 {
+	return s.TemplateData.BaseEnergyRegen
 }
 
 //GetRealMaxHeat Returns the real max heat of the ship after modifiers
@@ -880,8 +903,16 @@ func (m *FittedSlot) PeriodicUpdate() {
 	} else {
 		//check for activation intent
 		if m.WillRepeat {
-			//activate module
-			m.IsCycling = true
+			//check for sufficient activation energy
+			activationEnergy, found := m.ItemTypeMeta.GetFloat64("activation_energy")
+
+			if found {
+				if m.shipMountedOn.Energy-activationEnergy >= 0 {
+					//activate module
+					m.shipMountedOn.Energy -= activationEnergy
+					m.IsCycling = true
+				}
+			}
 		}
 	}
 }
