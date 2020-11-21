@@ -408,13 +408,22 @@ function handleGlobalUpdate(d: GameMessage) {
     // start new module effects
     for (const ef of msg.newModuleEffects) {
       // copy values
-      const effect = new ModuleEffect(ef);
-
-      console.log(effect);
+      const effect = new ModuleEffect(ef, engineSack.player);
 
       // append
       engineSack.player.currentSystem.moduleEffects.push(effect);
     }
+
+    // get rid of expired module effects
+    const keepModuleEffects: ModuleEffect[] = [];
+
+    for (const ef of engineSack.player.currentSystem.moduleEffects) {
+      if (!ef.finished) {
+        keepModuleEffects.push(ef);
+      }
+    }
+
+    engineSack.player.currentSystem.moduleEffects = keepModuleEffects;
   }
 
   // update overview window
@@ -522,6 +531,11 @@ function periodicUpdate() {
   for (const w of engineSack.windows) {
     w.periodicUpdate();
   }
+
+  // update module visual effects
+  for (const ef of engineSack.player.currentSystem.moduleEffects) {
+    ef.periodicUpdate();
+  }
 }
 
 function clientRender() {
@@ -559,6 +573,11 @@ function clientRender() {
       sh.render(engineSack.ctx, engineSack.camera);
       keepShips.push(sh);
     }
+  }
+
+  // draw module visual effects
+  for (const ef of engineSack.player.currentSystem.moduleEffects) {
+    ef.render(engineSack.ctx, engineSack.camera);
   }
 
   // keep only ships that were drawable in-memory
