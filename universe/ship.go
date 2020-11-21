@@ -14,11 +14,17 @@ import (
 //ShipFuelTurn Scaler for the amount of fuel used turning
 const ShipFuelTurn = 0.1
 
+//ShipHeatTurn Scaler for the amount of heat generated turning
+const ShipHeatTurn = 0.003
+
 //ShipFuelBurn Scaler for the amount of fuel used thrusting
 const ShipFuelBurn = 0.3
 
+//ShipHeatBurn Scaler for the amount of heat generated thrusting
+const ShipHeatBurn = 0.06
+
 //ShipFuelEnergyRegen Scaler for the amount of fuel used regenerating energy
-const ShipFuelEnergyRegen = 0.1
+const ShipFuelEnergyRegen = 0.09
 
 //AutopilotRegistry Autopilot states for ships
 type AutopilotRegistry struct {
@@ -202,6 +208,12 @@ func (s *Ship) PeriodicUpdate() {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
+	// update energy
+	s.updateEnergy()
+
+	// update heat
+	s.updateHeat()
+
 	// check if docked or undocked at a station (docking with other objects not yet supported)
 	if s.DockedAtStationID == nil {
 		/* Is Undocked */
@@ -219,45 +231,6 @@ func (s *Ship) PeriodicUpdate() {
 			s.Theta -= 360
 		} else if s.Theta < 0 {
 			s.Theta += 360
-		}
-
-		// regenerate energy
-		energyRegenAmount := (s.GetRealEnergyRegen() / 1000) * Heartbeat
-		energyRegenFuelCost := energyRegenAmount * ShipFuelEnergyRegen
-
-		if s.Fuel-energyRegenFuelCost >= 0 {
-			// deduct fuel
-			s.Fuel -= energyRegenFuelCost
-
-			// increase energy level
-			s.Energy += energyRegenAmount
-		}
-
-		// clamp energy
-		maxEnergy := s.GetRealMaxEnergy()
-
-		if s.Energy < 0 {
-			s.Energy = 0
-		}
-
-		if s.Energy > maxEnergy {
-			s.Energy = maxEnergy
-		}
-
-		// dissipate heat
-		s.Heat -= (s.GetRealHeatSink() / 1000) * Heartbeat
-
-		// check for excess heat
-		maxHeat := s.GetRealMaxHeat()
-
-		if s.Heat > maxHeat {
-			// damage ship with excess heat
-			s.Hull -= ((s.Heat - maxHeat) / 1000) * Heartbeat
-		}
-
-		// clamp heat
-		if s.Heat < 0 {
-			s.Heat = 0
 		}
 
 		// apply dampening
@@ -310,6 +283,49 @@ func (s *Ship) PeriodicUpdate() {
 
 		// check autopilot
 		s.doDockedAutopilot()
+	}
+}
+
+func (s *Ship) updateEnergy() {
+	// regenerate energy
+	energyRegenAmount := (s.GetRealEnergyRegen() / 1000) * Heartbeat
+	energyRegenFuelCost := energyRegenAmount * ShipFuelEnergyRegen
+
+	if s.Fuel-energyRegenFuelCost >= 0 {
+		// deduct fuel
+		s.Fuel -= energyRegenFuelCost
+
+		// increase energy level
+		s.Energy += energyRegenAmount
+	}
+
+	// clamp energy
+	maxEnergy := s.GetRealMaxEnergy()
+
+	if s.Energy < 0 {
+		s.Energy = 0
+	}
+
+	if s.Energy > maxEnergy {
+		s.Energy = maxEnergy
+	}
+}
+
+func (s *Ship) updateHeat() {
+	// dissipate heat
+	s.Heat -= (s.GetRealHeatSink() / 1000) * Heartbeat
+
+	// check for excess heat
+	maxHeat := s.GetRealMaxHeat()
+
+	if s.Heat > maxHeat {
+		// damage ship with excess heat
+		s.Hull -= ((s.Heat - maxHeat) / 1000) * Heartbeat
+	}
+
+	// clamp heat
+	if s.Heat < 0 {
+		s.Heat = 0
 	}
 }
 
@@ -853,6 +869,9 @@ func (s *Ship) rotate(scale float64) {
 
 	// expend fuel
 	s.Fuel -= math.Abs(burn) * ShipFuelTurn
+
+	// accumulate heat
+	s.Heat += math.Abs(burn) * ShipHeatTurn
 }
 
 //forwardThrust Fire the ship's thrusters
@@ -880,6 +899,9 @@ func (s *Ship) forwardThrust(scale float64) {
 
 	// consume fuel
 	s.Fuel -= math.Abs(burn) * ShipFuelBurn
+
+	// accumulate heat
+	s.Heat += math.Abs(burn) * ShipHeatBurn
 }
 
 //FindModule Finds a module fitted on this ship
