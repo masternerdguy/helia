@@ -17,6 +17,9 @@ const ShipFuelTurn = 0.1
 //ShipFuelBurn Scaler for the amount of fuel used thrusting
 const ShipFuelBurn = 0.3
 
+//ShipFuelEnergyRegen Scaler for the amount of fuel used regenerating energy
+const ShipFuelEnergyRegen = 0.1
+
 //AutopilotRegistry Autopilot states for ships
 type AutopilotRegistry struct {
 	None      int
@@ -219,7 +222,16 @@ func (s *Ship) PeriodicUpdate() {
 		}
 
 		// regenerate energy
-		s.Energy += (s.GetRealEnergyRegen() / 1000) * Heartbeat
+		energyRegenAmount := (s.GetRealEnergyRegen() / 1000) * Heartbeat
+		energyRegenFuelCost := energyRegenAmount * ShipFuelEnergyRegen
+
+		if s.Fuel-energyRegenFuelCost >= 0 {
+			// deduct fuel
+			s.Fuel -= energyRegenFuelCost
+
+			// increase energy level
+			s.Energy += energyRegenAmount
+		}
 
 		// clamp energy
 		maxEnergy := s.GetRealMaxEnergy()
@@ -230,6 +242,22 @@ func (s *Ship) PeriodicUpdate() {
 
 		if s.Energy > maxEnergy {
 			s.Energy = maxEnergy
+		}
+
+		// dissipate heat
+		s.Heat -= (s.GetRealHeatSink() / 1000) * Heartbeat
+
+		// check for excess heat
+		maxHeat := s.GetRealMaxHeat()
+
+		if s.Heat > maxHeat {
+			// damage ship with excess heat
+			s.Hull -= ((s.Heat - maxHeat) / 1000) * Heartbeat
+		}
+
+		// clamp heat
+		if s.Heat < 0 {
+			s.Heat = 0
 		}
 
 		// apply dampening
@@ -447,6 +475,11 @@ func (s *Ship) GetRealEnergyRegen() float64 {
 //GetRealMaxHeat Returns the real max heat of the ship after modifiers
 func (s *Ship) GetRealMaxHeat() float64 {
 	return s.TemplateData.BaseHeatCap
+}
+
+//GetRealHeatSink Returns the real heat dissipation rate of the ship after modifiers
+func (s *Ship) GetRealHeatSink() float64 {
+	return s.TemplateData.BaseHeatSink
 }
 
 //GetRealMaxFuel Returns the real max fuel of the ship after modifiers
@@ -911,6 +944,13 @@ func (m *FittedSlot) PeriodicUpdate() {
 					//activate module
 					m.shipMountedOn.Energy -= activationEnergy
 					m.IsCycling = true
+
+					//apply activation heating
+					activationHeat, found := m.ItemTypeMeta.GetFloat64("activation_heat")
+
+					if found {
+						m.shipMountedOn.Heat += activationHeat
+					}
 				}
 			}
 		}
