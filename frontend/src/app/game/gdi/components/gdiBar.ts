@@ -7,6 +7,7 @@ export class GDIBar extends GDIBase {
 
     private text = '';
     private percentage = 0;
+    private showPercentage = false;
     private font: FontSize =  FontSize.normal;
     private color = GDIStyle.barFillColor;
 
@@ -38,7 +39,9 @@ export class GDIBar extends GDIBase {
         this.ctx.font = GDIStyle.getUnderlyingFont(this.getFont());
 
         // render text
-        this.ctx.fillText(this.getText(), this.getWidth() / 2, this.getHeight() / 2);
+        this.ctx.fillText(this.getText()
+                + (this.showPercentage ? ` (${Math.round(this.percentage)}%)` : ''),
+            this.getWidth() / 2, this.getHeight() / 2);
 
         if (GDIStyle.barBorderSize > 0) {
             // render border
@@ -89,5 +92,13 @@ export class GDIBar extends GDIBase {
 
     getColor(): string {
         return this.color;
+    }
+
+    getShowPercentage(): boolean {
+        return this.showPercentage;
+    }
+
+    setShowPercentage(b: boolean) {
+        this.showPercentage = b;
     }
 }

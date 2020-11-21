@@ -54,6 +54,7 @@ export class ShipStatusWindow extends GDIWindow {
 
         this.shieldBar.setFont(FontSize.small);
         this.shieldBar.setText('Shield');
+        this.shieldBar.setShowPercentage(true);
 
         // setup armor bar
         this.armorBar.setWidth(600);
@@ -66,6 +67,7 @@ export class ShipStatusWindow extends GDIWindow {
 
         this.armorBar.setFont(FontSize.small);
         this.armorBar.setText('Armor');
+        this.armorBar.setShowPercentage(true);
 
         // setup hull bar
         this.hullBar.setWidth(600);
@@ -78,6 +80,7 @@ export class ShipStatusWindow extends GDIWindow {
 
         this.hullBar.setFont(FontSize.small);
         this.hullBar.setText('Hull');
+        this.hullBar.setShowPercentage(true);
 
         // setup energy bar
         this.energyBar.setWidth(600);
@@ -90,6 +93,7 @@ export class ShipStatusWindow extends GDIWindow {
 
         this.energyBar.setFont(FontSize.small);
         this.energyBar.setText('Energy');
+        this.energyBar.setShowPercentage(true);
 
         // setup heat bar
         this.heatBar.setWidth(600);
@@ -102,6 +106,7 @@ export class ShipStatusWindow extends GDIWindow {
 
         this.heatBar.setFont(FontSize.small);
         this.heatBar.setText('Heat');
+        this.heatBar.setShowPercentage(true);
 
         // setup fuel bar
         this.fuelBar.setWidth(600);
@@ -114,6 +119,7 @@ export class ShipStatusWindow extends GDIWindow {
 
         this.fuelBar.setFont(FontSize.small);
         this.fuelBar.setText('Fuel');
+        this.fuelBar.setShowPercentage(true);
 
         // setup rack a
         this.rackA.setWidth(200);
