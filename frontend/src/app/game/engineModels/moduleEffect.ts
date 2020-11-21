@@ -2,6 +2,8 @@ import { WsPushModuleEffect } from '../wsModels/entities/wsPushModuleEffect';
 import { ModuleActivationEffectData, ModuleActivationEffectRepository } from '../data/moduleActivationEffectData';
 import { Camera } from './camera';
 import { Player, TargetType } from './player';
+import { Station } from './station';
+import { Ship } from './ship';
 
 export class ModuleEffect extends WsPushModuleEffect {
     vfxData: ModuleActivationEffectData;
@@ -91,9 +93,57 @@ export class ModuleEffect extends WsPushModuleEffect {
         if (this.vfxData) {
             if (this.vfxData.type === 'laser') {
                 /* draw a line of the given color from source to destination */
+                if (this.objStart && this.objEnd) {
+                    // get end-point coordinates
+                    const src = getTargetCoordinatesAndRadius(this.objStart, this.objStartType);
+                    const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
 
-                console.log(this);
+                    // project to screen
+                    const sx = camera.projectX(src[0]);
+                    const sy = camera.projectY(src[1]);
+                    const sr = camera.projectR(src[2]); // todo: use this as the root for the hardpoint offset
+
+                    const tx = camera.projectX(dest[0]);
+                    const ty = camera.projectY(dest[1]);
+                    const tr = camera.projectR(dest[2]); // todo: use this to vary where the beam ends up in the target
+
+                    // project laser beam thickness
+                    const lt = camera.projectR(this.vfxData.thickness);
+
+                    // style line
+                    ctx.strokeStyle = this.vfxData.color;
+
+                    const oldFilter = ctx.filter;
+
+                    if (this.vfxData.filter) {
+                        ctx.filter = this.vfxData.filter;
+                    }
+
+                    // draw line
+                    ctx.beginPath();
+                    ctx.moveTo(sx, sy);
+                    ctx.lineTo(tx, ty);
+                    ctx.lineWidth = lt;
+                    ctx.stroke();
+
+                    // revert filter
+                    ctx.filter = oldFilter;
+                }
             }
         }
     }
+}
+
+function getTargetCoordinatesAndRadius(tgt: any, tgtType: TargetType): [number, number, number] {
+    if (tgtType === TargetType.Station) {
+        const st = tgt as Station;
+        return [st.x, st.y, st.radius];
+    }
+
+    if (tgtType === TargetType.Ship) {
+        const s = tgt as Ship;
+        return [s.x, s.y, s.radius];
+    }
+
+    return [tgt?.x, tgt?.y, tgt?.radius];
 }
