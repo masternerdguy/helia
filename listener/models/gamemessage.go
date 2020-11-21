@@ -238,13 +238,13 @@ type ServerFittingStatusBody struct {
 
 //ServerModuleStatusBody Body containing information about a module fitted to a ship
 type ServerModuleStatusBody struct {
-	ItemID       string `json:"itemID"`
-	ItemTypeID   string `json:"itemTypeID"`
-	Family       string `json:"family"`
-	Type         string `json:"type"`
-	IsCycling    bool   `json:"isCycling"`
-	WillRepeat   bool   `json:"willRepeat"`
-	CyclePercent int    `json:"cyclePercent"`
+	ItemID       uuid.UUID `json:"itemID"`
+	ItemTypeID   uuid.UUID `json:"itemTypeID"`
+	Family       string    `json:"family"`
+	Type         string    `json:"type"`
+	IsCycling    bool      `json:"isCycling"`
+	WillRepeat   bool      `json:"willRepeat"`
+	CyclePercent int       `json:"cyclePercent"`
 }
 
 //ServerRackStatusBody Body containing information about a ship's rack

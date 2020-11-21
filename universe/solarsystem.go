@@ -639,8 +639,8 @@ func copyModuleInfo(v FittedSlot) models.ServerModuleStatusBody {
 	module.Family = v.ItemTypeFamily
 	module.Type = v.ItemTypeName
 	module.IsCycling = v.IsCycling
-	module.ItemID = v.ItemID.String()
-	module.ItemTypeID = v.ItemTypeID.String()
+	module.ItemID = v.ItemID
+	module.ItemTypeID = v.ItemTypeID
 	module.WillRepeat = v.WillRepeat
 	module.CyclePercent = v.CyclePercent
 
