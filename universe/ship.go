@@ -12,19 +12,22 @@ import (
 )
 
 //ShipFuelTurn Scaler for the amount of fuel used turning
-const ShipFuelTurn = 0.1
+const ShipFuelTurn = 0.001
 
 //ShipHeatTurn Scaler for the amount of heat generated turning
 const ShipHeatTurn = 0.003
 
 //ShipFuelBurn Scaler for the amount of fuel used thrusting
-const ShipFuelBurn = 0.3
+const ShipFuelBurn = 0.003
 
 //ShipHeatBurn Scaler for the amount of heat generated thrusting
 const ShipHeatBurn = 0.06
 
 //ShipFuelEnergyRegen Scaler for the amount of fuel used regenerating energy
 const ShipFuelEnergyRegen = 0.09
+
+//ShipHeatDamage Scaler for damage inflicted by excess heat
+const ShipHeatDamage = 0.01
 
 //AutopilotRegistry Autopilot states for ships
 type AutopilotRegistry struct {
@@ -288,21 +291,23 @@ func (s *Ship) PeriodicUpdate() {
 
 //updateEnergy Updates the ship's energy level for a tick
 func (s *Ship) updateEnergy() {
-	// regenerate energy
-	energyRegenAmount := (s.GetRealEnergyRegen() / 1000) * Heartbeat
-	energyRegenFuelCost := energyRegenAmount * ShipFuelEnergyRegen
+	maxEnergy := s.GetRealMaxEnergy()
 
-	if s.Fuel-energyRegenFuelCost >= 0 {
-		// deduct fuel
-		s.Fuel -= energyRegenFuelCost
+	if s.Energy < maxEnergy {
+		// regenerate energy
+		energyRegenAmount := (s.GetRealEnergyRegen() / 1000) * Heartbeat
+		energyRegenFuelCost := energyRegenAmount * ShipFuelEnergyRegen
 
-		// increase energy level
-		s.Energy += energyRegenAmount
+		if s.Fuel-energyRegenFuelCost >= 0 {
+			// deduct fuel
+			s.Fuel -= energyRegenFuelCost
+
+			// increase energy level
+			s.Energy += energyRegenAmount
+		}
 	}
 
 	// clamp energy
-	maxEnergy := s.GetRealMaxEnergy()
-
 	if s.Energy < 0 {
 		s.Energy = 0
 	}
@@ -322,7 +327,7 @@ func (s *Ship) updateHeat() {
 
 	if s.Heat > maxHeat {
 		// damage ship with excess heat
-		s.Hull -= ((s.Heat - maxHeat) / 1000) * Heartbeat
+		s.Hull -= (((s.Heat - maxHeat) / 1000) * Heartbeat) * ShipHeatDamage
 	}
 
 	// clamp heat
