@@ -107,6 +107,7 @@ export class ShipStatusWindow extends GDIWindow {
         this.heatBar.setFont(FontSize.small);
         this.heatBar.setText('Heat');
         this.heatBar.setShowPercentage(true);
+        this.heatBar.setAllowOverflow(true);
 
         // setup fuel bar
         this.fuelBar.setWidth(600);

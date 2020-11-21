@@ -7,6 +7,7 @@ export class GDIBar extends GDIBase {
 
     private text = '';
     private percentage = 0;
+    private allowOverflow = false;
     private showPercentage = false;
     private font: FontSize =  FontSize.normal;
     private color = GDIStyle.barFillColor;
@@ -71,7 +72,7 @@ export class GDIBar extends GDIBase {
     }
 
     setPercentage(p: number) {
-        if (p > 100) {
+        if (p > 100 && !this.allowOverflow) {
             p = 100;
         }
 
@@ -100,5 +101,13 @@ export class GDIBar extends GDIBase {
 
     setShowPercentage(b: boolean) {
         this.showPercentage = b;
+    }
+
+    getAllowOverflow(): boolean {
+        return this.allowOverflow;
+    }
+
+    setAllowOverflow(b: boolean) {
+        this.allowOverflow = b;
     }
 }
