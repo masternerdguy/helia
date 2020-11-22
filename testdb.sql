@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2020-11-21 03:37:45
+-- Started on 2020-11-21 19:10:46
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -307,7 +307,7 @@ COPY public.items (id, itemtypeid, meta) FROM stdin;
 --
 
 COPY public.itemtypes (id, family, name, meta) FROM stdin;
-9d1014c5-3422-4a0f-9839-f585269b4b16	gun_turret	Basic Laser Tool	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "activation_energy": 5, "active_gfx_effect": "basic_laser_tool", "ore_mining_volume": 1}
+9d1014c5-3422-4a0f-9839-f585269b4b16	gun_turret	Basic Laser Tool	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}
 \.
 
 
@@ -318,22 +318,8 @@ COPY public.itemtypes (id, family, name, meta) FROM stdin;
 --
 
 COPY public.sessions (id, userid) FROM stdin;
-7b887091-b4db-4368-aa75-10f142510338	502b5a79-f5d4-46ff-8e94-653c0778bb6e
-9d95b925-106d-4eac-99c7-80257eebaae8	57194133-619d-4239-bc10-ee4a2d9fdd62
-3a2f8402-47f6-45d3-9cd5-251f309605fb	90fe2d7d-a7f0-46d5-a4d4-0d5bb6edbbe0
-b910560f-fe99-4830-a3aa-a631d6ccd469	4d42a4ef-a84e-431f-a422-f5808aabee9f
-8a210e3d-766d-4eae-af42-4b2628e885c4	ec5c12e6-04b1-4ea3-b1c7-a8e5615b012a
-ef31917a-4d0c-429d-bfc1-dab75d3667ee	c21b1de6-e103-4335-aa6c-d652782b6bc5
-d0d7272e-1096-47e0-88a4-5b788ca24f23	49011544-cb64-4aef-9bd3-02557c73dc8c
-0a796888-ff32-4d4c-bdd2-5036e951f663	b73e441e-be0f-40f2-af2b-6fe2de883736
-f2315fc2-28cf-4c46-975f-b7c52dfe0c4c	a9e82098-3de1-43c7-a008-1484f4239530
-d9cbbe7b-3c68-4554-b97c-71c66d67d4f1	ded647c9-2799-4fb6-9887-a32ca11d0c4c
-38c95eda-861f-40ea-adb2-f023b14a9624	298011ef-0eb1-42d3-9aed-28e7166da350
-4af30de8-4272-4940-be80-32c6638e17a4	f1bb5c0c-d698-4e56-8cd8-c4b05a32f8b8
-9539dbc0-f4ff-4649-9027-a6f04bb1259f	35096539-5278-4c6f-b83f-3af7abc5a60d
-0341d6c2-0c81-441c-b635-f07708b39588	b03baaf2-e331-421f-9d78-09faece0bc07
-17dd8064-d711-4acf-98c1-1a8c7a4f71f5	06ddd20c-bc9a-4833-ac19-7915789efc42
-b4a32592-10c9-4836-90ae-c4cfa279977c	27c88822-09f0-47cd-bc20-376b2f2cc295
+c5bb477e-d76e-417e-81b2-76ac56194042	06ddd20c-bc9a-4833-ac19-7915789efc42
+42db941c-a9cc-4ccb-a9dc-5bb8bbeff2bd	27c88822-09f0-47cd-bc20-376b2f2cc295
 \.
 
 
@@ -344,7 +330,7 @@ b4a32592-10c9-4836-90ae-c4cfa279977c	27c88822-09f0-47cd-bc20-376b2f2cc295
 --
 
 COPY public.ships (id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid, dockedat_stationid, fitting) FROM stdin;
-c5bb86e3-5447-409e-aa8a-fba56db164b0	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	27c88822-09f0-47cd-bc20-376b2f2cc295	24771.795632863843	-9938.30877953488	03:18:04.439264-05	nwiehoff's Starter Ship	Sparrow	22.287948237875128	0	0	209	169	135	265	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": [{"item_id": "49381757-36b7-44e1-8a27-84c75cd405d7", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "7286cb5d-5ded-4ff5-9a5a-7f56932ada9a", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}], "b_rack": null, "c_rack": null}
+c5bb86e3-5447-409e-aa8a-fba56db164b0	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	27c88822-09f0-47cd-bc20-376b2f2cc295	207460	-335230	03:18:04.439264-05	nwiehoff's Starter Ship	Sparrow	60.68884391665598	0	0	209	169	135	265	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	526f57f5-09e0-41c7-9a89-cd803ec0a065	{"a_rack": [{"item_id": "49381757-36b7-44e1-8a27-84c75cd405d7", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "7286cb5d-5ded-4ff5-9a5a-7f56932ada9a", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}], "b_rack": null, "c_rack": null}
 0fb2bb2b-a649-4b60-8f6e-634016fbaad7	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	06ddd20c-bc9a-4833-ac19-7915789efc42	24771.795632863843	-9938.30877953488	03:34:27.903963-05	asdf's Starter Ship	Sparrow	19.33197817380082	0	0	209	169	135	265	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": null, "b_rack": null, "c_rack": null}
 \.
 
@@ -430,8 +416,8 @@ COPY public.universe_stars (id, universe_systemid, pos_x, pos_y, texture, radius
 --
 
 COPY public.universe_stations (id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta) FROM stdin;
-526f57f5-09e0-41c7-9a89-cd803ec0a065	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Test Station	207460	-335230	Fleet Armory	810	65000	23.33
 cf07bba9-90b2-4599-b1e3-84d797a67f0a	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Another Station	24771.795632863843	-9938.30877953488	Sunfarm	740	25300	112.4
+526f57f5-09e0-41c7-9a89-cd803ec0a065	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Test Station	207460	-335230	Fleet Armory	810	65000	23.33
 \.
 
 
@@ -764,7 +750,7 @@ ALTER TABLE ONLY public.universe_stations
     ADD CONSTRAINT station_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
 
 
--- Completed on 2020-11-21 03:37:45
+-- Completed on 2020-11-21 19:10:46
 
 --
 -- PostgreSQL database dump complete
