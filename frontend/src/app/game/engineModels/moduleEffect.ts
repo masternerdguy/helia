@@ -18,6 +18,8 @@ export class ModuleEffect extends WsPushModuleEffect {
     objStart: any;
     objEnd: any;
 
+    endPosOffset: [number, number];
+
     constructor(b: WsPushModuleEffect, player: Player) {
         // assign values
         super();
@@ -98,6 +100,21 @@ export class ModuleEffect extends WsPushModuleEffect {
                     const src = getTargetCoordinatesAndRadius(this.objStart, this.objStartType);
                     const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
 
+                    // apply offset to destination coordinates for cooler effect
+                    if (!this.endPosOffset) {
+                        // get a random point within the radius of the target
+                        const bR = dest[2] / 2;
+
+                        const ox = randomIntFromInterval(-bR, bR);
+                        const oy = randomIntFromInterval(-bR, bR);
+
+                        // store offset
+                        this.endPosOffset = [ox, oy];
+                    }
+
+                    dest[0] += this.endPosOffset[0];
+                    dest[1] += this.endPosOffset[1];
+
                     // project to screen
                     const sx = camera.projectX(src[0]);
                     const sy = camera.projectY(src[1]);
@@ -105,7 +122,6 @@ export class ModuleEffect extends WsPushModuleEffect {
 
                     const tx = camera.projectX(dest[0]);
                     const ty = camera.projectY(dest[1]);
-                    const tr = camera.projectR(dest[2]); // todo: use this to vary where the beam ends up in the target
 
                     // project laser beam thickness
                     const lt = camera.projectR(this.vfxData.thickness);
@@ -146,4 +162,8 @@ function getTargetCoordinatesAndRadius(tgt: any, tgtType: TargetType): [number, 
     }
 
     return [tgt?.x, tgt?.y, tgt?.radius];
+}
+
+function randomIntFromInterval(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1) + min);
 }
