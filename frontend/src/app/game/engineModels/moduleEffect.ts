@@ -115,10 +115,11 @@ export class ModuleEffect extends WsPushModuleEffect {
                     dest[0] += this.endPosOffset[0];
                     dest[1] += this.endPosOffset[1];
 
+                    // todo: implement hardpoint offset for source ship
+
                     // project to screen
                     const sx = camera.projectX(src[0]);
                     const sy = camera.projectY(src[1]);
-                    const sr = camera.projectR(src[2]); // todo: use this as the root for the hardpoint offset
 
                     const tx = camera.projectX(dest[0]);
                     const ty = camera.projectY(dest[1]);
