@@ -10,7 +10,6 @@ import { ClientDock } from '../../wsModels/bodies/dock';
 import { Ship } from '../../engineModels/ship';
 import { ClientUndock } from '../../wsModels/bodies/undock';
 import { GDIBar } from '../components/gdiBar';
-import { Station } from '../../engineModels/station';
 
 export class TargetInteractionWindow extends GDIWindow {
     private target: any;

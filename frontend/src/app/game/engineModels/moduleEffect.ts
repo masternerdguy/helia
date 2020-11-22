@@ -103,7 +103,7 @@ export class ModuleEffect extends WsPushModuleEffect {
                     // apply offset to destination coordinates for cooler effect
                     if (!this.endPosOffset) {
                         // get a random point within the radius of the target
-                        const bR = dest[2] / 2;
+                        const bR = dest[2] / 3;
 
                         const ox = randomIntFromInterval(-bR, bR);
                         const oy = randomIntFromInterval(-bR, bR);
