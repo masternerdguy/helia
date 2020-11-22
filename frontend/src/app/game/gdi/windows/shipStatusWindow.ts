@@ -1,5 +1,5 @@
 import { GDIWindow } from '../base/gdiWindow';
-import { FontSize } from '../base/gdiStyle';
+import { FontSize, GDIStyle } from '../base/gdiStyle';
 import { GDIBar } from '../components/gdiBar';
 import { Ship } from '../../engineModels/ship';
 import { GDIList } from '../components/gdiList';
@@ -55,7 +55,7 @@ export class ShipStatusWindow extends GDIWindow {
         this.shieldBar.setFont(FontSize.small);
         this.shieldBar.setText('Shield');
         this.shieldBar.setShowPercentage(true);
-        this.shieldBar.setColor('#154360');
+        this.shieldBar.setColor(GDIStyle.shieldBarColor);
 
         // setup armor bar
         this.armorBar.setWidth(600);
@@ -69,7 +69,7 @@ export class ShipStatusWindow extends GDIWindow {
         this.armorBar.setFont(FontSize.small);
         this.armorBar.setText('Armor');
         this.armorBar.setShowPercentage(true);
-        this.armorBar.setColor('#4A235A');
+        this.armorBar.setColor(GDIStyle.armorBarColor);
 
         // setup hull bar
         this.hullBar.setWidth(600);
@@ -83,7 +83,7 @@ export class ShipStatusWindow extends GDIWindow {
         this.hullBar.setFont(FontSize.small);
         this.hullBar.setText('Hull');
         this.hullBar.setShowPercentage(true);
-        this.hullBar.setColor('#78281F');
+        this.hullBar.setColor(GDIStyle.hullBarColor);
 
         // setup energy bar
         this.energyBar.setWidth(600);
@@ -97,7 +97,7 @@ export class ShipStatusWindow extends GDIWindow {
         this.energyBar.setFont(FontSize.small);
         this.energyBar.setText('Energy');
         this.energyBar.setShowPercentage(true);
-        this.energyBar.setColor('#1D8348');
+        this.energyBar.setColor(GDIStyle.energyBarColor);
 
         // setup heat bar
         this.heatBar.setWidth(600);
@@ -112,7 +112,7 @@ export class ShipStatusWindow extends GDIWindow {
         this.heatBar.setText('Heat');
         this.heatBar.setShowPercentage(true);
         this.heatBar.setAllowOverflow(true);
-        this.heatBar.setColor('#BA4A00');
+        this.heatBar.setColor(GDIStyle.heatBarColor);
 
         // setup fuel bar
         this.fuelBar.setWidth(600);
@@ -126,7 +126,7 @@ export class ShipStatusWindow extends GDIWindow {
         this.fuelBar.setFont(FontSize.small);
         this.fuelBar.setText('Fuel');
         this.fuelBar.setShowPercentage(true);
-        this.fuelBar.setColor('#4D5656');
+        this.fuelBar.setColor(GDIStyle.fuelBarColor);
 
         // setup rack a
         this.rackA.setWidth(200);

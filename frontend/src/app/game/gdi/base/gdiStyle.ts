@@ -63,6 +63,14 @@ export class GDIStyle {
     static largeFont =  GDIStyle.normalFontSize + 'px monospace';
     static giantFont =  GDIStyle.giantFontSize + 'px monospace';
 
+    // standardized bar colors for gameplay elements
+    static shieldBarColor = '#154360';
+    static armorBarColor = '#4A235A';
+    static hullBarColor = '#78281F';
+    static energyBarColor = '#1D8348';
+    static heatBarColor = '#BA4A00';
+    static fuelBarColor = '#4D5656';
+
     // helpers
     static getUnderlyingFont(font: FontSize): string {
         let f = '';
