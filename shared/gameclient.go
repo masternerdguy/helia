@@ -23,6 +23,7 @@ type GameClient struct {
 	// keys for quick lookups
 	CurrentShipID   uuid.UUID
 	CurrentSystemID uuid.UUID
+	StartID         uuid.UUID
 }
 
 //Initialize Initializes the internals of a GameClient

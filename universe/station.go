@@ -19,7 +19,8 @@ type Station struct {
 	Mass        float64
 	Theta       float64
 	//in-memory only
-	Lock sync.Mutex
+	Lock          sync.Mutex
+	CurrentSystem *SolarSystem
 }
 
 //PeriodicUpdate Processes the ship for a tick

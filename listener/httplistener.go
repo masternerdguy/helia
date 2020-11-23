@@ -2,10 +2,8 @@ package listener
 
 import (
 	"encoding/json"
-	"fmt"
 	"helia/engine"
 	"helia/listener/models"
-	"helia/physics"
 	"helia/sql"
 	"io/ioutil"
 	"net/http"
@@ -29,10 +27,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 
 	//get services
 	userSvc := sql.GetUserService()
-	shipSvc := sql.GetShipService()
-	shipTmpSvc := sql.GetShipTemplateService()
 	startSvc := sql.GetStartService()
-	itemSvc := sql.GetItemService()
 
 	//read body
 	b, err := ioutil.ReadAll(r.Body)
@@ -86,121 +81,11 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//get ship template from start
-	temp, err := shipTmpSvc.GetShipTemplateByID(start.ShipTemplateID)
+	//create their noob ship
+	u, err = engine.CreateNoobShipForPlayer(start, u.ID)
 
 	if err != nil {
-		http.Error(w, "getstartertemplate: "+err.Error(), 500)
-		return
-	}
-
-	//create fitting from start
-	const moduleCreationReason = "Module for starter ship of new player"
-
-	fitting := sql.Fitting{
-		ARack: []sql.FittedSlot{},
-		BRack: []sql.FittedSlot{},
-		CRack: []sql.FittedSlot{},
-	}
-
-	//create rack a modules
-	for _, l := range start.ShipFitting.ARack {
-		//create item for slot
-		i, err := itemSvc.NewItem(sql.Item{
-			ItemTypeID:    l.ItemTypeID,
-			Meta:          sql.Meta{},
-			CreatedBy:     &u.ID,
-			CreatedReason: moduleCreationReason,
-		})
-
-		if err != nil {
-			http.Error(w, "createitemforstartership(a): "+err.Error(), 500)
-			return
-		}
-
-		//link item to slot
-		fitting.ARack = append(fitting.ARack, sql.FittedSlot{
-			ItemID:     i.ID,
-			ItemTypeID: l.ItemTypeID,
-		})
-	}
-
-	//create rack b modules
-	for _, l := range start.ShipFitting.BRack {
-		//create item for slot
-		i, err := itemSvc.NewItem(sql.Item{
-			ItemTypeID:    l.ItemTypeID,
-			Meta:          sql.Meta{},
-			CreatedBy:     &u.ID,
-			CreatedReason: moduleCreationReason,
-		})
-
-		if err != nil {
-			http.Error(w, "createitemforstartership(b): "+err.Error(), 500)
-			return
-		}
-
-		//link item to slot
-		fitting.BRack = append(fitting.BRack, sql.FittedSlot{
-			ItemID:     i.ID,
-			ItemTypeID: l.ItemTypeID,
-		})
-	}
-
-	//create rack c modules
-	for _, l := range start.ShipFitting.CRack {
-		//create item for slot
-		i, err := itemSvc.NewItem(sql.Item{
-			ItemTypeID:    l.ItemTypeID,
-			Meta:          sql.Meta{},
-			CreatedBy:     &u.ID,
-			CreatedReason: moduleCreationReason,
-		})
-
-		if err != nil {
-			http.Error(w, "createitemforstartership(c): "+err.Error(), 500)
-			return
-		}
-
-		//link item to slot
-		fitting.CRack = append(fitting.CRack, sql.FittedSlot{
-			ItemID:     i.ID,
-			ItemTypeID: l.ItemTypeID,
-		})
-	}
-
-	//create starter ship
-	t := sql.Ship{
-		SystemID:       start.SystemID,
-		UserID:         u.ID,
-		ShipName:       fmt.Sprintf("%s's Starter Ship", m.Username),
-		Texture:        temp.Texture,
-		Theta:          0,
-		Shield:         temp.BaseShield,
-		Armor:          temp.BaseArmor,
-		Hull:           temp.BaseHull,
-		Fuel:           temp.BaseFuel,
-		Heat:           0,
-		Energy:         temp.BaseEnergy,
-		ShipTemplateID: temp.ID,
-		PosX:           float64(physics.RandInRange(-50000, 50000)),
-		PosY:           float64(physics.RandInRange(-50000, 50000)),
-		Fitting:        fitting,
-		Destroyed:      false,
-	}
-
-	starterShip, err := shipSvc.NewShip(t)
-
-	if err != nil {
-		http.Error(w, "createstartership: "+err.Error(), 500)
-		return
-	}
-
-	//put user in starter ship
-	err = userSvc.SetCurrentShipID(u.ID, &starterShip.ID)
-
-	if err != nil {
-		http.Error(w, "putuserinstartership: "+err.Error(), 500)
+		http.Error(w, "createnoobshipforplayer: "+err.Error(), 500)
 		return
 	}
 

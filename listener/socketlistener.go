@@ -174,6 +174,9 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		//lookup user in database
 		u, _ := userSvc.GetUserByID(session.UserID)
 
+		//store start
+		client.StartID = u.StartID
+
 		//lookup current ship in memory
 		currShip := l.Engine.Universe.FindShip(*u.CurrentShipID)
 

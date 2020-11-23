@@ -27,6 +27,7 @@ type Start struct {
 	Created        time.Time
 	Available      bool
 	SystemID       uuid.UUID
+	HomeStationID  uuid.UUID
 }
 
 //StartFitting Structure representing the initial fitting of a starter ship of a given start
@@ -70,14 +71,16 @@ func (s StartService) GetStartByID(StartID uuid.UUID) (*Start, error) {
 
 	sqlStatement :=
 		`
-			SELECT id, name, shiptemplateid, shipfitting, created, available, systemid
+			SELECT id, name, shiptemplateid, shipfitting, created, available, systemid, 
+				   homestationid
 			FROM public.Starts
 			WHERE id = $1
 		`
 
 	row := db.QueryRow(sqlStatement, StartID)
 
-	switch err := row.Scan(&t.ID, &t.Name, &t.ShipTemplateID, &t.ShipFitting, &t.Created, &t.Available, &t.SystemID); err {
+	switch err := row.Scan(&t.ID, &t.Name, &t.ShipTemplateID, &t.ShipFitting, &t.Created, &t.Available, &t.SystemID,
+		&t.HomeStationID); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("start not found")
 	case nil:
@@ -100,7 +103,8 @@ func (s StartService) GetAllStarts() ([]Start, error) {
 
 	//load starts
 	sql := `
-				SELECT id, name, shiptemplateid, shipfitting, created, available, systemid
+				SELECT id, name, shiptemplateid, shipfitting, created, available, systemid,
+					   homestationid
 				FROM public.Starts
 			`
 
@@ -114,7 +118,8 @@ func (s StartService) GetAllStarts() ([]Start, error) {
 		s := Start{}
 
 		//scan into start structure
-		rows.Scan(&s.ID, &s.Name, &s.ShipTemplateID, &s.ShipFitting, &s.Created, &s.Available, &s.SystemID)
+		rows.Scan(&s.ID, &s.Name, &s.ShipTemplateID, &s.ShipFitting, &s.Created, &s.Available, &s.SystemID,
+			&s.HomeStationID)
 
 		//append to ship slice
 		starts = append(starts, s)

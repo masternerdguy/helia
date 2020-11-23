@@ -2,6 +2,8 @@ package engine
 
 import (
 	"fmt"
+	"helia/shared"
+	"helia/sql"
 	"helia/universe"
 	"log"
 	"os"
@@ -56,6 +58,9 @@ func (e *HeliaEngine) Start() {
 					//update system
 					sol.PeriodicUpdate()
 
+					//handle escalations from system
+					handleEscalations(sol)
+
 					//get time of last frame
 					now := makeTimestamp()
 					tpf = int(now - lastFrame)
@@ -107,4 +112,111 @@ func (e *HeliaEngine) Shutdown() {
 	//end program
 	log.Println("Shutdown complete! Goodbye :)")
 	os.Exit(0)
+}
+
+func handleEscalations(sol *universe.SolarSystem) {
+	//get services
+	startSvc := sql.GetStartService()
+	shipSvc := sql.GetShipService()
+
+	//obtain lock
+	sol.Lock.Lock()
+	defer sol.Lock.Unlock()
+
+	//iterate over dead ships
+	for id := range sol.DeadShips {
+		ds, _ := sol.DeadShips[id]
+
+		//make sure everything is set
+		ds.Destroyed = true
+
+		if ds.DestroyedAt == nil {
+			now := time.Now()
+			ds.DestroyedAt = &now
+		}
+
+		//update dead ship in db
+		saveShip(ds)
+
+		//remove ship from system
+		sol.RemoveShip(ds, false)
+	}
+
+	//reset dead ship list
+	sol.DeadShips = make(map[string]*universe.Ship)
+
+	//iterate over clients in need of respawn
+	for id := range sol.NeedRespawn {
+		rs, _ := sol.NeedRespawn[id]
+
+		//remove client from system
+		sol.RemoveClient(rs, false)
+
+		//find their starting conditions
+		start, err := startSvc.GetStartByID(rs.StartID)
+
+		if err != nil {
+			log.Println(fmt.Sprintf("! Unable to respawn player %v - no starting conditions!", rs.UID))
+			continue
+		}
+
+		//find their home station
+		home := sol.Universe.FindStation(start.HomeStationID)
+
+		if home == nil {
+			log.Println(fmt.Sprintf("! Unable to respawn player %v - no home station!", rs.UID))
+			continue
+		}
+
+		//create their noob ship docked in that station
+		u, err := CreateNoobShipForPlayer(start, *rs.UID)
+
+		if err != nil || u.CurrentShipID == nil {
+			log.Println(fmt.Sprintf("! Unable to respawn player %v - failed to create noob ship (%v | %v)!", rs.UID, err, u.CurrentShipID))
+			continue
+		}
+
+		ns, err := shipSvc.GetShipByID(*u.CurrentShipID, false)
+
+		if err != nil || ns == nil {
+			log.Println(fmt.Sprintf("! Unable to respawn player %v - no noob ship!", rs.UID))
+			continue
+		}
+
+		ns.DockedAtStationID = &start.HomeStationID
+
+		//save noob ship
+		err = shipSvc.UpdateShip(*ns)
+
+		if home == nil {
+			log.Println(fmt.Sprintf("! Unable to respawn player %v - couldn't save noob ship changes (%v)!", rs.UID, err))
+			continue
+		}
+
+		//load the noob ship into the home station's system
+		ns, err = shipSvc.GetShipByID(*u.CurrentShipID, false)
+
+		if err != nil || ns == nil {
+			log.Println(fmt.Sprintf("! Unable to respawn player %v - no noob ship again!", rs.UID))
+			continue
+		}
+
+		es, err := loadShip(ns)
+
+		if err != nil || es == nil {
+			log.Println(fmt.Sprintf("! Unable to respawn player %v - couldn't load new noobship into universe (%v)!", rs.UID, err))
+			continue
+		}
+
+		home.CurrentSystem.AddShip(es, true)
+
+		//set client current ship to new noob ship
+		rs.CurrentShipID = es.ID
+
+		//put the client in that system
+		home.CurrentSystem.AddClient(rs, true)
+	}
+
+	//reset respawn client list
+	sol.NeedRespawn = make(map[string]*shared.GameClient)
 }

@@ -13,46 +13,16 @@ func loadUniverse() (*universe.Universe, error) {
 	regionSvc := sql.GetRegionService()
 	systemSvc := sql.GetSolarSystemService()
 	shipSvc := sql.GetShipService()
-	shipTmpSvc := sql.GetShipTemplateService()
 	starSvc := sql.GetStarService()
 	planetSvc := sql.GetPlanetService()
 	stationSvc := sql.GetStationService()
 	jumpholeSvc := sql.GetJumpholeService()
-	userSvc := sql.GetUserService()
-	startSvc := sql.GetStartService()
 
 	u := universe.Universe{}
 
 	//for linking jumpholes later
 	jhMap := make(map[string]*universe.Jumphole)
 	sMap := make(map[string]*universe.SolarSystem)
-
-	//load starts
-	ps, err := startSvc.GetAllStarts()
-
-	if err != nil {
-		return nil, err
-	}
-
-	starts := make(map[string]*universe.Start, 0)
-
-	for _, e := range ps {
-		//load start information
-		p := universe.Start{
-			ID:             e.ID,
-			Name:           e.Name,
-			ShipTemplateID: e.ShipTemplateID,
-			ShipFitting:    StartFittingFromSQL(&e.ShipFitting),
-			Created:        e.Created,
-			Available:      e.Available,
-		}
-
-		//store start
-		starts[e.ID.String()] = &p
-	}
-
-	//link starts into universe
-	u.Starts = starts
 
 	//load regions
 	rs, err := regionSvc.GetAllRegions()
@@ -89,6 +59,9 @@ func loadUniverse() (*universe.Universe, error) {
 			s.Initialize()
 			systems[s.ID.String()] = &s
 
+			//link universe into system
+			s.Universe = &u
+
 			//for jumphole linking later
 			sMap[s.ID.String()] = &s
 
@@ -100,75 +73,13 @@ func loadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, sh := range ships {
-				//get template
-				temp, err := shipTmpSvc.GetShipTemplateByID(sh.ShipTemplateID)
+				es, err := loadShip(&sh)
 
 				if err != nil {
 					return nil, err
 				}
 
-				//get owner info
-				owner, err := userSvc.GetUserByID((sh.UserID))
-
-				if err != nil {
-					return nil, err
-				}
-
-				//get fitting
-				fitting, err := FittingFromSQL(&sh.Fitting)
-
-				if err != nil {
-					return nil, err
-				}
-
-				//build in-memory ship
-				es := universe.Ship{
-					ID:                sh.ID,
-					UserID:            sh.UserID,
-					Created:           sh.Created,
-					ShipName:          sh.ShipName,
-					OwnerName:         owner.Username,
-					PosX:              sh.PosX,
-					PosY:              sh.PosY,
-					SystemID:          sh.SystemID,
-					Texture:           sh.Texture,
-					Theta:             sh.Theta,
-					VelX:              sh.VelX,
-					VelY:              sh.VelY,
-					Shield:            sh.Shield,
-					Armor:             sh.Armor,
-					Hull:              sh.Hull,
-					Fuel:              sh.Fuel,
-					Heat:              sh.Heat,
-					Energy:            sh.Energy,
-					DockedAtStationID: sh.DockedAtStationID,
-					Fitting:           *fitting,
-					Destroyed:         sh.Destroyed,
-					DestroyedAt:       sh.DestroyedAt,
-					TemplateData: universe.ShipTemplate{
-						ID:               temp.ID,
-						Created:          temp.Created,
-						ShipTemplateName: temp.ShipTemplateName,
-						Texture:          temp.Texture,
-						Radius:           temp.Radius,
-						BaseAccel:        temp.BaseAccel,
-						BaseMass:         temp.BaseMass,
-						BaseTurn:         temp.BaseTurn,
-						BaseShield:       temp.BaseShield,
-						BaseShieldRegen:  temp.BaseShieldRegen,
-						BaseArmor:        temp.BaseArmor,
-						BaseHull:         temp.BaseHull,
-						BaseFuel:         temp.BaseFuel,
-						BaseHeatCap:      temp.BaseHeatCap,
-						BaseHeatSink:     temp.BaseHeatSink,
-						BaseEnergy:       temp.BaseEnergy,
-						BaseEnergyRegen:  temp.BaseEnergyRegen,
-						ShipTypeID:       temp.ShipTypeID,
-						SlotLayout:       SlotLayoutFromSQL(&temp.SlotLayout),
-					},
-				}
-
-				s.AddShip(&es, true)
+				s.AddShip(es, true)
 			}
 
 			//load stars
@@ -261,6 +172,8 @@ func loadUniverse() (*universe.Universe, error) {
 					Radius:      currStation.Radius,
 					Mass:        currStation.Mass,
 					Theta:       currStation.Theta,
+					//link solar system into station
+					CurrentSystem: &s,
 				}
 
 				s.AddStation(&station)
@@ -302,7 +215,6 @@ func loadUniverse() (*universe.Universe, error) {
 //saveUniverse Saves the current state of dynamic entities in the simulation to the database
 func saveUniverse(u *universe.Universe) {
 	//get services
-	shipSvc := sql.GetShipService()
 	stationSvc := sql.GetStationService()
 
 	//iterate over systems
@@ -313,38 +225,7 @@ func saveUniverse(u *universe.Universe) {
 
 			//save ships to database
 			for _, ship := range ships {
-				//obtain lock on copy
-				ship.Lock.Lock()
-				defer ship.Lock.Unlock()
-
-				dbShip := sql.Ship{
-					ID:                ship.ID,
-					UserID:            ship.UserID,
-					Created:           ship.Created,
-					ShipName:          ship.ShipName,
-					PosX:              ship.PosX,
-					PosY:              ship.PosY,
-					SystemID:          ship.SystemID,
-					Texture:           ship.Texture,
-					Theta:             ship.Theta,
-					VelX:              ship.VelX,
-					VelY:              ship.VelY,
-					Shield:            ship.Shield,
-					Armor:             ship.Armor,
-					Hull:              ship.Hull,
-					Fuel:              ship.Fuel,
-					Heat:              ship.Heat,
-					Energy:            ship.Energy,
-					ShipTemplateID:    ship.TemplateData.ID,
-					DockedAtStationID: ship.DockedAtStationID,
-					Fitting:           SQLFromFitting(&ship.Fitting),
-				}
-
-				err := shipSvc.UpdateShip(dbShip)
-
-				if err != nil {
-					log.Println(fmt.Sprintf("Error saving ship: %v | %v", dbShip, err))
-				}
+				saveShip(ship)
 			}
 
 			//get npc stations in system
@@ -655,4 +536,120 @@ func StartFittedSlotFromSQL(value *sql.StartFittedSlot) universe.StartFittedSlot
 
 	//return filled slot
 	return slot
+}
+
+func loadShip(sh *sql.Ship) (*universe.Ship, error) {
+	shipTmpSvc := sql.GetShipTemplateService()
+	userSvc := sql.GetUserService()
+
+	//get template
+	temp, err := shipTmpSvc.GetShipTemplateByID(sh.ShipTemplateID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//get owner info
+	owner, err := userSvc.GetUserByID((sh.UserID))
+
+	if err != nil {
+		return nil, err
+	}
+
+	//get fitting
+	fitting, err := FittingFromSQL(&sh.Fitting)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//build in-memory ship
+	es := universe.Ship{
+		ID:                sh.ID,
+		UserID:            sh.UserID,
+		Created:           sh.Created,
+		ShipName:          sh.ShipName,
+		OwnerName:         owner.Username,
+		PosX:              sh.PosX,
+		PosY:              sh.PosY,
+		SystemID:          sh.SystemID,
+		Texture:           sh.Texture,
+		Theta:             sh.Theta,
+		VelX:              sh.VelX,
+		VelY:              sh.VelY,
+		Shield:            sh.Shield,
+		Armor:             sh.Armor,
+		Hull:              sh.Hull,
+		Fuel:              sh.Fuel,
+		Heat:              sh.Heat,
+		Energy:            sh.Energy,
+		DockedAtStationID: sh.DockedAtStationID,
+		Fitting:           *fitting,
+		Destroyed:         sh.Destroyed,
+		DestroyedAt:       sh.DestroyedAt,
+		TemplateData: universe.ShipTemplate{
+			ID:               temp.ID,
+			Created:          temp.Created,
+			ShipTemplateName: temp.ShipTemplateName,
+			Texture:          temp.Texture,
+			Radius:           temp.Radius,
+			BaseAccel:        temp.BaseAccel,
+			BaseMass:         temp.BaseMass,
+			BaseTurn:         temp.BaseTurn,
+			BaseShield:       temp.BaseShield,
+			BaseShieldRegen:  temp.BaseShieldRegen,
+			BaseArmor:        temp.BaseArmor,
+			BaseHull:         temp.BaseHull,
+			BaseFuel:         temp.BaseFuel,
+			BaseHeatCap:      temp.BaseHeatCap,
+			BaseHeatSink:     temp.BaseHeatSink,
+			BaseEnergy:       temp.BaseEnergy,
+			BaseEnergyRegen:  temp.BaseEnergyRegen,
+			ShipTypeID:       temp.ShipTypeID,
+			SlotLayout:       SlotLayoutFromSQL(&temp.SlotLayout),
+		},
+	}
+
+	return &es, nil
+}
+
+//saveShip Updates a ship in the database
+func saveShip(ship *universe.Ship) error {
+	//get ship service
+	shipSvc := sql.GetShipService()
+
+	//obtain lock on copy
+	ship.Lock.Lock()
+	defer ship.Lock.Unlock()
+
+	dbShip := sql.Ship{
+		ID:                ship.ID,
+		UserID:            ship.UserID,
+		Created:           ship.Created,
+		ShipName:          ship.ShipName,
+		PosX:              ship.PosX,
+		PosY:              ship.PosY,
+		SystemID:          ship.SystemID,
+		Texture:           ship.Texture,
+		Theta:             ship.Theta,
+		VelX:              ship.VelX,
+		VelY:              ship.VelY,
+		Shield:            ship.Shield,
+		Armor:             ship.Armor,
+		Hull:              ship.Hull,
+		Fuel:              ship.Fuel,
+		Heat:              ship.Heat,
+		Energy:            ship.Energy,
+		ShipTemplateID:    ship.TemplateData.ID,
+		DockedAtStationID: ship.DockedAtStationID,
+		Fitting:           SQLFromFitting(&ship.Fitting),
+	}
+
+	err := shipSvc.UpdateShip(dbShip)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Error saving ship: %v | %v", dbShip, err))
+	}
+
+	return err
 }

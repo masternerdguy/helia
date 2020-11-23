@@ -14,6 +14,8 @@ type Start struct {
 	ShipFitting    StartFitting
 	Created        time.Time
 	Available      bool
+	SystemID       uuid.UUID
+	HomeStationID  uuid.UUID
 }
 
 //StartFitting Structure representing the initial fitting of a starter ship of a given start

@@ -6,6 +6,7 @@ import (
 	"helia/physics"
 	"helia/shared"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -15,6 +16,7 @@ type SolarSystem struct {
 	ID                uuid.UUID
 	SystemName        string
 	RegionID          uuid.UUID
+	Universe          *Universe
 	ships             map[string]*Ship
 	stars             map[string]*Star
 	planets           map[string]*Planet
@@ -23,6 +25,9 @@ type SolarSystem struct {
 	clients           map[string]*shared.GameClient       //clients in this system
 	pushModuleEffects []models.GlobalPushModuleEffectBody //module visual effect aggregation for tick
 	Lock              sync.Mutex
+	//event escalations to engine core
+	NeedRespawn map[string]*shared.GameClient //clients in need of a respawn by core
+	DeadShips   map[string]*Ship              //dead ships in need of cleanup by core
 }
 
 //Initialize Initializes internal aspects of SolarSystem
@@ -38,6 +43,8 @@ func (s *SolarSystem) Initialize() {
 	s.planets = make(map[string]*Planet)
 	s.jumpholes = make(map[string]*Jumphole)
 	s.stations = make(map[string]*Station)
+	s.DeadShips = make(map[string]*Ship)
+	s.NeedRespawn = make(map[string]*shared.GameClient)
 
 	//initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -174,7 +181,30 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	//update ships
 	for _, e := range s.ships {
-		e.PeriodicUpdate()
+		//is hull at or below 0?
+		if e.Hull <= 0 {
+			now := time.Now()
+
+			//mark as dead
+			e.Destroyed = true
+			e.DestroyedAt = &now
+
+			//was this a ship actively being flown by a player?
+			c := s.clients[e.UserID.String()]
+
+			if c != nil {
+				if c.CurrentShipID == e.ID {
+					//escalate respawn request to core
+					s.NeedRespawn[e.UserID.String()] = c
+				}
+			}
+
+			//escalate ship cleanup request to core
+			s.DeadShips[e.ID.String()] = e
+		} else {
+			//update ship
+			e.PeriodicUpdate()
+		}
 	}
 
 	//update npc stations
@@ -184,14 +214,24 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	//ship collission testing
 	for _, sA := range s.ships {
-		// skip docked ships
+		//skip dead ships
+		if sA.Destroyed || sA.DestroyedAt != nil {
+			continue
+		}
+
+		//skip docked ships
 		if sA.DockedAtStationID != nil {
 			continue
 		}
 
 		//with other ships
 		for _, sB := range s.ships {
-			// skip docked ships
+			//skip dead ships
+			if sB.Destroyed || sB.DestroyedAt != nil {
+				continue
+			}
+
+			//skip docked ships
 			if sB.DockedAtStationID != nil {
 				continue
 			}
@@ -269,7 +309,12 @@ func (s *SolarSystem) PeriodicUpdate() {
 	}
 
 	for _, d := range s.ships {
-		// skip docked ships
+		//skip dead ships
+		if d.Destroyed || d.DestroyedAt != nil {
+			continue
+		}
+
+		//skip docked ships
 		if d.DockedAtStationID != nil {
 			continue
 		}
