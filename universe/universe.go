@@ -10,6 +10,7 @@ const SpaceDrag float64 = 0.025
 
 //Universe Structure representing the current game universe
 type Universe struct {
+	Starts  map[string]*Start
 	Regions map[string]*Region
 }
 
@@ -29,6 +30,17 @@ func (u *Universe) FindShip(shipID uuid.UUID) *Ship {
 				return sh
 			}
 		}
+	}
+
+	return nil
+}
+
+//FindStart Finds the start with the specified ID in the start cache
+func (u *Universe) FindStart(startID uuid.UUID) *Start {
+	x, f := u.Starts[startID.String()]
+
+	if f {
+		return x
 	}
 
 	return nil

@@ -26,6 +26,7 @@ type User struct {
 	Registered    time.Time
 	Banned        bool
 	CurrentShipID *uuid.UUID
+	StartID       uuid.UUID
 }
 
 //Hashpass Hashes a user's password using their username and an internal constant as the salt
@@ -43,7 +44,7 @@ func (s UserService) Hashpass(username string, pwd string) (hash *string, err er
 }
 
 //NewUser Creates a new user
-func (s UserService) NewUser(u string, p string) (*User, error) {
+func (s UserService) NewUser(u string, p string, startID uuid.UUID) (*User, error) {
 	//get db handle
 	db, err := connect()
 
@@ -60,14 +61,14 @@ func (s UserService) NewUser(u string, p string) (*User, error) {
 
 	//insert user
 	sql := `
-				INSERT INTO public.users(id, username, hashpass, registered, banned)
-				VALUES ($1, $2, $3, $4, $5);
+				INSERT INTO public.users(id, username, hashpass, registered, banned, startid)
+				VALUES ($1, $2, $3, $4, $5, $6);
 			`
 
 	uid := uuid.New()
 	createdAt := time.Now()
 
-	_, err = db.Query(sql, uid, u, *hp, createdAt, 0)
+	_, err = db.Query(sql, uid, u, *hp, createdAt, 0, startID)
 
 	if err != nil {
 		return nil, err
@@ -81,6 +82,7 @@ func (s UserService) NewUser(u string, p string) (*User, error) {
 		Registered:    createdAt,
 		Banned:        false,
 		CurrentShipID: nil,
+		StartID:       startID,
 	}
 
 	return &user, nil
@@ -156,13 +158,14 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 	//check for user with these credentials
 	user := User{}
 
-	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid
+	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, startid
 					 FROM users
 					 WHERE id=$1`
 
 	row := db.QueryRow(sqlStatement, uid)
 
-	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID); err {
+	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
+		&user.StartID); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("User does not exist or invalid credentials")
 	case nil:

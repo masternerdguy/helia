@@ -154,7 +154,7 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID, isDestroyed bool)
 		return nil, err
 	}
 
-	//load solar systems
+	//load ships
 	sql := `
 				SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
 					   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,

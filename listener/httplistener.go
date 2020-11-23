@@ -31,6 +31,8 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	userSvc := sql.GetUserService()
 	shipSvc := sql.GetShipService()
 	shipTmpSvc := sql.GetShipTemplateService()
+	startSvc := sql.GetStartService()
+	itemSvc := sql.GetItemService()
 
 	//read body
 	b, err := ioutil.ReadAll(r.Body)
@@ -61,39 +63,115 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//get start - todo: make this player selectable from a list of available starts
+	startID, err := uuid.Parse("49f06e8929fb4a02a0344b5d0702adac")
+
+	if err != nil {
+		http.Error(w, "caststartid: "+err.Error(), 500)
+		return
+	}
+
 	//create user
-	u, err := userSvc.NewUser(m.Username, m.Password)
+	u, err := userSvc.NewUser(m.Username, m.Password, startID)
 
 	if err != nil {
 		http.Error(w, "createuser: "+err.Error(), 500)
 		return
 	}
 
-	//create starter ship
-	systemID, err := uuid.Parse("1d4e0a339f674f248b7b1af4d5aa2ef1")
+	start, err := startSvc.GetStartByID(startID)
 
 	if err != nil {
-		http.Error(w, "castsystemid: "+err.Error(), 500)
+		http.Error(w, "getstart: "+err.Error(), 500)
 		return
 	}
 
-	//sparrow is the hard-coded starter ship temporarily - we'll want this to be selectable as part of character creation eventually and something less powerful
-	tempID, err := uuid.Parse("8d9e032cd9b14a368bbf1448fa60a09a")
-
-	if err != nil {
-		http.Error(w, "parsestartertemplateid: "+err.Error(), 500)
-		return
-	}
-
-	temp, err := shipTmpSvc.GetShipTemplateByID(tempID)
+	//get ship template from start
+	temp, err := shipTmpSvc.GetShipTemplateByID(start.ShipTemplateID)
 
 	if err != nil {
 		http.Error(w, "getstartertemplate: "+err.Error(), 500)
 		return
 	}
 
+	//create fitting from start
+	const moduleCreationReason = "Module for starter ship of new player"
+
+	fitting := sql.Fitting{
+		ARack: []sql.FittedSlot{},
+		BRack: []sql.FittedSlot{},
+		CRack: []sql.FittedSlot{},
+	}
+
+	//create rack a modules
+	for _, l := range start.ShipFitting.ARack {
+		//create item for slot
+		i, err := itemSvc.NewItem(sql.Item{
+			ItemTypeID:    l.ItemTypeID,
+			Meta:          sql.Meta{},
+			CreatedBy:     &u.ID,
+			CreatedReason: moduleCreationReason,
+		})
+
+		if err != nil {
+			http.Error(w, "createitemforstartership(a): "+err.Error(), 500)
+			return
+		}
+
+		//link item to slot
+		fitting.ARack = append(fitting.ARack, sql.FittedSlot{
+			ItemID:     i.ID,
+			ItemTypeID: l.ItemTypeID,
+		})
+	}
+
+	//create rack b modules
+	for _, l := range start.ShipFitting.BRack {
+		//create item for slot
+		i, err := itemSvc.NewItem(sql.Item{
+			ItemTypeID:    l.ItemTypeID,
+			Meta:          sql.Meta{},
+			CreatedBy:     &u.ID,
+			CreatedReason: moduleCreationReason,
+		})
+
+		if err != nil {
+			http.Error(w, "createitemforstartership(b): "+err.Error(), 500)
+			return
+		}
+
+		//link item to slot
+		fitting.BRack = append(fitting.BRack, sql.FittedSlot{
+			ItemID:     i.ID,
+			ItemTypeID: l.ItemTypeID,
+		})
+	}
+
+	//create rack c modules
+	for _, l := range start.ShipFitting.CRack {
+		//create item for slot
+		i, err := itemSvc.NewItem(sql.Item{
+			ItemTypeID:    l.ItemTypeID,
+			Meta:          sql.Meta{},
+			CreatedBy:     &u.ID,
+			CreatedReason: moduleCreationReason,
+		})
+
+		if err != nil {
+			http.Error(w, "createitemforstartership(c): "+err.Error(), 500)
+			return
+		}
+
+		//link item to slot
+		fitting.CRack = append(fitting.CRack, sql.FittedSlot{
+			ItemID:     i.ID,
+			ItemTypeID: l.ItemTypeID,
+		})
+	}
+
+	//create starter ship
 	t := sql.Ship{
-		SystemID:       systemID,
+		SystemID:       start.SystemID,
 		UserID:         u.ID,
 		ShipName:       fmt.Sprintf("%s's Starter Ship", m.Username),
 		Texture:        temp.Texture,
@@ -105,8 +183,9 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		Heat:           0,
 		Energy:         temp.BaseEnergy,
 		ShipTemplateID: temp.ID,
-		PosX:           float64(physics.RandInRange(-500, 500)),
-		PosY:           float64(physics.RandInRange(-500, 500)),
+		PosX:           float64(physics.RandInRange(-50000, 50000)),
+		PosY:           float64(physics.RandInRange(-50000, 50000)),
+		Fitting:        fitting,
 		Destroyed:      false,
 	}
 

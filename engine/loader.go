@@ -19,12 +19,40 @@ func loadUniverse() (*universe.Universe, error) {
 	stationSvc := sql.GetStationService()
 	jumpholeSvc := sql.GetJumpholeService()
 	userSvc := sql.GetUserService()
+	startSvc := sql.GetStartService()
 
 	u := universe.Universe{}
 
 	//for linking jumpholes later
 	jhMap := make(map[string]*universe.Jumphole)
 	sMap := make(map[string]*universe.SolarSystem)
+
+	//load starts
+	ps, err := startSvc.GetAllStarts()
+
+	if err != nil {
+		return nil, err
+	}
+
+	starts := make(map[string]*universe.Start, 0)
+
+	for _, e := range ps {
+		//load start information
+		p := universe.Start{
+			ID:             e.ID,
+			Name:           e.Name,
+			ShipTemplateID: e.ShipTemplateID,
+			ShipFitting:    StartFittingFromSQL(&e.ShipFitting),
+			Created:        e.Created,
+			Available:      e.Available,
+		}
+
+		//store start
+		starts[e.ID.String()] = &p
+	}
+
+	//link starts into universe
+	u.Starts = starts
 
 	//load regions
 	rs, err := regionSvc.GetAllRegions()
@@ -578,4 +606,53 @@ func SQLFromMeta(value *universe.Meta) sql.Meta {
 
 	//return filled meta
 	return meta
+}
+
+//StartFittingFromSQL Converts a StartFitting from the SQL type to the engine type
+func StartFittingFromSQL(value *sql.StartFitting) universe.StartFitting {
+	//set up empty layout
+	layout := universe.StartFitting{}
+
+	// null check
+	if value == nil {
+		// return empty layout
+		return layout
+	}
+
+	//copy slot data into layout
+	for _, v := range value.ARack {
+		slot := StartFittedSlotFromSQL(&v)
+		layout.ARack = append(layout.ARack, slot)
+	}
+
+	for _, v := range value.BRack {
+		slot := StartFittedSlotFromSQL(&v)
+		layout.BRack = append(layout.BRack, slot)
+	}
+
+	for _, v := range value.CRack {
+		slot := StartFittedSlotFromSQL(&v)
+		layout.CRack = append(layout.CRack, slot)
+	}
+
+	//return filled layout
+	return layout
+}
+
+//StartFittedSlotFromSQL Converts a StartFittedSlot from the SQL type to the engine type
+func StartFittedSlotFromSQL(value *sql.StartFittedSlot) universe.StartFittedSlot {
+	//set up empty slot
+	slot := universe.StartFittedSlot{}
+
+	//null check
+	if value == nil {
+		// return empty slot
+		return slot
+	}
+
+	//copy slot data
+	slot.ItemTypeID = value.ItemTypeID
+
+	//return filled slot
+	return slot
 }
