@@ -179,7 +179,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 		if currShip == nil {
 			// they must have registered today - get their ship from the db
-			dbShip, _ := shipSvc.GetShipByID(*u.CurrentShipID)
+			dbShip, _ := shipSvc.GetShipByID(*u.CurrentShipID, false)
 
 			if dbShip == nil {
 				return
@@ -202,25 +202,27 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 			// build in-memory ship
 			currShip = &universe.Ship{
-				ID:        dbShip.ID,
-				UserID:    dbShip.UserID,
-				Created:   dbShip.Created,
-				ShipName:  dbShip.ShipName,
-				OwnerName: u.Username,
-				PosX:      dbShip.PosX,
-				PosY:      dbShip.PosY,
-				SystemID:  dbShip.SystemID,
-				Texture:   dbShip.Texture,
-				Theta:     dbShip.Theta,
-				VelX:      dbShip.VelX,
-				VelY:      dbShip.VelY,
-				Shield:    dbShip.Shield,
-				Armor:     dbShip.Armor,
-				Hull:      dbShip.Hull,
-				Fuel:      dbShip.Fuel,
-				Heat:      dbShip.Heat,
-				Energy:    dbShip.Energy,
-				Fitting:   *fitting,
+				ID:          dbShip.ID,
+				UserID:      dbShip.UserID,
+				Created:     dbShip.Created,
+				ShipName:    dbShip.ShipName,
+				OwnerName:   u.Username,
+				PosX:        dbShip.PosX,
+				PosY:        dbShip.PosY,
+				SystemID:    dbShip.SystemID,
+				Texture:     dbShip.Texture,
+				Theta:       dbShip.Theta,
+				VelX:        dbShip.VelX,
+				VelY:        dbShip.VelY,
+				Shield:      dbShip.Shield,
+				Armor:       dbShip.Armor,
+				Hull:        dbShip.Hull,
+				Fuel:        dbShip.Fuel,
+				Heat:        dbShip.Heat,
+				Energy:      dbShip.Energy,
+				Fitting:     *fitting,
+				Destroyed:   dbShip.Destroyed,
+				DestroyedAt: dbShip.DestroyedAt,
 				TemplateData: universe.ShipTemplate{
 					ID:               dbTemp.ID,
 					Created:          dbTemp.Created,

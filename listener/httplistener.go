@@ -107,6 +107,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		ShipTemplateID: temp.ID,
 		PosX:           float64(physics.RandInRange(-500, 500)),
 		PosY:           float64(physics.RandInRange(-500, 500)),
+		Destroyed:      false,
 	}
 
 	starterShip, err := shipSvc.NewShip(t)

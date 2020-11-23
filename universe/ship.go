@@ -82,25 +82,27 @@ type UndockData struct {
 
 //Ship Structure representing a player ship in the game universe
 type Ship struct {
-	ID        uuid.UUID
-	UserID    uuid.UUID
-	Created   time.Time
-	ShipName  string
-	OwnerName string
-	PosX      float64
-	PosY      float64
-	SystemID  uuid.UUID
-	Texture   string
-	Theta     float64
-	VelX      float64
-	VelY      float64
-	Shield    float64
-	Armor     float64
-	Hull      float64
-	Fuel      float64
-	Heat      float64
-	Energy    float64
-	Fitting   Fitting
+	ID          uuid.UUID
+	UserID      uuid.UUID
+	Created     time.Time
+	ShipName    string
+	OwnerName   string
+	PosX        float64
+	PosY        float64
+	SystemID    uuid.UUID
+	Texture     string
+	Theta       float64
+	VelX        float64
+	VelY        float64
+	Shield      float64
+	Armor       float64
+	Hull        float64
+	Fuel        float64
+	Heat        float64
+	Energy      float64
+	Fitting     Fitting
+	Destroyed   bool
+	DestroyedAt *time.Time
 	//cache of base template
 	TemplateData ShipTemplate
 	//docking
@@ -169,6 +171,7 @@ func (s *Ship) CopyShip() *Ship {
 		Heat:      s.Heat,
 		Energy:    s.Energy,
 		Fitting:   s.Fitting,
+		Destroyed: s.Destroyed,
 		TemplateData: ShipTemplate{
 			ID:               s.TemplateData.ID,
 			Created:          s.TemplateData.Created,
@@ -202,6 +205,10 @@ func (s *Ship) CopyShip() *Ship {
 
 	if s.DockedAtStationID != nil {
 		sc.DockedAtStationID = *&s.DockedAtStationID
+	}
+
+	if s.DestroyedAt != nil {
+		sc.DestroyedAt = *&s.DestroyedAt
 	}
 
 	return &sc

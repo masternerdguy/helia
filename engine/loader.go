@@ -65,7 +65,7 @@ func loadUniverse() (*universe.Universe, error) {
 			sMap[s.ID.String()] = &s
 
 			//load ships
-			ships, err := shipSvc.GetShipsBySolarSystem(s.ID)
+			ships, err := shipSvc.GetShipsBySolarSystem(s.ID, false)
 
 			if err != nil {
 				return nil, err
@@ -115,6 +115,8 @@ func loadUniverse() (*universe.Universe, error) {
 					Energy:            sh.Energy,
 					DockedAtStationID: sh.DockedAtStationID,
 					Fitting:           *fitting,
+					Destroyed:         sh.Destroyed,
+					DestroyedAt:       sh.DestroyedAt,
 					TemplateData: universe.ShipTemplate{
 						ID:               temp.ID,
 						Created:          temp.Created,
