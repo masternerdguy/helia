@@ -435,6 +435,11 @@ function handleCurrentShipUpdate(d: GameMessage) {
   const msg = JSON.parse(d.body) as ServerCurrentShipUpdate;
 
   // update current ship cache
+  if (msg.currentShipInfo.id !== engineSack.player.currentShip.id) {
+    // player has changed ships somehow
+    engineSack.player.currentShip = new Ship(msg.currentShipInfo);
+  }
+
   engineSack.player.currentShip.sync(msg.currentShipInfo);
 
   // update camera position to track player ship
