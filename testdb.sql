@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2020-11-23 18:25:16
+-- Started on 2020-11-23 22:27:14
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -324,6 +324,14 @@ COPY public.items (id, itemtypeid, meta, created, createdby, createdreason) FROM
 93e4f414-c917-4333-8b97-02f0d8985c45	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2020-11-23 16:03:29.750024-05	7168a9e6-09dc-44f8-9943-bd1231df7b9f	Module for starter ship of new player
 b0c0566f-b85d-4d24-a295-6cdc305be833	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2020-11-23 16:05:14.65662-05	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	Module for starter ship of new player
 42bc15d0-1891-4898-bd18-42d8ff04600e	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2020-11-23 16:05:14.66362-05	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	Module for starter ship of new player
+98d8c6fa-e83c-4cb5-97e0-179e8be27c6e	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2020-11-23 18:38:07.63895-05	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	Module for new noob ship for player
+8a18ab6d-63ce-401c-ac40-f3ead327c089	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2020-11-23 18:38:07.641982-05	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	Module for new noob ship for player
+d26843f5-6c94-4c54-8eca-bf96ab790d51	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2020-11-23 22:08:06.921454-05	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	Module for new noob ship for player
+c63f5c44-c55a-4729-a240-52d2f8c02d73	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2020-11-23 22:08:06.925453-05	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	Module for new noob ship for player
+7283c2de-d72a-49db-bb75-0a13e17da259	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2020-11-23 22:14:30.033992-05	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	Module for new noob ship for player
+a430b5f1-faae-4d06-afa6-0d21069c32c1	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2020-11-23 22:14:30.039992-05	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	Module for new noob ship for player
+88f7e2a5-f8f4-4a57-af65-a4ed6d58fa75	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2020-11-23 22:21:47.30866-05	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	Module for new noob ship for player
+0a21e964-7c7d-49da-80f8-cefcd0a68e06	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2020-11-23 22:21:47.311659-05	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	Module for new noob ship for player
 \.
 
 
@@ -345,8 +353,8 @@ COPY public.itemtypes (id, family, name, meta) FROM stdin;
 --
 
 COPY public.sessions (id, userid) FROM stdin;
-797baa21-aa5a-4039-b4a3-512942af120d	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9
-bd6db832-1270-498c-8008-f2216e2c61a1	7168a9e6-09dc-44f8-9943-bd1231df7b9f
+f72a7380-cb22-40f2-b2ac-09a1dc8bc2c4	7168a9e6-09dc-44f8-9943-bd1231df7b9f
+99bef7a0-3bef-4635-835d-fd41bf8be42d	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9
 \.
 
 
@@ -357,8 +365,12 @@ bd6db832-1270-498c-8008-f2216e2c61a1	7168a9e6-09dc-44f8-9943-bd1231df7b9f
 --
 
 COPY public.ships (id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid, dockedat_stationid, fitting, destroyed, destroyedat) FROM stdin;
-9fd579ce-a902-4b2d-aaa9-92e192e65b92	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	7168a9e6-09dc-44f8-9943-bd1231df7b9f	23904.472311497604	-10766.736566542999	16:03:29.80897-05	nwiehoff's Starter Ship	Sparrow	45	9.4e-323	-9.4e-323	179.9363964760146	169	135	132.9881892243827	488.6168218985555	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "297d14b2-e6b5-4301-ba79-222546a394a0", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "93e4f414-c917-4333-8b97-02f0d8985c45", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}], "b_rack": null, "c_rack": null}	f	\N
-f0b1bcfb-3dd9-48b6-a18f-3c6388da4691	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	23929.999545489525	-10759.153359441	16:05:14.729621-05	asdf's Starter Ship	Sparrow	242.88276782449734	-0.036360060776925975	0.12489793979415233	0	3.1457566815223164	0	252.3329006044156	0.0010932727949170384	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "b0c0566f-b85d-4d24-a295-6cdc305be833", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "42bc15d0-1891-4898-bd18-42d8ff04600e", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}], "b_rack": null, "c_rack": null}	f	\N
+682b6f69-454b-4c59-91cd-b28efcc03b31	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	25442.006719087145	-10293.573959813153	22:21:47.378659-05	asdf's Starter Ship	Sparrow	292.38013505195954	8.530894365056186e-28	1.3460008542411117e-27	209	169	135	263.85108582400454	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "88f7e2a5-f8f4-4a57-af65-a4ed6d58fa75", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "0a21e964-7c7d-49da-80f8-cefcd0a68e06", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}], "b_rack": null, "c_rack": null}	f	\N
+9fd579ce-a902-4b2d-aaa9-92e192e65b92	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	7168a9e6-09dc-44f8-9943-bd1231df7b9f	25694.663945820448	23229.63409093131	16:03:29.80897-05	nwiehoff's Starter Ship	Sparrow	17.81888891452278	6.994785466385944e-25	-1.4648071225466374e-24	179.9363964760146	169	135	125.36574984313376	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "297d14b2-e6b5-4301-ba79-222546a394a0", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "93e4f414-c917-4333-8b97-02f0d8985c45", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}], "b_rack": null, "c_rack": null}	f	\N
+f0b1bcfb-3dd9-48b6-a18f-3c6388da4691	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	23928.54514305847	-10754.15744184927	16:05:14.729621-05	asdf's Starter Ship	Sparrow	242.88276782449734	-2.0305346126718823e-97	6.974949556860364e-97	0	0	0	252.3329006044156	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "b0c0566f-b85d-4d24-a295-6cdc305be833", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "42bc15d0-1891-4898-bd18-42d8ff04600e", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}], "b_rack": null, "c_rack": null}	t	2020-11-23 18:52:09.777582-05
+07870a03-913b-4430-a42a-cd1d7a94fb10	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	23926.20860334656	-10745.975049228044	22:08:07.003453-05	asdf's Starter Ship	Sparrow	136.313965978422	-1.1215133471123992e-28	-1.071218537955603e-28	0	3.137702061778015	0	260.23998597682646	61.30000000000106	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "d26843f5-6c94-4c54-8eca-bf96ab790d51", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "c63f5c44-c55a-4729-a240-52d2f8c02d73", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}], "b_rack": null, "c_rack": null}	t	2020-11-23 22:14:30.004993-05
+05171d64-bf9d-4612-84f6-0afa534b2630	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	23927.592214583863	-10776.780874378657	18:38:07.715928-05	asdf's Starter Ship	Sparrow	203.48225691739913	-1.8826987743846525e-219	8.179275792709127e-220	0	0	0	262.5595870856634	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "98d8c6fa-e83c-4cb5-97e0-179e8be27c6e", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "8a18ab6d-63ce-401c-ac40-f3ead327c089", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}], "b_rack": null, "c_rack": null}	t	2020-11-23 22:09:33.022188-05
+e39dff9d-5686-4011-b7fd-0d5c581279b2	edf08406-0879-4141-8af1-f68d32e31c8d	664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	-598411.9958169686	351865.8952203155	22:14:30.120993-05	asdf's Starter Ship	Sparrow	329.82647997035565	3.728475306676788e-25	2.183566104093122e-25	0	0	0	262.0334485065684	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "7283c2de-d72a-49db-bb75-0a13e17da259", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "a430b5f1-faae-4d06-afa6-0d21069c32c1", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}], "b_rack": null, "c_rack": null}	t	2020-11-23 22:21:47.296712-05
 \.
 
 
@@ -454,8 +466,8 @@ COPY public.universe_stars (id, universe_systemid, pos_x, pos_y, texture, radius
 --
 
 COPY public.universe_stations (id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta) FROM stdin;
-cf07bba9-90b2-4599-b1e3-84d797a67f0a	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Another Station	24771.795632863843	-9938.30877953488	Sunfarm	740	25300	112.4
 526f57f5-09e0-41c7-9a89-cd803ec0a065	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Test Station	207460	-335230	Fleet Armory	810	65000	23.33
+cf07bba9-90b2-4599-b1e3-84d797a67f0a	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Another Station	24771.795632863843	-9938.30877953488	Sunfarm	740	25300	112.4
 \.
 
 
@@ -479,7 +491,7 @@ edf08406-0879-4141-8af1-f68d32e31c8d	Another System	bfca1f47-e182-4b4d-8632-48d8
 
 COPY public.users (id, username, hashpass, registered, banned, current_shipid, startid) FROM stdin;
 7168a9e6-09dc-44f8-9943-bd1231df7b9f	nwiehoff	02c4bf7d7e35c6bab999ac03ece60b8586a27f7ecd4830983b138b74262bf3f9	2020-11-23 16:03:29.677724-05	0	9fd579ce-a902-4b2d-aaa9-92e192e65b92	49f06e89-29fb-4a02-a034-4b5d0702adac
-664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	asdf	7ab518aea3a72084bf1f1e1ddeb7fa25563a47b73b643452960187b6405b72f1	2020-11-23 16:05:14.583626-05	0	f0b1bcfb-3dd9-48b6-a18f-3c6388da4691	49f06e89-29fb-4a02-a034-4b5d0702adac
+664a4f4d-4cb1-4e4f-a5c6-c9a970d87bf9	asdf	7ab518aea3a72084bf1f1e1ddeb7fa25563a47b73b643452960187b6405b72f1	2020-11-23 16:05:14.583626-05	0	682b6f69-454b-4c59-91cd-b28efcc03b31	49f06e89-29fb-4a02-a034-4b5d0702adac
 \.
 
 
@@ -857,7 +869,7 @@ ALTER TABLE ONLY public.universe_stations
     ADD CONSTRAINT station_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
 
 
--- Completed on 2020-11-23 18:25:17
+-- Completed on 2020-11-23 22:27:14
 
 --
 -- PostgreSQL database dump complete

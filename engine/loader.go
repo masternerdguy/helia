@@ -643,6 +643,8 @@ func saveShip(ship *universe.Ship) error {
 		ShipTemplateID:    ship.TemplateData.ID,
 		DockedAtStationID: ship.DockedAtStationID,
 		Fitting:           SQLFromFitting(&ship.Fitting),
+		Destroyed:         ship.Destroyed,
+		DestroyedAt:       ship.DestroyedAt,
 	}
 
 	err := shipSvc.UpdateShip(dbShip)

@@ -55,21 +55,33 @@ func (e *HeliaEngine) Start() {
 						break
 					}
 
-					//update system
-					sol.PeriodicUpdate()
+					//for monitoring spawn exit
+					c := make(chan struct{}, 1)
 
-					//handle escalations from system
-					handleEscalations(sol)
+					//spawn goroutine so defer works as expected
+					go func() {
+						//update system
+						sol.PeriodicUpdate()
 
-					//get time of last frame
-					now := makeTimestamp()
-					tpf = int(now - lastFrame)
+						//handle escalations from system
+						handleEscalations(sol)
 
-					//find remaining portion of server heatbeat
-					if tpf < universe.Heartbeat {
-						//sleep for remainder of server heartbeat
-						time.Sleep(time.Duration(universe.Heartbeat-tpf) * time.Millisecond)
-					}
+						//get time of last frame
+						now := makeTimestamp()
+						tpf = int(now - lastFrame)
+
+						//find remaining portion of server heatbeat
+						if tpf < universe.Heartbeat {
+							//sleep for remainder of server heartbeat
+							time.Sleep(time.Duration(universe.Heartbeat-tpf) * time.Millisecond)
+						}
+
+						//done!
+						c <- struct{}{}
+					}()
+
+					//wait for goroutine to return
+					<-c
 
 					//update last frame time
 					lastFrame = makeTimestamp()
@@ -127,6 +139,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for id := range sol.DeadShips {
 		ds, _ := sol.DeadShips[id]
 
+		//remove ship from system
+		sol.RemoveShip(ds, false)
+
 		//make sure everything is set
 		ds.Destroyed = true
 
@@ -136,10 +151,12 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}
 
 		//update dead ship in db
-		saveShip(ds)
+		err := saveShip(ds)
 
-		//remove ship from system
-		sol.RemoveShip(ds, false)
+		if err != nil {
+			log.Println(fmt.Sprintf("! Unable to mark ship %v as dead in db (%v)!", ds.ID, err))
+			continue
+		}
 	}
 
 	//reset dead ship list
@@ -208,13 +225,17 @@ func handleEscalations(sol *universe.SolarSystem) {
 			continue
 		}
 
-		home.CurrentSystem.AddShip(es, true)
+		//don't lock if home station is in same system
+		sameSystem := home.CurrentSystem.ID == sol.ID
+
+		//put ship in home system
+		home.CurrentSystem.AddShip(es, !sameSystem)
 
 		//set client current ship to new noob ship
 		rs.CurrentShipID = es.ID
 
 		//put the client in that system
-		home.CurrentSystem.AddClient(rs, true)
+		home.CurrentSystem.AddClient(rs, !sameSystem)
 	}
 
 	//reset respawn client list
