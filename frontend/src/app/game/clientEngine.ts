@@ -20,6 +20,7 @@ import { ServerCurrentShipUpdate } from './wsModels/bodies/currentShipUpdate';
 import { TargetInteractionWindow } from './gdi/windows/targetInterationWindow';
 import { OverviewWindow } from './gdi/windows/overviewWindow';
 import { ModuleEffect } from './engineModels/moduleEffect';
+import { PointEffect } from './engineModels/pointEffect';
 
 class EngineSack {
   constructor() {}
@@ -218,6 +219,10 @@ function handleGlobalUpdate(d: GameMessage) {
       msg.newModuleEffects = [];
     }
 
+    if (!msg.newPointEffects || msg.newPointEffects == null) {
+      msg.newPointEffects = [];
+    }
+
     // update system
     engineSack.player.currentSystem.id = msg.currentSystemInfo.id;
     engineSack.player.currentSystem.systemName = msg.currentSystemInfo.systemName;
@@ -414,6 +419,15 @@ function handleGlobalUpdate(d: GameMessage) {
       engineSack.player.currentSystem.moduleEffects.push(effect);
     }
 
+    // start new point effects
+    for (const ef of msg.newPointEffects) {
+      // copy values
+      const effect = new PointEffect(ef, engineSack.player);
+
+      // append
+      engineSack.player.currentSystem.pointEffects.push(effect);
+    }
+
     // get rid of expired module effects
     const keepModuleEffects: ModuleEffect[] = [];
 
@@ -424,6 +438,17 @@ function handleGlobalUpdate(d: GameMessage) {
     }
 
     engineSack.player.currentSystem.moduleEffects = keepModuleEffects;
+
+    // get rid of expired point effects
+    const keepPointEffects: PointEffect[] = [];
+
+    for (const ef of engineSack.player.currentSystem.pointEffects) {
+      if (!ef.finished) {
+        keepPointEffects.push(ef);
+      }
+    }
+
+    engineSack.player.currentSystem.pointEffects = keepPointEffects;
   }
 
   // update overview window
@@ -582,6 +607,11 @@ function clientRender() {
 
   // draw module visual effects
   for (const ef of engineSack.player.currentSystem.moduleEffects) {
+    ef.render(engineSack.ctx, engineSack.camera);
+  }
+
+  // draw point visual effects
+  for (const ef of engineSack.player.currentSystem.pointEffects) {
     ef.render(engineSack.ctx, engineSack.camera);
   }
 

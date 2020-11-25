@@ -190,6 +190,7 @@ type ServerGlobalUpdateBody struct {
 	Jumpholes         []GlobalJumpholeInfo         `json:"jumpholes"`
 	Stations          []GlobalStationInfo          `json:"stations"`
 	NewModuleEffects  []GlobalPushModuleEffectBody `json:"newModuleEffects"`
+	NewPointEffects   []GlobalPushPointEffectBody  `json:"newPointEffects"`
 }
 
 //ClientNavClickBody Body containing a click-in-space move event from the client
@@ -276,4 +277,12 @@ type GlobalPushModuleEffectBody struct {
 	ObjStartType int        `json:"objStartType"`
 	ObjEndID     *uuid.UUID `json:"objEndID"`
 	ObjEndType   *int       `json:"objEndType"`
+}
+
+//GlobalPushPointEffectBody Body containing a non-module visual effect to be rendered at a point in space by the client
+type GlobalPushPointEffectBody struct {
+	GfxEffect string  `json:"gfxEffect"`
+	PosX      float64 `json:"x"`
+	PosY      float64 `json:"y"`
+	Radius    float64 `json:"r"`
 }

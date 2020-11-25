@@ -24,6 +24,7 @@ type SolarSystem struct {
 	stations          map[string]*Station
 	clients           map[string]*shared.GameClient       //clients in this system
 	pushModuleEffects []models.GlobalPushModuleEffectBody //module visual effect aggregation for tick
+	pushPointEffects  []models.GlobalPushPointEffectBody  //non-module point visual effect aggregation for tick
 	Lock              sync.Mutex
 	//event escalations to engine core
 	NeedRespawn map[string]*shared.GameClient //clients in need of a respawn by core
@@ -48,6 +49,7 @@ func (s *SolarSystem) Initialize() {
 
 	//initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
+	s.pushPointEffects = make([]models.GlobalPushPointEffectBody, 0)
 }
 
 //PeriodicUpdate Processes the solar system for a tick
@@ -201,6 +203,16 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 			//escalate ship cleanup request to core
 			s.DeadShips[e.ID.String()] = e
+
+			//drop explosion for ship
+			exp := models.GlobalPushPointEffectBody{
+				GfxEffect: "basic_explosion",
+				PosX:      e.PosX,
+				PosY:      e.PosY,
+				Radius:    e.TemplateData.Radius * 1.5,
+			}
+
+			s.pushPointEffects = append(s.pushPointEffects, exp)
 		} else {
 			//update ship
 			e.PeriodicUpdate()
@@ -507,6 +519,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	//reset new visual effects for next tick
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
+	s.pushPointEffects = make([]models.GlobalPushPointEffectBody, 0)
 }
 
 //AddShip Adds a ship to the system
