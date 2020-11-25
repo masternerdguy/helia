@@ -65,7 +65,7 @@ export class PointEffect extends WsPushPointEffect {
                     ctx.filter = this.vfxData.filter;
                 }
 
-                // determine elapsed lifetime ratio
+                // use elapsed lifetime ratio to shrink radius
                 const er = Math.max(0, sr * (1 - this.lifeElapsed / this.maxLifeTime));
 
                 // draw explosion
