@@ -413,6 +413,10 @@ func (s *SolarSystem) PeriodicUpdate() {
 		gu.NewModuleEffects = append(gu.NewModuleEffects, d)
 	}
 
+	for _, d := range s.pushPointEffects {
+		gu.NewPointEffects = append(gu.NewPointEffects, d)
+	}
+
 	//serialize global update
 	b, _ := json.Marshal(&gu)
 

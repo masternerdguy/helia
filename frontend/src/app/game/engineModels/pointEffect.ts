@@ -65,9 +65,12 @@ export class PointEffect extends WsPushPointEffect {
                     ctx.filter = this.vfxData.filter;
                 }
 
+                // determine elapsed lifetime ratio
+                const er = Math.max(0, sr * (1 - this.lifeElapsed / this.maxLifeTime));
+
                 // draw explosion
                 ctx.beginPath();
-                ctx.arc(sx, sy, sr * (1 - (this.lifeElapsed / this.maxLifeTime)), 0, 2 * Math.PI);
+                ctx.arc(sx, sy, er, 0, 2 * Math.PI);
                 ctx.fill();
 
                 // restore filter

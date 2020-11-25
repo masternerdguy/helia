@@ -566,6 +566,11 @@ function periodicUpdate() {
   for (const ef of engineSack.player.currentSystem.moduleEffects) {
     ef.periodicUpdate();
   }
+
+  // update point visual effects
+  for (const ef of engineSack.player.currentSystem.pointEffects) {
+    ef.periodicUpdate();
+  }
 }
 
 function clientRender() {
