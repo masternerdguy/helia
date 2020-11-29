@@ -26,11 +26,17 @@ const ShipHeatBurn = 0.06
 //ShipFuelEnergyRegen Scaler for the amount of fuel used regenerating energy
 const ShipFuelEnergyRegen = 0.09
 
+//ShipHeatEnergyRegen Scaler for the amount of heat generated regenerating energy
+const ShipHeatEnergyRegen = 0.1
+
 //ShipHeatDamage Scaler for damage inflicted by excess heat
 const ShipHeatDamage = 0.01
 
 //ShipShieldRegenEnergyBurn Scaler for the amount of energy used regenerating shields
 const ShipShieldRegenEnergyBurn = 0.5
+
+//ShipShieldRegenHeat Scaler for the amount of heat generated regenerating shields
+const ShipShieldRegenHeat = 1.5
 
 //AutopilotRegistry Autopilot states for ships
 type AutopilotRegistry struct {
@@ -318,6 +324,9 @@ func (s *Ship) updateEnergy() {
 			// deduct fuel
 			s.Fuel -= energyRegenFuelCost
 
+			// generate heat
+			s.Heat += energyRegenAmount * ShipHeatEnergyRegen
+
 			// increase energy level
 			s.Energy += energyRegenAmount
 		}
@@ -348,6 +357,9 @@ func (s *Ship) updateShield() {
 		if s.Energy-burn >= 0 {
 			// use energy
 			s.Energy -= burn
+
+			// generate heat
+			s.Heat += tickRegen * ShipShieldRegenHeat
 
 			// regenerate shield
 			s.Shield += tickRegen
