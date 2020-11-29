@@ -156,6 +156,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 	msgRegistry := models.NewMessageRegistry()
 	shipSvc := sql.GetShipService()
 	shipTmpSvc := sql.GetShipTemplateService()
+	startSvc := sql.GetStartService()
 
 	//store sid on server
 	client.SID = &body.SessionID
@@ -185,12 +186,39 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			dbShip, _ := shipSvc.GetShipByID(*u.CurrentShipID, false)
 
 			if dbShip == nil {
-				return
+				// report error
+				log.Println(fmt.Sprintf("player join error: unable to find ship %v for %v", u.CurrentShipID, u.ID))
+
+				// try to recover by creating a noob ship for player
+				nStart, err := startSvc.GetStartByID(u.StartID)
+
+				if err != nil {
+					//dump error to console
+					log.Println(fmt.Sprintf("player join recovery - unable to get start for player: %v", err))
+					return
+				}
+
+				u, err = engine.CreateNoobShipForPlayer(nStart, u.ID)
+
+				if err != nil {
+					//dump error to console
+					log.Println(fmt.Sprintf("player join recovery - unable to create noob ship for player: %v", err))
+					return
+				}
+
+				// get their new noob ship from the db
+				dbShip, err = shipSvc.GetShipByID(*u.CurrentShipID, false)
+
+				if dbShip == nil {
+					log.Println(fmt.Sprintf("player join recovery: unable to find recovery noob ship %v for %v", u.CurrentShipID, u.ID))
+				}
 			}
 
+			//get their ship's template
 			dbTemp, _ := shipTmpSvc.GetShipTemplateByID(dbShip.ShipTemplateID)
 
 			if dbTemp == nil {
+				log.Println(fmt.Sprintf("player join error: unable to find ship template %v for %v", dbShip.ShipTemplateID, u.ID))
 				return
 			}
 
