@@ -41,6 +41,9 @@ const ShipShieldRegenHeat = 1.5
 //ShipMinShieldRegenPercent Percentage of shield regen to be applied to a ship at 0% shields
 const ShipMinShieldRegenPercent = 0.05
 
+//ShipMinEnergyRegenPercent Percentage of energy regen to be applied to a ship at 100% energy
+const ShipMinEnergyRegenPercent = 0.07
+
 //AutopilotRegistry Autopilot states for ships
 type AutopilotRegistry struct {
 	None      int
@@ -316,22 +319,27 @@ func (s *Ship) PeriodicUpdate() {
 //updateEnergy Updates the ship's energy level for a tick
 func (s *Ship) updateEnergy() {
 	maxEnergy := s.GetRealMaxEnergy()
-	tickRegen := (s.GetRealEnergyRegen() / 1000) * Heartbeat
+
+	// calculate scaler for energy regen based on current energy percentage
+	x := math.Abs(s.Energy / maxEnergy)
+	u := math.Pow(ShipMinEnergyRegenPercent, x)
+
+	// get energy regen amount for tick taking energy percentage scaling into account
+	tickRegen := ((s.GetRealEnergyRegen() / 1000) * Heartbeat) * u
 
 	if s.Energy < (maxEnergy - tickRegen) {
 		// regenerate energy
-		energyRegenAmount := tickRegen
-		energyRegenFuelCost := energyRegenAmount * ShipFuelEnergyRegen
+		energyRegenFuelCost := tickRegen * ShipFuelEnergyRegen
 
 		if s.Fuel-energyRegenFuelCost >= 0 {
 			// deduct fuel
 			s.Fuel -= energyRegenFuelCost
 
 			// generate heat
-			s.Heat += energyRegenAmount * ShipHeatEnergyRegen
+			s.Heat += tickRegen * ShipHeatEnergyRegen
 
 			// increase energy level
-			s.Energy += energyRegenAmount
+			s.Energy += tickRegen
 		}
 	}
 
