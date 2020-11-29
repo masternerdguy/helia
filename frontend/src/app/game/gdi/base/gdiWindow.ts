@@ -1,5 +1,6 @@
 import { GDIBase } from './gdiBase';
 import { GDIComponent } from './gdiComponent';
+import { GDIRectangle } from './gdiRectangle';
 import { GDIStyle, FontSize } from './gdiStyle';
 
 export class GDIWindow extends GDIBase {
@@ -24,6 +25,11 @@ export class GDIWindow extends GDIBase {
         for (const c of this.components) {
             c.periodicUpdate();
         }
+    }
+
+    containsPoint(x: number, y: number): boolean {
+        const rect = new GDIRectangle(this.getX(), this.getY(), this.getWidth(), this.getHeight() + GDIStyle.windowHandleHeight);
+        return rect.containsPoint(x, y);
     }
 
     render(): ImageBitmap {
