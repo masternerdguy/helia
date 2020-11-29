@@ -38,6 +38,9 @@ const ShipShieldRegenEnergyBurn = 0.5
 //ShipShieldRegenHeat Scaler for the amount of heat generated regenerating shields
 const ShipShieldRegenHeat = 1.5
 
+//ShipMinShieldRegenPercent Percentage of shield regen to be applied to a ship at 0% shields
+const ShipMinShieldRegenPercent = 0.05
+
 //AutopilotRegistry Autopilot states for ships
 type AutopilotRegistry struct {
 	None      int
@@ -344,11 +347,15 @@ func (s *Ship) updateEnergy() {
 
 //UpdateShield Updates the ship's shield level for a tick
 func (s *Ship) updateShield() {
-	// get shield regen amount for tick
-	tickRegen := (s.GetRealShieldRegen() / 1000) * Heartbeat
-
 	// get max shield
 	max := s.GetRealMaxShield()
+
+	// calculate scaler for shield regen based on current shield percentage
+	x := math.Abs(s.Shield / max)
+	u := math.Pow(ShipMinShieldRegenPercent, 1.0-x)
+
+	// get shield regen amount for tick taking shield percentage scaling into account
+	tickRegen := ((s.GetRealShieldRegen() / 1000) * Heartbeat) * u
 
 	if s.Shield < (max - tickRegen) {
 		// calculate shield regen energy use
