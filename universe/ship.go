@@ -393,16 +393,29 @@ func (s *Ship) updateShield() {
 
 //updateHeat Updates the ship's heat level for a tick
 func (s *Ship) updateHeat() {
-	// dissipate heat
-	s.Heat -= (s.GetRealHeatSink() / 1000) * Heartbeat
-
-	// check for excess heat
+	// get max heat
 	maxHeat := s.GetRealMaxHeat()
 
+	// calculate dissipation efficiency modifier based on heat percentage
+	x := s.Heat / maxHeat
+	g := math.Cos(1.45 + math.Log(x+0.6))
+	u := math.Abs(math.Pow(x, g) + 0.1)
+
+	/*
+	 * the above formula will reach an optimal dissipation modifier of ~1.15x (+15% over ship max)
+	 * at ~73% capacity then fall off from there until ~800% capacity when it bottoms out at ~0.25x
+	 * then strictly increases, exceeding 1x again at ~2500% capacity. if their ship is still alive
+	 * at 2500% heat they deserve the >1x strictly increasing modifier :)
+	 */
+
+	// check for excess heat
 	if s.Heat > maxHeat {
 		// damage ship with excess heat
 		s.Hull -= (((s.Heat - maxHeat) / 1000) * Heartbeat) * ShipHeatDamage
 	}
+
+	// dissipate heat taking efficiency modifier into account
+	s.Heat -= ((s.GetRealHeatSink() / 1000) * Heartbeat) * u
 
 	// clamp heat
 	if s.Heat < 0 {
