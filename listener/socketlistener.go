@@ -211,6 +211,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 				if dbShip == nil {
 					log.Println(fmt.Sprintf("player join recovery: unable to find recovery noob ship %v for %v", u.CurrentShipID, u.ID))
+					return
 				}
 			}
 
