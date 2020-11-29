@@ -29,6 +29,9 @@ const ShipFuelEnergyRegen = 0.09
 //ShipHeatDamage Scaler for damage inflicted by excess heat
 const ShipHeatDamage = 0.01
 
+//ShipShieldRegenEnergyBurn Scaler for the amount of energy used regenerating shields
+const ShipShieldRegenEnergyBurn = 0.5
+
 //AutopilotRegistry Autopilot states for ships
 type AutopilotRegistry struct {
 	None      int
@@ -304,10 +307,11 @@ func (s *Ship) PeriodicUpdate() {
 //updateEnergy Updates the ship's energy level for a tick
 func (s *Ship) updateEnergy() {
 	maxEnergy := s.GetRealMaxEnergy()
+	tickRegen := (s.GetRealEnergyRegen() / 1000) * Heartbeat
 
-	if s.Energy < maxEnergy {
+	if s.Energy < (maxEnergy - tickRegen) {
 		// regenerate energy
-		energyRegenAmount := (s.GetRealEnergyRegen() / 1000) * Heartbeat
+		energyRegenAmount := tickRegen
 		energyRegenFuelCost := energyRegenAmount * ShipFuelEnergyRegen
 
 		if s.Fuel-energyRegenFuelCost >= 0 {
@@ -331,7 +335,33 @@ func (s *Ship) updateEnergy() {
 
 //UpdateShield Updates the ship's shield level for a tick
 func (s *Ship) updateShield() {
+	// get shield regen amount for tick
+	tickRegen := (s.GetRealShieldRegen() / 1000) * Heartbeat
 
+	// get max shield
+	max := s.GetRealMaxShield()
+
+	if s.Shield < (max - tickRegen) {
+		// calculate shield regen energy use
+		burn := tickRegen * ShipShieldRegenEnergyBurn
+
+		if s.Energy-burn >= 0 {
+			// use energy
+			s.Energy -= burn
+
+			// regenerate shield
+			s.Shield += tickRegen
+		}
+	}
+
+	// clamp shield
+	if s.Shield < 0 {
+		s.Shield = 0
+	}
+
+	if s.Shield > max {
+		s.Shield = max
+	}
 }
 
 //updateHeat Updates the ship's heat level for a tick
@@ -490,6 +520,11 @@ func (s *Ship) GetRealMass() float64 {
 //GetRealMaxShield Returns the real max shield of the ship after modifiers
 func (s *Ship) GetRealMaxShield() float64 {
 	return s.TemplateData.BaseShield
+}
+
+//GetRealShieldRegen Returns the real shield regen rate after modifiers
+func (s *Ship) GetRealShieldRegen() float64 {
+	return s.TemplateData.BaseShieldRegen
 }
 
 //GetRealMaxArmor Returns the real max armor of the ship after modifiers
