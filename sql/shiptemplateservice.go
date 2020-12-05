@@ -39,6 +39,7 @@ type ShipTemplate struct {
 	BaseEnergyRegen  float64
 	ShipTypeID       uuid.UUID
 	SlotLayout       SlotLayout
+	CargoBayVolume   float64
 }
 
 //SlotLayout JSON structure representing the slot layout available for fitting modules to this ship
@@ -86,7 +87,7 @@ func (s ShipTemplateService) GetShipTemplateByID(shipTemplateID uuid.UUID) (*Shi
 		`
 			SELECT id, created, shiptemplatename, texture, radius, baseaccel, basemass, baseturn, 
 				   baseshield, baseshieldregen, basearmor, basehull, basefuel, baseheatcap, baseheatsink, 
-				   baseenergy, baseenergyregen, shiptypeid, slotlayout
+				   baseenergy, baseenergyregen, shiptypeid, slotlayout, cargobayvolume
 			FROM public.shiptemplates
 			WHERE id = $1
 		`
@@ -95,7 +96,7 @@ func (s ShipTemplateService) GetShipTemplateByID(shipTemplateID uuid.UUID) (*Shi
 
 	switch err := row.Scan(&t.ID, &t.Created, &t.ShipTemplateName, &t.Texture, &t.Radius, &t.BaseAccel, &t.BaseMass, &t.BaseTurn,
 		&t.BaseShield, &t.BaseShieldRegen, &t.BaseArmor, &t.BaseHull, &t.BaseFuel, &t.BaseHeatCap, &t.BaseHeatSink,
-		&t.BaseEnergy, &t.BaseEnergyRegen, &t.ShipTypeID, &t.SlotLayout); err {
+		&t.BaseEnergy, &t.BaseEnergyRegen, &t.ShipTypeID, &t.SlotLayout, &t.CargoBayVolume); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("Ship template not found")
 	case nil:

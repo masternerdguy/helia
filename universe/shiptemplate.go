@@ -27,6 +27,7 @@ type ShipTemplate struct {
 	BaseEnergyRegen  float64
 	ShipTypeID       uuid.UUID
 	SlotLayout       SlotLayout
+	CargoBayVolume   float64
 }
 
 //SlotLayout Structure representing the slot layout available for fitting modules to this ship

@@ -20,28 +20,30 @@ func GetShipService() ShipService {
 
 //Ship Structure representing a row in the ships table
 type Ship struct {
-	ID                uuid.UUID
-	UserID            uuid.UUID
-	Created           time.Time
-	ShipName          string
-	PosX              float64
-	PosY              float64
-	SystemID          uuid.UUID
-	Texture           string
-	Theta             float64
-	VelX              float64
-	VelY              float64
-	Shield            float64
-	Armor             float64
-	Hull              float64
-	Fuel              float64
-	Heat              float64
-	Energy            float64
-	ShipTemplateID    uuid.UUID
-	DockedAtStationID *uuid.UUID
-	Fitting           Fitting
-	Destroyed         bool
-	DestroyedAt       *time.Time
+	ID                    uuid.UUID
+	UserID                uuid.UUID
+	Created               time.Time
+	ShipName              string
+	PosX                  float64
+	PosY                  float64
+	SystemID              uuid.UUID
+	Texture               string
+	Theta                 float64
+	VelX                  float64
+	VelY                  float64
+	Shield                float64
+	Armor                 float64
+	Hull                  float64
+	Fuel                  float64
+	Heat                  float64
+	Energy                float64
+	ShipTemplateID        uuid.UUID
+	DockedAtStationID     *uuid.UUID
+	Fitting               Fitting
+	Destroyed             bool
+	DestroyedAt           *time.Time
+	CargoBayContainerID   uuid.UUID
+	FittingBayContainerID uuid.UUID
 }
 
 //Fitting JSON structure representing the module racks of a ship and what is fitted to them
@@ -86,8 +88,10 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 				INSERT INTO public.ships(
 					id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta,
 					vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
-					dockedat_stationid, fitting, destroyed, destroyedat)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22);
+					dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid,
+					fittingbay_containerid)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22,
+						$23, $24);
 			`
 
 	uid := uuid.New()
@@ -95,7 +99,7 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 
 	_, err = db.Query(sql, uid, e.SystemID, e.UserID, e.PosX, e.PosY, createdAt, e.ShipName, e.Texture, e.Theta,
 		e.VelX, e.VelY, e.Shield, e.Armor, e.Hull, e.Fuel, e.Heat, e.Energy, e.ShipTemplateID, e.DockedAtStationID,
-		e.Fitting, e.Destroyed, e.DestroyedAt)
+		e.Fitting, e.Destroyed, e.DestroyedAt, e.CargoBayContainerID, e.FittingBayContainerID)
 
 	if err != nil {
 		return nil, err
@@ -103,6 +107,7 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 
 	//update id in model
 	e.ID = uid
+	e.Created = createdAt
 
 	//return pointer to inserted ship model
 	return &e, nil
@@ -124,7 +129,8 @@ func (s ShipService) GetShipByID(shipID uuid.UUID, isDestroyed bool) (*Ship, err
 		`
 			SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
 				   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
-				   dockedat_stationid, fitting, destroyed, destroyedat
+				   dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid,
+				   fittingbay_containerid
 			FROM public.ships
 			WHERE id = $1 and destroyed = $2
 		`
@@ -133,7 +139,8 @@ func (s ShipService) GetShipByID(shipID uuid.UUID, isDestroyed bool) (*Ship, err
 
 	switch err := row.Scan(&ship.ID, &ship.SystemID, &ship.UserID, &ship.PosX, &ship.PosY, &ship.Created, &ship.ShipName, &ship.Texture,
 		&ship.Theta, &ship.VelX, &ship.VelY, &ship.Shield, &ship.Armor, &ship.Hull, &ship.Fuel, &ship.Heat, &ship.Energy, &ship.ShipTemplateID,
-		&ship.DockedAtStationID, &ship.Fitting, &ship.Destroyed, &ship.DestroyedAt); err {
+		&ship.DockedAtStationID, &ship.Fitting, &ship.Destroyed, &ship.DestroyedAt, &ship.CargoBayContainerID,
+		&ship.FittingBayContainerID); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("Ship not found")
 	case nil:
@@ -158,7 +165,8 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID, isDestroyed bool)
 	sql := `
 				SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
 					   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
-					   dockedat_stationid, fitting, destroyed, destroyedat
+					   dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid,
+					   fittingbay_containerid
 				FROM public.ships
 				WHERE universe_systemid = $1 and destroyed = $2
 			`
@@ -175,7 +183,8 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID, isDestroyed bool)
 		//scan into ship structure
 		rows.Scan(&s.ID, &s.SystemID, &s.UserID, &s.PosX, &s.PosY, &s.Created, &s.ShipName, &s.Texture,
 			&s.Theta, &s.VelX, &s.VelY, &s.Shield, &s.Armor, &s.Hull, &s.Fuel, &s.Heat, &s.Energy, &s.ShipTemplateID,
-			&s.DockedAtStationID, &s.Fitting, &s.Destroyed, &s.DestroyedAt)
+			&s.DockedAtStationID, &s.Fitting, &s.Destroyed, &s.DestroyedAt, &s.CargoBayContainerID,
+			&s.FittingBayContainerID)
 
 		//append to ship slice
 		systems = append(systems, s)
@@ -199,13 +208,13 @@ func (s ShipService) UpdateShip(ship Ship) error {
 			UPDATE public.ships
 			SET universe_systemid=$2, userid=$3, pos_x=$4, pos_y=$5, created=$6, shipname=$7, texture=$8, theta=$9, vel_x=$10,
 				vel_y=$11, shield=$12, armor=$13, hull=$14, fuel=$15, heat=$16, energy=$17, shiptemplateid=$18, dockedat_stationid=$19,
-				fitting=$20, destroyed=$21, destroyedat=$22
+				fitting=$20, destroyed=$21, destroyedat=$22, cargobay_containerid=$23, fittingbay_containerid=$24
 			WHERE id = $1
 		`
 
 	_, err = db.Exec(sqlStatement, ship.ID, ship.SystemID, ship.UserID, ship.PosX, ship.PosY, ship.Created, ship.ShipName, ship.Texture, ship.Theta, ship.VelX,
 		ship.VelY, ship.Shield, ship.Armor, ship.Hull, ship.Fuel, ship.Heat, ship.Energy, ship.ShipTemplateID, ship.DockedAtStationID, ship.Fitting, ship.Destroyed,
-		ship.DestroyedAt)
+		ship.DestroyedAt, ship.CargoBayContainerID, ship.FittingBayContainerID)
 
 	return err
 }

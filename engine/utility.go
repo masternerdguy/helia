@@ -28,6 +28,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 	itemSvc := sql.GetItemService()
 	shipSvc := sql.GetShipService()
 	shipTmpSvc := sql.GetShipTemplateService()
+	containerSvc := sql.GetContainerService()
 
 	//get user by id
 	u, err := userSvc.GetUserByID(uid)
@@ -38,6 +39,20 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 
 	//get ship template from start
 	temp, err := shipTmpSvc.GetShipTemplateByID(start.ShipTemplateID)
+
+	if err != nil {
+		return u, err
+	}
+
+	//create container for cargo bay
+	cb, err := containerSvc.NewContainer(sql.Container{})
+
+	if err != nil {
+		return u, err
+	}
+
+	//create container for fitting bay
+	fb, err := containerSvc.NewContainer(sql.Container{})
 
 	if err != nil {
 		return u, err
@@ -58,6 +73,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 			Meta:          sql.Meta{},
 			CreatedBy:     &u.ID,
 			CreatedReason: moduleCreationReason,
+			ContainerID:   fb.ID,
 		})
 
 		if err != nil {
@@ -79,6 +95,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 			Meta:          sql.Meta{},
 			CreatedBy:     &u.ID,
 			CreatedReason: moduleCreationReason,
+			ContainerID:   fb.ID,
 		})
 
 		if err != nil {
@@ -100,6 +117,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 			Meta:          sql.Meta{},
 			CreatedBy:     &u.ID,
 			CreatedReason: moduleCreationReason,
+			ContainerID:   fb.ID,
 		})
 
 		if err != nil {
@@ -115,22 +133,24 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 
 	//create starter ship
 	t := sql.Ship{
-		SystemID:       start.SystemID,
-		UserID:         u.ID,
-		ShipName:       fmt.Sprintf("%s's Starter Ship", u.Username),
-		Texture:        temp.Texture,
-		Theta:          0,
-		Shield:         temp.BaseShield,
-		Armor:          temp.BaseArmor,
-		Hull:           temp.BaseHull,
-		Fuel:           temp.BaseFuel,
-		Heat:           0,
-		Energy:         temp.BaseEnergy,
-		ShipTemplateID: temp.ID,
-		PosX:           float64(physics.RandInRange(-50000, 50000)),
-		PosY:           float64(physics.RandInRange(-50000, 50000)),
-		Fitting:        fitting,
-		Destroyed:      false,
+		SystemID:              start.SystemID,
+		UserID:                u.ID,
+		ShipName:              fmt.Sprintf("%s's Starter Ship", u.Username),
+		Texture:               temp.Texture,
+		Theta:                 0,
+		Shield:                temp.BaseShield,
+		Armor:                 temp.BaseArmor,
+		Hull:                  temp.BaseHull,
+		Fuel:                  temp.BaseFuel,
+		Heat:                  0,
+		Energy:                temp.BaseEnergy,
+		ShipTemplateID:        temp.ID,
+		PosX:                  float64(physics.RandInRange(-50000, 50000)),
+		PosY:                  float64(physics.RandInRange(-50000, 50000)),
+		Fitting:               fitting,
+		Destroyed:             false,
+		CargoBayContainerID:   cb.ID,
+		FittingBayContainerID: fb.ID,
 	}
 
 	starterShip, err := shipSvc.NewShip(t)
