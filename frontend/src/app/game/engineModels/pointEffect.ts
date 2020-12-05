@@ -24,6 +24,8 @@ export class PointEffect extends WsPushPointEffect {
 
         if (b.gfxEffect === 'basic_explosion') {
             this.vfxData = registry.basicExplosion();
+        } else if (b.gfxEffect === 'basic_shield_booster') {
+            this.vfxData = registry.basicShieldBooster();
         }
 
         this.maxLifeTime = this.vfxData?.duration ?? 0;
@@ -72,6 +74,31 @@ export class PointEffect extends WsPushPointEffect {
                 ctx.beginPath();
                 ctx.arc(sx, sy, er, 0, 2 * Math.PI);
                 ctx.fill();
+
+                // restore filter
+                ctx.filter = oldFilter;
+            } else if (this.vfxData.type === 'bubble_shield_boost') {
+                // project to screen
+                const sx = camera.projectX(this.x);
+                const sy = camera.projectY(this.y);
+                const sr = camera.projectR(this.r);
+
+                // backup filter
+                const oldFilter = ctx.filter;
+
+                // style boost
+                ctx.strokeStyle = this.vfxData.color;
+                if (this.vfxData.filter) {
+                    ctx.filter = this.vfxData.filter;
+                }
+
+                // use elapsed lifetime ratio to expand radius
+                const er = Math.max(0, sr * (this.lifeElapsed / this.maxLifeTime));
+
+                // draw explosion
+                ctx.beginPath();
+                ctx.arc(sx, sy, er, 0, 2 * Math.PI);
+                ctx.stroke();
 
                 // restore filter
                 ctx.filter = oldFilter;
