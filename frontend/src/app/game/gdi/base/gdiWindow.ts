@@ -37,6 +37,10 @@ export class GDIWindow extends GDIBase {
     }
 
     containsPoint(x: number, y: number): boolean {
+        if (this.isHidden()) {
+            return false;
+        }
+
         const rect = new GDIRectangle(this.getX(), this.getY(), this.getWidth(), this.getHeight() + GDIStyle.windowHandleHeight);
         return rect.containsPoint(x, y);
     }
