@@ -82,7 +82,7 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   // initialize ui windows
   engineSack.shipStatusWindow = new ShipStatusWindow();
   engineSack.shipStatusWindow.setX(engineSack.windowManager.getWidth());
-  engineSack.shipStatusWindow.setY(50);
+  engineSack.shipStatusWindow.setY(0);
   engineSack.shipStatusWindow.initialize();
   engineSack.shipStatusWindow.pack();
   engineSack.shipStatusWindow.setWsService(wsService);
@@ -92,7 +92,7 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.targetInteractionWindow.initialize();
   engineSack.targetInteractionWindow.setWsSvc(wsService);
   engineSack.targetInteractionWindow.setX((gameCanvas.width - (engineSack.targetInteractionWindow.getWidth())));
-  engineSack.targetInteractionWindow.setY(50);
+  engineSack.targetInteractionWindow.setY(0);
   engineSack.targetInteractionWindow.pack();
 
   engineSack.overviewWindow = new OverviewWindow();
