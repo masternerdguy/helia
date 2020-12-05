@@ -45,14 +45,18 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 	}
 
 	//create container for cargo bay
-	cb, err := containerSvc.NewContainer(sql.Container{})
+	cb, err := containerSvc.NewContainer(sql.Container{
+		Meta: sql.Meta{},
+	})
 
 	if err != nil {
 		return u, err
 	}
 
 	//create container for fitting bay
-	fb, err := containerSvc.NewContainer(sql.Container{})
+	fb, err := containerSvc.NewContainer(sql.Container{
+		Meta: sql.Meta{},
+	})
 
 	if err != nil {
 		return u, err
