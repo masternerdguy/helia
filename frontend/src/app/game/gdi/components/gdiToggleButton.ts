@@ -36,22 +36,22 @@ export class GDIToggleButton extends GDIBase {
                 this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight());
             }
         } else {
-            if (!this.toggled) {
-                // render background
-                this.ctx.fillStyle = GDIStyle.buttonFillColor;
-                this.ctx.fillRect(0, 0, this.getWidth(), this.getHeight());
-            } else {
-                // render background
-                this.ctx.fillStyle = GDIStyle.toggleButtonEnabledFillColor;
-                this.ctx.fillRect(0, 0, this.getWidth(), this.getHeight());
-            }
+            // render background
+            this.ctx.fillStyle = GDIStyle.buttonFillColor;
+            this.ctx.fillRect(0, 0, this.getWidth(), this.getHeight());
 
             // style text
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
 
-            this.ctx.fillStyle = GDIStyle.buttonTextColor;
-            this.ctx.strokeStyle = GDIStyle.buttonTextColor;
+            if (!this.toggled) {
+                this.ctx.fillStyle = GDIStyle.buttonTextColor;
+                this.ctx.strokeStyle = GDIStyle.buttonTextColor;
+            } else {
+                this.ctx.fillStyle = GDIStyle.toggleButtonEnabledTextColor;
+                this.ctx.strokeStyle = GDIStyle.toggleButtonEnabledTextColor;
+            }
+
             this.ctx.font = GDIStyle.getUnderlyingFont(this.getFont());
 
             // render text
