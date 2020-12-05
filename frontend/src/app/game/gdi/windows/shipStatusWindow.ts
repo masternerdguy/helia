@@ -155,7 +155,7 @@ export class ShipStatusWindow extends GDIWindow {
         this.rackB.setX(200);
         this.rackB.setY(60);
 
-        this.rackB.setFont(FontSize.small);
+        this.rackB.setFont(FontSize.smallNormal);
         this.rackB.setOnClick((module: RackRow) => {
             if (!module.object.willRepeat) {
                 // issue order to activate module
@@ -174,7 +174,7 @@ export class ShipStatusWindow extends GDIWindow {
         this.rackC.setX(400);
         this.rackC.setY(60);
 
-        this.rackC.setFont(FontSize.small);
+        this.rackC.setFont(FontSize.smallNormal);
         this.rackC.setOnClick((module: RackRow) => {
             if (!module.object.willRepeat) {
                 // issue order to activate module
