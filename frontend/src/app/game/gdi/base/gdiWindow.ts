@@ -9,9 +9,12 @@ export class GDIWindow extends GDIBase {
     private ctx: any;
 
     private dragMode = false;
-    private hidden = false;
     private borderless = false;
     private title = '';
+
+    private hidden = false;
+    private onHide = () => {};
+    private onShow = () => {};
 
     initialize() {
         // initialize offscreen canvas
@@ -56,6 +59,11 @@ export class GDIWindow extends GDIBase {
 
         this.ctx.fillText(this.title, GDIStyle.windowBorderSize + 2, (GDIStyle.windowHandleHeight / 2));
 
+        // render close icon
+        this.ctx.font = `${GDIStyle.windowHandleHeight}px monospace`; // todo: there are better ways of doing this...
+        this.ctx.fillText('⮽',
+            this.getWidth() - (GDIStyle.windowHandleHeight), (GDIStyle.windowHandleHeight / 2));
+
         // render background
         this.ctx.fillStyle = GDIStyle.windowFillColor;
         this.ctx.fillRect(0, GDIStyle.windowHandleHeight, this.getWidth(), this.getHeight());
@@ -83,18 +91,26 @@ export class GDIWindow extends GDIBase {
             return;
         }
 
+        // adjust input to be relative to window origin
+        const rX = x - this.getX();
+        const rY = y - (this.getY() + GDIStyle.windowHandleHeight);
+
         // check for click in handle
         const hY = y - this.getY();
 
         if (hY < GDIStyle.windowHandleHeight) {
+            // check for close
+            const cx = this.getWidth() - (GDIStyle.windowHandleHeight);
+            if (rX >= cx) {
+                // hide window
+                this.setHidden(true);
+                return;
+            }
+
             // toggle drag mode
             this.dragMode = !this.dragMode;
             return;
         }
-
-        // adjust input to be relative to window origin
-        const rX = x - this.getX();
-        const rY = y - (this.getY() + GDIStyle.windowHandleHeight);
 
         // find the component that is being scrolled on within this window
         for (const c of this.components) {
@@ -172,6 +188,20 @@ export class GDIWindow extends GDIBase {
 
     setHidden(h: boolean) {
         this.hidden = h;
+
+        if (this.hidden) {
+            this.onHide();
+        } else {
+            this.onShow();
+        }
+    }
+
+    setOnHide(f: () => void) {
+        this.onHide = f;
+    }
+
+    setOnShow(f: () => void) {
+        this.onShow = f;
     }
 
     isBorderless(): boolean {

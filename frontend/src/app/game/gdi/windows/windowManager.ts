@@ -33,7 +33,8 @@ export class WindowManager extends GDIWindow {
             const w = wt[0] as GDIWindow;
             const b = wt[1] as GDIToggleButton;
 
-            w.setHidden(!b.isToggled());
+            // update toggle based on window state
+            b.setToggled(!w.isHidden());
         }
 
         // enforce position on screen
@@ -41,7 +42,7 @@ export class WindowManager extends GDIWindow {
         this.setY(-GDIStyle.windowHandleHeight);
     }
 
-    manageWindow(w: GDIWindow, i: string, v: boolean) {
+    manageWindow(w: GDIWindow, i: string) {
         // set up toggle button for this window
         const width = this.getWidth();
         const wt = new GDIToggleButton();
@@ -52,12 +53,12 @@ export class WindowManager extends GDIWindow {
         wt.setY(this.windowToggles.length * width);
 
         wt.setText(i);
-        wt.setOnClick(() => {});
+        wt.setOnClick(() => {
+            w.setHidden(!wt.isToggled());
+        });
 
         wt.setFont(FontSize.giant);
         wt.setBorderless(true);
-        wt.setToggled(v);
-
         wt.initialize();
 
         // store window and toggle
