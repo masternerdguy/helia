@@ -7,15 +7,6 @@ export class PointEffectRegistry {
             filter: 'blur(10px)' // "feather"
         };
     }
-
-    basicShieldBooster(): PointEffectData {
-        return {
-            type: 'bubble_shield_boost',
-            duration: 450,
-            color: '#A1FA61',
-            filter: 'blur(5px)' // "feather"
-        };
-    }
 }
 
 export class PointEffectData {

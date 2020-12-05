@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2020-12-05 17:21:02
+-- Started on 2020-12-05 17:45:58
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -374,8 +374,8 @@ ed9b5175-9fb0-4c50-b21c-88cc274992b1	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	202
 
 COPY public.itemtypes (id, family, name, meta) FROM stdin;
 9d1014c5-3422-4a0f-9839-f585269b4b16	gun_turret	Basic Laser Tool	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}
-09172710-740c-4d1c-9fc0-43cb62e674e7	shield_booster	Basic Shield Booster	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "activation_energy": 15, "shield_boost_amount": 20, "activation_pgfx_effect": "basic_shield_booster"}
 b481a521-1b12-4ffa-ac2f-4da015036f7f	fuel_tank	Basic Fuel Tank	{"hp": 15, "rack": "c", "volume": 3, "fuel_max_add": 30}
+09172710-740c-4d1c-9fc0-43cb62e674e7	shield_booster	Basic Shield Booster	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "activation_energy": 15, "shield_boost_amount": 20, "activation_gfx_effect": "basic_shield_booster"}
 \.
 
 
@@ -386,7 +386,7 @@ b481a521-1b12-4ffa-ac2f-4da015036f7f	fuel_tank	Basic Fuel Tank	{"hp": 15, "rack"
 --
 
 COPY public.sessions (id, userid) FROM stdin;
-6866f8c2-3402-4ee5-bba1-e90bbba187b9	7a44a154-1154-44e8-9084-e6c7b8df94f4
+1b463fed-4c4d-4894-89fa-659eb77345cc	7a44a154-1154-44e8-9084-e6c7b8df94f4
 4db6fd4c-3a20-4ae1-b856-181270a83d86	270613be-4b65-4c55-a9c8-9a88718b308e
 8ca56ea3-a6df-450b-989f-cee65014d2e0	15ee3a6d-ef4d-43b1-ae6a-348ba43d2957
 \.
@@ -961,7 +961,7 @@ ALTER TABLE ONLY public.universe_stations
     ADD CONSTRAINT station_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
 
 
--- Completed on 2020-12-05 17:21:02
+-- Completed on 2020-12-05 17:45:58
 
 --
 -- PostgreSQL database dump complete

@@ -8,6 +8,16 @@ export class ModuleActivationEffectRepository {
             thickness: 0.5
         };
     }
+
+    basicShieldBooster(): ModuleActivationEffectData {
+        return {
+            type: 'bubble_shield_boost',
+            duration: 450,
+            color: '#A1FA61',
+            filter: 'blur(5px)', // "feather"
+            thickness: 2
+        };
+    }
 }
 
 export class ModuleActivationEffectData {

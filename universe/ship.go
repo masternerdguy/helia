@@ -1354,19 +1354,20 @@ func (m *FittedSlot) activateAsShieldBooster() bool {
 	m.shipMountedOn.DealDamage(-shieldBoost, 0, 0)
 
 	//include visual effect if present
-	activationPGfxEffect, found := m.ItemTypeMeta.GetString("activation_pgfx_effect")
+	activationPGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
 
 	if found {
+		tgtReg := models.NewTargetTypeRegistry()
+
 		//build effect trigger
-		pGfxEffect := models.GlobalPushPointEffectBody{
-			GfxEffect: activationPGfxEffect,
-			PosX:      m.shipMountedOn.PosX,
-			PosY:      m.shipMountedOn.PosY,
-			Radius:    m.shipMountedOn.TemplateData.Radius,
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationPGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
 		}
 
 		//push to solar system list for next update
-		m.shipMountedOn.CurrentSystem.pushPointEffects = append(m.shipMountedOn.CurrentSystem.pushPointEffects, pGfxEffect)
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
 	}
 
 	//module activates!

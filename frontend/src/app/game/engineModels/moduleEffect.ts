@@ -31,6 +31,8 @@ export class ModuleEffect extends WsPushModuleEffect {
 
         if (b.gfxEffect === 'basic_laser_tool') {
             this.vfxData = repo.basicLaserTool();
+        } else if (b.gfxEffect === 'basic_shield_booster') {
+            this.vfxData = repo.basicShieldBooster();
         }
 
         this.maxLifeTime = this.vfxData?.duration ?? 0;
@@ -146,6 +148,36 @@ export class ModuleEffect extends WsPushModuleEffect {
                     // revert filter
                     ctx.filter = oldFilter;
                 }
+            } else if (this.vfxData.type === 'bubble_shield_boost') {
+                // get start coordinates
+                const src = getTargetCoordinatesAndRadius(this.objStart, this.objStartType);
+
+                // project to screen
+                const sx = camera.projectX(src[0]);
+                const sy = camera.projectY(src[1]);
+                const sr = camera.projectR(src[2]);
+                const bt = camera.projectR(this.vfxData.thickness);
+
+                // backup filter
+                const oldFilter = ctx.filter;
+
+                // style boost
+                ctx.strokeStyle = this.vfxData.color;
+                if (this.vfxData.filter) {
+                    ctx.filter = this.vfxData.filter;
+                    ctx.lineWidth = bt;
+                }
+
+                // use elapsed lifetime ratio to expand radius
+                const er = Math.max(0, sr * (this.lifeElapsed / this.maxLifeTime));
+
+                // draw explosion
+                ctx.beginPath();
+                ctx.arc(sx, sy, er, 0, 2 * Math.PI);
+                ctx.stroke();
+
+                // restore filter
+                ctx.filter = oldFilter;
             }
         }
     }
