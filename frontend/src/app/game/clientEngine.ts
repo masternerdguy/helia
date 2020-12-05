@@ -21,6 +21,7 @@ import { TargetInteractionWindow } from './gdi/windows/targetInterationWindow';
 import { OverviewWindow } from './gdi/windows/overviewWindow';
 import { ModuleEffect } from './engineModels/moduleEffect';
 import { PointEffect } from './engineModels/pointEffect';
+import { WindowManager } from './gdi/windows/windowManager';
 
 class EngineSack {
   constructor() {}
@@ -46,6 +47,7 @@ class EngineSack {
   lastShiftDown: number;
 
   windows: GDIWindow[];
+  windowManager: WindowManager;
 
   // client-server communication
   wsSvc: WsService;
@@ -70,9 +72,16 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.camera = new Camera(gameCanvas.width, gameCanvas.height, 1);
   engineSack.backplateRenderer = new Backplate(backCanvas);
 
+  // initialize window manager
+  engineSack.windowManager = new WindowManager();
+  engineSack.windowManager.preinit(gameCanvas.height);
+  engineSack.windowManager.setX(0);
+  engineSack.windowManager.setY(Number.NEGATIVE_INFINITY);
+  engineSack.windowManager.initialize();
+
   // initialize ui windows
   engineSack.shipStatusWindow = new ShipStatusWindow();
-  engineSack.shipStatusWindow.setX(0);
+  engineSack.shipStatusWindow.setX(engineSack.windowManager.getWidth());
   engineSack.shipStatusWindow.setY(50);
   engineSack.shipStatusWindow.initialize();
   engineSack.shipStatusWindow.pack();
@@ -95,11 +104,17 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
                                  GDIStyle.windowHandleHeight);
   engineSack.overviewWindow.pack();
 
+  // link windows to window manager
+  engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☄', true);
+  engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☸', true);
+  engineSack.windowManager.manageWindow(engineSack.targetInteractionWindow, '⛶', true);
+
   // cache windows for simpler updating and rendering
   engineSack.windows = [
     engineSack.shipStatusWindow,
     engineSack.targetInteractionWindow,
-    engineSack.overviewWindow
+    engineSack.overviewWindow,
+    engineSack.windowManager
   ];
 
   // store globals
@@ -630,6 +645,10 @@ function clientRender() {
 
   // draw ui windows (from bottom to top)
   for (const w of engineSack.windows.slice().reverse()) {
+    if (w.isHidden()) {
+      continue;
+    }
+
     const bmp = w.render();
     engineSack.ctx.drawImage(bmp, w.getX(), w.getY());
   }

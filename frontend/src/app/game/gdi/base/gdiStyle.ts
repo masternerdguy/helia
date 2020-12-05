@@ -11,6 +11,7 @@ export class GDIStyle {
     // button
     static buttonBorderColor = 'white';
     static buttonFillColor = '#00091a';
+    static toggleButtonEnabledFillColor = '#a1fa61';
     static buttonTextColor = 'white';
     static buttonBorderSize = 2;
 

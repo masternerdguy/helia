@@ -9,6 +9,8 @@ export class GDIWindow extends GDIBase {
     private ctx: any;
 
     private dragMode = false;
+    private hidden = false;
+    private borderless = false;
     private title = '';
 
     initialize() {
@@ -21,6 +23,10 @@ export class GDIWindow extends GDIBase {
     }
 
     periodicUpdate() {
+        if (this.hidden) {
+            return;
+        }
+
         // update components
         for (const c of this.components) {
             c.periodicUpdate();
@@ -60,10 +66,12 @@ export class GDIWindow extends GDIBase {
             this.ctx.drawImage(b, c.getX(), c.getY() + GDIStyle.windowHandleHeight);
         }
 
-        // render border
-        this.ctx.lineWidth = GDIStyle.windowBorderSize;
-        this.ctx.strokeStyle = GDIStyle.windowBorderColor;
-        this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight() + GDIStyle.windowHandleHeight);
+        if (!this.borderless) {
+            // render border
+            this.ctx.lineWidth = GDIStyle.windowBorderSize;
+            this.ctx.strokeStyle = GDIStyle.windowBorderColor;
+            this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight() + GDIStyle.windowHandleHeight);
+        }
 
         // convert to image and return
         return this.canvas.transferToImageBitmap();
@@ -156,5 +164,21 @@ export class GDIWindow extends GDIBase {
 
     setTitle(title: string) {
         this.title = title;
+    }
+
+    isHidden(): boolean {
+        return this.hidden;
+    }
+
+    setHidden(h: boolean) {
+        this.hidden = h;
+    }
+
+    isBorderless(): boolean {
+        return this.borderless;
+    }
+
+    setBorderless(b: boolean) {
+        this.borderless = b;
     }
 }
