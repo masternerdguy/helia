@@ -192,25 +192,25 @@ func (s *Ship) CopyShip() *Ship {
 		CargoBayContainerID:   s.CargoBayContainerID,
 		FittingBayContainerID: s.FittingBayContainerID,
 		TemplateData: ShipTemplate{
-			ID:               s.TemplateData.ID,
-			Created:          s.TemplateData.Created,
-			ShipTemplateName: s.TemplateData.ShipTemplateName,
-			Texture:          s.TemplateData.Texture,
-			Radius:           s.TemplateData.Radius,
-			BaseAccel:        s.TemplateData.BaseAccel,
-			BaseMass:         s.TemplateData.BaseMass,
-			BaseTurn:         s.TemplateData.BaseTurn,
-			BaseShield:       s.TemplateData.BaseShield,
-			BaseShieldRegen:  s.TemplateData.BaseShieldRegen,
-			BaseArmor:        s.TemplateData.BaseArmor,
-			BaseHull:         s.TemplateData.BaseHull,
-			BaseFuel:         s.TemplateData.BaseFuel,
-			BaseHeatCap:      s.TemplateData.BaseHeatCap,
-			BaseHeatSink:     s.TemplateData.BaseHeatSink,
-			BaseEnergy:       s.TemplateData.BaseEnergy,
-			BaseEnergyRegen:  s.TemplateData.BaseEnergyRegen,
-			ShipTypeID:       s.TemplateData.ShipTypeID,
-			CargoBayVolume:   s.TemplateData.CargoBayVolume,
+			ID:                 s.TemplateData.ID,
+			Created:            s.TemplateData.Created,
+			ShipTemplateName:   s.TemplateData.ShipTemplateName,
+			Texture:            s.TemplateData.Texture,
+			Radius:             s.TemplateData.Radius,
+			BaseAccel:          s.TemplateData.BaseAccel,
+			BaseMass:           s.TemplateData.BaseMass,
+			BaseTurn:           s.TemplateData.BaseTurn,
+			BaseShield:         s.TemplateData.BaseShield,
+			BaseShieldRegen:    s.TemplateData.BaseShieldRegen,
+			BaseArmor:          s.TemplateData.BaseArmor,
+			BaseHull:           s.TemplateData.BaseHull,
+			BaseFuel:           s.TemplateData.BaseFuel,
+			BaseHeatCap:        s.TemplateData.BaseHeatCap,
+			BaseHeatSink:       s.TemplateData.BaseHeatSink,
+			BaseEnergy:         s.TemplateData.BaseEnergy,
+			BaseEnergyRegen:    s.TemplateData.BaseEnergyRegen,
+			ShipTypeID:         s.TemplateData.ShipTypeID,
+			BaseCargoBayVolume: s.TemplateData.BaseCargoBayVolume,
 		},
 		//in-memory only
 		Lock:               sync.Mutex{},
@@ -605,6 +605,11 @@ func (s *Ship) GetRealHeatSink() float64 {
 //GetRealMaxFuel Returns the real max fuel of the ship after modifiers
 func (s *Ship) GetRealMaxFuel() float64 {
 	return s.TemplateData.BaseFuel
+}
+
+//GetRealCargoBayVolume Returns the real max cargo bay volume of the ship after modifiers
+func (s *Ship) GetRealCargoBayVolume() float64 {
+	return s.TemplateData.BaseCargoBayVolume
 }
 
 //DealDamage Deals damage to the ship

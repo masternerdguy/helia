@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2020-12-05 15:38:07
+-- Started on 2020-12-05 15:56:59
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -156,7 +156,7 @@ CREATE TABLE public.shiptemplates (
     baseenergyregen double precision DEFAULT 0 NOT NULL,
     shiptypeid uuid NOT NULL,
     slotlayout jsonb DEFAULT '{}'::jsonb NOT NULL,
-    cargobayvolume double precision DEFAULT 0 NOT NULL
+    basecargobayvolume double precision DEFAULT 0 NOT NULL
 );
 
 
@@ -753,7 +753,7 @@ ALTER TABLE ONLY public.universe_stations
     ADD CONSTRAINT station_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
 
 
--- Completed on 2020-12-05 15:38:07
+-- Completed on 2020-12-05 15:56:59
 
 --
 -- PostgreSQL database dump complete

@@ -20,26 +20,26 @@ func GetShipTemplateService() *ShipTemplateService {
 
 //ShipTemplate Structure representing a row in the shiptemplates table
 type ShipTemplate struct {
-	ID               uuid.UUID
-	Created          time.Time
-	ShipTemplateName string
-	Texture          string
-	Radius           float64
-	BaseAccel        float64
-	BaseMass         float64
-	BaseTurn         float64
-	BaseShield       float64
-	BaseShieldRegen  float64
-	BaseArmor        float64
-	BaseHull         float64
-	BaseFuel         float64
-	BaseHeatCap      float64
-	BaseHeatSink     float64
-	BaseEnergy       float64
-	BaseEnergyRegen  float64
-	ShipTypeID       uuid.UUID
-	SlotLayout       SlotLayout
-	CargoBayVolume   float64
+	ID                 uuid.UUID
+	Created            time.Time
+	ShipTemplateName   string
+	Texture            string
+	Radius             float64
+	BaseAccel          float64
+	BaseMass           float64
+	BaseTurn           float64
+	BaseShield         float64
+	BaseShieldRegen    float64
+	BaseArmor          float64
+	BaseHull           float64
+	BaseFuel           float64
+	BaseHeatCap        float64
+	BaseHeatSink       float64
+	BaseEnergy         float64
+	BaseEnergyRegen    float64
+	ShipTypeID         uuid.UUID
+	SlotLayout         SlotLayout
+	BaseCargoBayVolume float64
 }
 
 //SlotLayout JSON structure representing the slot layout available for fitting modules to this ship
@@ -87,7 +87,7 @@ func (s ShipTemplateService) GetShipTemplateByID(shipTemplateID uuid.UUID) (*Shi
 		`
 			SELECT id, created, shiptemplatename, texture, radius, baseaccel, basemass, baseturn, 
 				   baseshield, baseshieldregen, basearmor, basehull, basefuel, baseheatcap, baseheatsink, 
-				   baseenergy, baseenergyregen, shiptypeid, slotlayout, cargobayvolume
+				   baseenergy, baseenergyregen, shiptypeid, slotlayout, basecargobayvolume
 			FROM public.shiptemplates
 			WHERE id = $1
 		`
@@ -96,7 +96,7 @@ func (s ShipTemplateService) GetShipTemplateByID(shipTemplateID uuid.UUID) (*Shi
 
 	switch err := row.Scan(&t.ID, &t.Created, &t.ShipTemplateName, &t.Texture, &t.Radius, &t.BaseAccel, &t.BaseMass, &t.BaseTurn,
 		&t.BaseShield, &t.BaseShieldRegen, &t.BaseArmor, &t.BaseHull, &t.BaseFuel, &t.BaseHeatCap, &t.BaseHeatSink,
-		&t.BaseEnergy, &t.BaseEnergyRegen, &t.ShipTypeID, &t.SlotLayout, &t.CargoBayVolume); err {
+		&t.BaseEnergy, &t.BaseEnergyRegen, &t.ShipTypeID, &t.SlotLayout, &t.BaseCargoBayVolume); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("Ship template not found")
 	case nil:
