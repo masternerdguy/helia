@@ -282,12 +282,12 @@ func (s *Ship) PeriodicUpdate() {
 		}
 
 		for i := range s.Fitting.BRack {
-			s.Fitting.ARack[i].shipMountedOn = s
+			s.Fitting.BRack[i].shipMountedOn = s
 			s.Fitting.BRack[i].PeriodicUpdate()
 		}
 
 		for i := range s.Fitting.CRack {
-			s.Fitting.ARack[i].shipMountedOn = s
+			s.Fitting.CRack[i].shipMountedOn = s
 			s.Fitting.CRack[i].PeriodicUpdate()
 		}
 	} else {
@@ -1201,6 +1201,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 			//handle module family effects
 			if m.ItemTypeFamily == "gun_turret" {
 				canActivate = m.activateAsGunTurret()
+			} else if m.ItemTypeFamily == "shield_booster" {
+				canActivate = m.activateAsShieldBooster()
 			}
 
 			if canActivate {
@@ -1338,6 +1340,33 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 
 		//push to solar system list for next update
 		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
+	//module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsShieldBooster() bool {
+	//get shield boost amount
+	shieldBoost, _ := m.ItemTypeMeta.GetFloat64("shield_boost_amount")
+
+	//apply boost to mounting ship
+	m.shipMountedOn.DealDamage(-shieldBoost, 0, 0)
+
+	//include visual effect if present
+	activationPGfxEffect, found := m.ItemTypeMeta.GetString("activation_pgfx_effect")
+
+	if found {
+		//build effect trigger
+		pGfxEffect := models.GlobalPushPointEffectBody{
+			GfxEffect: activationPGfxEffect,
+			PosX:      m.shipMountedOn.PosX,
+			PosY:      m.shipMountedOn.PosY,
+			Radius:    m.shipMountedOn.TemplateData.Radius,
+		}
+
+		//push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushPointEffects = append(m.shipMountedOn.CurrentSystem.pushPointEffects, pGfxEffect)
 	}
 
 	//module activates!
