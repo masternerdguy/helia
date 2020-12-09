@@ -51,11 +51,11 @@ export class GDIStyle {
     static inputBorderSize = 2;
 
     // underlying font sizes
-    static smallFontSize =  8;
-    static smallNormalFontSize = 10;
-    static normalFontSize =  12;
-    static largeFontSize =  16;
-    static giantFontSize =  24;
+    static smallFontSize =  7.25;
+    static smallNormalFontSize = 9.25;
+    static normalFontSize =  11.25;
+    static largeFontSize =  15.25;
+    static giantFontSize =  23.25;
 
     // underlying fonts
     static smallFont =  GDIStyle.smallFontSize + 'px monospace';
