@@ -107,7 +107,7 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   // link windows to window manager
   engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☄');
   engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☸');
-  engineSack.windowManager.manageWindow(engineSack.targetInteractionWindow, '⛶');
+  engineSack.windowManager.manageWindow(engineSack.targetInteractionWindow, '◎');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [

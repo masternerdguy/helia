@@ -65,7 +65,7 @@ export class GDIWindow extends GDIBase {
 
         // render close icon
         this.ctx.font = `${GDIStyle.windowHandleHeight}px monospace`; // todo: there are better ways of doing this...
-        this.ctx.fillText('⮽',
+        this.ctx.fillText('☒',
             this.getWidth() - (GDIStyle.windowHandleHeight), (GDIStyle.windowHandleHeight / 2));
 
         // render background
