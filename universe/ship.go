@@ -604,7 +604,20 @@ func (s *Ship) GetRealHeatSink() float64 {
 
 //GetRealMaxFuel Returns the real max fuel of the ship after modifiers
 func (s *Ship) GetRealMaxFuel() float64 {
-	return s.TemplateData.BaseFuel
+	// get base max fuel
+	f := s.TemplateData.BaseFuel
+
+	// add bonuses from passive modules in rack c
+	for _, e := range s.Fitting.CRack {
+		fuelMaxAdd, s := e.ItemTypeMeta.GetFloat64("fuel_max_add")
+
+		if s {
+			// include in real max
+			f += fuelMaxAdd
+		}
+	}
+
+	return f
 }
 
 //GetRealCargoBayVolume Returns the real max cargo bay volume of the ship after modifiers
