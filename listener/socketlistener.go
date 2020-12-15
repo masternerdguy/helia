@@ -257,6 +257,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				DestroyedAt:           dbShip.DestroyedAt,
 				CargoBayContainerID:   dbShip.CargoBayContainerID,
 				FittingBayContainerID: dbShip.FittingBayContainerID,
+				ReMaxDirty:            dbShip.ReMaxDirty,
 				TemplateData: universe.ShipTemplate{
 					ID:                 dbTemp.ID,
 					Created:            dbTemp.Created,

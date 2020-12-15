@@ -120,6 +120,7 @@ type Ship struct {
 	DestroyedAt           *time.Time
 	CargoBayContainerID   uuid.UUID
 	FittingBayContainerID uuid.UUID
+	ReMaxDirty            bool
 	//cache of base template
 	TemplateData ShipTemplate
 	//docking
@@ -191,6 +192,7 @@ func (s *Ship) CopyShip() *Ship {
 		Destroyed:             s.Destroyed,
 		CargoBayContainerID:   s.CargoBayContainerID,
 		FittingBayContainerID: s.FittingBayContainerID,
+		ReMaxDirty:            s.ReMaxDirty,
 		TemplateData: ShipTemplate{
 			ID:                 s.TemplateData.ID,
 			Created:            s.TemplateData.Created,
@@ -239,6 +241,11 @@ func (s *Ship) PeriodicUpdate() {
 	// lock entity
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
+
+	// remax some stats if needed for spawning
+	if s.ReMaxDirty {
+		s.ReMaxStatsForSpawn()
+	}
 
 	// update energy
 	s.updateEnergy()
@@ -545,6 +552,18 @@ func (s *Ship) ApplyPhysicsDummy(dummy physics.Dummy) {
 	s.VelY = dummy.VelY
 	s.PosX = dummy.PosX
 	s.PosY = dummy.PosY
+}
+
+//ReMaxStatsForSpawn Resets some stats to their maximum (for use when spawning a new ship)
+func (s *Ship) ReMaxStatsForSpawn() {
+	if s.ReMaxDirty {
+		s.Shield = s.GetRealMaxShield()
+		s.Armor = s.GetRealMaxArmor()
+		s.Hull = s.GetRealMaxHull()
+		s.Fuel = s.GetRealMaxFuel()
+		s.Energy = s.GetRealMaxEnergy()
+		s.ReMaxDirty = false
+	}
 }
 
 //GetRealAccel Returns the real acceleration capability of a ship after modifiers

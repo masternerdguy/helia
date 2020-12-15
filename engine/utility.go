@@ -155,6 +155,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 		Destroyed:             false,
 		CargoBayContainerID:   cb.ID,
 		FittingBayContainerID: fb.ID,
+		ReMaxDirty:            true,
 	}
 
 	starterShip, err := shipSvc.NewShip(t)
