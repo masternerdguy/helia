@@ -91,14 +91,18 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.targetInteractionWindow = new TargetInteractionWindow();
   engineSack.targetInteractionWindow.initialize();
   engineSack.targetInteractionWindow.setWsSvc(wsService);
-  engineSack.targetInteractionWindow.setX((gameCanvas.width - (engineSack.targetInteractionWindow.getWidth())));
+  engineSack.targetInteractionWindow.setX(
+    (gameCanvas.width - engineSack.targetInteractionWindow.getWidth())
+  );
   engineSack.targetInteractionWindow.setY(0);
   engineSack.targetInteractionWindow.pack();
 
   engineSack.overviewWindow = new OverviewWindow();
   engineSack.overviewWindow.setHeight(gameCanvas.height / 2);
   engineSack.overviewWindow.initialize();
-  engineSack.overviewWindow.setX((gameCanvas.width - (engineSack.overviewWindow.getWidth())));
+  engineSack.overviewWindow.setX(
+    (gameCanvas.width - engineSack.overviewWindow.getWidth())
+  );
   engineSack.overviewWindow.setY(engineSack.targetInteractionWindow.getY() +
                                  engineSack.targetInteractionWindow.getHeight() +
                                  GDIStyle.windowHandleHeight);
