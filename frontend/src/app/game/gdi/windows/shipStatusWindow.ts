@@ -175,14 +175,8 @@ export class ShipStatusWindow extends GDIWindow {
         this.rackC.setY(60);
 
         this.rackC.setFont(FontSize.smallNormal);
-        this.rackC.setOnClick((module: RackRow) => {
-            if (!module.object.willRepeat) {
-                // issue order to activate module
-                this.activateModule(module, 'C');
-            } else {
-                // issue order to deactivate module
-                this.deactivateModule(module, 'C');
-            }
+        this.rackC.setOnClick(() => {
+            // all rack c modules are passive in helia
         });
 
         // add components

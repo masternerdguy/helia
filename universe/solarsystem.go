@@ -134,6 +134,11 @@ func (s *SolarSystem) PeriodicUpdate() {
 				//extract data
 				data := evt.Body.(models.ClientActivateModuleBody)
 
+				//skip if rack c (passive modules)
+				if data.Rack == "C" {
+					continue
+				}
+
 				//find module
 				mod := sh.FindModule(data.ItemID, data.Rack)
 
@@ -159,6 +164,11 @@ func (s *SolarSystem) PeriodicUpdate() {
 			if sh != nil {
 				//extract data
 				data := evt.Body.(models.ClientDeactivateModuleBody)
+
+				//skip if rack c (passive modules)
+				if data.Rack == "C" {
+					continue
+				}
 
 				//find module
 				mod := sh.FindModule(data.ItemID, data.Rack)
