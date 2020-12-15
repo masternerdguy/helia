@@ -105,9 +105,9 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.overviewWindow.pack();
 
   // link windows to window manager
-  engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☄');
-  engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☸');
-  engineSack.windowManager.manageWindow(engineSack.targetInteractionWindow, '◎');
+  engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☀');
+  engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☍');
+  engineSack.windowManager.manageWindow(engineSack.targetInteractionWindow, '☉');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
@@ -515,7 +515,7 @@ function gfxDockOverlay() {
 
   // draw docked text
   engineSack.ctx.fillStyle = 'gray';
-  engineSack.ctx.font = '30px monospace';
+  engineSack.ctx.font = '30px FiraCode-Regular';
   engineSack.ctx.fillText('Docked', (engineSack.gfx.width / 2) - 100, (engineSack.gfx.height / 2));
 }
 

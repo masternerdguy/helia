@@ -281,7 +281,7 @@ export class ShipStatusWindow extends GDIWindow {
         const pc = fixedString(m.isCycling ? `${m.cyclePercent}%` : '', 4);
 
         // build status string
-        return `${fixedString(m.willRepeat ? '*' : '', 1)} ${fixedString(m.type, 24)} ${pc}~`;
+        return `${fixedString(m.willRepeat ? '*' : '', 1)} ${fixedString(m.type, 24)} ${pc}`;
     }
 
     setShip(ship: Ship) {

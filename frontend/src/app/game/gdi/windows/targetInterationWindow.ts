@@ -27,7 +27,7 @@ export class TargetInteractionWindow extends GDIWindow {
 
     initialize() {
         // set dimensions
-        this.setWidth(300);
+        this.setWidth(310);
         this.setHeight(40);
 
         // initialize
@@ -113,7 +113,7 @@ export class TargetInteractionWindow extends GDIWindow {
         this.addComponent(this.dockBtn);
 
         // setup shield bar
-        this.tgtShieldBar.setWidth(100);
+        this.tgtShieldBar.setWidth(110);
         this.tgtShieldBar.setHeight(13.333333);
         this.tgtShieldBar.initialize();
 
@@ -126,7 +126,7 @@ export class TargetInteractionWindow extends GDIWindow {
         this.tgtShieldBar.setColor(GDIStyle.shieldBarColor);
 
         // setup armor bar
-        this.tgtArmorBar.setWidth(100);
+        this.tgtArmorBar.setWidth(110);
         this.tgtArmorBar.setHeight(13.333333);
         this.tgtArmorBar.initialize();
 
@@ -139,7 +139,7 @@ export class TargetInteractionWindow extends GDIWindow {
         this.tgtArmorBar.setColor(GDIStyle.armorBarColor);
 
         // setup hull bar
-        this.tgtHullBar.setWidth(100);
+        this.tgtHullBar.setWidth(110);
         this.tgtHullBar.setHeight(13.333333);
         this.tgtHullBar.initialize();
 

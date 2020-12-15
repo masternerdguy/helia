@@ -64,7 +64,7 @@ export class GDIWindow extends GDIBase {
         this.ctx.fillText(this.title, GDIStyle.windowBorderSize + 2, (GDIStyle.windowHandleHeight / 2));
 
         // render close icon
-        this.ctx.font = `${GDIStyle.windowHandleHeight}px monospace`; // todo: there are better ways of doing this...
+        this.ctx.font = `${GDIStyle.windowHandleHeight}px FiraCode-Light`; // todo: there are better ways of doing this...
         this.ctx.fillText('☒',
             this.getWidth() - (GDIStyle.windowHandleHeight), (GDIStyle.windowHandleHeight / 2));
 

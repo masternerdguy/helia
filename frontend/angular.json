@@ -26,7 +26,8 @@
               "src/assets/stars",
               "src/assets/planets",
               "src/assets/jumpholes",
-              "src/assets/stations"
+              "src/assets/stations",
+              "src/assets/fonts"
             ],
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",

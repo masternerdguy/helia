@@ -1,1 +1,31 @@
 /* You can add global styles to this file, and also import other style files */
+
+@font-face {
+    font-family: FiraCode-Bold;
+    src: url(assets/fonts/FiraCode-Bold.woff2) format("woff2");
+}
+
+@font-face {
+    font-family: FiraCode-Light;
+    src: url(assets/fonts/FiraCode-Light.woff2) format("woff2");
+}
+
+@font-face {
+    font-family: FiraCode-Medium;
+    src: url(assets/fonts/FiraCode-Medium.woff2) format("woff2");
+}
+
+@font-face {
+    font-family: FiraCode-Regular;
+    src: url(assets/fonts/FiraCode-Regular.woff2) format("woff2");
+}
+
+@font-face {
+    font-family: FiraCode-SemiBold;
+    src: url(assets/fonts/FiraCode-SemiBold.woff2) format("woff2");
+}
+
+@font-face {
+    font-family: FiraCode-VF;
+    src: url(assets/fonts/FiraCode-VF.woff2) format("woff2");
+}

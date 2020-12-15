@@ -58,11 +58,11 @@ export class GDIStyle {
     static giantFontSize =  23.25;
 
     // underlying fonts
-    static smallFont =  GDIStyle.smallFontSize + 'px monospace';
-    static smallNormalFont =  GDIStyle.smallNormalFontSize + 'px monospace';
-    static normalFont =  GDIStyle.normalFontSize + 'px monospace';
-    static largeFont =  GDIStyle.normalFontSize + 'px monospace';
-    static giantFont =  GDIStyle.giantFontSize + 'px monospace';
+    static smallFont =  GDIStyle.smallFontSize + 'px FiraCode-Regular';
+    static smallNormalFont =  GDIStyle.smallNormalFontSize + 'px FiraCode-Regular';
+    static normalFont =  GDIStyle.normalFontSize + 'px FiraCode-Regular';
+    static largeFont =  GDIStyle.normalFontSize + 'px FiraCode-Regular';
+    static giantFont =  GDIStyle.giantFontSize + 'px FiraCode-Regular';
 
     // standardized bar colors for gameplay elements
     static shieldBarColor = '#154360';

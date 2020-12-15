@@ -15,7 +15,7 @@ export class OverviewWindow extends GDIWindow {
 
     initialize() {
         // set dimensions
-        this.setWidth(300);
+        this.setWidth(310);
         this.setHeight(this.getHeight());
 
         // initialize
