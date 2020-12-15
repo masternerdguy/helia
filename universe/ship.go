@@ -574,7 +574,20 @@ func (s *Ship) GetRealShieldRegen() float64 {
 
 //GetRealMaxArmor Returns the real max armor of the ship after modifiers
 func (s *Ship) GetRealMaxArmor() float64 {
-	return s.TemplateData.BaseArmor
+	// get base max armor
+	a := s.TemplateData.BaseArmor
+
+	// add bonuses from passive modules in rack c
+	for _, e := range s.Fitting.CRack {
+		armorMaxAdd, s := e.ItemTypeMeta.GetFloat64("armor_max_add")
+
+		if s {
+			// include in real max
+			a += armorMaxAdd
+		}
+	}
+
+	return a
 }
 
 //GetRealMaxHull Returns the real max hull of the ship after modifiers
