@@ -22,6 +22,7 @@ import { OverviewWindow } from './gdi/windows/overviewWindow';
 import { ModuleEffect } from './engineModels/moduleEffect';
 import { PointEffect } from './engineModels/pointEffect';
 import { WindowManager } from './gdi/windows/windowManager';
+import { ShipFittingWindow } from './gdi/windows/shipFittingWindow';
 
 class EngineSack {
   constructor() {}
@@ -44,6 +45,7 @@ class EngineSack {
   shipStatusWindow: ShipStatusWindow;
   targetInteractionWindow: TargetInteractionWindow;
   overviewWindow: OverviewWindow;
+  shipFittingWindow: ShipFittingWindow;
   lastShiftDown: number;
 
   windows: GDIWindow[];
@@ -88,6 +90,14 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.shipStatusWindow.setWsService(wsService);
   engineSack.shipStatusWindow.setPlayer(engineSack.player);
 
+  engineSack.shipFittingWindow = new ShipFittingWindow();
+  engineSack.shipFittingWindow.setX(300);
+  engineSack.shipFittingWindow.setY(300);
+  engineSack.shipFittingWindow.initialize();
+  engineSack.shipFittingWindow.pack();
+  engineSack.shipFittingWindow.setWsService(wsService);
+  engineSack.shipFittingWindow.setPlayer(engineSack.player);
+
   engineSack.targetInteractionWindow = new TargetInteractionWindow();
   engineSack.targetInteractionWindow.initialize();
   engineSack.targetInteractionWindow.setWsSvc(wsService);
@@ -112,12 +122,14 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☀');
   engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☍');
   engineSack.windowManager.manageWindow(engineSack.targetInteractionWindow, '☉');
+  engineSack.windowManager.manageWindow(engineSack.shipFittingWindow, 'Ʌ');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
     engineSack.shipStatusWindow,
     engineSack.targetInteractionWindow,
     engineSack.overviewWindow,
+    engineSack.shipFittingWindow,
     engineSack.windowManager
   ];
 
@@ -502,6 +514,9 @@ function handleCurrentShipUpdate(d: GameMessage) {
 
   // update status window
   engineSack.shipStatusWindow.setShip(engineSack.player.currentShip);
+
+  // update fitting window
+  engineSack.shipFittingWindow.setShip(engineSack.player.currentShip);
 }
 
 // clears the screen
