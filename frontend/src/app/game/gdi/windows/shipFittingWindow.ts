@@ -42,7 +42,7 @@ export class ShipFittingWindow extends GDIWindow {
         this.shipView.setX(0);
         this.shipView.setY(0);
 
-        this.shipView.setFont(FontSize.smallNormal);
+        this.shipView.setFont(FontSize.normal);
         this.shipView.setOnClick((row: ShipViewRow) => {
             // todo
         });
@@ -55,7 +55,7 @@ export class ShipFittingWindow extends GDIWindow {
         this.infoView.setX(0);
         this.infoView.setY(400);
 
-        this.infoView.setFont(FontSize.smallNormal);
+        this.infoView.setFont(FontSize.normal);
         this.infoView.setOnClick(() => {});
 
         // setup action view
@@ -66,7 +66,7 @@ export class ShipFittingWindow extends GDIWindow {
         this.actionView.setX(500);
         this.actionView.setY(0);
 
-        this.actionView.setFont(FontSize.smallNormal);
+        this.actionView.setFont(FontSize.normal);
         this.actionView.setOnClick(() => {});
 
         // pack

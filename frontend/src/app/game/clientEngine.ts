@@ -198,6 +198,9 @@ function handleJoin(d: GameMessage) {
   document.addEventListener('MSFullscreenChange', exitHandler, false);
   document.addEventListener('webkitfullscreenchange', exitHandler, false);
 
+  // hide initially hidden windows
+  engineSack.shipFittingWindow.setHidden(true);
+
   // start game loop
   engineSack.lastFrameTime = Date.now();
   engineSack.lastSyncTime = Date.now();
