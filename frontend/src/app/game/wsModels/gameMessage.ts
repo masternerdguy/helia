@@ -13,5 +13,6 @@ export enum MessageTypes {
     Dock = 6,
     Undock = 7,
     ActivateModule = 8,
-    DeactivateModule = 9
+    DeactivateModule = 9,
+    ViewCargoBay = 10
 }

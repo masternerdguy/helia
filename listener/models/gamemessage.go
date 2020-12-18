@@ -18,6 +18,7 @@ type MessageRegistry struct {
 	Undock            int
 	ActivateModule    int
 	DeactivateModule  int
+	ViewCargoBay      int
 }
 
 //TargetTypeRegistry Registry of target types
@@ -42,6 +43,7 @@ func NewMessageRegistry() *MessageRegistry {
 		Undock:            7,
 		ActivateModule:    8,
 		DeactivateModule:  9,
+		ViewCargoBay:      10,
 	}
 }
 
@@ -285,4 +287,9 @@ type GlobalPushPointEffectBody struct {
 	PosX      float64 `json:"x"`
 	PosY      float64 `json:"y"`
 	Radius    float64 `json:"r"`
+}
+
+//ClientViewCargoBayBody Body containing a request for the contents of the ship's cargo bay
+type ClientViewCargoBayBody struct {
+	SessionID uuid.UUID `json:"sid"`
 }
