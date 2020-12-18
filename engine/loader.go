@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"helia/sql"
 	"helia/universe"
@@ -541,14 +542,12 @@ func StartFittedSlotFromSQL(value *sql.StartFittedSlot) universe.StartFittedSlot
 //ContainerFromSQL Converts a Container from the SQL type to the engine type
 func ContainerFromSQL(value *sql.Container) *universe.Container {
 	//set up empty container
-
 	container := universe.Container{}
 
 	//null check
-
 	if value == nil {
-		//return empty container
-		return &container
+		//return nil
+		return nil
 	}
 
 	//copy container data
@@ -558,6 +557,61 @@ func ContainerFromSQL(value *sql.Container) *universe.Container {
 
 	//return filled container
 	return &container
+}
+
+//ItemFromSQL Converts an Item from the SQL type to the engine type
+func ItemFromSQL(value *sql.Item) *universe.Item {
+	//set up empty item
+	item := universe.Item{}
+
+	//null check
+	if value == nil {
+		//return nil
+		return nil
+	}
+
+	//copy item data
+	item.ID = value.ID
+	item.ItemTypeID = value.ItemTypeID
+	item.ContainerID = value.ContainerID
+	item.Created = value.Created
+	item.CreatedBy = value.CreatedBy
+	item.CreatedReason = value.CreatedReason
+	item.Meta = MetaFromSQL(&value.Meta)
+
+	//return filled item
+	return &item
+}
+
+//LoadContainer Takes a SQL Container and converts it, and items it loads, into the engine type ready for insertion into the universe.
+func LoadContainer(c *sql.Container) (*universe.Container, error) {
+	//load base container
+	container := ContainerFromSQL(c)
+
+	//load items
+	itemSvc := sql.GetItemService()
+
+	s, err := itemSvc.GetItemsByContainer(container.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//convert items and push into container
+	for _, i := range s {
+		m := ItemFromSQL(&i)
+
+		//null check
+		if m == nil {
+			return nil, errors.New("Item argument was nil")
+		}
+
+		//push into container
+		container.Items = append(container.Items, m)
+	}
+
+	//return full container
+	return container, nil
 }
 
 //LoadShip Takes a SQL Ship and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
@@ -594,7 +648,11 @@ func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 		return nil, err
 	}
 
-	cargoBay := ContainerFromSQL(cb)
+	cargoBay, err := LoadContainer(cb)
+
+	if err != nil {
+		return nil, err
+	}
 
 	//load fitting bay
 	fb, err := containerSvc.GetContainerByID(sh.FittingBayContainerID)
@@ -603,9 +661,11 @@ func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 		return nil, err
 	}
 
-	fittingBay := ContainerFromSQL(fb)
+	fittingBay, err := LoadContainer(fb)
 
-	log.Println(fmt.Sprintf("%v \n %v", fittingBay, cargoBay))
+	if err != nil {
+		return nil, err
+	}
 
 	//build in-memory ship
 	es := universe.Ship{

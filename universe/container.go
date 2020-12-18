@@ -14,5 +14,5 @@ type Container struct {
 	Created time.Time
 	//in-memory only
 	Lock  sync.Mutex
-	Items []Item
+	Items []*Item
 }
