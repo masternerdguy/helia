@@ -135,6 +135,8 @@ type Ship struct {
 	AutopilotUndock    UndockData
 	CurrentSystem      *SolarSystem
 	DockedAtStation    *Station
+	CargoBay           *Container
+	FittingBay         *Container
 	Lock               sync.Mutex
 }
 

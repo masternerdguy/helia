@@ -224,7 +224,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 				return
 			}
 
-			es, err := loadShip(ns)
+			es, err := LoadShip(ns)
 
 			if err != nil || es == nil {
 				log.Println(fmt.Sprintf("! Unable to respawn player %v - couldn't load new noobship into universe (%v)!", rs.UID, err))

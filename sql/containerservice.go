@@ -19,7 +19,7 @@ func GetContainerService() ContainerService {
 //Container Structure representing a row in the containers table
 type Container struct {
 	ID      uuid.UUID
-	Meta    Meta
+	Meta    Meta `json:"meta"`
 	Created time.Time
 }
 

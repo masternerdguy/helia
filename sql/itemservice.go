@@ -58,6 +58,44 @@ func (s ItemService) GetItemByID(ItemID uuid.UUID) (*Item, error) {
 	}
 }
 
+//GetItemsByContainer Retrieves all items in a given container
+func (s ItemService) GetItemsByContainer(containerID uuid.UUID) ([]Item, error) {
+	items := make([]Item, 0)
+
+	//get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	//load items
+	sql :=
+		`
+			SELECT id, itemtypeid, meta, created, createdby, createdreason, containerid
+			FROM public.Items
+			WHERE containerid = $1
+		`
+
+	rows, err := db.Query(sql, containerID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		i := Item{}
+
+		//scan into item structure
+		rows.Scan(&i.ID, &i.ItemTypeID, &i.Meta, &i.Created, &i.CreatedBy, &i.CreatedReason, &i.ContainerID)
+
+		//append to item slice
+		items = append(items, i)
+	}
+
+	return items, err
+}
+
 //NewItem Creates a new item
 func (s ItemService) NewItem(e Item) (*Item, error) {
 	//get db handle

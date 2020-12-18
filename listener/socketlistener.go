@@ -7,7 +7,6 @@ import (
 	"helia/listener/models"
 	"helia/shared"
 	"helia/sql"
-	"helia/universe"
 	"log"
 	"net/http"
 	"sync"
@@ -155,7 +154,6 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 	userSvc := sql.GetUserService()
 	msgRegistry := models.NewMessageRegistry()
 	shipSvc := sql.GetShipService()
-	shipTmpSvc := sql.GetShipTemplateService()
 	startSvc := sql.GetStartService()
 
 	//store sid on server
@@ -215,71 +213,12 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				}
 			}
 
-			//get their ship's template
-			dbTemp, _ := shipTmpSvc.GetShipTemplateByID(dbShip.ShipTemplateID)
+			// build in-memory ship
+			currShip, err = engine.LoadShip(dbShip)
 
-			if dbTemp == nil {
-				log.Println(fmt.Sprintf("player join error: unable to find ship template %v for %v", dbShip.ShipTemplateID, u.ID))
-				return
-			}
-
-			//get fitting
-			fitting, err := engine.FittingFromSQL(&dbShip.Fitting)
-
-			if err != nil {
-				//dump error to console
+			if dbShip == nil {
 				log.Println(fmt.Sprintf("player join error: %v", err))
 				return
-			}
-
-			// build in-memory ship
-			currShip = &universe.Ship{
-				ID:                    dbShip.ID,
-				UserID:                dbShip.UserID,
-				Created:               dbShip.Created,
-				ShipName:              dbShip.ShipName,
-				OwnerName:             u.Username,
-				PosX:                  dbShip.PosX,
-				PosY:                  dbShip.PosY,
-				SystemID:              dbShip.SystemID,
-				Texture:               dbShip.Texture,
-				Theta:                 dbShip.Theta,
-				VelX:                  dbShip.VelX,
-				VelY:                  dbShip.VelY,
-				Shield:                dbShip.Shield,
-				Armor:                 dbShip.Armor,
-				Hull:                  dbShip.Hull,
-				Fuel:                  dbShip.Fuel,
-				Heat:                  dbShip.Heat,
-				Energy:                dbShip.Energy,
-				Fitting:               *fitting,
-				Destroyed:             dbShip.Destroyed,
-				DestroyedAt:           dbShip.DestroyedAt,
-				CargoBayContainerID:   dbShip.CargoBayContainerID,
-				FittingBayContainerID: dbShip.FittingBayContainerID,
-				ReMaxDirty:            dbShip.ReMaxDirty,
-				TemplateData: universe.ShipTemplate{
-					ID:                 dbTemp.ID,
-					Created:            dbTemp.Created,
-					ShipTemplateName:   dbTemp.ShipTemplateName,
-					Texture:            dbTemp.Texture,
-					Radius:             dbTemp.Radius,
-					BaseAccel:          dbTemp.BaseAccel,
-					BaseMass:           dbTemp.BaseMass,
-					BaseTurn:           dbTemp.BaseTurn,
-					BaseShield:         dbTemp.BaseShield,
-					BaseShieldRegen:    dbTemp.BaseShieldRegen,
-					BaseArmor:          dbTemp.BaseArmor,
-					BaseHull:           dbTemp.BaseHull,
-					BaseFuel:           dbTemp.BaseFuel,
-					BaseHeatCap:        dbTemp.BaseHeatCap,
-					BaseHeatSink:       dbTemp.BaseHeatSink,
-					BaseEnergy:         dbTemp.BaseEnergy,
-					BaseEnergyRegen:    dbTemp.BaseEnergyRegen,
-					ShipTypeID:         dbTemp.ShipTypeID,
-					SlotLayout:         engine.SlotLayoutFromSQL(&dbTemp.SlotLayout),
-					BaseCargoBayVolume: dbTemp.BaseCargoBayVolume,
-				},
 			}
 		}
 

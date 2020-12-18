@@ -73,7 +73,7 @@ func loadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, sh := range ships {
-				es, err := loadShip(&sh)
+				es, err := LoadShip(&sh)
 
 				if err != nil {
 					return nil, err
@@ -538,9 +538,33 @@ func StartFittedSlotFromSQL(value *sql.StartFittedSlot) universe.StartFittedSlot
 	return slot
 }
 
-func loadShip(sh *sql.Ship) (*universe.Ship, error) {
+//ContainerFromSQL Converts a Container from the SQL type to the engine type
+func ContainerFromSQL(value *sql.Container) *universe.Container {
+	//set up empty container
+
+	container := universe.Container{}
+
+	//null check
+
+	if value == nil {
+		//return empty container
+		return &container
+	}
+
+	//copy container data
+	container.ID = value.ID
+	container.Created = value.Created
+	container.Meta = MetaFromSQL(&value.Meta)
+
+	//return filled container
+	return &container
+}
+
+//LoadShip Takes a SQL Ship and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
+func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 	shipTmpSvc := sql.GetShipTemplateService()
 	userSvc := sql.GetUserService()
+	containerSvc := sql.GetContainerService()
 
 	//get template
 	temp, err := shipTmpSvc.GetShipTemplateByID(sh.ShipTemplateID)
@@ -562,6 +586,26 @@ func loadShip(sh *sql.Ship) (*universe.Ship, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	//load cargo bay
+	cb, err := containerSvc.GetContainerByID(sh.CargoBayContainerID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	cargoBay := ContainerFromSQL(cb)
+
+	//load fitting bay
+	fb, err := containerSvc.GetContainerByID(sh.FittingBayContainerID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	fittingBay := ContainerFromSQL(fb)
+
+	log.Println(fmt.Sprintf("%v \n %v", fittingBay, cargoBay))
 
 	//build in-memory ship
 	es := universe.Ship{
@@ -588,7 +632,9 @@ func loadShip(sh *sql.Ship) (*universe.Ship, error) {
 		Destroyed:             sh.Destroyed,
 		DestroyedAt:           sh.DestroyedAt,
 		CargoBayContainerID:   sh.CargoBayContainerID,
+		CargoBay:              cargoBay,
 		FittingBayContainerID: sh.FittingBayContainerID,
+		FittingBay:            fittingBay,
 		ReMaxDirty:            sh.ReMaxDirty,
 		TemplateData: universe.ShipTemplate{
 			ID:                 temp.ID,
