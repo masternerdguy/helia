@@ -7,7 +7,7 @@ import { WsService } from '../../ws.service';
 import { ClientActivateModule } from '../../wsModels/bodies/activateModule';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { Player } from '../../engineModels/player';
-import { ClientDeactivateModule } from '../../wsModels/bodies/clientDeactivateModule';
+import { ClientDeactivateModule } from '../../wsModels/bodies/deactivateModule';
 
 export class ShipFittingWindow extends GDIWindow {
     // lists
