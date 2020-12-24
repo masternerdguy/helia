@@ -1,13 +1,12 @@
 import { GDIWindow } from '../base/gdiWindow';
-import { FontSize, GDIStyle } from '../base/gdiStyle';
+import { FontSize } from '../base/gdiStyle';
 import { Ship } from '../../engineModels/ship';
 import { GDIList } from '../components/gdiList';
 import { WSModule } from '../../wsModels/entities/wsShip';
 import { WsService } from '../../ws.service';
-import { ClientActivateModule } from '../../wsModels/bodies/activateModule';
-import { MessageTypes } from '../../wsModels/gameMessage';
 import { Player } from '../../engineModels/player';
-import { ClientDeactivateModule } from '../../wsModels/bodies/deactivateModule';
+import { ClientViewCargoBay } from '../../wsModels/bodies/viewCargoBay';
+import { MessageTypes } from '../../wsModels/gameMessage';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -15,11 +14,10 @@ export class ShipFittingWindow extends GDIWindow {
   private infoView: GDIList = new GDIList();
   private actionView: GDIList = new GDIList();
 
-  // ship being fit
-  private ship: Ship;
+  // player
   private player: Player;
 
-  // ws
+  // ws service
   private wsSvc: WsService;
 
   initialize() {
@@ -43,7 +41,7 @@ export class ShipFittingWindow extends GDIWindow {
     this.shipView.setY(0);
 
     this.shipView.setFont(FontSize.normal);
-    this.shipView.setOnClick((row: ShipViewRow) => {
+    this.shipView.setOnClick(() => {
       // todo
     });
 
@@ -76,9 +74,19 @@ export class ShipFittingWindow extends GDIWindow {
   }
 
   periodicUpdate() {
-    if (this.ship !== undefined && this.ship !== null) {
-      if (this.ship.fitStatus !== undefined && this.ship.fitStatus !== null) {
+    if (this.isHidden()) {
+      return;
+    }
+
+    if (this.player?.currentShip) {
+      if (this.player?.currentShip.fitStatus) {
         const rows: ShipViewRow[] = [];
+
+        // request current cargo bay
+        const b = new ClientViewCargoBay();
+        b.sid = this.wsSvc.sid;
+
+        this.wsSvc.sendMessage(MessageTypes.ViewCargoBay, b);
 
         // update fitted module display
         const rackAMods: ShipViewRow[] = [];
@@ -86,17 +94,17 @@ export class ShipFittingWindow extends GDIWindow {
         const rackCMods: ShipViewRow[] = [];
 
         // build entries for modules on racks
-        for (const m of this.ship.fitStatus.aRack.modules) {
+        for (const m of this.player.currentShip.fitStatus.aRack.modules) {
           const d = buildFittingRowFromModule(m);
           rackAMods.push(d);
         }
 
-        for (const m of this.ship.fitStatus.bRack.modules) {
+        for (const m of this.player.currentShip.fitStatus.bRack.modules) {
           const d = buildFittingRowFromModule(m);
           rackBMods.push(d);
         }
 
-        for (const m of this.ship.fitStatus.cRack.modules) {
+        for (const m of this.player.currentShip.fitStatus.cRack.modules) {
           const d = buildFittingRowFromModule(m);
           rackCMods.push(d);
         }
@@ -135,10 +143,6 @@ export class ShipFittingWindow extends GDIWindow {
         this.shipView.setSelectedIndex(i);
       }
     }
-  }
-
-  setShip(ship: Ship) {
-    this.ship = ship;
   }
 
   setWsService(wsSvc: WsService) {

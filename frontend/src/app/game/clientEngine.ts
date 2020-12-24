@@ -550,7 +550,8 @@ function handleCurrentShipUpdate(d: GameMessage) {
   engineSack.shipStatusWindow.setShip(engineSack.player.currentShip);
 
   // update fitting window
-  engineSack.shipFittingWindow.setShip(engineSack.player.currentShip);
+  engineSack.shipFittingWindow.setPlayer(engineSack.player);
+  engineSack.shipFittingWindow.setWsService(engineSack.wsSvc);
 }
 
 // clears the screen
