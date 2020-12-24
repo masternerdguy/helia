@@ -34,20 +34,20 @@ export function createRenderer(regl) {
     `,
     attributes: {
       position: regl.buffer([-1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1]),
-      uv: regl.buffer([0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1])
+      uv: regl.buffer([0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1]),
     },
     uniforms: {
-      center: regl.prop('center'),
-      coreRadius: regl.prop('coreRadius'),
-      coreColor: regl.prop('coreColor'),
-      haloColor: regl.prop('haloColor'),
-      haloFalloff: regl.prop('haloFalloff'),
-      resolution: regl.prop('resolution'),
-      scale: regl.prop('scale'),
-      source: regl.prop('source')
+      center: regl.prop("center"),
+      coreRadius: regl.prop("coreRadius"),
+      coreColor: regl.prop("coreColor"),
+      haloColor: regl.prop("haloColor"),
+      haloFalloff: regl.prop("haloFalloff"),
+      resolution: regl.prop("resolution"),
+      scale: regl.prop("scale"),
+      source: regl.prop("source"),
     },
-    framebuffer: regl.prop('destination'),
-    viewport: regl.prop('viewport'),
-    count: 6
+    framebuffer: regl.prop("destination"),
+    viewport: regl.prop("viewport"),
+    count: 6,
   });
 }

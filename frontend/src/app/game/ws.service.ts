@@ -5,20 +5,23 @@ import { GameMessage, MessageTypes } from './wsModels/gameMessage';
 import { ClientJoinBody } from './wsModels/bodies/join';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WsService {
   ws: WebSocketSubject<GameMessage>;
   lastMessageReceivedAt: number;
   sid: string;
 
-  constructor() { }
+  constructor() {}
 
-  connect(sid: string, handler: (data: GameMessage, s: WebSocketSubject<GameMessage>) => void) {
+  connect(
+    sid: string,
+    handler: (data: GameMessage, s: WebSocketSubject<GameMessage>) => void
+  ) {
     this.ws = webSocket({
       url: environment.wsUrl + 'connect',
       deserializer: (e: MessageEvent) => JSON.parse(e.data),
-      serializer: (value: GameMessage) => JSON.stringify(value)
+      serializer: (value: GameMessage) => JSON.stringify(value),
     });
 
     this.ws.asObservable().subscribe((data) => {

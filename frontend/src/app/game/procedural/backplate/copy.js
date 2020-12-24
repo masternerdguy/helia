@@ -22,13 +22,13 @@ export function createRenderer(regl) {
     `,
     attributes: {
       position: regl.buffer([-1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1]),
-      uv: regl.buffer([0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1])
+      uv: regl.buffer([0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1]),
     },
     uniforms: {
-      source: regl.prop('source'),
+      source: regl.prop("source"),
     },
-    framebuffer: regl.prop('destination'),
-    viewport: regl.prop('viewport'),
-    count: 6
+    framebuffer: regl.prop("destination"),
+    viewport: regl.prop("viewport"),
+    count: 6,
   });
 }

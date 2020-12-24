@@ -1,6 +1,6 @@
 "use strict";
 
-const vec2 = require('gl-vec2');
+const vec2 = require("gl-vec2");
 
 export function generateNoiseTexture(regl, rand, size) {
   let l = size * size * 2;
@@ -11,12 +11,12 @@ export function generateNoiseTexture(regl, rand, size) {
     array[i * 2 + 1] = Math.round(0.5 * (1.0 + r[1]) * 255);
   }
   return regl.texture({
-    format: 'luminance alpha',
+    format: "luminance alpha",
     width: size,
     height: size,
-    wrapS: 'repeat',
-    wrapT: 'repeat',
-    data: array
+    wrapS: "repeat",
+    wrapT: "repeat",
+    data: array,
   });
 }
 
@@ -103,20 +103,20 @@ export function createRenderer(regl, rand) {
     `,
     attributes: {
       position: regl.buffer([-1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1]),
-      uv: regl.buffer([0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1])
+      uv: regl.buffer([0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1]),
     },
     uniforms: {
-      source: regl.prop('source'),
-      offset: regl.prop('offset'),
-      scale: regl.prop('scale'),
-      falloff: regl.prop('falloff'),
-      color: regl.prop('color'),
-      density: regl.prop('density'),
+      source: regl.prop("source"),
+      offset: regl.prop("offset"),
+      scale: regl.prop("scale"),
+      falloff: regl.prop("falloff"),
+      color: regl.prop("color"),
+      density: regl.prop("density"),
       tNoise: pgTexture,
-      tNoiseSize: pgWidth
+      tNoiseSize: pgWidth,
     },
-    framebuffer: regl.prop('destination'),
-    viewport: regl.prop('viewport'),
-    count: 6
+    framebuffer: regl.prop("destination"),
+    viewport: regl.prop("viewport"),
+    count: 6,
   });
 }

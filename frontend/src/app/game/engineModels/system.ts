@@ -8,31 +8,31 @@ import { ModuleEffect } from './moduleEffect';
 import { PointEffect } from './pointEffect';
 
 export class System extends WSSystem {
-    constructor(ws: WSSystem) {
-        super();
+  constructor(ws: WSSystem) {
+    super();
 
-        // copy from ws model
-        this.id = ws.id;
-        this.systemName = ws.systemName;
+    // copy from ws model
+    this.id = ws.id;
+    this.systemName = ws.systemName;
 
-        // initialize self
-        this.ships = [];
-        this.stars = [];
-        this.planets = [];
-        this.jumpholes = [];
-        this.stations = [];
-        this.moduleEffects = [];
-        this.pointEffects = [];
-    }
+    // initialize self
+    this.ships = [];
+    this.stars = [];
+    this.planets = [];
+    this.jumpholes = [];
+    this.stations = [];
+    this.moduleEffects = [];
+    this.pointEffects = [];
+  }
 
-    ships: Ship[];
-    stars: Star[];
-    planets: Planet[];
-    jumpholes: Jumphole[];
-    stations: Station[];
-    moduleEffects: ModuleEffect[];
-    pointEffects: PointEffect[];
+  ships: Ship[];
+  stars: Star[];
+  planets: Planet[];
+  jumpholes: Jumphole[];
+  stations: Station[];
+  moduleEffects: ModuleEffect[];
+  pointEffects: PointEffect[];
 
-    backplateImg: HTMLImageElement;
-    backplateValid = false;
+  backplateImg: HTMLImageElement;
+  backplateValid = false;
 }

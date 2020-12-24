@@ -4,78 +4,78 @@ import { Camera } from './camera';
 import { Player } from './player';
 
 export class PointEffect extends WsPushPointEffect {
-    player: Player;
-    vfxData: PointEffectData;
+  player: Player;
+  vfxData: PointEffectData;
 
-    maxLifeTime: number;
-    lifeElapsed = 0;
-    finished = false;
+  maxLifeTime: number;
+  lifeElapsed = 0;
+  finished = false;
 
-    lastUpdateTime: number;
+  lastUpdateTime: number;
 
-    constructor(b: WsPushPointEffect, player: Player) {
-        // assign values
-        super();
-        Object.assign(this, b);
-        this.player = player;
+  constructor(b: WsPushPointEffect, player: Player) {
+    // assign values
+    super();
+    Object.assign(this, b);
+    this.player = player;
 
-        // get effect data
-        const registry = new PointEffectRegistry();
+    // get effect data
+    const registry = new PointEffectRegistry();
 
-        if (b.gfxEffect === 'basic_explosion') {
-            this.vfxData = registry.basicExplosion();
-        }
-
-        this.maxLifeTime = this.vfxData?.duration ?? 0;
-
-        // set frame time
-        this.lastUpdateTime = Date.now();
+    if (b.gfxEffect === 'basic_explosion') {
+      this.vfxData = registry.basicExplosion();
     }
 
-    periodicUpdate() {
-        // get time
-        const now = Date.now();
+    this.maxLifeTime = this.vfxData?.duration ?? 0;
 
-        // increase lifetime elapsed
-        this.lifeElapsed += (now - this.lastUpdateTime);
+    // set frame time
+    this.lastUpdateTime = Date.now();
+  }
 
-        // check for finish
-        if (this.lifeElapsed >= this.maxLifeTime) {
-            this.finished = true;
-        }
+  periodicUpdate() {
+    // get time
+    const now = Date.now();
 
-        // store frame time
-        this.lastUpdateTime = now;
+    // increase lifetime elapsed
+    this.lifeElapsed += now - this.lastUpdateTime;
+
+    // check for finish
+    if (this.lifeElapsed >= this.maxLifeTime) {
+      this.finished = true;
     }
 
-    render(ctx: any, camera: Camera) {
-        if (this.vfxData) {
-            if (this.vfxData.type === 'point_explosion') {
-                // project to screen
-                const sx = camera.projectX(this.x);
-                const sy = camera.projectY(this.y);
-                const sr = camera.projectR(this.r);
+    // store frame time
+    this.lastUpdateTime = now;
+  }
 
-                // backup filter
-                const oldFilter = ctx.filter;
+  render(ctx: any, camera: Camera) {
+    if (this.vfxData) {
+      if (this.vfxData.type === 'point_explosion') {
+        // project to screen
+        const sx = camera.projectX(this.x);
+        const sy = camera.projectY(this.y);
+        const sr = camera.projectR(this.r);
 
-                // style explosion
-                ctx.fillStyle = this.vfxData.color;
-                if (this.vfxData.filter) {
-                    ctx.filter = this.vfxData.filter;
-                }
+        // backup filter
+        const oldFilter = ctx.filter;
 
-                // use elapsed lifetime ratio to shrink radius
-                const er = Math.max(0, sr * (1 - this.lifeElapsed / this.maxLifeTime));
-
-                // draw explosion
-                ctx.beginPath();
-                ctx.arc(sx, sy, er, 0, 2 * Math.PI);
-                ctx.fill();
-
-                // restore filter
-                ctx.filter = oldFilter;
-            }
+        // style explosion
+        ctx.fillStyle = this.vfxData.color;
+        if (this.vfxData.filter) {
+          ctx.filter = this.vfxData.filter;
         }
+
+        // use elapsed lifetime ratio to shrink radius
+        const er = Math.max(0, sr * (1 - this.lifeElapsed / this.maxLifeTime));
+
+        // draw explosion
+        ctx.beginPath();
+        ctx.arc(sx, sy, er, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // restore filter
+        ctx.filter = oldFilter;
+      }
     }
+  }
 }

@@ -1,3 +1,3 @@
 export class ClientViewCargoBay {
-    sid: string;
+  sid: string;
 }

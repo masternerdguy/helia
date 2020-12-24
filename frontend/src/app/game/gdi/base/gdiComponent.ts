@@ -1,21 +1,21 @@
 export interface GDIComponent {
-    initialize();
+  initialize();
 
-    getX(): number;
-    getY(): number;
-    getWidth(): number;
-    getHeight(): number;
+  getX(): number;
+  getY(): number;
+  getWidth(): number;
+  getHeight(): number;
 
-    setX(x: number);
-    setY(y: number);
-    setWidth(w: number);
-    setHeight(h: number);
+  setX(x: number);
+  setY(y: number);
+  setWidth(w: number);
+  setHeight(h: number);
 
-    periodicUpdate();
-    render(): ImageBitmap;
+  periodicUpdate();
+  render(): ImageBitmap;
 
-    containsPoint(x: number, y: number): boolean;
-    handleClick(x: number, y: number);
-    handleScroll(x: number, y: number, d: number);
-    handleKeyDown(x: number, y: number, key: string);
+  containsPoint(x: number, y: number): boolean;
+  handleClick(x: number, y: number);
+  handleScroll(x: number, y: number, d: number);
+  handleKeyDown(x: number, y: number, key: string);
 }

@@ -1,5 +1,5 @@
 export class ClientNavClick {
-    sid: string;
-    dT: number;
-    m: number;
+  sid: string;
+  dT: number;
+  m: number;
 }

@@ -1,5 +1,5 @@
 export class ClientDeactivateModule {
-    sid: string;
-    rack: string;
-    itemID: string;
+  sid: string;
+  rack: string;
+  itemID: string;
 }

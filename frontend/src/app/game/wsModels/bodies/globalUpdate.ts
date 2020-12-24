@@ -8,12 +8,12 @@ import { WsPushModuleEffect } from '../entities/wsPushModuleEffect';
 import { WsPushPointEffect } from '../entities/wsPushPointEffect';
 
 export class ServerGlobalUpdateBody {
-    currentSystemInfo: WSSystem;
-    ships: WSShip[];
-    stars: WSStar[];
-    planets: WSPlanet[];
-    jumpholes: WSJumphole[];
-    stations: WSStation[];
-    newModuleEffects: WsPushModuleEffect[];
-    newPointEffects: WsPushPointEffect[];
+  currentSystemInfo: WSSystem;
+  ships: WSShip[];
+  stars: WSStar[];
+  planets: WSPlanet[];
+  jumpholes: WSJumphole[];
+  stations: WSStation[];
+  newModuleEffects: WsPushModuleEffect[];
+  newPointEffects: WsPushPointEffect[];
 }

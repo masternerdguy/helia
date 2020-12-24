@@ -68,7 +68,12 @@ class EngineSack {
 
 const engineSack: EngineSack = new EngineSack();
 
-export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement, backCanvas: HTMLCanvasElement, sid: string) {
+export function clientStart(
+  wsService: WsService,
+  gameCanvas: HTMLCanvasElement,
+  backCanvas: HTMLCanvasElement,
+  sid: string
+) {
   // initialize
   engineSack.player = new Player();
   engineSack.camera = new Camera(gameCanvas.width, gameCanvas.height, 1);
@@ -102,7 +107,7 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.targetInteractionWindow.initialize();
   engineSack.targetInteractionWindow.setWsSvc(wsService);
   engineSack.targetInteractionWindow.setX(
-    (gameCanvas.width - engineSack.targetInteractionWindow.getWidth())
+    gameCanvas.width - engineSack.targetInteractionWindow.getWidth()
   );
   engineSack.targetInteractionWindow.setY(0);
   engineSack.targetInteractionWindow.pack();
@@ -111,17 +116,22 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
   engineSack.overviewWindow.setHeight(gameCanvas.height / 2);
   engineSack.overviewWindow.initialize();
   engineSack.overviewWindow.setX(
-    (gameCanvas.width - engineSack.overviewWindow.getWidth())
+    gameCanvas.width - engineSack.overviewWindow.getWidth()
   );
-  engineSack.overviewWindow.setY(engineSack.targetInteractionWindow.getY() +
-                                 engineSack.targetInteractionWindow.getHeight() +
-                                 GDIStyle.windowHandleHeight);
+  engineSack.overviewWindow.setY(
+    engineSack.targetInteractionWindow.getY() +
+      engineSack.targetInteractionWindow.getHeight() +
+      GDIStyle.windowHandleHeight
+  );
   engineSack.overviewWindow.pack();
 
   // link windows to window manager
   engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☀');
   engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☍');
-  engineSack.windowManager.manageWindow(engineSack.targetInteractionWindow, '☉');
+  engineSack.windowManager.manageWindow(
+    engineSack.targetInteractionWindow,
+    '☉'
+  );
   engineSack.windowManager.manageWindow(engineSack.shipFittingWindow, 'Ʌ');
 
   // cache windows for simpler updating and rendering
@@ -130,7 +140,7 @@ export function clientStart(wsService: WsService, gameCanvas: HTMLCanvasElement,
     engineSack.targetInteractionWindow,
     engineSack.overviewWindow,
     engineSack.shipFittingWindow,
-    engineSack.windowManager
+    engineSack.windowManager,
   ];
 
   // store globals
@@ -174,7 +184,7 @@ function handleJoin(d: GameMessage) {
   });
 
   // add mouse scroll event handler
-  engineSack.gfx.addEventListener('wheel', event => {
+  engineSack.gfx.addEventListener('wheel', (event) => {
     // get scroll direction
     const delta = Math.sign(event.deltaY);
 
@@ -259,7 +269,8 @@ function handleGlobalUpdate(d: GameMessage) {
 
     // update system
     engineSack.player.currentSystem.id = msg.currentSystemInfo.id;
-    engineSack.player.currentSystem.systemName = msg.currentSystemInfo.systemName;
+    engineSack.player.currentSystem.systemName =
+      msg.currentSystemInfo.systemName;
 
     // update ships
     for (const sh of msg.ships) {
@@ -279,8 +290,10 @@ function handleGlobalUpdate(d: GameMessage) {
 
           // current ship target check if undocked
           if (!engineSack.player.currentShip.dockedAtStationID) {
-            if (sm.id === engineSack.player.currentTargetID
-                && engineSack.player.currentTargetType === TargetType.Ship) {
+            if (
+              sm.id === engineSack.player.currentTargetID &&
+              engineSack.player.currentTargetType === TargetType.Ship
+            ) {
               sm.isTargeted = true;
               engineSack.targetInteractionWindow.setTarget(sm, TargetType.Ship);
             }
@@ -326,8 +339,10 @@ function handleGlobalUpdate(d: GameMessage) {
 
           // current ship target check if undocked
           if (!engineSack.player.currentShip.dockedAtStationID) {
-            if (sm.id === engineSack.player.currentTargetID
-                && engineSack.player.currentTargetType === TargetType.Star) {
+            if (
+              sm.id === engineSack.player.currentTargetID &&
+              engineSack.player.currentTargetType === TargetType.Star
+            ) {
               sm.isTargeted = true;
               engineSack.targetInteractionWindow.setTarget(sm, TargetType.Star);
             }
@@ -359,10 +374,15 @@ function handleGlobalUpdate(d: GameMessage) {
 
           // current ship target check if undocked
           if (!engineSack.player.currentShip.dockedAtStationID) {
-            if (sm.id === engineSack.player.currentTargetID
-                && engineSack.player.currentTargetType === TargetType.Planet) {
+            if (
+              sm.id === engineSack.player.currentTargetID &&
+              engineSack.player.currentTargetType === TargetType.Planet
+            ) {
               sm.isTargeted = true;
-              engineSack.targetInteractionWindow.setTarget(sm, TargetType.Planet);
+              engineSack.targetInteractionWindow.setTarget(
+                sm,
+                TargetType.Planet
+              );
             }
           }
 
@@ -392,10 +412,15 @@ function handleGlobalUpdate(d: GameMessage) {
 
           // current ship target check if undocked
           if (!engineSack.player.currentShip.dockedAtStationID) {
-            if (sm.id === engineSack.player.currentTargetID
-                && engineSack.player.currentTargetType === TargetType.Jumphole) {
+            if (
+              sm.id === engineSack.player.currentTargetID &&
+              engineSack.player.currentTargetType === TargetType.Jumphole
+            ) {
               sm.isTargeted = true;
-              engineSack.targetInteractionWindow.setTarget(sm, TargetType.Jumphole);
+              engineSack.targetInteractionWindow.setTarget(
+                sm,
+                TargetType.Jumphole
+              );
             }
           }
 
@@ -425,10 +450,15 @@ function handleGlobalUpdate(d: GameMessage) {
           // current ship target check
           sm.isTargeted = false;
 
-          if (sm.id === engineSack.player.currentTargetID
-              && engineSack.player.currentTargetType === TargetType.Station) {
+          if (
+            sm.id === engineSack.player.currentTargetID &&
+            engineSack.player.currentTargetType === TargetType.Station
+          ) {
             sm.isTargeted = true;
-            engineSack.targetInteractionWindow.setTarget(sm, TargetType.Station);
+            engineSack.targetInteractionWindow.setTarget(
+              sm,
+              TargetType.Station
+            );
           }
 
           // exit loop
@@ -511,7 +541,8 @@ function handleCurrentShipUpdate(d: GameMessage) {
     engineSack.player.currentTargetType = TargetType.Station;
 
     // store target on overview window as well
-    engineSack.overviewWindow.selectedItemID = msg.currentShipInfo.dockedAtStationID;
+    engineSack.overviewWindow.selectedItemID =
+      msg.currentShipInfo.dockedAtStationID;
     engineSack.overviewWindow.selectedItemType = TargetType.Station;
   }
 
@@ -533,32 +564,44 @@ function gfxDockOverlay() {
   // draw docked background
   engineSack.ctx.fillStyle = 'black';
   engineSack.ctx.strokeStyle = 'black';
-  engineSack.ctx.fillRect((engineSack.gfx.width / 2) - 100, (engineSack.gfx.height / 2) - 25, 200, 50);
+  engineSack.ctx.fillRect(
+    engineSack.gfx.width / 2 - 100,
+    engineSack.gfx.height / 2 - 25,
+    200,
+    50
+  );
 
   // draw docked text
   engineSack.ctx.fillStyle = 'gray';
   engineSack.ctx.font = '30px FiraCode-Regular';
-  engineSack.ctx.fillText('Docked', (engineSack.gfx.width / 2) - 100, (engineSack.gfx.height / 2));
+  engineSack.ctx.fillText(
+    'Docked',
+    engineSack.gfx.width / 2 - 100,
+    engineSack.gfx.height / 2
+  );
 }
 
 // draws the backplate for the current system
 function gfxBackplate() {
-  if (!engineSack.player.currentSystem.backplateImg || !engineSack.player.currentSystem.backplateValid) {
+  if (
+    !engineSack.player.currentSystem.backplateImg ||
+    !engineSack.player.currentSystem.backplateValid
+  ) {
     // render backplate
-    engineSack.backplateRenderer.render(
-      {
-        renderPointStars: true,
-        renderStars: true,
-        renderSun: false,
-        renderNebulae: true,
-        shortScale: false,
-        seed: engineSack.player.currentSystem.id // quick way to get a different plate for each system
-      }
-    );
+    engineSack.backplateRenderer.render({
+      renderPointStars: true,
+      renderStars: true,
+      renderSun: false,
+      renderNebulae: true,
+      shortScale: false,
+      seed: engineSack.player.currentSystem.id, // quick way to get a different plate for each system
+    });
 
     // get data url and convert to image
     engineSack.player.currentSystem.backplateImg = new Image();
-    engineSack.player.currentSystem.backplateImg.src = engineSack.backplateCanvas.toDataURL('image/png');
+    engineSack.player.currentSystem.backplateImg.src = engineSack.backplateCanvas.toDataURL(
+      'image/png'
+    );
 
     // mark as valid
     engineSack.player.currentSystem.backplateValid = true;
@@ -741,10 +784,16 @@ function handleClick(x: number, y: number) {
     const b = new ClientNavClick();
 
     // calculate cursor vector
-    b.dT = angleBetween(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y);
-    b.m = (magnitude(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y))
+    b.dT = angleBetween(
+      engineSack.gfx.width / 2,
+      engineSack.gfx.height / 2,
+      x,
+      y
+    );
+    b.m =
+      magnitude(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y) /
       // half way across the shortest part of the screen is a full speed request
-      / Math.min(engineSack.gfx.width / 4, engineSack.gfx.height / 4);
+      Math.min(engineSack.gfx.width / 4, engineSack.gfx.height / 4);
 
     // send nav click request
     b.sid = engineSack.player.sid;
@@ -761,16 +810,24 @@ function handleMouseMove(x: number, y: number) {
       w.setY(y);
 
       // fix boundary crossing
-      if ((w.getX() + w.getWidth()) > engineSack.gfx.width) {
+      if (w.getX() + w.getWidth() > engineSack.gfx.width) {
         w.setX(engineSack.gfx.width - w.getWidth());
       }
 
-      if ((w.getY() + (w.getHeight() + GDIStyle.windowHandleHeight)) > engineSack.gfx.height) {
-        w.setY(engineSack.gfx.height - (w.getHeight() + GDIStyle.windowHandleHeight));
+      if (
+        w.getY() + (w.getHeight() + GDIStyle.windowHandleHeight) >
+        engineSack.gfx.height
+      ) {
+        w.setY(
+          engineSack.gfx.height - (w.getHeight() + GDIStyle.windowHandleHeight)
+        );
       }
 
       // move dragged window to top
-      engineSack.windows = [w, ...engineSack.windows.filter(item => item !== w)];
+      engineSack.windows = [
+        w,
+        ...engineSack.windows.filter((item) => item !== w),
+      ];
 
       // only allow one window to drag at a time
       return;

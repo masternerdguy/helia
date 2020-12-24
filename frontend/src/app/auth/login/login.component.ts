@@ -38,10 +38,14 @@ export class LoginComponent implements OnInit {
 
       setTimeout(() => {
         // get back canvas
-        const backCanvas = document.getElementsByClassName('backCanvas')[0] as any;
+        const backCanvas = document.getElementsByClassName(
+          'backCanvas'
+        )[0] as any;
 
         // enter fullscreen
-        const gameCanvas = document.getElementsByClassName('gameCanvas')[0] as any;
+        const gameCanvas = document.getElementsByClassName(
+          'gameCanvas'
+        )[0] as any;
 
         if (gameCanvas.webkitRequestFullScreen) {
           gameCanvas.webkitRequestFullScreen();
