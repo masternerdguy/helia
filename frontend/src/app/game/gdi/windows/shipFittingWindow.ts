@@ -78,71 +78,81 @@ export class ShipFittingWindow extends GDIWindow {
       return;
     }
 
-    if (this.player?.currentShip) {
-      if (this.player?.currentShip.fitStatus) {
-        const rows: ShipViewRow[] = [];
-
-        // request current cargo bay
-        const b = new ClientViewCargoBay();
-        b.sid = this.wsSvc.sid;
-
-        this.wsSvc.sendMessage(MessageTypes.ViewCargoBay, b);
-
-        // update fitted module display
-        const rackAMods: ShipViewRow[] = [];
-        const rackBMods: ShipViewRow[] = [];
-        const rackCMods: ShipViewRow[] = [];
-
-        // build entries for modules on racks
-        for (const m of this.player.currentShip.fitStatus.aRack.modules) {
-          const d = buildFittingRowFromModule(m);
-          rackAMods.push(d);
-        }
-
-        for (const m of this.player.currentShip.fitStatus.bRack.modules) {
-          const d = buildFittingRowFromModule(m);
-          rackBMods.push(d);
-        }
-
-        for (const m of this.player.currentShip.fitStatus.cRack.modules) {
-          const d = buildFittingRowFromModule(m);
-          rackCMods.push(d);
-        }
-
-        // layout rack a
-        rows.push(buildShipViewRowText('Rack A'));
-
-        for (const r of rackAMods) {
-          rows.push(r);
-        }
-
-        rows.push(buildShipViewRowSpacer());
-
-        // layout rack b
-        rows.push(buildShipViewRowText('Rack B'));
-
-        for (const r of rackBMods) {
-          rows.push(r);
-        }
-
-        rows.push(buildShipViewRowSpacer());
-
-        // layout rack c
-        rows.push(buildShipViewRowText('Rack C'));
-
-        for (const r of rackCMods) {
-          rows.push(r);
-        }
-
-        rows.push(buildShipViewRowSpacer());
-
-        // push to view
-        const i = this.shipView.getSelectedIndex();
-
-        this.shipView.setItems(rows);
-        this.shipView.setSelectedIndex(i);
-      }
+    // make sure resources are available
+    if (!this.player?.currentShip) {
+        return;
     }
+
+    if (!this.player?.currentShip.fitStatus) {
+        return;
+    }
+
+    if (!this.wsSvc) {
+        return;
+    }
+
+    // set up view row list
+    const rows: ShipViewRow[] = [];
+
+    // request current cargo bay
+    const b = new ClientViewCargoBay();
+    b.sid = this.wsSvc.sid;
+
+    this.wsSvc.sendMessage(MessageTypes.ViewCargoBay, b);
+
+    // update fitted module display
+    const rackAMods: ShipViewRow[] = [];
+    const rackBMods: ShipViewRow[] = [];
+    const rackCMods: ShipViewRow[] = [];
+
+    // build entries for modules on racks
+    for (const m of this.player.currentShip.fitStatus.aRack.modules) {
+      const d = buildFittingRowFromModule(m);
+      rackAMods.push(d);
+    }
+
+    for (const m of this.player.currentShip.fitStatus.bRack.modules) {
+      const d = buildFittingRowFromModule(m);
+      rackBMods.push(d);
+    }
+
+    for (const m of this.player.currentShip.fitStatus.cRack.modules) {
+      const d = buildFittingRowFromModule(m);
+      rackCMods.push(d);
+    }
+
+    // layout rack a
+    rows.push(buildShipViewRowText('Rack A'));
+
+    for (const r of rackAMods) {
+      rows.push(r);
+    }
+
+    rows.push(buildShipViewRowSpacer());
+
+    // layout rack b
+    rows.push(buildShipViewRowText('Rack B'));
+
+    for (const r of rackBMods) {
+      rows.push(r);
+    }
+
+    rows.push(buildShipViewRowSpacer());
+
+    // layout rack c
+    rows.push(buildShipViewRowText('Rack C'));
+
+    for (const r of rackCMods) {
+      rows.push(r);
+    }
+
+    rows.push(buildShipViewRowSpacer());
+
+    // push to view
+    const i = this.shipView.getSelectedIndex();
+
+    this.shipView.setItems(rows);
+    this.shipView.setSelectedIndex(i);
   }
 
   setWsService(wsSvc: WsService) {
