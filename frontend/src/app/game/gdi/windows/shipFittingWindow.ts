@@ -1,6 +1,5 @@
 import { GDIWindow } from '../base/gdiWindow';
 import { FontSize } from '../base/gdiStyle';
-import { Ship } from '../../engineModels/ship';
 import { GDIList } from '../components/gdiList';
 import { WSModule } from '../../wsModels/entities/wsShip';
 import { WsService } from '../../ws.service';
@@ -19,6 +18,9 @@ export class ShipFittingWindow extends GDIWindow {
 
   // ws service
   private wsSvc: WsService;
+
+  // last cargo bay refresh
+  private lastCargoView = 0;
 
   initialize() {
     // set dimensions
@@ -80,25 +82,31 @@ export class ShipFittingWindow extends GDIWindow {
 
     // make sure resources are available
     if (!this.player?.currentShip) {
-        return;
+      return;
     }
 
     if (!this.player?.currentShip.fitStatus) {
-        return;
+      return;
     }
 
     if (!this.wsSvc) {
-        return;
+      return;
     }
 
     // set up view row list
     const rows: ShipViewRow[] = [];
 
-    // request current cargo bay
-    const b = new ClientViewCargoBay();
-    b.sid = this.wsSvc.sid;
+    // check if cargo bay is stale
+    const now = Date.now();
 
-    this.wsSvc.sendMessage(MessageTypes.ViewCargoBay, b);
+    if (now - this.lastCargoView > 5000) {
+      // request current cargo bay
+      const b = new ClientViewCargoBay();
+      b.sid = this.wsSvc.sid;
+
+      this.wsSvc.sendMessage(MessageTypes.ViewCargoBay, b);
+      this.lastCargoView = now;
+    }
 
     // update fitted module display
     const rackAMods: ShipViewRow[] = [];
