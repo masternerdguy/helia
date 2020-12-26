@@ -44,8 +44,15 @@ export class ShipFittingWindow extends GDIWindow {
     this.shipView.setY(0);
 
     this.shipView.setFont(FontSize.normal);
-    this.shipView.setOnClick(() => {
-      // todo
+    this.shipView.setOnClick((r) => {
+      // check for actions
+      if (r.actions) {
+        // map action strings for use in view
+        const actions = r.actions.map((s: string) => buildShipViewRowText(s));
+
+        // list actions on action view
+        this.actionView.setItems(actions);
+      }
     });
 
     // setup info view
