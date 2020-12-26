@@ -2,9 +2,11 @@ package universe
 
 import (
 	"encoding/json"
+	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"sync"
 	"time"
 
@@ -187,6 +189,16 @@ func (s *SolarSystem) PeriodicUpdate() {
 						mod.TargetType = nil
 					}
 				}
+			}
+		} else if evt.Type == models.NewMessageRegistry().ViewCargoBay {
+			//find player ship
+			sh := s.ships[c.CurrentShipID.String()]
+
+			if sh != nil {
+				//extract data (currently nothing to process)
+				data := evt.Body.(models.ClientViewCargoBayBody)
+
+				log.Println(fmt.Sprintf("%v", data))
 			}
 		}
 	}
