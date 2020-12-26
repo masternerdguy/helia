@@ -224,6 +224,32 @@ func (s *SolarSystem) PeriodicUpdate() {
 				//write response to client
 				c.WriteMessage(&cu)
 			}
+		} else if evt.Type == models.NewMessageRegistry().UnfitModule {
+			//find player ship
+			sh := s.ships[c.CurrentShipID.String()]
+
+			if sh != nil {
+				//extract data
+				data := evt.Body.(models.ClientUnfitModuleBody)
+
+				//find module
+				mod := sh.FindModule(data.ItemID, data.Rack)
+
+				// make sure we found something
+				if mod == nil {
+					// do nothing
+					continue
+				} else {
+					// unfit module
+					err := sh.UnfitModule(mod)
+
+					// there are lots of reasons this could fail the player will need to know about
+					if err != nil {
+						// send error message to client
+						c.WriteErrorMessage(err.Error())
+					}
+				}
+			}
 		}
 	}
 

@@ -8,6 +8,7 @@ import (
 
 //MessageRegistry Registry of game message types
 type MessageRegistry struct {
+	PushError         int
 	Join              int
 	GlobalUpdate      int
 	NavClick          int
@@ -20,6 +21,7 @@ type MessageRegistry struct {
 	DeactivateModule  int
 	ViewCargoBay      int
 	CargoBayUpdate    int
+	UnfitModule       int
 }
 
 //TargetTypeRegistry Registry of target types
@@ -34,6 +36,7 @@ type TargetTypeRegistry struct {
 //NewMessageRegistry Returns a MessageRegistry with correct enum values
 func NewMessageRegistry() *MessageRegistry {
 	return &MessageRegistry{
+		PushError:         -1,
 		Join:              0,
 		GlobalUpdate:      1,
 		NavClick:          2,
@@ -46,6 +49,7 @@ func NewMessageRegistry() *MessageRegistry {
 		DeactivateModule:  9,
 		ViewCargoBay:      10,
 		CargoBayUpdate:    11,
+		UnfitModule:       12,
 	}
 }
 
@@ -309,4 +313,16 @@ type ServerItemViewBody struct {
 type ServerContainerViewBody struct {
 	ContainerID uuid.UUID            `json:"id"`
 	Items       []ServerItemViewBody `json:"items"`
+}
+
+//ClientUnfitModuleBody Body containing a request to unfit a module from a rack and move it into the cargo bay
+type ClientUnfitModuleBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	Rack      string    `json:"rack"`
+	ItemID    uuid.UUID `json:"itemID"`
+}
+
+//ServerPushErrorMessage Body containing a message string to be displayed to the player from the server
+type ServerPushErrorMessage struct {
+	Message string `json:"message"`
 }

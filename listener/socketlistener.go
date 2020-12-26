@@ -119,26 +119,33 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 			//handle message
 			l.handleClientUndock(&client, &b)
 		} else if m.MessageType == msgRegistry.ActivateModule {
-			//decode body as ClientUndockBody
+			//decode body as ClientActivateModuleBody
 			b := models.ClientActivateModuleBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
 			//handle message
 			l.handleClientActivateModule(&client, &b)
 		} else if m.MessageType == msgRegistry.DeactivateModule {
-			//decode body as ClientUndockBody
+			//decode body as ClientDeactivateModuleBody
 			b := models.ClientDeactivateModuleBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
 			//handle message
 			l.handleClientDeactivateModule(&client, &b)
 		} else if m.MessageType == msgRegistry.ViewCargoBay {
-			//decode body as ViewCargoBayBody
+			//decode body as ClientViewCargoBayBody
 			b := models.ClientViewCargoBayBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
 			//handle message
 			l.handleClientViewCargoBay(&client, &b)
+		} else if m.MessageType == msgRegistry.UnfitModule {
+			//decode body as ClientUnfitModuleBody
+			b := models.ClientUnfitModuleBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			//handle message
+			l.handleClientUnfitModule(&client, &b)
 		}
 	}
 }
@@ -486,6 +493,29 @@ func (l *SocketListener) handleClientViewCargoBay(client *shared.GameClient, bod
 		//push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.ViewCargoBay)
+	}
+}
+
+func (l *SocketListener) handleClientUnfitModule(client *shared.GameClient, body *models.ClientUnfitModuleBody) {
+	//safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	//verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientUnfitModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		//initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		//push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.UnfitModule)
 	}
 }
 

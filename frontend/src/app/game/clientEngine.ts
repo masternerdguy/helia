@@ -25,6 +25,7 @@ import { WindowManager } from './gdi/windows/windowManager';
 import { ShipFittingWindow } from './gdi/windows/shipFittingWindow';
 import { ServerContainerView } from './wsModels/bodies/containerView';
 import { Container } from './engineModels/container';
+import { ServerErrorMessage } from './wsModels/bodies/errorMessage';
 
 class EngineSack {
   constructor() {}
@@ -162,6 +163,8 @@ export function clientStart(
       handleCurrentShipUpdate(d);
     } else if (d.type === MessageTypes.CargoBayUpdate) {
       handleCargoBayUpdate(d);
+    } else if (d.type === MessageTypes.PushError) {
+      handleErrorMessageFromServer(d);
     }
   });
 }
@@ -521,6 +524,14 @@ function handleGlobalUpdate(d: GameMessage) {
 
   // update overview window
   engineSack.overviewWindow.sync(engineSack.player);
+}
+
+function handleErrorMessageFromServer(d: GameMessage) {
+    // parse body
+    const msg = JSON.parse(d.body) as ServerErrorMessage;
+
+    // todo: display in ui somewhere
+    console.error(msg);
 }
 
 function handleCargoBayUpdate(d: GameMessage) {

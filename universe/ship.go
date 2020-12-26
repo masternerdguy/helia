@@ -1,6 +1,7 @@
 package universe
 
 import (
+	"errors"
 	"math"
 	"sync"
 	"time"
@@ -1122,6 +1123,16 @@ func (s *Ship) FindModule(id uuid.UUID, rack string) *FittedSlot {
 	}
 
 	return nil
+}
+
+//UnfitModule Removes a module from a ship and places it in the cargo hold
+func (s *Ship) UnfitModule(m *FittedSlot) error {
+	//lock entity
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//todo
+	return errors.New("server - not yet implemented")
 }
 
 //PeriodicUpdate Updates a fitted slot on a ship

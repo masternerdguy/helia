@@ -4,6 +4,7 @@ export class GameMessage {
 }
 
 export enum MessageTypes {
+  PushError = -1,
   Join = 0,
   Update = 1,
   NavClick = 2,
@@ -16,4 +17,5 @@ export enum MessageTypes {
   DeactivateModule = 9,
   ViewCargoBay = 10,
   CargoBayUpdate = 11,
+  UnfitModule = 12
 }

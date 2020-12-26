@@ -54,6 +54,27 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 	}
 }
 
+//WriteErrorMessage Send an error string to the client to be displayed
+func (c *GameClient) WriteErrorMessage(msg string) {
+	//get message registry
+	msgRegistry := models.NewMessageRegistry()
+
+	//package message
+	d := models.ServerPushErrorMessage{
+		Message: msg,
+	}
+
+	b, _ := json.Marshal(&d)
+
+	cu := models.GameMessage{
+		MessageType: msgRegistry.PushError,
+		MessageBody: string(b),
+	}
+
+	//write error to client
+	c.WriteMessage(&cu)
+}
+
 //PushShipEvent Adds an event to the ship event queue
 func (c *GameClient) PushShipEvent(evt interface{}, eventType int) {
 	c.lock.Lock()
