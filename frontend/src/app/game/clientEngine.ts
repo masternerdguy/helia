@@ -535,8 +535,6 @@ function handleCargoBayUpdate(d: GameMessage) {
   // update current cargo view cache
   const vw = new Container(msg);
   engineSack.player.currentCargoView = vw;
-
-  console.log(vw);
 }
 
 function handleCurrentShipUpdate(d: GameMessage) {

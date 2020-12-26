@@ -6,6 +6,7 @@ import { WsService } from '../../ws.service';
 import { Player } from '../../engineModels/player';
 import { ClientViewCargoBay } from '../../wsModels/bodies/viewCargoBay';
 import { MessageTypes } from '../../wsModels/gameMessage';
+import { WSContainerItem } from '../../wsModels/entities/wsContainer';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -108,6 +109,16 @@ export class ShipFittingWindow extends GDIWindow {
       this.lastCargoView = now;
     }
 
+    // update cargo display
+    const cargo: ShipViewRow[] = [];
+
+    if (this.player.currentCargoView) {
+      for (const ci of this.player.currentCargoView.items) {
+        const r = buildCargoRowFromContainerItem(ci);
+        cargo.push(r);
+      }
+    }
+
     // update fitted module display
     const rackAMods: ShipViewRow[] = [];
     const rackBMods: ShipViewRow[] = [];
@@ -156,6 +167,15 @@ export class ShipFittingWindow extends GDIWindow {
 
     rows.push(buildShipViewRowSpacer());
 
+    // layout cargo bay
+    rows.push(buildShipViewRowText('Cargo Bay'));
+
+    for (const r of cargo) {
+      rows.push(r);
+    }
+
+    rows.push(buildShipViewRowSpacer());
+
     // push to view
     const i = this.shipView.getSelectedIndex();
 
@@ -173,7 +193,7 @@ export class ShipFittingWindow extends GDIWindow {
 }
 
 class ShipViewRow {
-  object: WSModule;
+  object: any;
   actions: string[];
 
   listString: () => string;
@@ -197,6 +217,18 @@ function buildShipViewRowText(s: string): ShipViewRow {
     actions: [],
     listString: () => {
       return s;
+    },
+  };
+
+  return r;
+}
+
+function buildCargoRowFromContainerItem(m: WSContainerItem): ShipViewRow {
+  const r: ShipViewRow = {
+    object: m,
+    actions: ['Trash'],
+    listString: () => {
+      return itemStatusString(m);
     },
   };
 
@@ -231,4 +263,12 @@ function moduleStatusString(m: WSModule) {
     m.type,
     24
   )} ${pc}`;
+}
+
+function itemStatusString(m: WSContainerItem) {
+  // build status string
+  return `${fixedString('', 1)} ${fixedString(
+    m.itemTypeName,
+    24
+  )}`;
 }
