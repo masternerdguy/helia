@@ -583,6 +583,44 @@ func ItemFromSQL(value *sql.Item) *universe.Item {
 	return &item
 }
 
+//LoadItem Loads an item with some type and family data for use in the simulation.
+func LoadItem(i *sql.Item) (*universe.Item, error) {
+	itemTypeSvc := sql.GetItemTypeService()
+	itemFamilySvc := sql.GetItemFamilyService()
+
+	//load base item
+	ei := ItemFromSQL(i)
+
+	//null check
+	if ei == nil {
+		return nil, errors.New("Item from SQL failed")
+	}
+
+	//load item type
+	it, err := itemTypeSvc.GetItemTypeByID(ei.ItemTypeID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//include item type data
+	ei.ItemTypeName = it.Name
+	ei.ItemFamilyID = it.Family
+
+	//load item family
+	fm, err := itemFamilySvc.GetItemFamilyByID(it.Family)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//include item family data
+	ei.ItemFamilyName = fm.FriendlyName
+
+	//return filled item
+	return ei, nil
+}
+
 //LoadContainer Takes a SQL Container and converts it, and items it loads, into the engine type ready for insertion into the universe.
 func LoadContainer(c *sql.Container) (*universe.Container, error) {
 	//load base container
@@ -597,9 +635,13 @@ func LoadContainer(c *sql.Container) (*universe.Container, error) {
 		return nil, err
 	}
 
-	//convert items and push into container
+	//load items and push into container
 	for _, i := range s {
-		m := ItemFromSQL(&i)
+		m, err := LoadItem(&i)
+
+		if err != nil {
+			return nil, err
+		}
 
 		//null check
 		if m == nil {

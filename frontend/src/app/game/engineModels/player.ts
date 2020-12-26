@@ -1,8 +1,10 @@
+import { Container } from './container';
 import { Ship } from './ship';
 import { System } from './system';
 
 export class Player {
   currentShip: Ship;
+  currentCargoView: Container;
   currentSystem: System;
 
   currentTargetID: string;

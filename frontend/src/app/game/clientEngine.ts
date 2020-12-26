@@ -23,6 +23,8 @@ import { ModuleEffect } from './engineModels/moduleEffect';
 import { PointEffect } from './engineModels/pointEffect';
 import { WindowManager } from './gdi/windows/windowManager';
 import { ShipFittingWindow } from './gdi/windows/shipFittingWindow';
+import { ServerContainerView } from './wsModels/bodies/containerView';
+import { Container } from './engineModels/container';
 
 class EngineSack {
   constructor() {}
@@ -158,6 +160,8 @@ export function clientStart(
       handleGlobalUpdate(d);
     } else if (d.type === MessageTypes.CurrentShipUpdate) {
       handleCurrentShipUpdate(d);
+    } else if (d.type === MessageTypes.CargoBayUpdate) {
+      handleCargoBayUpdate(d);
     }
   });
 }
@@ -517,6 +521,22 @@ function handleGlobalUpdate(d: GameMessage) {
 
   // update overview window
   engineSack.overviewWindow.sync(engineSack.player);
+}
+
+function handleCargoBayUpdate(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerContainerView;
+
+  // null check
+  if (!msg.items) {
+    msg.items = [];
+  }
+
+  // update current cargo view cache
+  const vw = new Container(msg);
+  engineSack.player.currentCargoView = vw;
+
+  console.log(vw);
 }
 
 function handleCurrentShipUpdate(d: GameMessage) {

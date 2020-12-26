@@ -2,11 +2,9 @@ package universe
 
 import (
 	"encoding/json"
-	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"sync"
 	"time"
 
@@ -196,9 +194,35 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 			if sh != nil {
 				//extract data (currently nothing to process)
-				data := evt.Body.(models.ClientViewCargoBayBody)
+				//data := evt.Body.(models.ClientViewCargoBayBody)
 
-				log.Println(fmt.Sprintf("%v", data))
+				//convert cargo bay to an update message for the client
+				vw := models.ServerContainerViewBody{
+					ContainerID: sh.CargoBayContainerID,
+				}
+
+				for _, i := range sh.CargoBay.Items {
+					r := models.ServerItemViewBody{
+						ID:             i.ID,
+						ItemTypeID:     i.ItemTypeID,
+						ItemTypeName:   i.ItemTypeName,
+						ItemFamilyID:   i.ItemFamilyID,
+						ItemFamilyName: i.ItemFamilyName,
+					}
+
+					vw.Items = append(vw.Items, r)
+				}
+
+				//package message
+				b, _ := json.Marshal(&vw)
+
+				cu := models.GameMessage{
+					MessageType: msgRegistry.CargoBayUpdate,
+					MessageBody: string(b),
+				}
+
+				//write response to client
+				c.WriteMessage(&cu)
 			}
 		}
 	}

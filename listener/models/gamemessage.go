@@ -296,7 +296,17 @@ type ClientViewCargoBayBody struct {
 	SessionID uuid.UUID `json:"sid"`
 }
 
-//ServerCargoBayUpdateBody Body containing a response to a view cargo bay request from the client
-type ServerCargoBayUpdateBody struct {
-	// todo
+//ServerItemViewBody Structure representing a view of an item in a container from the server
+type ServerItemViewBody struct {
+	ID             uuid.UUID `json:"id"`
+	ItemTypeID     uuid.UUID `json:"itemTypeID"`
+	ItemTypeName   string    `json:"itemTypeName"`
+	ItemFamilyID   string    `json:"itemFamilyID"`
+	ItemFamilyName string    `json:"itemFamilyName"`
+}
+
+//ServerContainerViewBody Generic body for returning container views requested by the client (ex: cargo bay)
+type ServerContainerViewBody struct {
+	ContainerID uuid.UUID            `json:"id"`
+	Items       []ServerItemViewBody `json:"items"`
 }
