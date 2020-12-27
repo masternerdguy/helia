@@ -6,6 +6,8 @@ import (
 	"helia/sql"
 	"helia/universe"
 	"log"
+
+	"github.com/google/uuid"
 )
 
 //loadUniverse Loads the state of the universe from the database
@@ -809,4 +811,10 @@ func saveShip(ship *universe.Ship) error {
 	}
 
 	return err
+}
+
+//saveItemLocation Moves an item to a different container in the database
+func saveItemLocation(itemID uuid.UUID, containerID uuid.UUID) error {
+	itemSvc := sql.GetItemService()
+	return itemSvc.SetContainerID(itemID, containerID)
 }

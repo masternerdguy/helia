@@ -135,6 +135,28 @@ func handleEscalations(sol *universe.SolarSystem) {
 	sol.Lock.Lock()
 	defer sol.Lock.Unlock()
 
+	//iterate over moved items
+	for id := range sol.MovedItems {
+		//capture reference and remove from map
+		mi, _ := sol.MovedItems[id]
+		delete(sol.MovedItems, id)
+
+		//handle escalation on another goroutine
+		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			//lock item
+			mi.Lock.Lock()
+			defer mi.Lock.Unlock()
+
+			//save new location of item to db
+			err := saveItemLocation(mi.ID, mi.ContainerID)
+
+			//error check
+			if err != nil {
+				log.Println(fmt.Sprintf("Unable to relocate item %v: %v", mi.ID, err))
+			}
+		}(mi, sol)
+	}
+
 	//iterate over dead ships
 	for id := range sol.DeadShips {
 		//capture reference and remove from map

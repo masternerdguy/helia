@@ -29,6 +29,7 @@ type SolarSystem struct {
 	//event escalations to engine core
 	NeedRespawn map[string]*shared.GameClient //clients in need of a respawn by core
 	DeadShips   map[string]*Ship              //dead ships in need of cleanup by core
+	MovedItems  map[string]*Item              //items moved to a new container in need of saving by core
 }
 
 //Initialize Initializes internal aspects of SolarSystem
@@ -46,6 +47,7 @@ func (s *SolarSystem) Initialize() {
 	s.stations = make(map[string]*Station)
 	s.DeadShips = make(map[string]*Ship)
 	s.NeedRespawn = make(map[string]*shared.GameClient)
+	s.MovedItems = make(map[string]*Item)
 
 	//initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)

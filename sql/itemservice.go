@@ -129,3 +129,26 @@ func (s ItemService) NewItem(e Item) (*Item, error) {
 	//return pointer to inserted item model
 	return &e, nil
 }
+
+//SetContainerID Updates the database with a new storage location for an item
+func (s ItemService) SetContainerID(id uuid.UUID, containerID uuid.UUID) error {
+	//get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	//update user
+	sql := `
+				UPDATE public.items SET containerid = $1 WHERE id = $2;
+			`
+
+	_, err = db.Query(sql, containerID, id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

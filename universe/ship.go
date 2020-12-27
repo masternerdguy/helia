@@ -1264,6 +1264,9 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 			if s.TotalCargoBayVolumeUsed(lock)+v <= s.GetRealCargoBayVolume() {
 				m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, o)
 				o.ContainerID = m.shipMountedOn.CargoBayContainerID
+
+				//escalate to core to save to db
+				s.CurrentSystem.MovedItems[o.ID.String()] = o
 			} else {
 				return errors.New("Insufficient room in cargo bay to unfit module")
 			}
