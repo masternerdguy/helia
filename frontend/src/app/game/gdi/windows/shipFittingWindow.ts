@@ -5,8 +5,9 @@ import { WSModule } from '../../wsModels/entities/wsShip';
 import { WsService } from '../../ws.service';
 import { Player } from '../../engineModels/player';
 import { ClientViewCargoBay } from '../../wsModels/bodies/viewCargoBay';
-import { MessageTypes } from '../../wsModels/gameMessage';
+import { GameMessage, MessageTypes } from '../../wsModels/gameMessage';
 import { WSContainerItem } from '../../wsModels/entities/wsContainer';
+import { ClientUnfitModule } from '../../wsModels/bodies/unfitModule';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -75,7 +76,26 @@ export class ShipFittingWindow extends GDIWindow {
     this.actionView.setY(0);
 
     this.actionView.setFont(FontSize.normal);
-    this.actionView.setOnClick(() => {});
+    this.actionView.setOnClick((r) => {
+      // get action
+      const a = r.listString();
+
+      // perform action
+      if (a === 'Unfit') {
+        // get selected module
+        const i: ShipViewRow = this.shipView.getSelectedItem();
+        const metaRack = i.object.metaRack;
+
+        // send unfit request
+        const umMsg: ClientUnfitModule = {
+          sid: this.wsSvc.sid,
+          rack: metaRack,
+          itemID: (i.object as WSModule).itemID
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.UnfitModule, umMsg);
+      }
+    });
 
     // pack
     this.addComponent(this.shipView);
@@ -151,6 +171,7 @@ export class ShipFittingWindow extends GDIWindow {
     rows.push(buildShipViewRowText('Rack A'));
 
     for (const r of rackAMods) {
+      r.object.metaRack = 'A';
       rows.push(r);
     }
 
@@ -160,6 +181,7 @@ export class ShipFittingWindow extends GDIWindow {
     rows.push(buildShipViewRowText('Rack B'));
 
     for (const r of rackBMods) {
+      r.object.metaRack = 'B';
       rows.push(r);
     }
 
@@ -169,6 +191,7 @@ export class ShipFittingWindow extends GDIWindow {
     rows.push(buildShipViewRowText('Rack C'));
 
     for (const r of rackCMods) {
+      r.object.metaRack = 'C';
       rows.push(r);
     }
 
