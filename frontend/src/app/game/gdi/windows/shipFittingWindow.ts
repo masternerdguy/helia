@@ -91,7 +91,7 @@ export class ShipFittingWindow extends GDIWindow {
         const umMsg: ClientUnfitModule = {
           sid: this.wsSvc.sid,
           rack: metaRack,
-          itemID: (i.object as WSModule).itemID
+          itemID: (i.object as WSModule).itemID,
         };
 
         this.wsSvc.sendMessage(MessageTypes.UnfitModule, umMsg);
@@ -287,12 +287,13 @@ function buildCargoRowFromContainerItem(m: WSContainerItem): ShipViewRow {
   return r;
 }
 
-function buildFittingRowFromModule(m: WSModule, isDocked: boolean): ShipViewRow {
+function buildFittingRowFromModule(
+  m: WSModule,
+  isDocked: boolean
+): ShipViewRow {
   const r: ShipViewRow = {
     object: m,
-    actions: isDocked
-    ? ['Unfit']
-    : [''],
+    actions: isDocked ? ['Unfit'] : [''],
     listString: () => {
       return moduleStatusString(m);
     },
@@ -321,8 +322,5 @@ function moduleStatusString(m: WSModule) {
 
 function itemStatusString(m: WSContainerItem) {
   // build status string
-  return `${fixedString('', 1)} ${fixedString(
-    m.itemTypeName,
-    24
-  )}`;
+  return `${fixedString('', 1)} ${fixedString(m.itemTypeName, 24)}`;
 }

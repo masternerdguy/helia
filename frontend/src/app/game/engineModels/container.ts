@@ -1,9 +1,9 @@
 import { WSContainer } from '../wsModels/entities/wsContainer';
 
 export class Container extends WSContainer {
-    constructor(s: WSContainer) {
-        super();
+  constructor(s: WSContainer) {
+    super();
 
-        Object.assign(this, s);
-    }
+    Object.assign(this, s);
+  }
 }

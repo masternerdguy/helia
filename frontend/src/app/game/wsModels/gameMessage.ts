@@ -17,5 +17,5 @@ export enum MessageTypes {
   DeactivateModule = 9,
   ViewCargoBay = 10,
   CargoBayUpdate = 11,
-  UnfitModule = 12
+  UnfitModule = 12,
 }

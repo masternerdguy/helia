@@ -527,11 +527,11 @@ function handleGlobalUpdate(d: GameMessage) {
 }
 
 function handleErrorMessageFromServer(d: GameMessage) {
-    // parse body
-    const msg = JSON.parse(d.body) as ServerErrorMessage;
+  // parse body
+  const msg = JSON.parse(d.body) as ServerErrorMessage;
 
-    // todo: display in ui somewhere
-    console.error(msg);
+  // todo: display in ui somewhere
+  console.error(msg);
 }
 
 function handleCargoBayUpdate(d: GameMessage) {

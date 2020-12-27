@@ -1,3 +1,3 @@
 export class ServerErrorMessage {
-    message: string;
+  message: string;
 }
