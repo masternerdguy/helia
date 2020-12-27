@@ -1230,6 +1230,11 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	m.shipMountedOn.FittingBay.Lock.Lock()
 	defer m.shipMountedOn.FittingBay.Lock.Unlock()
 
+	//make sure ship is docked
+	if s.DockedAtStationID == nil {
+		return errors.New("You must be docked to unfit a module")
+	}
+
 	//get module volume
 	v, _ := m.ItemTypeMeta.GetFloat64("volume")
 
