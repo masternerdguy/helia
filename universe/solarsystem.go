@@ -70,11 +70,16 @@ func (s *SolarSystem) PeriodicUpdate() {
 			continue
 		}
 
+		//find player ship
+		sh := s.ships[c.CurrentShipID.String()]
+
+		//null check
+		if sh == nil {
+			continue
+		}
+
 		//process event
 		if evt.Type == models.NewMessageRegistry().NavClick {
-			//find player ship
-			sh := s.ships[c.CurrentShipID.String()]
-
 			if sh != nil {
 				//extract data
 				data := evt.Body.(models.ClientNavClickBody)
@@ -83,9 +88,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 				sh.CmdManualNav(data.ScreenTheta, data.ScreenMagnitude)
 			}
 		} else if evt.Type == models.NewMessageRegistry().Goto {
-			//find player ship
-			sh := s.ships[c.CurrentShipID.String()]
-
 			if sh != nil {
 				//extract data
 				data := evt.Body.(models.ClientGotoBody)
@@ -94,9 +96,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 				sh.CmdGoto(data.TargetID, data.Type)
 			}
 		} else if evt.Type == models.NewMessageRegistry().Orbit {
-			//find player ship
-			sh := s.ships[c.CurrentShipID.String()]
-
 			if sh != nil {
 				//extract data
 				data := evt.Body.(models.ClientOrbitBody)
@@ -105,9 +104,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 				sh.CmdOrbit(data.TargetID, data.Type)
 			}
 		} else if evt.Type == models.NewMessageRegistry().Dock {
-			//find player ship
-			sh := s.ships[c.CurrentShipID.String()]
-
 			if sh != nil {
 				//extract data
 				data := evt.Body.(models.ClientDockBody)
@@ -116,9 +112,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 				sh.CmdDock(data.TargetID, data.Type)
 			}
 		} else if evt.Type == models.NewMessageRegistry().Undock {
-			//find player ship
-			sh := s.ships[c.CurrentShipID.String()]
-
 			if sh != nil {
 				//extract data (currently nothing to process)
 				//data := evt.Body.(models.ClientUndockBody)
@@ -127,9 +120,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 				sh.CmdUndock()
 			}
 		} else if evt.Type == models.NewMessageRegistry().ActivateModule {
-			//find player ship
-			sh := s.ships[c.CurrentShipID.String()]
-
 			if sh != nil {
 				//extract data
 				data := evt.Body.(models.ClientActivateModuleBody)
@@ -137,30 +127,27 @@ func (s *SolarSystem) PeriodicUpdate() {
 				//skip if rack c (passive modules)
 				if data.Rack == "C" {
 					continue
-				}
-
-				//find module
-				mod := sh.FindModule(data.ItemID, data.Rack)
-
-				// make sure we found something
-				if mod == nil {
-					// do nothing
-					continue
 				} else {
-					if !mod.WillRepeat {
-						// set repeat to true
-						mod.WillRepeat = true
+					//find module
+					mod := sh.FindModule(data.ItemID, data.Rack)
 
-						// store target
-						mod.TargetID = data.TargetID
-						mod.TargetType = data.TargetType
+					// make sure we found something
+					if mod == nil {
+						// do nothing
+						continue
+					} else {
+						if !mod.WillRepeat {
+							// set repeat to true
+							mod.WillRepeat = true
+
+							// store target
+							mod.TargetID = data.TargetID
+							mod.TargetType = data.TargetType
+						}
 					}
 				}
 			}
 		} else if evt.Type == models.NewMessageRegistry().DeactivateModule {
-			//find player ship
-			sh := s.ships[c.CurrentShipID.String()]
-
 			if sh != nil {
 				//extract data
 				data := evt.Body.(models.ClientDeactivateModuleBody)
@@ -168,30 +155,27 @@ func (s *SolarSystem) PeriodicUpdate() {
 				//skip if rack c (passive modules)
 				if data.Rack == "C" {
 					continue
-				}
-
-				//find module
-				mod := sh.FindModule(data.ItemID, data.Rack)
-
-				// make sure we found something
-				if mod == nil {
-					// do nothing
-					continue
 				} else {
-					if mod.WillRepeat {
-						// set repeat to false
-						mod.WillRepeat = false
+					//find module
+					mod := sh.FindModule(data.ItemID, data.Rack)
 
-						// clear target
-						mod.TargetID = nil
-						mod.TargetType = nil
+					// make sure we found something
+					if mod == nil {
+						// do nothing
+						continue
+					} else {
+						if mod.WillRepeat {
+							// set repeat to false
+							mod.WillRepeat = false
+
+							// clear target
+							mod.TargetID = nil
+							mod.TargetType = nil
+						}
 					}
 				}
 			}
 		} else if evt.Type == models.NewMessageRegistry().ViewCargoBay {
-			//find player ship
-			sh := s.ships[c.CurrentShipID.String()]
-
 			if sh != nil {
 				//extract data (currently nothing to process)
 				//data := evt.Body.(models.ClientViewCargoBayBody)
@@ -225,9 +209,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 				c.WriteMessage(&cu)
 			}
 		} else if evt.Type == models.NewMessageRegistry().UnfitModule {
-			//find player ship
-			sh := s.ships[c.CurrentShipID.String()]
-
 			if sh != nil {
 				//extract data
 				data := evt.Body.(models.ClientUnfitModuleBody)
@@ -241,7 +222,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 					continue
 				} else {
 					// unfit module
-					err := sh.UnfitModule(mod)
+					err := sh.UnfitModule(mod, false)
 
 					// there are lots of reasons this could fail the player will need to know about
 					if err != nil {

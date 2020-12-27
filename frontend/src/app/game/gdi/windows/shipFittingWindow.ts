@@ -94,6 +94,14 @@ export class ShipFittingWindow extends GDIWindow {
         };
 
         this.wsSvc.sendMessage(MessageTypes.UnfitModule, umMsg);
+
+        // request cargo bay refresh
+        setTimeout(() => {
+          const b = new ClientViewCargoBay();
+          b.sid = this.wsSvc.sid;
+
+          this.wsSvc.sendMessage(MessageTypes.ViewCargoBay, b);
+        }, 200);
       }
     });
 

@@ -167,6 +167,38 @@ type FittedSlot struct {
 	cooldownProgress int
 }
 
+//stripModuleFromFitting Removes the fitted slot containing a module from the fitting
+func (f *Fitting) stripModuleFromFitting(itemID uuid.UUID) {
+	// stub new empty racks
+	newA := make([]FittedSlot, 0)
+	newB := make([]FittedSlot, 0)
+	newC := make([]FittedSlot, 0)
+
+	// copy all except module being unfit
+	for _, i := range f.ARack {
+		if i.ItemID != itemID {
+			newA = append(newA, i)
+		}
+	}
+
+	for _, i := range f.BRack {
+		if i.ItemID != itemID {
+			newB = append(newB, i)
+		}
+	}
+
+	for _, i := range f.CRack {
+		if i.ItemID != itemID {
+			newC = append(newC, i)
+		}
+	}
+
+	// replace racks in fitting
+	f.ARack = newA
+	f.BRack = newB
+	f.CRack = newC
+}
+
 //CopyShip Returns a copy of the ship
 func (s *Ship) CopyShip() *Ship {
 	s.Lock.Lock()
@@ -366,6 +398,17 @@ func (s *Ship) updateEnergy() {
 	if s.Energy > maxEnergy {
 		s.Energy = maxEnergy
 	}
+
+	// clamp fuel
+	if s.Fuel < 0 {
+		s.Fuel = 0
+	}
+
+	maxFuel := s.GetRealMaxFuel()
+
+	if s.Fuel > maxFuel {
+		s.Fuel = maxFuel
+	}
 }
 
 //UpdateShield Updates the ship's shield level for a tick
@@ -403,6 +446,28 @@ func (s *Ship) updateShield() {
 
 	if s.Shield > max {
 		s.Shield = max
+	}
+
+	// clamp armor
+	if s.Armor < 0 {
+		s.Armor = 0
+	}
+
+	maxArmor := s.GetRealMaxArmor()
+
+	if s.Armor > maxArmor {
+		s.Armor = maxArmor
+	}
+
+	// clamp hull
+	if s.Hull < 0 {
+		s.Hull = 0
+	}
+
+	maxHull := s.GetRealMaxHull()
+
+	if s.Hull > maxHull {
+		s.Hull = maxHull
 	}
 }
 
@@ -658,6 +723,31 @@ func (s *Ship) GetRealMaxFuel() float64 {
 //GetRealCargoBayVolume Returns the real max cargo bay volume of the ship after modifiers
 func (s *Ship) GetRealCargoBayVolume() float64 {
 	return s.TemplateData.BaseCargoBayVolume
+}
+
+//TotalCargoBayVolumeUsed Returns the total amount of cargo bay space currently in use
+func (s *Ship) TotalCargoBayVolumeUsed(lock bool) float64 {
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// accumulator
+	var tV = 0.0
+
+	// loop over items in cargo hold
+	for _, i := range s.CargoBay.Items {
+		// get their volume metadata
+		volume, f := i.Meta.GetFloat64("volume")
+
+		if f {
+			tV += volume
+		}
+	}
+
+	// return total
+	return tV
 }
 
 //DealDamage Deals damage to the ship
@@ -1126,13 +1216,64 @@ func (s *Ship) FindModule(id uuid.UUID, rack string) *FittedSlot {
 }
 
 //UnfitModule Removes a module from a ship and places it in the cargo hold
-func (s *Ship) UnfitModule(m *FittedSlot) error {
-	//lock entity
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
+	if lock {
+		//lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
-	//todo
-	return errors.New("server - not yet implemented")
+	//lock containers
+	m.shipMountedOn.CargoBay.Lock.Lock()
+	defer m.shipMountedOn.CargoBay.Lock.Unlock()
+
+	m.shipMountedOn.FittingBay.Lock.Lock()
+	defer m.shipMountedOn.FittingBay.Lock.Unlock()
+
+	//get module volume
+	v, _ := m.ItemTypeMeta.GetFloat64("volume")
+
+	//make sure there is sufficient space in the cargo bay
+	if s.TotalCargoBayVolumeUsed(lock)+v > s.GetRealCargoBayVolume() {
+		return errors.New("Insufficient room in cargo bay to unfit module")
+	}
+
+	//make sure the module is not cycling
+	if m.IsCycling || m.WillRepeat {
+		return errors.New("Modules must be offline to be unfit")
+	}
+
+	//remove from fitting data
+	m.shipMountedOn.Fitting.stripModuleFromFitting(m.ItemID)
+
+	//reassign item to cargo bay
+	newFB := make([]*Item, 0)
+
+	for i := range m.shipMountedOn.FittingBay.Items {
+		o := m.shipMountedOn.FittingBay.Items[i]
+
+		//lock item
+		o.Lock.Lock()
+		defer o.Lock.Unlock()
+
+		//skip if not this module
+		if o.ID != m.ItemID {
+			newFB = append(newFB, o)
+		} else {
+			//move to cargo bay if there is still room
+			if s.TotalCargoBayVolumeUsed(lock)+v <= s.GetRealCargoBayVolume() {
+				m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, o)
+				o.ContainerID = m.shipMountedOn.CargoBayContainerID
+			} else {
+				return errors.New("Insufficient room in cargo bay to unfit module")
+			}
+		}
+	}
+
+	s.FittingBay.Items = newFB
+
+	//success!
+	return nil
 }
 
 //PeriodicUpdate Updates a fitted slot on a ship
