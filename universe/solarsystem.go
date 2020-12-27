@@ -335,31 +335,36 @@ func (s *SolarSystem) PeriodicUpdate() {
 				//find client
 				c := s.clients[sA.UserID.String()]
 
-				if c != nil {
-					//check if this was the current ship of a player
-					if sA.ID == c.CurrentShipID {
-						//move player to destination system
-						c.CurrentSystemID = jB.OutSystemID
+				//perform move at end of update cycle
+				defer func(gsA *Ship, gjB *Jumphole, gc *shared.GameClient) {
+					if gc != nil {
+						//check if this was the current ship of a player
+						if gsA.ID == gc.CurrentShipID {
+							//move player to destination system
+							gc.CurrentSystemID = gjB.OutSystemID
 
-						jB.OutSystem.AddClient(c, true)
-						defer s.RemoveClient(c, false)
+							defer gjB.OutSystem.AddClient(gc, true)
+							defer s.RemoveClient(gc, false)
+						}
 					}
-				}
 
-				//move ship to destination system
-				sA.SystemID = jB.OutSystemID
-				jB.OutSystem.AddShip(sA, true)
-				defer s.RemoveShip(sA, false)
+					//kill ship autopilot
+					defer gsA.CmdAbort()
 
-				//kill ship autopilot
-				defer sA.CmdAbort()
+					//place ship on the opposite side of the hole
+					riX := gjB.PosX - gsA.PosX
+					riY := gjB.PosY - gsA.PosY
 
-				//on the opposite side of the hole
-				riX := jB.PosX - sA.PosX
-				riY := jB.PosY - sA.PosY
+					gsA.PosX = (gjB.OutJumphole.PosX + (riX * 1.25))
+					gsA.PosY = (gjB.OutJumphole.PosY + (riY * 1.25))
 
-				sA.PosX = (jB.OutJumphole.PosX + (riX * 1.25))
-				sA.PosY = (jB.OutJumphole.PosY + (riY * 1.25))
+					//in the destination system
+					gsA.SystemID = gjB.OutSystemID
+
+					//perform move operation
+					defer gjB.OutSystem.AddShip(gsA, true)
+					defer s.RemoveShip(gsA, false)
+				}(sA, jB, c)
 
 				break
 			}
