@@ -5,7 +5,7 @@ import { WSModule } from '../../wsModels/entities/wsShip';
 import { WsService } from '../../ws.service';
 import { Player } from '../../engineModels/player';
 import { ClientViewCargoBay } from '../../wsModels/bodies/viewCargoBay';
-import { GameMessage, MessageTypes } from '../../wsModels/gameMessage';
+import { MessageTypes } from '../../wsModels/gameMessage';
 import { WSContainerItem } from '../../wsModels/entities/wsContainer';
 import { ClientUnfitModule } from '../../wsModels/bodies/unfitModule';
 
@@ -23,6 +23,7 @@ export class ShipFittingWindow extends GDIWindow {
 
   // last cargo bay refresh
   private lastCargoView = 0;
+  private isDocked = false;
 
   initialize() {
     // set dimensions
@@ -129,6 +130,19 @@ export class ShipFittingWindow extends GDIWindow {
       return;
     }
 
+    // check for docked status change
+    const docked: boolean = !!this.player.currentShip.dockedAtStationID;
+
+    if (docked !== this.isDocked) {
+      // reset ship view
+      this.shipView.setSelectedIndex(-1);
+      this.shipView.setItems([]);
+
+      // reset action view and store status
+      this.actionView.setItems([]);
+      this.isDocked = docked;
+    }
+
     // set up view row list
     const rows: ShipViewRow[] = [];
 
@@ -161,17 +175,17 @@ export class ShipFittingWindow extends GDIWindow {
 
     // build entries for modules on racks
     for (const m of this.player.currentShip.fitStatus.aRack.modules) {
-      const d = buildFittingRowFromModule(m);
+      const d = buildFittingRowFromModule(m, this.isDocked);
       rackAMods.push(d);
     }
 
     for (const m of this.player.currentShip.fitStatus.bRack.modules) {
-      const d = buildFittingRowFromModule(m);
+      const d = buildFittingRowFromModule(m, this.isDocked);
       rackBMods.push(d);
     }
 
     for (const m of this.player.currentShip.fitStatus.cRack.modules) {
-      const d = buildFittingRowFromModule(m);
+      const d = buildFittingRowFromModule(m, this.isDocked);
       rackCMods.push(d);
     }
 
@@ -273,10 +287,12 @@ function buildCargoRowFromContainerItem(m: WSContainerItem): ShipViewRow {
   return r;
 }
 
-function buildFittingRowFromModule(m: WSModule): ShipViewRow {
+function buildFittingRowFromModule(m: WSModule, isDocked: boolean): ShipViewRow {
   const r: ShipViewRow = {
     object: m,
-    actions: ['Unfit'],
+    actions: isDocked
+    ? ['Unfit']
+    : [''],
     listString: () => {
       return moduleStatusString(m);
     },
