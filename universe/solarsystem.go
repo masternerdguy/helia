@@ -194,6 +194,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 						ItemTypeName:   i.ItemTypeName,
 						ItemFamilyID:   i.ItemFamilyID,
 						ItemFamilyName: i.ItemFamilyName,
+						Quantity:       i.Quantity,
 					}
 
 					vw.Items = append(vw.Items, r)

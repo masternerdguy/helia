@@ -25,6 +25,7 @@ type Item struct {
 	CreatedBy     *uuid.UUID
 	CreatedReason string
 	ContainerID   uuid.UUID
+	Quantity      int
 }
 
 //GetItemByID Finds and returns an Item by its id
@@ -41,14 +42,16 @@ func (s ItemService) GetItemByID(ItemID uuid.UUID) (*Item, error) {
 
 	sqlStatement :=
 		`
-			SELECT id, itemtypeid, meta, created, createdby, createdreason, containerid
+			SELECT id, itemtypeid, meta, created, createdby, createdreason, containerid, 
+				   quantity
 			FROM public.Items
 			WHERE id = $1
 		`
 
 	row := db.QueryRow(sqlStatement, ItemID)
 
-	switch err := row.Scan(&item.ID, &item.ItemTypeID, &item.Meta, &item.Created, &item.CreatedBy, &item.CreatedReason, &item.ContainerID); err {
+	switch err := row.Scan(&item.ID, &item.ItemTypeID, &item.Meta, &item.Created, &item.CreatedBy, &item.CreatedReason, &item.ContainerID,
+		&item.Quantity); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("Item not found")
 	case nil:
@@ -72,7 +75,8 @@ func (s ItemService) GetItemsByContainer(containerID uuid.UUID) ([]Item, error) 
 	//load items
 	sql :=
 		`
-			SELECT id, itemtypeid, meta, created, createdby, createdreason, containerid
+			SELECT id, itemtypeid, meta, created, createdby, createdreason, containerid,
+				   quantity
 			FROM public.Items
 			WHERE containerid = $1
 		`
@@ -87,7 +91,8 @@ func (s ItemService) GetItemsByContainer(containerID uuid.UUID) ([]Item, error) 
 		i := Item{}
 
 		//scan into item structure
-		rows.Scan(&i.ID, &i.ItemTypeID, &i.Meta, &i.Created, &i.CreatedBy, &i.CreatedReason, &i.ContainerID)
+		rows.Scan(&i.ID, &i.ItemTypeID, &i.Meta, &i.Created, &i.CreatedBy, &i.CreatedReason, &i.ContainerID,
+			&i.Quantity)
 
 		//append to item slice
 		items = append(items, i)
@@ -108,15 +113,17 @@ func (s ItemService) NewItem(e Item) (*Item, error) {
 	//insert item
 	sql := `
 				INSERT INTO public.items(
-					id, itemtypeid, meta, created, createdby, createdreason, containerid
+					id, itemtypeid, meta, created, createdby, createdreason, containerid,
+					quantity
 				)
-				VALUES ($1, $2, $3, $4, $5, $6, $7);
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 			`
 
 	uid := uuid.New()
 	createdAt := time.Now()
 
-	_, err = db.Query(sql, uid, e.ItemTypeID, e.Meta, createdAt, e.CreatedBy, e.CreatedReason, e.ContainerID)
+	_, err = db.Query(sql, uid, e.ItemTypeID, e.Meta, createdAt, e.CreatedBy, e.CreatedReason, e.ContainerID,
+		e.Quantity)
 
 	if err != nil {
 		return nil, err

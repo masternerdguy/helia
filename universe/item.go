@@ -16,6 +16,7 @@ type Item struct {
 	CreatedBy     *uuid.UUID
 	CreatedReason string
 	ContainerID   uuid.UUID
+	Quantity      int
 	//in-memory only
 	Lock           sync.Mutex
 	ItemTypeName   string

@@ -322,5 +322,27 @@ function moduleStatusString(m: WSModule) {
 
 function itemStatusString(m: WSContainerItem) {
   // build status string
-  return `${fixedString('', 1)} ${fixedString(m.itemTypeName, 24)}`;
+  const q = cargoQuantity(m.quantity);
+  return `${fixedString('', 1)} ${fixedString(m.itemTypeName, 56)} ${fixedString(q, 8)}`;
+}
+
+function cargoQuantity(
+  d: number
+): string {
+  let o = `${d}`;
+
+  // include metric prefix if needed
+  if (d >= 1000000000000000) {
+    o = `${(d / 1000000000000000).toFixed(2)}P`;
+  } else if (d >= 1000000000000) {
+    o = `${(d / 1000000000000).toFixed(2)}T`;
+  } else if (d >= 1000000000) {
+    o = `${(d / 1000000000).toFixed(2)}G`;
+  } else if (d >= 1000000) {
+    o = `${(d / 1000000).toFixed(2)}M`;
+  } else if (d >= 1000) {
+    o = `${(d / 1000).toFixed(2)}k`;
+  }
+
+  return o;
 }

@@ -580,6 +580,7 @@ func ItemFromSQL(value *sql.Item) *universe.Item {
 	item.CreatedBy = value.CreatedBy
 	item.CreatedReason = value.CreatedReason
 	item.Meta = MetaFromSQL(&value.Meta)
+	item.Quantity = value.Quantity
 
 	//return filled item
 	return &item

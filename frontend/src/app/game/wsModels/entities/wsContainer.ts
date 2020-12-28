@@ -9,4 +9,5 @@ export class WSContainerItem {
   itemTypeName: string;
   itemFamilyID: string;
   itemFamilyName: string;
+  quantity: number;
 }

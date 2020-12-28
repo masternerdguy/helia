@@ -302,11 +302,11 @@ function overviewDistance(
   x: number,
   y: number
 ): string {
-  // get distance with unit appended
+  // get distance
   const d = Math.round(Math.sqrt((px - x) * (px - x) + (py - y) * (py - y)));
   let o = `${d}`;
 
-  // include metrix prefix if needed
+  // include metric prefix if needed
   if (d >= 1000000000000000) {
     o = `${(d / 1000000000000000).toFixed(2)}P`;
   } else if (d >= 1000000000000) {
