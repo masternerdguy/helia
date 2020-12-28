@@ -765,7 +765,27 @@ func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 		},
 	}
 
-	return &es, nil
+	//get pointer to ship
+	sp := &es
+
+	//link ship into fitting
+	for i := range sp.Fitting.ARack {
+		m := &sp.Fitting.ARack[i]
+		m.LinkShip(sp)
+	}
+
+	for i := range sp.Fitting.BRack {
+		m := &sp.Fitting.BRack[i]
+		m.LinkShip(sp)
+	}
+
+	for i := range sp.Fitting.CRack {
+		m := &sp.Fitting.CRack[i]
+		m.LinkShip(sp)
+	}
+
+	//return pointer to ship
+	return sp, nil
 }
 
 //saveShip Updates a ship in the database

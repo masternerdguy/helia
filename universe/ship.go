@@ -167,6 +167,11 @@ type FittedSlot struct {
 	cooldownProgress int
 }
 
+//LinkShip Links the ship the slot is on into the slot
+func (m *FittedSlot) LinkShip(sp *Ship) {
+	m.shipMountedOn = sp
+}
+
 //stripModuleFromFitting Removes the fitted slot containing a module from the fitting
 func (f *Fitting) stripModuleFromFitting(itemID uuid.UUID) {
 	// stub new empty racks

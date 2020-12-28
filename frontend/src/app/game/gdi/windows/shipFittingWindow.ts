@@ -323,7 +323,7 @@ function moduleStatusString(m: WSModule) {
 function itemStatusString(m: WSContainerItem) {
   // build status string
   const q = cargoQuantity(m.quantity);
-  return `${fixedString('', 1)} ${fixedString(m.itemTypeName, 56)} ${fixedString(q, 8)}`;
+  return `${fixedString('', 1)} ${fixedString(m.itemTypeName, 40)} ${fixedString(m.itemFamilyName, 16)} ${fixedString(q, 8)}`;
 }
 
 function cargoQuantity(
