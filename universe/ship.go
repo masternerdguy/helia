@@ -121,6 +121,7 @@ type Ship struct {
 	DestroyedAt           *time.Time
 	CargoBayContainerID   uuid.UUID
 	FittingBayContainerID uuid.UUID
+	TrashContainerID      uuid.UUID
 	ReMaxDirty            bool
 	//cache of base template
 	TemplateData ShipTemplate
@@ -232,6 +233,7 @@ func (s *Ship) CopyShip() *Ship {
 		Destroyed:             s.Destroyed,
 		CargoBayContainerID:   s.CargoBayContainerID,
 		FittingBayContainerID: s.FittingBayContainerID,
+		TrashContainerID:      s.TrashContainerID,
 		ReMaxDirty:            s.ReMaxDirty,
 		TemplateData: ShipTemplate{
 			ID:                 s.TemplateData.ID,

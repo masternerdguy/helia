@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2020-12-27 21:36:38
+-- Started on 2020-12-27 22:19:01
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -127,7 +127,8 @@ CREATE TABLE public.ships (
     destroyedat timestamp with time zone,
     cargobay_containerid uuid NOT NULL,
     fittingbay_containerid uuid NOT NULL,
-    remaxdirty boolean DEFAULT true NOT NULL
+    remaxdirty boolean DEFAULT true NOT NULL,
+    trash_containerid uuid NOT NULL
 );
 
 
@@ -331,7 +332,7 @@ ALTER TABLE ONLY public.sessions
 
 
 --
--- TOC entry 2811 (class 2606 OID 50716)
+-- TOC entry 2812 (class 2606 OID 50716)
 -- Name: ships ships_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -340,7 +341,7 @@ ALTER TABLE ONLY public.ships
 
 
 --
--- TOC entry 2813 (class 2606 OID 50718)
+-- TOC entry 2814 (class 2606 OID 50718)
 -- Name: shiptemplates shiptemplates_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -349,7 +350,7 @@ ALTER TABLE ONLY public.shiptemplates
 
 
 --
--- TOC entry 2815 (class 2606 OID 50720)
+-- TOC entry 2816 (class 2606 OID 50720)
 -- Name: shiptypes shiptypes_name_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -358,7 +359,7 @@ ALTER TABLE ONLY public.shiptypes
 
 
 --
--- TOC entry 2817 (class 2606 OID 50722)
+-- TOC entry 2818 (class 2606 OID 50722)
 -- Name: shiptypes shiptypes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -367,7 +368,7 @@ ALTER TABLE ONLY public.shiptypes
 
 
 --
--- TOC entry 2821 (class 2606 OID 50724)
+-- TOC entry 2822 (class 2606 OID 50724)
 -- Name: starts starts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -376,7 +377,7 @@ ALTER TABLE ONLY public.starts
 
 
 --
--- TOC entry 2823 (class 2606 OID 50726)
+-- TOC entry 2824 (class 2606 OID 50726)
 -- Name: universe_jumpholes universe_jumphole_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -385,7 +386,7 @@ ALTER TABLE ONLY public.universe_jumpholes
 
 
 --
--- TOC entry 2825 (class 2606 OID 50728)
+-- TOC entry 2826 (class 2606 OID 50728)
 -- Name: universe_planets universe_planet_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -394,7 +395,7 @@ ALTER TABLE ONLY public.universe_planets
 
 
 --
--- TOC entry 2827 (class 2606 OID 50730)
+-- TOC entry 2828 (class 2606 OID 50730)
 -- Name: universe_regions universe_regions_name_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -403,7 +404,7 @@ ALTER TABLE ONLY public.universe_regions
 
 
 --
--- TOC entry 2829 (class 2606 OID 50732)
+-- TOC entry 2830 (class 2606 OID 50732)
 -- Name: universe_regions universe_regions_pk_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -412,7 +413,7 @@ ALTER TABLE ONLY public.universe_regions
 
 
 --
--- TOC entry 2831 (class 2606 OID 50734)
+-- TOC entry 2832 (class 2606 OID 50734)
 -- Name: universe_stars universe_star_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -421,7 +422,7 @@ ALTER TABLE ONLY public.universe_stars
 
 
 --
--- TOC entry 2833 (class 2606 OID 50736)
+-- TOC entry 2834 (class 2606 OID 50736)
 -- Name: universe_stations universe_station_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -430,7 +431,7 @@ ALTER TABLE ONLY public.universe_stations
 
 
 --
--- TOC entry 2835 (class 2606 OID 50738)
+-- TOC entry 2836 (class 2606 OID 50738)
 -- Name: universe_systems universe_systems_name_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -439,7 +440,7 @@ ALTER TABLE ONLY public.universe_systems
 
 
 --
--- TOC entry 2837 (class 2606 OID 50740)
+-- TOC entry 2838 (class 2606 OID 50740)
 -- Name: universe_systems universe_systems_pk_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -493,7 +494,7 @@ ALTER TABLE ONLY public.sessions
 
 
 --
--- TOC entry 2840 (class 2606 OID 50752)
+-- TOC entry 2841 (class 2606 OID 50752)
 -- Name: users users_pk_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -502,7 +503,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 2842 (class 2606 OID 50754)
+-- TOC entry 2843 (class 2606 OID 50754)
 -- Name: users users_username_uq; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -543,7 +544,15 @@ CREATE INDEX fki_fk_ships_containers_fittingbay ON public.ships USING btree (fit
 
 
 --
--- TOC entry 2818 (class 1259 OID 50759)
+-- TOC entry 2810 (class 1259 OID 50874)
+-- Name: fki_fk_ships_containers_trash; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX fki_fk_ships_containers_trash ON public.ships USING btree (trash_containerid);
+
+
+--
+-- TOC entry 2819 (class 1259 OID 50759)
 -- Name: fki_fk_starts_homestations; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -551,7 +560,7 @@ CREATE INDEX fki_fk_starts_homestations ON public.starts USING btree (homestatio
 
 
 --
--- TOC entry 2819 (class 1259 OID 50760)
+-- TOC entry 2820 (class 1259 OID 50760)
 -- Name: fki_fk_starts_systems; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -559,7 +568,7 @@ CREATE INDEX fki_fk_starts_systems ON public.starts USING btree (systemid);
 
 
 --
--- TOC entry 2838 (class 1259 OID 50761)
+-- TOC entry 2839 (class 1259 OID 50761)
 -- Name: fki_fk_users_ships; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -567,7 +576,7 @@ CREATE INDEX fki_fk_users_ships ON public.users USING btree (current_shipid);
 
 
 --
--- TOC entry 2843 (class 2606 OID 50762)
+-- TOC entry 2844 (class 2606 OID 50762)
 -- Name: items fk_items_containers; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -576,7 +585,7 @@ ALTER TABLE ONLY public.items
 
 
 --
--- TOC entry 2844 (class 2606 OID 50767)
+-- TOC entry 2845 (class 2606 OID 50767)
 -- Name: items fk_items_itemtypes; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -585,7 +594,7 @@ ALTER TABLE ONLY public.items
 
 
 --
--- TOC entry 2845 (class 2606 OID 50772)
+-- TOC entry 2846 (class 2606 OID 50772)
 -- Name: items fk_items_users; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -594,7 +603,7 @@ ALTER TABLE ONLY public.items
 
 
 --
--- TOC entry 2846 (class 2606 OID 50777)
+-- TOC entry 2847 (class 2606 OID 50777)
 -- Name: itemtypes fk_itemtypes_itemfamilies; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -603,7 +612,7 @@ ALTER TABLE ONLY public.itemtypes
 
 
 --
--- TOC entry 2847 (class 2606 OID 50782)
+-- TOC entry 2848 (class 2606 OID 50782)
 -- Name: ships fk_ships_containers_cargobay; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -612,7 +621,7 @@ ALTER TABLE ONLY public.ships
 
 
 --
--- TOC entry 2848 (class 2606 OID 50787)
+-- TOC entry 2849 (class 2606 OID 50787)
 -- Name: ships fk_ships_containers_fittingbay; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -621,7 +630,16 @@ ALTER TABLE ONLY public.ships
 
 
 --
--- TOC entry 2849 (class 2606 OID 50792)
+-- TOC entry 2854 (class 2606 OID 50869)
+-- Name: ships fk_ships_containers_trash; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ships
+    ADD CONSTRAINT fk_ships_containers_trash FOREIGN KEY (trash_containerid) REFERENCES public.containers(id);
+
+
+--
+-- TOC entry 2850 (class 2606 OID 50792)
 -- Name: ships fk_ships_dockstations; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -630,7 +648,7 @@ ALTER TABLE ONLY public.ships
 
 
 --
--- TOC entry 2850 (class 2606 OID 50797)
+-- TOC entry 2851 (class 2606 OID 50797)
 -- Name: ships fk_ships_shiptemplates; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -639,7 +657,7 @@ ALTER TABLE ONLY public.ships
 
 
 --
--- TOC entry 2851 (class 2606 OID 50802)
+-- TOC entry 2852 (class 2606 OID 50802)
 -- Name: ships fk_ships_systems; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -648,7 +666,7 @@ ALTER TABLE ONLY public.ships
 
 
 --
--- TOC entry 2852 (class 2606 OID 50807)
+-- TOC entry 2853 (class 2606 OID 50807)
 -- Name: ships fk_ships_users; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -657,7 +675,7 @@ ALTER TABLE ONLY public.ships
 
 
 --
--- TOC entry 2853 (class 2606 OID 50812)
+-- TOC entry 2855 (class 2606 OID 50812)
 -- Name: shiptemplates fk_shiptemplates_shiptypes; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -666,7 +684,7 @@ ALTER TABLE ONLY public.shiptemplates
 
 
 --
--- TOC entry 2854 (class 2606 OID 50817)
+-- TOC entry 2856 (class 2606 OID 50817)
 -- Name: starts fk_starts_homestations; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -675,7 +693,7 @@ ALTER TABLE ONLY public.starts
 
 
 --
--- TOC entry 2855 (class 2606 OID 50822)
+-- TOC entry 2857 (class 2606 OID 50822)
 -- Name: starts fk_starts_shiptemplates; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -684,7 +702,7 @@ ALTER TABLE ONLY public.starts
 
 
 --
--- TOC entry 2856 (class 2606 OID 50827)
+-- TOC entry 2858 (class 2606 OID 50827)
 -- Name: starts fk_starts_systems; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -693,7 +711,7 @@ ALTER TABLE ONLY public.starts
 
 
 --
--- TOC entry 2862 (class 2606 OID 50832)
+-- TOC entry 2864 (class 2606 OID 50832)
 -- Name: universe_systems fk_system_region; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -702,7 +720,7 @@ ALTER TABLE ONLY public.universe_systems
 
 
 --
--- TOC entry 2863 (class 2606 OID 50837)
+-- TOC entry 2865 (class 2606 OID 50837)
 -- Name: users fk_users_ships; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -711,7 +729,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 2857 (class 2606 OID 50842)
+-- TOC entry 2859 (class 2606 OID 50842)
 -- Name: universe_jumpholes jumphole_out_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -720,7 +738,7 @@ ALTER TABLE ONLY public.universe_jumpholes
 
 
 --
--- TOC entry 2858 (class 2606 OID 50847)
+-- TOC entry 2860 (class 2606 OID 50847)
 -- Name: universe_jumpholes jumphole_system_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -729,7 +747,7 @@ ALTER TABLE ONLY public.universe_jumpholes
 
 
 --
--- TOC entry 2859 (class 2606 OID 50852)
+-- TOC entry 2861 (class 2606 OID 50852)
 -- Name: universe_planets planet_system_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -738,7 +756,7 @@ ALTER TABLE ONLY public.universe_planets
 
 
 --
--- TOC entry 2860 (class 2606 OID 50857)
+-- TOC entry 2862 (class 2606 OID 50857)
 -- Name: universe_stars star_system_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -747,7 +765,7 @@ ALTER TABLE ONLY public.universe_stars
 
 
 --
--- TOC entry 2861 (class 2606 OID 50862)
+-- TOC entry 2863 (class 2606 OID 50862)
 -- Name: universe_stations station_system_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -755,7 +773,7 @@ ALTER TABLE ONLY public.universe_stations
     ADD CONSTRAINT station_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
 
 
--- Completed on 2020-12-27 21:36:38
+-- Completed on 2020-12-27 22:19:02
 
 --
 -- PostgreSQL database dump complete

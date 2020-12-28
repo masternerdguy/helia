@@ -44,6 +44,15 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 		return u, err
 	}
 
+	//create container for trashed items
+	tb, err := containerSvc.NewContainer(sql.Container{
+		Meta: sql.Meta{},
+	})
+
+	if err != nil {
+		return u, err
+	}
+
 	//create container for cargo bay
 	cb, err := containerSvc.NewContainer(sql.Container{
 		Meta: sql.Meta{},
@@ -159,6 +168,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 		CargoBayContainerID:   cb.ID,
 		FittingBayContainerID: fb.ID,
 		ReMaxDirty:            true,
+		TrashContainerID:      tb.ID,
 	}
 
 	starterShip, err := shipSvc.NewShip(t)
