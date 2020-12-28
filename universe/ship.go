@@ -1222,6 +1222,22 @@ func (s *Ship) FindModule(id uuid.UUID, rack string) *FittedSlot {
 	return nil
 }
 
+//FindItemInCargo Returns an item in the ship's cargo bay if it is present
+func (s *Ship) FindItemInCargo(id uuid.UUID) *Item {
+	//look for item
+	for i := range s.CargoBay.Items {
+		item := s.CargoBay.Items[i]
+
+		if item.ID == id {
+			//return item
+			return item
+		}
+	}
+
+	//nothing found
+	return nil
+}
+
 //UnfitModule Removes a module from a ship and places it in the cargo hold
 func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	if lock {
@@ -1288,6 +1304,46 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	s.FittingBay.Items = newFB
 
 	//success!
+	return nil
+}
+
+//TrashItemInCargo Trashes an item in the ship's cargo bay if it exists
+func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
+	if lock {
+		//lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	//lock cargo bay
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	//make sure ship is docked
+	if s.DockedAtStationID == nil {
+		return errors.New("You must be docked to trash an item")
+	}
+
+	//remove from cargo bay
+	newCB := make([]*Item, 0)
+
+	for i := range s.CargoBay.Items {
+		o := s.CargoBay.Items[i]
+
+		//skip if not this item
+		if o.ID != id {
+			newCB = append(newCB, o)
+		} else {
+			//move to trash
+			o.ContainerID = s.TrashContainerID
+
+			//escalate to core to save to db
+			s.CurrentSystem.MovedItems[o.ID.String()] = o
+		}
+	}
+
+	s.CargoBay.Items = newCB
+
 	return nil
 }
 

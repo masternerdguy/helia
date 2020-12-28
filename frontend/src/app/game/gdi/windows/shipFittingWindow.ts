@@ -98,12 +98,7 @@ export class ShipFittingWindow extends GDIWindow {
         this.wsSvc.sendMessage(MessageTypes.UnfitModule, umMsg);
 
         // request cargo bay refresh
-        setTimeout(() => {
-          const b = new ClientViewCargoBay();
-          b.sid = this.wsSvc.sid;
-
-          this.wsSvc.sendMessage(MessageTypes.ViewCargoBay, b);
-        }, 200);
+        this.refreshCargoBay();
       } else if (a === 'Trash') {
         // get selected item
         const i: ShipViewRow = this.shipView.getSelectedItem();
@@ -117,12 +112,7 @@ export class ShipFittingWindow extends GDIWindow {
         this.wsSvc.sendMessage(MessageTypes.TrashItem, tiMsg);
 
         // request cargo bay refresh
-        setTimeout(() => {
-          const b = new ClientViewCargoBay();
-          b.sid = this.wsSvc.sid;
-
-          this.wsSvc.sendMessage(MessageTypes.ViewCargoBay, b);
-        }, 200);
+        this.refreshCargoBay();
       }
     });
 
@@ -130,6 +120,15 @@ export class ShipFittingWindow extends GDIWindow {
     this.addComponent(this.shipView);
     this.addComponent(this.infoView);
     this.addComponent(this.actionView);
+  }
+
+  private refreshCargoBay() {
+    setTimeout(() => {
+      const b = new ClientViewCargoBay();
+      b.sid = this.wsSvc.sid;
+
+      this.wsSvc.sendMessage(MessageTypes.ViewCargoBay, b);
+    }, 200);
   }
 
   periodicUpdate() {
