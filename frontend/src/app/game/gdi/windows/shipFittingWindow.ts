@@ -8,6 +8,7 @@ import { ClientViewCargoBay } from '../../wsModels/bodies/viewCargoBay';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { WSContainerItem } from '../../wsModels/entities/wsContainer';
 import { ClientUnfitModule } from '../../wsModels/bodies/unfitModule';
+import { ClientTrashItem } from '../../wsModels/bodies/trashItem';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -103,6 +104,25 @@ export class ShipFittingWindow extends GDIWindow {
 
           this.wsSvc.sendMessage(MessageTypes.ViewCargoBay, b);
         }, 200);
+      } else if (a === 'Trash') {
+        // get selected item
+        const i: ShipViewRow = this.shipView.getSelectedItem();
+
+        // send trash request
+        const tiMsg: ClientTrashItem = {
+          sid: this.wsSvc.sid,
+          itemID: (i.object as WSContainerItem).id,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.TrashItem, tiMsg);
+
+        // request cargo bay refresh
+        setTimeout(() => {
+          const b = new ClientViewCargoBay();
+          b.sid = this.wsSvc.sid;
+
+          this.wsSvc.sendMessage(MessageTypes.ViewCargoBay, b);
+        }, 200);
       }
     });
 
@@ -163,7 +183,7 @@ export class ShipFittingWindow extends GDIWindow {
 
     if (this.player.currentCargoView) {
       for (const ci of this.player.currentCargoView.items) {
-        const r = buildCargoRowFromContainerItem(ci);
+        const r = buildCargoRowFromContainerItem(ci, this.isDocked);
         cargo.push(r);
       }
     }
@@ -275,10 +295,13 @@ function buildShipViewRowText(s: string): ShipViewRow {
   return r;
 }
 
-function buildCargoRowFromContainerItem(m: WSContainerItem): ShipViewRow {
+function buildCargoRowFromContainerItem(
+  m: WSContainerItem,
+  isDocked: boolean
+): ShipViewRow {
   const r: ShipViewRow = {
     object: m,
-    actions: ['Trash'],
+    actions: isDocked ? ['Trash'] : [''],
     listString: () => {
       return itemStatusString(m);
     },
@@ -323,12 +346,13 @@ function moduleStatusString(m: WSModule) {
 function itemStatusString(m: WSContainerItem) {
   // build status string
   const q = cargoQuantity(m.quantity);
-  return `${fixedString('', 1)} ${fixedString(m.itemTypeName, 40)} ${fixedString(m.itemFamilyName, 16)} ${fixedString(q, 8)}`;
+  return `${fixedString('', 1)} ${fixedString(
+    m.itemTypeName,
+    40
+  )} ${fixedString(m.itemFamilyName, 16)} ${fixedString(q, 8)}`;
 }
 
-function cargoQuantity(
-  d: number
-): string {
+function cargoQuantity(d: number): string {
   let o = `${d}`;
 
   // include metric prefix if needed

@@ -22,6 +22,7 @@ type MessageRegistry struct {
 	ViewCargoBay      int
 	CargoBayUpdate    int
 	UnfitModule       int
+	TrashItem         int
 }
 
 //TargetTypeRegistry Registry of target types
@@ -50,6 +51,7 @@ func NewMessageRegistry() *MessageRegistry {
 		ViewCargoBay:      10,
 		CargoBayUpdate:    11,
 		UnfitModule:       12,
+		TrashItem:         13,
 	}
 }
 
@@ -326,4 +328,10 @@ type ClientUnfitModuleBody struct {
 //ServerPushErrorMessage Body containing a message string to be displayed to the player from the server
 type ServerPushErrorMessage struct {
 	Message string `json:"message"`
+}
+
+//ClientTrashItemBody Body containing a request to trash an item in the current ship's cargo hold
+type ClientTrashItemBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	ItemID    uuid.UUID `json:"itemID"`
 }
