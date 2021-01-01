@@ -300,7 +300,7 @@ function buildCargoRowFromContainerItem(
 ): ShipViewRow {
   const r: ShipViewRow = {
     object: m,
-    actions: isDocked ? ['Trash'] : [''],
+    actions: getCargoRowActions(isDocked),
     listString: () => {
       return itemStatusString(m);
     },
@@ -309,19 +309,43 @@ function buildCargoRowFromContainerItem(
   return r;
 }
 
+function getCargoRowActions(
+  isDocked: boolean
+) {
+  const actions: string[] = [];
+
+  if (isDocked) {
+    actions.push('Trash');
+  }
+
+  return actions;
+}
+
 function buildFittingRowFromModule(
   m: WSModule,
   isDocked: boolean
 ): ShipViewRow {
   const r: ShipViewRow = {
     object: m,
-    actions: isDocked ? ['Unfit'] : [''],
+    actions: getFittingRowActions(isDocked),
     listString: () => {
       return moduleStatusString(m);
     },
   };
 
   return r;
+}
+
+function getFittingRowActions(
+  isDocked: boolean
+) {
+  const actions: string[] = [];
+
+  if (isDocked) {
+    actions.push('Unfit');
+  }
+
+  return actions;
 }
 
 function fixedString(str: string, width: number) {
