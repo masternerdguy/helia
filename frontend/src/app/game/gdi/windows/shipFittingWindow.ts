@@ -317,10 +317,7 @@ function buildCargoRowFromContainerItem(
   return r;
 }
 
-function getCargoRowActions(
-  m: WSContainerItem,
-  isDocked: boolean
-) {
+function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
   const actions: string[] = [];
 
   actions.push('Stack');
@@ -361,9 +358,7 @@ function buildFittingRowFromModule(
   return r;
 }
 
-function getFittingRowActions(
-  isDocked: boolean
-) {
+function getFittingRowActions(isDocked: boolean) {
   const actions: string[] = [];
 
   if (isDocked) {
