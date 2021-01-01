@@ -17,6 +17,7 @@ type Item struct {
 	CreatedReason string
 	ContainerID   uuid.UUID
 	Quantity      int
+	IsPackaged    bool
 	//in-memory only
 	Lock           sync.Mutex
 	ItemTypeName   string

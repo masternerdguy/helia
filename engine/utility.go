@@ -88,6 +88,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 			CreatedReason: moduleCreationReason,
 			ContainerID:   fb.ID,
 			Quantity:      1,
+			IsPackaged:    false,
 		})
 
 		if err != nil {
@@ -111,6 +112,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 			CreatedReason: moduleCreationReason,
 			ContainerID:   fb.ID,
 			Quantity:      1,
+			IsPackaged:    false,
 		})
 
 		if err != nil {
@@ -134,6 +136,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 			CreatedReason: moduleCreationReason,
 			ContainerID:   fb.ID,
 			Quantity:      1,
+			IsPackaged:    false,
 		})
 
 		if err != nil {

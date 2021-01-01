@@ -310,6 +310,7 @@ type ServerItemViewBody struct {
 	ItemFamilyID   string    `json:"itemFamilyID"`
 	ItemFamilyName string    `json:"itemFamilyName"`
 	Quantity       int       `json:"quantity"`
+	IsPackaged     bool      `json:"ispackaged"`
 }
 
 //ServerContainerViewBody Generic body for returning container views requested by the client (ex: cargo bay)
