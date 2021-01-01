@@ -113,6 +113,14 @@ export class ShipFittingWindow extends GDIWindow {
 
         // request cargo bay refresh
         this.refreshCargoBay();
+      } else if (a === 'Package') {
+        throw new Error(`${a} not yet implemented`);
+      } else if (a === 'Unpackage') {
+        throw new Error(`${a} not yet implemented`);
+      } else if (a === 'Stack') {
+        throw new Error(`${a} not yet implemented`);
+      } else if (a === 'Split') {
+        throw new Error(`${a} not yet implemented`);
       }
     });
 
@@ -300,7 +308,7 @@ function buildCargoRowFromContainerItem(
 ): ShipViewRow {
   const r: ShipViewRow = {
     object: m,
-    actions: getCargoRowActions(isDocked),
+    actions: getCargoRowActions(m, isDocked),
     listString: () => {
       return itemStatusString(m);
     },
@@ -310,11 +318,28 @@ function buildCargoRowFromContainerItem(
 }
 
 function getCargoRowActions(
+  m: WSContainerItem,
   isDocked: boolean
 ) {
   const actions: string[] = [];
 
+  actions.push('Stack');
+
+  if (m.quantity > 1) {
+    actions.push('Split');
+  }
+
   if (isDocked) {
+    if (m.ispackaged) {
+      actions.push('Unpackage');
+    } else {
+      actions.push('Package');
+    }
+
+    // spacer
+    actions.push('');
+
+    // danger zone
     actions.push('Trash');
   }
 
