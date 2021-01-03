@@ -19,4 +19,6 @@ export enum MessageTypes {
   CargoBayUpdate = 11,
   UnfitModule = 12,
   TrashItem = 13,
+  PackageItem = 14,
+  UnpackageItem = 15
 }
