@@ -1480,13 +1480,8 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 	}
 
 	//merge stack into next stack
-	tmpCB := make([]*Item, 0)
-
 	for i := range s.CargoBay.Items {
 		o := s.CargoBay.Items[i]
-
-		//store in tmp slice
-		tmpCB = append(tmpCB, o)
 
 		//skip if this item
 		if o.ID == id {
@@ -1513,8 +1508,8 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 	//remove 0 quantity stacks
 	newCB := make([]*Item, 0)
 
-	for i := range tmpCB {
-		o := tmpCB[i]
+	for i := range s.CargoBay.Items {
+		o := s.CargoBay.Items[i]
 
 		//only retain if non empty
 		if o.Quantity > 0 {

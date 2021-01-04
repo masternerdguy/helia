@@ -379,10 +379,10 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
 
   if (m.isPackaged) {
     actions.push('Stack');
-  }
 
-  if (m.quantity > 1) {
-    actions.push('Split');
+    if (m.quantity > 1) {
+      actions.push('Split');
+    }
   }
 
   if (isDocked) {
