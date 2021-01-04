@@ -443,9 +443,7 @@ function buildInfoRowsFromContainerItem(m: WSContainerItem): ShipViewRow[] {
 
   for (const prop in meta) {
     if (Object.prototype.hasOwnProperty.call(meta, prop)) {
-      const v = buildShipViewRowText(
-        infoKeyValueString(prop, `${meta[prop]}`)
-      );
+      const v = buildShipViewRowText(infoKeyValueString(prop, `${meta[prop]}`));
 
       rows.push(v);
     }
