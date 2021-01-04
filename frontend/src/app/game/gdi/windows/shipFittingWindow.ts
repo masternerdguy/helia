@@ -9,6 +9,8 @@ import { MessageTypes } from '../../wsModels/gameMessage';
 import { WSContainerItem } from '../../wsModels/entities/wsContainer';
 import { ClientUnfitModule } from '../../wsModels/bodies/unfitModule';
 import { ClientTrashItem } from '../../wsModels/bodies/trashItem';
+import { ClientPackageItem } from '../../wsModels/bodies/packageItem';
+import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -118,7 +120,7 @@ export class ShipFittingWindow extends GDIWindow {
         const i: ShipViewRow = this.shipView.getSelectedItem();
 
         // send package request
-        const tiMsg: ClientTrashItem = {
+        const tiMsg: ClientPackageItem = {
           sid: this.wsSvc.sid,
           itemID: (i.object as WSContainerItem).id,
         };
@@ -132,7 +134,7 @@ export class ShipFittingWindow extends GDIWindow {
         const i: ShipViewRow = this.shipView.getSelectedItem();
 
         // send unpackage request
-        const tiMsg: ClientTrashItem = {
+        const tiMsg: ClientUnpackageItem = {
           sid: this.wsSvc.sid,
           itemID: (i.object as WSContainerItem).id,
         };

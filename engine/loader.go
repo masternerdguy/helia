@@ -852,3 +852,9 @@ func packageItem(itemID uuid.UUID) error {
 	itemSvc := sql.GetItemService()
 	return itemSvc.PackageItem(itemID)
 }
+
+//unpackageItem Marks an item as unpackaged in the database
+func unpackageItem(itemID uuid.UUID, meta universe.Meta) error {
+	itemSvc := sql.GetItemService()
+	return itemSvc.UnpackageItem(itemID, SQLFromMeta(&meta))
+}

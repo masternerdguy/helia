@@ -183,3 +183,26 @@ func (s ItemService) PackageItem(id uuid.UUID) error {
 
 	return nil
 }
+
+//UnpackageItem Updates the database to make an item unpackaged
+func (s ItemService) UnpackageItem(id uuid.UUID, meta Meta) error {
+	//get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	//update item
+	sql := `
+				UPDATE public.items SET meta=$2, ispackaged='f' WHERE id = $1;
+			`
+
+	_, err = db.Query(sql, id, meta)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

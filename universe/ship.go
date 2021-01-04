@@ -1404,6 +1404,42 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 	return nil
 }
 
+//UnpackageItemInCargo Packages an item in the ship's cargo bay if it exists
+func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
+	if lock {
+		//lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	//lock cargo bay
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	//make sure ship is docked
+	if s.DockedAtStationID == nil {
+		return errors.New("You must be docked to unpackage an item")
+	}
+
+	//get the item to be packaged
+	item := s.FindItemInCargo(id)
+
+	if item == nil {
+		return errors.New("Item not found in cargo bay")
+	}
+
+	//unpackage item in-memory
+	item.IsPackaged = false
+
+	//copy item type metadata as initial item metadata
+	item.Meta = item.ItemTypeMeta
+
+	//escalate item for unpackaging in db
+	s.CurrentSystem.UnpackagedItems[item.ID.String()] = item
+
+	return nil
+}
+
 //PeriodicUpdate Updates a fitted slot on a ship
 func (m *FittedSlot) PeriodicUpdate() {
 	if m.IsCycling {

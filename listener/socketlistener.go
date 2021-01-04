@@ -160,7 +160,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			//handle message
 			l.handleClientPackageItem(&client, &b)
-		} else if m.MessageType == msgRegistry.TrashItem {
+		} else if m.MessageType == msgRegistry.UnpackageItem {
 			//decode body as ClientUnpackageItemBody
 			b := models.ClientUnpackageItemBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
