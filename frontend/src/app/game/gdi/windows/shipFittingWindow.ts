@@ -58,6 +58,21 @@ export class ShipFittingWindow extends GDIWindow {
 
         // list actions on action view
         this.actionView.setItems(actions);
+
+        // build and show item info
+        if (r.object) {
+          if (!r.object.metaRack) {
+            // this is an item in the cargo bay
+            const info = buildInfoRowsFromContainerItem(r.object);
+            this.infoView.setItems(info);
+          } else {
+            // todo: handle fitted modules
+            this.infoView.setItems([]);
+          }
+        } else {
+          // this is nothing
+          this.infoView.setItems([]);
+        }
       }
     });
 
@@ -102,6 +117,9 @@ export class ShipFittingWindow extends GDIWindow {
 
         // request cargo bay refresh
         this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
       } else if (a === 'Trash') {
         // get selected item
         const i: ShipViewRow = this.shipView.getSelectedItem();
@@ -116,6 +134,9 @@ export class ShipFittingWindow extends GDIWindow {
 
         // request cargo bay refresh
         this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
       } else if (a === 'Package') {
         // get selected item
         const i: ShipViewRow = this.shipView.getSelectedItem();
@@ -323,8 +344,11 @@ export class ShipFittingWindow extends GDIWindow {
     this.shipView.setSelectedIndex(-1);
     this.shipView.setItems([]);
 
-    // reset action view and store status
+    // reset action view
     this.actionView.setItems([]);
+
+    // reset info view
+    this.infoView.setItems([]);
   }
 }
 
@@ -372,6 +396,66 @@ function buildCargoRowFromContainerItem(
   };
 
   return r;
+}
+
+function buildInfoRowsFromContainerItem(m: WSContainerItem): ShipViewRow[] {
+  const rows: ShipViewRow[] = [];
+
+  // basic info
+  rows.push(buildShipViewRowText('Basic Info'));
+
+  const type = buildShipViewRowText(infoKeyValueString('Type', m.itemTypeName));
+
+  const family = buildShipViewRowText(
+    infoKeyValueString('Family', m.itemFamilyName)
+  );
+
+  const quantity = buildShipViewRowText(
+    infoKeyValueString('Quantity', m.quantity.toString())
+  );
+
+  const packaged = buildShipViewRowText(
+    infoKeyValueString('Packaged', m.isPackaged.toString())
+  );
+
+  // store basic info
+  rows.push(type);
+  rows.push(family);
+  rows.push(quantity);
+  rows.push(packaged);
+
+  // spacer after basic info
+  rows.push(buildShipViewRowSpacer());
+
+  // combine item and item type metadata
+  const meta: any = {};
+
+  if (m.itemTypeMeta) {
+    Object.assign(meta, m.itemTypeMeta);
+  }
+
+  if (m.meta) {
+    Object.assign(meta, m.meta);
+  }
+
+  // metadata info
+  rows.push(buildShipViewRowText('Metadata'));
+
+  for (const prop in meta) {
+    if (Object.prototype.hasOwnProperty.call(meta, prop)) {
+      const v = buildShipViewRowText(
+        infoKeyValueString(prop, `${meta[prop]}`)
+      );
+
+      rows.push(v);
+    }
+  }
+
+  // spacer after metadata info
+  rows.push(buildShipViewRowSpacer());
+
+  // return info rows
+  return rows;
 }
 
 function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
@@ -454,6 +538,14 @@ function itemStatusString(m: WSContainerItem) {
     m.itemTypeName,
     40
   )} ${fixedString(m.itemFamilyName, 16)} ${fixedString(q, 8)}`;
+}
+
+function infoKeyValueString(key: string, value: string) {
+  // build string
+  return `${fixedString('', 1)} ${fixedString(key, 32)} ${fixedString(
+    value,
+    32
+  )}`;
 }
 
 function cargoQuantity(d: number): string {

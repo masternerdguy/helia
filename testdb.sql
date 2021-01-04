@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2021-01-03 21:53:02
+-- Started on 2021-01-03 22:39:35
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -339,6 +339,9 @@ f01c22f8-1c65-418d-ac6a-3ae2490b12e4	{}	2021-01-03 21:01:00.73886-05
 1497e102-3bc1-48ab-8235-00f2ac205767	{}	2021-01-03 21:49:13.182759-05
 c949aadb-dc7c-482a-82c9-779abf4615e3	{}	2021-01-03 21:49:13.18476-05
 7eebfd7d-d803-496a-a0ce-0e4cc7755454	{}	2021-01-03 21:49:13.25576-05
+1da4f80b-c950-4d86-ab3e-03a979c03805	{}	2021-01-03 22:36:12.851528-05
+8e12bc8e-cb0b-4a98-a1af-b1b8d9102cb5	{}	2021-01-03 22:36:12.853588-05
+faa9e921-8fd4-4820-b7be-287dfab455a9	{}	2021-01-03 22:36:12.92558-05
 \.
 
 
@@ -367,8 +370,6 @@ nothing	Empty Space	{}
 COPY public.items (id, itemtypeid, meta, created, createdby, createdreason, containerid, quantity, ispackaged) FROM stdin;
 a2076201-4d22-437d-88dd-e1b631be74ba	09172710-740c-4d1c-9fc0-43cb62e674e7	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "activation_energy": 15, "shield_boost_amount": 20, "activation_gfx_effect": "basic_shield_booster"}	2021-01-03 21:06:37.387738-05	7635aca2-3536-4727-a1a5-2b6255982ec2	Module for new noob ship for player	1d6833a4-2076-4a35-832c-5880d1925948	1	f
 9cf91783-4b98-4665-b1b0-d0b83ed58f9e	b481a521-1b12-4ffa-ac2f-4da015036f7f	{}	2021-01-03 21:06:37.469964-05	7635aca2-3536-4727-a1a5-2b6255982ec2	Module for new noob ship for player	1d6833a4-2076-4a35-832c-5880d1925948	1	t
-1c5e7d03-5a64-4001-b871-ccef274c4359	09172710-740c-4d1c-9fc0-43cb62e674e7	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "activation_energy": 15, "shield_boost_amount": 20, "activation_gfx_effect": "basic_shield_booster"}	2021-01-03 21:01:01.050813-05	c27609bb-8eaf-4053-a4e1-6e47a76cb8e4	Module for new noob ship for player	f01c22f8-1c65-418d-ac6a-3ae2490b12e4	1	f
-a8c4429b-3c3e-4837-89ff-f36e8c5b1524	c311df30-c21e-4895-acb0-d8808f99710e	{"hp": 75, "rack": "c", "volume": 6, "armor_max_add": 75}	2021-01-03 21:01:01.210875-05	c27609bb-8eaf-4053-a4e1-6e47a76cb8e4	Module for new noob ship for player	f01c22f8-1c65-418d-ac6a-3ae2490b12e4	1	f
 4ccad356-93e8-43f8-aa04-71bccfb5b6e7	b481a521-1b12-4ffa-ac2f-4da015036f7f	{"hp": 15, "rack": "c", "volume": 3, "fuel_max_add": 30}	2021-01-03 21:01:01.130875-05	c27609bb-8eaf-4053-a4e1-6e47a76cb8e4	Module for new noob ship for player	5a4d2ed1-f597-4713-b251-61396dc6e61f	1	f
 fe104590-0e2c-458c-bc5e-94e46a722e46	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2021-01-03 21:01:00.885875-05	c27609bb-8eaf-4053-a4e1-6e47a76cb8e4	Module for new noob ship for player	5a4d2ed1-f597-4713-b251-61396dc6e61f	0	t
 3cd14dd0-9ed5-445d-a538-69861615efae	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2021-01-03 21:01:00.971807-05	c27609bb-8eaf-4053-a4e1-6e47a76cb8e4	Module for new noob ship for player	5a4d2ed1-f597-4713-b251-61396dc6e61f	2	t
@@ -378,8 +379,15 @@ c3242572-4dad-42e1-8376-4bbb16142f8f	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	202
 04328a44-4425-491d-8154-5fa5b36b62c8	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2021-01-03 21:06:37.309643-05	7635aca2-3536-4727-a1a5-2b6255982ec2	Module for new noob ship for player	1d6833a4-2076-4a35-832c-5880d1925948	0	t
 41aa39a5-c46f-407a-81a9-2eab96c89984	c311df30-c21e-4895-acb0-d8808f99710e	{"hp": 75, "rack": "c", "volume": 6, "armor_max_add": 75}	2021-01-03 21:49:13.705761-05	93354119-42d5-40b8-8139-8a920a5d99cf	Module for new noob ship for player	7eebfd7d-d803-496a-a0ce-0e4cc7755454	1	f
 cb871dec-3b41-406f-ac3c-ea1bf3188367	09172710-740c-4d1c-9fc0-43cb62e674e7	{}	2021-01-03 21:49:13.54876-05	93354119-42d5-40b8-8139-8a920a5d99cf	Module for new noob ship for player	c949aadb-dc7c-482a-82c9-779abf4615e3	1	t
+a8c4429b-3c3e-4837-89ff-f36e8c5b1524	c311df30-c21e-4895-acb0-d8808f99710e	{"hp": 75, "rack": "c", "volume": 6, "armor_max_add": 75}	2021-01-03 21:01:01.210875-05	c27609bb-8eaf-4053-a4e1-6e47a76cb8e4	Module for new noob ship for player	5a4d2ed1-f597-4713-b251-61396dc6e61f	1	f
 ffc66fe9-92ee-4644-955c-92442164bf3e	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2021-01-03 21:49:13.47176-05	93354119-42d5-40b8-8139-8a920a5d99cf	Module for new noob ship for player	c949aadb-dc7c-482a-82c9-779abf4615e3	2	t
 41050f2f-4ec2-4af6-b788-f3d4be2fa45c	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2021-01-03 21:49:13.39676-05	93354119-42d5-40b8-8139-8a920a5d99cf	Module for new noob ship for player	c949aadb-dc7c-482a-82c9-779abf4615e3	0	t
+1c5e7d03-5a64-4001-b871-ccef274c4359	09172710-740c-4d1c-9fc0-43cb62e674e7	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "activation_energy": 15, "shield_boost_amount": 20, "activation_gfx_effect": "basic_shield_booster"}	2021-01-03 21:01:01.050813-05	c27609bb-8eaf-4053-a4e1-6e47a76cb8e4	Module for new noob ship for player	5a4d2ed1-f597-4713-b251-61396dc6e61f	1	f
+568c3262-4fc0-4c65-ba4a-1cf9b546462c	09172710-740c-4d1c-9fc0-43cb62e674e7	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "activation_energy": 15, "shield_boost_amount": 20, "activation_gfx_effect": "basic_shield_booster"}	2021-01-03 22:36:13.226595-05	985b2429-7c00-4f4e-9872-c90a83a30fa8	Module for new noob ship for player	8e12bc8e-cb0b-4a98-a1af-b1b8d9102cb5	1	f
+3b66cf1b-f559-4ba3-8a77-ac28dd091773	c311df30-c21e-4895-acb0-d8808f99710e	{"hp": 75, "rack": "c", "volume": 6, "armor_max_add": 75}	2021-01-03 22:36:13.384581-05	985b2429-7c00-4f4e-9872-c90a83a30fa8	Module for new noob ship for player	8e12bc8e-cb0b-4a98-a1af-b1b8d9102cb5	1	f
+41f864fd-50cb-4e69-b4f0-4577e43f89dd	b481a521-1b12-4ffa-ac2f-4da015036f7f	{}	2021-01-03 22:36:13.305581-05	985b2429-7c00-4f4e-9872-c90a83a30fa8	Module for new noob ship for player	8e12bc8e-cb0b-4a98-a1af-b1b8d9102cb5	1	t
+7f5adf18-e511-4074-8094-292f251e3174	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2021-01-03 22:36:13.149527-05	985b2429-7c00-4f4e-9872-c90a83a30fa8	Module for new noob ship for player	8e12bc8e-cb0b-4a98-a1af-b1b8d9102cb5	2	t
+89faca0b-21d2-44a4-8a4d-a0302b434a92	9d1014c5-3422-4a0f-9839-f585269b4b16	{}	2021-01-03 22:36:13.071527-05	985b2429-7c00-4f4e-9872-c90a83a30fa8	Module for new noob ship for player	8e12bc8e-cb0b-4a98-a1af-b1b8d9102cb5	0	t
 \.
 
 
@@ -405,9 +413,10 @@ c311df30-c21e-4895-acb0-d8808f99710e	armor_plate	Basic Armor Plate	{"hp": 75, "r
 --
 
 COPY public.sessions (id, userid) FROM stdin;
-2439b10d-6440-4c20-8a91-d592842c8322	c27609bb-8eaf-4053-a4e1-6e47a76cb8e4
 67b80662-a240-421a-82af-f719ee43189d	7635aca2-3536-4727-a1a5-2b6255982ec2
-a1cb6448-0ace-40cc-bfaa-892d470da51f	93354119-42d5-40b8-8139-8a920a5d99cf
+50901299-8b5f-4d65-b25e-eb0781afbdbf	93354119-42d5-40b8-8139-8a920a5d99cf
+d641d317-b25d-4f51-b623-96d5a7510c50	c27609bb-8eaf-4053-a4e1-6e47a76cb8e4
+284b1479-6a55-4b9d-8feb-b3cee58430b8	985b2429-7c00-4f4e-9872-c90a83a30fa8
 \.
 
 
@@ -418,9 +427,10 @@ a1cb6448-0ace-40cc-bfaa-892d470da51f	93354119-42d5-40b8-8139-8a920a5d99cf
 --
 
 COPY public.ships (id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid, dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid, fittingbay_containerid, remaxdirty, trash_containerid) FROM stdin;
-e928d764-c270-424b-8969-939186074344	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	7635aca2-3536-4727-a1a5-2b6255982ec2	24771.795632863843	-9938.30877953488	2021-01-03 21:06:37.558964-05	asdf's Starter Ship	Sparrow	207.57863264297916	0	0	209	244	135	265	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": null, "b_rack": null, "c_rack": [{"item_id": "8b65e978-211f-473c-8c14-64c64e9a4dbe", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	1d6833a4-2076-4a35-832c-5880d1925948	0b23a6bf-1078-49ff-bd26-cb87c717178f	f	6aa7c441-e38b-4d26-bb4d-7c23b1bea2a4
-0bebd4f2-4e91-4352-ae78-7472702c6bdc	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	c27609bb-8eaf-4053-a4e1-6e47a76cb8e4	48237.077569892834	-22194.52128189182	2021-01-03 21:01:01.216874-05	nwiehoff's Starter Ship	Sparrow	0	2.6112951229350715e-160	-1.3639123543858191e-160	209	244	135	295	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "fe104590-0e2c-458c-bc5e-94e46a722e46", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "3cd14dd0-9ed5-445d-a538-69861615efae", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}], "b_rack": [{"item_id": "1c5e7d03-5a64-4001-b871-ccef274c4359", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}], "c_rack": [{"item_id": "4ccad356-93e8-43f8-aa04-71bccfb5b6e7", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "a8c4429b-3c3e-4837-89ff-f36e8c5b1524", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	5a4d2ed1-f597-4713-b251-61396dc6e61f	f01c22f8-1c65-418d-ac6a-3ae2490b12e4	f	aa22ba1f-80e2-4d15-a83d-a0d60c03543c
 b6cdd740-c8a3-4e65-b70f-f338b3efd4e9	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	93354119-42d5-40b8-8139-8a920a5d99cf	24771.795632863843	-9938.30877953488	2021-01-03 21:49:13.71276-05	lol's Starter Ship	Sparrow	207.578632642979	0	0	209	244	135	265	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": null, "b_rack": null, "c_rack": [{"item_id": "41aa39a5-c46f-407a-81a9-2eab96c89984", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	c949aadb-dc7c-482a-82c9-779abf4615e3	7eebfd7d-d803-496a-a0ce-0e4cc7755454	f	1497e102-3bc1-48ab-8235-00f2ac205767
+e928d764-c270-424b-8969-939186074344	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	7635aca2-3536-4727-a1a5-2b6255982ec2	24771.795632863843	-9938.30877953488	2021-01-03 21:06:37.558964-05	asdf's Starter Ship	Sparrow	207.57863264297916	0	0	209	244	135	265	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": null, "b_rack": null, "c_rack": [{"item_id": "8b65e978-211f-473c-8c14-64c64e9a4dbe", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	1d6833a4-2076-4a35-832c-5880d1925948	0b23a6bf-1078-49ff-bd26-cb87c717178f	f	6aa7c441-e38b-4d26-bb4d-7c23b1bea2a4
+0bebd4f2-4e91-4352-ae78-7472702c6bdc	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	c27609bb-8eaf-4053-a4e1-6e47a76cb8e4	24771.795632863843	-9938.30877953488	2021-01-03 21:01:01.216874-05	nwiehoff's Starter Ship	Sparrow	207.57863264297947	0	0	209	169	135	265	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": null, "b_rack": null, "c_rack": null}	f	\N	5a4d2ed1-f597-4713-b251-61396dc6e61f	f01c22f8-1c65-418d-ac6a-3ae2490b12e4	f	aa22ba1f-80e2-4d15-a83d-a0d60c03543c
+c69388f4-b024-46cf-bf7e-4e6ac1e6e45c	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	985b2429-7c00-4f4e-9872-c90a83a30fa8	24771.795632863843	-9938.30877953488	2021-01-03 22:36:13.391547-05	aaa's Starter Ship	Sparrow	207.578632642979	0	0	209	169	135	265	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": null, "b_rack": null, "c_rack": null}	f	\N	8e12bc8e-cb0b-4a98-a1af-b1b8d9102cb5	faa9e921-8fd4-4820-b7be-287dfab455a9	f	1da4f80b-c950-4d86-ab3e-03a979c03805
 \.
 
 
@@ -543,6 +553,7 @@ COPY public.users (id, username, hashpass, registered, banned, current_shipid, s
 c27609bb-8eaf-4053-a4e1-6e47a76cb8e4	nwiehoff	02c4bf7d7e35c6bab999ac03ece60b8586a27f7ecd4830983b138b74262bf3f9	2021-01-03 21:01:00.577808-05	0	0bebd4f2-4e91-4352-ae78-7472702c6bdc	49f06e89-29fb-4a02-a034-4b5d0702adac
 7635aca2-3536-4727-a1a5-2b6255982ec2	asdf	7ab518aea3a72084bf1f1e1ddeb7fa25563a47b73b643452960187b6405b72f1	2021-01-03 21:06:36.925479-05	0	e928d764-c270-424b-8969-939186074344	49f06e89-29fb-4a02-a034-4b5d0702adac
 93354119-42d5-40b8-8139-8a920a5d99cf	lol	7c17eeca2d07d6757b8e11e789522b94c73fb83f229574594566011bf2c0dcf5	2021-01-03 21:49:13.101567-05	0	b6cdd740-c8a3-4e65-b70f-f338b3efd4e9	49f06e89-29fb-4a02-a034-4b5d0702adac
+985b2429-7c00-4f4e-9872-c90a83a30fa8	aaa	09b6eea09b48ac41c136ef0515927f468dd413d64406b97660a4b1de14c15d0c	2021-01-03 22:36:12.70311-05	0	c69388f4-b024-46cf-bf7e-4e6ac1e6e45c	49f06e89-29fb-4a02-a034-4b5d0702adac
 \.
 
 
@@ -997,7 +1008,7 @@ ALTER TABLE ONLY public.universe_stations
     ADD CONSTRAINT station_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
 
 
--- Completed on 2021-01-03 21:53:03
+-- Completed on 2021-01-03 22:39:35
 
 --
 -- PostgreSQL database dump complete

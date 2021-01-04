@@ -753,7 +753,7 @@ func (s *Ship) TotalCargoBayVolumeUsed(lock bool) float64 {
 		volume, f := i.Meta.GetFloat64("volume")
 
 		if f {
-			tV += volume
+			tV += (volume * float64(i.Quantity))
 		}
 	}
 

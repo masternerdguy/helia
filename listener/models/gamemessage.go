@@ -317,7 +317,12 @@ type ServerItemViewBody struct {
 	ItemFamilyName string    `json:"itemFamilyName"`
 	Quantity       int       `json:"quantity"`
 	IsPackaged     bool      `json:"isPackaged"`
+	Meta           Meta      `json:"meta"`
+	ItemTypeMeta   Meta      `json:"itemTypeMeta"`
 }
+
+//Meta Type representing metadata to be sent between the client and server
+type Meta map[string]interface{}
 
 //ServerContainerViewBody Generic body for returning container views requested by the client (ex: cargo bay)
 type ServerContainerViewBody struct {

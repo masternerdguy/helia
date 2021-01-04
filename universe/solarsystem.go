@@ -202,6 +202,8 @@ func (s *SolarSystem) PeriodicUpdate() {
 						ItemFamilyName: i.ItemFamilyName,
 						Quantity:       i.Quantity,
 						IsPackaged:     i.IsPackaged,
+						Meta:           models.Meta(i.Meta),
+						ItemTypeMeta:   models.Meta(i.ItemTypeMeta),
 					}
 
 					vw.Items = append(vw.Items, r)
