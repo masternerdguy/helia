@@ -201,6 +201,28 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(mi, sol)
 	}
 
+	//iterate over changed quantity items
+	for id := range sol.ChangedQuantityItems {
+		//capture reference and remove from map
+		mi, _ := sol.ChangedQuantityItems[id]
+		delete(sol.ChangedQuantityItems, id)
+
+		//handle escalation on another goroutine
+		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			//lock item
+			mi.Lock.Lock()
+			defer mi.Lock.Unlock()
+
+			//save quantity of item to db
+			err := changeQuantity(mi.ID, mi.Quantity)
+
+			//error check
+			if err != nil {
+				log.Println(fmt.Sprintf("Unable to change quantity of item %v: %v", mi.ID, err))
+			}
+		}(mi, sol)
+	}
+
 	//iterate over dead ships
 	for id := range sol.DeadShips {
 		//capture reference and remove from map

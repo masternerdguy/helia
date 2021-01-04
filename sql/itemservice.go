@@ -80,6 +80,7 @@ func (s ItemService) GetItemsByContainer(containerID uuid.UUID) ([]Item, error) 
 				   quantity, ispackaged
 			FROM public.Items
 			WHERE containerid = $1
+			AND quantity > 0
 		`
 
 	rows, err := db.Query(sql, containerID)
@@ -199,6 +200,29 @@ func (s ItemService) UnpackageItem(id uuid.UUID, meta Meta) error {
 			`
 
 	_, err = db.Query(sql, id, meta)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//ChangeQuantity Updates the database to change the quantity of an item stack
+func (s ItemService) ChangeQuantity(id uuid.UUID, quantity int) error {
+	//get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	//update item
+	sql := `
+				UPDATE public.items SET quantity=$2 WHERE id = $1;
+			`
+
+	_, err = db.Query(sql, id, quantity)
 
 	if err != nil {
 		return err

@@ -20,5 +20,6 @@ export enum MessageTypes {
   UnfitModule = 12,
   TrashItem = 13,
   PackageItem = 14,
-  UnpackageItem = 15
+  UnpackageItem = 15,
+  StackItem = 16
 }

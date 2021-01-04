@@ -27,11 +27,12 @@ type SolarSystem struct {
 	pushPointEffects  []models.GlobalPushPointEffectBody  //non-module point visual effect aggregation for tick
 	Lock              sync.Mutex
 	//event escalations to engine core
-	NeedRespawn     map[string]*shared.GameClient //clients in need of a respawn by core
-	DeadShips       map[string]*Ship              //dead ships in need of cleanup by core
-	MovedItems      map[string]*Item              //items moved to a new container in need of saving by core
-	PackagedItems   map[string]*Item              //items packaged in need of saving by core
-	UnpackagedItems map[string]*Item              //items unpackaged in need of saving by core
+	NeedRespawn          map[string]*shared.GameClient //clients in need of a respawn by core
+	DeadShips            map[string]*Ship              //dead ships in need of cleanup by core
+	MovedItems           map[string]*Item              //items moved to a new container in need of saving by core
+	PackagedItems        map[string]*Item              //items packaged in need of saving by core
+	UnpackagedItems      map[string]*Item              //items unpackaged in need of saving by core
+	ChangedQuantityItems map[string]*Item              //stacks of items that have changed quantity and need saving by core
 }
 
 //Initialize Initializes internal aspects of SolarSystem
@@ -52,6 +53,7 @@ func (s *SolarSystem) Initialize() {
 	s.MovedItems = make(map[string]*Item)
 	s.PackagedItems = make(map[string]*Item)
 	s.UnpackagedItems = make(map[string]*Item)
+	s.ChangedQuantityItems = make(map[string]*Item)
 
 	//initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -300,6 +302,29 @@ func (s *SolarSystem) PeriodicUpdate() {
 				} else {
 					// unpackage item
 					err := sh.UnpackageItemInCargo(item.ID, false)
+
+					// there is a reason this could fail the player will need to know about
+					if err != nil {
+						// send error message to client
+						c.WriteErrorMessage(err.Error())
+					}
+				}
+			}
+		} else if evt.Type == models.NewMessageRegistry().StackItem {
+			if sh != nil {
+				//extract data
+				data := evt.Body.(models.ClientStackItemBody)
+
+				//find item
+				item := sh.FindItemInCargo(data.ItemID)
+
+				// make sure we found something
+				if item == nil {
+					// do nothing
+					continue
+				} else {
+					// stack item
+					err := sh.StackItemInCargo(item.ID, false)
 
 					// there is a reason this could fail the player will need to know about
 					if err != nil {

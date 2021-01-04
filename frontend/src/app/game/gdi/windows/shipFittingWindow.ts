@@ -11,6 +11,7 @@ import { ClientUnfitModule } from '../../wsModels/bodies/unfitModule';
 import { ClientTrashItem } from '../../wsModels/bodies/trashItem';
 import { ClientPackageItem } from '../../wsModels/bodies/packageItem';
 import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
+import { ClientStackItem } from '../../wsModels/bodies/stackItem';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -150,7 +151,22 @@ export class ShipFittingWindow extends GDIWindow {
         // reset views
         this.resetViews();
       } else if (a === 'Stack') {
-        throw new Error(`${a} not yet implemented`);
+        // get selected item
+        const i: ShipViewRow = this.shipView.getSelectedItem();
+
+        // send stack request
+        const tiMsg: ClientStackItem = {
+          sid: this.wsSvc.sid,
+          itemID: (i.object as WSContainerItem).id,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.StackItem, tiMsg);
+
+        // request cargo bay refresh
+        this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
       } else if (a === 'Split') {
         throw new Error(`${a} not yet implemented`);
       }
@@ -371,7 +387,9 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
 
   if (isDocked) {
     if (m.isPackaged) {
-      actions.push('Unpackage');
+      if (m.quantity === 1) {
+        actions.push('Unpackage');
+      }
     } else {
       actions.push('Package');
     }

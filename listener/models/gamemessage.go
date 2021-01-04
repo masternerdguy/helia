@@ -25,6 +25,7 @@ type MessageRegistry struct {
 	TrashItem         int
 	PackageItem       int
 	UnpackageItem     int
+	StackItem         int
 }
 
 //TargetTypeRegistry Registry of target types
@@ -56,6 +57,7 @@ func NewMessageRegistry() *MessageRegistry {
 		TrashItem:         13,
 		PackageItem:       14,
 		UnpackageItem:     15,
+		StackItem:         16,
 	}
 }
 
@@ -349,6 +351,12 @@ type ClientPackageItemBody struct {
 
 //ClientUnpackageItemBody Body containing a request to unpackage an item in the current ship's cargo hold
 type ClientUnpackageItemBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	ItemID    uuid.UUID `json:"itemID"`
+}
+
+//ClientStackItemBody Body containing a request to stack an item in the current ship's cargo hold
+type ClientStackItemBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemID"`
 }

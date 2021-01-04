@@ -1455,6 +1455,79 @@ func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 	return nil
 }
 
+//StackItemInCargo Stacks an item in the ship's cargo bay if it exists
+func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
+	if lock {
+		//lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	//lock cargo bay
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	//get the item to be stacked
+	item := s.FindItemInCargo(id)
+
+	if item == nil {
+		return errors.New("Item not found in cargo bay")
+	}
+
+	//make sure the item is packaged
+	if !item.IsPackaged {
+		return errors.New("Only packaged items can be stacked")
+	}
+
+	//merge stack into next stack
+	tmpCB := make([]*Item, 0)
+
+	for i := range s.CargoBay.Items {
+		o := s.CargoBay.Items[i]
+
+		//store in tmp slice
+		tmpCB = append(tmpCB, o)
+
+		//skip if this item
+		if o.ID == id {
+			continue
+		} else {
+			//see if we can merge into this stack
+			if o.IsPackaged && o.ItemTypeID == item.ItemTypeID {
+				//merge stacks
+				q := item.Quantity
+
+				o.Quantity += q
+				item.Quantity -= q
+
+				//escalate to core for saving in db
+				s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
+				s.CurrentSystem.ChangedQuantityItems[o.ID.String()] = o
+
+				//exit loop
+				break
+			}
+		}
+	}
+
+	//remove 0 quantity stacks
+	newCB := make([]*Item, 0)
+
+	for i := range tmpCB {
+		o := tmpCB[i]
+
+		//only retain if non empty
+		if o.Quantity > 0 {
+			newCB = append(newCB, o)
+		}
+	}
+
+	//update cargo bay
+	s.CargoBay.Items = newCB
+
+	return nil
+}
+
 //PeriodicUpdate Updates a fitted slot on a ship
 func (m *FittedSlot) PeriodicUpdate() {
 	if m.IsCycling {

@@ -858,3 +858,9 @@ func unpackageItem(itemID uuid.UUID, meta universe.Meta) error {
 	itemSvc := sql.GetItemService()
 	return itemSvc.UnpackageItem(itemID, SQLFromMeta(&meta))
 }
+
+//changeQuantity Changes the quantity of an item stack in the database
+func changeQuantity(itemID uuid.UUID, quantity int) error {
+	itemSvc := sql.GetItemService()
+	return itemSvc.ChangeQuantity(itemID, quantity)
+}
