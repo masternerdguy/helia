@@ -129,6 +129,9 @@ export class ShipFittingWindow extends GDIWindow {
 
         // request cargo bay refresh
         this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
       } else if (a === 'Unpackage') {
         // get selected item
         const i: ShipViewRow = this.shipView.getSelectedItem();
@@ -143,6 +146,9 @@ export class ShipFittingWindow extends GDIWindow {
 
         // request cargo bay refresh
         this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
       } else if (a === 'Stack') {
         throw new Error(`${a} not yet implemented`);
       } else if (a === 'Split') {
@@ -295,6 +301,15 @@ export class ShipFittingWindow extends GDIWindow {
   setPlayer(player: Player) {
     this.player = player;
   }
+
+  resetViews() {
+    // reset ship view
+    this.shipView.setSelectedIndex(-1);
+    this.shipView.setItems([]);
+
+    // reset action view and store status
+    this.actionView.setItems([]);
+  }
 }
 
 class ShipViewRow {
@@ -346,7 +361,9 @@ function buildCargoRowFromContainerItem(
 function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
   const actions: string[] = [];
 
-  actions.push('Stack');
+  if (m.isPackaged) {
+    actions.push('Stack');
+  }
 
   if (m.quantity > 1) {
     actions.push('Split');
@@ -415,7 +432,7 @@ function moduleStatusString(m: WSModule) {
 function itemStatusString(m: WSContainerItem) {
   // build status string
   const q = cargoQuantity(m.quantity);
-  return `${fixedString(m.isPackaged ? '▩' : '', 1)} ${fixedString(
+  return `${fixedString(m.isPackaged ? '◰' : '', 1)} ${fixedString(
     m.itemTypeName,
     40
   )} ${fixedString(m.itemFamilyName, 16)} ${fixedString(q, 8)}`;

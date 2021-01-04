@@ -1382,6 +1382,11 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 		return errors.New("Item not found in cargo bay")
 	}
 
+	//make sure the item is unpackaged
+	if item.IsPackaged {
+		return errors.New("Item is already packaged")
+	}
+
 	//make sure the item is fully repaired
 	iHp, f := item.Meta.GetFloat64("hp")
 	tHp, g := item.ItemTypeMeta.GetFloat64("hp")
@@ -1426,6 +1431,16 @@ func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 
 	if item == nil {
 		return errors.New("Item not found in cargo bay")
+	}
+
+	//make sure the item is packaged
+	if !item.IsPackaged {
+		return errors.New("Item is already unpackaged")
+	}
+
+	//make sure there is only one in the stack
+	if item.Quantity != 1 {
+		return errors.New("Must be a stack of 1 to unpackage")
 	}
 
 	//unpackage item in-memory
