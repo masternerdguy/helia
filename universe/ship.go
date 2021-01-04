@@ -163,6 +163,7 @@ type FittedSlot struct {
 	CyclePercent   int
 	TargetID       *uuid.UUID
 	TargetType     *int
+	Rack           string
 	//in-memory only, secret
 	shipMountedOn    *Ship
 	cooldownProgress int
@@ -327,16 +328,19 @@ func (s *Ship) PeriodicUpdate() {
 		// update modules
 		for i := range s.Fitting.ARack {
 			s.Fitting.ARack[i].shipMountedOn = s
+			s.Fitting.ARack[i].Rack = "A"
 			s.Fitting.ARack[i].PeriodicUpdate()
 		}
 
 		for i := range s.Fitting.BRack {
 			s.Fitting.BRack[i].shipMountedOn = s
+			s.Fitting.BRack[i].Rack = "B"
 			s.Fitting.BRack[i].PeriodicUpdate()
 		}
 
 		for i := range s.Fitting.CRack {
 			s.Fitting.CRack[i].shipMountedOn = s
+			s.Fitting.CRack[i].Rack = "C"
 			s.Fitting.CRack[i].PeriodicUpdate()
 		}
 	} else {
@@ -1271,6 +1275,13 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 		return errors.New("Modules must be offline to be unfit")
 	}
 
+	//if the module is in rack c, make sure the ship is fully repaired
+	if m.Rack == "C" {
+		if s.Armor < s.GetRealMaxArmor() || s.Hull < s.GetRealMaxHull() {
+			return errors.New("Armor and hull must be fully repaired before unfitting modules in rack c")
+		}
+	}
+
 	//remove from fitting data
 	m.shipMountedOn.Fitting.stripModuleFromFitting(m.ItemID)
 
@@ -1343,6 +1354,52 @@ func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
 	}
 
 	s.CargoBay.Items = newCB
+
+	return nil
+}
+
+//PackageItemInCargo Packages an item in the ship's cargo bay if it exists
+func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
+	if lock {
+		//lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	//lock cargo bay
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	//make sure ship is docked
+	if s.DockedAtStationID == nil {
+		return errors.New("You must be docked to package an item")
+	}
+
+	//get the item to be packaged
+	item := s.FindItemInCargo(id)
+
+	if item == nil {
+		return errors.New("Item not found in cargo bay")
+	}
+
+	//make sure the item is fully repaired
+	iHp, f := item.Meta.GetFloat64("hp")
+	tHp, g := item.ItemTypeMeta.GetFloat64("hp")
+
+	if f && g {
+		if iHp < tHp {
+			return errors.New("Item must be fully repaired before packaging")
+		}
+	}
+
+	//package item in-memory
+	item.IsPackaged = true
+
+	//wipe out item metadata
+	item.Meta = Meta{}
+
+	//escalate item for packaging in db
+	s.CurrentSystem.PackagedItems[item.ID.String()] = item
 
 	return nil
 }

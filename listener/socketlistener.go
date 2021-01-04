@@ -153,6 +153,20 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			//handle message
 			l.handleClientTrashItem(&client, &b)
+		} else if m.MessageType == msgRegistry.PackageItem {
+			//decode body as ClientPackageItemBody
+			b := models.ClientPackageItemBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			//handle message
+			l.handleClientPackageItem(&client, &b)
+		} else if m.MessageType == msgRegistry.TrashItem {
+			//decode body as ClientUnpackageItemBody
+			b := models.ClientUnpackageItemBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			//handle message
+			l.handleClientUnpackageItem(&client, &b)
 		}
 	}
 }
@@ -546,6 +560,52 @@ func (l *SocketListener) handleClientTrashItem(client *shared.GameClient, body *
 		//push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.TrashItem)
+	}
+}
+
+func (l *SocketListener) handleClientPackageItem(client *shared.GameClient, body *models.ClientPackageItemBody) {
+	//safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	//verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientPackageItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		//initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		//push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.PackageItem)
+	}
+}
+
+func (l *SocketListener) handleClientUnpackageItem(client *shared.GameClient, body *models.ClientUnpackageItemBody) {
+	//safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	//verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientUnpackageItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		//initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		//push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.UnpackageItem)
 	}
 }
 

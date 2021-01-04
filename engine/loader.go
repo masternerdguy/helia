@@ -332,6 +332,7 @@ func FittingFromSQL(value *sql.Fitting) (*universe.Fitting, error) {
 			return nil, err
 		}
 
+		slot.Rack = "A"
 		fitting.ARack = append(fitting.ARack, *slot)
 	}
 
@@ -342,6 +343,7 @@ func FittingFromSQL(value *sql.Fitting) (*universe.Fitting, error) {
 			return nil, err
 		}
 
+		slot.Rack = "B"
 		fitting.BRack = append(fitting.BRack, *slot)
 	}
 
@@ -352,6 +354,7 @@ func FittingFromSQL(value *sql.Fitting) (*universe.Fitting, error) {
 			return nil, err
 		}
 
+		slot.Rack = "C"
 		fitting.CRack = append(fitting.CRack, *slot)
 	}
 
@@ -610,6 +613,7 @@ func LoadItem(i *sql.Item) (*universe.Item, error) {
 	//include item type data
 	ei.ItemTypeName = it.Name
 	ei.ItemFamilyID = it.Family
+	ei.ItemTypeMeta = MetaFromSQL(&it.Meta)
 
 	//load item family
 	fm, err := itemFamilySvc.GetItemFamilyByID(it.Family)
@@ -841,4 +845,10 @@ func saveShip(ship *universe.Ship) error {
 func saveItemLocation(itemID uuid.UUID, containerID uuid.UUID) error {
 	itemSvc := sql.GetItemService()
 	return itemSvc.SetContainerID(itemID, containerID)
+}
+
+//packageItem Marks an item as packaged in the database
+func packageItem(itemID uuid.UUID) error {
+	itemSvc := sql.GetItemService()
+	return itemSvc.PackageItem(itemID)
 }

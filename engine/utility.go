@@ -26,6 +26,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 	//get services
 	userSvc := sql.GetUserService()
 	itemSvc := sql.GetItemService()
+	itemTypeSvc := sql.GetItemTypeService()
 	shipSvc := sql.GetShipService()
 	shipTmpSvc := sql.GetShipTemplateService()
 	containerSvc := sql.GetContainerService()
@@ -80,10 +81,17 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 
 	//create rack a modules
 	for _, l := range start.ShipFitting.ARack {
+		//load item type data
+		itemType, err := itemTypeSvc.GetItemTypeByID(l.ItemTypeID)
+
+		if err != nil {
+			return nil, err
+		}
+
 		//create item for slot
 		i, err := itemSvc.NewItem(sql.Item{
 			ItemTypeID:    l.ItemTypeID,
-			Meta:          sql.Meta{},
+			Meta:          itemType.Meta,
 			CreatedBy:     &u.ID,
 			CreatedReason: moduleCreationReason,
 			ContainerID:   fb.ID,
@@ -104,10 +112,17 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 
 	//create rack b modules
 	for _, l := range start.ShipFitting.BRack {
+		//load item type data
+		itemType, err := itemTypeSvc.GetItemTypeByID(l.ItemTypeID)
+
+		if err != nil {
+			return nil, err
+		}
+
 		//create item for slot
 		i, err := itemSvc.NewItem(sql.Item{
 			ItemTypeID:    l.ItemTypeID,
-			Meta:          sql.Meta{},
+			Meta:          itemType.Meta,
 			CreatedBy:     &u.ID,
 			CreatedReason: moduleCreationReason,
 			ContainerID:   fb.ID,
@@ -128,10 +143,17 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 
 	//create rack c modules
 	for _, l := range start.ShipFitting.CRack {
+		//load item type data
+		itemType, err := itemTypeSvc.GetItemTypeByID(l.ItemTypeID)
+
+		if err != nil {
+			return nil, err
+		}
+
 		//create item for slot
 		i, err := itemSvc.NewItem(sql.Item{
 			ItemTypeID:    l.ItemTypeID,
-			Meta:          sql.Meta{},
+			Meta:          itemType.Meta,
 			CreatedBy:     &u.ID,
 			CreatedReason: moduleCreationReason,
 			ContainerID:   fb.ID,

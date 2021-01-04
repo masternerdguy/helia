@@ -23,4 +23,5 @@ type Item struct {
 	ItemTypeName   string
 	ItemFamilyID   string
 	ItemFamilyName string
+	ItemTypeMeta   Meta
 }

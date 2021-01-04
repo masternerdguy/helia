@@ -93,7 +93,7 @@ func (s ItemService) GetItemsByContainer(containerID uuid.UUID) ([]Item, error) 
 
 		//scan into item structure
 		rows.Scan(&i.ID, &i.ItemTypeID, &i.Meta, &i.Created, &i.CreatedBy, &i.CreatedReason, &i.ContainerID,
-			&i.Quantity, *&i.IsPackaged)
+			&i.Quantity, &i.IsPackaged)
 
 		//append to item slice
 		items = append(items, i)
@@ -147,12 +147,35 @@ func (s ItemService) SetContainerID(id uuid.UUID, containerID uuid.UUID) error {
 		return err
 	}
 
-	//update user
+	//update item
 	sql := `
 				UPDATE public.items SET containerid = $1 WHERE id = $2;
 			`
 
 	_, err = db.Query(sql, containerID, id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//PackageItem Updates the database to make an item packaged
+func (s ItemService) PackageItem(id uuid.UUID) error {
+	//get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	//update item
+	sql := `
+				UPDATE public.items SET meta='{}', ispackaged='t' WHERE id = $1;
+			`
+
+	_, err = db.Query(sql, id)
 
 	if err != nil {
 		return err

@@ -10,5 +10,5 @@ export class WSContainerItem {
   itemFamilyID: string;
   itemFamilyName: string;
   quantity: number;
-  ispackaged: boolean;
+  isPackaged: boolean;
 }

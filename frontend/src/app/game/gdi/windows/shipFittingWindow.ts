@@ -114,9 +114,33 @@ export class ShipFittingWindow extends GDIWindow {
         // request cargo bay refresh
         this.refreshCargoBay();
       } else if (a === 'Package') {
-        throw new Error(`${a} not yet implemented`);
+        // get selected item
+        const i: ShipViewRow = this.shipView.getSelectedItem();
+
+        // send package request
+        const tiMsg: ClientTrashItem = {
+          sid: this.wsSvc.sid,
+          itemID: (i.object as WSContainerItem).id,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.PackageItem, tiMsg);
+
+        // request cargo bay refresh
+        this.refreshCargoBay();
       } else if (a === 'Unpackage') {
-        throw new Error(`${a} not yet implemented`);
+        // get selected item
+        const i: ShipViewRow = this.shipView.getSelectedItem();
+
+        // send unpackage request
+        const tiMsg: ClientTrashItem = {
+          sid: this.wsSvc.sid,
+          itemID: (i.object as WSContainerItem).id,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.UnpackageItem, tiMsg);
+
+        // request cargo bay refresh
+        this.refreshCargoBay();
       } else if (a === 'Stack') {
         throw new Error(`${a} not yet implemented`);
       } else if (a === 'Split') {
@@ -327,7 +351,7 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
   }
 
   if (isDocked) {
-    if (m.ispackaged) {
+    if (m.isPackaged) {
       actions.push('Unpackage');
     } else {
       actions.push('Package');
@@ -389,7 +413,7 @@ function moduleStatusString(m: WSModule) {
 function itemStatusString(m: WSContainerItem) {
   // build status string
   const q = cargoQuantity(m.quantity);
-  return `${fixedString('', 1)} ${fixedString(
+  return `${fixedString(m.isPackaged ? '▩' : '', 1)} ${fixedString(
     m.itemTypeName,
     40
   )} ${fixedString(m.itemFamilyName, 16)} ${fixedString(q, 8)}`;

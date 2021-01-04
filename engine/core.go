@@ -157,6 +157,28 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(mi, sol)
 	}
 
+	//iterate over packaged items
+	for id := range sol.PackagedItems {
+		//capture reference and remove from map
+		mi, _ := sol.PackagedItems[id]
+		delete(sol.PackagedItems, id)
+
+		//handle escalation on another goroutine
+		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			//lock item
+			mi.Lock.Lock()
+			defer mi.Lock.Unlock()
+
+			//mark item as packaged in the db
+			err := packageItem(mi.ID)
+
+			//error check
+			if err != nil {
+				log.Println(fmt.Sprintf("Unable to package item %v: %v", mi.ID, err))
+			}
+		}(mi, sol)
+	}
+
 	//iterate over dead ships
 	for id := range sol.DeadShips {
 		//capture reference and remove from map
