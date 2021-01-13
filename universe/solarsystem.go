@@ -2,11 +2,9 @@ package universe
 
 import (
 	"encoding/json"
-	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"sync"
 	"time"
 
@@ -35,6 +33,7 @@ type SolarSystem struct {
 	PackagedItems        map[string]*Item              //items packaged in need of saving by core
 	UnpackagedItems      map[string]*Item              //items unpackaged in need of saving by core
 	ChangedQuantityItems map[string]*Item              //stacks of items that have changed quantity and need saving by core
+	NewItems             map[string]*Item              //stacks of items that are newly created and need to be saved by core
 }
 
 //Initialize Initializes internal aspects of SolarSystem
@@ -56,6 +55,7 @@ func (s *SolarSystem) Initialize() {
 	s.PackagedItems = make(map[string]*Item)
 	s.UnpackagedItems = make(map[string]*Item)
 	s.ChangedQuantityItems = make(map[string]*Item)
+	s.NewItems = make(map[string]*Item)
 
 	//initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -342,8 +342,23 @@ func (s *SolarSystem) PeriodicUpdate() {
 				//extract data
 				data := evt.Body.(models.ClientSplitItemBody)
 
-				//debug out
-				log.Println(fmt.Sprintf("ClientSplitItemBody: %v", data))
+				//find item
+				item := sh.FindItemInCargo(data.ItemID)
+
+				// make sure we found something
+				if item == nil {
+					// do nothing
+					continue
+				} else {
+					// split item
+					err := sh.SplitItemInCargo(item.ID, data.Size, false)
+
+					// there is a reason this could fail the player will need to know about
+					if err != nil {
+						// send error message to client
+						c.WriteErrorMessage(err.Error())
+					}
+				}
 			}
 		}
 	}

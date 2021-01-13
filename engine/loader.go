@@ -590,6 +590,26 @@ func ItemFromSQL(value *sql.Item) *universe.Item {
 	return &item
 }
 
+//SQLFromItem Converts an item from the engine type to the SQL type
+func SQLFromItem(value *universe.Item) *sql.Item {
+	//set up empty item
+	item := sql.Item{}
+
+	//copy item data
+	item.ID = value.ID
+	item.ItemTypeID = value.ItemTypeID
+	item.ContainerID = value.ContainerID
+	item.Created = value.Created
+	item.CreatedBy = value.CreatedBy
+	item.CreatedReason = value.CreatedReason
+	item.Meta = SQLFromMeta(&value.Meta)
+	item.Quantity = value.Quantity
+	item.IsPackaged = value.IsPackaged
+
+	//return filled item
+	return &item
+}
+
 //LoadItem Loads an item with some type and family data for use in the simulation.
 func LoadItem(i *sql.Item) (*universe.Item, error) {
 	itemTypeSvc := sql.GetItemTypeService()
@@ -863,4 +883,21 @@ func unpackageItem(itemID uuid.UUID, meta universe.Meta) error {
 func changeQuantity(itemID uuid.UUID, quantity int) error {
 	itemSvc := sql.GetItemService()
 	return itemSvc.ChangeQuantity(itemID, quantity)
+}
+
+//newItem Saves a new item to the database
+func newItem(item *universe.Item) error {
+	itemSvc := sql.GetItemService()
+
+	//convert to sql type
+	sql := SQLFromItem(item)
+
+	if sql == nil {
+		return errors.New("Error converting item to SQL type")
+	}
+
+	//save item
+	_, err := itemSvc.NewItem(*sql)
+
+	return err
 }

@@ -223,6 +223,28 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(mi, sol)
 	}
 
+	//iterate over new items
+	for id := range sol.NewItems {
+		//capture reference and remove from map
+		mi, _ := sol.NewItems[id]
+		delete(sol.NewItems, id)
+
+		//handle escalation on another goroutine
+		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			//lock item
+			mi.Lock.Lock()
+			defer mi.Lock.Unlock()
+
+			//save new item to db
+			err := newItem(mi)
+
+			//error check
+			if err != nil {
+				log.Println(fmt.Sprintf("Unable to save new item %v: %v", mi.ID, err))
+			}
+		}(mi, sol)
+	}
+
 	//iterate over dead ships
 	for id := range sol.DeadShips {
 		//capture reference and remove from map

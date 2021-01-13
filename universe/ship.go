@@ -1523,6 +1523,77 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 	return nil
 }
 
+//SplitItemInCargo Splits an item stack in the ship's cargo bay if it exists
+func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
+	if lock {
+		//lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	//lock cargo bay
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	//get the item to be split
+	item := s.FindItemInCargo(id)
+
+	if item == nil {
+		return errors.New("Item not found in cargo bay")
+	}
+
+	//make sure the item is packaged
+	if !item.IsPackaged {
+		return errors.New("Only packaged items can be split")
+	}
+
+	//make sure we are splitting a positive size
+	if size <= 0 {
+		return errors.New("New stack size must be positive")
+	}
+
+	//make sure we are splitting off less than the quantity - 1
+	if size > item.Quantity-1 {
+		return errors.New("Both output stacks must have a positive size")
+	}
+
+	//reduce found stack by new stack size
+	item.Quantity -= size
+
+	//make a new item stack of the given size
+	nid, err := uuid.NewUUID()
+
+	if err != nil {
+		return err
+	}
+
+	newItem := Item{
+		ID:             nid,
+		ItemTypeID:     item.ItemTypeID,
+		Meta:           item.Meta,
+		Created:        time.Now(),
+		CreatedBy:      &s.UserID,
+		CreatedReason:  "Stack split",
+		ContainerID:    s.CargoBayContainerID,
+		Quantity:       size,
+		IsPackaged:     true,
+		Lock:           sync.Mutex{},
+		ItemTypeName:   item.ItemTypeName,
+		ItemFamilyID:   item.ItemFamilyID,
+		ItemFamilyName: item.ItemFamilyName,
+		ItemTypeMeta:   item.ItemTypeMeta,
+	}
+
+	//escalate to core for saving in db
+	s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
+	s.CurrentSystem.NewItems[newItem.ID.String()] = &newItem
+
+	//add new item to cargo hold
+	s.CargoBay.Items = append(s.CargoBay.Items, &newItem)
+
+	return nil
+}
+
 //PeriodicUpdate Updates a fitted slot on a ship
 func (m *FittedSlot) PeriodicUpdate() {
 	if m.IsCycling {
