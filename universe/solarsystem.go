@@ -2,9 +2,11 @@ package universe
 
 import (
 	"encoding/json"
+	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"sync"
 	"time"
 
@@ -334,6 +336,14 @@ func (s *SolarSystem) PeriodicUpdate() {
 						c.WriteErrorMessage(err.Error())
 					}
 				}
+			}
+		} else if evt.Type == models.NewMessageRegistry().SplitItem {
+			if sh != nil {
+				//extract data
+				data := evt.Body.(models.ClientSplitItemBody)
+
+				//debug out
+				log.Println(fmt.Sprintf("ClientSplitItemBody: %v", data))
 			}
 		}
 	}

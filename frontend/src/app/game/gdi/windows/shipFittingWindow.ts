@@ -14,6 +14,7 @@ import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
 import { ClientStackItem } from '../../wsModels/bodies/stackItem';
 import { GDIInput } from '../components/gdiInput';
 import { GDIOverlay } from '../components/gdiOverlay';
+import { ClientSplitItem } from '../../wsModels/bodies/splitItem';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -195,13 +196,28 @@ export class ShipFittingWindow extends GDIWindow {
         // reset views
         this.resetViews();
       } else if (a === 'Split') {
+        // get selected item
+        const i: ShipViewRow = this.shipView.getSelectedItem();
+
         this.modalInput.setOnReturn((txt: string) => {
-          // convert text to number
+          // convert text to an integer
           const n = Math.round(Number(txt));
 
           if (!Number.isNaN(n)) {
-            // todo: send to server as part of split message
-            console.log(n);
+            // send split request
+            const tiMsg: ClientSplitItem = {
+              sid: this.wsSvc.sid,
+              itemID: (i.object as WSContainerItem).id,
+              size: n
+            };
+
+            this.wsSvc.sendMessage(MessageTypes.SplitItem, tiMsg);
+
+            // request cargo bay refresh
+            this.refreshCargoBay();
+
+            // reset views
+            this.resetViews();
           }
 
           // clear input

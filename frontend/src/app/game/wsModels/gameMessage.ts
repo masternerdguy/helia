@@ -22,4 +22,5 @@ export enum MessageTypes {
   PackageItem = 14,
   UnpackageItem = 15,
   StackItem = 16,
+  SplitItem = 17,
 }
