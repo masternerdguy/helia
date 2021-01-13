@@ -1483,13 +1483,13 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 	//get the item to be stacked
 	item := s.FindItemInCargo(id)
 
+	if item == nil {
+		return errors.New("Item not found in cargo bay")
+	}
+
 	//make sure item is clean
 	if item.CoreDirty {
 		return errors.New("Item is dirty and waiting on an escalation to save its state")
-	}
-
-	if item == nil {
-		return errors.New("Item not found in cargo bay")
 	}
 
 	//make sure the item is packaged
@@ -1587,6 +1587,9 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 	item.Quantity -= size
 	item.CoreDirty = true
 
+	//escalate to core for saving in db
+	s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
+
 	//make a new item stack of the given size
 	nid, err := uuid.NewUUID()
 
@@ -1613,7 +1616,6 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 	}
 
 	//escalate to core for saving in db
-	s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
 	s.CurrentSystem.NewItems[newItem.ID.String()] = &newItem
 
 	//add new item to cargo hold

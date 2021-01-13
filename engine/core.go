@@ -260,12 +260,15 @@ func handleEscalations(sol *universe.SolarSystem) {
 			defer mi.Lock.Unlock()
 
 			//save new item to db
-			err := newItem(mi)
+			id, err := newItem(mi)
 
 			//error check
-			if err != nil {
+			if err != nil || id == nil {
 				log.Println(fmt.Sprintf("Unable to save new item %v: %v", mi.ID, err))
 			} else {
+				//store corrected id from db insert
+				mi.ID = *id
+
 				//mark as clean
 				mi.CoreDirty = false
 			}

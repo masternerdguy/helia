@@ -886,18 +886,18 @@ func changeQuantity(itemID uuid.UUID, quantity int) error {
 }
 
 //newItem Saves a new item to the database
-func newItem(item *universe.Item) error {
+func newItem(item *universe.Item) (*uuid.UUID, error) {
 	itemSvc := sql.GetItemService()
 
 	//convert to sql type
 	sql := SQLFromItem(item)
 
 	if sql == nil {
-		return errors.New("Error converting item to SQL type")
+		return nil, errors.New("Error converting item to SQL type")
 	}
 
 	//save item
-	_, err := itemSvc.NewItem(*sql)
+	o, err := itemSvc.NewItem(*sql)
 
-	return err
+	return &o.ID, err
 }
