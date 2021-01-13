@@ -147,12 +147,18 @@ func handleEscalations(sol *universe.SolarSystem) {
 			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
 
+			//mark as dirty if not marked already
+			mi.CoreDirty = true
+
 			//save new location of item to db
 			err := saveItemLocation(mi.ID, mi.ContainerID)
 
 			//error check
 			if err != nil {
 				log.Println(fmt.Sprintf("Unable to relocate item %v: %v", mi.ID, err))
+			} else {
+				//mark as clean
+				mi.CoreDirty = false
 			}
 		}(mi, sol)
 	}
@@ -169,12 +175,18 @@ func handleEscalations(sol *universe.SolarSystem) {
 			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
 
+			//mark as dirty if not marked already
+			mi.CoreDirty = true
+
 			//mark item as packaged in the db
 			err := packageItem(mi.ID)
 
 			//error check
 			if err != nil {
 				log.Println(fmt.Sprintf("Unable to package item %v: %v", mi.ID, err))
+			} else {
+				//mark as clean
+				mi.CoreDirty = false
 			}
 		}(mi, sol)
 	}
@@ -191,12 +203,18 @@ func handleEscalations(sol *universe.SolarSystem) {
 			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
 
+			//mark as dirty if not marked already
+			mi.CoreDirty = true
+
 			//save unpackaged item to db
 			err := unpackageItem(mi.ID, mi.Meta)
 
 			//error check
 			if err != nil {
 				log.Println(fmt.Sprintf("Unable to unpackage item %v: %v", mi.ID, err))
+			} else {
+				//mark as clean
+				mi.CoreDirty = false
 			}
 		}(mi, sol)
 	}
@@ -213,12 +231,18 @@ func handleEscalations(sol *universe.SolarSystem) {
 			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
 
+			//mark as dirty if not marked already
+			mi.CoreDirty = true
+
 			//save quantity of item to db
 			err := changeQuantity(mi.ID, mi.Quantity)
 
 			//error check
 			if err != nil {
 				log.Println(fmt.Sprintf("Unable to change quantity of item %v: %v", mi.ID, err))
+			} else {
+				//mark as clean
+				mi.CoreDirty = false
 			}
 		}(mi, sol)
 	}
@@ -241,6 +265,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 			//error check
 			if err != nil {
 				log.Println(fmt.Sprintf("Unable to save new item %v: %v", mi.ID, err))
+			} else {
+				//mark as clean
+				mi.CoreDirty = false
 			}
 		}(mi, sol)
 	}

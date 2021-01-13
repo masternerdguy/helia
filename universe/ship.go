@@ -1341,12 +1341,13 @@ func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
 	for i := range s.CargoBay.Items {
 		o := s.CargoBay.Items[i]
 
-		//skip if not this item
-		if o.ID != id {
+		//skip if not this item or is dirty
+		if o.ID != id || o.CoreDirty {
 			newCB = append(newCB, o)
 		} else {
 			//move to trash
 			o.ContainerID = s.TrashContainerID
+			o.CoreDirty = true
 
 			//escalate to core to save to db
 			s.CurrentSystem.MovedItems[o.ID.String()] = o
@@ -1382,6 +1383,11 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 		return errors.New("Item not found in cargo bay")
 	}
 
+	//make sure item is clean
+	if item.CoreDirty {
+		return errors.New("Item is dirty and waiting on an escalation to save its state")
+	}
+
 	//make sure the item is unpackaged
 	if item.IsPackaged {
 		return errors.New("Item is already packaged")
@@ -1399,6 +1405,7 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 
 	//package item in-memory
 	item.IsPackaged = true
+	item.CoreDirty = true
 
 	//wipe out item metadata
 	item.Meta = Meta{}
@@ -1433,6 +1440,11 @@ func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 		return errors.New("Item not found in cargo bay")
 	}
 
+	//make sure item is clean
+	if item.CoreDirty {
+		return errors.New("Item is dirty and waiting on an escalation to save its state")
+	}
+
 	//make sure the item is packaged
 	if !item.IsPackaged {
 		return errors.New("Item is already unpackaged")
@@ -1445,6 +1457,7 @@ func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 
 	//unpackage item in-memory
 	item.IsPackaged = false
+	item.CoreDirty = true
 
 	//copy item type metadata as initial item metadata
 	item.Meta = item.ItemTypeMeta
@@ -1470,6 +1483,11 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 	//get the item to be stacked
 	item := s.FindItemInCargo(id)
 
+	//make sure item is clean
+	if item.CoreDirty {
+		return errors.New("Item is dirty and waiting on an escalation to save its state")
+	}
+
 	if item == nil {
 		return errors.New("Item not found in cargo bay")
 	}
@@ -1488,12 +1506,15 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 			continue
 		} else {
 			//see if we can merge into this stack
-			if o.IsPackaged && o.ItemTypeID == item.ItemTypeID {
+			if o.IsPackaged && o.ItemTypeID == item.ItemTypeID && !o.CoreDirty && !item.CoreDirty {
 				//merge stacks
 				q := item.Quantity
 
 				o.Quantity += q
 				item.Quantity -= q
+
+				o.CoreDirty = true
+				item.CoreDirty = true
 
 				//escalate to core for saving in db
 				s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
@@ -1542,6 +1563,11 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 		return errors.New("Item not found in cargo bay")
 	}
 
+	//make sure item is clean
+	if item.CoreDirty {
+		return errors.New("Item is dirty and waiting on an escalation to save its state")
+	}
+
 	//make sure the item is packaged
 	if !item.IsPackaged {
 		return errors.New("Only packaged items can be split")
@@ -1559,6 +1585,7 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 
 	//reduce found stack by new stack size
 	item.Quantity -= size
+	item.CoreDirty = true
 
 	//make a new item stack of the given size
 	nid, err := uuid.NewUUID()
@@ -1582,6 +1609,7 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 		ItemFamilyID:   item.ItemFamilyID,
 		ItemFamilyName: item.ItemFamilyName,
 		ItemTypeMeta:   item.ItemTypeMeta,
+		CoreDirty:      true,
 	}
 
 	//escalate to core for saving in db

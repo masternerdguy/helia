@@ -24,4 +24,5 @@ type Item struct {
 	ItemFamilyID   string
 	ItemFamilyName string
 	ItemTypeMeta   Meta
+	CoreDirty      bool
 }

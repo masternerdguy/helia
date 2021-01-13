@@ -196,6 +196,12 @@ func (s *SolarSystem) PeriodicUpdate() {
 				}
 
 				for _, i := range sh.CargoBay.Items {
+					//skip if dirty
+					if i.CoreDirty {
+						continue
+					}
+
+					//add to message
 					r := models.ServerItemViewBody{
 						ID:             i.ID,
 						ItemTypeID:     i.ItemTypeID,
