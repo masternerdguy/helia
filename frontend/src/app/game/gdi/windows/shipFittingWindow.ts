@@ -196,7 +196,18 @@ export class ShipFittingWindow extends GDIWindow {
         this.resetViews();
       } else if (a === 'Split') {
         this.modalInput.setOnReturn((txt: string) => {
-          console.log(txt);
+          // convert text to number
+          const n = Math.round(Number(txt));
+
+          if (!Number.isNaN(n)) {
+            // todo: send to server as part of split message
+            console.log(n);
+          }
+
+          // clear input
+          this.modalInput.setText('');
+
+          // hide modal overlay
           this.hideModalInput();
         });
 
