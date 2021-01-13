@@ -28,7 +28,7 @@
     "regl": "^1.7.0",
     "rng": "^0.2.2",
     "rxjs": "~6.5.4",
-    "tslib": "^2.0.0",
+    "tslib": "^2.1.0",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {
@@ -37,7 +37,7 @@
     "@angular/compiler-cli": "^10.2.4",
     "@types/jasmine": "^3.6.2",
     "@types/jasminewd2": "~2.0.3",
-    "@types/node": "^12.19.11",
+    "@types/node": "^12.19.13",
     "codelyzer": "^5.1.2",
     "jasmine-core": "~3.5.0",
     "jasmine-spec-reporter": "~5.0.0",
