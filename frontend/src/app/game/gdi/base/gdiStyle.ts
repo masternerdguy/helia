@@ -21,6 +21,11 @@ export class GDIStyle {
   static labelTextColor = 'white';
   static labelBorderSize = 0;
 
+  // overlay
+  static overlayBorderColor = '';
+  static overlayFillColor = '#00091a';
+  static overlayBorderSize = 0;
+
   // tab
   static tabBorderColor = 'white';
   static tabFillColor = '#00091a';

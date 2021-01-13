@@ -1,5 +1,5 @@
 import { GDIWindow } from '../base/gdiWindow';
-import { FontSize } from '../base/gdiStyle';
+import { FontSize, GDIStyle } from '../base/gdiStyle';
 import { GDIList } from '../components/gdiList';
 import { WSModule } from '../../wsModels/entities/wsShip';
 import { WsService } from '../../ws.service';
@@ -12,12 +12,18 @@ import { ClientTrashItem } from '../../wsModels/bodies/trashItem';
 import { ClientPackageItem } from '../../wsModels/bodies/packageItem';
 import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
 import { ClientStackItem } from '../../wsModels/bodies/stackItem';
+import { GDIInput } from '../components/gdiInput';
+import { GDIOverlay } from '../components/gdiOverlay';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
   private shipView: GDIList = new GDIList();
   private infoView: GDIList = new GDIList();
   private actionView: GDIList = new GDIList();
+
+  // inputs
+  private modalOverlay: GDIOverlay = new GDIOverlay();
+  private modalInput: GDIInput = new GDIInput();
 
   // player
   private player: Player;
@@ -189,14 +195,50 @@ export class ShipFittingWindow extends GDIWindow {
         // reset views
         this.resetViews();
       } else if (a === 'Split') {
-        throw new Error(`${a} not yet implemented`);
+        this.modalInput.setOnReturn((txt: string) => {
+          console.log(txt);
+          this.hideModalInput();
+        });
+
+        this.showModalInput();
       }
     });
+
+    // setup modal input
+    this.modalOverlay.setWidth(this.getWidth());
+    this.modalOverlay.setHeight(this.getHeight());
+    this.modalOverlay.setX(0);
+    this.modalOverlay.setY(0);
+    this.modalOverlay.initialize();
+
+    const fontSize = GDIStyle.getUnderlyingFontSize(FontSize.large);
+    this.modalInput.setWidth(100);
+    this.modalInput.setHeight(Math.round(fontSize + 0.5));
+    this.modalInput.setX((this.getWidth() / 2) - (this.modalInput.getWidth() / 2));
+    this.modalInput.setY((this.getHeight() / 2) - (this.modalInput.getHeight() / 2));
+    this.modalInput.setFont(FontSize.large);
+    this.modalInput.initialize();
 
     // pack
     this.addComponent(this.shipView);
     this.addComponent(this.infoView);
     this.addComponent(this.actionView);
+  }
+
+  private showModalInput() {
+    this.removeComponent(this.shipView);
+    this.removeComponent(this.infoView);
+    this.removeComponent(this.actionView);
+    this.addComponent(this.modalOverlay);
+    this.addComponent(this.modalInput);
+  }
+
+  private hideModalInput() {
+    this.addComponent(this.shipView);
+    this.addComponent(this.infoView);
+    this.addComponent(this.actionView);
+    this.removeComponent(this.modalOverlay);
+    this.removeComponent(this.modalInput);
   }
 
   private refreshCargoBay() {

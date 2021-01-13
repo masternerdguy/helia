@@ -199,6 +199,10 @@ export class GDIWindow extends GDIBase {
     this.components.push(component);
   }
 
+  removeComponent(component: GDIComponent) {
+    this.components = this.components.filter(el => el !== component);
+  }
+
   isDragging(): boolean {
     return this.dragMode;
   }
