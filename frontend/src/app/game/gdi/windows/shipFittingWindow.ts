@@ -15,6 +15,7 @@ import { ClientStackItem } from '../../wsModels/bodies/stackItem';
 import { GDIInput } from '../components/gdiInput';
 import { GDIOverlay } from '../components/gdiOverlay';
 import { ClientSplitItem } from '../../wsModels/bodies/splitItem';
+import { ClientFitModule } from '../../wsModels/bodies/fitModule';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -228,6 +229,23 @@ export class ShipFittingWindow extends GDIWindow {
         });
 
         this.showModalInput();
+      } else if (a === 'Fit') {
+        // get selected item
+        const i: ShipViewRow = this.shipView.getSelectedItem();
+
+        // send fit request
+        const tiMsg: ClientFitModule = {
+          sid: this.wsSvc.sid,
+          itemID: (i.object as WSContainerItem).id,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.FitModule, tiMsg);
+
+        // request cargo bay refresh
+        this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
       }
     });
 
@@ -543,6 +561,19 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
       }
     } else {
       actions.push('Package');
+
+      // determine whether or not this is a module
+      const isModule =
+        m.itemFamilyID === 'gun_turret' ||
+        m.itemFamilyID === 'missile_launcher' ||
+        m.itemFamilyID === 'shield_booster' ||
+        m.itemFamilyID === 'fuel_tank' ||
+        m.itemFamilyID === 'armor_plate';
+
+      if (isModule) {
+        // offer fit action
+        actions.push('Fit');
+      }
     }
 
     // spacer
