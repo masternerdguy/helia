@@ -2,6 +2,8 @@ package universe
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"math"
 	"sync"
 	"time"
@@ -1239,6 +1241,42 @@ func (s *Ship) FindItemInCargo(id uuid.UUID) *Item {
 	}
 
 	//nothing found
+	return nil
+}
+
+//FitModule Removes an item from the cargo hold and fits it to the ship
+func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
+	if lock {
+		//lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	//lock containers
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	s.FittingBay.Lock.Lock()
+	defer s.FittingBay.Lock.Unlock()
+
+	//make sure ship is docked
+	if s.DockedAtStationID == nil {
+		return errors.New("You must be docked to fit a module")
+	}
+
+	//get the item to be packaged
+	item := s.FindItemInCargo(id)
+
+	if item == nil {
+		return errors.New("Item not found in cargo bay")
+	}
+
+	//get module volume
+	//v, _ := item.ItemTypeMeta.GetFloat64("volume")
+
+	log.Println(fmt.Sprintf("todo fit module: %v", item))
+
+	//success!
 	return nil
 }
 
