@@ -624,7 +624,7 @@ function moduleStatusString(m: WSModule) {
 
   // build status string
   return `${fixedString(m.willRepeat ? '*' : '', 1)} ${fixedString(
-    m.type,
+    m.itemID !== '00000000-0000-0000-0000-000000000000' ? m.type : '[EMPTY]',
     24
   )} ${pc}`;
 }
