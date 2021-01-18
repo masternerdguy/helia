@@ -209,7 +209,7 @@ export class ShipFittingWindow extends GDIWindow {
             const tiMsg: ClientSplitItem = {
               sid: this.wsSvc.sid,
               itemID: (i.object as WSContainerItem).id,
-              size: n
+              size: n,
             };
 
             this.wsSvc.sendMessage(MessageTypes.SplitItem, tiMsg);
@@ -259,8 +259,10 @@ export class ShipFittingWindow extends GDIWindow {
     const fontSize = GDIStyle.getUnderlyingFontSize(FontSize.large);
     this.modalInput.setWidth(100);
     this.modalInput.setHeight(Math.round(fontSize + 0.5));
-    this.modalInput.setX((this.getWidth() / 2) - (this.modalInput.getWidth() / 2));
-    this.modalInput.setY((this.getHeight() / 2) - (this.modalInput.getHeight() / 2));
+    this.modalInput.setX(this.getWidth() / 2 - this.modalInput.getWidth() / 2);
+    this.modalInput.setY(
+      this.getHeight() / 2 - this.modalInput.getHeight() / 2
+    );
     this.modalInput.setFont(FontSize.large);
     this.modalInput.initialize();
 
@@ -592,7 +594,7 @@ function buildFittingRowFromModule(
 ): ShipViewRow {
   const r: ShipViewRow = {
     object: m,
-    actions: getFittingRowActions(isDocked),
+    actions: getFittingRowActions(isDocked, m),
     listString: () => {
       return moduleStatusString(m);
     },
@@ -601,11 +603,13 @@ function buildFittingRowFromModule(
   return r;
 }
 
-function getFittingRowActions(isDocked: boolean) {
+function getFittingRowActions(isDocked: boolean, m: WSModule) {
   const actions: string[] = [];
 
   if (isDocked) {
-    actions.push('Unfit');
+    if (m.itemID !== '00000000-0000-0000-0000-000000000000') {
+      actions.push('Unfit');
+    }
   }
 
   return actions;
