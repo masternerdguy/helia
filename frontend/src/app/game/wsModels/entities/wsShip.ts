@@ -23,6 +23,7 @@ export class WSShip {
   fuelP: number;
   fitStatus: WSFitting;
   dockedAtStationID: string;
+  cargoP: number;
 }
 
 export class WSFitting {

@@ -16,6 +16,7 @@ import { GDIInput } from '../components/gdiInput';
 import { GDIOverlay } from '../components/gdiOverlay';
 import { ClientSplitItem } from '../../wsModels/bodies/splitItem';
 import { ClientFitModule } from '../../wsModels/bodies/fitModule';
+import { GDIBar } from '../components/gdiBar';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -26,6 +27,9 @@ export class ShipFittingWindow extends GDIWindow {
   // inputs
   private modalOverlay: GDIOverlay = new GDIOverlay();
   private modalInput: GDIInput = new GDIInput();
+
+  // bars
+  private cargoBayUsed: GDIBar = new GDIBar();
 
   // player
   private player: Player;
@@ -51,7 +55,7 @@ export class ShipFittingWindow extends GDIWindow {
 
     // setup ship view
     this.shipView.setWidth(500);
-    this.shipView.setHeight(400);
+    this.shipView.setHeight(380);
     this.shipView.initialize();
 
     this.shipView.setX(0);
@@ -83,6 +87,15 @@ export class ShipFittingWindow extends GDIWindow {
         }
       }
     });
+
+    // setup cargo bar
+    this.cargoBayUsed.setX(0);
+    this.cargoBayUsed.setY(380);
+    this.cargoBayUsed.setWidth(500);
+    this.cargoBayUsed.setHeight(20);
+    this.cargoBayUsed.initialize();
+    this.cargoBayUsed.setFont(FontSize.normal);
+    this.cargoBayUsed.setText('Cargo Bay Used');
 
     // setup info view
     this.infoView.setWidth(500);
@@ -270,12 +283,14 @@ export class ShipFittingWindow extends GDIWindow {
     this.addComponent(this.shipView);
     this.addComponent(this.infoView);
     this.addComponent(this.actionView);
+    this.addComponent(this.cargoBayUsed);
   }
 
   private showModalInput() {
     this.removeComponent(this.shipView);
     this.removeComponent(this.infoView);
     this.removeComponent(this.actionView);
+    this.removeComponent(this.cargoBayUsed);
     this.addComponent(this.modalOverlay);
     this.addComponent(this.modalInput);
   }
@@ -284,6 +299,7 @@ export class ShipFittingWindow extends GDIWindow {
     this.addComponent(this.shipView);
     this.addComponent(this.infoView);
     this.addComponent(this.actionView);
+    this.addComponent(this.cargoBayUsed);
     this.removeComponent(this.modalOverlay);
     this.removeComponent(this.modalInput);
   }
@@ -352,6 +368,9 @@ export class ShipFittingWindow extends GDIWindow {
         cargo.push(r);
       }
     }
+
+    this.cargoBayUsed.setPercentage(this.player.currentShip.cargoP);
+    console.log(this.player.currentShip.cargoP);
 
     // update fitted module display
     const rackAMods: ShipViewRow[] = [];
