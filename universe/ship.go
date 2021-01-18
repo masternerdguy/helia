@@ -1401,6 +1401,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 		if i.ID == item.ID {
 			// reassign to fitting bay and escalate to save
 			i.ContainerID = s.FittingBayContainerID
+			s.FittingBay.Items = append(s.FittingBay.Items, i)
 			s.CurrentSystem.MovedItems[i.ID.String()] = i
 		} else {
 			// keep in cargo bay
