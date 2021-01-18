@@ -848,11 +848,20 @@ func (s *Ship) TotalCargoBayVolumeUsed(lock bool) float64 {
 
 	// loop over items in cargo hold
 	for _, i := range s.CargoBay.Items {
-		// get their volume metadata
-		volume, f := i.Meta.GetFloat64("volume")
+		if i.IsPackaged {
+			// get item type volume metadata
+			volume, f := i.ItemTypeMeta.GetFloat64("volume")
 
-		if f {
-			tV += (volume * float64(i.Quantity))
+			if f {
+				tV += (volume * float64(i.Quantity))
+			}
+		} else {
+			// get item volume metadata
+			volume, f := i.Meta.GetFloat64("volume")
+
+			if f {
+				tV += (volume * float64(i.Quantity))
+			}
 		}
 	}
 
