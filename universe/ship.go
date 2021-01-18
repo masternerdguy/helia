@@ -1425,6 +1425,13 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	//fit to ship
 	(*rack)[idx] = fs
 
+	//increase max armor if needed
+	armorMaxAdd, f := fs.ItemMeta.GetFloat64("armor_max_add")
+
+	if f {
+		s.Armor += armorMaxAdd
+	}
+
 	//success!
 	return nil
 }
