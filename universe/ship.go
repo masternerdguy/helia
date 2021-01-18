@@ -2,8 +2,6 @@ package universe
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"math"
 	"sync"
 	"time"
@@ -187,18 +185,24 @@ func (f *Fitting) stripModuleFromFitting(itemID uuid.UUID) {
 	for _, i := range f.ARack {
 		if i.ItemID != itemID {
 			newA = append(newA, i)
+		} else {
+			newA = append(newA, FittedSlot{})
 		}
 	}
 
 	for _, i := range f.BRack {
 		if i.ItemID != itemID {
 			newB = append(newB, i)
+		} else {
+			newB = append(newB, FittedSlot{})
 		}
 	}
 
 	for _, i := range f.CRack {
 		if i.ItemID != itemID {
 			newC = append(newC, i)
+		} else {
+			newC = append(newC, FittedSlot{})
 		}
 	}
 
@@ -206,6 +210,83 @@ func (f *Fitting) stripModuleFromFitting(itemID uuid.UUID) {
 	f.ARack = newA
 	f.BRack = newB
 	f.CRack = newC
+}
+
+//getFreeSlotIndex Determines whether a rack has a free slot suitable for fitting a given module and returns the index if found
+func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (int, bool) {
+	// get default uuid
+	emptyUUID := uuid.UUID{}
+	defaultUUID := emptyUUID.String()
+
+	// convert item family to module family
+	var modFamily string = ""
+
+	if itemFamilyID == "gun_turret" {
+		modFamily = "gun"
+	} else if itemFamilyID == "missile_launcher" {
+		modFamily = "missile"
+	} else if itemFamilyID == "shield_booster" ||
+		itemFamilyID == "armor_plate" {
+		modFamily = "tank"
+	} else if itemFamilyID == "fuel_tank" {
+		modFamily = "fuel"
+	}
+
+	if modFamily == "" {
+		return -1, false
+	}
+
+	// find rack in fitting
+	var realRack *[]FittedSlot = nil
+
+	if rack == "a" {
+		realRack = &s.Fitting.ARack
+	} else if rack == "b" {
+		realRack = &s.Fitting.BRack
+	} else if rack == "c" {
+		realRack = &s.Fitting.CRack
+	}
+
+	if realRack == nil {
+		return -1, false
+	}
+
+	// find rack in layout
+	var layoutRack *[]Slot = nil
+
+	if rack == "a" {
+		layoutRack = &s.TemplateData.SlotLayout.ASlots
+	} else if rack == "b" {
+		layoutRack = &s.TemplateData.SlotLayout.BSlots
+	} else if rack == "c" {
+		layoutRack = &s.TemplateData.SlotLayout.CSlots
+	}
+
+	if layoutRack == nil {
+		return -1, false
+	}
+
+	// iterate over slot layout
+	for i, s := range *layoutRack {
+		// check if this slot is used in the fitting
+		if len(*realRack) > i {
+			f := (*realRack)[i]
+
+			if f.ItemID.String() != defaultUUID {
+				// this slot is in use
+				continue
+			}
+		}
+
+		// check if this slot is compatible
+		if s.Volume >= volume &&
+			(s.Family == modFamily || s.Family == "any") {
+			// this slot is compatible
+			return i, true
+		}
+	}
+
+	return -1, false
 }
 
 //CopyShip Returns a copy of the ship
@@ -360,6 +441,22 @@ func (s *Ship) PeriodicUpdate() {
 			} else {
 				s.DockedAtStation = station
 			}
+		}
+
+		// make sure ship is still linked into frozen modules
+		for i := range s.Fitting.ARack {
+			s.Fitting.ARack[i].shipMountedOn = s
+			s.Fitting.ARack[i].Rack = "A"
+		}
+
+		for i := range s.Fitting.BRack {
+			s.Fitting.BRack[i].shipMountedOn = s
+			s.Fitting.BRack[i].Rack = "B"
+		}
+
+		for i := range s.Fitting.CRack {
+			s.Fitting.CRack[i].shipMountedOn = s
+			s.Fitting.CRack[i].Rack = "C"
 		}
 
 		// clamp to station
@@ -1271,10 +1368,62 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 		return errors.New("Item not found in cargo bay")
 	}
 
-	//get module volume
-	//v, _ := item.ItemTypeMeta.GetFloat64("volume")
+	//get module rack
+	r, _ := item.ItemTypeMeta.GetString("rack")
+	var rack *[]FittedSlot = nil
 
-	log.Println(fmt.Sprintf("todo fit module: %v", item))
+	if r == "a" {
+		rack = &s.Fitting.ARack
+	} else if r == "b" {
+		rack = &s.Fitting.BRack
+	} else if r == "c" {
+		rack = &s.Fitting.CRack
+	}
+
+	if rack == nil {
+		return errors.New("Rack not found")
+	}
+
+	//get module volume
+	v, _ := item.ItemTypeMeta.GetInt("volume")
+
+	//find a free slot
+	idx, fnd := s.getFreeSlotIndex(item.ItemFamilyID, v, r)
+
+	if !fnd || idx < 0 {
+		return errors.New("No available and compatible slot found to fit this module")
+	}
+
+	//remove item from cargo bay and move to fitting bay
+	newCB := make([]*Item, 0)
+
+	for _, i := range s.CargoBay.Items {
+		if i.ID == item.ID {
+			// reassign to fitting bay and escalate to save
+			i.ContainerID = s.FittingBayContainerID
+			s.CurrentSystem.MovedItems[i.ID.String()] = i
+		} else {
+			// keep in cargo bay
+			newCB = append(newCB, i)
+		}
+	}
+
+	s.CargoBay.Items = newCB
+
+	//create new fitted slot for item
+	fs := FittedSlot{
+		ItemID:         item.ID,
+		ItemTypeID:     item.ItemTypeID,
+		ItemMeta:       item.Meta,
+		ItemTypeMeta:   item.ItemTypeMeta,
+		ItemTypeFamily: item.ItemFamilyID,
+		ItemTypeName:   item.ItemTypeName,
+	}
+
+	fs.shipMountedOn = s
+
+	//fit to ship
+	(*rack)[idx] = fs
 
 	//success!
 	return nil

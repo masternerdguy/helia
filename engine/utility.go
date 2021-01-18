@@ -18,6 +18,10 @@ func makeTimestamp() int64 {
 func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error) {
 	const moduleCreationReason = "Module for new noob ship for player"
 
+	// get default uuid
+	emptyUUID := uuid.UUID{}
+	defaultUUID := emptyUUID.String()
+
 	//safety check
 	if start == nil {
 		return nil, errors.New("no start provided")
@@ -81,6 +85,13 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 
 	//create rack a modules
 	for _, l := range start.ShipFitting.ARack {
+		//skip if empty slot
+		if l.ItemTypeID.String() == defaultUUID {
+			//link empty slot and move on
+			fitting.ARack = append(fitting.ARack, sql.FittedSlot{})
+			continue
+		}
+
 		//load item type data
 		itemType, err := itemTypeSvc.GetItemTypeByID(l.ItemTypeID)
 
@@ -112,6 +123,13 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 
 	//create rack b modules
 	for _, l := range start.ShipFitting.BRack {
+		//skip if empty slot
+		if l.ItemTypeID.String() == defaultUUID {
+			//link empty slot and move on
+			fitting.BRack = append(fitting.BRack, sql.FittedSlot{})
+			continue
+		}
+
 		//load item type data
 		itemType, err := itemTypeSvc.GetItemTypeByID(l.ItemTypeID)
 
@@ -143,6 +161,13 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 
 	//create rack c modules
 	for _, l := range start.ShipFitting.CRack {
+		//skip if empty slot
+		if l.ItemTypeID.String() == defaultUUID {
+			//link empty slot and move on
+			fitting.CRack = append(fitting.CRack, sql.FittedSlot{})
+			continue
+		}
+
 		//load item type data
 		itemType, err := itemTypeSvc.GetItemTypeByID(l.ItemTypeID)
 

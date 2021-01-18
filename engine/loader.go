@@ -364,6 +364,10 @@ func FittingFromSQL(value *sql.Fitting) (*universe.Fitting, error) {
 
 //FittedSlotFromSQL Converts a FittedSlot from the SQL type to the engine type
 func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
+	// get default uuid
+	emptyUUID := uuid.UUID{}
+	defaultUUID := emptyUUID.String()
+
 	// get services
 	itemSvc := sql.GetItemService()
 	itemTypeSvc := sql.GetItemTypeService()
@@ -380,6 +384,13 @@ func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
 	//copy slot data
 	slot.ItemID = value.ItemID
 	slot.ItemTypeID = value.ItemTypeID
+
+	//check if this slot is empty
+	if slot.ItemID.String() == defaultUUID ||
+		slot.ItemTypeID.String() == defaultUUID {
+		// return empty slot
+		return &slot, nil
+	}
 
 	//load item data
 	item, err := itemSvc.GetItemByID(slot.ItemID)
