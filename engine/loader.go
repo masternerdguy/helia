@@ -20,6 +20,7 @@ func loadUniverse() (*universe.Universe, error) {
 	planetSvc := sql.GetPlanetService()
 	stationSvc := sql.GetStationService()
 	jumpholeSvc := sql.GetJumpholeService()
+	asteroidSvc := sql.GetAsteroidService()
 
 	u := universe.Universe{}
 
@@ -128,6 +129,31 @@ func loadUniverse() (*universe.Universe, error) {
 				}
 
 				s.AddPlanet(&planet)
+			}
+
+			//load asteroids
+			asteroids, err := asteroidSvc.GetAsteroidsBySolarSystem(s.ID)
+
+			if err != nil {
+				return nil, err
+			}
+
+			for _, p := range asteroids {
+				asteroid := universe.Asteroid{
+					ID:         p.ID,
+					SystemID:   p.SystemID,
+					ItemTypeID: p.ItemTypeID,
+					Name:       p.Name,
+					Texture:    p.Texture,
+					Radius:     p.Radius,
+					Theta:      p.Theta,
+					PosX:       p.PosX,
+					PosY:       p.PosY,
+					Yield:      p.Yield,
+					Mass:       p.Mass,
+				}
+
+				s.AddAsteroid(&asteroid)
 			}
 
 			//load jumpholes

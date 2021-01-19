@@ -22,6 +22,7 @@ type SolarSystem struct {
 	planets           map[string]*Planet
 	jumpholes         map[string]*Jumphole
 	stations          map[string]*Station
+	asteroids         map[string]*Asteroid
 	clients           map[string]*shared.GameClient       //clients in this system
 	pushModuleEffects []models.GlobalPushModuleEffectBody //module visual effect aggregation for tick
 	pushPointEffects  []models.GlobalPushPointEffectBody  //non-module point visual effect aggregation for tick
@@ -49,6 +50,7 @@ func (s *SolarSystem) Initialize() {
 	s.planets = make(map[string]*Planet)
 	s.jumpholes = make(map[string]*Jumphole)
 	s.stations = make(map[string]*Station)
+	s.asteroids = make(map[string]*Asteroid)
 	s.DeadShips = make(map[string]*Ship)
 	s.NeedRespawn = make(map[string]*shared.GameClient)
 	s.MovedItems = make(map[string]*Item)
@@ -823,6 +825,21 @@ func (s *SolarSystem) AddPlanet(c *Planet) {
 
 	//add planet
 	s.planets[c.ID.String()] = c
+}
+
+//AddAsteroid Adds a asteroid to the system
+func (s *SolarSystem) AddAsteroid(c *Asteroid) {
+	//safety check
+	if c == nil {
+		return
+	}
+
+	//obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//add asteroid
+	s.asteroids[c.ID.String()] = c
 }
 
 //AddJumphole Adds a jumphole to the system
