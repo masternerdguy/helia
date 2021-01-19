@@ -661,9 +661,14 @@ func (s *SolarSystem) PeriodicUpdate() {
 		//rack a
 		rackA := models.ServerRackStatusBody{}
 
-		for _, v := range d.Fitting.ARack {
+		for idx, v := range d.Fitting.ARack {
 			//build module statusinfo
 			module := copyModuleInfo(v)
+
+			//include slot info
+			slot := d.TemplateData.SlotLayout.ASlots[idx]
+			module.HardpointFamily = slot.Family
+			module.HardpointVolume = slot.Volume
 
 			//store on message
 			rackA.Modules = append(rackA.Modules, module)
@@ -672,9 +677,14 @@ func (s *SolarSystem) PeriodicUpdate() {
 		//rack b
 		rackB := models.ServerRackStatusBody{}
 
-		for _, v := range d.Fitting.BRack {
+		for idx, v := range d.Fitting.BRack {
 			//build module statusinfo
 			module := copyModuleInfo(v)
+
+			//include slot info
+			slot := d.TemplateData.SlotLayout.BSlots[idx]
+			module.HardpointFamily = slot.Family
+			module.HardpointVolume = slot.Volume
 
 			//store on message
 			rackB.Modules = append(rackB.Modules, module)
@@ -683,9 +693,14 @@ func (s *SolarSystem) PeriodicUpdate() {
 		//rack c
 		rackC := models.ServerRackStatusBody{}
 
-		for _, v := range d.Fitting.CRack {
+		for idx, v := range d.Fitting.CRack {
 			//build module statusinfo
 			module := copyModuleInfo(v)
+
+			//include slot info
+			slot := d.TemplateData.SlotLayout.CSlots[idx]
+			module.HardpointFamily = slot.Family
+			module.HardpointVolume = slot.Volume
 
 			//store on message
 			rackC.Modules = append(rackC.Modules, module)
@@ -941,6 +956,7 @@ func copyModuleInfo(v FittedSlot) models.ServerModuleStatusBody {
 	module.ItemTypeID = v.ItemTypeID
 	module.WillRepeat = v.WillRepeat
 	module.CyclePercent = v.CyclePercent
+	module.Meta = models.Meta(v.ItemMeta)
 
 	return module
 }

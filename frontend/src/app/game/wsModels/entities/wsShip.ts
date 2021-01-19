@@ -44,4 +44,7 @@ export class WSModule {
   isCycling: boolean;
   willRepeat: boolean;
   cyclePercent: number;
+  meta: any;
+  hpFamily: string;
+  hpVolume: number;
 }

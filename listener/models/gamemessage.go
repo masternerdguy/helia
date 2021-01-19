@@ -268,6 +268,10 @@ type ServerModuleStatusBody struct {
 	IsCycling    bool      `json:"isCycling"`
 	WillRepeat   bool      `json:"willRepeat"`
 	CyclePercent int       `json:"cyclePercent"`
+	Meta         Meta      `json:"meta"`
+	// hardpoint details
+	HardpointFamily string `json:"hpFamily"`
+	HardpointVolume int    `json:"hpVolume"`
 }
 
 //ServerRackStatusBody Body containing information about a ship's rack

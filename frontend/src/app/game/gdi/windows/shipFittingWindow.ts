@@ -78,8 +78,9 @@ export class ShipFittingWindow extends GDIWindow {
             const info = buildInfoRowsFromContainerItem(r.object);
             this.infoView.setItems(info);
           } else {
-            // todo: handle fitted modules
-            this.infoView.setItems([]);
+            // this is a fitted module
+            const info = buildInfoRowsFromModule(r.object);
+            this.infoView.setItems(info);
           }
         } else {
           // this is nothing
@@ -370,7 +371,6 @@ export class ShipFittingWindow extends GDIWindow {
     }
 
     this.cargoBayUsed.setPercentage(this.player.currentShip.cargoP);
-    console.log(this.player.currentShip.cargoP);
 
     // update fitted module display
     const rackAMods: ShipViewRow[] = [];
@@ -558,6 +558,66 @@ function buildInfoRowsFromContainerItem(m: WSContainerItem): ShipViewRow[] {
   }
 
   // spacer after metadata info
+  rows.push(buildShipViewRowSpacer());
+
+  // return info rows
+  return rows;
+}
+
+function buildInfoRowsFromModule(m: WSModule): ShipViewRow[] {
+  const rows: ShipViewRow[] = [];
+
+  // basic info
+  rows.push(buildShipViewRowText('Basic Info'));
+
+  const type = buildShipViewRowText(infoKeyValueString('Type', m.type));
+
+  const family = buildShipViewRowText(
+    infoKeyValueString('Family', m.family)
+  );
+
+  // store basic info
+  rows.push(type);
+  rows.push(family);
+
+  // spacer after basic info
+  rows.push(buildShipViewRowSpacer());
+
+  // combine item and item type metadata
+  const meta: any = {};
+
+  if (m.meta) {
+    Object.assign(meta, m.meta);
+  }
+
+  if (m.meta) {
+    Object.assign(meta, m.meta);
+  }
+
+  // metadata info
+  rows.push(buildShipViewRowText('Metadata'));
+
+  for (const prop in meta) {
+    if (Object.prototype.hasOwnProperty.call(meta, prop)) {
+      const v = buildShipViewRowText(infoKeyValueString(prop, `${meta[prop]}`));
+
+      rows.push(v);
+    }
+  }
+
+  // spacer after metadata info
+  rows.push(buildShipViewRowSpacer());
+
+  // slot info
+  rows.push(buildShipViewRowText('Slot Info'));
+
+  const slotFamily = buildShipViewRowText(infoKeyValueString('Family', m.hpFamily));
+  const slotVolume = buildShipViewRowText(infoKeyValueString('Volume', m.hpVolume?.toString()));
+
+  rows.push(slotFamily);
+  rows.push(slotVolume);
+
+  // spacer after slot info
   rows.push(buildShipViewRowSpacer());
 
   // return info rows
