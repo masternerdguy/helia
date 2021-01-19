@@ -40,6 +40,7 @@ export class WSModule {
   itemID: string;
   itemTypeID: string;
   family: string;
+  familyName: string;
   type: string;
   isCycling: boolean;
   willRepeat: boolean;

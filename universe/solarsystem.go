@@ -950,6 +950,7 @@ func copyModuleInfo(v FittedSlot) models.ServerModuleStatusBody {
 	module := models.ServerModuleStatusBody{}
 
 	module.Family = v.ItemTypeFamily
+	module.FamilyName = v.ItemTypeFamilyName
 	module.Type = v.ItemTypeName
 	module.IsCycling = v.IsCycling
 	module.ItemID = v.ItemID

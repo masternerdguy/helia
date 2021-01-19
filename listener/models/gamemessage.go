@@ -264,6 +264,7 @@ type ServerModuleStatusBody struct {
 	ItemID       uuid.UUID `json:"itemID"`
 	ItemTypeID   uuid.UUID `json:"itemTypeID"`
 	Family       string    `json:"family"`
+	FamilyName   string    `json:"familyName"`
 	Type         string    `json:"type"`
 	IsCycling    bool      `json:"isCycling"`
 	WillRepeat   bool      `json:"willRepeat"`

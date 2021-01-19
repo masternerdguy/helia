@@ -573,7 +573,7 @@ function buildInfoRowsFromModule(m: WSModule): ShipViewRow[] {
   const type = buildShipViewRowText(infoKeyValueString('Type', m.type));
 
   const family = buildShipViewRowText(
-    infoKeyValueString('Family', m.family)
+    infoKeyValueString('Family', m.familyName)
   );
 
   // store basic info
@@ -585,10 +585,6 @@ function buildInfoRowsFromModule(m: WSModule): ShipViewRow[] {
 
   // combine item and item type metadata
   const meta: any = {};
-
-  if (m.meta) {
-    Object.assign(meta, m.meta);
-  }
 
   if (m.meta) {
     Object.assign(meta, m.meta);
@@ -611,7 +607,7 @@ function buildInfoRowsFromModule(m: WSModule): ShipViewRow[] {
   // slot info
   rows.push(buildShipViewRowText('Slot Info'));
 
-  const slotFamily = buildShipViewRowText(infoKeyValueString('Family', m.hpFamily));
+  const slotFamily = buildShipViewRowText(infoKeyValueString('Compatibility', m.hpFamily));
   const slotVolume = buildShipViewRowText(infoKeyValueString('Volume', m.hpVolume?.toString()));
 
   rows.push(slotFamily);

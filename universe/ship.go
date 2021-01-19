@@ -154,16 +154,17 @@ type FittedSlot struct {
 	ItemTypeID uuid.UUID
 	ItemID     uuid.UUID
 	//in-memory only, exposable to player
-	ItemTypeFamily string
-	ItemTypeName   string
-	ItemMeta       Meta
-	ItemTypeMeta   Meta
-	IsCycling      bool
-	WillRepeat     bool
-	CyclePercent   int
-	TargetID       *uuid.UUID
-	TargetType     *int
-	Rack           string
+	ItemTypeFamily     string
+	ItemTypeFamilyName string
+	ItemTypeName       string
+	ItemMeta           Meta
+	ItemTypeMeta       Meta
+	IsCycling          bool
+	WillRepeat         bool
+	CyclePercent       int
+	TargetID           *uuid.UUID
+	TargetType         *int
+	Rack               string
 	//in-memory only, secret
 	shipMountedOn    *Ship
 	cooldownProgress int
@@ -1422,12 +1423,13 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 
 	//create new fitted slot for item
 	fs := FittedSlot{
-		ItemID:         item.ID,
-		ItemTypeID:     item.ItemTypeID,
-		ItemMeta:       item.Meta,
-		ItemTypeMeta:   item.ItemTypeMeta,
-		ItemTypeFamily: item.ItemFamilyID,
-		ItemTypeName:   item.ItemTypeName,
+		ItemID:             item.ID,
+		ItemTypeID:         item.ItemTypeID,
+		ItemMeta:           item.Meta,
+		ItemTypeMeta:       item.ItemTypeMeta,
+		ItemTypeFamily:     item.ItemFamilyID,
+		ItemTypeFamilyName: item.ItemFamilyName,
+		ItemTypeName:       item.ItemTypeName,
 	}
 
 	fs.shipMountedOn = s

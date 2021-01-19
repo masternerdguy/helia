@@ -371,6 +371,7 @@ func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
 	// get services
 	itemSvc := sql.GetItemService()
 	itemTypeSvc := sql.GetItemTypeService()
+	itemFamilySvc := sql.GetItemFamilyService()
 
 	//set up empty slot
 	slot := universe.FittedSlot{}
@@ -406,10 +407,18 @@ func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
 		return nil, err
 	}
 
+	// load item family data
+	itemFamily, err := itemFamilySvc.GetItemFamilyByID(itemType.Family)
+
+	if err != nil {
+		return nil, err
+	}
+
 	//store on slot
 	slot.ItemMeta = MetaFromSQL(&item.Meta)
 	slot.ItemTypeMeta = MetaFromSQL(&itemType.Meta)
 	slot.ItemTypeFamily = itemType.Family
+	slot.ItemTypeFamilyName = itemFamily.FriendlyName
 	slot.ItemTypeName = itemType.Name
 
 	//return filled slot
