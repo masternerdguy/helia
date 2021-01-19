@@ -6,6 +6,7 @@ import { WSStation } from '../entities/wsStation';
 import { WSJumphole } from '../entities/wsJumphole';
 import { WsPushModuleEffect } from '../entities/wsPushModuleEffect';
 import { WsPushPointEffect } from '../entities/wsPushPointEffect';
+import { WSAsteroid } from '../entities/wsAsteroid';
 
 export class ServerGlobalUpdateBody {
   currentSystemInfo: WSSystem;
@@ -14,6 +15,7 @@ export class ServerGlobalUpdateBody {
   planets: WSPlanet[];
   jumpholes: WSJumphole[];
   stations: WSStation[];
+  asteroids: WSAsteroid[];
   newModuleEffects: WsPushModuleEffect[];
   newPointEffects: WsPushPointEffect[];
 }

@@ -598,6 +598,20 @@ func (s *SolarSystem) PeriodicUpdate() {
 		})
 	}
 
+	for _, d := range s.asteroids {
+		gu.Asteroids = append(gu.Asteroids, models.GlobalAsteroidInfo{
+			ID:       d.ID,
+			SystemID: d.SystemID,
+			Name:     d.Name,
+			PosX:     d.PosX,
+			PosY:     d.PosY,
+			Texture:  d.Texture,
+			Radius:   d.Radius,
+			Mass:     d.Mass,
+			Theta:    d.Theta,
+		})
+	}
+
 	for _, d := range s.jumpholes {
 		gu.Jumpholes = append(gu.Jumpholes, models.GlobalJumpholeInfo{
 			ID:           d.ID,
@@ -827,7 +841,7 @@ func (s *SolarSystem) AddPlanet(c *Planet) {
 	s.planets[c.ID.String()] = c
 }
 
-//AddAsteroid Adds a asteroid to the system
+//AddAsteroid Adds an asteroid to the system
 func (s *SolarSystem) AddAsteroid(c *Asteroid) {
 	//safety check
 	if c == nil {

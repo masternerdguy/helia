@@ -26,6 +26,7 @@ import { ShipFittingWindow } from './gdi/windows/shipFittingWindow';
 import { ServerContainerView } from './wsModels/bodies/containerView';
 import { Container } from './engineModels/container';
 import { ServerErrorMessage } from './wsModels/bodies/errorMessage';
+import { Asteroid } from './engineModels/asteroid';
 
 class EngineSack {
   constructor() {}
@@ -266,6 +267,10 @@ function handleGlobalUpdate(d: GameMessage) {
       msg.stars = [];
     }
 
+    if (!msg.asteroids || msg.asteroids == null) {
+      msg.asteroids = [];
+    }
+
     if (!msg.newModuleEffects || msg.newModuleEffects == null) {
       msg.newModuleEffects = [];
     }
@@ -401,6 +406,44 @@ function handleGlobalUpdate(d: GameMessage) {
       if (!match) {
         // add planet to memory
         engineSack.player.currentSystem.planets.push(new Planet(p));
+      }
+    }
+
+    // update asteroids
+    for (const p of msg.asteroids) {
+      let match = false;
+
+      // find asteroid in memory
+      for (const sm of engineSack.player.currentSystem.asteroids) {
+        if (p.id === sm.id) {
+          match = true;
+          sm.isTargeted = false;
+
+          // sync asteroid in memory
+          sm.sync(p);
+
+          // current ship target check if undocked
+          if (!engineSack.player.currentShip.dockedAtStationID) {
+            if (
+              sm.id === engineSack.player.currentTargetID &&
+              engineSack.player.currentTargetType === TargetType.Asteroid
+            ) {
+              sm.isTargeted = true;
+              engineSack.targetInteractionWindow.setTarget(
+                sm,
+                TargetType.Asteroid
+              );
+            }
+          }
+
+          // exit loop
+          break;
+        }
+      }
+
+      if (!match) {
+        // add asteroid to memory
+        engineSack.player.currentSystem.asteroids.push(new Asteroid(p));
       }
     }
 
@@ -708,6 +751,11 @@ function clientRender() {
   // draw npc stations
   for (const st of engineSack.player.currentSystem.stations) {
     st.render(engineSack.ctx, engineSack.camera);
+  }
+
+  // draw asteroids
+  for (const p of engineSack.player.currentSystem.asteroids) {
+    p.render(engineSack.ctx, engineSack.camera);
   }
 
   // draw ships

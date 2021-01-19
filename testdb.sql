@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2021-01-18 21:29:10
+-- Started on 2021-01-18 22:18:41
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -352,6 +352,9 @@ ALTER TABLE public.users OWNER TO postgres;
 --
 
 COPY public.containers (id, meta, created) FROM stdin;
+7bf8f0fc-8d62-4178-99d4-c79be5d31dc1	{}	2021-01-18 22:15:44.865334-05
+ab59dcf4-867b-49eb-9cec-ec576b3343ab	{}	2021-01-18 22:15:44.86803-05
+62d60ec7-2314-4c3a-a1f6-be0e6dee8f44	{}	2021-01-18 22:15:44.937632-05
 \.
 
 
@@ -379,6 +382,11 @@ ore	Ore	{}
 --
 
 COPY public.items (id, itemtypeid, meta, created, createdby, createdreason, containerid, quantity, ispackaged) FROM stdin;
+b9f5aed1-f1cb-456f-a389-d503ca378910	9d1014c5-3422-4a0f-9839-f585269b4b16	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}	2021-01-18 22:15:45.074086-05	540cfb79-19aa-4d1c-a71d-e08c1220045c	Module for new noob ship for player	62d60ec7-2314-4c3a-a1f6-be0e6dee8f44	1	f
+cad1206b-997d-4788-9cda-6eb5a866f2db	9d1014c5-3422-4a0f-9839-f585269b4b16	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}	2021-01-18 22:15:45.152077-05	540cfb79-19aa-4d1c-a71d-e08c1220045c	Module for new noob ship for player	62d60ec7-2314-4c3a-a1f6-be0e6dee8f44	1	f
+0a3e786e-f2c8-4372-89cf-d07158079c27	09172710-740c-4d1c-9fc0-43cb62e674e7	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "activation_energy": 15, "shield_boost_amount": 20, "activation_gfx_effect": "basic_shield_booster"}	2021-01-18 22:15:45.228293-05	540cfb79-19aa-4d1c-a71d-e08c1220045c	Module for new noob ship for player	62d60ec7-2314-4c3a-a1f6-be0e6dee8f44	1	f
+240d170e-c23e-4aaf-8a97-75d6a2c220ed	b481a521-1b12-4ffa-ac2f-4da015036f7f	{"hp": 15, "rack": "c", "volume": 3, "fuel_max_add": 30}	2021-01-18 22:15:45.309292-05	540cfb79-19aa-4d1c-a71d-e08c1220045c	Module for new noob ship for player	62d60ec7-2314-4c3a-a1f6-be0e6dee8f44	1	f
+65cc5524-1b54-40d5-b581-42c0aa220ac7	c311df30-c21e-4895-acb0-d8808f99710e	{"hp": 75, "rack": "c", "volume": 6, "armor_max_add": 75}	2021-01-18 22:15:45.395292-05	540cfb79-19aa-4d1c-a71d-e08c1220045c	Module for new noob ship for player	62d60ec7-2314-4c3a-a1f6-be0e6dee8f44	1	f
 \.
 
 
@@ -405,6 +413,7 @@ dd522f03-2f52-4e82-b2f8-d7e0029cb82f	ore	Testite	{"hp": 1, "volume": 1}
 --
 
 COPY public.sessions (id, userid) FROM stdin;
+9ef4e5d9-c091-43d4-a885-89d72c9d0be3	540cfb79-19aa-4d1c-a71d-e08c1220045c
 \.
 
 
@@ -415,6 +424,7 @@ COPY public.sessions (id, userid) FROM stdin;
 --
 
 COPY public.ships (id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid, dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid, fittingbay_containerid, remaxdirty, trash_containerid) FROM stdin;
+7251798a-8c0a-4f76-b4ad-e777928f61e7	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	540cfb79-19aa-4d1c-a71d-e08c1220045c	-62222.85318610485	-34065.95203748269	2021-01-18 22:15:45.402292-05	nwiehoff's Starter Ship	Sparrow	173.81534070291616	-1.819501830679189e-12	-1.9716825374760104e-13	209	244	135	286.50496487900756	2.8064661705684555e-15	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "b9f5aed1-f1cb-456f-a389-d503ca378910", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "cad1206b-997d-4788-9cda-6eb5a866f2db", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "0a3e786e-f2c8-4372-89cf-d07158079c27", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "240d170e-c23e-4aaf-8a97-75d6a2c220ed", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "65cc5524-1b54-40d5-b581-42c0aa220ac7", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	ab59dcf4-867b-49eb-9cec-ec576b3343ab	62d60ec7-2314-4c3a-a1f6-be0e6dee8f44	f	7bf8f0fc-8d62-4178-99d4-c79be5d31dc1
 \.
 
 
@@ -545,6 +555,7 @@ edf08406-0879-4141-8af1-f68d32e31c8d	Another System	bfca1f47-e182-4b4d-8632-48d8
 --
 
 COPY public.users (id, username, hashpass, registered, banned, current_shipid, startid) FROM stdin;
+540cfb79-19aa-4d1c-a71d-e08c1220045c	nwiehoff	02c4bf7d7e35c6bab999ac03ece60b8586a27f7ecd4830983b138b74262bf3f9	2021-01-18 22:15:44.780494-05	0	7251798a-8c0a-4f76-b4ad-e777928f61e7	49f06e89-29fb-4a02-a034-4b5d0702adac
 \.
 
 
@@ -1026,7 +1037,7 @@ ALTER TABLE ONLY public.universe_stations
     ADD CONSTRAINT station_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
 
 
--- Completed on 2021-01-18 21:29:10
+-- Completed on 2021-01-18 22:18:41
 
 --
 -- PostgreSQL database dump complete

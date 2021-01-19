@@ -230,6 +230,29 @@ export class OverviewWindow extends GDIWindow {
       jumpholes.push(d);
     }
 
+    // include asteroids
+    for (const i of player.currentSystem.asteroids) {
+      const od = overviewDistance(
+        player.currentShip.x,
+        player.currentShip.y,
+        i.x,
+        i.y
+      );
+
+      const d = {
+        object: i,
+        type: TargetType.Asteroid,
+        listString: () => {
+          return `${fixedString('ASTEROID', 9)}${fixedString(
+            i.name,
+            24
+          )} ${fixedString(od, 8)}`;
+        },
+      };
+
+      objects.push(d);
+    }
+
     // store on lists
     this.globalList.setItems(objects);
     this.shipList.setItems(ships);

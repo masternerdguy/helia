@@ -37,6 +37,7 @@ type TargetTypeRegistry struct {
 	Star     int
 	Planet   int
 	Jumphole int
+	Asteroid int
 }
 
 //NewMessageRegistry Returns a MessageRegistry with correct enum values
@@ -73,6 +74,7 @@ func NewTargetTypeRegistry() *TargetTypeRegistry {
 		Star:     3,
 		Planet:   4,
 		Jumphole: 5,
+		Asteroid: 6,
 	}
 }
 
@@ -151,6 +153,19 @@ type GlobalPlanetInfo struct {
 	Theta      float64   `json:"theta"`
 }
 
+//GlobalAsteroidInfo Structure for passing non-secret information about an asteroid
+type GlobalAsteroidInfo struct {
+	ID       uuid.UUID `json:"id"`
+	SystemID uuid.UUID `json:"systemId"`
+	Name     string    `json:"name"`
+	PosX     float64   `json:"x"`
+	PosY     float64   `json:"y"`
+	Texture  string    `json:"texture"`
+	Radius   float64   `json:"radius"`
+	Mass     float64   `json:"mass"`
+	Theta    float64   `json:"theta"`
+}
+
 //GlobalJumpholeInfo Structure for passing non-secret information about a jumphole
 type GlobalJumpholeInfo struct {
 	ID           uuid.UUID `json:"id"`
@@ -210,6 +225,7 @@ type ServerGlobalUpdateBody struct {
 	Planets           []GlobalPlanetInfo           `json:"planets"`
 	Jumpholes         []GlobalJumpholeInfo         `json:"jumpholes"`
 	Stations          []GlobalStationInfo          `json:"stations"`
+	Asteroids         []GlobalAsteroidInfo         `json:"asteroids"`
 	NewModuleEffects  []GlobalPushModuleEffectBody `json:"newModuleEffects"`
 	NewPointEffects   []GlobalPushPointEffectBody  `json:"newPointEffects"`
 }

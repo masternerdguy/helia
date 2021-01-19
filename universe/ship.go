@@ -1052,6 +1052,19 @@ func (s *Ship) doAutopilotGoto() {
 		tX = tgt.PosX
 		tY = tgt.PosY
 		tR = tgt.Radius
+	} else if s.AutopilotGoto.Type == targetTypeReg.Asteroid {
+		// find asteroid with id
+		tgt := s.CurrentSystem.asteroids[s.AutopilotGoto.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+		tR = tgt.Radius
 	} else {
 		s.CmdAbort()
 		return
@@ -1129,6 +1142,18 @@ func (s *Ship) doAutopilotOrbit() {
 	} else if s.AutopilotOrbit.Type == targetTypeReg.Jumphole {
 		// find jumphole with id
 		tgt := s.CurrentSystem.jumpholes[s.AutopilotOrbit.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort()
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+	} else if s.AutopilotOrbit.Type == targetTypeReg.Asteroid {
+		// find asteroid with id
+		tgt := s.CurrentSystem.asteroids[s.AutopilotOrbit.TargetID.String()]
 
 		if tgt == nil {
 			s.CmdAbort()
