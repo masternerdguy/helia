@@ -5,7 +5,7 @@
 -- Dumped from database version 12.2
 -- Dumped by pg_dump version 12.2
 
--- Started on 2021-01-18 22:18:41
+-- Started on 2021-01-18 23:07:03
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -413,7 +413,7 @@ dd522f03-2f52-4e82-b2f8-d7e0029cb82f	ore	Testite	{"hp": 1, "volume": 1}
 --
 
 COPY public.sessions (id, userid) FROM stdin;
-9ef4e5d9-c091-43d4-a885-89d72c9d0be3	540cfb79-19aa-4d1c-a71d-e08c1220045c
+2e3a9d66-88ef-467f-9e61-464432e74e17	540cfb79-19aa-4d1c-a71d-e08c1220045c
 \.
 
 
@@ -1037,7 +1037,7 @@ ALTER TABLE ONLY public.universe_stations
     ADD CONSTRAINT station_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
 
 
--- Completed on 2021-01-18 22:18:41
+-- Completed on 2021-01-18 23:07:04
 
 --
 -- PostgreSQL database dump complete
