@@ -27,6 +27,7 @@
               "src/assets/planets",
               "src/assets/jumpholes",
               "src/assets/stations",
+              "src/assets/asteroids",
               "src/assets/fonts"
             ],
             "styles": [
