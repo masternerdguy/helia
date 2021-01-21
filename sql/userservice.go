@@ -68,11 +68,13 @@ func (s UserService) NewUser(u string, p string, startID uuid.UUID) (*User, erro
 	uid := uuid.New()
 	createdAt := time.Now()
 
-	_, err = db.Query(sql, uid, u, *hp, createdAt, 0, startID)
+	q, err := db.Query(sql, uid, u, *hp, createdAt, 0, startID)
 
 	if err != nil {
 		return nil, err
 	}
+
+	defer q.Close()
 
 	//return user with inserted data
 	user := User{
@@ -102,11 +104,13 @@ func (s UserService) SetCurrentShipID(uid uuid.UUID, shipID *uuid.UUID) error {
 				UPDATE public.users SET current_shipid = $1 WHERE id = $2;
 			`
 
-	_, err = db.Query(sql, *shipID, uid)
+	q, err := db.Query(sql, *shipID, uid)
 
 	if err != nil {
 		return err
 	}
+
+	defer q.Close()
 
 	return nil
 }

@@ -49,6 +49,8 @@ func (s AsteroidService) GetAsteroidsBySolarSystem(systemID uuid.UUID) ([]Astero
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		r := Asteroid{}
 

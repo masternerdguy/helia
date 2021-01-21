@@ -41,11 +41,13 @@ func (s SessionService) NewSession(userid uuid.UUID) (*Session, error) {
 		   `
 
 	sid := uuid.New()
-	_, err = db.Query(sql, sid, userid)
+	q, err := db.Query(sql, sid, userid)
 
 	if err != nil {
 		return nil, err
 	}
+
+	defer q.Close()
 
 	//return session with inserted data
 	Session := Session{
@@ -102,11 +104,13 @@ func (s SessionService) DeleteSession(userid uuid.UUID) error {
 			FROM sessions
 			WHERE userid=$1`
 
-	_, err = db.Query(sql, userid)
+	q, err := db.Query(sql, userid)
 
 	if err != nil {
 		return err
 	}
+
+	defer q.Close()
 
 	return nil
 }

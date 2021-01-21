@@ -36,6 +36,8 @@ func (s RegionService) GetAllRegions() ([]Region, error) {
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		r := Region{}
 

@@ -47,6 +47,8 @@ func (s JumpholeService) GetAllJumpholes() ([]Jumphole, error) {
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		r := Jumphole{}
 
@@ -83,6 +85,8 @@ func (s JumpholeService) GetJumpholesBySolarSystem(systemID uuid.UUID) ([]Jumpho
 	if err != nil {
 		return nil, err
 	}
+
+	defer rows.Close()
 
 	for rows.Next() {
 		r := Jumphole{}

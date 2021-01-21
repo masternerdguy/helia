@@ -114,6 +114,8 @@ func (s StartService) GetAllStarts() ([]Start, error) {
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		s := Start{}
 

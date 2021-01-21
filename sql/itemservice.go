@@ -89,6 +89,8 @@ func (s ItemService) GetItemsByContainer(containerID uuid.UUID) ([]Item, error) 
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		i := Item{}
 
@@ -124,12 +126,14 @@ func (s ItemService) NewItem(e Item) (*Item, error) {
 	uid := uuid.New()
 	createdAt := time.Now()
 
-	_, err = db.Query(sql, uid, e.ItemTypeID, e.Meta, createdAt, e.CreatedBy, e.CreatedReason, e.ContainerID,
+	q, err := db.Query(sql, uid, e.ItemTypeID, e.Meta, createdAt, e.CreatedBy, e.CreatedReason, e.ContainerID,
 		e.Quantity, e.IsPackaged)
 
 	if err != nil {
 		return nil, err
 	}
+
+	defer q.Close()
 
 	//update id in model
 	e.ID = uid
@@ -153,11 +157,13 @@ func (s ItemService) SetContainerID(id uuid.UUID, containerID uuid.UUID) error {
 				UPDATE public.items SET containerid = $1 WHERE id = $2;
 			`
 
-	_, err = db.Query(sql, containerID, id)
+	q, err := db.Query(sql, containerID, id)
 
 	if err != nil {
 		return err
 	}
+
+	defer q.Close()
 
 	return nil
 }
@@ -176,11 +182,13 @@ func (s ItemService) PackageItem(id uuid.UUID) error {
 				UPDATE public.items SET meta='{}', ispackaged='t' WHERE id = $1;
 			`
 
-	_, err = db.Query(sql, id)
+	q, err := db.Query(sql, id)
 
 	if err != nil {
 		return err
 	}
+
+	defer q.Close()
 
 	return nil
 }
@@ -199,11 +207,13 @@ func (s ItemService) UnpackageItem(id uuid.UUID, meta Meta) error {
 				UPDATE public.items SET meta=$2, ispackaged='f' WHERE id = $1;
 			`
 
-	_, err = db.Query(sql, id, meta)
+	q, err := db.Query(sql, id, meta)
 
 	if err != nil {
 		return err
 	}
+
+	defer q.Close()
 
 	return nil
 }
@@ -222,11 +232,13 @@ func (s ItemService) ChangeQuantity(id uuid.UUID, quantity int) error {
 				UPDATE public.items SET quantity=$2 WHERE id = $1;
 			`
 
-	_, err = db.Query(sql, id, quantity)
+	q, err := db.Query(sql, id, quantity)
 
 	if err != nil {
 		return err
 	}
+
+	defer q.Close()
 
 	return nil
 }

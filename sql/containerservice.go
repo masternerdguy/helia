@@ -43,11 +43,13 @@ func (s ContainerService) NewContainer(e Container) (*Container, error) {
 	uid := uuid.New()
 	createdAt := time.Now()
 
-	_, err = db.Query(sql, uid, e.Meta, createdAt)
+	q, err := db.Query(sql, uid, e.Meta, createdAt)
 
 	if err != nil {
 		return nil, err
 	}
+
+	defer q.Close()
 
 	//update id in model
 	e.ID = uid

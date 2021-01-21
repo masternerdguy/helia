@@ -45,6 +45,8 @@ func (s StarService) GetAllStars() ([]Star, error) {
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		r := Star{}
 
@@ -81,6 +83,8 @@ func (s StarService) GetStarsBySolarSystem(systemID uuid.UUID) ([]Star, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	defer rows.Close()
 
 	for rows.Next() {
 		r := Star{}

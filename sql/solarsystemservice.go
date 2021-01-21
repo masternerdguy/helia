@@ -37,6 +37,8 @@ func (s SolarSystemService) GetSolarSystemsByRegion(regionID uuid.UUID) ([]Solar
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		r := SolarSystem{}
 

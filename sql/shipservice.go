@@ -99,7 +99,7 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 	uid := uuid.New()
 	createdAt := time.Now()
 
-	_, err = db.Query(sql, uid, e.SystemID, e.UserID, e.PosX, e.PosY, createdAt, e.ShipName, e.Texture, e.Theta,
+	q, err := db.Query(sql, uid, e.SystemID, e.UserID, e.PosX, e.PosY, createdAt, e.ShipName, e.Texture, e.Theta,
 		e.VelX, e.VelY, e.Shield, e.Armor, e.Hull, e.Fuel, e.Heat, e.Energy, e.ShipTemplateID, e.DockedAtStationID,
 		e.Fitting, e.Destroyed, e.DestroyedAt, e.CargoBayContainerID, e.FittingBayContainerID, e.ReMaxDirty,
 		e.TrashContainerID)
@@ -107,6 +107,8 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	defer q.Close()
 
 	//update id in model
 	e.ID = uid
@@ -179,6 +181,8 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID, isDestroyed bool)
 	if err != nil {
 		return nil, err
 	}
+
+	defer rows.Close()
 
 	for rows.Next() {
 		s := Ship{}

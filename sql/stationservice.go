@@ -46,6 +46,8 @@ func (s StationService) GetAllStations() ([]Station, error) {
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		r := Station{}
 
@@ -82,6 +84,8 @@ func (s StationService) GetStationsBySolarSystem(systemID uuid.UUID) ([]Station,
 	if err != nil {
 		return nil, err
 	}
+
+	defer rows.Close()
 
 	for rows.Next() {
 		r := Station{}

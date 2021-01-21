@@ -32,12 +32,12 @@ func connect() (*sql.DB, error) {
 	if sharedConfig != nil {
 		//make sure we aren't over on connections
 		if sharedConfig.Stats().OpenConnections+1 >= sharedConfig.Stats().MaxOpenConnections {
-			log.Println(fmt.Sprintf("resetting %v/%v", sharedConfig.Stats().OpenConnections, sharedConfig.Stats().MaxOpenConnections))
+			log.Println(fmt.Sprintf("resetting %v/%v/%v", sharedConfig.Stats().OpenConnections, sharedConfig.Stats().MaxOpenConnections, sharedConfig.Stats().Idle))
 			//reset shared connection
 			sharedConfig.Close()
 			sharedConfig = nil
 		} else {
-			log.Println("reusing")
+			log.Println(fmt.Sprintf("reusing %v/%v/%v", sharedConfig.Stats().OpenConnections, sharedConfig.Stats().MaxOpenConnections, sharedConfig.Stats().Idle))
 			//return existing connection
 			return sharedConfig, nil
 		}
@@ -58,6 +58,7 @@ func connect() (*sql.DB, error) {
 	//connect to the db
 	db, err := sql.Open("postgres", conn)
 	db.SetMaxOpenConns(50)
+	db.SetMaxIdleConns(2)
 
 	//stash config for reuse across goroutines
 	sharedConfig = db

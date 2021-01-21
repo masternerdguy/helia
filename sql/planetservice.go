@@ -46,6 +46,8 @@ func (s PlanetService) GetAllPlanets() ([]Planet, error) {
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		r := Planet{}
 
@@ -82,6 +84,8 @@ func (s PlanetService) GetPlanetsBySolarSystem(systemID uuid.UUID) ([]Planet, er
 	if err != nil {
 		return nil, err
 	}
+
+	defer rows.Close()
 
 	for rows.Next() {
 		r := Planet{}
