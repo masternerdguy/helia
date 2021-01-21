@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"sync"
 
@@ -32,12 +31,10 @@ func connect() (*sql.DB, error) {
 	if sharedConfig != nil {
 		//make sure we aren't over on connections
 		if sharedConfig.Stats().OpenConnections+1 >= sharedConfig.Stats().MaxOpenConnections {
-			log.Println(fmt.Sprintf("resetting %v/%v/%v", sharedConfig.Stats().OpenConnections, sharedConfig.Stats().MaxOpenConnections, sharedConfig.Stats().Idle))
 			//reset shared connection
 			sharedConfig.Close()
 			sharedConfig = nil
 		} else {
-			log.Println(fmt.Sprintf("reusing %v/%v/%v", sharedConfig.Stats().OpenConnections, sharedConfig.Stats().MaxOpenConnections, sharedConfig.Stats().Idle))
 			//return existing connection
 			return sharedConfig, nil
 		}
