@@ -1953,6 +1953,17 @@ func (m *FittedSlot) PeriodicUpdate() {
 
 						return
 					}
+				} else if *m.TargetType == tgtReg.Asteroid {
+					// find asteroid
+					_, f := m.shipMountedOn.CurrentSystem.asteroids[m.TargetID.String()]
+
+					if !f {
+						//target doesn't exist - can't activate
+						m.TargetID = nil
+						m.TargetType = nil
+
+						return
+					}
 				} else {
 					// unsupported target type - can't activate
 					m.TargetID = nil
@@ -2045,6 +2056,22 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		//store target details
 		tgtDummy = tgt.ToPhysicsDummy()
 		tgtI = tgt
+	} else if *m.TargetType == tgtReg.Asteroid {
+		// find asteroid
+		tgt, f := m.shipMountedOn.CurrentSystem.asteroids[m.TargetID.String()]
+
+		if !f {
+			//target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		//store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtI = tgt
 	} else {
 		//unsupported target type - can't activate
 		m.TargetID = nil
@@ -2082,11 +2109,13 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	//account for falloff if present
 	falloff, found := m.ItemTypeMeta.GetString("falloff")
 
+	rangeRatio := 1.0 //default to 100% damage (or ore pull if asteroid)
+
 	if found {
-		//adjust damage based on falloff style
+		//adjust based on falloff style
 		if falloff == "linear" {
-			//damage dealt is a proportion of the distance to target over max range (closer is higher)
-			rangeRatio := 1 - (d / modRange)
+			//damage dealt (or ore pulled if asteroid) is a proportion of the distance to target over max range (closer is higher)
+			rangeRatio = 1 - (d / modRange)
 
 			shieldDmg *= rangeRatio
 			armorDmg *= rangeRatio
@@ -2094,13 +2123,85 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		}
 	}
 
-	//apply damage to target
+	//apply damage (or ore pulled if asteroid) to target
 	if *m.TargetType == tgtReg.Ship {
 		c := tgtI.(*Ship)
 		c.DealDamage(shieldDmg, armorDmg, hullDmg)
 	} else if *m.TargetType == tgtReg.Ship {
 		c := tgtI.(*Station)
 		c.DealDamage(shieldDmg, armorDmg, hullDmg)
+	} else if *m.TargetType == tgtReg.Asteroid {
+		//target is an asteroid - is this a miner?
+		canMineOre, f := m.ItemTypeMeta.GetBool("can_mine_ore")
+
+		if f && canMineOre {
+			//get mining volume
+			miningVolume, _ := m.ItemTypeMeta.GetFloat64("ore_mining_volume")
+
+			//get ore type and volume
+			c := tgtI.(*Asteroid)
+
+			oreType := c.ItemTypeID
+			oreVol, _ := c.ItemTypeMeta.GetFloat64("volume")
+
+			//get available space in cargo hold
+			free := m.shipMountedOn.GetRealCargoBayVolume() - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
+
+			//calculate effective ore volume pulled
+			pulled := miningVolume * c.Yield * rangeRatio
+
+			//make sure there is sufficient room to deposit the ore
+			if free-pulled >= 0 {
+				found := false
+
+				//quantity to be placed in cargo bay
+				q := int((miningVolume * c.Yield) / oreVol)
+
+				//is there already packaged ore of this type in the hold?
+				for idx := range m.shipMountedOn.CargoBay.Items {
+					itm := m.shipMountedOn.CargoBay.Items[idx]
+
+					if itm.ItemTypeID == oreType && itm.IsPackaged && !itm.CoreDirty {
+						//increase the size of this stack
+						itm.Quantity += q
+
+						//escalate for saving
+						m.shipMountedOn.CurrentSystem.ChangedQuantityItems[itm.ID.String()] = itm
+
+						//mark as found
+						found = true
+						break
+					}
+				}
+
+				if !found {
+					//create a new stack of ore
+					newItem := Item{
+						ID:             uuid.New(),
+						ItemTypeID:     oreType,
+						Meta:           c.ItemTypeMeta,
+						Created:        time.Now(),
+						CreatedBy:      &m.shipMountedOn.UserID,
+						CreatedReason:  "Mined ore",
+						ContainerID:    m.shipMountedOn.CargoBayContainerID,
+						Quantity:       q,
+						IsPackaged:     true,
+						Lock:           sync.Mutex{},
+						ItemTypeName:   c.ItemTypeName,
+						ItemFamilyID:   c.ItemFamilyID,
+						ItemFamilyName: c.ItemFamilyName,
+						ItemTypeMeta:   c.ItemTypeMeta,
+						CoreDirty:      true,
+					}
+
+					//escalate to core for saving in db
+					m.shipMountedOn.CurrentSystem.NewItems[newItem.ID.String()] = &newItem
+
+					//add new item to cargo hold
+					m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, &newItem)
+				}
+			}
+		}
 	}
 
 	//include visual effect if present

@@ -7,6 +7,7 @@ import { Camera } from './camera';
 import { Player, TargetType } from './player';
 import { Station } from './station';
 import { Ship } from './ship';
+import { Asteroid } from './asteroid';
 
 export class ModuleEffect extends WsPushModuleEffect {
   vfxData: ModuleActivationEffectData;
@@ -55,6 +56,13 @@ export class ModuleEffect extends WsPushModuleEffect {
           break;
         }
       }
+    } else if (this.objStartType === TargetType.Asteroid) {
+      for (const s of this.player.currentSystem.asteroids) {
+        if (s.id === this.objStartID) {
+          this.objStart = s;
+          break;
+        }
+      }
     }
 
     // locate end object if present
@@ -68,6 +76,13 @@ export class ModuleEffect extends WsPushModuleEffect {
         }
       } else if (this.objEndType === TargetType.Ship) {
         for (const s of this.player.currentSystem.ships) {
+          if (s.id === this.objEndID) {
+            this.objEnd = s;
+            break;
+          }
+        }
+      } else if (this.objEndType === TargetType.Asteroid) {
+        for (const s of this.player.currentSystem.asteroids) {
           if (s.id === this.objEndID) {
             this.objEnd = s;
             break;
@@ -206,6 +221,11 @@ function getTargetCoordinatesAndRadius(
 
   if (tgtType === TargetType.Ship) {
     const s = tgt as Ship;
+    return [s.x, s.y, s.radius];
+  }
+
+  if (tgtType === TargetType.Asteroid) {
+    const s = tgt as Asteroid;
     return [s.x, s.y, s.radius];
   }
 

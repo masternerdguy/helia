@@ -21,6 +21,8 @@ func loadUniverse() (*universe.Universe, error) {
 	stationSvc := sql.GetStationService()
 	jumpholeSvc := sql.GetJumpholeService()
 	asteroidSvc := sql.GetAsteroidService()
+	itemTypeSvc := sql.GetItemTypeService()
+	itemFamilySvc := sql.GetItemFamilyService()
 
 	u := universe.Universe{}
 
@@ -139,20 +141,40 @@ func loadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, p := range asteroids {
-				asteroid := universe.Asteroid{
-					ID:         p.ID,
-					SystemID:   p.SystemID,
-					ItemTypeID: p.ItemTypeID,
-					Name:       p.Name,
-					Texture:    p.Texture,
-					Radius:     p.Radius,
-					Theta:      p.Theta,
-					PosX:       p.PosX,
-					PosY:       p.PosY,
-					Yield:      p.Yield,
-					Mass:       p.Mass,
+				//get ore item type
+				oi, err := itemTypeSvc.GetItemTypeByID(p.ItemTypeID)
+
+				if err != nil {
+					return nil, err
 				}
 
+				//get ore item family
+				of, err := itemFamilySvc.GetItemFamilyByID(oi.Family)
+
+				if err != nil {
+					return nil, err
+				}
+
+				//build asteroid
+				asteroid := universe.Asteroid{
+					ID:             p.ID,
+					SystemID:       p.SystemID,
+					Name:           p.Name,
+					Texture:        p.Texture,
+					Radius:         p.Radius,
+					Theta:          p.Theta,
+					PosX:           p.PosX,
+					PosY:           p.PosY,
+					Yield:          p.Yield,
+					Mass:           p.Mass,
+					ItemTypeName:   oi.Name,
+					ItemTypeID:     oi.ID,
+					ItemFamilyName: of.FriendlyName,
+					ItemFamilyID:   oi.Family,
+					ItemTypeMeta:   universe.Meta(oi.Meta),
+				}
+
+				//store in universe
 				s.AddAsteroid(&asteroid)
 			}
 
