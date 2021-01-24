@@ -28,6 +28,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	//get services
 	userSvc := sql.GetUserService()
 	startSvc := sql.GetStartService()
+	containerSvc := sql.GetContainerService()
 
 	//read body
 	b, err := ioutil.ReadAll(r.Body)
@@ -66,8 +67,18 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//create escrow container for user
+	ec, err := containerSvc.NewContainer(sql.Container{
+		Meta: sql.Meta{},
+	})
+
+	if err != nil {
+		http.Error(w, "createscrowcontainer: "+err.Error(), 500)
+		return
+	}
+
 	//create user
-	u, err := userSvc.NewUser(m.Username, m.Password, startID)
+	u, err := userSvc.NewUser(m.Username, m.Password, startID, ec.ID)
 
 	if err != nil {
 		http.Error(w, "createuser: "+err.Error(), 500)
@@ -82,7 +93,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//create their noob ship
-	u, err = engine.CreateNoobShipForPlayer(start, u.ID)
+	u, err = engine.CreateNoobShipForPlayer(start, u.ID, true)
 
 	if err != nil {
 		http.Error(w, "createnoobshipforplayer: "+err.Error(), 500)

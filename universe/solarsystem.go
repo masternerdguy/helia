@@ -754,6 +754,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 				FitStatus:         fs,
 				DockedAtStationID: d.DockedAtStationID,
 				CargoP:            ((d.TotalCargoBayVolumeUsed(false) / d.GetRealCargoBayVolume()) * 100) + Epsilon,
+				Wallet:            d.Wallet,
 			},
 		}
 

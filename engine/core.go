@@ -332,7 +332,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			}
 
 			//create their noob ship docked in that station
-			u, err := CreateNoobShipForPlayer(start, *rs.UID)
+			u, err := CreateNoobShipForPlayer(start, *rs.UID, false)
 
 			if err != nil || u.CurrentShipID == nil {
 				log.Println(fmt.Sprintf("! Unable to respawn player %v - failed to create noob ship (%v | %v)!", rs.UID, err, u.CurrentShipID))

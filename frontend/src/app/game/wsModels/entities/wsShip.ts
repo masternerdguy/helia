@@ -24,6 +24,7 @@ export class WSShip {
   fitStatus: WSFitting;
   dockedAtStationID: string;
   cargoP: number;
+  wallet: number;
 }
 
 export class WSFitting {

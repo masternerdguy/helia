@@ -46,6 +46,7 @@ type Ship struct {
 	FittingBayContainerID uuid.UUID
 	TrashContainerID      uuid.UUID
 	ReMaxDirty            bool
+	Wallet                float64
 }
 
 //Fitting JSON structure representing the module racks of a ship and what is fitted to them
@@ -91,9 +92,9 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 					id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta,
 					vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
 					dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid,
-					fittingbay_containerid, remaxdirty, trash_containerid)
+					fittingbay_containerid, remaxdirty, trash_containerid, wallet)
 				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22,
-						$23, $24, $25, $26);
+						$23, $24, $25, $26, $27);
 			`
 
 	uid := uuid.New()
@@ -102,7 +103,7 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 	q, err := db.Query(sql, uid, e.SystemID, e.UserID, e.PosX, e.PosY, createdAt, e.ShipName, e.Texture, e.Theta,
 		e.VelX, e.VelY, e.Shield, e.Armor, e.Hull, e.Fuel, e.Heat, e.Energy, e.ShipTemplateID, e.DockedAtStationID,
 		e.Fitting, e.Destroyed, e.DestroyedAt, e.CargoBayContainerID, e.FittingBayContainerID, e.ReMaxDirty,
-		e.TrashContainerID)
+		e.TrashContainerID, e.Wallet)
 
 	if err != nil {
 		return nil, err
@@ -135,7 +136,7 @@ func (s ShipService) GetShipByID(shipID uuid.UUID, isDestroyed bool) (*Ship, err
 			SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
 				   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
 				   dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid,
-				   fittingbay_containerid, remaxdirty, trash_containerid
+				   fittingbay_containerid, remaxdirty, trash_containerid, wallet
 			FROM public.ships
 			WHERE id = $1 and destroyed = $2
 		`
@@ -145,7 +146,7 @@ func (s ShipService) GetShipByID(shipID uuid.UUID, isDestroyed bool) (*Ship, err
 	switch err := row.Scan(&ship.ID, &ship.SystemID, &ship.UserID, &ship.PosX, &ship.PosY, &ship.Created, &ship.ShipName, &ship.Texture,
 		&ship.Theta, &ship.VelX, &ship.VelY, &ship.Shield, &ship.Armor, &ship.Hull, &ship.Fuel, &ship.Heat, &ship.Energy, &ship.ShipTemplateID,
 		&ship.DockedAtStationID, &ship.Fitting, &ship.Destroyed, &ship.DestroyedAt, &ship.CargoBayContainerID,
-		&ship.FittingBayContainerID, &ship.ReMaxDirty, &ship.TrashContainerID); err {
+		&ship.FittingBayContainerID, &ship.ReMaxDirty, &ship.TrashContainerID, &ship.Wallet); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("Ship not found")
 	case nil:
@@ -171,7 +172,7 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID, isDestroyed bool)
 				SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
 					   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
 					   dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid,
-					   fittingbay_containerid, remaxdirty, trash_containerid
+					   fittingbay_containerid, remaxdirty, trash_containerid, wallet
 				FROM public.ships
 				WHERE universe_systemid = $1 and destroyed = $2
 			`
@@ -191,7 +192,7 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID, isDestroyed bool)
 		rows.Scan(&s.ID, &s.SystemID, &s.UserID, &s.PosX, &s.PosY, &s.Created, &s.ShipName, &s.Texture,
 			&s.Theta, &s.VelX, &s.VelY, &s.Shield, &s.Armor, &s.Hull, &s.Fuel, &s.Heat, &s.Energy, &s.ShipTemplateID,
 			&s.DockedAtStationID, &s.Fitting, &s.Destroyed, &s.DestroyedAt, &s.CargoBayContainerID,
-			&s.FittingBayContainerID, &s.ReMaxDirty, &s.TrashContainerID)
+			&s.FittingBayContainerID, &s.ReMaxDirty, &s.TrashContainerID, &s.Wallet)
 
 		//append to ship slice
 		systems = append(systems, s)
@@ -216,13 +217,13 @@ func (s ShipService) UpdateShip(ship Ship) error {
 			SET universe_systemid=$2, userid=$3, pos_x=$4, pos_y=$5, created=$6, shipname=$7, texture=$8, theta=$9, vel_x=$10,
 				vel_y=$11, shield=$12, armor=$13, hull=$14, fuel=$15, heat=$16, energy=$17, shiptemplateid=$18, dockedat_stationid=$19,
 				fitting=$20, destroyed=$21, destroyedat=$22, cargobay_containerid=$23, fittingbay_containerid=$24, remaxdirty=$25,
-				trash_containerid=$26
+				trash_containerid=$26, wallet=$27
 			WHERE id = $1
 		`
 
 	_, err = db.Exec(sqlStatement, ship.ID, ship.SystemID, ship.UserID, ship.PosX, ship.PosY, ship.Created, ship.ShipName, ship.Texture, ship.Theta, ship.VelX,
 		ship.VelY, ship.Shield, ship.Armor, ship.Hull, ship.Fuel, ship.Heat, ship.Energy, ship.ShipTemplateID, ship.DockedAtStationID, ship.Fitting, ship.Destroyed,
-		ship.DestroyedAt, ship.CargoBayContainerID, ship.FittingBayContainerID, ship.ReMaxDirty, ship.TrashContainerID)
+		ship.DestroyedAt, ship.CargoBayContainerID, ship.FittingBayContainerID, ship.ReMaxDirty, ship.TrashContainerID, ship.Wallet)
 
 	return err
 }

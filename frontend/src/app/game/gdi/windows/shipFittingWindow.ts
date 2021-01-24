@@ -51,7 +51,7 @@ export class ShipFittingWindow extends GDIWindow {
   }
 
   pack() {
-    this.setTitle('Ship Fitting');
+    this.setTitle('Ship Cargo and Fitting');
 
     // setup ship view
     this.shipView.setWidth(500);
@@ -429,6 +429,12 @@ export class ShipFittingWindow extends GDIWindow {
     for (const r of cargo) {
       rows.push(r);
     }
+
+    rows.push(buildShipViewRowSpacer());
+
+    // layout wallet
+    rows.push(buildShipViewRowText("Wallet"));
+    rows.push(buildShipViewRowText(`  ${this.player.currentShip.wallet} CBN`))
 
     rows.push(buildShipViewRowSpacer());
 

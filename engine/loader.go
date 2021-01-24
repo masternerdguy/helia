@@ -835,6 +835,7 @@ func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 		FittingBay:            fittingBay,
 		ReMaxDirty:            sh.ReMaxDirty,
 		TrashContainerID:      sh.TrashContainerID,
+		Wallet:                sh.Wallet,
 		TemplateData: universe.ShipTemplate{
 			ID:                 temp.ID,
 			Created:            temp.Created,
@@ -918,6 +919,7 @@ func saveShip(ship *universe.Ship) error {
 		FittingBayContainerID: ship.FittingBayContainerID,
 		TrashContainerID:      ship.TrashContainerID,
 		ReMaxDirty:            ship.ReMaxDirty,
+		Wallet:                ship.Wallet,
 	}
 
 	err := shipSvc.UpdateShip(dbShip)

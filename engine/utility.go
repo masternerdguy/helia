@@ -15,7 +15,7 @@ func makeTimestamp() int64 {
 }
 
 //CreateNoobShipForPlayer Creates a noob (starter) ship for a player and put them in it
-func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error) {
+func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sql.User, error) {
 	const moduleCreationReason = "Module for new noob ship for player"
 
 	// get default uuid
@@ -197,6 +197,14 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 		})
 	}
 
+	//determine new ship wallet
+	var wallet float64 = 0.0
+
+	if newUser {
+		//this is the player's first ship - give them the initial starting wallet amount
+		wallet = start.Wallet
+	}
+
 	//create starter ship
 	t := sql.Ship{
 		SystemID:              start.SystemID,
@@ -219,6 +227,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 		FittingBayContainerID: fb.ID,
 		ReMaxDirty:            true,
 		TrashContainerID:      tb.ID,
+		Wallet:                wallet,
 	}
 
 	starterShip, err := shipSvc.NewShip(t)

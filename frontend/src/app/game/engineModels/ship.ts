@@ -64,6 +64,10 @@ export class Ship extends WSShip {
     if (ws.cargoP) {
       this.cargoP = ws.cargoP;
     }
+
+    if (ws.wallet) {
+      this.wallet = Math.round(ws.wallet);
+    }
   }
 
   render(ctx: any, camera: Camera) {
@@ -179,6 +183,10 @@ export class Ship extends WSShip {
       if (this.fitStatus.cRack.modules == null) {
         this.fitStatus.cRack.modules = [];
       }
+    }
+
+    if (sh.wallet) {
+      this.wallet = Math.round(sh.wallet);
     }
   }
 }

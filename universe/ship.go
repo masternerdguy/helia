@@ -123,6 +123,7 @@ type Ship struct {
 	FittingBayContainerID uuid.UUID
 	TrashContainerID      uuid.UUID
 	ReMaxDirty            bool
+	Wallet                float64
 	//cache of base template
 	TemplateData ShipTemplate
 	//docking
@@ -320,6 +321,7 @@ func (s *Ship) CopyShip() *Ship {
 		FittingBayContainerID: s.FittingBayContainerID,
 		TrashContainerID:      s.TrashContainerID,
 		ReMaxDirty:            s.ReMaxDirty,
+		Wallet:                s.Wallet,
 		TemplateData: ShipTemplate{
 			ID:                 s.TemplateData.ID,
 			Created:            s.TemplateData.Created,

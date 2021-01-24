@@ -105,6 +105,7 @@ type CurrentShipInfo struct {
 	FitStatus         ServerFittingStatusBody `json:"fitStatus"`
 	DockedAtStationID *uuid.UUID              `json:"dockedAtStationID"`
 	CargoP            float64                 `json:"cargoP"`
+	Wallet            float64                 `json:"wallet"`
 }
 
 //GlobalShipInfo Structure for passing non-secret information about a ship

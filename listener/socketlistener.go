@@ -252,7 +252,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 					return
 				}
 
-				u, err = engine.CreateNoobShipForPlayer(nStart, u.ID)
+				u, err = engine.CreateNoobShipForPlayer(nStart, u.ID, false)
 
 				if err != nil {
 					//dump error to console
