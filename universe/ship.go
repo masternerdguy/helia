@@ -2,8 +2,6 @@ package universe
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"math"
 	"sync"
 	"time"
@@ -2136,8 +2134,6 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	if trackingRatio > 1.0 {
 		trackingRatio = 1.0
 	}
-
-	log.Println(fmt.Sprintf("t: %v, r: %v", tracking, trackingRatio))
 
 	//adjust damage based on tracking
 	shieldDmg *= trackingRatio
