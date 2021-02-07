@@ -2,6 +2,8 @@ package universe
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"math"
 	"sync"
 	"time"
@@ -2089,9 +2091,10 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	var d float64 = 0
 
 	if found {
-		//verify target is in range
+		//get distance to target
 		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
 
+		//verify target is in range
 		if d > modRange {
 			//out of range - can't activate
 			m.TargetID = nil
@@ -2107,6 +2110,19 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	shieldDmg, _ := m.ItemTypeMeta.GetFloat64("shield_damage")
 	armorDmg, _ := m.ItemTypeMeta.GetFloat64("armor_damage")
 	hullDmg, _ := m.ItemTypeMeta.GetFloat64("hull_damage")
+
+	//determine angular velocity for tracking
+	dvX := m.shipMountedOn.VelX - tgtDummy.VelX
+	dvY := m.shipMountedOn.VelY - tgtDummy.VelY
+
+	dv := math.Sqrt((dvX * dvX) + (dvY * dvY))
+	w := 0.0
+
+	if d > 0 {
+		w = ((dv / d) * float64(Heartbeat)) * (180.0 / math.Pi)
+	}
+
+	log.Println(fmt.Sprintf("dv: %v | w: %v", dv, w))
 
 	//account for falloff if present
 	falloff, found := m.ItemTypeMeta.GetString("falloff")
