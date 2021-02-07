@@ -2122,7 +2122,27 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		w = ((dv / d) * float64(Heartbeat)) * (180.0 / math.Pi)
 	}
 
-	log.Println(fmt.Sprintf("dv: %v | w: %v", dv, w))
+	//get tracking value
+	tracking, _ := m.ItemTypeMeta.GetFloat64("tracking")
+
+	//calculate tracking ratio
+	trackingRatio := 1.0 //default to 100% tracking
+
+	if w > 0 {
+		trackingRatio = tracking / w
+	}
+
+	//clamp tracking to 100%
+	if trackingRatio > 1.0 {
+		trackingRatio = 1.0
+	}
+
+	log.Println(fmt.Sprintf("t: %v, r: %v", tracking, trackingRatio))
+
+	//adjust damage based on tracking
+	shieldDmg *= trackingRatio
+	armorDmg *= trackingRatio
+	hullDmg *= trackingRatio
 
 	//account for falloff if present
 	falloff, found := m.ItemTypeMeta.GetString("falloff")
