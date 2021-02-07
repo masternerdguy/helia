@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve --host 10.0.0.125",
     "build": "ng build",
+    "backup-db": "pg_dump -d helia -f ../schema.sql -s && pg_dump -d helia -f ../testdb.sql",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
