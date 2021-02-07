@@ -433,8 +433,8 @@ export class ShipFittingWindow extends GDIWindow {
     rows.push(buildShipViewRowSpacer());
 
     // layout wallet
-    rows.push(buildShipViewRowText("Wallet"));
-    rows.push(buildShipViewRowText(`  ${this.player.currentShip.wallet} CBN`))
+    rows.push(buildShipViewRowText('Wallet'));
+    rows.push(buildShipViewRowText(`  ${this.player.currentShip.wallet} CBN`));
 
     rows.push(buildShipViewRowSpacer());
 
@@ -613,8 +613,12 @@ function buildInfoRowsFromModule(m: WSModule): ShipViewRow[] {
   // slot info
   rows.push(buildShipViewRowText('Slot Info'));
 
-  const slotFamily = buildShipViewRowText(infoKeyValueString('Compatibility', m.hpFamily));
-  const slotVolume = buildShipViewRowText(infoKeyValueString('Volume', m.hpVolume?.toString()));
+  const slotFamily = buildShipViewRowText(
+    infoKeyValueString('Compatibility', m.hpFamily)
+  );
+  const slotVolume = buildShipViewRowText(
+    infoKeyValueString('Volume', m.hpVolume?.toString())
+  );
 
   rows.push(slotFamily);
   rows.push(slotVolume);
