@@ -15,6 +15,7 @@ export class OrdersMarketWindow extends GDIWindow {
   // lists
   private cargoView: GDIList = new GDIList();
   private actionView: GDIList = new GDIList();
+  private orderView: GDIList = new GDIList();
 
   // inputs
   private modalOverlay: GDIOverlay = new GDIOverlay();
@@ -83,6 +84,17 @@ export class OrdersMarketWindow extends GDIWindow {
       // todo
     });
 
+    // setup info view
+    this.orderView.setWidth(700);
+    this.orderView.setHeight(330);
+    this.orderView.initialize();
+
+    this.orderView.setX(0);
+    this.orderView.setY(0);
+
+    this.orderView.setFont(FontSize.normal);
+    this.orderView.setOnClick(() => {});
+
     // setup modal input
     this.modalOverlay.setWidth(this.getWidth());
     this.modalOverlay.setHeight(this.getHeight());
@@ -104,12 +116,14 @@ export class OrdersMarketWindow extends GDIWindow {
     this.addComponent(this.cargoView);
     this.addComponent(this.actionView);
     this.addComponent(this.cargoBayUsed);
+    this.addComponent(this.orderView);
   }
 
   private showModalInput() {
     this.removeComponent(this.cargoView);
     this.removeComponent(this.actionView);
     this.removeComponent(this.cargoBayUsed);
+    this.removeComponent(this.orderView);
     this.addComponent(this.modalOverlay);
     this.addComponent(this.modalInput);
   }
@@ -118,6 +132,7 @@ export class OrdersMarketWindow extends GDIWindow {
     this.addComponent(this.cargoView);
     this.addComponent(this.actionView);
     this.addComponent(this.cargoBayUsed);
+    this.addComponent(this.orderView);
     this.removeComponent(this.modalOverlay);
     this.removeComponent(this.modalInput);
   }
