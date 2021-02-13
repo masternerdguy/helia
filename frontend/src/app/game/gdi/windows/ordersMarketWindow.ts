@@ -15,6 +15,7 @@ import { ClientStackItem } from '../../wsModels/bodies/stackItem';
 import { ClientTrashItem } from '../../wsModels/bodies/trashItem';
 import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
 import { ClientSellAsOrder } from '../../wsModels/bodies/sellAsOrder';
+import { ClientViewOpenSellOrders } from '../../wsModels/bodies/viewOpenSellOrders';
 
 export class OrdersMarketWindow extends GDIWindow {
   // lists
@@ -265,6 +266,13 @@ export class OrdersMarketWindow extends GDIWindow {
     this.addComponent(this.actionView);
     this.addComponent(this.cargoBayUsed);
     this.addComponent(this.orderView);
+
+    // request periodic sell order updates when docked
+    setInterval(() => {
+      if (this.isDocked && !this.isHidden()) {
+        this.refreshOpenSellOrders();
+      }
+    }, 5000);
   }
 
   private showModalInput() {
@@ -291,6 +299,15 @@ export class OrdersMarketWindow extends GDIWindow {
       b.sid = this.wsSvc.sid;
 
       this.wsSvc.sendMessage(MessageTypes.ViewCargoBay, b);
+    }, 200);
+  }
+
+  private refreshOpenSellOrders() {
+    setTimeout(() => {
+      const b = new ClientViewOpenSellOrders();
+      b.sid = this.wsSvc.sid;
+
+      this.wsSvc.sendMessage(MessageTypes.ViewOpenSellOrders, b);
     }, 200);
   }
 

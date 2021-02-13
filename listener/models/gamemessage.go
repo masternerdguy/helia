@@ -8,27 +8,28 @@ import (
 
 //MessageRegistry Registry of game message types
 type MessageRegistry struct {
-	PushError         int
-	Join              int
-	GlobalUpdate      int
-	NavClick          int
-	CurrentShipUpdate int
-	Goto              int
-	Orbit             int
-	Dock              int
-	Undock            int
-	ActivateModule    int
-	DeactivateModule  int
-	ViewCargoBay      int
-	CargoBayUpdate    int
-	UnfitModule       int
-	TrashItem         int
-	PackageItem       int
-	UnpackageItem     int
-	StackItem         int
-	SplitItem         int
-	FitModule         int
-	SellAsOrder       int
+	PushError          int
+	Join               int
+	GlobalUpdate       int
+	NavClick           int
+	CurrentShipUpdate  int
+	Goto               int
+	Orbit              int
+	Dock               int
+	Undock             int
+	ActivateModule     int
+	DeactivateModule   int
+	ViewCargoBay       int
+	CargoBayUpdate     int
+	UnfitModule        int
+	TrashItem          int
+	PackageItem        int
+	UnpackageItem      int
+	StackItem          int
+	SplitItem          int
+	FitModule          int
+	SellAsOrder        int
+	ViewOpenSellOrders int
 }
 
 //TargetTypeRegistry Registry of target types
@@ -44,27 +45,28 @@ type TargetTypeRegistry struct {
 //NewMessageRegistry Returns a MessageRegistry with correct enum values
 func NewMessageRegistry() *MessageRegistry {
 	return &MessageRegistry{
-		PushError:         -1,
-		Join:              0,
-		GlobalUpdate:      1,
-		NavClick:          2,
-		CurrentShipUpdate: 3,
-		Goto:              4,
-		Orbit:             5,
-		Dock:              6,
-		Undock:            7,
-		ActivateModule:    8,
-		DeactivateModule:  9,
-		ViewCargoBay:      10,
-		CargoBayUpdate:    11,
-		UnfitModule:       12,
-		TrashItem:         13,
-		PackageItem:       14,
-		UnpackageItem:     15,
-		StackItem:         16,
-		SplitItem:         17,
-		FitModule:         18,
-		SellAsOrder:       19,
+		PushError:          -1,
+		Join:               0,
+		GlobalUpdate:       1,
+		NavClick:           2,
+		CurrentShipUpdate:  3,
+		Goto:               4,
+		Orbit:              5,
+		Dock:               6,
+		Undock:             7,
+		ActivateModule:     8,
+		DeactivateModule:   9,
+		ViewCargoBay:       10,
+		CargoBayUpdate:     11,
+		UnfitModule:        12,
+		TrashItem:          13,
+		PackageItem:        14,
+		UnpackageItem:      15,
+		StackItem:          16,
+		SplitItem:          17,
+		FitModule:          18,
+		SellAsOrder:        19,
+		ViewOpenSellOrders: 20,
 	}
 }
 
@@ -413,4 +415,9 @@ type ClientSellAsOrderBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemID"`
 	Price     int       `json:"price"`
+}
+
+//ClientViewOpenSellOrdersBody Body containing a request for open sell orders at the currently docked-at station
+type ClientViewOpenSellOrdersBody struct {
+	SessionID uuid.UUID `json:"sid"`
 }

@@ -2,9 +2,11 @@ package universe
 
 import (
 	"encoding/json"
+	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"sync"
 	"time"
 
@@ -418,6 +420,53 @@ func (s *SolarSystem) PeriodicUpdate() {
 						c.WriteErrorMessage(err.Error())
 					}
 				}
+			}
+		} else if evt.Type == models.NewMessageRegistry().DeactivateModule {
+			if sh != nil {
+				//extract data
+				data := evt.Body.(models.ClientDeactivateModuleBody)
+
+				//skip if rack c (passive modules)
+				if data.Rack == "C" {
+					continue
+				} else {
+					//find module
+					mod := sh.FindModule(data.ItemID, data.Rack)
+
+					// make sure we found something
+					if mod == nil {
+						// do nothing
+						continue
+					} else {
+						if mod.WillRepeat {
+							// set repeat to false
+							mod.WillRepeat = false
+
+							// clear target
+							mod.TargetID = nil
+							mod.TargetType = nil
+						}
+					}
+				}
+			}
+		} else if evt.Type == models.NewMessageRegistry().ViewOpenSellOrders {
+			if sh != nil {
+				//extract data (currently nothing to process)
+				//data := evt.Body.(models.ClientViewOpenSellOrdersBody)
+
+				//debug out
+				log.Println(fmt.Sprintf("oo request"))
+
+				/*//package message
+				b, _ := json.Marshal(&vw)
+
+				cu := models.GameMessage{
+					MessageType: msgRegistry.CargoBayUpdate,
+					MessageBody: string(b),
+				}
+
+				//write response to client
+				c.WriteMessage(&cu)*/
 			}
 		}
 	}
