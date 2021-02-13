@@ -34,7 +34,7 @@ export class OrdersMarketWindow extends GDIWindow {
 
   initialize() {
     // set dimensions
-    this.setWidth(600);
+    this.setWidth(800);
     this.setHeight(600);
 
     // initialize
@@ -45,12 +45,12 @@ export class OrdersMarketWindow extends GDIWindow {
     this.setTitle('Station Orders Market');
 
     // setup cargo view
-    this.cargoView.setWidth(500);
-    this.cargoView.setHeight(380);
+    this.cargoView.setWidth(700);
+    this.cargoView.setHeight(250);
     this.cargoView.initialize();
 
     this.cargoView.setX(0);
-    this.cargoView.setY(0);
+    this.cargoView.setY(this.getHeight() - this.cargoView.getHeight());
 
     this.cargoView.setFont(FontSize.normal);
     this.cargoView.setOnClick((r) => {
@@ -59,8 +59,8 @@ export class OrdersMarketWindow extends GDIWindow {
 
     // setup cargo bar
     this.cargoBayUsed.setX(0);
-    this.cargoBayUsed.setY(380);
-    this.cargoBayUsed.setWidth(500);
+    this.cargoBayUsed.setY(this.cargoView.getY() - 20);
+    this.cargoBayUsed.setWidth(700);
     this.cargoBayUsed.setHeight(20);
     this.cargoBayUsed.initialize();
     this.cargoBayUsed.setFont(FontSize.normal);
