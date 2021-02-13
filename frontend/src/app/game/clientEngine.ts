@@ -608,16 +608,16 @@ function handleCargoBayUpdate(d: GameMessage) {
 }
 
 function handleOpenSellOrdersUpdateMessageFromServer(d: GameMessage) {
-    // parse body
-    const msg = JSON.parse(d.body) as ServerOpenSellOrdersUpdate;
+  // parse body
+  const msg = JSON.parse(d.body) as ServerOpenSellOrdersUpdate;
 
-    // null check
-    if (!msg.orders) {
-      msg.orders = [];
-    }
+  // null check
+  if (!msg.orders) {
+    msg.orders = [];
+  }
 
-    // todo: update orders on orders market window
-    console.log(msg);
+  // todo: update orders on orders market window
+  console.log(msg);
 }
 
 function handleCurrentShipUpdate(d: GameMessage) {

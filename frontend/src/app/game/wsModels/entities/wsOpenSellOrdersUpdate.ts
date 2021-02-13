@@ -1,17 +1,17 @@
-import { WSContainerItem } from "./wsContainer";
+import { WSContainerItem } from './wsContainer';
 
 export class WSOpenSellOrdersUpdate {
-    orders: WSOpenSellOrder[];
+  orders: WSOpenSellOrder[];
 }
 
 export class WSOpenSellOrder {
-	id: string;
-	stationId: string;
-	itemId: string;
-	sellerId: string;
-	ask: number;
-	createdAt: string;
-	boughtAt: string;
-	buyerId: string;
-	item: WSContainerItem;
+  id: string;
+  stationId: string;
+  itemId: string;
+  sellerId: string;
+  ask: number;
+  createdAt: string;
+  boughtAt: string;
+  buyerId: string;
+  item: WSContainerItem;
 }

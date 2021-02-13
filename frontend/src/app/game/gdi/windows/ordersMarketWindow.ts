@@ -267,12 +267,19 @@ export class OrdersMarketWindow extends GDIWindow {
     this.addComponent(this.cargoBayUsed);
     this.addComponent(this.orderView);
 
-    // request periodic sell order updates when docked
+    // request updates on show
+    this.setOnShow(() => {
+      this.refreshCargoBay();
+      this.refreshOpenSellOrders();
+    });
+
+    // request periodic updates when docked and shown
     setInterval(() => {
       if (this.isDocked && !this.isHidden()) {
+        this.refreshCargoBay();
         this.refreshOpenSellOrders();
       }
-    }, 5000);
+    }, 30000);
   }
 
   private showModalInput() {
