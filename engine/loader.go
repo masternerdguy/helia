@@ -250,11 +250,6 @@ func loadUniverse() (*universe.Universe, error) {
 					station.OpenSellOrders[so.ID.String()] = so
 				}
 
-				//debug out
-				for _, o := range station.OpenSellOrders {
-					log.Println(fmt.Sprintf("O: %v", *o))
-				}
-
 				//add to solar system
 				s.AddStation(&station)
 			}

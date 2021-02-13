@@ -2,11 +2,9 @@ package universe
 
 import (
 	"encoding/json"
-	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"sync"
 	"time"
 
@@ -411,9 +409,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 					// do nothing
 					continue
 				} else {
-					// debug out
-					log.Println(fmt.Sprintf("sell request: %v", data))
-
 					// sell item stack as order
 					err := sh.SellItemAsOrder(item.ID, float64(data.Price), false)
 
