@@ -1025,3 +1025,20 @@ func newItem(item *universe.Item) (*uuid.UUID, error) {
 
 	return &o.ID, err
 }
+
+//newSellOrder Saves a new sell order to the database
+func newSellOrder(sellOrder *universe.SellOrder) (*uuid.UUID, error) {
+	sellOrderSvc := sql.GetSellOrderService()
+
+	//convert to sql type
+	sql := SQLFromSellOrder(sellOrder)
+
+	if sql == nil {
+		return nil, errors.New("Error converting sell order to SQL type")
+	}
+
+	//save sell order
+	o, err := sellOrderSvc.NewSellOrder(*sql)
+
+	return &o.ID, err
+}

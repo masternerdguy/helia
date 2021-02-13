@@ -140,6 +140,7 @@ type Ship struct {
 	DockedAtStation    *Station
 	CargoBay           *Container
 	FittingBay         *Container
+	EscrowContainerID  *uuid.UUID
 	Lock               sync.Mutex
 }
 
@@ -352,6 +353,7 @@ func (s *Ship) CopyShip() *Ship {
 		AutopilotOrbit:     s.AutopilotOrbit,
 		AutopilotDock:      s.AutopilotDock,
 		AutopilotUndock:    s.AutopilotUndock,
+		EscrowContainerID:  s.EscrowContainerID,
 	}
 
 	if s.DockedAtStationID != nil {
@@ -1645,6 +1647,75 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 
 	//escalate item for packaging in db
 	s.CurrentSystem.PackagedItems[item.ID.String()] = item
+
+	return nil
+}
+
+//SellItemAsOrder Lists an item in the ship's cargo bay on the station order exchange if it exists
+func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
+	if lock {
+		//lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	//lock cargo bay
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	//make sure ship is docked
+	if s.DockedAtStationID == nil {
+		return errors.New("You must be docked to list an item on the station orders exchange")
+	}
+
+	//make sure there is an escrow container attached to this ship
+	if s.EscrowContainerID == nil {
+		return errors.New("No escrow container associated with this ship")
+	}
+
+	//get the item to be listed for sale
+	item := s.FindItemInCargo(id)
+
+	if item == nil {
+		return errors.New("Item not found in cargo bay")
+	}
+
+	//make sure item is clean
+	if item.CoreDirty {
+		return errors.New("Item is dirty and waiting on an escalation to save its state")
+	}
+
+	//make sure the ask price is > 0
+	if price <= 0 {
+		return errors.New("Items must be sold at a price greater than 0")
+	}
+
+	//mark item as dirty and place it in the escrow container
+	item.CoreDirty = true
+	item.ContainerID = *s.EscrowContainerID
+
+	//escalate item for saving in db
+	s.CurrentSystem.MovedItems[item.ID.String()] = item
+
+	//create sell order for item
+	nid, err := uuid.NewUUID()
+
+	if err != nil {
+		return err
+	}
+
+	newOrder := SellOrder{
+		ID:           nid,
+		StationID:    *s.DockedAtStationID,
+		ItemID:       item.ID,
+		SellerUserID: s.UserID,
+		AskPrice:     price,
+		Created:      time.Now(),
+		CoreDirty:    true,
+	}
+
+	//escalate to core for saving in db
+	s.CurrentSystem.NewSellOrders[newOrder.ID.String()] = &newOrder
 
 	return nil
 }

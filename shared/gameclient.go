@@ -21,9 +21,10 @@ type GameClient struct {
 	shipEventQueue *eventQueue
 
 	// keys for quick lookups
-	CurrentShipID   uuid.UUID
-	CurrentSystemID uuid.UUID
-	StartID         uuid.UUID
+	CurrentShipID     uuid.UUID
+	CurrentSystemID   uuid.UUID
+	StartID           uuid.UUID
+	EscrowContainerID uuid.UUID
 }
 
 //Initialize Initializes the internals of a GameClient

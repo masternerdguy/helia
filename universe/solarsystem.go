@@ -37,6 +37,7 @@ type SolarSystem struct {
 	UnpackagedItems      map[string]*Item              //items unpackaged in need of saving by core
 	ChangedQuantityItems map[string]*Item              //stacks of items that have changed quantity and need saving by core
 	NewItems             map[string]*Item              //stacks of items that are newly created and need to be saved by core
+	NewSellOrders        map[string]*SellOrder         //new sell orders in need of saving by core
 }
 
 //Initialize Initializes internal aspects of SolarSystem
@@ -60,6 +61,7 @@ func (s *SolarSystem) Initialize() {
 	s.UnpackagedItems = make(map[string]*Item)
 	s.ChangedQuantityItems = make(map[string]*Item)
 	s.NewItems = make(map[string]*Item)
+	s.NewSellOrders = make(map[string]*SellOrder)
 
 	//initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -91,6 +93,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 		if sh == nil {
 			continue
 		}
+
+		//associate escrow container id
+		sh.EscrowContainerID = &c.EscrowContainerID
 
 		//process event
 		if evt.Type == models.NewMessageRegistry().NavClick {
@@ -409,15 +414,14 @@ func (s *SolarSystem) PeriodicUpdate() {
 					// debug out
 					log.Println(fmt.Sprintf("sell request: %v", data))
 
-					// todo: adapt for selling
-					/*// fit module
-					err := sh.FitModule(item.ID, false)
+					// sell item stack as order
+					err := sh.SellItemAsOrder(item.ID, float64(data.Price), false)
 
 					// there is a reason this could fail the player will need to know about
 					if err != nil {
 						// send error message to client
 						c.WriteErrorMessage(err.Error())
-					}*/
+					}
 				}
 			}
 		}
@@ -1005,6 +1009,18 @@ func (s *SolarSystem) CopyJumpholes() map[string]*Jumphole {
 
 	//return copy map
 	return copy
+}
+
+//StoreOpenSellOrder Stores an open sell order on a station
+func (s *SolarSystem) StoreOpenSellOrder(order *SellOrder, lock bool) {
+	if lock {
+		//obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	//add to map
+	s.stations[order.StationID.String()].OpenSellOrders[order.ID.String()] = order
 }
 
 func copyModuleInfo(v FittedSlot) models.ServerModuleStatusBody {
