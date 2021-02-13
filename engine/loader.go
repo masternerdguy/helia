@@ -227,6 +227,10 @@ func loadUniverse() (*universe.Universe, error) {
 					CurrentSystem: &s,
 				}
 
+				//initialize station
+				station.Initialize()
+
+				//add to solar system
 				s.AddStation(&station)
 			}
 		}
@@ -630,6 +634,56 @@ func ContainerFromSQL(value *sql.Container) *universe.Container {
 
 	//return filled container
 	return &container
+}
+
+//SellOrderFromSQL Converts a SellOrder from the SQL type to the engine type
+func SellOrderFromSQL(value *sql.SellOrder) *universe.SellOrder {
+	//set up empty sell order
+	order := universe.SellOrder{}
+
+	//null check
+	if value == nil {
+		//return nil
+		return nil
+	}
+
+	//copy order data
+	order.ID = value.ID
+	order.StationID = value.StationID
+	order.ItemID = value.ItemID
+	order.SellerUserID = value.SellerUserID
+	order.AskPrice = value.AskPrice
+	order.Created = value.Created
+	order.Bought = value.Bought
+	order.BuyerUserID = value.BuyerUserID
+
+	//return filled order
+	return &order
+}
+
+//SQLFromSellOrder Converts a SellOrder from the engine type to the SQL type
+func SQLFromSellOrder(value *universe.SellOrder) *sql.SellOrder {
+	//set up empty sell order
+	order := sql.SellOrder{}
+
+	//null check
+	if value == nil {
+		//return nil
+		return nil
+	}
+
+	//copy order data
+	order.ID = value.ID
+	order.StationID = value.StationID
+	order.ItemID = value.ItemID
+	order.SellerUserID = value.SellerUserID
+	order.AskPrice = value.AskPrice
+	order.Created = value.Created
+	order.Bought = value.Bought
+	order.BuyerUserID = value.BuyerUserID
+
+	//return filled order
+	return &order
 }
 
 //ItemFromSQL Converts an Item from the SQL type to the engine type

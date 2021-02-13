@@ -19,8 +19,19 @@ type Station struct {
 	Mass        float64
 	Theta       float64
 	//in-memory only
-	Lock          sync.Mutex
-	CurrentSystem *SolarSystem
+	Lock           sync.Mutex
+	CurrentSystem  *SolarSystem
+	OpenSellOrders map[string]*SellOrder
+}
+
+//Initialize Initializes internal aspects of Station
+func (s *Station) Initialize() {
+	//obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	//initialize maps
+	s.OpenSellOrders = make(map[string]*SellOrder)
 }
 
 //PeriodicUpdate Processes the ship for a tick
