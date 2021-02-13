@@ -640,7 +640,7 @@ function handleCurrentShipUpdate(d: GameMessage) {
 
   // update orders market window
   engineSack.ordersMarketWindow.setPlayer(engineSack.player);
-  engineSack.ordersMarketWindow.setWsService(engineSack.wsSvc)
+  engineSack.ordersMarketWindow.setWsService(engineSack.wsSvc);
 }
 
 // clears the screen
