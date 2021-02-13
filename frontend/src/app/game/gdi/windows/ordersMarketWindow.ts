@@ -1,7 +1,6 @@
 import { GDIWindow } from '../base/gdiWindow';
 import { FontSize, GDIStyle } from '../base/gdiStyle';
 import { GDIList } from '../components/gdiList';
-import { WSModule } from '../../wsModels/entities/wsShip';
 import { WsService } from '../../ws.service';
 import { Player } from '../../engineModels/player';
 import { ClientViewCargoBay } from '../../wsModels/bodies/viewCargoBay';
@@ -15,6 +14,7 @@ import { ClientSplitItem } from '../../wsModels/bodies/splitItem';
 import { ClientStackItem } from '../../wsModels/bodies/stackItem';
 import { ClientTrashItem } from '../../wsModels/bodies/trashItem';
 import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
+import { ClientSellAsOrder } from '../../wsModels/bodies/sellAsOrder';
 
 export class OrdersMarketWindow extends GDIWindow {
   // lists
@@ -181,6 +181,41 @@ export class OrdersMarketWindow extends GDIWindow {
 
             // request cargo bay refresh
             this.refreshCargoBay();
+
+            // reset views
+            this.resetViews();
+          }
+
+          // clear input
+          this.modalInput.setText('');
+
+          // hide modal overlay
+          this.hideModalInput();
+        });
+
+        this.showModalInput();
+      } else if (a === 'Sell') {
+        // get selected item
+        const i: ShipViewRow = this.cargoView.getSelectedItem();
+
+        this.modalInput.setOnReturn((txt: string) => {
+          // convert text to an integer
+          const n = Math.round(Number(txt));
+
+          if (!Number.isNaN(n)) {
+            // send sell request
+            const tiMsg: ClientSellAsOrder = {
+              sid: this.wsSvc.sid,
+              itemID: (i.object as WSContainerItem).id,
+              price: n,
+            };
+
+            this.wsSvc.sendMessage(MessageTypes.SellAsOrder, tiMsg);
+
+            // request cargo bay refresh
+            this.refreshCargoBay();
+
+            // todo: request station orders refresh
 
             // reset views
             this.resetViews();
@@ -417,6 +452,10 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
     } else {
       actions.push('Package');
     }
+
+    // spacer and sell
+    actions.push('');
+    actions.push('Sell');
 
     // spacer
     actions.push('');

@@ -188,6 +188,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			//handle message
 			l.handleClientFitModule(&client, &b)
+		} else if m.MessageType == msgRegistry.SellAsOrder {
+			//decode body as ClientSellAsOrderBody
+			b := models.ClientSellAsOrderBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			//handle message
+			l.handleClientSellAsOrder(&client, &b)
 		}
 	}
 }
@@ -696,6 +703,29 @@ func (l *SocketListener) handleClientFitModule(client *shared.GameClient, body *
 		//push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.FitModule)
+	}
+}
+
+func (l *SocketListener) handleClientSellAsOrder(client *shared.GameClient, body *models.ClientSellAsOrderBody) {
+	//safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	//verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientSellAsOrder: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		//initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		//push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.SellAsOrder)
 	}
 }
 

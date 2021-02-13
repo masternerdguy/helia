@@ -28,6 +28,7 @@ type MessageRegistry struct {
 	StackItem         int
 	SplitItem         int
 	FitModule         int
+	SellAsOrder       int
 }
 
 //TargetTypeRegistry Registry of target types
@@ -63,6 +64,7 @@ func NewMessageRegistry() *MessageRegistry {
 		StackItem:         16,
 		SplitItem:         17,
 		FitModule:         18,
+		SellAsOrder:       19,
 	}
 }
 
@@ -404,4 +406,11 @@ type ClientSplitItemBody struct {
 type ClientFitModuleBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemID"`
+}
+
+//ClientSellAsOrderBody Body containing a request to sell an item stack in the current ship's cargo hold on the stations order market
+type ClientSellAsOrderBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	ItemID    uuid.UUID `json:"itemID"`
+	Price     int       `json:"price"`
 }

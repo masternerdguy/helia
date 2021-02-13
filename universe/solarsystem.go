@@ -2,9 +2,11 @@ package universe
 
 import (
 	"encoding/json"
+	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"sync"
 	"time"
 
@@ -389,6 +391,33 @@ func (s *SolarSystem) PeriodicUpdate() {
 						// send error message to client
 						c.WriteErrorMessage(err.Error())
 					}
+				}
+			}
+		} else if evt.Type == models.NewMessageRegistry().SellAsOrder {
+			if sh != nil {
+				//extract data
+				data := evt.Body.(models.ClientSellAsOrderBody)
+
+				//find item
+				item := sh.FindItemInCargo(data.ItemID)
+
+				// make sure we found something
+				if item == nil {
+					// do nothing
+					continue
+				} else {
+					// debug out
+					log.Println(fmt.Sprintf("sell request: %v", data))
+
+					// todo: adapt for selling
+					/*// fit module
+					err := sh.FitModule(item.ID, false)
+
+					// there is a reason this could fail the player will need to know about
+					if err != nil {
+						// send error message to client
+						c.WriteErrorMessage(err.Error())
+					}*/
 				}
 			}
 		}
