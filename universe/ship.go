@@ -1690,6 +1690,20 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 		return errors.New("Items must be sold at a price greater than 0")
 	}
 
+	//remove from cargo bay
+	newCB := make([]*Item, 0)
+
+	for i := range s.CargoBay.Items {
+		o := s.CargoBay.Items[i]
+
+		//keep if not this item or is dirty
+		if o.ID != id {
+			newCB = append(newCB, o)
+		}
+	}
+
+	s.CargoBay.Items = newCB
+
 	//mark item as dirty and place it in the escrow container
 	item.CoreDirty = true
 	item.ContainerID = *s.EscrowContainerID
