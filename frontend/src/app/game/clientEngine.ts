@@ -28,6 +28,7 @@ import { Container } from './engineModels/container';
 import { ServerErrorMessage } from './wsModels/bodies/errorMessage';
 import { Asteroid } from './engineModels/asteroid';
 import { OrdersMarketWindow } from './gdi/windows/ordersMarketWindow';
+import { ServerOpenSellOrdersUpdate } from './wsModels/bodies/openSellOrdersUpdate';
 
 class EngineSack {
   constructor() {}
@@ -608,7 +609,7 @@ function handleCargoBayUpdate(d: GameMessage) {
 
 function handleOpenSellOrdersUpdateMessageFromServer(d: GameMessage) {
     // parse body
-    const msg = JSON.parse(d.body) as any; /* todo: create model */
+    const msg = JSON.parse(d.body) as ServerOpenSellOrdersUpdate;
 
     // null check
     if (!msg.orders) {
