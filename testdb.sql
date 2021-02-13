@@ -384,12 +384,14 @@ cce56f8c-ac40-477a-87c7-5e23fc8f4f20	09172710-740c-4d1c-9fc0-43cb62e674e7	{"hp":
 5dae670e-482d-46b0-94b8-e4ab5e7a4737	c311df30-c21e-4895-acb0-d8808f99710e	{"hp": 75, "rack": "c", "volume": 6, "armor_max_add": 75}	2021-01-24 01:03:56.112507-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Module for new noob ship for player	82ffe4dd-7343-4191-9652-2940ae5a4f42	1	f
 a8fb8932-a2bb-47b7-ab6d-bd632a906d81	9d1014c5-3422-4a0f-9839-f585269b4b16	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}	2021-01-24 01:03:56.106008-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Module for new noob ship for player	82ffe4dd-7343-4191-9652-2940ae5a4f42	1	f
 58c57c2d-efea-4fdd-b4af-5a851ccec732	9d1014c5-3422-4a0f-9839-f585269b4b16	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}	2021-01-24 01:03:56.10364-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Module for new noob ship for player	82ffe4dd-7343-4191-9652-2940ae5a4f42	1	f
-ee9268a9-957e-48fa-9676-db2baa033f32	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 20:35:53.411537-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	10f9eb73-7ede-4c60-909e-0a9341bf41cc	10	t
-ff33f34d-0265-4655-a7db-bd8e6227cf42	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 20:36:15.770344-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	10f9eb73-7ede-4c60-909e-0a9341bf41cc	3	t
-540ac6ca-4566-4d29-aaaa-008d9d206cfd	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-01-24 01:12:46.345811-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Mined ore	10f9eb73-7ede-4c60-909e-0a9341bf41cc	5	t
 8875f5c7-969c-4f4c-93a1-3325cc467d3b	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 20:36:05.755204-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	10f9eb73-7ede-4c60-909e-0a9341bf41cc	0	t
-41bdf879-616e-4712-ba34-b260ac7069fb	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 20:36:10.559523-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	10f9eb73-7ede-4c60-909e-0a9341bf41cc	1	t
 99d9544d-3a2f-4879-ab62-67c94231d213	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 20:37:06.337896-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	10f9eb73-7ede-4c60-909e-0a9341bf41cc	1	f
+ff33f34d-0265-4655-a7db-bd8e6227cf42	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 20:36:15.770344-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	9c283482-76d4-4139-ae6c-3138345ad19c	3	t
+41bdf879-616e-4712-ba34-b260ac7069fb	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 20:36:10.559523-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	9c283482-76d4-4139-ae6c-3138345ad19c	1	t
+540ac6ca-4566-4d29-aaaa-008d9d206cfd	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-01-24 01:12:46.345811-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Mined ore	10f9eb73-7ede-4c60-909e-0a9341bf41cc	3	t
+ee9268a9-957e-48fa-9676-db2baa033f32	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 20:35:53.411537-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	10f9eb73-7ede-4c60-909e-0a9341bf41cc	8	t
+d35eacb2-81ec-408a-9bcc-cee58bdb9784	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 23:07:31.325767-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	10f9eb73-7ede-4c60-909e-0a9341bf41cc	2	t
+1e5905eb-83b4-461e-8c55-f466101579be	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 23:07:25.333361-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	9c283482-76d4-4139-ae6c-3138345ad19c	2	t
 \.
 
 
@@ -412,6 +414,9 @@ dd522f03-2f52-4e82-b2f8-d7e0029cb82f	ore	Testite	{"hp": 1, "volume": 1}
 --
 
 COPY public.sellorders (id, universe_stationid, itemid, seller_userid, askprice, created, bought, buyer_userid) FROM stdin;
+a884dc99-c2ff-433e-a6c0-accd7fed4316	cf07bba9-90b2-4599-b1e3-84d797a67f0a	ff33f34d-0265-4655-a7db-bd8e6227cf42	22e53c8f-d5ad-46dd-827f-03204644ddf7	33	2021-02-12 23:00:35.293677-05	\N	\N
+33b4aa6c-09ed-4d20-a6a9-f0968ffa4bd7	cf07bba9-90b2-4599-b1e3-84d797a67f0a	41bdf879-616e-4712-ba34-b260ac7069fb	22e53c8f-d5ad-46dd-827f-03204644ddf7	45	2021-02-12 23:06:28.652443-05	\N	\N
+19a8ce42-b095-4620-bdc8-8884a0138d25	cf07bba9-90b2-4599-b1e3-84d797a67f0a	1e5905eb-83b4-461e-8c55-f466101579be	22e53c8f-d5ad-46dd-827f-03204644ddf7	99	2021-02-12 23:25:22.784236-05	\N	\N
 \.
 
 
@@ -420,7 +425,7 @@ COPY public.sellorders (id, universe_stationid, itemid, seller_userid, askprice,
 --
 
 COPY public.sessions (id, userid) FROM stdin;
-5219f997-45a7-416c-980a-1e1acbb7a336	22e53c8f-d5ad-46dd-827f-03204644ddf7
+eb1331f7-024c-4c52-8513-46953a45ed20	22e53c8f-d5ad-46dd-827f-03204644ddf7
 \.
 
 
@@ -429,7 +434,7 @@ COPY public.sessions (id, userid) FROM stdin;
 --
 
 COPY public.ships (id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid, dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid, fittingbay_containerid, remaxdirty, trash_containerid, wallet) FROM stdin;
-5452e22f-7e5c-4626-8828-696427c0ee8c	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	22e53c8f-d5ad-46dd-827f-03204644ddf7	24771.795632863843	-9938.30877953488	2021-01-24 01:03:56.114356-05	aaa's Starter Ship	Sparrow	142.63370752441807	0	0	209	244	135	295	0	137.99108472735128	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": [{"item_id": "58c57c2d-efea-4fdd-b4af-5a851ccec732", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "a8fb8932-a2bb-47b7-ab6d-bd632a906d81", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "cce56f8c-ac40-477a-87c7-5e23fc8f4f20", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "4cfafc0a-85fa-490f-9a6b-5ea5c40641aa", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "5dae670e-482d-46b0-94b8-e4ab5e7a4737", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	10f9eb73-7ede-4c60-909e-0a9341bf41cc	82ffe4dd-7343-4191-9652-2940ae5a4f42	f	bbc5a814-6bb1-4955-a0b5-d9580f692e2e	10000
+5452e22f-7e5c-4626-8828-696427c0ee8c	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	22e53c8f-d5ad-46dd-827f-03204644ddf7	24771.795632863843	-9938.30877953488	2021-01-24 01:03:56.114356-05	aaa's Starter Ship	Sparrow	244.30473689855808	0	0	209	244	135	295	0	137.99108472735128	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": [{"item_id": "58c57c2d-efea-4fdd-b4af-5a851ccec732", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "a8fb8932-a2bb-47b7-ab6d-bd632a906d81", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "cce56f8c-ac40-477a-87c7-5e23fc8f4f20", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "4cfafc0a-85fa-490f-9a6b-5ea5c40641aa", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "5dae670e-482d-46b0-94b8-e4ab5e7a4737", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	10f9eb73-7ede-4c60-909e-0a9341bf41cc	82ffe4dd-7343-4191-9652-2940ae5a4f42	f	bbc5a814-6bb1-4955-a0b5-d9580f692e2e	10000
 \.
 
 
@@ -518,8 +523,8 @@ COPY public.universe_stars (id, universe_systemid, pos_x, pos_y, texture, radius
 --
 
 COPY public.universe_stations (id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta) FROM stdin;
-526f57f5-09e0-41c7-9a89-cd803ec0a065	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Test Station	207460	-335230	Fleet Armory	810	65000	23.33
 cf07bba9-90b2-4599-b1e3-84d797a67f0a	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Another Station	24771.795632863843	-9938.30877953488	Sunfarm	740	25300	112.4
+526f57f5-09e0-41c7-9a89-cd803ec0a065	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Test Station	207460	-335230	Fleet Armory	810	65000	23.33
 \.
 
 
