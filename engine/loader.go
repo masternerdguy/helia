@@ -23,6 +23,7 @@ func loadUniverse() (*universe.Universe, error) {
 	asteroidSvc := sql.GetAsteroidService()
 	itemTypeSvc := sql.GetItemTypeService()
 	itemFamilySvc := sql.GetItemFamilyService()
+	sellOrderSvc := sql.GetSellOrderService()
 
 	u := universe.Universe{}
 
@@ -229,6 +230,30 @@ func loadUniverse() (*universe.Universe, error) {
 
 				//initialize station
 				station.Initialize()
+
+				//load open sell orders
+				sos, err := sellOrderSvc.GetOpenSellOrdersByStation(station.ID)
+
+				if err != nil {
+					return nil, err
+				}
+
+				for _, o := range sos {
+					// convert to engine type
+					so := SellOrderFromSQL(&o)
+
+					if so == nil {
+						return nil, errors.New("Unable to load sell order")
+					}
+
+					// store on station
+					station.OpenSellOrders[so.ID.String()] = so
+				}
+
+				//debug out
+				for _, o := range station.OpenSellOrders {
+					log.Println(fmt.Sprintf("O: %v", *o))
+				}
 
 				//add to solar system
 				s.AddStation(&station)
