@@ -26,4 +26,5 @@ export enum MessageTypes {
   FitModule = 18,
   SellAsOrder = 19,
   ViewOpenSellOrders = 20,
+  OpenSellOrdersUpdate = 21,
 }
