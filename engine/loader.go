@@ -24,6 +24,7 @@ func loadUniverse() (*universe.Universe, error) {
 	itemTypeSvc := sql.GetItemTypeService()
 	itemFamilySvc := sql.GetItemFamilyService()
 	sellOrderSvc := sql.GetSellOrderService()
+	itemSvc := sql.GetItemService()
 
 	u := universe.Universe{}
 
@@ -245,6 +246,22 @@ func loadUniverse() (*universe.Universe, error) {
 					if so == nil {
 						return nil, errors.New("Unable to load sell order")
 					}
+
+					// load item for sale
+					it, err := itemSvc.GetItemByID(so.ItemID)
+
+					if err != nil {
+						return nil, err
+					}
+
+					item, err := LoadItem(it)
+
+					if err != nil {
+						return nil, err
+					}
+
+					// link item into order
+					so.Item = item
 
 					// store on station
 					station.OpenSellOrders[so.ID.String()] = so

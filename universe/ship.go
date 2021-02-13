@@ -1728,6 +1728,9 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 		CoreDirty:    true,
 	}
 
+	//link item into sell order
+	newOrder.Item = item
+
 	//escalate to core for saving in db
 	s.CurrentSystem.NewSellOrders[newOrder.ID.String()] = &newOrder
 
