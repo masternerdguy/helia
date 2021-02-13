@@ -10,6 +10,11 @@ import { WSContainerItem } from '../../wsModels/entities/wsContainer';
 import { GDIInput } from '../components/gdiInput';
 import { GDIOverlay } from '../components/gdiOverlay';
 import { GDIBar } from '../components/gdiBar';
+import { ClientPackageItem } from '../../wsModels/bodies/packageItem';
+import { ClientSplitItem } from '../../wsModels/bodies/splitItem';
+import { ClientStackItem } from '../../wsModels/bodies/stackItem';
+import { ClientTrashItem } from '../../wsModels/bodies/trashItem';
+import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
 
 export class OrdersMarketWindow extends GDIWindow {
   // lists
@@ -56,7 +61,14 @@ export class OrdersMarketWindow extends GDIWindow {
 
     this.cargoView.setFont(FontSize.normal);
     this.cargoView.setOnClick((r) => {
-      // todo
+      // check for actions
+      if (r.actions) {
+        // map action strings for use in view
+        const actions = r.actions.map((s: string) => buildShipViewRowText(s));
+
+        // list actions on action view
+        this.actionView.setItems(actions);
+      }
     });
 
     // setup cargo bar
@@ -81,7 +93,108 @@ export class OrdersMarketWindow extends GDIWindow {
       // get action
       const a = r.listString();
 
-      // todo
+      if (a === 'Trash') {
+        // get selected item
+        const i: ShipViewRow = this.cargoView.getSelectedItem();
+
+        // send trash request
+        const tiMsg: ClientTrashItem = {
+          sid: this.wsSvc.sid,
+          itemID: (i.object as WSContainerItem).id,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.TrashItem, tiMsg);
+
+        // request cargo bay refresh
+        this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
+      } else if (a === 'Package') {
+        // get selected item
+        const i: ShipViewRow = this.cargoView.getSelectedItem();
+
+        // send package request
+        const tiMsg: ClientPackageItem = {
+          sid: this.wsSvc.sid,
+          itemID: (i.object as WSContainerItem).id,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.PackageItem, tiMsg);
+
+        // request cargo bay refresh
+        this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
+      } else if (a === 'Unpackage') {
+        // get selected item
+        const i: ShipViewRow = this.cargoView.getSelectedItem();
+
+        // send unpackage request
+        const tiMsg: ClientUnpackageItem = {
+          sid: this.wsSvc.sid,
+          itemID: (i.object as WSContainerItem).id,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.UnpackageItem, tiMsg);
+
+        // request cargo bay refresh
+        this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
+      } else if (a === 'Stack') {
+        // get selected item
+        const i: ShipViewRow = this.cargoView.getSelectedItem();
+
+        // send stack request
+        const tiMsg: ClientStackItem = {
+          sid: this.wsSvc.sid,
+          itemID: (i.object as WSContainerItem).id,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.StackItem, tiMsg);
+
+        // request cargo bay refresh
+        this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
+      } else if (a === 'Split') {
+        // get selected item
+        const i: ShipViewRow = this.cargoView.getSelectedItem();
+
+        this.modalInput.setOnReturn((txt: string) => {
+          // convert text to an integer
+          const n = Math.round(Number(txt));
+
+          if (!Number.isNaN(n)) {
+            // send split request
+            const tiMsg: ClientSplitItem = {
+              sid: this.wsSvc.sid,
+              itemID: (i.object as WSContainerItem).id,
+              size: n,
+            };
+
+            this.wsSvc.sendMessage(MessageTypes.SplitItem, tiMsg);
+
+            // request cargo bay refresh
+            this.refreshCargoBay();
+
+            // reset views
+            this.resetViews();
+          }
+
+          // clear input
+          this.modalInput.setText('');
+
+          // hide modal overlay
+          this.hideModalInput();
+        });
+
+        this.showModalInput();
+      }
     });
 
     // setup info view
@@ -171,6 +284,10 @@ export class OrdersMarketWindow extends GDIWindow {
       // reset cargo view
       this.cargoView.setSelectedIndex(-1);
       this.cargoView.setItems([]);
+
+      // reset action view and store status
+      this.actionView.setItems([]);
+      this.isDocked = docked;
     }
 
     // set up view row list
@@ -281,124 +398,6 @@ function buildCargoRowFromContainerItem(
   return r;
 }
 
-function buildInfoRowsFromContainerItem(m: WSContainerItem): ShipViewRow[] {
-  const rows: ShipViewRow[] = [];
-
-  // basic info
-  rows.push(buildShipViewRowText('Basic Info'));
-
-  const type = buildShipViewRowText(infoKeyValueString('Type', m.itemTypeName));
-
-  const family = buildShipViewRowText(
-    infoKeyValueString('Family', m.itemFamilyName)
-  );
-
-  const quantity = buildShipViewRowText(
-    infoKeyValueString('Quantity', m.quantity.toString())
-  );
-
-  const packaged = buildShipViewRowText(
-    infoKeyValueString('Packaged', m.isPackaged.toString())
-  );
-
-  // store basic info
-  rows.push(type);
-  rows.push(family);
-  rows.push(quantity);
-  rows.push(packaged);
-
-  // spacer after basic info
-  rows.push(buildShipViewRowSpacer());
-
-  // combine item and item type metadata
-  const meta: any = {};
-
-  if (m.itemTypeMeta) {
-    Object.assign(meta, m.itemTypeMeta);
-  }
-
-  if (m.meta) {
-    Object.assign(meta, m.meta);
-  }
-
-  // metadata info
-  rows.push(buildShipViewRowText('Metadata'));
-
-  for (const prop in meta) {
-    if (Object.prototype.hasOwnProperty.call(meta, prop)) {
-      const v = buildShipViewRowText(infoKeyValueString(prop, `${meta[prop]}`));
-
-      rows.push(v);
-    }
-  }
-
-  // spacer after metadata info
-  rows.push(buildShipViewRowSpacer());
-
-  // return info rows
-  return rows;
-}
-
-function buildInfoRowsFromModule(m: WSModule): ShipViewRow[] {
-  const rows: ShipViewRow[] = [];
-
-  // basic info
-  rows.push(buildShipViewRowText('Basic Info'));
-
-  const type = buildShipViewRowText(infoKeyValueString('Type', m.type));
-
-  const family = buildShipViewRowText(
-    infoKeyValueString('Family', m.familyName)
-  );
-
-  // store basic info
-  rows.push(type);
-  rows.push(family);
-
-  // spacer after basic info
-  rows.push(buildShipViewRowSpacer());
-
-  // combine item and item type metadata
-  const meta: any = {};
-
-  if (m.meta) {
-    Object.assign(meta, m.meta);
-  }
-
-  // metadata info
-  rows.push(buildShipViewRowText('Metadata'));
-
-  for (const prop in meta) {
-    if (Object.prototype.hasOwnProperty.call(meta, prop)) {
-      const v = buildShipViewRowText(infoKeyValueString(prop, `${meta[prop]}`));
-
-      rows.push(v);
-    }
-  }
-
-  // spacer after metadata info
-  rows.push(buildShipViewRowSpacer());
-
-  // slot info
-  rows.push(buildShipViewRowText('Slot Info'));
-
-  const slotFamily = buildShipViewRowText(
-    infoKeyValueString('Compatibility', m.hpFamily)
-  );
-  const slotVolume = buildShipViewRowText(
-    infoKeyValueString('Volume', m.hpVolume?.toString())
-  );
-
-  rows.push(slotFamily);
-  rows.push(slotVolume);
-
-  // spacer after slot info
-  rows.push(buildShipViewRowSpacer());
-
-  // return info rows
-  return rows;
-}
-
 function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
   const actions: string[] = [];
 
@@ -417,19 +416,6 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
       }
     } else {
       actions.push('Package');
-
-      // determine whether or not this is a module
-      const isModule =
-        m.itemFamilyID === 'gun_turret' ||
-        m.itemFamilyID === 'missile_launcher' ||
-        m.itemFamilyID === 'shield_booster' ||
-        m.itemFamilyID === 'fuel_tank' ||
-        m.itemFamilyID === 'armor_plate';
-
-      if (isModule) {
-        // offer fit action
-        actions.push('Fit');
-      }
     }
 
     // spacer
@@ -437,33 +423,6 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
 
     // danger zone
     actions.push('Trash');
-  }
-
-  return actions;
-}
-
-function buildFittingRowFromModule(
-  m: WSModule,
-  isDocked: boolean
-): ShipViewRow {
-  const r: ShipViewRow = {
-    object: m,
-    actions: getFittingRowActions(isDocked, m),
-    listString: () => {
-      return moduleStatusString(m);
-    },
-  };
-
-  return r;
-}
-
-function getFittingRowActions(isDocked: boolean, m: WSModule) {
-  const actions: string[] = [];
-
-  if (isDocked) {
-    if (m.itemID !== '00000000-0000-0000-0000-000000000000') {
-      actions.push('Unfit');
-    }
   }
 
   return actions;
@@ -477,16 +436,6 @@ function fixedString(str: string, width: number) {
   return str.substr(0, width).padEnd(width);
 }
 
-function moduleStatusString(m: WSModule) {
-  const pc = fixedString(m.isCycling ? `${m.cyclePercent}%` : '', 4);
-
-  // build status string
-  return `${fixedString(m.willRepeat ? '*' : '', 1)} ${fixedString(
-    m.itemID !== '00000000-0000-0000-0000-000000000000' ? m.type : '[EMPTY]',
-    24
-  )} ${pc}`;
-}
-
 function itemStatusString(m: WSContainerItem) {
   // build status string
   const q = cargoQuantity(m.quantity);
@@ -494,14 +443,6 @@ function itemStatusString(m: WSContainerItem) {
     m.itemTypeName,
     40
   )} ${fixedString(m.itemFamilyName, 16)} ${fixedString(q, 8)}`;
-}
-
-function infoKeyValueString(key: string, value: string) {
-  // build string
-  return `${fixedString('', 1)} ${fixedString(key, 32)} ${fixedString(
-    value,
-    32
-  )}`;
 }
 
 function cargoQuantity(d: number): string {
