@@ -423,3 +423,21 @@ type ClientSellAsOrderBody struct {
 type ClientViewOpenSellOrdersBody struct {
 	SessionID uuid.UUID `json:"sid"`
 }
+
+//ServerSellOrderBody Structure containing information about a sell order for return to the client
+type ServerSellOrderBody struct {
+	ID           uuid.UUID          `json:"id"`
+	StationID    uuid.UUID          `json:"stationId"`
+	ItemID       uuid.UUID          `json:"itemId"`
+	SellerUserID uuid.UUID          `json:"sellerId"`
+	AskPrice     float64            `json:"ask"`
+	Created      time.Time          `json:"createdAt"`
+	Bought       *time.Time         `json:"boughtAt"`
+	BuyerUserID  *uuid.UUID         `json:"buyerId"`
+	Item         ServerItemViewBody `json:"item"`
+}
+
+//ServerOpenSellOrdersUpdateBody Body containing a response to a request to view open sell orders at their station from a client
+type ServerOpenSellOrdersUpdateBody struct {
+	Orders []ServerSellOrderBody `json:"orders"`
+}

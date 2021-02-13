@@ -178,6 +178,8 @@ export function clientStart(
       handleCargoBayUpdate(d);
     } else if (d.type === MessageTypes.PushError) {
       handleErrorMessageFromServer(d);
+    } else if (d.type === MessageTypes.OpenSellOrdersUpdate) {
+      handleOpenSellOrdersUpdateMessageFromServer(d);
     }
   });
 }
@@ -602,6 +604,19 @@ function handleCargoBayUpdate(d: GameMessage) {
   // update current cargo view cache
   const vw = new Container(msg);
   engineSack.player.currentCargoView = vw;
+}
+
+function handleOpenSellOrdersUpdateMessageFromServer(d: GameMessage) {
+    // parse body
+    const msg = JSON.parse(d.body) as any; /* todo: create model */
+
+    // null check
+    if (!msg.orders) {
+      msg.orders = [];
+    }
+
+    // todo: update orders on orders market window
+    console.log(msg);
 }
 
 function handleCurrentShipUpdate(d: GameMessage) {

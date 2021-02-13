@@ -2,11 +2,9 @@ package universe
 
 import (
 	"encoding/json"
-	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"sync"
 	"time"
 
@@ -454,19 +452,63 @@ func (s *SolarSystem) PeriodicUpdate() {
 				//extract data (currently nothing to process)
 				//data := evt.Body.(models.ClientViewOpenSellOrdersBody)
 
-				//debug out
-				log.Println(fmt.Sprintf("oo request"))
+				//make sure the ship is docked
+				if sh.DockedAtStation == nil || sh.DockedAtStationID == nil {
+					continue
+				}
 
-				/*//package message
+				//convert station's open sell orders to an update message for the client
+				vw := models.ServerOpenSellOrdersUpdateBody{}
+
+				for _, i := range sh.DockedAtStation.OpenSellOrders {
+					//skip if dirty
+					if i.CoreDirty {
+						continue
+					}
+
+					//make sure item is present
+					if i.Item == nil {
+						continue
+					}
+
+					//add to message
+					item := models.ServerItemViewBody{
+						ID:             i.Item.ID,
+						ItemTypeID:     i.Item.ItemTypeID,
+						ItemTypeName:   i.Item.ItemTypeName,
+						ItemFamilyID:   i.Item.ItemFamilyID,
+						ItemFamilyName: i.Item.ItemFamilyName,
+						Quantity:       i.Item.Quantity,
+						IsPackaged:     i.Item.IsPackaged,
+						Meta:           models.Meta(i.Item.Meta),
+						ItemTypeMeta:   models.Meta(i.Item.ItemTypeMeta),
+					}
+
+					order := models.ServerSellOrderBody{
+						ID:           i.ID,
+						StationID:    i.StationID,
+						ItemID:       i.ItemID,
+						SellerUserID: i.SellerUserID,
+						AskPrice:     i.AskPrice,
+						Created:      i.Created,
+						Bought:       i.Bought,
+						BuyerUserID:  i.BuyerUserID,
+						Item:         item,
+					}
+
+					vw.Orders = append(vw.Orders, order)
+				}
+
+				//package message
 				b, _ := json.Marshal(&vw)
 
 				cu := models.GameMessage{
-					MessageType: msgRegistry.CargoBayUpdate,
+					MessageType: msgRegistry.OpenSellOrdersUpdate,
 					MessageBody: string(b),
 				}
 
 				//write response to client
-				c.WriteMessage(&cu)*/
+				c.WriteMessage(&cu)
 			}
 		}
 	}
