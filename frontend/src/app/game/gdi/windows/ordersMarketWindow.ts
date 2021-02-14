@@ -16,6 +16,7 @@ import { ClientTrashItem } from '../../wsModels/bodies/trashItem';
 import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
 import { ClientSellAsOrder } from '../../wsModels/bodies/sellAsOrder';
 import { ClientViewOpenSellOrders } from '../../wsModels/bodies/viewOpenSellOrders';
+import { WSOpenSellOrdersUpdate } from '../../wsModels/entities/wsOpenSellOrdersUpdate';
 
 export class OrdersMarketWindow extends GDIWindow {
   // lists
@@ -316,6 +317,10 @@ export class OrdersMarketWindow extends GDIWindow {
 
       this.wsSvc.sendMessage(MessageTypes.ViewOpenSellOrders, b);
     }, 200);
+  }
+
+  syncSellOrders(orders: WSOpenSellOrdersUpdate) {
+    console.log(orders);
   }
 
   periodicUpdate() {

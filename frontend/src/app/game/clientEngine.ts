@@ -616,8 +616,8 @@ function handleOpenSellOrdersUpdateMessageFromServer(d: GameMessage) {
     msg.orders = [];
   }
 
-  // todo: update orders on orders market window
-  console.log(msg);
+  // update sell orders window
+  engineSack.ordersMarketWindow.syncSellOrders(msg);
 }
 
 function handleCurrentShipUpdate(d: GameMessage) {
