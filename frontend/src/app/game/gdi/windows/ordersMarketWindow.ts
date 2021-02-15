@@ -28,8 +28,7 @@ export class OrdersMarketWindow extends GDIWindow {
   private orderView: GDIList = new GDIList();
 
   // order tree depth
-  private depthID: string;
-  private depth: number = 0;
+  private depthStack: string[] = [];
 
   // inputs
   private modalOverlay: GDIOverlay = new GDIOverlay();
@@ -254,7 +253,26 @@ export class OrdersMarketWindow extends GDIWindow {
     this.orderView.setY(0);
 
     this.orderView.setFont(FontSize.normal);
-    this.orderView.setOnClick(() => {});
+    this.orderView.setOnClick(() => {
+      // get selected target
+      const i = this.orderView.getSelectedItem() as OrderViewRow;
+
+      // navigate to target frame
+      if (i.next) {
+        if (i.next == '--') {
+          this.popDepth();
+        } else {
+          this.pushDepth(i.next);
+        }
+      }
+
+      if (i.actions) {
+        // show actions
+        this.actionView.setItems(i.actions);
+      } else {
+        this.actionView.setItems([]);
+      }
+    });
 
     // setup modal input
     this.modalOverlay.setWidth(this.getWidth());
@@ -393,20 +411,20 @@ export class OrdersMarketWindow extends GDIWindow {
     }
 
     // sort trunk alphabetically
-    const trunkArr = Array
-      .from(safeTree.families)
-      .sort((a, b) => a[1].name > b[1].name ? 1 : -1);
+    const trunkArr = Array.from(safeTree.families).sort((a, b) =>
+      a[1].name > b[1].name ? 1 : -1
+    );
 
     safeTree.families.clear();
 
     for (const f of trunkArr) {
       // sort groups alphabetically
-      const groupArr = Array
-        .from(f[1].groups)
-        .sort((a, b) => a[1].name > b[1].name ? 1 : -1);
+      const groupArr = Array.from(f[1].groups).sort((a, b) =>
+        a[1].name > b[1].name ? 1 : -1
+      );
 
       f[1].groups.clear();
-      
+
       for (const g of groupArr) {
         // push sorted group to family
         f[1].groups.set(g[0], g[1]);
@@ -450,8 +468,7 @@ export class OrdersMarketWindow extends GDIWindow {
       this.openSellOrdersTree = undefined;
       this.orderView.setSelectedIndex(-1);
       this.orderView.setItems([]);
-      this.depth = 0;
-      this.depthID = "";
+      this.depthStack = [];
 
       // reset action view and store status
       this.actionView.setItems([]);
@@ -504,9 +521,47 @@ export class OrdersMarketWindow extends GDIWindow {
     this.cargoView.setItems(rows);
     this.cargoView.setSelectedIndex(i);
 
-    // show orders tree at current depth
-    if (this.isDocked && this.openSellOrdersTree) {
-      this.browseTo(this.depth, this.depthID);
+    if (this.openSellOrdersTree && this.depthStack) {
+      // show orders tree at current depth
+      const oRows: OrderViewRow[] = [];
+      const idx = this.orderView.getSelectedIndex();
+
+      const depth = this.depthStack.length;
+
+      if (depth === 0) {
+        for (const f of this.openSellOrdersTree.families) {
+          // add row to browse a specific family
+          oRows.push(buildOrderViewRowText(f[1].name, f[0]));
+        }
+      } else if(depth === 1) {
+        // add back button
+        oRows.push(buildOrderViewRowText("<== Back to Item Families", "--"));
+
+        // add spacer
+        oRows.push(buildOrderViewRowSpacer());
+
+        // add row to browse a specific item type
+        for (const g of this.openSellOrdersTree.families.get(this.depthStack[0]).groups) {
+          oRows.push(buildOrderViewRowText(g[1].name, g[0]));
+        }
+      } else if(depth === 2) {
+        // add back button
+        oRows.push(buildOrderViewRowText("<== Back to Item Types", "--"));
+
+        // add spacer
+        oRows.push(buildOrderViewRowSpacer());
+
+        // add row to browse a specific order
+        for (const g of this.openSellOrdersTree.families
+            .get(this.depthStack[0]).groups
+            .get(this.depthStack[1]).orders) {
+          // todo
+        }
+      }
+
+      // push rows to orders view
+      this.orderView.setItems(oRows);
+      this.orderView.setSelectedIndex(idx);
     }
   }
 
@@ -532,24 +587,15 @@ export class OrdersMarketWindow extends GDIWindow {
     this.actionView.setItems([]);
   }
 
-  private browseTo(depth: number, id: string) {
-    if(this.openSellOrdersTree) {
-      this.depth = depth;
-      this.depthID = id;
+  private pushDepth(id: string) {
+    if (this.openSellOrdersTree) {
+      this.depthStack.push(id);
+    }
+  }
 
-      const rows: OrderViewRow[] = [];
-      const idx = this.orderView.getSelectedIndex();
-  
-      if (this.depth === 0) {
-        for (const f of this.openSellOrdersTree.families) {
-          // add row to browse a specific family
-          rows.push(buildOrderViewRowText(f[1].name, f[0]));
-        }
-      }
-
-      // push rows to orders view
-      this.orderView.setItems(rows);
-      this.orderView.setSelectedIndex(idx);
+  private popDepth() {
+    if (this.openSellOrdersTree) {
+      this.depthStack.pop();
     }
   }
 }
@@ -649,6 +695,19 @@ function buildOrderViewRowText(s: string, next: string): OrderViewRow {
     next: next,
     listString: () => {
       return s;
+    },
+  };
+
+  return r;
+}
+
+function buildOrderViewRowSpacer(): OrderViewRow {
+  const r: OrderViewRow = {
+    object: null,
+    actions: [],
+    next: undefined,
+    listString: () => {
+      return "";
     },
   };
 
