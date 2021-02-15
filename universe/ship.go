@@ -2,8 +2,6 @@ package universe
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"math"
 	"sync"
 	"time"
@@ -1743,8 +1741,38 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 		return errors.New("Seller ship not found")
 	}
 
-	//debug out
-	log.Println(fmt.Sprintf("todo: try to buy %v", seller))
+	//check if we need to lock the seller
+	if seller.CurrentSystem.ID != s.CurrentSystem.ID {
+		// obtain lock
+		seller.Lock.Lock()
+		defer seller.Lock.Unlock()
+	}
+
+	//adjust wallets
+	seller.Wallet += order.AskPrice
+	s.Wallet -= order.AskPrice
+
+	//stamp order as fulfilled
+	now := time.Now()
+
+	order.Bought = &now
+	order.BuyerUserID = &s.UserID
+
+	//remove order from station
+	delete(s.DockedAtStation.OpenSellOrders, order.ID.String())
+
+	//escalate order save request to core
+	s.CurrentSystem.UpdatedSellOrders[order.ID.String()] = order
+
+	//mark item as dirty and place it in the cargo container
+	order.Item.CoreDirty = true
+	order.Item.ContainerID = s.CargoBayContainerID
+
+	//escalate item for saving in db
+	s.CurrentSystem.MovedItems[order.Item.ID.String()] = order.Item
+
+	//place item in cargo bay
+	s.CargoBay.Items = append(s.CargoBay.Items, order.Item)
 
 	//success
 	return nil

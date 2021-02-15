@@ -36,7 +36,7 @@ type SolarSystem struct {
 	ChangedQuantityItems map[string]*Item              //stacks of items that have changed quantity and need saving by core
 	NewItems             map[string]*Item              //stacks of items that are newly created and need to be saved by core
 	NewSellOrders        map[string]*SellOrder         //new sell orders in need of saving by core
-	BoughtSellOrders     map[string]*SellOrder         //sell order that has been bought in need of saving by core
+	UpdatedSellOrders    map[string]*SellOrder         //sell order that have been modified in need of saving by core
 }
 
 //Initialize Initializes internal aspects of SolarSystem
@@ -61,7 +61,7 @@ func (s *SolarSystem) Initialize() {
 	s.ChangedQuantityItems = make(map[string]*Item)
 	s.NewItems = make(map[string]*Item)
 	s.NewSellOrders = make(map[string]*SellOrder)
-	s.BoughtSellOrders = make(map[string]*SellOrder)
+	s.UpdatedSellOrders = make(map[string]*SellOrder)
 
 	//initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -465,6 +465,11 @@ func (s *SolarSystem) PeriodicUpdate() {
 				for _, i := range sh.DockedAtStation.OpenSellOrders {
 					//skip if dirty
 					if i.CoreDirty {
+						continue
+					}
+
+					//skip if closed
+					if i.BuyerUserID != nil || i.Bought != nil {
 						continue
 					}
 
