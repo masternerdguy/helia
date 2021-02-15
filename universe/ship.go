@@ -1680,6 +1680,62 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	//find the sell order
 	order := s.DockedAtStation.OpenSellOrders[id.String()]
 
+	//verify order exists
+	if order == nil {
+		return errors.New("Sell order not found")
+	}
+
+	//verify order is clean
+	if order.CoreDirty {
+		return errors.New("Sell order is dirty")
+	}
+
+	//verify order is unfulfilled
+	if order.Bought != nil || order.BuyerUserID != nil {
+		return errors.New("Sell order has already been fulfilled")
+	}
+
+	//lock order and item if needed
+	if lock {
+		order.Lock.Lock()
+		defer order.Lock.Unlock()
+
+		order.Item.Lock.Lock()
+		defer order.Item.Lock.Unlock()
+	}
+
+	//verify sufficient funds
+	if s.Wallet-order.AskPrice < 0 {
+		return errors.New("Insufficient CBN to fulfill order")
+	}
+
+	//calculate order volume
+	var unitVolume float64 = 0.0
+
+	if order.Item.IsPackaged {
+		v, f := order.Item.ItemTypeMeta.GetFloat64("volume")
+
+		if f {
+			unitVolume = v
+		}
+	} else {
+		v, f := order.Item.Meta.GetFloat64("volume")
+
+		if f {
+			unitVolume = v
+		}
+	}
+
+	orderVolume := unitVolume * float64(order.Item.Quantity)
+
+	//verify sufficient cargo capacity
+	usedBay := s.TotalCargoBayVolumeUsed(lock)
+	maxBay := s.GetRealCargoBayVolume()
+
+	if usedBay+orderVolume > maxBay {
+		return errors.New("Insufficient cargo space available")
+	}
+
 	//debug out
 	log.Println(fmt.Sprintf("todo: try to buy %v", order))
 
