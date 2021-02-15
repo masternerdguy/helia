@@ -268,8 +268,11 @@ export class OrdersMarketWindow extends GDIWindow {
       }
 
       if (i.actions) {
-        // show actions
-        this.actionView.setItems(i.actions);
+        // map action strings for use in view
+        const actions = i.actions.map((s: string) => buildOrderViewRowText(s, undefined));
+
+        // list actions on action view
+        this.actionView.setItems(actions);
       } else {
         this.actionView.setItems([]);
       }
@@ -897,7 +900,7 @@ function buildOrderViewDetailRow(order: WSOpenSellOrder): OrderViewRow {
   // build row
   const r: OrderViewRow = {
     object: order,
-    actions: [],
+    actions: ['Buy'],
     next: order.id,
     listString: () => {
       return `${cargoString} ${fixedString(
