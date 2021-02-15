@@ -20,6 +20,7 @@ import {
   WSOpenSellOrder,
   WSOpenSellOrdersUpdate,
 } from '../../wsModels/entities/wsOpenSellOrdersUpdate';
+import { heliaDateFromString, printHeliaDate } from '../../engineMath';
 
 export class OrdersMarketWindow extends GDIWindow {
   // lists
@@ -428,7 +429,8 @@ export class OrdersMarketWindow extends GDIWindow {
       for (const g of groupArr) {
         // sort orders by their price per unit
         const orderArr = Array.from(g[1].orders).sort((a, b) =>
-          a[1].ask / a[1].item.quantity > b[1].ask / b[1].item.quantity ? 1 : -1);
+          a[1].ask / a[1].item.quantity > b[1].ask / b[1].item.quantity ? 1 : -1
+        );
 
         g[1].orders.clear();
 
@@ -582,6 +584,142 @@ export class OrdersMarketWindow extends GDIWindow {
             .get(this.depthStack[0])
             .groups.get(this.depthStack[1])
             .orders.get(this.depthStack[2]);
+
+          // calculate unit volume
+          let volume = 0;
+
+          if (order.item.isPackaged) {
+            volume = Number(order.item.itemTypeMeta['volume']);
+          } else {
+            volume = Number(order.item.meta['volume']);
+          }
+
+          // NaN check
+          if (Number.isNaN(volume)) {
+            volume = 0;
+          }
+
+          // basic info
+          oRows.push(buildOrderViewRowText('Basic Info', undefined));
+          oRows.push(
+            buildOrderViewRowText(
+              infoKeyValueString('Item Type', order.item.itemTypeName),
+              undefined
+            )
+          );
+          oRows.push(
+            buildOrderViewRowText(
+              infoKeyValueString('Item Family', order.item.itemFamilyName),
+              undefined
+            )
+          );
+
+          // add spacer
+          oRows.push(buildOrderViewRowSpacer());
+
+          // order details
+          oRows.push(buildOrderViewRowText('Order Details', undefined));
+          oRows.push(
+            buildOrderViewRowText(
+              infoKeyValueString('Ask Price', `${order.ask} CBN`),
+              undefined
+            )
+          );
+          oRows.push(
+            buildOrderViewRowText(
+              infoKeyValueString(
+                'Unit Price',
+                `${order.ask / order.item.quantity} CBN`
+              ),
+              undefined
+            )
+          );
+          oRows.push(
+            buildOrderViewRowText(
+              infoKeyValueString('Delivery Quantity', `${order.item.quantity}`),
+              undefined
+            )
+          );
+          oRows.push(
+            buildOrderViewRowText(
+              infoKeyValueString(
+                'Delivery Volume',
+                `${volume * order.item.quantity}`
+              ),
+              undefined
+            )
+          );
+          oRows.push(
+            buildOrderViewRowText(
+              infoKeyValueString('Unit Volume', `${volume}`),
+              undefined
+            )
+          );
+          oRows.push(
+            buildOrderViewRowText(
+              infoKeyValueString(
+                'Listed',
+                `${printHeliaDate(heliaDateFromString(order.createdAt))}`
+              ),
+              undefined
+            )
+          );
+
+          // add spacer
+          oRows.push(buildOrderViewRowSpacer());
+
+          // metadata
+          oRows.push(buildOrderViewRowText('Metadata', undefined));
+
+          const meta = {};
+
+          if (order.item.isPackaged) {
+            Object.assign(meta, order.item.itemTypeMeta);
+          } else {
+            Object.assign(meta, order.item.meta);
+          }
+
+          for (const key in meta) {
+            if (Object.prototype.hasOwnProperty.call(meta, key)) {
+              const value = meta[key];
+              oRows.push(
+                buildOrderViewRowText(
+                  infoKeyValueString(key, `${value}`),
+                  undefined
+                )
+              );
+            }
+          }
+
+          // add spacer
+          oRows.push(buildOrderViewRowSpacer());
+
+          // item type metadata if unpackaged
+          if (!order.item.isPackaged) {
+            oRows.push(
+              buildOrderViewRowText('Item Type Base Metadata', undefined)
+            );
+
+            for (const key in order.item.itemTypeMeta) {
+              if (
+                Object.prototype.hasOwnProperty.call(
+                  order.item.itemTypeMeta,
+                  key
+                )
+              ) {
+                const value = order.item.itemTypeMeta[key];
+                oRows.push(
+                  buildOrderViewRowText(
+                    infoKeyValueString(key, `${value}`),
+                    undefined
+                  )
+                );
+              }
+            }
+
+            // add spacer
+            oRows.push(buildOrderViewRowSpacer());
+          }
         }
 
         // push rows to orders view
@@ -744,9 +882,9 @@ function buildOrderViewDetailRow(order: WSOpenSellOrder): OrderViewRow {
   let volume = 0;
 
   if (order.item.isPackaged) {
-    volume = order.item.quantity * Number(order.item.itemTypeMeta["volume"]);
+    volume = order.item.quantity * Number(order.item.itemTypeMeta['volume']);
   } else {
-    volume = order.item.quantity * Number(order.item.meta["volume"]);
+    volume = order.item.quantity * Number(order.item.meta['volume']);
   }
 
   // NaN check
@@ -763,7 +901,7 @@ function buildOrderViewDetailRow(order: WSOpenSellOrder): OrderViewRow {
       return `${cargoString} ${fixedString(
         order.ask.toString() + ' CBN',
         14
-      )} ${fixedString(cargoQuantity(volume), 8)}~`;
+      )} ${fixedString(cargoQuantity(volume), 8)}`;
     },
   };
 
@@ -781,6 +919,14 @@ function buildOrderViewRowSpacer(): OrderViewRow {
   };
 
   return r;
+}
+
+function infoKeyValueString(key: string, value: string) {
+  // build string
+  return `${fixedString('', 1)} ${fixedString(key, 32)} ${fixedString(
+    value,
+    32
+  )}`;
 }
 
 function fixedString(str: string, width: number) {
