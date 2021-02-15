@@ -1736,8 +1736,15 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 		return errors.New("Insufficient cargo space available")
 	}
 
+	//find the ship currently being flown by the seller so we can deposit funds in their wallet
+	seller := s.CurrentSystem.Universe.FindCurrentPlayerShip(order.SellerUserID)
+
+	if seller == nil {
+		return errors.New("Seller ship not found")
+	}
+
 	//debug out
-	log.Println(fmt.Sprintf("todo: try to buy %v", order))
+	log.Println(fmt.Sprintf("todo: try to buy %v", seller))
 
 	//success
 	return nil
