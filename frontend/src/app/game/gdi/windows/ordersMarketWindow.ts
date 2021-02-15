@@ -21,6 +21,7 @@ import {
   WSOpenSellOrdersUpdate,
 } from '../../wsModels/entities/wsOpenSellOrdersUpdate';
 import { heliaDateFromString, printHeliaDate } from '../../engineMath';
+import { ClientBuySellOrder } from '../../wsModels/bodies/buySellOrder';
 
 export class OrdersMarketWindow extends GDIWindow {
   // lists
@@ -242,6 +243,29 @@ export class OrdersMarketWindow extends GDIWindow {
         });
 
         this.showModalInput();
+      } else if (a === 'Buy') {
+        // get selected order id
+        const o: string = this.depthStack[this.depthStack.length - 1];
+
+        // send buy request
+        const tiMsg: ClientBuySellOrder = {
+          sid: this.wsSvc.sid,
+          orderID: o,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.BuySellOrder, tiMsg);
+
+        // request cargo bay refresh
+        this.refreshCargoBay();
+
+        // request station orders refresh
+        this.refreshOpenSellOrders();
+
+        // pop back
+        this.popDepth();
+
+        // reset views
+        this.resetViews();
       }
     });
 
@@ -269,7 +293,9 @@ export class OrdersMarketWindow extends GDIWindow {
 
       if (i.actions) {
         // map action strings for use in view
-        const actions = i.actions.map((s: string) => buildOrderViewRowText(s, undefined));
+        const actions = i.actions.map((s: string) =>
+          buildOrderViewRowText(s, undefined)
+        );
 
         // list actions on action view
         this.actionView.setItems(actions);

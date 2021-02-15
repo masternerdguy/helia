@@ -2,6 +2,8 @@ package universe
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"math"
 	"sync"
 	"time"
@@ -141,6 +143,7 @@ type Ship struct {
 	CargoBay           *Container
 	FittingBay         *Container
 	EscrowContainerID  *uuid.UUID
+	BeingFlownByPlayer bool
 	Lock               sync.Mutex
 }
 
@@ -354,6 +357,7 @@ func (s *Ship) CopyShip() *Ship {
 		AutopilotDock:      s.AutopilotDock,
 		AutopilotUndock:    s.AutopilotUndock,
 		EscrowContainerID:  s.EscrowContainerID,
+		BeingFlownByPlayer: s.BeingFlownByPlayer,
 	}
 
 	if s.DockedAtStationID != nil {
@@ -1648,6 +1652,38 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 	//escalate item for packaging in db
 	s.CurrentSystem.PackagedItems[item.ID.String()] = item
 
+	return nil
+}
+
+//BuyItemFromOrder Attempts to fulfill a sell order and place the item in cargo if successful
+func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
+	if lock {
+		//lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	//lock cargo bay
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	//make sure ship is docked
+	if s.DockedAtStationID == nil {
+		return errors.New("You must be docked to buy an item on the station orders exchange")
+	}
+
+	//make sure there is an escrow container attached to this ship
+	if s.EscrowContainerID == nil {
+		return errors.New("No escrow container associated with this ship")
+	}
+
+	//find the sell order
+	order := s.DockedAtStation.OpenSellOrders[id.String()]
+
+	//debug out
+	log.Println(fmt.Sprintf("todo: try to buy %v", order))
+
+	//success
 	return nil
 }
 

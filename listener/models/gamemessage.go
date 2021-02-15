@@ -31,6 +31,7 @@ type MessageRegistry struct {
 	SellAsOrder          int
 	ViewOpenSellOrders   int
 	OpenSellOrdersUpdate int
+	BuySellOrder         int
 }
 
 //TargetTypeRegistry Registry of target types
@@ -69,6 +70,7 @@ func NewMessageRegistry() *MessageRegistry {
 		SellAsOrder:          19,
 		ViewOpenSellOrders:   20,
 		OpenSellOrdersUpdate: 21,
+		BuySellOrder:         22,
 	}
 }
 
@@ -440,4 +442,10 @@ type ServerSellOrderBody struct {
 //ServerOpenSellOrdersUpdateBody Body containing a response to a request to view open sell orders at their station from a client
 type ServerOpenSellOrdersUpdateBody struct {
 	Orders []ServerSellOrderBody `json:"orders"`
+}
+
+//ClientBuySellOrderBody Body containing a request to buy an item listed for sale as a sell order at their station
+type ClientBuySellOrderBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	OrderID   uuid.UUID `json:"orderID"`
 }

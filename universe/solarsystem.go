@@ -36,6 +36,7 @@ type SolarSystem struct {
 	ChangedQuantityItems map[string]*Item              //stacks of items that have changed quantity and need saving by core
 	NewItems             map[string]*Item              //stacks of items that are newly created and need to be saved by core
 	NewSellOrders        map[string]*SellOrder         //new sell orders in need of saving by core
+	BoughtSellOrders     map[string]*SellOrder         //sell order that has been bought in need of saving by core
 }
 
 //Initialize Initializes internal aspects of SolarSystem
@@ -60,6 +61,7 @@ func (s *SolarSystem) Initialize() {
 	s.ChangedQuantityItems = make(map[string]*Item)
 	s.NewItems = make(map[string]*Item)
 	s.NewSellOrders = make(map[string]*SellOrder)
+	s.BoughtSellOrders = make(map[string]*SellOrder)
 
 	//initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -509,6 +511,20 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 				//write response to client
 				c.WriteMessage(&cu)
+			}
+		} else if evt.Type == models.NewMessageRegistry().BuySellOrder {
+			if sh != nil {
+				//extract data
+				data := evt.Body.(models.ClientBuySellOrderBody)
+
+				// sell item stack as order
+				err := sh.BuyItemFromOrder(data.OrderID, false)
+
+				// there is a reason this could fail the player will need to know about
+				if err != nil {
+					// send error message to client
+					c.WriteErrorMessage(err.Error())
+				}
 			}
 		}
 	}

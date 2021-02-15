@@ -27,4 +27,5 @@ export enum MessageTypes {
   SellAsOrder = 19,
   ViewOpenSellOrders = 20,
   OpenSellOrdersUpdate = 21,
+  BuySellOrder = 22,
 }

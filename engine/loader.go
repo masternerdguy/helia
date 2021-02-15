@@ -927,6 +927,7 @@ func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 		ReMaxDirty:            sh.ReMaxDirty,
 		TrashContainerID:      sh.TrashContainerID,
 		Wallet:                sh.Wallet,
+		BeingFlownByPlayer:    owner.CurrentShipID != nil && (sh.ID == *owner.CurrentShipID),
 		TemplateData: universe.ShipTemplate{
 			ID:                 temp.ID,
 			Created:            temp.Created,
