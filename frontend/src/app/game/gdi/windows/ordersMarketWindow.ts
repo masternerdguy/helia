@@ -555,8 +555,20 @@ export class OrdersMarketWindow extends GDIWindow {
         for (const g of this.openSellOrdersTree.families
             .get(this.depthStack[0]).groups
             .get(this.depthStack[1]).orders) {
-          // todo
+          oRows.push(buildOrderViewDataRow(g[1]));
         }
+      } else if(depth === 3) {
+        // add back button
+        oRows.push(buildOrderViewRowText("<== Back to Orders", "--"));
+
+        // add spacer
+        oRows.push(buildOrderViewRowSpacer());
+
+        // get order
+        const order = this.openSellOrdersTree.families
+          .get(this.depthStack[0]).groups
+          .get(this.depthStack[1]).orders
+          .get(this.depthStack[2]);
       }
 
       // push rows to orders view
@@ -695,6 +707,21 @@ function buildOrderViewRowText(s: string, next: string): OrderViewRow {
     next: next,
     listString: () => {
       return s;
+    },
+  };
+
+  return r;
+}
+
+function buildOrderViewDataRow(order: WSOpenSellOrder): OrderViewRow {
+  const cargoString = buildCargoRowFromContainerItem(order.item, true).listString();
+
+  const r: OrderViewRow = {
+    object: order,
+    actions: [],
+    next: order.id,
+    listString: () => {
+      return `${cargoString}~`;
     },
   };
 
