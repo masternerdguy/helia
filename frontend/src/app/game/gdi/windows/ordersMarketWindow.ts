@@ -418,8 +418,6 @@ export class OrdersMarketWindow extends GDIWindow {
 
     // store
     this.openSellOrdersTree = safeTree;
-
-    console.log(this.openSellOrdersTree);
   }
 
   periodicUpdate() {
@@ -540,13 +538,18 @@ export class OrdersMarketWindow extends GDIWindow {
       this.depthID = id;
 
       const rows: OrderViewRow[] = [];
+      const idx = this.orderView.getSelectedIndex();
   
       if (this.depth === 0) {
         for (const f of this.openSellOrdersTree.families) {
           // add row to browse a specific family
-
+          rows.push(buildOrderViewRowText(f[1].name, f[0]));
         }
       }
+
+      // push rows to orders view
+      this.orderView.setItems(rows);
+      this.orderView.setSelectedIndex(idx);
     }
   }
 }
