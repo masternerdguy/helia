@@ -426,6 +426,16 @@ export class OrdersMarketWindow extends GDIWindow {
       f[1].groups.clear();
 
       for (const g of groupArr) {
+        // sort orders by their price per unit
+        const orderArr = Array.from(g[1].orders).sort((a, b) =>
+          a[1].ask / a[1].item.quantity > b[1].ask / b[1].item.quantity ? 1 : -1);
+
+        g[1].orders.clear();
+
+        for (const od of orderArr) {
+          g[1].orders.set(od[0], od[1]);
+        }
+
         // push sorted group to family
         f[1].groups.set(g[0], g[1]);
       }
