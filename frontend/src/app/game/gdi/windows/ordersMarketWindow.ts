@@ -522,58 +522,69 @@ export class OrdersMarketWindow extends GDIWindow {
     this.cargoView.setSelectedIndex(i);
 
     if (this.openSellOrdersTree && this.depthStack) {
-      // show orders tree at current depth
-      const oRows: OrderViewRow[] = [];
-      const idx = this.orderView.getSelectedIndex();
+      try {
+        // show orders tree at current depth
+        const oRows: OrderViewRow[] = [];
+        const idx = this.orderView.getSelectedIndex();
 
-      const depth = this.depthStack.length;
+        const depth = this.depthStack.length;
 
-      if (depth === 0) {
-        for (const f of this.openSellOrdersTree.families) {
-          // add row to browse a specific family
-          oRows.push(buildOrderViewRowText(f[1].name, f[0]));
+        if (depth === 0) {
+          for (const f of this.openSellOrdersTree.families) {
+            // add row to browse a specific family
+            oRows.push(buildOrderViewRowText(f[1].name, f[0]));
+          }
+        } else if (depth === 1) {
+          // add back button
+          oRows.push(buildOrderViewRowText('<== Back to Item Families', '--'));
+
+          // add spacer
+          oRows.push(buildOrderViewRowSpacer());
+
+          // add row to browse a specific item type
+          for (const g of this.openSellOrdersTree.families.get(
+            this.depthStack[0]
+          ).groups) {
+            oRows.push(buildOrderViewRowText(g[1].name, g[0]));
+          }
+        } else if (depth === 2) {
+          // add back button
+          oRows.push(buildOrderViewRowText('<== Back to Item Types', '--'));
+
+          // add spacer
+          oRows.push(buildOrderViewRowSpacer());
+
+          // add row to browse a specific order
+          for (const g of this.openSellOrdersTree.families
+            .get(this.depthStack[0])
+            .groups.get(this.depthStack[1]).orders) {
+            oRows.push(buildOrderViewDataRow(g[1]));
+          }
+        } else if (depth === 3) {
+          // add back button
+          oRows.push(buildOrderViewRowText('<== Back to Orders', '--'));
+
+          // add spacer
+          oRows.push(buildOrderViewRowSpacer());
+
+          // get order
+          const order = this.openSellOrdersTree.families
+            .get(this.depthStack[0])
+            .groups.get(this.depthStack[1])
+            .orders.get(this.depthStack[2]);
         }
-      } else if(depth === 1) {
-        // add back button
-        oRows.push(buildOrderViewRowText("<== Back to Item Families", "--"));
 
-        // add spacer
-        oRows.push(buildOrderViewRowSpacer());
+        // push rows to orders view
+        this.orderView.setItems(oRows);
+        this.orderView.setSelectedIndex(idx);
+      } catch (ex) {
+        // log error
+        console.error(ex);
 
-        // add row to browse a specific item type
-        for (const g of this.openSellOrdersTree.families.get(this.depthStack[0]).groups) {
-          oRows.push(buildOrderViewRowText(g[1].name, g[0]));
-        }
-      } else if(depth === 2) {
-        // add back button
-        oRows.push(buildOrderViewRowText("<== Back to Item Types", "--"));
-
-        // add spacer
-        oRows.push(buildOrderViewRowSpacer());
-
-        // add row to browse a specific order
-        for (const g of this.openSellOrdersTree.families
-            .get(this.depthStack[0]).groups
-            .get(this.depthStack[1]).orders) {
-          oRows.push(buildOrderViewDataRow(g[1]));
-        }
-      } else if(depth === 3) {
-        // add back button
-        oRows.push(buildOrderViewRowText("<== Back to Orders", "--"));
-
-        // add spacer
-        oRows.push(buildOrderViewRowSpacer());
-
-        // get order
-        const order = this.openSellOrdersTree.families
-          .get(this.depthStack[0]).groups
-          .get(this.depthStack[1]).orders
-          .get(this.depthStack[2]);
+        // reset stack and view
+        this.depthStack = [];
+        this.orderView.setItems([]);
       }
-
-      // push rows to orders view
-      this.orderView.setItems(oRows);
-      this.orderView.setSelectedIndex(idx);
     }
   }
 
@@ -714,14 +725,20 @@ function buildOrderViewRowText(s: string, next: string): OrderViewRow {
 }
 
 function buildOrderViewDataRow(order: WSOpenSellOrder): OrderViewRow {
-  const cargoString = buildCargoRowFromContainerItem(order.item, true).listString();
+  const cargoString = buildCargoRowFromContainerItem(
+    order.item,
+    true
+  ).listString();
 
   const r: OrderViewRow = {
     object: order,
     actions: [],
     next: order.id,
     listString: () => {
-      return `${cargoString} ${fixedString(order.ask.toString() + " CBN", 14)}~`;
+      return `${cargoString} ${fixedString(
+        order.ask.toString() + ' CBN',
+        14
+      )}~`;
     },
   };
 
@@ -734,7 +751,7 @@ function buildOrderViewRowSpacer(): OrderViewRow {
     actions: [],
     next: undefined,
     listString: () => {
-      return "";
+      return '';
     },
   };
 
