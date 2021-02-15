@@ -16,7 +16,7 @@ import { ClientTrashItem } from '../../wsModels/bodies/trashItem';
 import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
 import { ClientSellAsOrder } from '../../wsModels/bodies/sellAsOrder';
 import { ClientViewOpenSellOrders } from '../../wsModels/bodies/viewOpenSellOrders';
-import { WSOpenSellOrdersUpdate } from '../../wsModels/entities/wsOpenSellOrdersUpdate';
+import { WSOpenSellOrder, WSOpenSellOrdersUpdate } from '../../wsModels/entities/wsOpenSellOrdersUpdate';
 
 export class OrdersMarketWindow extends GDIWindow {
   // lists
@@ -320,7 +320,33 @@ export class OrdersMarketWindow extends GDIWindow {
   }
 
   syncSellOrders(orders: WSOpenSellOrdersUpdate) {
-    console.log(orders);
+    const rawTree: any = {};
+
+    for (const o of orders.orders) {
+      // check if family needs to be created in tree
+      if(!rawTree[o.item.itemFamilyID]) {
+        // create branch
+        rawTree[o.item.itemFamilyID] = {
+          types: {},
+          name: o.item.itemFamilyName
+        };
+      }
+
+      // check if type needs to be created in tree
+      if(!rawTree[o.item.itemFamilyID].types[o.item.itemTypeID]) {
+        // create branch
+        rawTree[o.item.itemFamilyID].types[o.item.itemTypeID] = {
+          orders: {},
+          name: o.item.itemTypeName
+        };
+      }
+
+      // store order
+      rawTree[o.item.itemFamilyID].types[o.item.itemTypeID].orders[o.id] = o;
+
+      // debug out
+      console.log(rawTree);
+    }
   }
 
   periodicUpdate() {
