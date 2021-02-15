@@ -761,12 +761,14 @@ export class OrdersMarketWindow extends GDIWindow {
   private pushDepth(id: string) {
     if (this.openSellOrdersTree) {
       this.depthStack.push(id);
+      this.orderView.setItems([]);
     }
   }
 
   private popDepth() {
     if (this.openSellOrdersTree) {
       this.depthStack.pop();
+      this.orderView.setItems([]);
     }
   }
 }
