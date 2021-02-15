@@ -568,7 +568,7 @@ export class OrdersMarketWindow extends GDIWindow {
           for (const g of this.openSellOrdersTree.families
             .get(this.depthStack[0])
             .groups.get(this.depthStack[1]).orders) {
-            oRows.push(buildOrderViewDataRow(g[1]));
+            oRows.push(buildOrderViewDetailRow(g[1]));
           }
         } else if (depth === 3) {
           // add back button
@@ -734,12 +734,27 @@ function buildOrderViewRowText(s: string, next: string): OrderViewRow {
   return r;
 }
 
-function buildOrderViewDataRow(order: WSOpenSellOrder): OrderViewRow {
+function buildOrderViewDetailRow(order: WSOpenSellOrder): OrderViewRow {
   const cargoString = buildCargoRowFromContainerItem(
     order.item,
     true
   ).listString();
 
+  // calculate volume
+  let volume = 0;
+
+  if (order.item.isPackaged) {
+    volume = order.item.quantity * Number(order.item.itemTypeMeta["volume"]);
+  } else {
+    volume = order.item.quantity * Number(order.item.meta["volume"]);
+  }
+
+  // NaN check
+  if (Number.isNaN(volume)) {
+    volume = 0;
+  }
+
+  // build row
   const r: OrderViewRow = {
     object: order,
     actions: [],
@@ -748,7 +763,7 @@ function buildOrderViewDataRow(order: WSOpenSellOrder): OrderViewRow {
       return `${cargoString} ${fixedString(
         order.ask.toString() + ' CBN',
         14
-      )}~`;
+      )} ${fixedString(cargoQuantity(volume), 8)}~`;
     },
   };
 
