@@ -721,7 +721,7 @@ function buildOrderViewDataRow(order: WSOpenSellOrder): OrderViewRow {
     actions: [],
     next: order.id,
     listString: () => {
-      return `${cargoString}~`;
+      return `${cargoString} ${fixedString(order.ask.toString() + " CBN", 14)}~`;
     },
   };
 
