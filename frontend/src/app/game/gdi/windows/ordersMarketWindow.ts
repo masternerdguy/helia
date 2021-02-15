@@ -16,7 +16,10 @@ import { ClientTrashItem } from '../../wsModels/bodies/trashItem';
 import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
 import { ClientSellAsOrder } from '../../wsModels/bodies/sellAsOrder';
 import { ClientViewOpenSellOrders } from '../../wsModels/bodies/viewOpenSellOrders';
-import { WSOpenSellOrder, WSOpenSellOrdersUpdate } from '../../wsModels/entities/wsOpenSellOrdersUpdate';
+import {
+  WSOpenSellOrder,
+  WSOpenSellOrdersUpdate,
+} from '../../wsModels/entities/wsOpenSellOrdersUpdate';
 
 export class OrdersMarketWindow extends GDIWindow {
   // lists
@@ -40,6 +43,9 @@ export class OrdersMarketWindow extends GDIWindow {
   // last cargo bay refresh
   private lastCargoView = 0;
   private isDocked = false;
+
+  // orders tree
+  private openSellOrdersTree: SellOrdersTree;
 
   initialize() {
     // set dimensions
@@ -324,29 +330,65 @@ export class OrdersMarketWindow extends GDIWindow {
 
     for (const o of orders.orders) {
       // check if family needs to be created in tree
-      if(!rawTree[o.item.itemFamilyID]) {
+      if (!rawTree[o.item.itemFamilyID]) {
         // create branch
         rawTree[o.item.itemFamilyID] = {
           types: {},
-          name: o.item.itemFamilyName
+          name: o.item.itemFamilyName,
         };
       }
 
       // check if type needs to be created in tree
-      if(!rawTree[o.item.itemFamilyID].types[o.item.itemTypeID]) {
+      if (!rawTree[o.item.itemFamilyID].types[o.item.itemTypeID]) {
         // create branch
         rawTree[o.item.itemFamilyID].types[o.item.itemTypeID] = {
           orders: {},
-          name: o.item.itemTypeName
+          name: o.item.itemTypeName,
         };
       }
 
       // store order
       rawTree[o.item.itemFamilyID].types[o.item.itemTypeID].orders[o.id] = o;
-
-      // debug out
-      console.log(rawTree);
     }
+
+    // copy to safer structure
+    const safeTree = new SellOrdersTree();
+
+    for (const f in rawTree) {
+      if (Object.prototype.hasOwnProperty.call(rawTree, f)) {
+        const fe = rawTree[f];
+
+        const family = new SellOrdersFamily();
+        family.name = f;
+
+        for (const g in fe.types) {
+          if (Object.prototype.hasOwnProperty.call(fe.types, g)) {
+            const te = fe.types[g];
+
+            const group = new SellOrdersGroup();
+            group.name = te.name;
+
+            for (const d in te.orders) {
+              if (Object.prototype.hasOwnProperty.call(te.orders, d)) {
+                const de = te.orders[d] as WSOpenSellOrder;
+
+                group.orders.set(d, de);
+              }
+            }
+
+            family.groups.set(g, group);
+          }
+        }
+
+        safeTree.families.set(f, family);
+      }
+    }
+
+    // debug out
+    console.log(safeTree);
+
+    // store
+    this.openSellOrdersTree = safeTree;
   }
 
   periodicUpdate() {
@@ -556,4 +598,18 @@ function cargoQuantity(d: number): string {
   }
 
   return o;
+}
+
+class SellOrdersTree {
+  families: Map<string, SellOrdersFamily> = new Map<string, SellOrdersFamily>();
+}
+
+class SellOrdersFamily {
+  name: string;
+  groups: Map<string, SellOrdersGroup> = new Map<string, SellOrdersGroup>();
+}
+
+class SellOrdersGroup {
+  name: string;
+  orders: Map<string, WSOpenSellOrder> = new Map<string, WSOpenSellOrder>();
 }
