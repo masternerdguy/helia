@@ -27,6 +27,10 @@ export class OrdersMarketWindow extends GDIWindow {
   private actionView: GDIList = new GDIList();
   private orderView: GDIList = new GDIList();
 
+  // order tree depth
+  private depthID: string;
+  private depth: number = 0;
+
   // inputs
   private modalOverlay: GDIOverlay = new GDIOverlay();
   private modalInput: GDIInput = new GDIInput();
@@ -223,7 +227,8 @@ export class OrdersMarketWindow extends GDIWindow {
             // request cargo bay refresh
             this.refreshCargoBay();
 
-            // todo: request station orders refresh
+            // request station orders refresh
+            this.refreshOpenSellOrders();
 
             // reset views
             this.resetViews();
@@ -325,7 +330,7 @@ export class OrdersMarketWindow extends GDIWindow {
     }, 200);
   }
 
-  syncSellOrders(orders: WSOpenSellOrdersUpdate) {
+  syncOpenSellOrders(orders: WSOpenSellOrdersUpdate) {
     const rawTree: any = {};
 
     for (const o of orders.orders) {
@@ -359,7 +364,7 @@ export class OrdersMarketWindow extends GDIWindow {
         const fe = rawTree[f];
 
         const family = new SellOrdersFamily();
-        family.name = f;
+        family.name = fe.name;
 
         for (const g in fe.types) {
           if (Object.prototype.hasOwnProperty.call(fe.types, g)) {
@@ -372,23 +377,49 @@ export class OrdersMarketWindow extends GDIWindow {
               if (Object.prototype.hasOwnProperty.call(te.orders, d)) {
                 const de = te.orders[d] as WSOpenSellOrder;
 
+                // add to group
                 group.orders.set(d, de);
               }
             }
 
+            // add to family
             family.groups.set(g, group);
           }
         }
 
+        // add to trunk
         safeTree.families.set(f, family);
       }
     }
 
-    // debug out
-    console.log(safeTree);
+    // sort trunk alphabetically
+    const trunkArr = Array
+      .from(safeTree.families)
+      .sort((a, b) => a[1].name > b[1].name ? 1 : -1);
+
+    safeTree.families.clear();
+
+    for (const f of trunkArr) {
+      // sort groups alphabetically
+      const groupArr = Array
+        .from(f[1].groups)
+        .sort((a, b) => a[1].name > b[1].name ? 1 : -1);
+
+      f[1].groups.clear();
+      
+      for (const g of groupArr) {
+        // push sorted group to family
+        f[1].groups.set(g[0], g[1]);
+      }
+
+      // push sorted family to trunk
+      safeTree.families.set(f[0], f[1]);
+    }
 
     // store
     this.openSellOrdersTree = safeTree;
+
+    console.log(this.openSellOrdersTree);
   }
 
   periodicUpdate() {
@@ -416,6 +447,13 @@ export class OrdersMarketWindow extends GDIWindow {
       // reset cargo view
       this.cargoView.setSelectedIndex(-1);
       this.cargoView.setItems([]);
+
+      // reset order view and tree
+      this.openSellOrdersTree = undefined;
+      this.orderView.setSelectedIndex(-1);
+      this.orderView.setItems([]);
+      this.depth = 0;
+      this.depthID = "";
 
       // reset action view and store status
       this.actionView.setItems([]);
@@ -467,6 +505,11 @@ export class OrdersMarketWindow extends GDIWindow {
 
     this.cargoView.setItems(rows);
     this.cargoView.setSelectedIndex(i);
+
+    // show orders tree at current depth
+    if (this.isDocked && this.openSellOrdersTree) {
+      this.browseTo(this.depth, this.depthID);
+    }
   }
 
   setWsService(wsSvc: WsService) {
@@ -481,6 +524,30 @@ export class OrdersMarketWindow extends GDIWindow {
     // reset cargo view
     this.cargoView.setSelectedIndex(-1);
     this.cargoView.setItems([]);
+
+    // reset orders view
+    this.orderView.setSelectedIndex(-1);
+    this.orderView.setItems([]);
+
+    // reset actions view
+    this.actionView.setSelectedIndex(-1);
+    this.actionView.setItems([]);
+  }
+
+  private browseTo(depth: number, id: string) {
+    if(this.openSellOrdersTree) {
+      this.depth = depth;
+      this.depthID = id;
+
+      const rows: OrderViewRow[] = [];
+  
+      if (this.depth === 0) {
+        for (const f of this.openSellOrdersTree.families) {
+          // add row to browse a specific family
+
+        }
+      }
+    }
   }
 }
 
@@ -562,6 +629,27 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
   }
 
   return actions;
+}
+
+class OrderViewRow {
+  object: any;
+  next: string;
+  actions: string[];
+
+  listString: () => string;
+}
+
+function buildOrderViewRowText(s: string, next: string): OrderViewRow {
+  const r: OrderViewRow = {
+    object: null,
+    actions: [],
+    next: next,
+    listString: () => {
+      return s;
+    },
+  };
+
+  return r;
 }
 
 function fixedString(str: string, width: number) {

@@ -617,7 +617,7 @@ function handleOpenSellOrdersUpdateMessageFromServer(d: GameMessage) {
   }
 
   // update sell orders window
-  engineSack.ordersMarketWindow.syncSellOrders(msg);
+  engineSack.ordersMarketWindow.syncOpenSellOrders(msg);
 }
 
 function handleCurrentShipUpdate(d: GameMessage) {
