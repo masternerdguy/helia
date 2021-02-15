@@ -306,6 +306,31 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(mi, sol)
 	}
 
+	//iterate over bought sell orders
+	for id := range sol.BoughtSellOrders {
+		//capture reference and remove from map
+		mi, _ := sol.BoughtSellOrders[id]
+		delete(sol.BoughtSellOrders, id)
+
+		//handle escalation on another goroutine
+		go func(mi *universe.SellOrder, sol *universe.SolarSystem) {
+			//lock sell order
+			mi.Lock.Lock()
+			defer mi.Lock.Unlock()
+
+			//mark sell order as bought in db
+			err := markSellOrderAsBought(mi)
+
+			//error check
+			if err != nil {
+				log.Println(fmt.Sprintf("Unable to update bought sell order %v: %v", mi.ID, err))
+			} else {
+				//mark as clean
+				mi.CoreDirty = false
+			}
+		}(mi, sol)
+	}
+
 	//iterate over dead ships
 	for id := range sol.DeadShips {
 		//capture reference and remove from map

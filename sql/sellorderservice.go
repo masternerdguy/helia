@@ -136,3 +136,31 @@ func (s SellOrderService) NewSellOrder(e SellOrder) (*SellOrder, error) {
 	//return pointer to inserted sell order model
 	return &e, nil
 }
+
+//MarkSellOrderAsBought Updates the buyer and buyer_userid on a sell order
+func (s SellOrderService) MarkSellOrderAsBought(e SellOrder) error {
+	//get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	//insert sell order
+	sql := `
+			UPDATE public.sellorders
+			SET bought = $2, buyer_userid = $3
+			WHERE id = $1
+		   `
+
+	q, err := db.Query(sql, e.ID, e.Bought, e.BuyerUserID)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	//success
+	return nil
+}

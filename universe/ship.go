@@ -1755,6 +1755,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	//stamp order as fulfilled
 	now := time.Now()
 
+	order.CoreDirty = true
 	order.Bought = &now
 	order.BuyerUserID = &s.UserID
 
@@ -1762,7 +1763,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	delete(s.DockedAtStation.OpenSellOrders, order.ID.String())
 
 	//escalate order save request to core
-	s.CurrentSystem.UpdatedSellOrders[order.ID.String()] = order
+	s.CurrentSystem.BoughtSellOrders[order.ID.String()] = order
 
 	//mark item as dirty and place it in the cargo container
 	order.Item.CoreDirty = true
