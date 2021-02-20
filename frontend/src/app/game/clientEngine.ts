@@ -243,7 +243,7 @@ function handleJoin(d: GameMessage) {
   // hide initially hidden windows
   engineSack.shipFittingWindow.setHidden(true);
   engineSack.ordersMarketWindow.setHidden(true);
-  engineSack.pushErrorWindow.setHidden(false);
+  engineSack.pushErrorWindow.setHidden(true);
 
   // start game loop
   engineSack.lastFrameTime = Date.now();
@@ -601,9 +601,7 @@ function handleErrorMessageFromServer(d: GameMessage) {
 
   // show the push error window
   engineSack.pushErrorWindow.setHidden(false);
-
-  // todo: display in ui somewhere
-  console.error(msg);
+  engineSack.pushErrorWindow.setText(msg.message);
 }
 
 function handleCargoBayUpdate(d: GameMessage) {
