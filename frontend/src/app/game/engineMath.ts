@@ -1,4 +1,4 @@
-let sharedMathCanvas = document.createElement("canvas");
+let sharedMathCanvas = document.createElement('canvas');
 
 export function angleBetween(
   cx: number,
@@ -60,8 +60,8 @@ function convertDateToUTC(date: Date): Date {
 }
 
 export function getTextWidth(text: string, font: string): number {
-  var context = sharedMathCanvas.getContext("2d");
-  
+  var context = sharedMathCanvas.getContext('2d');
+
   context.font = font;
   var metrics = context.measureText(text);
 

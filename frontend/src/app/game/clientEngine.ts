@@ -99,8 +99,12 @@ export function clientStart(
   engineSack.pushErrorWindow = new PushErrorWindow();
   engineSack.pushErrorWindow.initialize();
   engineSack.pushErrorWindow.pack();
-  engineSack.pushErrorWindow.setX((gameCanvas.width / 2) - (engineSack.pushErrorWindow.getWidth() / 2));
-  engineSack.pushErrorWindow.setY((gameCanvas.height / 2) - (engineSack.pushErrorWindow.getHeight() / 2));
+  engineSack.pushErrorWindow.setX(
+    gameCanvas.width / 2 - engineSack.pushErrorWindow.getWidth() / 2
+  );
+  engineSack.pushErrorWindow.setY(
+    gameCanvas.height / 2 - engineSack.pushErrorWindow.getHeight() / 2
+  );
 
   engineSack.shipStatusWindow = new ShipStatusWindow();
   engineSack.shipStatusWindow.setX(engineSack.windowManager.getWidth());
@@ -598,6 +602,12 @@ function handleGlobalUpdate(d: GameMessage) {
 function handleErrorMessageFromServer(d: GameMessage) {
   // parse body
   const msg = JSON.parse(d.body) as ServerErrorMessage;
+
+  // move push error window to top
+  engineSack.windows = [
+    engineSack.pushErrorWindow,
+    ...engineSack.windows.filter((item) => item !== engineSack.pushErrorWindow),
+  ];
 
   // show the push error window
   engineSack.pushErrorWindow.setHidden(false);

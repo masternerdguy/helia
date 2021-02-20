@@ -16,17 +16,17 @@ export class PushErrorWindow extends GDIWindow {
 
   pack() {
     this.setTitle('Push Error');
-      // text list
-      this.textList.setWidth(this.getWidth());
-      this.textList.setHeight(this.getHeight());
-      this.textList.initialize();
-  
-      this.textList.setFont(FontSize.giant);
-      this.textList.setX(0);
-      this.textList.setY(0);
-      this.textList.setOverrideFillColor(GDIStyle.errorFillColor);
-  
-      this.addComponent(this.textList);
+    // text list
+    this.textList.setWidth(this.getWidth());
+    this.textList.setHeight(this.getHeight());
+    this.textList.initialize();
+
+    this.textList.setFont(FontSize.giant);
+    this.textList.setX(0);
+    this.textList.setY(0);
+    this.textList.setOverrideFillColor(GDIStyle.errorFillColor);
+
+    this.addComponent(this.textList);
   }
 
   setText(text: string) {

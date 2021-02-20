@@ -121,7 +121,8 @@ export class GDIList extends GDIBase {
     if (GDIStyle.listBorderSize > 0) {
       // render border
       this.ctx.lineWidth = GDIStyle.listBorderSize;
-      this.ctx.strokeStyle = this.overrideBorderColor ?? GDIStyle.listBorderColor;
+      this.ctx.strokeStyle =
+        this.overrideBorderColor ?? GDIStyle.listBorderColor;
       this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight());
     }
 
@@ -205,24 +206,33 @@ export class GDIList extends GDIBase {
     const byNewLines = text.split('\n');
 
     // then break by row width
-    const fontWidth = getCharWidth(' ', GDIStyle.getUnderlyingFont(this.getFont()));
-    const breakCol = Math.round(((this.getWidth() - (GDIStyle.listScrollWidth + 2 * (GDIStyle.listBorderSize + 3))) / fontWidth) - 0.5) - 1;
+    const fontWidth = getCharWidth(
+      ' ',
+      GDIStyle.getUnderlyingFont(this.getFont())
+    );
+    const breakCol =
+      Math.round(
+        (this.getWidth() -
+          (GDIStyle.listScrollWidth + 2 * (GDIStyle.listBorderSize + 3))) /
+          fontWidth -
+          0.5
+      ) - 1;
 
     for (const lbRow of byNewLines) {
-      let acc = "";
+      let acc = '';
       let accIdx = 0;
 
       for (var i = 0; i < lbRow.length; i++) {
         if (accIdx > breakCol) {
-          const sAcc = `${acc}`
+          const sAcc = `${acc}`;
 
           rows.push({
             text: `${acc}`,
-            listString: () => sAcc
+            listString: () => sAcc,
           });
 
           accIdx = 0;
-          acc = "";
+          acc = '';
         }
 
         acc += lbRow.charAt(i);
@@ -233,8 +243,8 @@ export class GDIList extends GDIBase {
 
       rows.push({
         text: `${acc}`,
-        listString: () => lAcc
-      });    
+        listString: () => lAcc,
+      });
     }
 
     // return text rows
