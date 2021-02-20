@@ -1,6 +1,7 @@
 import { GDIBase } from '../base/gdiBase';
 import { GDIStyle, FontSize } from '../base/gdiStyle';
 import { GDIRectangle } from '../base/gdiRectangle';
+import { getCharWidth } from '../../engineMath';
 
 export class GDIList extends GDIBase {
   private canvas: OffscreenCanvas;
@@ -183,6 +184,59 @@ export class GDIList extends GDIBase {
 
   setOnClick(h: (item: any) => void) {
     this.onClick = h;
+  }
+
+  setItemsFromText(text: string) {
+    // break text into rows
+    const rows = this.breakText(text);
+
+    // push to view
+    this.setItems(rows);
+  }
+
+  private breakText(text: string) {
+    const rows = [];
+
+    // first break text by newlines
+    const byNewLines = text.split('\n');
+
+    // then break by row width
+    const fontWidth = getCharWidth(' ', GDIStyle.getUnderlyingFont(this.getFont()));
+    const breakCol = Math.round(((this.getWidth() - (GDIStyle.listScrollWidth + 2 * (GDIStyle.listBorderSize + 3))) / fontWidth) - 0.5) - 1;
+
+    console.log(breakCol);
+
+    for (const lbRow of byNewLines) {
+      let acc = "";
+      let accIdx = 0;
+
+      for (var i = 0; i < lbRow.length; i++) {
+        if (accIdx > breakCol) {
+          const sAcc = `${acc}`
+
+          rows.push({
+            text: `${acc}`,
+            listString: () => sAcc
+          });
+
+          accIdx = 0;
+          acc = "";
+        }
+
+        acc += lbRow.charAt(i);
+        accIdx++;
+      }
+
+      const lAcc = `${acc}`;
+
+      rows.push({
+        text: `${acc}`,
+        listString: () => lAcc
+      });    
+    }
+
+    // return text rows
+    return rows;
   }
 
   setItems(items: any[]) {

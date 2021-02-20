@@ -1,3 +1,5 @@
+let sharedMathCanvas = document.createElement("canvas");
+
 export function angleBetween(
   cx: number,
   cy: number,
@@ -55,4 +57,17 @@ function convertDateToUTC(date: Date): Date {
     date.getUTCMinutes(),
     date.getUTCSeconds()
   );
+}
+
+export function getTextWidth(text: string, font: string) {
+  var context = sharedMathCanvas.getContext("2d");
+  
+  context.font = font;
+  var metrics = context.measureText(text);
+
+  return metrics.width;
+}
+
+export function getCharWidth(char: string, font: string) {
+  return getTextWidth(`${char}${char}${char}${char}${char}`, font) / 5;
 }
