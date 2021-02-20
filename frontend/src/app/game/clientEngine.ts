@@ -29,6 +29,7 @@ import { ServerErrorMessage } from './wsModels/bodies/errorMessage';
 import { Asteroid } from './engineModels/asteroid';
 import { OrdersMarketWindow } from './gdi/windows/ordersMarketWindow';
 import { ServerOpenSellOrdersUpdate } from './wsModels/bodies/openSellOrdersUpdate';
+import { PushErrorWindow } from './gdi/windows/pushErrorWindow';
 
 class EngineSack {
   constructor() {}
@@ -48,6 +49,7 @@ class EngineSack {
   backplateRenderer: Backplate;
 
   // ui elements
+  pushErrorWindow: PushErrorWindow;
   shipStatusWindow: ShipStatusWindow;
   targetInteractionWindow: TargetInteractionWindow;
   overviewWindow: OverviewWindow;
@@ -94,6 +96,12 @@ export function clientStart(
   engineSack.windowManager.initialize();
 
   // initialize ui windows
+  engineSack.pushErrorWindow = new PushErrorWindow();
+  engineSack.pushErrorWindow.initialize();
+  engineSack.pushErrorWindow.pack();
+  engineSack.pushErrorWindow.setX((gameCanvas.width / 2) - (engineSack.pushErrorWindow.getWidth() / 2));
+  engineSack.pushErrorWindow.setY((gameCanvas.height / 2) - (engineSack.pushErrorWindow.getHeight() / 2));
+
   engineSack.shipStatusWindow = new ShipStatusWindow();
   engineSack.shipStatusWindow.setX(engineSack.windowManager.getWidth());
   engineSack.shipStatusWindow.setY(0);
@@ -152,6 +160,7 @@ export function clientStart(
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
+    engineSack.pushErrorWindow,
     engineSack.shipStatusWindow,
     engineSack.targetInteractionWindow,
     engineSack.overviewWindow,
@@ -234,6 +243,7 @@ function handleJoin(d: GameMessage) {
   // hide initially hidden windows
   engineSack.shipFittingWindow.setHidden(true);
   engineSack.ordersMarketWindow.setHidden(true);
+  engineSack.pushErrorWindow.setHidden(false);
 
   // start game loop
   engineSack.lastFrameTime = Date.now();
@@ -588,6 +598,9 @@ function handleGlobalUpdate(d: GameMessage) {
 function handleErrorMessageFromServer(d: GameMessage) {
   // parse body
   const msg = JSON.parse(d.body) as ServerErrorMessage;
+
+  // show the push error window
+  engineSack.pushErrorWindow.setHidden(false);
 
   // todo: display in ui somewhere
   console.error(msg);
