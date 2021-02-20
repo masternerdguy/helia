@@ -1,4 +1,4 @@
-import { FontSize } from '../base/gdiStyle';
+import { FontSize, GDIStyle } from '../base/gdiStyle';
 import { GDIWindow } from '../base/gdiWindow';
 import { GDIList } from '../components/gdiList';
 
@@ -33,6 +33,7 @@ Euismod lacinia at quis risus sed. Enim ut sem viverra aliquet eget sit amet tel
       this.textList.setHeight(this.getHeight());
       this.textList.initialize();
   
+      this.textList.setFont(FontSize.large);
       this.textList.setX(0);
       this.textList.setY(0);
   
