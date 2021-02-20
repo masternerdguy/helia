@@ -14,6 +14,10 @@ export class GDIList extends GDIBase {
 
   private onClick: (item: any) => void;
 
+  private overrideFillColor: string;
+  private overrideTextColor: string;
+  private overrideBorderColor: string;
+
   initialize() {
     // initialize offscreen canvas
     this.canvas = new OffscreenCanvas(this.getWidth(), this.getHeight());
@@ -34,7 +38,7 @@ export class GDIList extends GDIBase {
 
   render(): ImageBitmap {
     // render background
-    this.ctx.fillStyle = GDIStyle.listFillColor;
+    this.ctx.fillStyle = this.overrideFillColor ?? GDIStyle.listFillColor;
     this.ctx.fillRect(0, 0, this.getWidth(), this.getHeight());
 
     // style text
@@ -84,8 +88,8 @@ export class GDIList extends GDIBase {
       }
 
       // render text
-      this.ctx.fillStyle = GDIStyle.listTextColor;
-      this.ctx.strokeStyle = GDIStyle.listTextColor;
+      this.ctx.fillStyle = this.overrideTextColor ?? GDIStyle.listTextColor;
+      this.ctx.strokeStyle = this.overrideTextColor ?? GDIStyle.listTextColor;
 
       this.ctx.fillText(t, bx, px * (r + 1) + bx);
 
@@ -117,7 +121,7 @@ export class GDIList extends GDIBase {
     if (GDIStyle.listBorderSize > 0) {
       // render border
       this.ctx.lineWidth = GDIStyle.listBorderSize;
-      this.ctx.strokeStyle = GDIStyle.listBorderColor;
+      this.ctx.strokeStyle = this.overrideBorderColor ?? GDIStyle.listBorderColor;
       this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight());
     }
 
@@ -280,5 +284,29 @@ export class GDIList extends GDIBase {
 
   getSelectedItem(): any {
     return this.items[this.selectedRow];
+  }
+
+  getOverrideFillColor(): string {
+    return this.overrideFillColor;
+  }
+
+  setOverrideFillColor(color: string) {
+    this.overrideFillColor = color;
+  }
+
+  getOverrideTextColor(): string {
+    return this.overrideTextColor;
+  }
+
+  setOverrideTextColor(color: string) {
+    this.overrideTextColor = color;
+  }
+
+  getOverrideBorderColor(): string {
+    return this.overrideBorderColor;
+  }
+
+  setOverrideBorderColor(color: string) {
+    this.overrideBorderColor = color;
   }
 }
