@@ -59,7 +59,7 @@ function convertDateToUTC(date: Date): Date {
   );
 }
 
-export function getTextWidth(text: string, font: string) {
+export function getTextWidth(text: string, font: string): number {
   var context = sharedMathCanvas.getContext("2d");
   
   context.font = font;
@@ -68,6 +68,6 @@ export function getTextWidth(text: string, font: string) {
   return metrics.width;
 }
 
-export function getCharWidth(char: string, font: string) {
+export function getCharWidth(char: string, font: string): number {
   return getTextWidth(`${char}${char}${char}${char}${char}`, font) / 5;
 }

@@ -204,8 +204,6 @@ export class GDIList extends GDIBase {
     const fontWidth = getCharWidth(' ', GDIStyle.getUnderlyingFont(this.getFont()));
     const breakCol = Math.round(((this.getWidth() - (GDIStyle.listScrollWidth + 2 * (GDIStyle.listBorderSize + 3))) / fontWidth) - 0.5) - 1;
 
-    console.log(breakCol);
-
     for (const lbRow of byNewLines) {
       let acc = "";
       let accIdx = 0;
