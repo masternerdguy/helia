@@ -19,8 +19,8 @@ Euismod lacinia at quis risus sed. Enim ut sem viverra aliquet eget sit amet tel
 
   initialize() {
     // set dimensions
-    this.setWidth(400);
-    this.setHeight(400);
+    this.setWidth(600);
+    this.setHeight(100);
 
     // initialize
     super.initialize();
@@ -33,7 +33,7 @@ Euismod lacinia at quis risus sed. Enim ut sem viverra aliquet eget sit amet tel
       this.textList.setHeight(this.getHeight());
       this.textList.initialize();
   
-      this.textList.setFont(FontSize.large);
+      this.textList.setFont(FontSize.giant);
       this.textList.setX(0);
       this.textList.setY(0);
       this.textList.setOverrideFillColor(GDIStyle.errorFillColor);
