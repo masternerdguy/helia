@@ -36,10 +36,7 @@ Euismod lacinia at quis risus sed. Enim ut sem viverra aliquet eget sit amet tel
       this.textList.setFont(FontSize.large);
       this.textList.setX(0);
       this.textList.setY(0);
-
-      this.textList.setOverrideBorderColor("orange");
-      this.textList.setOverrideFillColor("red");
-      this.textList.setOverrideTextColor("green");
+      this.textList.setOverrideFillColor(GDIStyle.errorFillColor);
   
       this.addComponent(this.textList);
 

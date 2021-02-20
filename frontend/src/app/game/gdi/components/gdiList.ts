@@ -100,7 +100,7 @@ export class GDIList extends GDIBase {
     const sw = GDIStyle.listScrollWidth;
 
     // render scroll bar
-    this.ctx.fillStyle = GDIStyle.listFillColor;
+    this.ctx.fillStyle = this.overrideFillColor ?? GDIStyle.listFillColor;
     this.ctx.fillRect(this.getWidth() - sw, 0, sw, this.getHeight());
 
     this.ctx.fillStyle = GDIStyle.listScrollColor;

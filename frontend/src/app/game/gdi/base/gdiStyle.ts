@@ -77,6 +77,9 @@ export class GDIStyle {
   static heatBarColor = '#BA4A00';
   static fuelBarColor = '#4D5656';
 
+  // standardized override colors for ui elements
+  static errorFillColor = '#b30000';
+
   // helpers
   static getUnderlyingFont(font: FontSize): string {
     let f = '';
