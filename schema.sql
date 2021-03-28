@@ -86,11 +86,19 @@ ALTER TABLE public.itemtypes OWNER TO developer;
 CREATE TABLE public.processes (
     id uuid NOT NULL,
     name character varying(32) NOT NULL,
-    meta jsonb DEFAULT '{}'::jsonb NOT NULL
+    meta jsonb DEFAULT '{}'::jsonb NOT NULL,
+    "time" integer DEFAULT 0 NOT NULL
 );
 
 
 ALTER TABLE public.processes OWNER TO developer;
+
+--
+-- Name: COLUMN processes."time"; Type: COMMENT; Schema: public; Owner: developer
+--
+
+COMMENT ON COLUMN public.processes."time" IS 'Manufacturing time in seconds.';
+
 
 --
 -- Name: processinputs; Type: TABLE; Schema: public; Owner: developer

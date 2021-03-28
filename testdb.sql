@@ -86,11 +86,19 @@ ALTER TABLE public.itemtypes OWNER TO developer;
 CREATE TABLE public.processes (
     id uuid NOT NULL,
     name character varying(32) NOT NULL,
-    meta jsonb DEFAULT '{}'::jsonb NOT NULL
+    meta jsonb DEFAULT '{}'::jsonb NOT NULL,
+    "time" integer DEFAULT 0 NOT NULL
 );
 
 
 ALTER TABLE public.processes OWNER TO developer;
+
+--
+-- Name: COLUMN processes."time"; Type: COMMENT; Schema: public; Owner: developer
+--
+
+COMMENT ON COLUMN public.processes."time" IS 'Manufacturing time in seconds.';
+
 
 --
 -- Name: processinputs; Type: TABLE; Schema: public; Owner: developer
@@ -418,6 +426,7 @@ fuel_tank	Fuel Tank	{}
 armor_plate	Armor Plate	{}
 nothing	Empty Space	{}
 ore	Ore	{}
+widget	Widget	{}
 \.
 
 
@@ -458,6 +467,7 @@ c311df30-c21e-4895-acb0-d8808f99710e	armor_plate	Basic Armor Plate	{"hp": 75, "r
 91ec9901-ea7e-476a-bc65-7da4523dca38	nothing	Nothing	{"volume": 0}
 dd522f03-2f52-4e82-b2f8-d7e0029cb82f	ore	Testite	{"hp": 1, "volume": 1}
 9d1014c5-3422-4a0f-9839-f585269b4b16	gun_turret	Basic Laser Tool	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}
+e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3	widget	Widget	{"volume": 1}
 \.
 
 
@@ -465,7 +475,8 @@ dd522f03-2f52-4e82-b2f8-d7e0029cb82f	ore	Testite	{"hp": 1, "volume": 1}
 -- Data for Name: processes; Type: TABLE DATA; Schema: public; Owner: developer
 --
 
-COPY public.processes (id, name, meta) FROM stdin;
+COPY public.processes (id, name, meta, "time") FROM stdin;
+0f33d5ce-2b0b-4f80-80eb-506dd803ac4c	Make Widget	{}	30
 \.
 
 
@@ -474,6 +485,7 @@ COPY public.processes (id, name, meta) FROM stdin;
 --
 
 COPY public.processinputs (id, itemtypeid, quantity, meta, processid) FROM stdin;
+c23de2ef-74e3-4510-8b18-b6f5bcd2f4e9	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	1	{}	0f33d5ce-2b0b-4f80-80eb-506dd803ac4c
 \.
 
 
@@ -482,6 +494,7 @@ COPY public.processinputs (id, itemtypeid, quantity, meta, processid) FROM stdin
 --
 
 COPY public.processoutputs (id, itemtypeid, quantity, meta, processid) FROM stdin;
+71d9ccfa-549b-42be-b1ed-7f5a54c05581	e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3	4	{}	0f33d5ce-2b0b-4f80-80eb-506dd803ac4c
 \.
 
 
