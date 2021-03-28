@@ -259,6 +259,30 @@ CREATE TABLE public.starts (
 ALTER TABLE public.starts OWNER TO developer;
 
 --
+-- Name: stationprocesses; Type: TABLE; Schema: public; Owner: developer
+--
+
+CREATE TABLE public.stationprocesses (
+    id uuid NOT NULL,
+    universe_stationid uuid NOT NULL,
+    processid uuid NOT NULL,
+    progress integer DEFAULT 0 NOT NULL,
+    container_inputs uuid NOT NULL,
+    container_outputs uuid NOT NULL,
+    meta jsonb DEFAULT '{}'::jsonb NOT NULL
+);
+
+
+ALTER TABLE public.stationprocesses OWNER TO developer;
+
+--
+-- Name: COLUMN stationprocesses.progress; Type: COMMENT; Schema: public; Owner: developer
+--
+
+COMMENT ON COLUMN public.stationprocesses.progress IS 'Progress of manufacturing job in seconds.';
+
+
+--
 -- Name: universe_asteroids; Type: TABLE; Schema: public; Owner: developer
 --
 
@@ -420,6 +444,14 @@ ALTER TABLE ONLY public.processinputs
 
 ALTER TABLE ONLY public.processoutputs
     ADD CONSTRAINT pk_processoutputs_uq PRIMARY KEY (id);
+
+
+--
+-- Name: stationprocesses pk_stationprocess_uq; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.stationprocesses
+    ADD CONSTRAINT pk_stationprocess_uq PRIMARY KEY (id);
 
 
 --
@@ -870,11 +902,43 @@ ALTER TABLE ONLY public.starts
 
 
 --
+-- Name: stationprocesses fk_stationprocess_container_input; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.stationprocesses
+    ADD CONSTRAINT fk_stationprocess_container_input FOREIGN KEY (container_inputs) REFERENCES public.containers(id);
+
+
+--
+-- Name: stationprocesses fk_stationprocess_container_output; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.stationprocesses
+    ADD CONSTRAINT fk_stationprocess_container_output FOREIGN KEY (container_outputs) REFERENCES public.containers(id);
+
+
+--
+-- Name: stationprocesses fk_stationprocess_process; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.stationprocesses
+    ADD CONSTRAINT fk_stationprocess_process FOREIGN KEY (processid) REFERENCES public.processes(id);
+
+
+--
 -- Name: universe_systems fk_system_region; Type: FK CONSTRAINT; Schema: public; Owner: developer
 --
 
 ALTER TABLE ONLY public.universe_systems
     ADD CONSTRAINT fk_system_region FOREIGN KEY (regionid) REFERENCES public.universe_regions(id);
+
+
+--
+-- Name: stationprocesses fk_universe_station_process; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.stationprocesses
+    ADD CONSTRAINT fk_universe_station_process FOREIGN KEY (universe_stationid) REFERENCES public.universe_stations(id);
 
 
 --
