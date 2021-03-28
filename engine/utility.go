@@ -22,12 +22,12 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sq
 	emptyUUID := uuid.UUID{}
 	defaultUUID := emptyUUID.String()
 
-	//safety check
+	// safety check
 	if start == nil {
 		return nil, errors.New("no start provided")
 	}
 
-	//get services
+	// get services
 	userSvc := sql.GetUserService()
 	itemSvc := sql.GetItemService()
 	itemTypeSvc := sql.GetItemTypeService()
@@ -35,21 +35,21 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sq
 	shipTmpSvc := sql.GetShipTemplateService()
 	containerSvc := sql.GetContainerService()
 
-	//get user by id
+	// get user by id
 	u, err := userSvc.GetUserByID(uid)
 
 	if err != nil {
 		return u, err
 	}
 
-	//get ship template from start
+	// get ship template from start
 	temp, err := shipTmpSvc.GetShipTemplateByID(start.ShipTemplateID)
 
 	if err != nil {
 		return u, err
 	}
 
-	//create container for trashed items
+	// create container for trashed items
 	tb, err := containerSvc.NewContainer(sql.Container{
 		Meta: sql.Meta{},
 	})
@@ -58,7 +58,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sq
 		return u, err
 	}
 
-	//create container for cargo bay
+	// create container for cargo bay
 	cb, err := containerSvc.NewContainer(sql.Container{
 		Meta: sql.Meta{},
 	})
@@ -67,7 +67,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sq
 		return u, err
 	}
 
-	//create container for fitting bay
+	// create container for fitting bay
 	fb, err := containerSvc.NewContainer(sql.Container{
 		Meta: sql.Meta{},
 	})
@@ -76,30 +76,30 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sq
 		return u, err
 	}
 
-	//initialize fitting
+	// initialize fitting
 	fitting := sql.Fitting{
 		ARack: []sql.FittedSlot{},
 		BRack: []sql.FittedSlot{},
 		CRack: []sql.FittedSlot{},
 	}
 
-	//create rack a modules
+	// create rack a modules
 	for _, l := range start.ShipFitting.ARack {
-		//skip if empty slot
+		// skip if empty slot
 		if l.ItemTypeID.String() == defaultUUID {
-			//link empty slot and move on
+			// link empty slot and move on
 			fitting.ARack = append(fitting.ARack, sql.FittedSlot{})
 			continue
 		}
 
-		//load item type data
+		// load item type data
 		itemType, err := itemTypeSvc.GetItemTypeByID(l.ItemTypeID)
 
 		if err != nil {
 			return nil, err
 		}
 
-		//create item for slot
+		// create item for slot
 		i, err := itemSvc.NewItem(sql.Item{
 			ItemTypeID:    l.ItemTypeID,
 			Meta:          itemType.Meta,
@@ -114,30 +114,30 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sq
 			return u, err
 		}
 
-		//link item to slot
+		// link item to slot
 		fitting.ARack = append(fitting.ARack, sql.FittedSlot{
 			ItemID:     i.ID,
 			ItemTypeID: l.ItemTypeID,
 		})
 	}
 
-	//create rack b modules
+	// create rack b modules
 	for _, l := range start.ShipFitting.BRack {
-		//skip if empty slot
+		// skip if empty slot
 		if l.ItemTypeID.String() == defaultUUID {
-			//link empty slot and move on
+			// link empty slot and move on
 			fitting.BRack = append(fitting.BRack, sql.FittedSlot{})
 			continue
 		}
 
-		//load item type data
+		// load item type data
 		itemType, err := itemTypeSvc.GetItemTypeByID(l.ItemTypeID)
 
 		if err != nil {
 			return nil, err
 		}
 
-		//create item for slot
+		// create item for slot
 		i, err := itemSvc.NewItem(sql.Item{
 			ItemTypeID:    l.ItemTypeID,
 			Meta:          itemType.Meta,
@@ -152,30 +152,30 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sq
 			return u, err
 		}
 
-		//link item to slot
+		// link item to slot
 		fitting.BRack = append(fitting.BRack, sql.FittedSlot{
 			ItemID:     i.ID,
 			ItemTypeID: l.ItemTypeID,
 		})
 	}
 
-	//create rack c modules
+	// create rack c modules
 	for _, l := range start.ShipFitting.CRack {
-		//skip if empty slot
+		// skip if empty slot
 		if l.ItemTypeID.String() == defaultUUID {
-			//link empty slot and move on
+			// link empty slot and move on
 			fitting.CRack = append(fitting.CRack, sql.FittedSlot{})
 			continue
 		}
 
-		//load item type data
+		// load item type data
 		itemType, err := itemTypeSvc.GetItemTypeByID(l.ItemTypeID)
 
 		if err != nil {
 			return nil, err
 		}
 
-		//create item for slot
+		// create item for slot
 		i, err := itemSvc.NewItem(sql.Item{
 			ItemTypeID:    l.ItemTypeID,
 			Meta:          itemType.Meta,
@@ -190,22 +190,22 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sq
 			return u, err
 		}
 
-		//link item to slot
+		// link item to slot
 		fitting.CRack = append(fitting.CRack, sql.FittedSlot{
 			ItemID:     i.ID,
 			ItemTypeID: l.ItemTypeID,
 		})
 	}
 
-	//determine new ship wallet
+	// determine new ship wallet
 	var wallet float64 = 0.0
 
 	if newUser {
-		//this is the player's first ship - give them the initial starting wallet amount
+		// this is the player's first ship - give them the initial starting wallet amount
 		wallet = start.Wallet
 	}
 
-	//create starter ship
+	// create starter ship
 	t := sql.Ship{
 		SystemID:              start.SystemID,
 		UserID:                u.ID,
@@ -236,7 +236,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sq
 		return u, err
 	}
 
-	//put user in starter ship
+	// put user in starter ship
 	err = userSvc.SetCurrentShipID(u.ID, &starterShip.ID)
 	u.CurrentShipID = &starterShip.ID
 
@@ -244,6 +244,6 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sq
 		return u, err
 	}
 
-	//success!
+	// success!
 	return u, nil
 }

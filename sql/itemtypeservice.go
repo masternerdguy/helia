@@ -25,14 +25,14 @@ type ItemType struct {
 
 // Finds and returns an ItemType by its id
 func (s ItemTypeService) GetItemTypeByID(ItemTypeID uuid.UUID) (*ItemType, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//find ItemType with this id
+	// find ItemType with this id
 	ItemType := ItemType{}
 
 	sqlStatement :=

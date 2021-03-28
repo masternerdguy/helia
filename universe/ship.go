@@ -86,7 +86,7 @@ type OrbitData struct {
 	Distance float64
 }
 
-//DockData Container structure for arguments of the Dock autopilot mode
+// DockData Container structure for arguments of the Dock autopilot mode
 type DockData struct {
 	TargetID uuid.UUID
 	Type     int
@@ -124,11 +124,11 @@ type Ship struct {
 	TrashContainerID      uuid.UUID
 	ReMaxDirty            bool
 	Wallet                float64
-	//cache of base template
+	// cache of base template
 	TemplateData ShipTemplate
-	//docking
+	// docking
 	DockedAtStationID *uuid.UUID
-	//in-memory only
+	// in-memory only
 	IsDocked           bool
 	AutopilotMode      int
 	AutopilotManualNav ManualNavData
@@ -156,7 +156,7 @@ type Fitting struct {
 type FittedSlot struct {
 	ItemTypeID uuid.UUID
 	ItemID     uuid.UUID
-	//in-memory only, exposable to player
+	// in-memory only, exposable to player
 	ItemTypeFamily     string
 	ItemTypeFamilyName string
 	ItemTypeName       string
@@ -168,7 +168,7 @@ type FittedSlot struct {
 	TargetID           *uuid.UUID
 	TargetType         *int
 	Rack               string
-	//in-memory only, secret
+	// in-memory only, secret
 	shipMountedOn    *Ship
 	cooldownProgress int
 }
@@ -178,7 +178,7 @@ func (m *FittedSlot) LinkShip(sp *Ship) {
 	m.shipMountedOn = sp
 }
 
-//stripModuleFromFitting Removes the fitted slot containing a module from the fitting
+// stripModuleFromFitting Removes the fitted slot containing a module from the fitting
 func (f *Fitting) stripModuleFromFitting(itemID uuid.UUID) {
 	// stub new empty racks
 	newA := make([]FittedSlot, 0)
@@ -345,7 +345,7 @@ func (s *Ship) CopyShip() *Ship {
 			ShipTypeID:         s.TemplateData.ShipTypeID,
 			BaseCargoBayVolume: s.TemplateData.BaseCargoBayVolume,
 		},
-		//in-memory only
+		// in-memory only
 		Lock:               sync.Mutex{},
 		IsDocked:           s.IsDocked,
 		AutopilotMode:      s.AutopilotMode,
@@ -624,10 +624,10 @@ func (s *Ship) updateHeat() {
 
 // Abruptly ends the current autopilot mode
 func (s *Ship) CmdAbort() {
-	//stop autopilot
+	// stop autopilot
 	s.AutopilotMode = NewAutopilotRegistry().None
 
-	//reset autopilot parameters
+	// reset autopilot parameters
 	s.AutopilotManualNav = ManualNavData{}
 	s.AutopilotGoto = GotoData{}
 	s.AutopilotOrbit = OrbitData{}
@@ -644,7 +644,7 @@ func (s *Ship) CmdManualNav(screenT float64, screenM float64) {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	//stash manual nav and activate autopilot
+	// stash manual nav and activate autopilot
 	s.AutopilotManualNav = ManualNavData{
 		Magnitude: screenM,
 		Theta:     screenT,
@@ -662,7 +662,7 @@ func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int) {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	//stash goto and activate autopilot
+	// stash goto and activate autopilot
 	s.AutopilotGoto = GotoData{
 		TargetID: targetID,
 		Type:     targetType,
@@ -680,7 +680,7 @@ func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int) {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	//stash orbit and activate autopilot
+	// stash orbit and activate autopilot
 	s.AutopilotOrbit = OrbitData{
 		TargetID: targetID,
 		Type:     targetType,
@@ -698,7 +698,7 @@ func (s *Ship) CmdDock(targetID uuid.UUID, targetType int) {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	//stash dock and activate autopilot
+	// stash dock and activate autopilot
 	s.AutopilotDock = DockData{
 		TargetID: targetID,
 		Type:     targetType,
@@ -716,7 +716,7 @@ func (s *Ship) CmdUndock() {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	//stash dock and activate autopilot
+	// stash dock and activate autopilot
 	s.AutopilotUndock = UndockData{}
 
 	s.AutopilotMode = registry.Undock
@@ -880,40 +880,40 @@ func (s *Ship) TotalCargoBayVolumeUsed(lock bool) float64 {
 
 // Deals damage to the ship
 func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) {
-	//apply shield damage
+	// apply shield damage
 	s.Shield -= shieldDmg
 
-	//clamp shield
+	// clamp shield
 	if s.Shield < 0 {
 		s.Shield = 0
 	}
 
-	//determine shield percentage
+	// determine shield percentage
 	shieldP := s.Shield / s.GetRealMaxShield()
 
-	//apply armor damage if shields below 25% scaling for remaining shields
+	// apply armor damage if shields below 25% scaling for remaining shields
 	if shieldP < 0.25 {
 		s.Armor -= armorDmg * (1 - shieldP)
 	}
 
-	//clamp armor
+	// clamp armor
 	if s.Armor < 0 {
 		s.Armor = 0
 	}
 
-	//determine armor percentage
+	// determine armor percentage
 	armorP := s.Armor / s.GetRealMaxArmor()
 
-	//apply hull damage if armor below 25% scaling for remaining shield and armor
+	// apply hull damage if armor below 25% scaling for remaining shield and armor
 	if armorP < 0.25 {
 		s.Hull -= hullDmg * (1 - armorP) * (1 - shieldP)
 	}
 
-	//clamp hull
+	// clamp hull
 	if s.Hull < 0 {
 		s.Hull = 0
 
-		//todo: handle death of player and respawn in noob ship at nearest station
+		// todo: handle death of player and respawn in noob ship at nearest station
 	}
 }
 
@@ -953,26 +953,26 @@ func (s *Ship) doDockedAutopilot() {
 func (s *Ship) doAutopilotManualNav() {
 	screenT := s.AutopilotManualNav.Theta
 
-	//calculate magnitude of requested turn
+	// calculate magnitude of requested turn
 	turnMag := math.Sqrt((screenT - s.Theta) * (screenT - s.Theta))
 
 	a := screenT - s.Theta
 	a = physics.FMod(a+180, 360) - 180
 
-	//apply turn with ship limits
+	// apply turn with ship limits
 	if a > 0 {
 		s.rotate(turnMag / s.GetRealTurn())
 	} else if a < 0 {
 		s.rotate(turnMag / -s.GetRealTurn())
 	}
 
-	//thrust forward
+	// thrust forward
 	s.forwardThrust(s.AutopilotManualNav.Magnitude)
 
-	//decrease magnitude (this is to allow this to expire and require another move order from the player)
+	// decrease magnitude (this is to allow this to expire and require another move order from the player)
 	s.AutopilotManualNav.Magnitude -= s.AutopilotManualNav.Magnitude * SpaceDrag
 
-	//stop when magnitude is low
+	// stop when magnitude is low
 	if s.AutopilotManualNav.Magnitude < 0.0001 {
 		s.AutopilotMode = NewAutopilotRegistry().None
 	}
@@ -1370,48 +1370,48 @@ func (s *Ship) FindModule(id uuid.UUID, rack string) *FittedSlot {
 
 // Returns an item in the ship's cargo bay if it is present
 func (s *Ship) FindItemInCargo(id uuid.UUID) *Item {
-	//look for item
+	// look for item
 	for i := range s.CargoBay.Items {
 		item := s.CargoBay.Items[i]
 
 		if item.ID == id {
-			//return item
+			// return item
 			return item
 		}
 	}
 
-	//nothing found
+	// nothing found
 	return nil
 }
 
 // Removes an item from the cargo hold and fits it to the ship
 func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	if lock {
-		//lock entity
+		// lock entity
 		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
-	//lock containers
+	// lock containers
 	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	s.FittingBay.Lock.Lock()
 	defer s.FittingBay.Lock.Unlock()
 
-	//make sure ship is docked
+	// make sure ship is docked
 	if s.DockedAtStationID == nil {
 		return errors.New("you must be docked to fit a module")
 	}
 
-	//get the item to be packaged
+	// get the item to be packaged
 	item := s.FindItemInCargo(id)
 
 	if item == nil {
 		return errors.New("Item not found in cargo bay")
 	}
 
-	//get module rack
+	// get module rack
 	r, _ := item.ItemTypeMeta.GetString("rack")
 	var rack *[]FittedSlot = nil
 
@@ -1427,17 +1427,17 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 		return errors.New("rack not found")
 	}
 
-	//get module volume
+	// get module volume
 	v, _ := item.ItemTypeMeta.GetInt("volume")
 
-	//find a free slot
+	// find a free slot
 	idx, fnd := s.getFreeSlotIndex(item.ItemFamilyID, v, r)
 
 	if !fnd || idx < 0 {
 		return errors.New("no available and compatible slot found to fit this module")
 	}
 
-	//remove item from cargo bay and move to fitting bay
+	// remove item from cargo bay and move to fitting bay
 	newCB := make([]*Item, 0)
 
 	for _, i := range s.CargoBay.Items {
@@ -1454,7 +1454,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 
 	s.CargoBay.Items = newCB
 
-	//create new fitted slot for item
+	// create new fitted slot for item
 	fs := FittedSlot{
 		ItemID:             item.ID,
 		ItemTypeID:         item.ItemTypeID,
@@ -1467,83 +1467,83 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 
 	fs.shipMountedOn = s
 
-	//fit to ship
+	// fit to ship
 	(*rack)[idx] = fs
 
-	//increase max armor if needed
+	// increase max armor if needed
 	armorMaxAdd, f := fs.ItemMeta.GetFloat64("armor_max_add")
 
 	if f {
 		s.Armor += armorMaxAdd
 	}
 
-	//success!
+	// success!
 	return nil
 }
 
 // Removes a module from a ship and places it in the cargo hold
 func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	if lock {
-		//lock entity
+		// lock entity
 		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
-	//lock containers
+	// lock containers
 	m.shipMountedOn.CargoBay.Lock.Lock()
 	defer m.shipMountedOn.CargoBay.Lock.Unlock()
 
 	m.shipMountedOn.FittingBay.Lock.Lock()
 	defer m.shipMountedOn.FittingBay.Lock.Unlock()
 
-	//make sure ship is docked
+	// make sure ship is docked
 	if s.DockedAtStationID == nil {
 		return errors.New("you must be docked to unfit a module")
 	}
 
-	//get module volume
+	// get module volume
 	v, _ := m.ItemTypeMeta.GetFloat64("volume")
 
-	//make sure there is sufficient space in the cargo bay
+	// make sure there is sufficient space in the cargo bay
 	if s.TotalCargoBayVolumeUsed(lock)+v > s.GetRealCargoBayVolume() {
 		return errors.New("insufficient room in cargo bay to unfit module")
 	}
 
-	//make sure the module is not cycling
+	// make sure the module is not cycling
 	if m.IsCycling || m.WillRepeat {
 		return errors.New("modules must be offline to be unfit")
 	}
 
-	//if the module is in rack c, make sure the ship is fully repaired
+	// if the module is in rack c, make sure the ship is fully repaired
 	if m.Rack == "C" {
 		if s.Armor < s.GetRealMaxArmor() || s.Hull < s.GetRealMaxHull() {
 			return errors.New("armor and hull must be fully repaired before unfitting modules in rack c")
 		}
 	}
 
-	//remove from fitting data
+	// remove from fitting data
 	m.shipMountedOn.Fitting.stripModuleFromFitting(m.ItemID)
 
-	//reassign item to cargo bay
+	// reassign item to cargo bay
 	newFB := make([]*Item, 0)
 
 	for i := range m.shipMountedOn.FittingBay.Items {
 		o := m.shipMountedOn.FittingBay.Items[i]
 
-		//lock item
+		// lock item
 		o.Lock.Lock()
 		defer o.Lock.Unlock()
 
-		//skip if not this module
+		// skip if not this module
 		if o.ID != m.ItemID {
 			newFB = append(newFB, o)
 		} else {
-			//move to cargo bay if there is still room
+			// move to cargo bay if there is still room
 			if s.TotalCargoBayVolumeUsed(lock)+v <= s.GetRealCargoBayVolume() {
 				m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, o)
 				o.ContainerID = m.shipMountedOn.CargoBayContainerID
 
-				//escalate to core to save to db
+				// escalate to core to save to db
 				s.CurrentSystem.MovedItems[o.ID.String()] = o
 			} else {
 				return errors.New("insufficient room in cargo bay to unfit module")
@@ -1553,42 +1553,42 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 
 	s.FittingBay.Items = newFB
 
-	//success!
+	// success!
 	return nil
 }
 
 // Trashes an item in the ship's cargo bay if it exists
 func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
-		//lock entity
+		// lock entity
 		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
-	//lock cargo bay
+	// lock cargo bay
 	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
-	//make sure ship is docked
+	// make sure ship is docked
 	if s.DockedAtStationID == nil {
 		return errors.New("you must be docked to trash an item")
 	}
 
-	//remove from cargo bay
+	// remove from cargo bay
 	newCB := make([]*Item, 0)
 
 	for i := range s.CargoBay.Items {
 		o := s.CargoBay.Items[i]
 
-		//skip if not this item or is dirty
+		// skip if not this item or is dirty
 		if o.ID != id || o.CoreDirty {
 			newCB = append(newCB, o)
 		} else {
-			//move to trash
+			// move to trash
 			o.ContainerID = s.TrashContainerID
 			o.CoreDirty = true
 
-			//escalate to core to save to db
+			// escalate to core to save to db
 			s.CurrentSystem.MovedItems[o.ID.String()] = o
 		}
 	}
@@ -1601,38 +1601,38 @@ func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
 // Packages an item in the ship's cargo bay if it exists
 func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
-		//lock entity
+		// lock entity
 		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
-	//lock cargo bay
+	// lock cargo bay
 	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
-	//make sure ship is docked
+	// make sure ship is docked
 	if s.DockedAtStationID == nil {
 		return errors.New("you must be docked to package an item")
 	}
 
-	//get the item to be packaged
+	// get the item to be packaged
 	item := s.FindItemInCargo(id)
 
 	if item == nil {
 		return errors.New("item not found in cargo bay")
 	}
 
-	//make sure item is clean
+	// make sure item is clean
 	if item.CoreDirty {
 		return errors.New("item is dirty and waiting on an escalation to save its state")
 	}
 
-	//make sure the item is unpackaged
+	// make sure the item is unpackaged
 	if item.IsPackaged {
 		return errors.New("item is already packaged")
 	}
 
-	//make sure the item is fully repaired
+	// make sure the item is fully repaired
 	iHp, f := item.Meta.GetFloat64("hp")
 	tHp, g := item.ItemTypeMeta.GetFloat64("hp")
 
@@ -1642,14 +1642,14 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 		}
 	}
 
-	//package item in-memory
+	// package item in-memory
 	item.IsPackaged = true
 	item.CoreDirty = true
 
-	//wipe out item metadata
+	// wipe out item metadata
 	item.Meta = Meta{}
 
-	//escalate item for packaging in db
+	// escalate item for packaging in db
 	s.CurrentSystem.PackagedItems[item.ID.String()] = item
 
 	return nil
@@ -1658,44 +1658,44 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 // Attempts to fulfill a sell order and place the item in cargo if successful
 func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	if lock {
-		//lock entity
+		// lock entity
 		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
-	//lock cargo bay
+	// lock cargo bay
 	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
-	//make sure ship is docked
+	// make sure ship is docked
 	if s.DockedAtStationID == nil {
 		return errors.New("you must be docked to buy an item on the station orders exchange")
 	}
 
-	//make sure there is an escrow container attached to this ship
+	// make sure there is an escrow container attached to this ship
 	if s.EscrowContainerID == nil {
 		return errors.New("no escrow container associated with this ship")
 	}
 
-	//find the sell order
+	// find the sell order
 	order := s.DockedAtStation.OpenSellOrders[id.String()]
 
-	//verify order exists
+	// verify order exists
 	if order == nil {
 		return errors.New("sell order not found")
 	}
 
-	//verify order is clean
+	// verify order is clean
 	if order.CoreDirty {
 		return errors.New("sell order is dirty")
 	}
 
-	//verify order is unfulfilled
+	// verify order is unfulfilled
 	if order.Bought != nil || order.BuyerUserID != nil {
 		return errors.New("sell order has already been fulfilled")
 	}
 
-	//lock order and item if needed
+	// lock order and item if needed
 	if lock {
 		order.Lock.Lock()
 		defer order.Lock.Unlock()
@@ -1704,12 +1704,12 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 		defer order.Item.Lock.Unlock()
 	}
 
-	//verify sufficient funds
+	// verify sufficient funds
 	if s.Wallet-order.AskPrice < 0 {
 		return errors.New("insufficient CBN to fulfill order")
 	}
 
-	//calculate order volume
+	// calculate order volume
 	var unitVolume float64 = 0.0
 
 	if order.Item.IsPackaged {
@@ -1728,7 +1728,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 
 	orderVolume := unitVolume * float64(order.Item.Quantity)
 
-	//verify sufficient cargo capacity
+	// verify sufficient cargo capacity
 	usedBay := s.TotalCargoBayVolumeUsed(lock)
 	maxBay := s.GetRealCargoBayVolume()
 
@@ -1736,97 +1736,97 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 		return errors.New("insufficient cargo space available")
 	}
 
-	//find the ship currently being flown by the seller so we can deposit funds in their wallet
+	// find the ship currently being flown by the seller so we can deposit funds in their wallet
 	seller := s.CurrentSystem.Universe.FindCurrentPlayerShip(order.SellerUserID)
 
 	if seller == nil {
 		return errors.New("seller ship not found")
 	}
 
-	//check if we need to lock the seller
+	// check if we need to lock the seller
 	if seller.CurrentSystem.ID != s.CurrentSystem.ID {
 		// obtain lock
 		seller.Lock.Lock()
 		defer seller.Lock.Unlock()
 	}
 
-	//adjust wallets
+	// adjust wallets
 	seller.Wallet += order.AskPrice
 	s.Wallet -= order.AskPrice
 
-	//stamp order as fulfilled
+	// stamp order as fulfilled
 	now := time.Now()
 
 	order.CoreDirty = true
 	order.Bought = &now
 	order.BuyerUserID = &s.UserID
 
-	//remove order from station
+	// remove order from station
 	delete(s.DockedAtStation.OpenSellOrders, order.ID.String())
 
-	//escalate order save request to core
+	// escalate order save request to core
 	s.CurrentSystem.BoughtSellOrders[order.ID.String()] = order
 
-	//mark item as dirty and place it in the cargo container
+	// mark item as dirty and place it in the cargo container
 	order.Item.CoreDirty = true
 	order.Item.ContainerID = s.CargoBayContainerID
 
-	//escalate item for saving in db
+	// escalate item for saving in db
 	s.CurrentSystem.MovedItems[order.Item.ID.String()] = order.Item
 
-	//place item in cargo bay
+	// place item in cargo bay
 	s.CargoBay.Items = append(s.CargoBay.Items, order.Item)
 
-	//success
+	// success
 	return nil
 }
 
 // Lists an item in the ship's cargo bay on the station order exchange if it exists
 func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 	if lock {
-		//lock entity
+		// lock entity
 		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
-	//lock cargo bay
+	// lock cargo bay
 	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
-	//make sure ship is docked
+	// make sure ship is docked
 	if s.DockedAtStationID == nil {
 		return errors.New("you must be docked to list an item on the station orders exchange")
 	}
 
-	//make sure there is an escrow container attached to this ship
+	// make sure there is an escrow container attached to this ship
 	if s.EscrowContainerID == nil {
 		return errors.New("no escrow container associated with this ship")
 	}
 
-	//get the item to be listed for sale
+	// get the item to be listed for sale
 	item := s.FindItemInCargo(id)
 
 	if item == nil {
 		return errors.New("Item not found in cargo bay")
 	}
 
-	//make sure item is clean
+	// make sure item is clean
 	if item.CoreDirty {
 		return errors.New("Item is dirty and waiting on an escalation to save its state")
 	}
 
-	//make sure the ask price is > 0
+	// make sure the ask price is > 0
 	if price <= 0 {
 		return errors.New("items must be sold at a price greater than 0")
 	}
 
-	//remove from cargo bay
+	// remove from cargo bay
 	newCB := make([]*Item, 0)
 
 	for i := range s.CargoBay.Items {
 		o := s.CargoBay.Items[i]
 
-		//keep if not this item or is dirty
+		// keep if not this item or is dirty
 		if o.ID != id {
 			newCB = append(newCB, o)
 		}
@@ -1834,14 +1834,14 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 
 	s.CargoBay.Items = newCB
 
-	//mark item as dirty and place it in the escrow container
+	// mark item as dirty and place it in the escrow container
 	item.CoreDirty = true
 	item.ContainerID = *s.EscrowContainerID
 
-	//escalate item for saving in db
+	// escalate item for saving in db
 	s.CurrentSystem.MovedItems[item.ID.String()] = item
 
-	//create sell order for item
+	// create sell order for item
 	nid, err := uuid.NewUUID()
 
 	if err != nil {
@@ -1858,10 +1858,10 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 		CoreDirty:    true,
 	}
 
-	//link item into sell order
+	// link item into sell order
 	newOrder.Item = item
 
-	//escalate to core for saving in db
+	// escalate to core for saving in db
 	s.CurrentSystem.NewSellOrders[newOrder.ID.String()] = &newOrder
 
 	return nil
@@ -1870,50 +1870,50 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 // Packages an item in the ship's cargo bay if it exists
 func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
-		//lock entity
+		// lock entity
 		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
-	//lock cargo bay
+	// lock cargo bay
 	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
-	//make sure ship is docked
+	// make sure ship is docked
 	if s.DockedAtStationID == nil {
 		return errors.New("you must be docked to unpackage an item")
 	}
 
-	//get the item to be packaged
+	// get the item to be packaged
 	item := s.FindItemInCargo(id)
 
 	if item == nil {
 		return errors.New("Item not found in cargo bay")
 	}
 
-	//make sure item is clean
+	// make sure item is clean
 	if item.CoreDirty {
 		return errors.New("Item is dirty and waiting on an escalation to save its state")
 	}
 
-	//make sure the item is packaged
+	// make sure the item is packaged
 	if !item.IsPackaged {
 		return errors.New("Item is already unpackaged")
 	}
 
-	//make sure there is only one in the stack
+	// make sure there is only one in the stack
 	if item.Quantity != 1 {
 		return errors.New("must be a stack of 1 to unpackage")
 	}
 
-	//unpackage item in-memory
+	// unpackage item in-memory
 	item.IsPackaged = false
 	item.CoreDirty = true
 
-	//copy item type metadata as initial item metadata
+	// copy item type metadata as initial item metadata
 	item.Meta = item.ItemTypeMeta
 
-	//escalate item for unpackaging in db
+	// escalate item for unpackaging in db
 	s.CurrentSystem.UnpackagedItems[item.ID.String()] = item
 
 	return nil
@@ -1922,43 +1922,43 @@ func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 // Stacks an item in the ship's cargo bay if it exists
 func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
-		//lock entity
+		// lock entity
 		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
-	//lock cargo bay
+	// lock cargo bay
 	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
-	//get the item to be stacked
+	// get the item to be stacked
 	item := s.FindItemInCargo(id)
 
 	if item == nil {
 		return errors.New("Item not found in cargo bay")
 	}
 
-	//make sure item is clean
+	// make sure item is clean
 	if item.CoreDirty {
 		return errors.New("Item is dirty and waiting on an escalation to save its state")
 	}
 
-	//make sure the item is packaged
+	// make sure the item is packaged
 	if !item.IsPackaged {
 		return errors.New("only packaged items can be stacked")
 	}
 
-	//merge stack into next stack
+	// merge stack into next stack
 	for i := range s.CargoBay.Items {
 		o := s.CargoBay.Items[i]
 
-		//skip if this item
+		// skip if this item
 		if o.ID == id {
 			continue
 		} else {
-			//see if we can merge into this stack
+			// see if we can merge into this stack
 			if o.IsPackaged && o.ItemTypeID == item.ItemTypeID && !o.CoreDirty && !item.CoreDirty {
-				//merge stacks
+				// merge stacks
 				q := item.Quantity
 
 				o.Quantity += q
@@ -1967,29 +1967,29 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 				o.CoreDirty = true
 				item.CoreDirty = true
 
-				//escalate to core for saving in db
+				// escalate to core for saving in db
 				s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
 				s.CurrentSystem.ChangedQuantityItems[o.ID.String()] = o
 
-				//exit loop
+				// exit loop
 				break
 			}
 		}
 	}
 
-	//remove 0 quantity stacks
+	// remove 0 quantity stacks
 	newCB := make([]*Item, 0)
 
 	for i := range s.CargoBay.Items {
 		o := s.CargoBay.Items[i]
 
-		//only retain if non empty
+		// only retain if non empty
 		if o.Quantity > 0 {
 			newCB = append(newCB, o)
 		}
 	}
 
-	//update cargo bay
+	// update cargo bay
 	s.CargoBay.Items = newCB
 
 	return nil
@@ -1998,50 +1998,50 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 // Splits an item stack in the ship's cargo bay if it exists
 func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 	if lock {
-		//lock entity
+		// lock entity
 		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
-	//lock cargo bay
+	// lock cargo bay
 	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
-	//get the item to be split
+	// get the item to be split
 	item := s.FindItemInCargo(id)
 
 	if item == nil {
 		return errors.New("Item not found in cargo bay")
 	}
 
-	//make sure item is clean
+	// make sure item is clean
 	if item.CoreDirty {
 		return errors.New("Item is dirty and waiting on an escalation to save its state")
 	}
 
-	//make sure the item is packaged
+	// make sure the item is packaged
 	if !item.IsPackaged {
 		return errors.New("only packaged items can be split")
 	}
 
-	//make sure we are splitting a positive size
+	// make sure we are splitting a positive size
 	if size <= 0 {
 		return errors.New("new stack size must be positive")
 	}
 
-	//make sure we are splitting off less than the quantity - 1
+	// make sure we are splitting off less than the quantity - 1
 	if size > item.Quantity-1 {
 		return errors.New("both output stacks must have a positive size")
 	}
 
-	//reduce found stack by new stack size
+	// reduce found stack by new stack size
 	item.Quantity -= size
 	item.CoreDirty = true
 
-	//escalate to core for saving in db
+	// escalate to core for saving in db
 	s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
 
-	//make a new item stack of the given size
+	// make a new item stack of the given size
 	nid, err := uuid.NewUUID()
 
 	if err != nil {
@@ -2066,10 +2066,10 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 		CoreDirty:      true,
 	}
 
-	//escalate to core for saving in db
+	// escalate to core for saving in db
 	s.CurrentSystem.NewItems[newItem.ID.String()] = &newItem
 
-	//add new item to cargo hold
+	// add new item to cargo hold
 	s.CargoBay.Items = append(s.CargoBay.Items, &newItem)
 
 	return nil
@@ -2078,11 +2078,11 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 // Updates a fitted slot on a ship
 func (m *FittedSlot) PeriodicUpdate() {
 	if m.IsCycling {
-		//update cycle timer
+		// update cycle timer
 		cooldown, found := m.ItemTypeMeta.GetFloat64("cooldown")
 
 		if !found {
-			//module has no cooldown - deactivate
+			// module has no cooldown - deactivate
 			m.IsCycling = false
 			m.WillRepeat = false
 
@@ -2093,29 +2093,29 @@ func (m *FittedSlot) PeriodicUpdate() {
 		m.cooldownProgress += Heartbeat
 
 		if m.cooldownProgress > cooldownMs {
-			//cycle completed
+			// cycle completed
 			m.IsCycling = false
 			m.cooldownProgress = 0
 			m.CyclePercent = 0
 		} else {
-			//update percentage
+			// update percentage
 			m.CyclePercent = ((m.cooldownProgress * 100) / cooldownMs)
 		}
 	} else {
-		//check for activation intent
+		// check for activation intent
 		if m.WillRepeat {
-			//check if a target is required
+			// check if a target is required
 			needsTarget, _ := m.ItemTypeMeta.GetBool("needs_target")
 
 			if needsTarget {
-				//check for a target
+				// check for a target
 				if m.TargetID == nil || m.TargetType == nil {
-					//no target - can't activate
+					// no target - can't activate
 					m.WillRepeat = false
 					return
 				}
 
-				//make sure the target actually exists in this solar system
+				// make sure the target actually exists in this solar system
 				tgtReg := models.NewTargetTypeRegistry()
 
 				if *m.TargetType == tgtReg.Ship {
@@ -2123,7 +2123,7 @@ func (m *FittedSlot) PeriodicUpdate() {
 					_, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
 
 					if !f {
-						//target doesn't exist - can't activate
+						// target doesn't exist - can't activate
 						m.TargetID = nil
 						m.TargetType = nil
 
@@ -2134,7 +2134,7 @@ func (m *FittedSlot) PeriodicUpdate() {
 					_, f := m.shipMountedOn.CurrentSystem.stations[m.TargetID.String()]
 
 					if !f {
-						//target doesn't exist - can't activate
+						// target doesn't exist - can't activate
 						m.TargetID = nil
 						m.TargetType = nil
 
@@ -2145,7 +2145,7 @@ func (m *FittedSlot) PeriodicUpdate() {
 					_, f := m.shipMountedOn.CurrentSystem.planets[m.TargetID.String()]
 
 					if !f {
-						//target doesn't exist - can't activate
+						// target doesn't exist - can't activate
 						m.TargetID = nil
 						m.TargetType = nil
 
@@ -2156,7 +2156,7 @@ func (m *FittedSlot) PeriodicUpdate() {
 					_, f := m.shipMountedOn.CurrentSystem.jumpholes[m.TargetID.String()]
 
 					if !f {
-						//target doesn't exist - can't activate
+						// target doesn't exist - can't activate
 						m.TargetID = nil
 						m.TargetType = nil
 
@@ -2167,7 +2167,7 @@ func (m *FittedSlot) PeriodicUpdate() {
 					_, f := m.shipMountedOn.CurrentSystem.stars[m.TargetID.String()]
 
 					if !f {
-						//target doesn't exist - can't activate
+						// target doesn't exist - can't activate
 						m.TargetID = nil
 						m.TargetType = nil
 
@@ -2178,7 +2178,7 @@ func (m *FittedSlot) PeriodicUpdate() {
 					_, f := m.shipMountedOn.CurrentSystem.asteroids[m.TargetID.String()]
 
 					if !f {
-						//target doesn't exist - can't activate
+						// target doesn't exist - can't activate
 						m.TargetID = nil
 						m.TargetType = nil
 
@@ -2193,21 +2193,21 @@ func (m *FittedSlot) PeriodicUpdate() {
 				}
 			}
 
-			//check for sufficient activation energy
+			// check for sufficient activation energy
 			activationEnergy, found := m.ItemTypeMeta.GetFloat64("activation_energy")
 
 			if found {
 				if m.shipMountedOn.Energy-activationEnergy < 0 {
-					//insufficient energy - can't activate
+					// insufficient energy - can't activate
 					m.WillRepeat = false
 					return
 				}
 			}
 
-			//to determine whether activation succeeds later
+			// to determine whether activation succeeds later
 			canActivate := false
 
-			//handle module family effects
+			// handle module family effects
 			if m.ItemTypeFamily == "gun_turret" {
 				canActivate = m.activateAsGunTurret()
 			} else if m.ItemTypeFamily == "shield_booster" {
@@ -2215,11 +2215,11 @@ func (m *FittedSlot) PeriodicUpdate() {
 			}
 
 			if canActivate {
-				//activate module
+				// activate module
 				m.shipMountedOn.Energy -= activationEnergy
 				m.IsCycling = true
 
-				//apply activation heating
+				// apply activation heating
 				activationHeat, found := m.ItemTypeMeta.GetFloat64("activation_heat")
 
 				if found {
@@ -2231,25 +2231,25 @@ func (m *FittedSlot) PeriodicUpdate() {
 }
 
 func (m *FittedSlot) activateAsGunTurret() bool {
-	//safety check targeting pointers
+	// safety check targeting pointers
 	if m.TargetID == nil || m.TargetType == nil {
 		m.WillRepeat = false
 		return false
 	}
 
-	//get target
+	// get target
 	tgtReg := models.NewTargetTypeRegistry()
 
-	//target details
+	// target details
 	var tgtDummy physics.Dummy = physics.Dummy{}
 	var tgtI Any
 
 	if *m.TargetType == tgtReg.Ship {
-		//find ship
+		// find ship
 		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
 
 		if !f {
-			//target doesn't exist - can't activate
+			// target doesn't exist - can't activate
 			m.TargetID = nil
 			m.TargetType = nil
 			m.WillRepeat = false
@@ -2265,7 +2265,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		tgt, f := m.shipMountedOn.CurrentSystem.stations[m.TargetID.String()]
 
 		if !f {
-			//target doesn't exist - can't activate
+			// target doesn't exist - can't activate
 			m.TargetID = nil
 			m.TargetType = nil
 			m.WillRepeat = false
@@ -2273,7 +2273,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 			return false
 		}
 
-		//store target details
+		// store target details
 		tgtDummy = tgt.ToPhysicsDummy()
 		tgtI = tgt
 	} else if *m.TargetType == tgtReg.Asteroid {
@@ -2281,7 +2281,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		tgt, f := m.shipMountedOn.CurrentSystem.asteroids[m.TargetID.String()]
 
 		if !f {
-			//target doesn't exist - can't activate
+			// target doesn't exist - can't activate
 			m.TargetID = nil
 			m.TargetType = nil
 			m.WillRepeat = false
@@ -2289,11 +2289,11 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 			return false
 		}
 
-		//store target details
+		// store target details
 		tgtDummy = tgt.ToPhysicsDummy()
 		tgtI = tgt
 	} else {
-		//unsupported target type - can't activate
+		// unsupported target type - can't activate
 		m.TargetID = nil
 		m.TargetType = nil
 		m.WillRepeat = false
@@ -2302,17 +2302,17 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		return false
 	}
 
-	//check for max range
+	// check for max range
 	modRange, found := m.ItemTypeMeta.GetFloat64("range")
 	var d float64 = 0
 
 	if found {
-		//get distance to target
+		// get distance to target
 		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
 
-		//verify target is in range
+		// verify target is in range
 		if d > modRange {
-			//out of range - can't activate
+			// out of range - can't activate
 			m.TargetID = nil
 			m.TargetType = nil
 			m.WillRepeat = false
@@ -2322,12 +2322,12 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		}
 	}
 
-	//get damage values
+	// get damage values
 	shieldDmg, _ := m.ItemTypeMeta.GetFloat64("shield_damage")
 	armorDmg, _ := m.ItemTypeMeta.GetFloat64("armor_damage")
 	hullDmg, _ := m.ItemTypeMeta.GetFloat64("hull_damage")
 
-	//determine angular velocity for tracking
+	// determine angular velocity for tracking
 	dvX := m.shipMountedOn.VelX - tgtDummy.VelX
 	dvY := m.shipMountedOn.VelY - tgtDummy.VelY
 
@@ -2338,35 +2338,35 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		w = ((dv / d) * float64(Heartbeat)) * (180.0 / math.Pi)
 	}
 
-	//get tracking value
+	// get tracking value
 	tracking, _ := m.ItemTypeMeta.GetFloat64("tracking")
 
-	//calculate tracking ratio
-	trackingRatio := 1.0 //default to 100% tracking
+	// calculate tracking ratio
+	trackingRatio := 1.0 // default to 100% tracking
 
 	if w > 0 {
 		trackingRatio = tracking / w
 	}
 
-	//clamp tracking to 100%
+	// clamp tracking to 100%
 	if trackingRatio > 1.0 {
 		trackingRatio = 1.0
 	}
 
-	//adjust damage based on tracking
+	// adjust damage based on tracking
 	shieldDmg *= trackingRatio
 	armorDmg *= trackingRatio
 	hullDmg *= trackingRatio
 
-	//account for falloff if present
+	// account for falloff if present
 	falloff, found := m.ItemTypeMeta.GetString("falloff")
 
-	rangeRatio := 1.0 //default to 100% damage (or ore pull if asteroid)
+	rangeRatio := 1.0 // default to 100% damage (or ore pull if asteroid)
 
 	if found {
-		//adjust based on falloff style
+		// adjust based on falloff style
 		if falloff == "linear" {
-			//damage dealt (or ore pulled if asteroid) is a proportion of the distance to target over max range (closer is higher)
+			// damage dealt (or ore pulled if asteroid) is a proportion of the distance to target over max range (closer is higher)
 			rangeRatio = 1 - (d / modRange)
 
 			shieldDmg *= rangeRatio
@@ -2375,7 +2375,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		}
 	}
 
-	//apply damage (or ore pulled if asteroid) to target
+	// apply damage (or ore pulled if asteroid) to target
 	if *m.TargetType == tgtReg.Ship {
 		c := tgtI.(*Ship)
 		c.DealDamage(shieldDmg, armorDmg, hullDmg)
@@ -2383,51 +2383,51 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		c := tgtI.(*Station)
 		c.DealDamage(shieldDmg, armorDmg, hullDmg)
 	} else if *m.TargetType == tgtReg.Asteroid {
-		//target is an asteroid - is this a miner?
+		// target is an asteroid - is this a miner?
 		canMineOre, f := m.ItemTypeMeta.GetBool("can_mine_ore")
 
 		if f && canMineOre {
-			//get mining volume
+			// get mining volume
 			miningVolume, _ := m.ItemTypeMeta.GetFloat64("ore_mining_volume")
 
-			//get ore type and volume
+			// get ore type and volume
 			c := tgtI.(*Asteroid)
 
 			oreType := c.ItemTypeID
 			oreVol, _ := c.ItemTypeMeta.GetFloat64("volume")
 
-			//get available space in cargo hold
+			// get available space in cargo hold
 			free := m.shipMountedOn.GetRealCargoBayVolume() - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
 
-			//calculate effective ore volume pulled
+			// calculate effective ore volume pulled
 			pulled := miningVolume * c.Yield * rangeRatio
 
-			//make sure there is sufficient room to deposit the ore
+			// make sure there is sufficient room to deposit the ore
 			if free-pulled >= 0 {
 				found := false
 
-				//quantity to be placed in cargo bay
+				// quantity to be placed in cargo bay
 				q := int((miningVolume * c.Yield) / oreVol)
 
-				//is there already packaged ore of this type in the hold?
+				// is there already packaged ore of this type in the hold?
 				for idx := range m.shipMountedOn.CargoBay.Items {
 					itm := m.shipMountedOn.CargoBay.Items[idx]
 
 					if itm.ItemTypeID == oreType && itm.IsPackaged && !itm.CoreDirty {
-						//increase the size of this stack
+						// increase the size of this stack
 						itm.Quantity += q
 
-						//escalate for saving
+						// escalate for saving
 						m.shipMountedOn.CurrentSystem.ChangedQuantityItems[itm.ID.String()] = itm
 
-						//mark as found
+						// mark as found
 						found = true
 						break
 					}
 				}
 
 				if !found {
-					//create a new stack of ore
+					// create a new stack of ore
 					newItem := Item{
 						ID:             uuid.New(),
 						ItemTypeID:     oreType,
@@ -2446,21 +2446,21 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 						CoreDirty:      true,
 					}
 
-					//escalate to core for saving in db
+					// escalate to core for saving in db
 					m.shipMountedOn.CurrentSystem.NewItems[newItem.ID.String()] = &newItem
 
-					//add new item to cargo hold
+					// add new item to cargo hold
 					m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, &newItem)
 				}
 			}
 		}
 	}
 
-	//include visual effect if present
+	// include visual effect if present
 	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
 
 	if found {
-		//build effect trigger
+		// build effect trigger
 		gfxEffect := models.GlobalPushModuleEffectBody{
 			GfxEffect:    activationGfxEffect,
 			ObjStartID:   m.shipMountedOn.ID,
@@ -2469,38 +2469,38 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 			ObjEndType:   m.TargetType,
 		}
 
-		//push to solar system list for next update
+		// push to solar system list for next update
 		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
 	}
 
-	//module activates!
+	// module activates!
 	return true
 }
 
 func (m *FittedSlot) activateAsShieldBooster() bool {
-	//get shield boost amount
+	// get shield boost amount
 	shieldBoost, _ := m.ItemTypeMeta.GetFloat64("shield_boost_amount")
 
-	//apply boost to mounting ship
+	// apply boost to mounting ship
 	m.shipMountedOn.DealDamage(-shieldBoost, 0, 0)
 
-	//include visual effect if present
+	// include visual effect if present
 	activationPGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
 
 	if found {
 		tgtReg := models.NewTargetTypeRegistry()
 
-		//build effect trigger
+		// build effect trigger
 		gfxEffect := models.GlobalPushModuleEffectBody{
 			GfxEffect:    activationPGfxEffect,
 			ObjStartID:   m.shipMountedOn.ID,
 			ObjStartType: tgtReg.Ship,
 		}
 
-		//push to solar system list for next update
+		// push to solar system list for next update
 		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
 	}
 
-	//module activates!
+	// module activates!
 	return true
 }

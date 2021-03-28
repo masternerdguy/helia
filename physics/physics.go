@@ -20,7 +20,7 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy) {
 		return
 	}
 
-	//get velocity and mass
+	// get velocity and mass
 	aVx := dummyA.VelX
 	aVy := dummyA.VelY
 	aM := dummyA.Mass
@@ -28,23 +28,23 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy) {
 	bVy := dummyB.VelY
 	bM := dummyB.Mass
 
-	//push them apart to avoid double counting and overlap
+	// push them apart to avoid double counting and overlap
 	dummyA.PosX = (dummyA.PosX - aVx*2.0)
 	dummyA.PosY = (dummyA.PosY - aVy*2.0)
 	dummyB.PosX = (dummyB.PosX - bVx*2.0)
 	dummyB.PosY = (dummyB.PosY - bVy*2.0)
 
-	//determine center of mass's velocity
+	// determine center of mass's velocity
 	cVx := (aVx*aM + bVx*bM) / (aM + bM)
 	cVy := (aVy*aM + bVy*bM) / (aM + bM)
 
-	//reverse directions and de-reference frame
+	// reverse directions and de-reference frame
 	aVx2 := -aVx + cVx
 	aVy2 := -aVy + cVy
 	bVx2 := -bVx + cVx
 	bVy2 := -bVy + cVy
 
-	//store
+	// store
 	dummyA.VelX = aVx2
 	dummyA.VelY = aVy2
 	dummyB.VelX = bVx2

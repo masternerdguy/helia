@@ -16,7 +16,7 @@ import (
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		//todo: lock this down when frontend domains are known
+		// todo: lock this down when frontend domains are known
 		return true
 	},
 } // use default options
@@ -32,20 +32,20 @@ type SocketListener struct {
 func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 	var upgrader = websocket.Upgrader{}
 
-	//upgrade to websocket connection
+	// upgrade to websocket connection
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	c, err := upgrader.Upgrade(w, r, nil)
 
-	//return if protocol change failed
+	// return if protocol change failed
 	if err != nil {
 		log.Print("ws protocol update error:", err)
 		return
 	}
 
-	//defer cleanup of connection
+	// defer cleanup of connection
 	defer c.Close()
 
-	//add client to pool
+	// add client to pool
 	client := shared.GameClient{
 		SID:  nil,
 		UID:  nil,
@@ -55,166 +55,166 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 	client.Initialize()
 	l.addClient(&client)
 
-	//defer cleanup of client when they disconnect
+	// defer cleanup of client when they disconnect
 	defer l.removeClient(&client)
 
-	//get message type registry
+	// get message type registry
 	msgRegistry := models.NewMessageRegistry()
 
-	//socket listener loop
+	// socket listener loop
 	for {
-		//read message from client
+		// read message from client
 		_, r, err := c.ReadMessage()
 
 		m := models.GameMessage{}
 		json.Unmarshal(r, &m)
 
-		//exit if read failed
+		// exit if read failed
 		if err != nil {
 			log.Println("ws read error:", err)
 			break
 		}
 
-		//handle message based on type
+		// handle message based on type
 		if m.MessageType == msgRegistry.Join {
-			//decode body as ClientJoinBody
+			// decode body as ClientJoinBody
 			b := models.ClientJoinBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientJoin(&client, &b)
 		} else if m.MessageType == msgRegistry.NavClick {
-			//decode body as ClientNavBody
+			// decode body as ClientNavBody
 			b := models.ClientNavClickBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientNavClick(&client, &b)
 		} else if m.MessageType == msgRegistry.Goto {
-			//decode body as ClientGotoBody
+			// decode body as ClientGotoBody
 			b := models.ClientGotoBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientGoto(&client, &b)
 		} else if m.MessageType == msgRegistry.Orbit {
-			//decode body as ClientOrbitBody
+			// decode body as ClientOrbitBody
 			b := models.ClientOrbitBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientOrbit(&client, &b)
 		} else if m.MessageType == msgRegistry.Dock {
-			//decode body as ClientDockBody
+			// decode body as ClientDockBody
 			b := models.ClientDockBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientDock(&client, &b)
 		} else if m.MessageType == msgRegistry.Undock {
-			//decode body as ClientUndockBody
+			// decode body as ClientUndockBody
 			b := models.ClientUndockBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientUndock(&client, &b)
 		} else if m.MessageType == msgRegistry.ActivateModule {
-			//decode body as ClientActivateModuleBody
+			// decode body as ClientActivateModuleBody
 			b := models.ClientActivateModuleBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientActivateModule(&client, &b)
 		} else if m.MessageType == msgRegistry.DeactivateModule {
-			//decode body as ClientDeactivateModuleBody
+			// decode body as ClientDeactivateModuleBody
 			b := models.ClientDeactivateModuleBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientDeactivateModule(&client, &b)
 		} else if m.MessageType == msgRegistry.ViewCargoBay {
-			//decode body as ClientViewCargoBayBody
+			// decode body as ClientViewCargoBayBody
 			b := models.ClientViewCargoBayBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientViewCargoBay(&client, &b)
 		} else if m.MessageType == msgRegistry.UnfitModule {
-			//decode body as ClientUnfitModuleBody
+			// decode body as ClientUnfitModuleBody
 			b := models.ClientUnfitModuleBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientUnfitModule(&client, &b)
 		} else if m.MessageType == msgRegistry.TrashItem {
-			//decode body as ClientTrashItemBody
+			// decode body as ClientTrashItemBody
 			b := models.ClientTrashItemBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientTrashItem(&client, &b)
 		} else if m.MessageType == msgRegistry.PackageItem {
-			//decode body as ClientPackageItemBody
+			// decode body as ClientPackageItemBody
 			b := models.ClientPackageItemBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientPackageItem(&client, &b)
 		} else if m.MessageType == msgRegistry.UnpackageItem {
-			//decode body as ClientUnpackageItemBody
+			// decode body as ClientUnpackageItemBody
 			b := models.ClientUnpackageItemBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientUnpackageItem(&client, &b)
 		} else if m.MessageType == msgRegistry.StackItem {
-			//decode body as ClientStackItemBody
+			// decode body as ClientStackItemBody
 			b := models.ClientStackItemBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientStackItem(&client, &b)
 		} else if m.MessageType == msgRegistry.SplitItem {
-			//decode body as ClientSplitItemBody
+			// decode body as ClientSplitItemBody
 			b := models.ClientSplitItemBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientSplitItem(&client, &b)
 		} else if m.MessageType == msgRegistry.FitModule {
-			//decode body as ClientFitModuleBody
+			// decode body as ClientFitModuleBody
 			b := models.ClientFitModuleBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientFitModule(&client, &b)
 		} else if m.MessageType == msgRegistry.SellAsOrder {
-			//decode body as ClientSellAsOrderBody
+			// decode body as ClientSellAsOrderBody
 			b := models.ClientSellAsOrderBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientSellAsOrder(&client, &b)
 		} else if m.MessageType == msgRegistry.ViewOpenSellOrders {
-			//decode body as ClientViewOpenSellOrdersBody
+			// decode body as ClientViewOpenSellOrdersBody
 			b := models.ClientViewOpenSellOrdersBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientViewOpenSellOrders(&client, &b)
 		} else if m.MessageType == msgRegistry.BuySellOrder {
-			//decode body as ClientBuySellOrderBody
+			// decode body as ClientBuySellOrderBody
 			b := models.ClientBuySellOrderBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
-			//handle message
+			// handle message
 			l.handleClientBuySellOrder(&client, &b)
 		}
 	}
 }
 
 func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *models.ClientJoinBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -223,40 +223,40 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		return
 	}
 
-	//debug out
+	// debug out
 	log.Println(fmt.Sprintf("player join attempt: %v", &body.SessionID))
 
-	//initialize services
+	// initialize services
 	sessionSvc := sql.GetSessionService()
 	userSvc := sql.GetUserService()
 	msgRegistry := models.NewMessageRegistry()
 	shipSvc := sql.GetShipService()
 	startSvc := sql.GetStartService()
 
-	//store sid on server
+	// store sid on server
 	client.SID = &body.SessionID
 
-	//prepare welcome message to client
+	// prepare welcome message to client
 	w := models.ServerJoinBody{}
 
-	//lookup user session
+	// lookup user session
 	session, err := sessionSvc.GetSessionByID(body.SessionID)
 
 	if err == nil {
-		//store userid
+		// store userid
 		client.UID = &session.UserID
 		w.UserID = session.UserID
 
-		//lookup user in database
+		// lookup user in database
 		u, _ := userSvc.GetUserByID(session.UserID)
 
-		//store start
+		// store start
 		client.StartID = u.StartID
 
-		//store escrow container
+		// store escrow container
 		client.EscrowContainerID = u.EscrowContainerID
 
-		//lookup current ship in memory
+		// lookup current ship in memory
 		currShip := l.Engine.Universe.FindShip(*u.CurrentShipID)
 
 		if currShip == nil {
@@ -271,7 +271,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				nStart, err := startSvc.GetStartByID(u.StartID)
 
 				if err != nil {
-					//dump error to console
+					// dump error to console
 					log.Println(fmt.Sprintf("player join recovery - unable to get start for player: %v", err))
 					return
 				}
@@ -279,7 +279,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				u, err = engine.CreateNoobShipForPlayer(nStart, u.ID, false)
 
 				if err != nil {
-					//dump error to console
+					// dump error to console
 					log.Println(fmt.Sprintf("player join recovery - unable to create noob ship for player: %v", err))
 					return
 				}
@@ -302,13 +302,13 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			}
 		}
 
-		//obtain ship lock
+		// obtain ship lock
 		currShip.Lock.Lock()
 		defer currShip.Lock.Unlock()
 
-		//build current ship info data for welcome message
+		// build current ship info data for welcome message
 		shipInfo := models.CurrentShipInfo{
-			//global stuff
+			// global stuff
 			ID:       currShip.ID,
 			UserID:   currShip.UserID,
 			Created:  currShip.Created,
@@ -327,7 +327,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			ShieldP:  (currShip.Shield / currShip.GetRealMaxShield()) * 100,
 			ArmorP:   (currShip.Armor / currShip.GetRealMaxArmor()) * 100,
 			HullP:    (currShip.Hull / currShip.GetRealMaxHull()) * 100,
-			//secret stuff
+			// secret stuff
 			EnergyP: (currShip.Energy / currShip.GetRealMaxEnergy()) * 100,
 			HeatP:   (currShip.Heat / currShip.GetRealMaxHeat()) * 100,
 			FuelP:   (currShip.Fuel / currShip.GetRealMaxFuel()) * 100,
@@ -335,9 +335,9 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 		w.CurrentShipInfo = shipInfo
 
-		//place player into system
+		// place player into system
 		for _, r := range l.Engine.Universe.Regions {
-			//lookup system in region
+			// lookup system in region
 			s := r.Systems[currShip.SystemID.String()]
 
 			if s == nil {
@@ -347,19 +347,19 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			s.AddClient(client, true)
 			s.AddShip(currShip, true)
 
-			//build current system info for welcome message
+			// build current system info for welcome message
 			w.CurrentSystemInfo = models.CurrentSystemInfo{}
 			w.CurrentSystemInfo.ID = s.ID
 			w.CurrentSystemInfo.SystemName = s.SystemName
 
-			//stash current ship and system ids for quick reference
+			// stash current ship and system ids for quick reference
 			client.CurrentShipID = currShip.ID
 			client.CurrentSystemID = currShip.SystemID
 
 			break
 		}
 
-		//package message
+		// package message
 		b, _ := json.Marshal(&w)
 
 		msg := models.GameMessage{
@@ -367,19 +367,19 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			MessageBody: string(b),
 		}
 
-		//send welcome message to client
+		// send welcome message to client
 		client.WriteMessage(&msg)
 
-		//debug out
+		// debug out
 		log.Println(fmt.Sprintf("player joined: %v", &body.SessionID))
 	} else {
-		//dump error to console
+		// dump error to console
 		log.Println(fmt.Sprintf("player join error: %v", err))
 	}
 }
 
 func (l *SocketListener) handleClientNavClick(client *shared.GameClient, body *models.ClientNavClickBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -388,21 +388,21 @@ func (l *SocketListener) handleClientNavClick(client *shared.GameClient, body *m
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientNavClick: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.NavClick)
 	}
 }
 
 func (l *SocketListener) handleClientGoto(client *shared.GameClient, body *models.ClientGotoBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -411,21 +411,21 @@ func (l *SocketListener) handleClientGoto(client *shared.GameClient, body *model
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientGoto: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.Goto)
 	}
 }
 
 func (l *SocketListener) handleClientOrbit(client *shared.GameClient, body *models.ClientOrbitBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -434,21 +434,21 @@ func (l *SocketListener) handleClientOrbit(client *shared.GameClient, body *mode
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientOrbit: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.Orbit)
 	}
 }
 
 func (l *SocketListener) handleClientDock(client *shared.GameClient, body *models.ClientDockBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -457,21 +457,21 @@ func (l *SocketListener) handleClientDock(client *shared.GameClient, body *model
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientDock: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.Dock)
 	}
 }
 
 func (l *SocketListener) handleClientUndock(client *shared.GameClient, body *models.ClientUndockBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -480,21 +480,21 @@ func (l *SocketListener) handleClientUndock(client *shared.GameClient, body *mod
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientUndock: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.Undock)
 	}
 }
 
 func (l *SocketListener) handleClientActivateModule(client *shared.GameClient, body *models.ClientActivateModuleBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -503,21 +503,21 @@ func (l *SocketListener) handleClientActivateModule(client *shared.GameClient, b
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientActivateModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.ActivateModule)
 	}
 }
 
 func (l *SocketListener) handleClientDeactivateModule(client *shared.GameClient, body *models.ClientDeactivateModuleBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -526,21 +526,21 @@ func (l *SocketListener) handleClientDeactivateModule(client *shared.GameClient,
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientDeactivateModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.DeactivateModule)
 	}
 }
 
 func (l *SocketListener) handleClientViewCargoBay(client *shared.GameClient, body *models.ClientViewCargoBayBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -549,21 +549,21 @@ func (l *SocketListener) handleClientViewCargoBay(client *shared.GameClient, bod
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientViewCargoBay: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.ViewCargoBay)
 	}
 }
 
 func (l *SocketListener) handleClientUnfitModule(client *shared.GameClient, body *models.ClientUnfitModuleBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -572,21 +572,21 @@ func (l *SocketListener) handleClientUnfitModule(client *shared.GameClient, body
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientUnfitModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.UnfitModule)
 	}
 }
 
 func (l *SocketListener) handleClientTrashItem(client *shared.GameClient, body *models.ClientTrashItemBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -595,21 +595,21 @@ func (l *SocketListener) handleClientTrashItem(client *shared.GameClient, body *
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientTrashItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.TrashItem)
 	}
 }
 
 func (l *SocketListener) handleClientPackageItem(client *shared.GameClient, body *models.ClientPackageItemBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -618,21 +618,21 @@ func (l *SocketListener) handleClientPackageItem(client *shared.GameClient, body
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientPackageItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.PackageItem)
 	}
 }
 
 func (l *SocketListener) handleClientUnpackageItem(client *shared.GameClient, body *models.ClientUnpackageItemBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -641,21 +641,21 @@ func (l *SocketListener) handleClientUnpackageItem(client *shared.GameClient, bo
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientUnpackageItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.UnpackageItem)
 	}
 }
 
 func (l *SocketListener) handleClientStackItem(client *shared.GameClient, body *models.ClientStackItemBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -664,21 +664,21 @@ func (l *SocketListener) handleClientStackItem(client *shared.GameClient, body *
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientStackItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.StackItem)
 	}
 }
 
 func (l *SocketListener) handleClientSplitItem(client *shared.GameClient, body *models.ClientSplitItemBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -687,21 +687,21 @@ func (l *SocketListener) handleClientSplitItem(client *shared.GameClient, body *
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientSplitItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.SplitItem)
 	}
 }
 
 func (l *SocketListener) handleClientFitModule(client *shared.GameClient, body *models.ClientFitModuleBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -710,21 +710,21 @@ func (l *SocketListener) handleClientFitModule(client *shared.GameClient, body *
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientFitModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.FitModule)
 	}
 }
 
 func (l *SocketListener) handleClientSellAsOrder(client *shared.GameClient, body *models.ClientSellAsOrderBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -733,21 +733,21 @@ func (l *SocketListener) handleClientSellAsOrder(client *shared.GameClient, body
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientSellAsOrder: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.SellAsOrder)
 	}
 }
 
 func (l *SocketListener) handleClientViewOpenSellOrders(client *shared.GameClient, body *models.ClientViewOpenSellOrdersBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -756,21 +756,21 @@ func (l *SocketListener) handleClientViewOpenSellOrders(client *shared.GameClien
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientViewOpenSellOrders: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.ViewOpenSellOrders)
 	}
 }
 
 func (l *SocketListener) handleClientBuySellOrder(client *shared.GameClient, body *models.ClientBuySellOrderBody) {
-	//safety returns
+	// safety returns
 	if body == nil {
 		return
 	}
@@ -779,14 +779,14 @@ func (l *SocketListener) handleClientBuySellOrder(client *shared.GameClient, bod
 		return
 	}
 
-	//verify session id
+	// verify session id
 	if body.SessionID != *client.SID {
 		log.Println(fmt.Sprintf("handleClientBuySellOrder: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
-		//initialize services
+		// initialize services
 		msgRegistry := models.NewMessageRegistry()
 
-		//push event onto player's ship queue
+		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.BuySellOrder)
 	}
@@ -805,7 +805,7 @@ func (l *SocketListener) removeClient(c *shared.GameClient) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	//find the client to remove
+	// find the client to remove
 	e := -1
 	for i, s := range l.clients {
 		if s == c {
@@ -814,7 +814,7 @@ func (l *SocketListener) removeClient(c *shared.GameClient) {
 		}
 	}
 
-	//remove client
+	// remove client
 	if e > -1 {
 		t := len(l.clients)
 

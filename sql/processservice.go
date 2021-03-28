@@ -27,14 +27,14 @@ type Process struct {
 func (s ProcessService) GetAllProcesses() ([]Process, error) {
 	processes := make([]Process, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load processes
+	// load processes
 	sql := `
 				SELECT id, name, meta, time
 				FROM public.processes;
@@ -51,10 +51,10 @@ func (s ProcessService) GetAllProcesses() ([]Process, error) {
 	for rows.Next() {
 		r := Process{}
 
-		//scan into process structure
+		// scan into process structure
 		rows.Scan(&r.ID, &r.Name, &r.Meta, &r.Time)
 
-		//append to process slice
+		// append to process slice
 		processes = append(processes, r)
 	}
 
@@ -63,14 +63,14 @@ func (s ProcessService) GetAllProcesses() ([]Process, error) {
 
 // Finds and returns a process by its id
 func (s ProcessService) GetProcessByID(processID uuid.UUID) (*Process, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//find process with this id
+	// find process with this id
 	process := Process{}
 
 	sqlStatement :=

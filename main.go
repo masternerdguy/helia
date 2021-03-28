@@ -8,12 +8,12 @@ import (
 )
 
 func main() {
-	//initialize game engine
+	// initialize game engine
 	log.Println("Initializing engine...")
 	engine := engine.HeliaEngine{}
 	engine.Initialize()
 
-	//instantiate socket listener
+	// instantiate socket listener
 	log.Println("Initializing socket listener...")
 	socketListener := &listener.SocketListener{}
 	socketListener.Engine = &engine
@@ -21,16 +21,16 @@ func main() {
 	log.Println("Wiring up socket handlers...")
 	http.HandleFunc("/ws/connect", socketListener.HandleConnect)
 
-	//start engine
+	// start engine
 	log.Println("Starting engine...")
 	engine.Start()
 
-	//instantiate http listener
+	// instantiate http listener
 	log.Println("Initializing HTTP listener...")
 	httpListener := &listener.HTTPListener{}
 	httpListener.Engine = &engine
 
-	//listen an serve api requests
+	// listen an serve api requests
 	log.Println("Wiring up HTTP handlers...")
 	http.HandleFunc("/api/register", httpListener.HandleRegister)
 	http.HandleFunc("/api/login", httpListener.HandleLogin)

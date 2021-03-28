@@ -28,14 +28,14 @@ type Jumphole struct {
 func (s JumpholeService) GetAllJumpholes() ([]Jumphole, error) {
 	jumpholes := make([]Jumphole, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load jumpholes
+	// load jumpholes
 	sql := `
 				SELECT id, universe_systemid, out_systemid, jumpholename, pos_x, pos_y, texture, radius, mass, theta
 				FROM public.universe_jumpholes;
@@ -52,28 +52,28 @@ func (s JumpholeService) GetAllJumpholes() ([]Jumphole, error) {
 	for rows.Next() {
 		r := Jumphole{}
 
-		//scan into jumphole structure
+		// scan into jumphole structure
 		rows.Scan(&r.ID, &r.SystemID, &r.OutSystemID, &r.JumpholeName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta)
 
-		//append to jumphole slice
+		// append to jumphole slice
 		jumpholes = append(jumpholes, r)
 	}
 
 	return jumpholes, err
 }
 
-//GetJumpholesBySolarSystem Retrieves all jumpholes in a given solar system from the database
+// GetJumpholesBySolarSystem Retrieves all jumpholes in a given solar system from the database
 func (s JumpholeService) GetJumpholesBySolarSystem(systemID uuid.UUID) ([]Jumphole, error) {
 	jumpholes := make([]Jumphole, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load jumpholes
+	// load jumpholes
 	sql := `
 				SELECT id, universe_systemid, out_systemid, jumpholename, pos_x, pos_y, texture, radius, mass, theta
 				FROM public.universe_jumpholes
@@ -91,10 +91,10 @@ func (s JumpholeService) GetJumpholesBySolarSystem(systemID uuid.UUID) ([]Jumpho
 	for rows.Next() {
 		r := Jumphole{}
 
-		//scan into jumphole structure
+		// scan into jumphole structure
 		rows.Scan(&r.ID, &r.SystemID, &r.OutSystemID, &r.JumpholeName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta)
 
-		//append to jumphole slice
+		// append to jumphole slice
 		jumpholes = append(jumpholes, r)
 	}
 

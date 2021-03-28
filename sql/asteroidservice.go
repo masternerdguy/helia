@@ -29,14 +29,14 @@ type Asteroid struct {
 func (s AsteroidService) GetAsteroidsBySolarSystem(systemID uuid.UUID) ([]Asteroid, error) {
 	asteroids := make([]Asteroid, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load asteroids
+	// load asteroids
 	sql := `
 				SELECT id, universe_systemid, ore_itemtypeid, name, texture, radius, theta, pos_x, pos_y, yield, mass
 				FROM public.universe_asteroids
@@ -54,10 +54,10 @@ func (s AsteroidService) GetAsteroidsBySolarSystem(systemID uuid.UUID) ([]Astero
 	for rows.Next() {
 		r := Asteroid{}
 
-		//scan into asteroid structure
+		// scan into asteroid structure
 		rows.Scan(&r.ID, &r.SystemID, &r.ItemTypeID, &r.Name, &r.Texture, &r.Radius, &r.Theta, &r.PosX, &r.PosY, &r.Yield, &r.Mass)
 
-		//append to asteroid slice
+		// append to asteroid slice
 		asteroids = append(asteroids, r)
 	}
 

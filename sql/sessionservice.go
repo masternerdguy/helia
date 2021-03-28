@@ -23,7 +23,7 @@ type Session struct {
 
 // Creates a new session
 func (s SessionService) NewSession(userid uuid.UUID) (*Session, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
@@ -34,7 +34,7 @@ func (s SessionService) NewSession(userid uuid.UUID) (*Session, error) {
 		return nil, err
 	}
 
-	//insert Session
+	// insert Session
 	sql := `
 				INSERT INTO sessions(id, userid)
 				VALUES ($1, $2);
@@ -49,7 +49,7 @@ func (s SessionService) NewSession(userid uuid.UUID) (*Session, error) {
 
 	defer q.Close()
 
-	//return session with inserted data
+	// return session with inserted data
 	Session := Session{
 		ID:     sid,
 		UserID: userid,
@@ -60,7 +60,7 @@ func (s SessionService) NewSession(userid uuid.UUID) (*Session, error) {
 
 // Finds a session by its id
 func (s SessionService) GetSessionByID(sessionid uuid.UUID) (*Session, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
@@ -71,7 +71,7 @@ func (s SessionService) GetSessionByID(sessionid uuid.UUID) (*Session, error) {
 		return nil, err
 	}
 
-	//find session by id
+	// find session by id
 	Session := Session{}
 
 	sqlStatement := `SELECT id, userid
@@ -92,14 +92,14 @@ func (s SessionService) GetSessionByID(sessionid uuid.UUID) (*Session, error) {
 
 // Deletes existing sessions by userid
 func (s SessionService) DeleteSession(userid uuid.UUID) error {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return err
 	}
 
-	//delete sessions
+	// delete sessions
 	sql := `DELETE
 			FROM sessions
 			WHERE userid=$1`

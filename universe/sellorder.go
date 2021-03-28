@@ -17,7 +17,7 @@ type SellOrder struct {
 	Created      time.Time
 	Bought       *time.Time
 	BuyerUserID  *uuid.UUID
-	//in-memory only
+	// in-memory only
 	Lock      sync.Mutex
 	Item      *Item
 	CoreDirty bool

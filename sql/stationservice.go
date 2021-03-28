@@ -27,14 +27,14 @@ type Station struct {
 func (s StationService) GetAllStations() ([]Station, error) {
 	stations := make([]Station, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load stations
+	// load stations
 	sql := `
 				SELECT id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta
 				FROM public.universe_stations;
@@ -51,10 +51,10 @@ func (s StationService) GetAllStations() ([]Station, error) {
 	for rows.Next() {
 		r := Station{}
 
-		//scan into station structure
+		// scan into station structure
 		rows.Scan(&r.ID, &r.SystemID, &r.StationName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta)
 
-		//append to station slice
+		// append to station slice
 		stations = append(stations, r)
 	}
 
@@ -65,14 +65,14 @@ func (s StationService) GetAllStations() ([]Station, error) {
 func (s StationService) GetStationsBySolarSystem(systemID uuid.UUID) ([]Station, error) {
 	stations := make([]Station, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load stations
+	// load stations
 	sql := `
 				SELECT id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta
 				FROM public.universe_stations
@@ -90,10 +90,10 @@ func (s StationService) GetStationsBySolarSystem(systemID uuid.UUID) ([]Station,
 	for rows.Next() {
 		r := Station{}
 
-		//scan into station structure
+		// scan into station structure
 		rows.Scan(&r.ID, &r.SystemID, &r.StationName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta)
 
-		//append to station slice
+		// append to station slice
 		stations = append(stations, r)
 	}
 
@@ -102,14 +102,14 @@ func (s StationService) GetStationsBySolarSystem(systemID uuid.UUID) ([]Station,
 
 // Updates an NPC station in the database
 func (s StationService) UpdateStation(station Station) error {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return err
 	}
 
-	//update ship in database
+	// update ship in database
 	sqlStatement :=
 		`
 			UPDATE public.universe_stations

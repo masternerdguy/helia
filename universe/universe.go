@@ -17,10 +17,10 @@ type Universe struct {
 
 // Finds the ship with the specified ID in the running game simulation
 func (u *Universe) FindShip(shipID uuid.UUID) *Ship {
-	//iterate over all systems in all regions
+	// iterate over all systems in all regions
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			//look for ship in system
+			// look for ship in system
 			sh := s.ships[shipID.String()]
 
 			if sh != nil {
@@ -34,10 +34,10 @@ func (u *Universe) FindShip(shipID uuid.UUID) *Ship {
 
 // Finds the ship currently being flown by the specified player in the running game simulation
 func (u *Universe) FindCurrentPlayerShip(userID uuid.UUID) *Ship {
-	//iterate over all systems in all regions
+	// iterate over all systems in all regions
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			//look for ship in system
+			// look for ship in system
 			for _, shx := range s.ships {
 				if shx != nil {
 					// id and flown check
@@ -54,10 +54,10 @@ func (u *Universe) FindCurrentPlayerShip(userID uuid.UUID) *Ship {
 
 // Finds the station with the specified ID in the running game simulation
 func (u *Universe) FindStation(stationID uuid.UUID) *Station {
-	//iterate over all systems in all regions
+	// iterate over all systems in all regions
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			//look for station in system
+			// look for station in system
 			sh := s.stations[stationID.String()]
 
 			if sh != nil {

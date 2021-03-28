@@ -27,14 +27,14 @@ type Planet struct {
 func (s PlanetService) GetAllPlanets() ([]Planet, error) {
 	planets := make([]Planet, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load planets
+	// load planets
 	sql := `
 				SELECT id, universe_systemid, planetname, pos_x, pos_y, texture, radius, mass, theta
 				FROM public.universe_planets;
@@ -51,10 +51,10 @@ func (s PlanetService) GetAllPlanets() ([]Planet, error) {
 	for rows.Next() {
 		r := Planet{}
 
-		//scan into planet structure
+		// scan into planet structure
 		rows.Scan(&r.ID, &r.SystemID, &r.PlanetName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta)
 
-		//append to planet slice
+		// append to planet slice
 		planets = append(planets, r)
 	}
 
@@ -65,14 +65,14 @@ func (s PlanetService) GetAllPlanets() ([]Planet, error) {
 func (s PlanetService) GetPlanetsBySolarSystem(systemID uuid.UUID) ([]Planet, error) {
 	planets := make([]Planet, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load planets
+	// load planets
 	sql := `
 				SELECT id, universe_systemid, planetname, pos_x, pos_y, texture, radius, mass, theta
 				FROM public.universe_planets
@@ -90,10 +90,10 @@ func (s PlanetService) GetPlanetsBySolarSystem(systemID uuid.UUID) ([]Planet, er
 	for rows.Next() {
 		r := Planet{}
 
-		//scan into planet structure
+		// scan into planet structure
 		rows.Scan(&r.ID, &r.SystemID, &r.PlanetName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta)
 
-		//append to planet slice
+		// append to planet slice
 		planets = append(planets, r)
 	}
 

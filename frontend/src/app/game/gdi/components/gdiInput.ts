@@ -17,7 +17,7 @@ export class GDIInput extends GDIBase {
   }
 
   periodicUpdate() {
-    //
+    // 
   }
 
   render(): ImageBitmap {

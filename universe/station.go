@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//Station Structure representing an NPC space station
+// Structure representing an NPC space station
 type Station struct {
 	ID          uuid.UUID
 	SystemID    uuid.UUID
@@ -20,7 +20,7 @@ type Station struct {
 	Radius      float64
 	Mass        float64
 	Theta       float64
-	//in-memory only
+	// in-memory only
 	Lock           sync.Mutex
 	CurrentSystem  *SolarSystem
 	OpenSellOrders map[string]*SellOrder
@@ -29,19 +29,19 @@ type Station struct {
 
 // Initializes internal aspects of Station
 func (s *Station) Initialize() {
-	//obtain lock
+	// obtain lock
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	//initialize maps
+	// initialize maps
 	s.OpenSellOrders = make(map[string]*SellOrder)
 
-	//install processes if needed
+	// install processes if needed
 	for i := range s.Processes {
 		process := &s.Processes[i]
 
 		if !process.Installed {
-			//set up process for first time
+			// set up process for first time
 
 			/*
 			 * In Helia, "stations" are always NPC operated and indestructible. This is so that players
@@ -69,7 +69,7 @@ func (s *Station) PeriodicUpdate() {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	//todo
+	// todo
 }
 
 // Returns a copy of the station
@@ -87,7 +87,7 @@ func (s *Station) CopyStation() Station {
 		Theta:       s.Theta,
 		Radius:      s.Radius,
 		Mass:        s.Mass,
-		//in-memory only
+		// in-memory only
 		Lock: sync.Mutex{},
 	}
 }

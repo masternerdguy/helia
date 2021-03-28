@@ -20,7 +20,7 @@ export class GDIToggleButton extends GDIBase {
   }
 
   periodicUpdate() {
-    //
+    // 
   }
 
   render(): ImageBitmap {

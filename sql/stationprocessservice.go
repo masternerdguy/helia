@@ -25,14 +25,14 @@ type StationProcess struct {
 func (s StationProcessService) GetAllStationProcesses() ([]StationProcess, error) {
 	stationProcesses := make([]StationProcess, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load station processes
+	// load station processes
 	sql := `
 				SELECT id, universe_stationid, processid, progress, installed, internalstate, meta
 				FROM public.stationprocesses;
@@ -49,10 +49,10 @@ func (s StationProcessService) GetAllStationProcesses() ([]StationProcess, error
 	for rows.Next() {
 		r := StationProcess{}
 
-		//scan into stationprocess structure
+		// scan into stationprocess structure
 		rows.Scan(&r.ID, &r.StationID, &r.ProcessID, &r.Progress, &r.Installed, &r.InternalState, &r.Meta)
 
-		//append to stationprocess slice
+		// append to stationprocess slice
 		stationProcesses = append(stationProcesses, r)
 	}
 
@@ -63,14 +63,14 @@ func (s StationProcessService) GetAllStationProcesses() ([]StationProcess, error
 func (s StationProcessService) GetStationProcessesByStation(stationID uuid.UUID) ([]StationProcess, error) {
 	stationProcesses := make([]StationProcess, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load stationProcesses
+	// load stationProcesses
 	sql := `
 				SELECT id, universe_stationid, processid, progress, installed, internalstate, meta
 				FROM public.stationprocesses
@@ -88,10 +88,10 @@ func (s StationProcessService) GetStationProcessesByStation(stationID uuid.UUID)
 	for rows.Next() {
 		r := StationProcess{}
 
-		//scan into stationprocess structure
+		// scan into stationprocess structure
 		rows.Scan(&r.ID, &r.StationID, &r.ProcessID, &r.Progress, &r.Installed, &r.InternalState, &r.Meta)
 
-		//append to stationprocess slice
+		// append to stationprocess slice
 		stationProcesses = append(stationProcesses, r)
 	}
 

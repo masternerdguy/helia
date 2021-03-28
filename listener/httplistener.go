@@ -22,15 +22,15 @@ func enableCors(w *http.ResponseWriter) {
 
 // Handles a user registering
 func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
-	//enable cors
+	// enable cors
 	enableCors(&w)
 
-	//get services
+	// get services
 	userSvc := sql.GetUserService()
 	startSvc := sql.GetStartService()
 	containerSvc := sql.GetContainerService()
 
-	//read body
+	// read body
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -39,7 +39,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//parse model
+	// parse model
 	m := models.APIRegisterModel{}
 	err = json.Unmarshal(b, &m)
 
@@ -48,7 +48,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//validation
+	// validation
 	if len(m.Username) == 0 {
 		http.Error(w, "Username must not be empty.", 500)
 		return
@@ -59,7 +59,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//get start - todo: make this player selectable from a list of available starts
+	// get start - todo: make this player selectable from a list of available starts
 	startID, err := uuid.Parse("49f06e8929fb4a02a0344b5d0702adac")
 
 	if err != nil {
@@ -67,7 +67,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//create escrow container for user
+	// create escrow container for user
 	ec, err := containerSvc.NewContainer(sql.Container{
 		Meta: sql.Meta{},
 	})
@@ -77,7 +77,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//create user
+	// create user
 	u, err := userSvc.NewUser(m.Username, m.Password, startID, ec.ID)
 
 	if err != nil {
@@ -92,7 +92,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//create their noob ship
+	// create their noob ship
 	u, err = engine.CreateNoobShipForPlayer(start, u.ID, true)
 
 	if err != nil {
@@ -100,20 +100,20 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//success!
+	// success!
 	w.WriteHeader(200)
 }
 
 // Handles a user signing in
 func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	//enable cors
+	// enable cors
 	enableCors(&w)
 
-	//get services
+	// get services
 	userSvc := sql.GetUserService()
 	sessionSvc := sql.GetSessionService()
 
-	//read body
+	// read body
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -122,7 +122,7 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//parse model
+	// parse model
 	m := models.APILoginModel{}
 	err = json.Unmarshal(b, &m)
 
@@ -131,7 +131,7 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//attempt login
+	// attempt login
 	res := models.APILoginResponseModel{}
 	user, err := userSvc.GetUserByLogin(m.Username, m.Password)
 
@@ -141,38 +141,38 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	} else {
 		res.UID = user.ID.String()
 
-		//delete old session
+		// delete old session
 		err := sessionSvc.DeleteSession(user.ID)
 
 		if err != nil {
 			res.Success = false
 			res.Message = err.Error()
 		} else {
-			//create session
+			// create session
 			s, err := sessionSvc.NewSession(user.ID)
 
 			if err != nil {
 				res.Success = false
 				res.Message = err.Error()
 			} else {
-				//store sessionid in result
+				// store sessionid in result
 				res.SessionID = (&s.ID).String()
 				res.Success = true
 			}
 		}
 	}
 
-	//return result
+	// return result
 	o, _ := json.Marshal(res)
 	w.Write(o)
 }
 
 // Shuts down the server after saving the game state
 func (l *HTTPListener) HandleShutdown(w http.ResponseWriter, r *http.Request) {
-	//enable cors
+	// enable cors
 	enableCors(&w)
 
-	//get auth token
+	// get auth token
 	keys, ok := r.URL.Query()["key"]
 
 	if !ok || len(keys[0]) < 1 {
@@ -181,15 +181,15 @@ func (l *HTTPListener) HandleShutdown(w http.ResponseWriter, r *http.Request) {
 
 	key := keys[0]
 
-	//load listener configuration
+	// load listener configuration
 	config, err := loadConfiguration()
 	if err != nil {
 		return
 	}
 
-	//validate auth token
+	// validate auth token
 	if config.ShutdownToken == key {
-		//initiate shutdown
+		// initiate shutdown
 		l.Engine.Shutdown()
 	}
 }

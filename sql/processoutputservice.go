@@ -23,14 +23,14 @@ type ProcessOutput struct {
 func (s ProcessOutputService) GetAllProcessOutputs() ([]ProcessOutput, error) {
 	processoutputs := make([]ProcessOutput, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load processoutputs
+	// load processoutputs
 	sql := `
 				SELECT id, itemtypeid, quantity, meta, processid
 				FROM public.processoutputs;
@@ -47,10 +47,10 @@ func (s ProcessOutputService) GetAllProcessOutputs() ([]ProcessOutput, error) {
 	for rows.Next() {
 		r := ProcessOutput{}
 
-		//scan into processoutput structure
+		// scan into processoutput structure
 		rows.Scan(&r.ID, &r.ItemTypeID, &r.Quantity, &r.Meta, &r.ProcessID)
 
-		//append to processoutput slice
+		// append to processoutput slice
 		processoutputs = append(processoutputs, r)
 	}
 
@@ -61,14 +61,14 @@ func (s ProcessOutputService) GetAllProcessOutputs() ([]ProcessOutput, error) {
 func (s ProcessOutputService) GetProcessOutputsByProcess(processID uuid.UUID) ([]ProcessOutput, error) {
 	processoutputs := make([]ProcessOutput, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load processoutputs
+	// load processoutputs
 	sql := `
 				SELECT id, itemtypeid, quantity, meta, processid
 				FROM public.processoutputs
@@ -86,10 +86,10 @@ func (s ProcessOutputService) GetProcessOutputsByProcess(processID uuid.UUID) ([
 	for rows.Next() {
 		r := ProcessOutput{}
 
-		//scan into processoutput structure
+		// scan into processoutput structure
 		rows.Scan(&r.ID, &r.ItemTypeID, &r.Quantity, &r.Meta, &r.ProcessID)
 
-		//append to processoutput slice
+		// append to processoutput slice
 		processoutputs = append(processoutputs, r)
 	}
 

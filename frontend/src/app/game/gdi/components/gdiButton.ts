@@ -19,7 +19,7 @@ export class GDIButton extends GDIBase {
   }
 
   periodicUpdate() {
-    //
+    // 
   }
 
   render(): ImageBitmap {

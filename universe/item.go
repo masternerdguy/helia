@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//Structure representing the most basic features of an item in the running game simulation
+// Structure representing the most basic features of an item in the running game simulation
 type Item struct {
 	ID            uuid.UUID
 	ItemTypeID    uuid.UUID
@@ -18,7 +18,7 @@ type Item struct {
 	ContainerID   uuid.UUID
 	Quantity      int
 	IsPackaged    bool
-	//in-memory only
+	// in-memory only
 	Lock           sync.Mutex
 	ItemTypeName   string
 	ItemFamilyID   string

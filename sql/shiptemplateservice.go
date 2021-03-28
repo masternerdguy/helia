@@ -73,14 +73,14 @@ func (a *SlotLayout) Scan(value interface{}) error {
 
 // Finds and returns a ship template by its id
 func (s ShipTemplateService) GetShipTemplateByID(shipTemplateID uuid.UUID) (*ShipTemplate, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//find ship with this id
+	// find ship with this id
 	t := ShipTemplate{}
 
 	sqlStatement :=

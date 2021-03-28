@@ -12,7 +12,7 @@ func RandInRange(min int, max int) int {
 
 // Modulo operator that doesn't retain negative sign
 func FMod(a float64, n float64) float64 {
-	//mod = (a, n) -> a - floor(a/n) * n
+	// mod = (a, n) -> a - floor(a/n) * n
 	return a - math.Floor(a/n)*n
 }
 

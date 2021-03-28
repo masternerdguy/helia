@@ -46,21 +46,21 @@ func (s UserService) Hashpass(username string, pwd string) (hash *string, err er
 
 // Creates a new user
 func (s UserService) NewUser(u string, p string, startID uuid.UUID, escrowContainerID uuid.UUID) (*User, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//hash password
+	// hash password
 	hp, err := s.Hashpass(u, p)
 
 	if err != nil {
 		return nil, err
 	}
 
-	//insert user
+	// insert user
 	sql := `
 				INSERT INTO public.users(id, username, hashpass, registered, banned, startid, escrow_containerid)
 				VALUES ($1, $2, $3, $4, $5, $6, $7);
@@ -77,7 +77,7 @@ func (s UserService) NewUser(u string, p string, startID uuid.UUID, escrowContai
 
 	defer q.Close()
 
-	//return user with inserted data
+	// return user with inserted data
 	user := User{
 		ID:            uid,
 		Username:      u,
@@ -93,14 +93,14 @@ func (s UserService) NewUser(u string, p string, startID uuid.UUID, escrowContai
 
 // Sets current_shipid on a user in the database
 func (s UserService) SetCurrentShipID(uid uuid.UUID, shipID *uuid.UUID) error {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return err
 	}
 
-	//update user
+	// update user
 	sql := `
 				UPDATE public.users SET current_shipid = $1 WHERE id = $2;
 			`
@@ -118,21 +118,21 @@ func (s UserService) SetCurrentShipID(uid uuid.UUID, shipID *uuid.UUID) error {
 
 // Finds the user with the supplied credentials
 func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//hash password
+	// hash password
 	hp, err := s.Hashpass(username, pwd)
 
 	if err != nil {
 		return nil, err
 	}
 
-	//check for user with these credentials
+	// check for user with these credentials
 	user := User{}
 
 	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, escrow_containerid
@@ -154,14 +154,14 @@ func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) 
 
 // Finds a user by its id
 func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//check for user with these credentials
+	// check for user with these credentials
 	user := User{}
 
 	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, startid, escrow_containerid

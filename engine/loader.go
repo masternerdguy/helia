@@ -12,7 +12,7 @@ import (
 
 // Loads the state of the universe from the database
 func loadUniverse() (*universe.Universe, error) {
-	//get services
+	// get services
 	regionSvc := sql.GetRegionService()
 	systemSvc := sql.GetSolarSystemService()
 	shipSvc := sql.GetShipService()
@@ -29,11 +29,11 @@ func loadUniverse() (*universe.Universe, error) {
 
 	u := universe.Universe{}
 
-	//for linking jumpholes later
+	// for linking jumpholes later
 	jhMap := make(map[string]*universe.Jumphole)
 	sMap := make(map[string]*universe.SolarSystem)
 
-	//load regions
+	// load regions
 	rs, err := regionSvc.GetAllRegions()
 
 	if err != nil {
@@ -42,13 +42,13 @@ func loadUniverse() (*universe.Universe, error) {
 
 	regions := make(map[string]*universe.Region)
 	for _, e := range rs {
-		//load basic region information
+		// load basic region information
 		r := universe.Region{
 			ID:         e.ID,
 			RegionName: e.RegionName,
 		}
 
-		//load systems in region
+		// load systems in region
 		ss, err := systemSvc.GetSolarSystemsByRegion(e.ID)
 
 		if err != nil {
@@ -64,17 +64,17 @@ func loadUniverse() (*universe.Universe, error) {
 				RegionID:   f.RegionID,
 			}
 
-			//initialize and store system
+			// initialize and store system
 			s.Initialize()
 			systems[s.ID.String()] = &s
 
-			//link universe into system
+			// link universe into system
 			s.Universe = &u
 
-			//for jumphole linking later
+			// for jumphole linking later
 			sMap[s.ID.String()] = &s
 
-			//load ships
+			// load ships
 			ships, err := shipSvc.GetShipsBySolarSystem(s.ID, false)
 
 			if err != nil {
@@ -91,7 +91,7 @@ func loadUniverse() (*universe.Universe, error) {
 				s.AddShip(es, true)
 			}
 
-			//load stars
+			// load stars
 			stars, err := starSvc.GetStarsBySolarSystem(s.ID)
 
 			if err != nil {
@@ -113,7 +113,7 @@ func loadUniverse() (*universe.Universe, error) {
 				s.AddStar(&star)
 			}
 
-			//load planets
+			// load planets
 			planets, err := planetSvc.GetPlanetsBySolarSystem(s.ID)
 
 			if err != nil {
@@ -136,7 +136,7 @@ func loadUniverse() (*universe.Universe, error) {
 				s.AddPlanet(&planet)
 			}
 
-			//load asteroids
+			// load asteroids
 			asteroids, err := asteroidSvc.GetAsteroidsBySolarSystem(s.ID)
 
 			if err != nil {
@@ -144,21 +144,21 @@ func loadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, p := range asteroids {
-				//get ore item type
+				// get ore item type
 				oi, err := itemTypeSvc.GetItemTypeByID(p.ItemTypeID)
 
 				if err != nil {
 					return nil, err
 				}
 
-				//get ore item family
+				// get ore item family
 				of, err := itemFamilySvc.GetItemFamilyByID(oi.Family)
 
 				if err != nil {
 					return nil, err
 				}
 
-				//build asteroid
+				// build asteroid
 				asteroid := universe.Asteroid{
 					ID:             p.ID,
 					SystemID:       p.SystemID,
@@ -177,11 +177,11 @@ func loadUniverse() (*universe.Universe, error) {
 					ItemTypeMeta:   universe.Meta(oi.Meta),
 				}
 
-				//store in universe
+				// store in universe
 				s.AddAsteroid(&asteroid)
 			}
 
-			//load jumpholes
+			// load jumpholes
 			jumpholes, err := jumpholeSvc.GetJumpholesBySolarSystem(s.ID)
 
 			if err != nil {
@@ -204,11 +204,11 @@ func loadUniverse() (*universe.Universe, error) {
 
 				s.AddJumphole(&jumphole)
 
-				//for jumphole linking later
+				// for jumphole linking later
 				jhMap[j.ID.String()] = &jumphole
 			}
 
-			//load npc stations
+			// load npc stations
 			stations, err := stationSvc.GetStationsBySolarSystem(s.ID)
 
 			if err != nil {
@@ -216,7 +216,7 @@ func loadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, currStation := range stations {
-				//load station processes
+				// load station processes
 				sqlProcesses, err := stationProcessSvc.GetStationProcessesByStation(currStation.ID)
 
 				if err != nil {
@@ -235,7 +235,7 @@ func loadUniverse() (*universe.Universe, error) {
 					processes = append(processes, *spx)
 				}
 
-				//build station
+				// build station
 				station := universe.Station{
 					ID:          currStation.ID,
 					SystemID:    currStation.SystemID,
@@ -246,17 +246,17 @@ func loadUniverse() (*universe.Universe, error) {
 					Radius:      currStation.Radius,
 					Mass:        currStation.Mass,
 					Theta:       currStation.Theta,
-					//link solar system into station
+					// link solar system into station
 					CurrentSystem: &s,
 					Processes:     processes,
 				}
 
-				//initialize station
+				// initialize station
 				station.Initialize()
 
 				log.Println(fmt.Sprintf("%v", station.Processes))
 
-				//load open sell orders
+				// load open sell orders
 				sos, err := sellOrderSvc.GetOpenSellOrdersByStation(station.ID)
 
 				if err != nil {
@@ -291,38 +291,38 @@ func loadUniverse() (*universe.Universe, error) {
 					station.OpenSellOrders[so.ID.String()] = so
 				}
 
-				//add to solar system
+				// add to solar system
 				s.AddStation(&station)
 			}
 		}
 
-		//store and append region
+		// store and append region
 		r.Systems = systems
 		regions[r.ID.String()] = &r
 	}
 
-	//link jumpholes
+	// link jumpholes
 	for _, j := range jhMap {
-		//get out system
+		// get out system
 		o := sMap[j.OutSystemID.String()]
 
-		//copy jumpholes
+		// copy jumpholes
 		jhs := o.CopyJumpholes()
 
-		//find and link destination jumphole into jumphole
+		// find and link destination jumphole into jumphole
 		for _, k := range jhs {
 			if k.OutSystemID == j.SystemID {
-				//get real jumphole pointer from map
+				// get real jumphole pointer from map
 				j.OutJumphole = jhMap[k.ID.String()]
 
-				//link destination system into jumphole
+				// link destination system into jumphole
 				j.OutSystem = o
 				break
 			}
 		}
 	}
 
-	//link regions into universe
+	// link regions into universe
 	u.Regions = regions
 
 	return &u, nil
@@ -330,26 +330,26 @@ func loadUniverse() (*universe.Universe, error) {
 
 // Saves the current state of dynamic entities in the simulation to the database
 func saveUniverse(u *universe.Universe) {
-	//get services
+	// get services
 	stationSvc := sql.GetStationService()
 
-	//iterate over systems
+	// iterate over systems
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			//get ships in system
+			// get ships in system
 			ships := s.CopyShips()
 
-			//save ships to database
+			// save ships to database
 			for _, ship := range ships {
 				saveShip(ship)
 			}
 
-			//get npc stations in system
+			// get npc stations in system
 			stations := s.CopyStations()
 
-			//save npc stations to database
+			// save npc stations to database
 			for _, station := range stations {
-				//obtain lock on copy
+				// obtain lock on copy
 				station.Lock.Lock()
 				defer station.Lock.Unlock()
 
@@ -377,7 +377,7 @@ func saveUniverse(u *universe.Universe) {
 
 // Converts a SlotLayout from the SQL type to the engine type
 func SlotLayoutFromSQL(value *sql.SlotLayout) universe.SlotLayout {
-	//set up empty layout
+	// set up empty layout
 	layout := universe.SlotLayout{}
 
 	// null check
@@ -386,7 +386,7 @@ func SlotLayoutFromSQL(value *sql.SlotLayout) universe.SlotLayout {
 		return layout
 	}
 
-	//copy slot data into layout
+	// copy slot data into layout
 	for _, v := range value.ASlots {
 		slot := SlotFromSQL(&v)
 		layout.ASlots = append(layout.ASlots, slot)
@@ -402,33 +402,33 @@ func SlotLayoutFromSQL(value *sql.SlotLayout) universe.SlotLayout {
 		layout.CSlots = append(layout.CSlots, slot)
 	}
 
-	//return filled layout
+	// return filled layout
 	return layout
 }
 
 // Converts a Slot from the SQL type to the engine type
 func SlotFromSQL(value *sql.Slot) universe.Slot {
-	//set up empty slot
+	// set up empty slot
 	slot := universe.Slot{}
 
-	//null check
+	// null check
 	if value == nil {
 		// return empty slot
 		return slot
 	}
 
-	//copy slot data
+	// copy slot data
 	slot.Family = value.Family
 	slot.Volume = value.Volume
 	slot.TexturePosition = value.TexturePosition
 
-	//return filled slot
+	// return filled slot
 	return slot
 }
 
 // Converts a Fitting from the SQL type to the engine type
 func FittingFromSQL(value *sql.Fitting) (*universe.Fitting, error) {
-	//set up empty layout
+	// set up empty layout
 	fitting := universe.Fitting{}
 
 	// null check
@@ -437,7 +437,7 @@ func FittingFromSQL(value *sql.Fitting) (*universe.Fitting, error) {
 		return &fitting, nil
 	}
 
-	//copy slot data into layout
+	// copy slot data into layout
 	for _, v := range value.ARack {
 		slot, err := FittedSlotFromSQL(&v)
 
@@ -471,7 +471,7 @@ func FittingFromSQL(value *sql.Fitting) (*universe.Fitting, error) {
 		fitting.CRack = append(fitting.CRack, *slot)
 	}
 
-	//return filled layout
+	// return filled layout
 	return &fitting, nil
 }
 
@@ -486,34 +486,34 @@ func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
 	itemTypeSvc := sql.GetItemTypeService()
 	itemFamilySvc := sql.GetItemFamilyService()
 
-	//set up empty slot
+	// set up empty slot
 	slot := universe.FittedSlot{}
 
-	//null check
+	// null check
 	if value == nil {
 		// return empty slot
 		return &slot, nil
 	}
 
-	//copy slot data
+	// copy slot data
 	slot.ItemID = value.ItemID
 	slot.ItemTypeID = value.ItemTypeID
 
-	//check if this slot is empty
+	// check if this slot is empty
 	if slot.ItemID.String() == defaultUUID ||
 		slot.ItemTypeID.String() == defaultUUID {
 		// return empty slot
 		return &slot, nil
 	}
 
-	//load item data
+	// load item data
 	item, err := itemSvc.GetItemByID(slot.ItemID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load item type data
+	// load item type data
 	itemType, err := itemTypeSvc.GetItemTypeByID(item.ItemTypeID)
 
 	if err != nil {
@@ -527,20 +527,20 @@ func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
 		return nil, err
 	}
 
-	//store on slot
+	// store on slot
 	slot.ItemMeta = MetaFromSQL(&item.Meta)
 	slot.ItemTypeMeta = MetaFromSQL(&itemType.Meta)
 	slot.ItemTypeFamily = itemType.Family
 	slot.ItemTypeFamilyName = itemFamily.FriendlyName
 	slot.ItemTypeName = itemType.Name
 
-	//return filled slot
+	// return filled slot
 	return &slot, nil
 }
 
 // Converts a Fitting from the engine type to the SQL type
 func SQLFromFitting(value *universe.Fitting) sql.Fitting {
-	//set up empty layout
+	// set up empty layout
 	fitting := sql.Fitting{}
 
 	// null check
@@ -549,7 +549,7 @@ func SQLFromFitting(value *universe.Fitting) sql.Fitting {
 		return fitting
 	}
 
-	//copy slot data into layout
+	// copy slot data into layout
 	for _, v := range value.ARack {
 		slot := SQLFromFittedSlot(&v)
 		fitting.ARack = append(fitting.ARack, slot)
@@ -565,72 +565,72 @@ func SQLFromFitting(value *universe.Fitting) sql.Fitting {
 		fitting.CRack = append(fitting.CRack, slot)
 	}
 
-	//return filled layout
+	// return filled layout
 	return fitting
 }
 
 // Converts a FittedSlot from the engine type to the SQL type
 func SQLFromFittedSlot(value *universe.FittedSlot) sql.FittedSlot {
-	//set up empty slot
+	// set up empty slot
 	slot := sql.FittedSlot{}
 
-	//null check
+	// null check
 	if value == nil {
 		// return empty slot
 		return slot
 	}
 
-	//copy slot data
+	// copy slot data
 	slot.ItemID = value.ItemID
 	slot.ItemTypeID = value.ItemTypeID
 
-	//return filled slot
+	// return filled slot
 	return slot
 }
 
 // Converts generic metadata from the SQL type to the engine type
 func MetaFromSQL(value *sql.Meta) universe.Meta {
-	//set up empty metadata
+	// set up empty metadata
 	meta := universe.Meta{}
 
-	//null check
+	// null check
 	if value == nil {
 		// return empty slot
 		return meta
 	}
 
-	//copy metadata
+	// copy metadata
 	for k, v := range *value {
 		meta[k] = v
 	}
 
-	//return filled meta
+	// return filled meta
 	return meta
 }
 
 // Converts generic metadata from the SQL type to the engine type
 func SQLFromMeta(value *universe.Meta) sql.Meta {
-	//set up empty metadata
+	// set up empty metadata
 	meta := sql.Meta{}
 
-	//null check
+	// null check
 	if value == nil {
 		// return empty slot
 		return meta
 	}
 
-	//copy metadata
+	// copy metadata
 	for k, v := range *value {
 		meta[k] = v
 	}
 
-	//return filled meta
+	// return filled meta
 	return meta
 }
 
 // Converts a StartFitting from the SQL type to the engine type
 func StartFittingFromSQL(value *sql.StartFitting) universe.StartFitting {
-	//set up empty layout
+	// set up empty layout
 	layout := universe.StartFitting{}
 
 	// null check
@@ -639,7 +639,7 @@ func StartFittingFromSQL(value *sql.StartFitting) universe.StartFitting {
 		return layout
 	}
 
-	//copy slot data into layout
+	// copy slot data into layout
 	for _, v := range value.ARack {
 		slot := StartFittedSlotFromSQL(&v)
 		layout.ARack = append(layout.ARack, slot)
@@ -655,60 +655,60 @@ func StartFittingFromSQL(value *sql.StartFitting) universe.StartFitting {
 		layout.CRack = append(layout.CRack, slot)
 	}
 
-	//return filled layout
+	// return filled layout
 	return layout
 }
 
 // Converts a StartFittedSlot from the SQL type to the engine type
 func StartFittedSlotFromSQL(value *sql.StartFittedSlot) universe.StartFittedSlot {
-	//set up empty slot
+	// set up empty slot
 	slot := universe.StartFittedSlot{}
 
-	//null check
+	// null check
 	if value == nil {
 		// return empty slot
 		return slot
 	}
 
-	//copy slot data
+	// copy slot data
 	slot.ItemTypeID = value.ItemTypeID
 
-	//return filled slot
+	// return filled slot
 	return slot
 }
 
 // Converts a Container from the SQL type to the engine type
 func ContainerFromSQL(value *sql.Container) *universe.Container {
-	//set up empty container
+	// set up empty container
 	container := universe.Container{}
 
-	//null check
+	// null check
 	if value == nil {
-		//return nil
+		// return nil
 		return nil
 	}
 
-	//copy container data
+	// copy container data
 	container.ID = value.ID
 	container.Created = value.Created
 	container.Meta = MetaFromSQL(&value.Meta)
 
-	//return filled container
+	// return filled container
 	return &container
 }
 
 // Converts a SellOrder from the SQL type to the engine type
 func SellOrderFromSQL(value *sql.SellOrder) *universe.SellOrder {
-	//set up empty sell order
+	// set up empty sell order
 	order := universe.SellOrder{}
 
-	//null check
+	// null check
 	if value == nil {
-		//return nil
+		// return nil
 		return nil
 	}
 
-	//copy order data
+	// copy order data
 	order.ID = value.ID
 	order.StationID = value.StationID
 	order.ItemID = value.ItemID
@@ -718,22 +718,22 @@ func SellOrderFromSQL(value *sql.SellOrder) *universe.SellOrder {
 	order.Bought = value.Bought
 	order.BuyerUserID = value.BuyerUserID
 
-	//return filled order
+	// return filled order
 	return &order
 }
 
 // Converts a SellOrder from the engine type to the SQL type
 func SQLFromSellOrder(value *universe.SellOrder) *sql.SellOrder {
-	//set up empty sell order
+	// set up empty sell order
 	order := sql.SellOrder{}
 
-	//null check
+	// null check
 	if value == nil {
-		//return nil
+		// return nil
 		return nil
 	}
 
-	//copy order data
+	// copy order data
 	order.ID = value.ID
 	order.StationID = value.StationID
 	order.ItemID = value.ItemID
@@ -743,22 +743,22 @@ func SQLFromSellOrder(value *universe.SellOrder) *sql.SellOrder {
 	order.Bought = value.Bought
 	order.BuyerUserID = value.BuyerUserID
 
-	//return filled order
+	// return filled order
 	return &order
 }
 
 // Converts an Item from the SQL type to the engine type
 func ItemFromSQL(value *sql.Item) *universe.Item {
-	//set up empty item
+	// set up empty item
 	item := universe.Item{}
 
-	//null check
+	// null check
 	if value == nil {
-		//return nil
+		// return nil
 		return nil
 	}
 
-	//copy item data
+	// copy item data
 	item.ID = value.ID
 	item.ItemTypeID = value.ItemTypeID
 	item.ContainerID = value.ContainerID
@@ -769,16 +769,16 @@ func ItemFromSQL(value *sql.Item) *universe.Item {
 	item.Quantity = value.Quantity
 	item.IsPackaged = value.IsPackaged
 
-	//return filled item
+	// return filled item
 	return &item
 }
 
 // Converts an item from the engine type to the SQL type
 func SQLFromItem(value *universe.Item) *sql.Item {
-	//set up empty item
+	// set up empty item
 	item := sql.Item{}
 
-	//copy item data
+	// copy item data
 	item.ID = value.ID
 	item.ItemTypeID = value.ItemTypeID
 	item.ContainerID = value.ContainerID
@@ -789,7 +789,7 @@ func SQLFromItem(value *universe.Item) *sql.Item {
 	item.Quantity = value.Quantity
 	item.IsPackaged = value.IsPackaged
 
-	//return filled item
+	// return filled item
 	return &item
 }
 
@@ -798,46 +798,46 @@ func LoadItem(i *sql.Item) (*universe.Item, error) {
 	itemTypeSvc := sql.GetItemTypeService()
 	itemFamilySvc := sql.GetItemFamilyService()
 
-	//load base item
+	// load base item
 	ei := ItemFromSQL(i)
 
-	//null check
+	// null check
 	if ei == nil {
 		return nil, errors.New("item from SQL failed")
 	}
 
-	//load item type
+	// load item type
 	it, err := itemTypeSvc.GetItemTypeByID(ei.ItemTypeID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	//include item type data
+	// include item type data
 	ei.ItemTypeName = it.Name
 	ei.ItemFamilyID = it.Family
 	ei.ItemTypeMeta = MetaFromSQL(&it.Meta)
 
-	//load item family
+	// load item family
 	fm, err := itemFamilySvc.GetItemFamilyByID(it.Family)
 
 	if err != nil {
 		return nil, err
 	}
 
-	//include item family data
+	// include item family data
 	ei.ItemFamilyName = fm.FriendlyName
 
-	//return filled item
+	// return filled item
 	return ei, nil
 }
 
 // Takes a SQL Container and converts it, and items it loads, into the engine type ready for insertion into the universe.
 func LoadContainer(c *sql.Container) (*universe.Container, error) {
-	//load base container
+	// load base container
 	container := ContainerFromSQL(c)
 
-	//load items
+	// load items
 	itemSvc := sql.GetItemService()
 
 	s, err := itemSvc.GetItemsByContainer(container.ID)
@@ -846,7 +846,7 @@ func LoadContainer(c *sql.Container) (*universe.Container, error) {
 		return nil, err
 	}
 
-	//load items and push into container
+	// load items and push into container
 	for _, i := range s {
 		m, err := LoadItem(&i)
 
@@ -854,16 +854,16 @@ func LoadContainer(c *sql.Container) (*universe.Container, error) {
 			return nil, err
 		}
 
-		//null check
+		// null check
 		if m == nil {
 			return nil, errors.New("item argument was nil")
 		}
 
-		//push into container
+		// push into container
 		container.Items = append(container.Items, m)
 	}
 
-	//return full container
+	// return full container
 	return container, nil
 }
 
@@ -998,28 +998,28 @@ func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 	userSvc := sql.GetUserService()
 	containerSvc := sql.GetContainerService()
 
-	//get template
+	// get template
 	temp, err := shipTmpSvc.GetShipTemplateByID(sh.ShipTemplateID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	//get owner info
+	// get owner info
 	owner, err := userSvc.GetUserByID((sh.UserID))
 
 	if err != nil {
 		return nil, err
 	}
 
-	//get fitting
+	// get fitting
 	fitting, err := FittingFromSQL(&sh.Fitting)
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load cargo bay
+	// load cargo bay
 	cb, err := containerSvc.GetContainerByID(sh.CargoBayContainerID)
 
 	if err != nil {
@@ -1032,7 +1032,7 @@ func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 		return nil, err
 	}
 
-	//load fitting bay
+	// load fitting bay
 	fb, err := containerSvc.GetContainerByID(sh.FittingBayContainerID)
 
 	if err != nil {
@@ -1045,7 +1045,7 @@ func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 		return nil, err
 	}
 
-	//build in-memory ship
+	// build in-memory ship
 	es := universe.Ship{
 		ID:                    sh.ID,
 		UserID:                sh.UserID,
@@ -1101,10 +1101,10 @@ func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 		},
 	}
 
-	//get pointer to ship
+	// get pointer to ship
 	sp := &es
 
-	//link ship into fitting
+	// link ship into fitting
 	for i := range sp.Fitting.ARack {
 		m := &sp.Fitting.ARack[i]
 		m.LinkShip(sp)
@@ -1120,16 +1120,16 @@ func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 		m.LinkShip(sp)
 	}
 
-	//return pointer to ship
+	// return pointer to ship
 	return sp, nil
 }
 
 // Updates a ship in the database
 func saveShip(ship *universe.Ship) error {
-	//get ship service
+	// get ship service
 	shipSvc := sql.GetShipService()
 
-	//obtain lock on copy
+	// obtain lock on copy
 	ship.Lock.Lock()
 	defer ship.Lock.Unlock()
 
@@ -1200,14 +1200,14 @@ func changeQuantity(itemID uuid.UUID, quantity int) error {
 func newItem(item *universe.Item) (*uuid.UUID, error) {
 	itemSvc := sql.GetItemService()
 
-	//convert to sql type
+	// convert to sql type
 	sql := SQLFromItem(item)
 
 	if sql == nil {
 		return nil, errors.New("error converting item to SQL type")
 	}
 
-	//save item
+	// save item
 	o, err := itemSvc.NewItem(*sql)
 
 	return &o.ID, err
@@ -1217,14 +1217,14 @@ func newItem(item *universe.Item) (*uuid.UUID, error) {
 func newSellOrder(sellOrder *universe.SellOrder) (*uuid.UUID, error) {
 	sellOrderSvc := sql.GetSellOrderService()
 
-	//convert to sql type
+	// convert to sql type
 	sql := SQLFromSellOrder(sellOrder)
 
 	if sql == nil {
 		return nil, errors.New("error converting sell order to SQL type")
 	}
 
-	//save sell order
+	// save sell order
 	o, err := sellOrderSvc.NewSellOrder(*sql)
 
 	return &o.ID, err
@@ -1234,14 +1234,14 @@ func newSellOrder(sellOrder *universe.SellOrder) (*uuid.UUID, error) {
 func markSellOrderAsBought(sellOrder *universe.SellOrder) error {
 	sellOrderSvc := sql.GetSellOrderService()
 
-	//convert to sql type
+	// convert to sql type
 	sql := SQLFromSellOrder(sellOrder)
 
 	if sql == nil {
 		return errors.New("error converting sell order to SQL type")
 	}
 
-	//save sell order
+	// save sell order
 	err := sellOrderSvc.MarkSellOrderAsBought(*sql)
 
 	return err

@@ -202,7 +202,7 @@ type GlobalStationInfo struct {
 	Theta       float64   `json:"theta"`
 }
 
-//CurrentSystemInfo Information about the user's current location
+// CurrentSystemInfo Information about the user's current location
 type CurrentSystemInfo struct {
 	ID         uuid.UUID `json:"id"`
 	SystemName string    `json:"systemName"`

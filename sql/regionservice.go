@@ -20,14 +20,14 @@ type Region struct {
 func (s RegionService) GetAllRegions() ([]Region, error) {
 	regions := make([]Region, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load regions
+	// load regions
 	sql := "select id, regionname from universe_regions"
 
 	rows, err := db.Query(sql)
@@ -41,10 +41,10 @@ func (s RegionService) GetAllRegions() ([]Region, error) {
 	for rows.Next() {
 		r := Region{}
 
-		//scan into region structure
+		// scan into region structure
 		rows.Scan(&r.ID, &r.RegionName)
 
-		//append to region slice
+		// append to region slice
 		regions = append(regions, r)
 	}
 

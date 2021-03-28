@@ -21,14 +21,14 @@ type SolarSystem struct {
 func (s SolarSystemService) GetSolarSystemsByRegion(regionID uuid.UUID) ([]SolarSystem, error) {
 	systems := make([]SolarSystem, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load solar systems
+	// load solar systems
 	sql := "select id, systemname, regionid from universe_systems where regionid = $1"
 
 	rows, err := db.Query(sql, regionID)
@@ -42,10 +42,10 @@ func (s SolarSystemService) GetSolarSystemsByRegion(regionID uuid.UUID) ([]Solar
 	for rows.Next() {
 		r := SolarSystem{}
 
-		//scan into system structure
+		// scan into system structure
 		rows.Scan(&r.ID, &r.SystemName, &r.RegionID)
 
-		//append to system slice
+		// append to system slice
 		systems = append(systems, r)
 	}
 

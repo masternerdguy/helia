@@ -60,14 +60,14 @@ func (a *StartFitting) Scan(value interface{}) error {
 
 // Finds and returns a start by its id
 func (s StartService) GetStartByID(StartID uuid.UUID) (*Start, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//find start with this id
+	// find start with this id
 	t := Start{}
 
 	sqlStatement :=
@@ -95,14 +95,14 @@ func (s StartService) GetStartByID(StartID uuid.UUID) (*Start, error) {
 func (s StartService) GetAllStarts() ([]Start, error) {
 	starts := make([]Start, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load starts
+	// load starts
 	sql := `
 				SELECT id, name, shiptemplateid, shipfitting, created, available, systemid,
 					   homestationid, wallet
@@ -120,11 +120,11 @@ func (s StartService) GetAllStarts() ([]Start, error) {
 	for rows.Next() {
 		s := Start{}
 
-		//scan into start structure
+		// scan into start structure
 		rows.Scan(&s.ID, &s.Name, &s.ShipTemplateID, &s.ShipFitting, &s.Created, &s.Available, &s.SystemID,
 			&s.HomeStationID, &s.Wallet)
 
-		//append to ship slice
+		// append to ship slice
 		starts = append(starts, s)
 	}
 

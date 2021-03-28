@@ -30,14 +30,14 @@ type SellOrder struct {
 
 // Finds and returns a sell order by its id
 func (s SellOrderService) GetSellOrderByID(SellOrderID uuid.UUID) (*SellOrder, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//find sell order with this id
+	// find sell order with this id
 	sellOrder := SellOrder{}
 
 	sqlStatement :=
@@ -64,14 +64,14 @@ func (s SellOrderService) GetSellOrderByID(SellOrderID uuid.UUID) (*SellOrder, e
 func (s SellOrderService) GetOpenSellOrdersByStation(containerID uuid.UUID) ([]SellOrder, error) {
 	sellOrders := make([]SellOrder, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load sell orders
+	// load sell orders
 	sql :=
 		`
 			SELECT id, universe_stationid, itemid, seller_userid, askprice, created, bought, buyer_userid
@@ -91,11 +91,11 @@ func (s SellOrderService) GetOpenSellOrdersByStation(containerID uuid.UUID) ([]S
 	for rows.Next() {
 		i := SellOrder{}
 
-		//scan into sell order structure
+		// scan into sell order structure
 		rows.Scan(&i.ID, &i.StationID, &i.ItemID, &i.SellerUserID,
 			&i.AskPrice, &i.Created, &i.Bought, &i.BuyerUserID)
 
-		//append to slice
+		// append to slice
 		sellOrders = append(sellOrders, i)
 	}
 
@@ -104,14 +104,14 @@ func (s SellOrderService) GetOpenSellOrdersByStation(containerID uuid.UUID) ([]S
 
 // Creates a new sell order
 func (s SellOrderService) NewSellOrder(e SellOrder) (*SellOrder, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//insert sell order
+	// insert sell order
 	sql := `
 			INSERT INTO public.sellorders(
 				id, universe_stationid, itemid, seller_userid, askprice, created, bought, buyer_userid)
@@ -129,24 +129,24 @@ func (s SellOrderService) NewSellOrder(e SellOrder) (*SellOrder, error) {
 
 	defer q.Close()
 
-	//update id in model
+	// update id in model
 	e.ID = uid
 	e.Created = createdAt
 
-	//return pointer to inserted sell order model
+	// return pointer to inserted sell order model
 	return &e, nil
 }
 
 // Updates the buyer and buyer_userid on a sell order
 func (s SellOrderService) MarkSellOrderAsBought(e SellOrder) error {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return err
 	}
 
-	//insert sell order
+	// insert sell order
 	sql := `
 			UPDATE public.sellorders
 			SET bought = $2, buyer_userid = $3
@@ -161,6 +161,6 @@ func (s SellOrderService) MarkSellOrderAsBought(e SellOrder) error {
 
 	defer q.Close()
 
-	//success
+	// success
 	return nil
 }

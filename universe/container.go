@@ -12,7 +12,7 @@ type Container struct {
 	ID      uuid.UUID
 	Meta    Meta
 	Created time.Time
-	//in-memory only
+	// in-memory only
 	Lock  sync.Mutex
 	Items []*Item
 }

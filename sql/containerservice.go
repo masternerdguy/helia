@@ -25,14 +25,14 @@ type Container struct {
 
 // Creates a new container
 func (s ContainerService) NewContainer(e Container) (*Container, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//insert container
+	// insert container
 	sql := `
 				INSERT INTO public.containers(
 					id, meta, created
@@ -51,24 +51,24 @@ func (s ContainerService) NewContainer(e Container) (*Container, error) {
 
 	defer q.Close()
 
-	//update id in model
+	// update id in model
 	e.ID = uid
 	e.Created = createdAt
 
-	//return pointer to inserted container model
+	// return pointer to inserted container model
 	return &e, nil
 }
 
 // Finds and returns a container by its id
 func (s ContainerService) GetContainerByID(containerID uuid.UUID) (*Container, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//find container with this id
+	// find container with this id
 	container := Container{}
 
 	sqlStatement :=
@@ -92,14 +92,14 @@ func (s ContainerService) GetContainerByID(containerID uuid.UUID) (*Container, e
 
 // Updates a container in the database
 func (s ContainerService) UpdateContainer(container Container) error {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return err
 	}
 
-	//update container in database
+	// update container in database
 	sqlStatement :=
 		`
 			UPDATE public.containers

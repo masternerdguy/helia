@@ -79,14 +79,14 @@ func (a *Fitting) Scan(value interface{}) error {
 
 // Creates a new ship
 func (s ShipService) NewShip(e Ship) (*Ship, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//insert ship
+	// insert ship
 	sql := `
 				INSERT INTO public.ships(
 					id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta,
@@ -111,24 +111,24 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 
 	defer q.Close()
 
-	//update id in model
+	// update id in model
 	e.ID = uid
 	e.Created = createdAt
 
-	//return pointer to inserted ship model
+	// return pointer to inserted ship model
 	return &e, nil
 }
 
 // Finds and returns a ship by its id
 func (s ShipService) GetShipByID(shipID uuid.UUID, isDestroyed bool) (*Ship, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//find ship with this id
+	// find ship with this id
 	ship := Ship{}
 
 	sqlStatement :=
@@ -160,14 +160,14 @@ func (s ShipService) GetShipByID(shipID uuid.UUID, isDestroyed bool) (*Ship, err
 func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID, isDestroyed bool) ([]Ship, error) {
 	systems := make([]Ship, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load ships
+	// load ships
 	sql := `
 				SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
 					   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
@@ -188,13 +188,13 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID, isDestroyed bool)
 	for rows.Next() {
 		s := Ship{}
 
-		//scan into ship structure
+		// scan into ship structure
 		rows.Scan(&s.ID, &s.SystemID, &s.UserID, &s.PosX, &s.PosY, &s.Created, &s.ShipName, &s.Texture,
 			&s.Theta, &s.VelX, &s.VelY, &s.Shield, &s.Armor, &s.Hull, &s.Fuel, &s.Heat, &s.Energy, &s.ShipTemplateID,
 			&s.DockedAtStationID, &s.Fitting, &s.Destroyed, &s.DestroyedAt, &s.CargoBayContainerID,
 			&s.FittingBayContainerID, &s.ReMaxDirty, &s.TrashContainerID, &s.Wallet)
 
-		//append to ship slice
+		// append to ship slice
 		systems = append(systems, s)
 	}
 
@@ -203,14 +203,14 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID, isDestroyed bool)
 
 // Updates a ship in the database
 func (s ShipService) UpdateShip(ship Ship) error {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return err
 	}
 
-	//update ship in database
+	// update ship in database
 	sqlStatement :=
 		`
 			UPDATE public.ships

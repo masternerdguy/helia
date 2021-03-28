@@ -32,7 +32,7 @@ func (c *GameClient) Initialize() {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	//initialize empty event queue
+	// initialize empty event queue
 	c.shipEventQueue = &eventQueue{
 		Events: make([]Event, 0),
 	}
@@ -43,24 +43,24 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	//package message as json
+	// package message as json
 	json, err := json.Marshal(msg)
 
 	if err == nil {
-		//send message
+		// send message
 		c.Conn.WriteMessage(1, json)
 	} else {
-		//dump error message to console
+		// dump error message to console
 		log.Println(err)
 	}
 }
 
 // Send an error string to the client to be displayed
 func (c *GameClient) WriteErrorMessage(msg string) {
-	//get message registry
+	// get message registry
 	msgRegistry := models.NewMessageRegistry()
 
-	//package message
+	// package message
 	d := models.ServerPushErrorMessage{
 		Message: msg,
 	}
@@ -72,7 +72,7 @@ func (c *GameClient) WriteErrorMessage(msg string) {
 		MessageBody: string(b),
 	}
 
-	//write error to client
+	// write error to client
 	c.WriteMessage(&cu)
 }
 
@@ -93,13 +93,13 @@ func (c *GameClient) PopShipEvent() *Event {
 	defer c.lock.Unlock()
 
 	if len(c.shipEventQueue.Events) > 0 {
-		//get top element
+		// get top element
 		x := c.shipEventQueue.Events[0]
 
-		//pop top element
+		// pop top element
 		c.shipEventQueue.Events = c.shipEventQueue.Events[1:]
 
-		//return event
+		// return event
 		return &x
 	}
 

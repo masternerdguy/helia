@@ -23,14 +23,14 @@ type ProcessInput struct {
 func (s ProcessInputService) GetAllProcessInputs() ([]ProcessInput, error) {
 	processinputs := make([]ProcessInput, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load processinputs
+	// load processinputs
 	sql := `
 				SELECT id, itemtypeid, quantity, meta, processid
 				FROM public.processinputs;
@@ -47,10 +47,10 @@ func (s ProcessInputService) GetAllProcessInputs() ([]ProcessInput, error) {
 	for rows.Next() {
 		r := ProcessInput{}
 
-		//scan into processinput structure
+		// scan into processinput structure
 		rows.Scan(&r.ID, &r.ItemTypeID, &r.Quantity, &r.Meta, &r.ProcessID)
 
-		//append to processinput slice
+		// append to processinput slice
 		processinputs = append(processinputs, r)
 	}
 
@@ -61,14 +61,14 @@ func (s ProcessInputService) GetAllProcessInputs() ([]ProcessInput, error) {
 func (s ProcessInputService) GetProcessInputsByProcess(processID uuid.UUID) ([]ProcessInput, error) {
 	processinputs := make([]ProcessInput, 0)
 
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//load processinputs
+	// load processinputs
 	sql := `
 				SELECT id, itemtypeid, quantity, meta, processid
 				FROM public.processinputs
@@ -86,10 +86,10 @@ func (s ProcessInputService) GetProcessInputsByProcess(processID uuid.UUID) ([]P
 	for rows.Next() {
 		r := ProcessInput{}
 
-		//scan into processinput structure
+		// scan into processinput structure
 		rows.Scan(&r.ID, &r.ItemTypeID, &r.Quantity, &r.Meta, &r.ProcessID)
 
-		//append to processinput slice
+		// append to processinput slice
 		processinputs = append(processinputs, r)
 	}
 

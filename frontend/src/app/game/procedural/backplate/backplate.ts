@@ -1,4 +1,4 @@
-// Based on https://github.com/wwwtyro/space-2d by Rye Terrell - thank you! :)
+// Based on https:// github.com/wwwtyro/space-2d by Rye Terrell - thank you! :)
 
 import * as REGL from 'regl';
 

@@ -7,10 +7,10 @@ import (
 	"os"
 	"sync"
 
-	_ "github.com/lib/pq" //driver
+	_ "github.com/lib/pq" // driver
 )
 
-//sharedConfig Shared database connection for services
+// sharedConfig Shared database connection for services
 var sharedConfig *sql.DB = nil
 var sharedDbLock sync.Mutex = sync.Mutex{}
 
@@ -23,44 +23,44 @@ type dbConfig struct {
 }
 
 func connect() (*sql.DB, error) {
-	//lock connect to handle excessive clients
+	// lock connect to handle excessive clients
 	sharedDbLock.Lock()
 	defer sharedDbLock.Unlock()
 
-	//check if we are already connected
+	// check if we are already connected
 	if sharedConfig != nil {
-		//make sure we aren't over on connections
+		// make sure we aren't over on connections
 		if sharedConfig.Stats().OpenConnections+1 >= sharedConfig.Stats().MaxOpenConnections {
-			//reset shared connection
+			// reset shared connection
 			sharedConfig.Close()
 			sharedConfig = nil
 		} else {
-			//return existing connection
+			// return existing connection
 			return sharedConfig, nil
 		}
 	}
 
-	//load config
+	// load config
 	config, err := loadConfiguration()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//create connection string
+	// create connection string
 	conn := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		config.DbHost, config.DbPort, config.DbUser, config.DbPass, config.DbName)
 
-	//connect to the db
+	// connect to the db
 	db, err := sql.Open("postgres", conn)
 	db.SetMaxOpenConns(50)
 	db.SetMaxIdleConns(2)
 
-	//stash config for reuse across goroutines
+	// stash config for reuse across goroutines
 	sharedConfig = db
 
-	//return handle to db
+	// return handle to db
 	return db, err
 }
 

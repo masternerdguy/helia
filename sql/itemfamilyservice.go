@@ -22,14 +22,14 @@ type ItemFamily struct {
 
 // Finds and returns an ItemFamily by its id
 func (s ItemFamilyService) GetItemFamilyByID(ItemFamilyID string) (*ItemFamily, error) {
-	//get db handle
+	// get db handle
 	db, err := connect()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//find ItemFamily with this id
+	// find ItemFamily with this id
 	ItemFamily := ItemFamily{}
 
 	sqlStatement :=
