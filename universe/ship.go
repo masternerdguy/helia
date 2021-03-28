@@ -359,11 +359,13 @@ func (s *Ship) CopyShip() *Ship {
 	}
 
 	if s.DockedAtStationID != nil {
-		sc.DockedAtStationID = *&s.DockedAtStationID
+		g := &s.DockedAtStationID
+		sc.DockedAtStationID = *g
 	}
 
 	if s.DestroyedAt != nil {
-		sc.DestroyedAt = *&s.DestroyedAt
+		g := &s.DestroyedAt
+		sc.DestroyedAt = *g
 	}
 
 	return &sc
@@ -1399,7 +1401,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 
 	//make sure ship is docked
 	if s.DockedAtStationID == nil {
-		return errors.New("You must be docked to fit a module")
+		return errors.New("you must be docked to fit a module")
 	}
 
 	//get the item to be packaged
@@ -1422,7 +1424,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	}
 
 	if rack == nil {
-		return errors.New("Rack not found")
+		return errors.New("rack not found")
 	}
 
 	//get module volume
@@ -1432,7 +1434,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	idx, fnd := s.getFreeSlotIndex(item.ItemFamilyID, v, r)
 
 	if !fnd || idx < 0 {
-		return errors.New("No available and compatible slot found to fit this module")
+		return errors.New("no available and compatible slot found to fit this module")
 	}
 
 	//remove item from cargo bay and move to fitting bay
@@ -1496,7 +1498,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 
 	//make sure ship is docked
 	if s.DockedAtStationID == nil {
-		return errors.New("You must be docked to unfit a module")
+		return errors.New("you must be docked to unfit a module")
 	}
 
 	//get module volume
@@ -1504,18 +1506,18 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 
 	//make sure there is sufficient space in the cargo bay
 	if s.TotalCargoBayVolumeUsed(lock)+v > s.GetRealCargoBayVolume() {
-		return errors.New("Insufficient room in cargo bay to unfit module")
+		return errors.New("insufficient room in cargo bay to unfit module")
 	}
 
 	//make sure the module is not cycling
 	if m.IsCycling || m.WillRepeat {
-		return errors.New("Modules must be offline to be unfit")
+		return errors.New("modules must be offline to be unfit")
 	}
 
 	//if the module is in rack c, make sure the ship is fully repaired
 	if m.Rack == "C" {
 		if s.Armor < s.GetRealMaxArmor() || s.Hull < s.GetRealMaxHull() {
-			return errors.New("Armor and hull must be fully repaired before unfitting modules in rack c")
+			return errors.New("armor and hull must be fully repaired before unfitting modules in rack c")
 		}
 	}
 
@@ -1544,7 +1546,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 				//escalate to core to save to db
 				s.CurrentSystem.MovedItems[o.ID.String()] = o
 			} else {
-				return errors.New("Insufficient room in cargo bay to unfit module")
+				return errors.New("insufficient room in cargo bay to unfit module")
 			}
 		}
 	}
@@ -1569,7 +1571,7 @@ func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
 
 	//make sure ship is docked
 	if s.DockedAtStationID == nil {
-		return errors.New("You must be docked to trash an item")
+		return errors.New("you must be docked to trash an item")
 	}
 
 	//remove from cargo bay
@@ -1610,24 +1612,24 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 
 	//make sure ship is docked
 	if s.DockedAtStationID == nil {
-		return errors.New("You must be docked to package an item")
+		return errors.New("you must be docked to package an item")
 	}
 
 	//get the item to be packaged
 	item := s.FindItemInCargo(id)
 
 	if item == nil {
-		return errors.New("Item not found in cargo bay")
+		return errors.New("item not found in cargo bay")
 	}
 
 	//make sure item is clean
 	if item.CoreDirty {
-		return errors.New("Item is dirty and waiting on an escalation to save its state")
+		return errors.New("item is dirty and waiting on an escalation to save its state")
 	}
 
 	//make sure the item is unpackaged
 	if item.IsPackaged {
-		return errors.New("Item is already packaged")
+		return errors.New("item is already packaged")
 	}
 
 	//make sure the item is fully repaired
@@ -1667,12 +1669,12 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 
 	//make sure ship is docked
 	if s.DockedAtStationID == nil {
-		return errors.New("You must be docked to buy an item on the station orders exchange")
+		return errors.New("you must be docked to buy an item on the station orders exchange")
 	}
 
 	//make sure there is an escrow container attached to this ship
 	if s.EscrowContainerID == nil {
-		return errors.New("No escrow container associated with this ship")
+		return errors.New("no escrow container associated with this ship")
 	}
 
 	//find the sell order
@@ -1680,17 +1682,17 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 
 	//verify order exists
 	if order == nil {
-		return errors.New("Sell order not found")
+		return errors.New("sell order not found")
 	}
 
 	//verify order is clean
 	if order.CoreDirty {
-		return errors.New("Sell order is dirty")
+		return errors.New("sell order is dirty")
 	}
 
 	//verify order is unfulfilled
 	if order.Bought != nil || order.BuyerUserID != nil {
-		return errors.New("Sell order has already been fulfilled")
+		return errors.New("sell order has already been fulfilled")
 	}
 
 	//lock order and item if needed
@@ -1704,7 +1706,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 
 	//verify sufficient funds
 	if s.Wallet-order.AskPrice < 0 {
-		return errors.New("Insufficient CBN to fulfill order")
+		return errors.New("insufficient CBN to fulfill order")
 	}
 
 	//calculate order volume
@@ -1731,14 +1733,14 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	maxBay := s.GetRealCargoBayVolume()
 
 	if usedBay+orderVolume > maxBay {
-		return errors.New("Insufficient cargo space available")
+		return errors.New("insufficient cargo space available")
 	}
 
 	//find the ship currently being flown by the seller so we can deposit funds in their wallet
 	seller := s.CurrentSystem.Universe.FindCurrentPlayerShip(order.SellerUserID)
 
 	if seller == nil {
-		return errors.New("Seller ship not found")
+		return errors.New("seller ship not found")
 	}
 
 	//check if we need to lock the seller
@@ -1793,12 +1795,12 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 
 	//make sure ship is docked
 	if s.DockedAtStationID == nil {
-		return errors.New("You must be docked to list an item on the station orders exchange")
+		return errors.New("you must be docked to list an item on the station orders exchange")
 	}
 
 	//make sure there is an escrow container attached to this ship
 	if s.EscrowContainerID == nil {
-		return errors.New("No escrow container associated with this ship")
+		return errors.New("no escrow container associated with this ship")
 	}
 
 	//get the item to be listed for sale
@@ -1815,7 +1817,7 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 
 	//make sure the ask price is > 0
 	if price <= 0 {
-		return errors.New("Items must be sold at a price greater than 0")
+		return errors.New("items must be sold at a price greater than 0")
 	}
 
 	//remove from cargo bay
@@ -1879,7 +1881,7 @@ func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 
 	//make sure ship is docked
 	if s.DockedAtStationID == nil {
-		return errors.New("You must be docked to unpackage an item")
+		return errors.New("you must be docked to unpackage an item")
 	}
 
 	//get the item to be packaged
@@ -1901,7 +1903,7 @@ func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 
 	//make sure there is only one in the stack
 	if item.Quantity != 1 {
-		return errors.New("Must be a stack of 1 to unpackage")
+		return errors.New("must be a stack of 1 to unpackage")
 	}
 
 	//unpackage item in-memory
@@ -1943,7 +1945,7 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 
 	//make sure the item is packaged
 	if !item.IsPackaged {
-		return errors.New("Only packaged items can be stacked")
+		return errors.New("only packaged items can be stacked")
 	}
 
 	//merge stack into next stack
@@ -2019,17 +2021,17 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 
 	//make sure the item is packaged
 	if !item.IsPackaged {
-		return errors.New("Only packaged items can be split")
+		return errors.New("only packaged items can be split")
 	}
 
 	//make sure we are splitting a positive size
 	if size <= 0 {
-		return errors.New("New stack size must be positive")
+		return errors.New("new stack size must be positive")
 	}
 
 	//make sure we are splitting off less than the quantity - 1
 	if size > item.Quantity-1 {
-		return errors.New("Both output stacks must have a positive size")
+		return errors.New("both output stacks must have a positive size")
 	}
 
 	//reduce found stack by new stack size
@@ -2103,7 +2105,7 @@ func (m *FittedSlot) PeriodicUpdate() {
 		//check for activation intent
 		if m.WillRepeat {
 			//check if a target is required
-			needsTarget, found := m.ItemTypeMeta.GetBool("needs_target")
+			needsTarget, _ := m.ItemTypeMeta.GetBool("needs_target")
 
 			if needsTarget {
 				//check for a target
@@ -2377,7 +2379,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	if *m.TargetType == tgtReg.Ship {
 		c := tgtI.(*Ship)
 		c.DealDamage(shieldDmg, armorDmg, hullDmg)
-	} else if *m.TargetType == tgtReg.Ship {
+	} else if *m.TargetType == tgtReg.Station {
 		c := tgtI.(*Station)
 		c.DealDamage(shieldDmg, armorDmg, hullDmg)
 	} else if *m.TargetType == tgtReg.Asteroid {

@@ -68,11 +68,12 @@ func loadConfiguration() (dbConfig, error) {
 	var config dbConfig
 
 	configFile, err := os.Open("db-configuration.json")
-	defer configFile.Close()
 
 	if err != nil {
 		return dbConfig{}, err
 	}
+
+	defer configFile.Close()
 
 	jsonParser := json.NewDecoder(configFile)
 	jsonParser.Decode(&config)
