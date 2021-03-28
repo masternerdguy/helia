@@ -485,13 +485,13 @@ ba6788d8-4424-4ee0-883f-1dcde6ba0be7	c311df30-c21e-4895-acb0-d8808f99710e	{"hp":
 --
 
 COPY public.itemtypes (id, family, name, meta) FROM stdin;
-b481a521-1b12-4ffa-ac2f-4da015036f7f	fuel_tank	Basic Fuel Tank	{"hp": 15, "rack": "c", "volume": 3, "fuel_max_add": 30}
-09172710-740c-4d1c-9fc0-43cb62e674e7	shield_booster	Basic Shield Booster	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "activation_energy": 15, "shield_boost_amount": 20, "activation_gfx_effect": "basic_shield_booster"}
-c311df30-c21e-4895-acb0-d8808f99710e	armor_plate	Basic Armor Plate	{"hp": 75, "rack": "c", "volume": 6, "armor_max_add": 75}
 91ec9901-ea7e-476a-bc65-7da4523dca38	nothing	Nothing	{"volume": 0}
-dd522f03-2f52-4e82-b2f8-d7e0029cb82f	ore	Testite	{"hp": 1, "volume": 1}
-9d1014c5-3422-4a0f-9839-f585269b4b16	gun_turret	Basic Laser Tool	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}
-e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3	widget	Widget	{"volume": 1}
+c311df30-c21e-4895-acb0-d8808f99710e	armor_plate	Basic Armor Plate	{"hp": 75, "rack": "c", "volume": 6, "armor_max_add": 75, "industrialmarket": {"maxprice": 65, "minprice": 30, "silosize": 1000}}
+b481a521-1b12-4ffa-ac2f-4da015036f7f	fuel_tank	Basic Fuel Tank	{"hp": 15, "rack": "c", "volume": 3, "fuel_max_add": 30, "industrialmarket": {"maxprice": 25, "minprice": 10, "silosize": 1000}}
+09172710-740c-4d1c-9fc0-43cb62e674e7	shield_booster	Basic Shield Booster	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "industrialmarket": {"maxprice": 650, "minprice": 275, "silosize": 1000}, "activation_energy": 15, "shield_boost_amount": 20, "activation_gfx_effect": "basic_shield_booster"}
+dd522f03-2f52-4e82-b2f8-d7e0029cb82f	ore	Testite	{"hp": 1, "volume": 1, "industrialmarket": {"maxprice": 3, "minprice": 1, "silosize": 300000000}}
+9d1014c5-3422-4a0f-9839-f585269b4b16	gun_turret	Basic Laser Tool	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "industrialmarket": {"maxprice": 210, "minprice": 125, "silosize": 1000}, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}
+e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3	widget	Widget	{"volume": 1, "industrialmarket": {"maxprice": 15, "minprice": 10, "silosize": 1000}}
 \.
 
 

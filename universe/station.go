@@ -33,6 +33,25 @@ func (s *Station) Initialize() {
 
 	//initialize maps
 	s.OpenSellOrders = make(map[string]*SellOrder)
+
+	//install processes if needed
+	for i := range s.Processes {
+		process := &s.Processes[i]
+
+		if !process.Installed {
+			//set up process for first time
+
+			/*
+			 * In Helia, "stations" are always NPC operated and indestructible. This is so that players
+			 * have a safe refuge to park their stuff and base out of. The equivalent, destructible,
+			 * structures built by players will be called "Outposts". Since "stations" are NPC-owned,
+			 * we want to pre-seed process inputs and outputs at installation to create the feeling of
+			 * a used universe.
+			 */
+
+			// randomize
+		}
+	}
 }
 
 //PeriodicUpdate Processes the ship for a tick

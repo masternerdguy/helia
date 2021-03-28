@@ -551,7 +551,7 @@ function handleGlobalUpdate(d: GameMessage) {
         engineSack.player.currentSystem.stations.push(new Station(p));
       }
 
-      // todo: handle npc station dying
+      // note: npc stations are indestructible for gameplay reasons, but the player owned equivalent "outposts" will not be!
     }
 
     // start new module effects

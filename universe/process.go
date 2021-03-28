@@ -33,6 +33,11 @@ type ProcessInput struct {
 	Quantity   int
 	Meta       Meta
 	ProcessID  uuid.UUID
+	// in-memory only
+	ItemTypeName   string
+	ItemFamilyID   string
+	ItemFamilyName string
+	ItemTypeMeta   Meta
 }
 
 // Structure representing an output product from a manufacturing process
@@ -42,4 +47,9 @@ type ProcessOutput struct {
 	Quantity   int
 	Meta       Meta
 	ProcessID  uuid.UUID
+	// in-memory only
+	ItemTypeName   string
+	ItemFamilyID   string
+	ItemFamilyName string
+	ItemTypeMeta   Meta
 }

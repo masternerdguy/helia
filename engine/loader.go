@@ -871,6 +871,8 @@ func LoadContainer(c *sql.Container) (*universe.Container, error) {
 func LoadProcess(p *sql.Process) (*universe.Process, error) {
 	inputSvc := sql.GetProcessInputService()
 	outputSvc := sql.GetProcessOutputService()
+	itemTypeSvc := sql.GetItemTypeService()
+	itemFamilySvc := sql.GetItemFamilyService()
 
 	// get inputs
 	inputs, err := inputSvc.GetProcessInputsByProcess(p.ID)
@@ -896,23 +898,59 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 
 	i := make([]universe.ProcessInput, 0)
 	for _, e := range inputs {
+		// get item type and family
+		itemType, err := itemTypeSvc.GetItemTypeByID(e.ItemTypeID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		itemFamily, err := itemFamilySvc.GetItemFamilyByID(itemType.Family)
+
+		if err != nil {
+			return nil, err
+		}
+
+		// build model
 		i = append(i, universe.ProcessInput{
-			ID:         e.ID,
-			ItemTypeID: e.ItemTypeID,
-			Quantity:   e.Quantity,
-			Meta:       universe.Meta(e.Meta),
-			ProcessID:  e.ProcessID,
+			ID:             e.ID,
+			ItemTypeID:     e.ItemTypeID,
+			Quantity:       e.Quantity,
+			Meta:           universe.Meta(e.Meta),
+			ProcessID:      e.ProcessID,
+			ItemTypeName:   itemType.Name,
+			ItemFamilyName: itemFamily.FriendlyName,
+			ItemFamilyID:   itemType.Family,
+			ItemTypeMeta:   universe.Meta(itemType.Meta),
 		})
 	}
 
 	o := make([]universe.ProcessOutput, 0)
 	for _, e := range outputs {
+		// get item type and family
+		itemType, err := itemTypeSvc.GetItemTypeByID(e.ItemTypeID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		itemFamily, err := itemFamilySvc.GetItemFamilyByID(itemType.Family)
+
+		if err != nil {
+			return nil, err
+		}
+
+		// build model
 		o = append(o, universe.ProcessOutput{
-			ID:         e.ID,
-			ItemTypeID: e.ItemTypeID,
-			Quantity:   e.Quantity,
-			Meta:       universe.Meta(e.Meta),
-			ProcessID:  e.ProcessID,
+			ID:             e.ID,
+			ItemTypeID:     e.ItemTypeID,
+			Quantity:       e.Quantity,
+			Meta:           universe.Meta(e.Meta),
+			ProcessID:      e.ProcessID,
+			ItemTypeName:   itemType.Name,
+			ItemFamilyName: itemFamily.FriendlyName,
+			ItemFamilyID:   itemType.Family,
+			ItemTypeMeta:   universe.Meta(itemType.Meta),
 		})
 	}
 
