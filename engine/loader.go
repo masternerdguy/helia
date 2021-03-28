@@ -223,7 +223,7 @@ func loadUniverse() (*universe.Universe, error) {
 					return nil, err
 				}
 
-				processes := make([]universe.StationProcess, 0)
+				processes := make([]*universe.StationProcess, 0)
 
 				for _, sp := range sqlProcesses {
 					spx, err := LoadStationProcess(&sp)
@@ -232,7 +232,7 @@ func loadUniverse() (*universe.Universe, error) {
 						return nil, err
 					}
 
-					processes = append(processes, *spx)
+					processes = append(processes, spx)
 				}
 
 				// build station
@@ -976,7 +976,9 @@ func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error
 	}
 
 	// convert internal state
-	internalState := universe.StationProcessInternalState{}
+	internalState := universe.StationProcessInternalState{
+		IsRunning: sp.InternalState.IsRunning,
+	}
 
 	for key := range sp.InternalState.Inputs {
 		v := sp.InternalState.Inputs[key]

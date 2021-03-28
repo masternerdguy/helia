@@ -1,6 +1,10 @@
 package universe
 
-import "github.com/google/uuid"
+import (
+	"log"
+
+	"github.com/google/uuid"
+)
 
 // Structure representing the status of a manufacturing process in a specific station
 type StationProcess struct {
@@ -12,13 +16,41 @@ type StationProcess struct {
 	InternalState StationProcessInternalState
 	Meta          Meta
 	// in-memory only
-	Process Process
+	Process   Process
+	MSCounter int64
+}
+
+func (p *StationProcess) PeriodicUpdate(dT int64) {
+	if p.InternalState.IsRunning {
+		if p.Progress >= p.Process.Time {
+			// reset process
+			p.Progress = 0
+			p.MSCounter = 0
+			p.InternalState.IsRunning = false
+
+			// deliver result
+			log.Println("process done!") // todo
+		} else {
+			// advance clock
+			p.MSCounter += dT
+
+			// check for second tick
+			if p.MSCounter >= 1000 {
+				// add 1 second to clock
+				p.Progress += 1
+
+				// roll back ms counter
+				p.MSCounter -= 1000
+			}
+		}
+	}
 }
 
 // Structure representing the internal state of the ware silos involved in the process
 type StationProcessInternalState struct {
-	Inputs  map[string]StationProcessInternalStateFactor
-	Outputs map[string]StationProcessInternalStateFactor
+	IsRunning bool
+	Inputs    map[string]StationProcessInternalStateFactor
+	Outputs   map[string]StationProcessInternalStateFactor
 }
 
 // Structure representing an input or output factor in a station process's internal state

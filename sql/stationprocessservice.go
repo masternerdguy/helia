@@ -29,8 +29,9 @@ type StationProcess struct {
 
 // JSON structure representing the internal state of the ware silos involved in the process
 type StationProcessInternalState struct {
-	Inputs  map[string]StationProcessInternalStateFactor `json:"inputs"`
-	Outputs map[string]StationProcessInternalStateFactor `json:"outputs"`
+	IsRunning bool                                         `json:"isRunning"`
+	Inputs    map[string]StationProcessInternalStateFactor `json:"inputs"`
+	Outputs   map[string]StationProcessInternalStateFactor `json:"outputs"`
 }
 
 // JSON structure representing an input or output factor in a station process's internal state

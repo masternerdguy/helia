@@ -1,10 +1,9 @@
 package universe
 
 import (
-	"fmt"
 	"helia/physics"
-	"log"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -21,10 +20,11 @@ type Station struct {
 	Mass        float64
 	Theta       float64
 	// in-memory only
-	Lock           sync.Mutex
-	CurrentSystem  *SolarSystem
-	OpenSellOrders map[string]*SellOrder
-	Processes      []StationProcess
+	Lock                   sync.Mutex
+	CurrentSystem          *SolarSystem
+	OpenSellOrders         map[string]*SellOrder
+	Processes              []*StationProcess
+	lastPeriodicUpdateTime time.Time
 }
 
 // Initializes internal aspects of Station
@@ -38,7 +38,7 @@ func (s *Station) Initialize() {
 
 	// install processes if needed
 	for i := range s.Processes {
-		process := &s.Processes[i]
+		process := s.Processes[i]
 
 		if !process.Installed {
 			// set up process for first time
@@ -59,8 +59,6 @@ func (s *Station) Initialize() {
 				// get industrial market metadata
 				marketLimits := x.GetIndustrialMetadata()
 
-				log.Println(fmt.Sprintf("%v", marketLimits))
-
 				// randomize stack size based on market limit
 				sf := StationProcessInternalStateFactor{
 					Quantity: physics.RandInRange(0, marketLimits.SiloSize),
@@ -74,8 +72,6 @@ func (s *Station) Initialize() {
 				// get industrial market metadata
 				marketLimits := x.GetIndustrialMetadata()
 
-				log.Println(fmt.Sprintf("%v", marketLimits))
-
 				// randomize stack size based on market limit
 				sf := StationProcessInternalStateFactor{
 					Quantity: physics.RandInRange(0, marketLimits.SiloSize),
@@ -83,6 +79,15 @@ func (s *Station) Initialize() {
 
 				// store in state
 				is.Outputs[x.ItemTypeID.String()] = sf
+			}
+
+			// randomize job progress
+			process.Progress = physics.RandInRange(0, process.Process.Time)
+
+			if process.Progress > 0 {
+				is.IsRunning = true
+			} else {
+				is.IsRunning = false
 			}
 
 			// store state
@@ -95,12 +100,24 @@ func (s *Station) Initialize() {
 
 	// do initial price calculation
 	s.calculateIndustrialMarketPrices()
+
+	// store time
+	s.lastPeriodicUpdateTime = time.Now()
 }
 
 // Processes the station for a tick
 func (s *Station) PeriodicUpdate() {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
+
+	// calculate delta and store time
+	dT := time.Since(s.lastPeriodicUpdateTime).Milliseconds()
+	s.lastPeriodicUpdateTime = time.Now()
+
+	// update processes
+	for _, p := range s.Processes {
+		p.PeriodicUpdate(dT)
+	}
 
 	// recalculate industrial market prices
 	s.calculateIndustrialMarketPrices()
@@ -146,7 +163,7 @@ func (s *Station) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float6
 func (s *Station) calculateIndustrialMarketPrices() {
 	for i := range s.Processes {
 		// get process
-		process := &s.Processes[i]
+		process := s.Processes[i]
 
 		// skip if not set up
 		if !process.Installed {
@@ -180,8 +197,6 @@ func (s *Station) calculateIndustrialMarketPrices() {
 
 			// update internal state
 			process.InternalState.Inputs[o.ItemTypeID.String()] = is
-
-			log.Println(fmt.Sprintf("%v", is))
 		}
 
 		for x := range process.Process.Outputs {
@@ -210,8 +225,6 @@ func (s *Station) calculateIndustrialMarketPrices() {
 
 			// update internal state
 			process.InternalState.Outputs[o.ItemTypeID.String()] = is
-
-			log.Println(fmt.Sprintf("%v", is))
 		}
 	}
 }
