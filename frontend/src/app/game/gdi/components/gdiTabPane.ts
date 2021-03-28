@@ -20,7 +20,7 @@ export class GDITabPane extends GDIBase {
   }
 
   periodicUpdate() {
-    // 
+    //
   }
 
   render(): ImageBitmap {

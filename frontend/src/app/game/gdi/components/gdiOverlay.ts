@@ -12,7 +12,7 @@ export class GDIOverlay extends GDIBase {
   }
 
   periodicUpdate() {
-    // 
+    //
   }
 
   render(): ImageBitmap {

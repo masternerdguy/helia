@@ -102,7 +102,7 @@ export class OverviewWindow extends GDIWindow {
   }
 
   periodicUpdate() {
-    // 
+    //
   }
 
   sync(player: Player) {

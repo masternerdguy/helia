@@ -19,7 +19,7 @@ export class GDIBar extends GDIBase {
   }
 
   periodicUpdate() {
-    // 
+    //
   }
 
   render(): ImageBitmap {

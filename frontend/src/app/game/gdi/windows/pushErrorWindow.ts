@@ -34,6 +34,6 @@ export class PushErrorWindow extends GDIWindow {
   }
 
   periodicUpdate() {
-    // 
+    //
   }
 }

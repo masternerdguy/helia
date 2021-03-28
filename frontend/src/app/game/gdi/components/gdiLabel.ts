@@ -15,7 +15,7 @@ export class GDILabel extends GDIBase {
   }
 
   periodicUpdate() {
-    // 
+    //
   }
 
   render(): ImageBitmap {
