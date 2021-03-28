@@ -2,15 +2,15 @@ package sql
 
 import "github.com/google/uuid"
 
-//StationService Facility for interacting with the universe_stations table
+// Facility for interacting with the universe_stations table
 type StationService struct{}
 
-//GetStationService Gets a station service for interacting with stations in the database
+// Gets a station service for interacting with stations in the database
 func GetStationService() *StationService {
 	return &StationService{}
 }
 
-//Station Structure representing a row in the universe_stations table
+// Structure representing a row in the universe_stations table
 type Station struct {
 	ID          uuid.UUID
 	SystemID    uuid.UUID
@@ -23,7 +23,7 @@ type Station struct {
 	Theta       float64
 }
 
-//GetAllStations Retrieves all stations from the database
+// Retrieves all stations from the database
 func (s StationService) GetAllStations() ([]Station, error) {
 	stations := make([]Station, 0)
 
@@ -61,7 +61,7 @@ func (s StationService) GetAllStations() ([]Station, error) {
 	return stations, err
 }
 
-//GetStationsBySolarSystem Retrieves all stations in a given solar system from the database
+// Retrieves all stations in a given solar system from the database
 func (s StationService) GetStationsBySolarSystem(systemID uuid.UUID) ([]Station, error) {
 	stations := make([]Station, 0)
 
@@ -100,7 +100,7 @@ func (s StationService) GetStationsBySolarSystem(systemID uuid.UUID) ([]Station,
 	return stations, err
 }
 
-//UpdateStation Updates an NPC station in the database
+// Updates an NPC station in the database
 func (s StationService) UpdateStation(station Station) error {
 	//get db handle
 	db, err := connect()

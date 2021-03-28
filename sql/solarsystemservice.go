@@ -2,22 +2,22 @@ package sql
 
 import "github.com/google/uuid"
 
-//SolarSystemService Facility for interacting with the universe_systems table in the database
+// Facility for interacting with the universe_systems table in the database
 type SolarSystemService struct{}
 
-//GetSolarSystemService Returns a solar system service for interacting with solar systems in the database
+// Returns a solar system service for interacting with solar systems in the database
 func GetSolarSystemService() SolarSystemService {
 	return SolarSystemService{}
 }
 
-//SolarSystem Structure representing a row in the universe_systems table
+// Structure representing a row in the universe_systems table
 type SolarSystem struct {
 	ID         uuid.UUID
 	SystemName string
 	RegionID   uuid.UUID
 }
 
-//GetSolarSystemsByRegion Retrieves all solar systems in a region from the database
+// Retrieves all solar systems in a region from the database
 func (s SolarSystemService) GetSolarSystemsByRegion(regionID uuid.UUID) ([]SolarSystem, error) {
 	systems := make([]SolarSystem, 0)
 

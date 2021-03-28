@@ -2,7 +2,7 @@ package universe
 
 import "github.com/google/uuid"
 
-//Planet Structure representing a planet
+// Structure representing a planet
 type Planet struct {
 	ID         uuid.UUID
 	SystemID   uuid.UUID

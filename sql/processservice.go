@@ -7,15 +7,15 @@ import (
 	"github.com/google/uuid"
 )
 
-//ProcessService Facility for interacting with the processes table
+// Facility for interacting with the processes table
 type ProcessService struct{}
 
-//GetProcessService Gets a process service for interacting with processes in the database
+// Gets a process service for interacting with processes in the database
 func GetProcessService() *ProcessService {
 	return &ProcessService{}
 }
 
-//Process Structure representing a row in the processes table
+// Structure representing a row in the processes table
 type Process struct {
 	ID   uuid.UUID
 	Name string
@@ -23,7 +23,7 @@ type Process struct {
 	Time int
 }
 
-//GetAllProcesses Retrieves all processes from the database
+// Retrieves all processes from the database
 func (s ProcessService) GetAllProcesses() ([]Process, error) {
 	processes := make([]Process, 0)
 
@@ -61,7 +61,7 @@ func (s ProcessService) GetAllProcesses() ([]Process, error) {
 	return processes, err
 }
 
-//GetProcessByID Finds and returns a process by its id
+// Finds and returns a process by its id
 func (s ProcessService) GetProcessByID(processID uuid.UUID) (*Process, error) {
 	//get db handle
 	db, err := connect()

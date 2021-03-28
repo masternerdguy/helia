@@ -2,15 +2,15 @@ package sql
 
 import "github.com/google/uuid"
 
-//AsteroidService Facility for interacting with the universe_asteroids table
+// Facility for interacting with the universe_asteroids table
 type AsteroidService struct{}
 
-//GetAsteroidService Gets a asteroid service for interacting with asteroids in the database
+// Gets a asteroid service for interacting with asteroids in the database
 func GetAsteroidService() *AsteroidService {
 	return &AsteroidService{}
 }
 
-//Asteroid Structure representing a row in the universe_asteroids table
+// Structure representing a row in the universe_asteroids table
 type Asteroid struct {
 	ID         uuid.UUID
 	SystemID   uuid.UUID
@@ -25,7 +25,7 @@ type Asteroid struct {
 	Mass       float64
 }
 
-//GetAsteroidsBySolarSystem Retrieves all asteroids in a given solar system from the database
+// Retrieves all asteroids in a given solar system from the database
 func (s AsteroidService) GetAsteroidsBySolarSystem(systemID uuid.UUID) ([]Asteroid, error) {
 	asteroids := make([]Asteroid, 0)
 

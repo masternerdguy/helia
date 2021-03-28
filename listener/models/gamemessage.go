@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//MessageRegistry Registry of game message types
+// Registry of game message types
 type MessageRegistry struct {
 	PushError            int
 	Join                 int
@@ -34,7 +34,7 @@ type MessageRegistry struct {
 	BuySellOrder         int
 }
 
-//TargetTypeRegistry Registry of target types
+// Registry of target types
 type TargetTypeRegistry struct {
 	Ship     int
 	Station  int
@@ -44,7 +44,7 @@ type TargetTypeRegistry struct {
 	Asteroid int
 }
 
-//NewMessageRegistry Returns a MessageRegistry with correct enum values
+// Returns a MessageRegistry with correct enum values
 func NewMessageRegistry() *MessageRegistry {
 	return &MessageRegistry{
 		PushError:            -1,
@@ -74,7 +74,7 @@ func NewMessageRegistry() *MessageRegistry {
 	}
 }
 
-//NewTargetTypeRegistry Returns a TargetTypeRegistry with correct enum values
+// Returns a TargetTypeRegistry with correct enum values
 func NewTargetTypeRegistry() *TargetTypeRegistry {
 	return &TargetTypeRegistry{
 		Ship:     1,
@@ -86,7 +86,7 @@ func NewTargetTypeRegistry() *TargetTypeRegistry {
 	}
 }
 
-//CurrentShipInfo Information about the user's current ship
+// Information about the user's current ship
 type CurrentShipInfo struct {
 	ID       uuid.UUID `json:"id"`
 	UserID   uuid.UUID `json:"uid"`
@@ -116,7 +116,7 @@ type CurrentShipInfo struct {
 	Wallet            float64                 `json:"wallet"`
 }
 
-//GlobalShipInfo Structure for passing non-secret information about a ship
+// Structure for passing non-secret information about a ship
 type GlobalShipInfo struct {
 	ID        uuid.UUID `json:"id"`
 	UserID    uuid.UUID `json:"uid"`
@@ -137,7 +137,7 @@ type GlobalShipInfo struct {
 	HullP     float64   `json:"hullP"`
 }
 
-//GlobalStarInfo Structure for passing non-secret information about a star
+// Structure for passing non-secret information about a star
 type GlobalStarInfo struct {
 	ID       uuid.UUID `json:"id"`
 	SystemID uuid.UUID `json:"systemId"`
@@ -149,7 +149,7 @@ type GlobalStarInfo struct {
 	Theta    float64   `json:"theta"`
 }
 
-//GlobalPlanetInfo Structure for passing non-secret information about a planet
+// Structure for passing non-secret information about a planet
 type GlobalPlanetInfo struct {
 	ID         uuid.UUID `json:"id"`
 	SystemID   uuid.UUID `json:"systemId"`
@@ -162,7 +162,7 @@ type GlobalPlanetInfo struct {
 	Theta      float64   `json:"theta"`
 }
 
-//GlobalAsteroidInfo Structure for passing non-secret information about an asteroid
+// Structure for passing non-secret information about an asteroid
 type GlobalAsteroidInfo struct {
 	ID       uuid.UUID `json:"id"`
 	SystemID uuid.UUID `json:"systemId"`
@@ -175,7 +175,7 @@ type GlobalAsteroidInfo struct {
 	Theta    float64   `json:"theta"`
 }
 
-//GlobalJumpholeInfo Structure for passing non-secret information about a jumphole
+// Structure for passing non-secret information about a jumphole
 type GlobalJumpholeInfo struct {
 	ID           uuid.UUID `json:"id"`
 	SystemID     uuid.UUID `json:"systemId"`
@@ -189,7 +189,7 @@ type GlobalJumpholeInfo struct {
 	Theta        float64   `json:"theta"`
 }
 
-//GlobalStationInfo Structure for passing non-secret information about an NPC station
+// Structure for passing non-secret information about an NPC station
 type GlobalStationInfo struct {
 	ID          uuid.UUID `json:"id"`
 	SystemID    uuid.UUID `json:"systemId"`
@@ -208,25 +208,25 @@ type CurrentSystemInfo struct {
 	SystemName string    `json:"systemName"`
 }
 
-//GameMessage Message container exchanged between client and server
+// Message container exchanged between client and server
 type GameMessage struct {
 	MessageType int    `json:"type"`
 	MessageBody string `json:"body"`
 }
 
-//ClientJoinBody Body for a server join request from the client
+// Body for a server join request from the client
 type ClientJoinBody struct {
 	SessionID uuid.UUID `json:"sid"`
 }
 
-//ServerJoinBody Body for the response to a ClientJoinBody request from the client
+// Body for the response to a ClientJoinBody request from the client
 type ServerJoinBody struct {
 	UserID            uuid.UUID         `json:"uid"`
 	CurrentShipInfo   CurrentShipInfo   `json:"currentShipInfo"`
 	CurrentSystemInfo CurrentSystemInfo `json:"currentSystemInfo"`
 }
 
-//ServerGlobalUpdateBody Body for periodically updating clients with globally-known (non-secret) system info
+// Body for periodically updating clients with globally-known (non-secret) system info
 type ServerGlobalUpdateBody struct {
 	CurrentSystemInfo CurrentSystemInfo            `json:"currentSystemInfo"`
 	Ships             []GlobalShipInfo             `json:"ships"`
@@ -239,52 +239,52 @@ type ServerGlobalUpdateBody struct {
 	NewPointEffects   []GlobalPushPointEffectBody  `json:"newPointEffects"`
 }
 
-//ClientNavClickBody Body containing a click-in-space move event from the client
+// Body containing a click-in-space move event from the client
 type ClientNavClickBody struct {
 	SessionID       uuid.UUID `json:"sid"`
 	ScreenTheta     float64   `json:"dT"`
 	ScreenMagnitude float64   `json:"m"`
 }
 
-//ServerCurrentShipUpdate Body containing information about the player's current ship including secrets
+// Body containing information about the player's current ship including secrets
 type ServerCurrentShipUpdate struct {
 	CurrentShipInfo CurrentShipInfo `json:"currentShipInfo"`
 }
 
-//ClientGotoBody Body containing a go-to move order
+// Body containing a go-to move order
 type ClientGotoBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	TargetID  uuid.UUID `json:"targetId"`
 	Type      int       `json:"type"`
 }
 
-//ClientOrbitBody Body containing an orbit move order
+// Body containing an orbit move order
 type ClientOrbitBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	TargetID  uuid.UUID `json:"targetId"`
 	Type      int       `json:"type"`
 }
 
-//ClientDockBody Body containing a dock move order
+// Body containing a dock move order
 type ClientDockBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	TargetID  uuid.UUID `json:"targetId"`
 	Type      int       `json:"type"`
 }
 
-//ClientUndockBody Body containing an undock move order
+// Body containing an undock move order
 type ClientUndockBody struct {
 	SessionID uuid.UUID `json:"sid"`
 }
 
-//ServerFittingStatusBody Body containing information about a ship's current fitting
+// Body containing information about a ship's current fitting
 type ServerFittingStatusBody struct {
 	ARack ServerRackStatusBody `json:"aRack"`
 	BRack ServerRackStatusBody `json:"bRack"`
 	CRack ServerRackStatusBody `json:"cRack"`
 }
 
-//ServerModuleStatusBody Body containing information about a module fitted to a ship
+// Body containing information about a module fitted to a ship
 type ServerModuleStatusBody struct {
 	ItemID       uuid.UUID `json:"itemID"`
 	ItemTypeID   uuid.UUID `json:"itemTypeID"`
@@ -300,12 +300,12 @@ type ServerModuleStatusBody struct {
 	HardpointVolume int    `json:"hpVolume"`
 }
 
-//ServerRackStatusBody Body containing information about a ship's rack
+// Body containing information about a ship's rack
 type ServerRackStatusBody struct {
 	Modules []ServerModuleStatusBody `json:"modules"`
 }
 
-//ClientActivateModuleBody Body containing an order to activate a module
+// Body containing an order to activate a module
 type ClientActivateModuleBody struct {
 	SessionID  uuid.UUID  `json:"sid"`
 	Rack       string     `json:"rack"`
@@ -314,14 +314,14 @@ type ClientActivateModuleBody struct {
 	TargetType *int       `json:"targetType"`
 }
 
-//ClientDeactivateModuleBody Body containing an order to deactivate a module
+// Body containing an order to deactivate a module
 type ClientDeactivateModuleBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	Rack      string    `json:"rack"`
 	ItemID    uuid.UUID `json:"itemID"`
 }
 
-//GlobalPushModuleEffectBody Body containing a module visual effect to be rendered by the client
+// Body containing a module visual effect to be rendered by the client
 type GlobalPushModuleEffectBody struct {
 	GfxEffect    string     `json:"gfxEffect"`
 	ObjStartID   uuid.UUID  `json:"objStartID"`
@@ -330,7 +330,7 @@ type GlobalPushModuleEffectBody struct {
 	ObjEndType   *int       `json:"objEndType"`
 }
 
-//GlobalPushPointEffectBody Body containing a non-module visual effect to be rendered at a point in space by the client
+// Body containing a non-module visual effect to be rendered at a point in space by the client
 type GlobalPushPointEffectBody struct {
 	GfxEffect string  `json:"gfxEffect"`
 	PosX      float64 `json:"x"`
@@ -338,12 +338,12 @@ type GlobalPushPointEffectBody struct {
 	Radius    float64 `json:"r"`
 }
 
-//ClientViewCargoBayBody Body containing a request for the contents of the ship's cargo bay
+// Body containing a request for the contents of the ship's cargo bay
 type ClientViewCargoBayBody struct {
 	SessionID uuid.UUID `json:"sid"`
 }
 
-//ServerItemViewBody Structure representing a view of an item in a container from the server
+// Structure representing a view of an item in a container from the server
 type ServerItemViewBody struct {
 	ID             uuid.UUID `json:"id"`
 	ItemTypeID     uuid.UUID `json:"itemTypeID"`
@@ -356,77 +356,77 @@ type ServerItemViewBody struct {
 	ItemTypeMeta   Meta      `json:"itemTypeMeta"`
 }
 
-//Meta Type representing metadata to be sent between the client and server
+// Type representing metadata to be sent between the client and server
 type Meta map[string]interface{}
 
-//ServerContainerViewBody Generic body for returning container views requested by the client (ex: cargo bay)
+// Generic body for returning container views requested by the client (ex: cargo bay)
 type ServerContainerViewBody struct {
 	ContainerID uuid.UUID            `json:"id"`
 	Items       []ServerItemViewBody `json:"items"`
 }
 
-//ClientUnfitModuleBody Body containing a request to unfit a module from a rack and move it into the cargo bay
+// Body containing a request to unfit a module from a rack and move it into the cargo bay
 type ClientUnfitModuleBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	Rack      string    `json:"rack"`
 	ItemID    uuid.UUID `json:"itemID"`
 }
 
-//ServerPushErrorMessage Body containing a message string to be displayed to the player from the server
+// Body containing a message string to be displayed to the player from the server
 type ServerPushErrorMessage struct {
 	Message string `json:"message"`
 }
 
-//ClientTrashItemBody Body containing a request to trash an item in the current ship's cargo hold
+// Body containing a request to trash an item in the current ship's cargo hold
 type ClientTrashItemBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemID"`
 }
 
-//ClientPackageItemBody Body containing a request to package an item in the current ship's cargo hold
+// Body containing a request to package an item in the current ship's cargo hold
 type ClientPackageItemBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemID"`
 }
 
-//ClientUnpackageItemBody Body containing a request to unpackage an item in the current ship's cargo hold
+// Body containing a request to unpackage an item in the current ship's cargo hold
 type ClientUnpackageItemBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemID"`
 }
 
-//ClientStackItemBody Body containing a request to stack an item in the current ship's cargo hold
+// Body containing a request to stack an item in the current ship's cargo hold
 type ClientStackItemBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemID"`
 }
 
-//ClientSplitItemBody Body containing a request to split an item stack in the current ship's cargo hold
+// Body containing a request to split an item stack in the current ship's cargo hold
 type ClientSplitItemBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemID"`
 	Size      int       `json:"size"`
 }
 
-//ClientFitModuleBody Body containing a request to fit a module from the cargo bay to its rack
+// Body containing a request to fit a module from the cargo bay to its rack
 type ClientFitModuleBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemID"`
 }
 
-//ClientSellAsOrderBody Body containing a request to sell an item stack in the current ship's cargo hold on the stations order market
+// Body containing a request to sell an item stack in the current ship's cargo hold on the stations order market
 type ClientSellAsOrderBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemID"`
 	Price     int       `json:"price"`
 }
 
-//ClientViewOpenSellOrdersBody Body containing a request for open sell orders at the currently docked-at station
+// Body containing a request for open sell orders at the currently docked-at station
 type ClientViewOpenSellOrdersBody struct {
 	SessionID uuid.UUID `json:"sid"`
 }
 
-//ServerSellOrderBody Structure containing information about a sell order for return to the client
+// Structure containing information about a sell order for return to the client
 type ServerSellOrderBody struct {
 	ID           uuid.UUID          `json:"id"`
 	StationID    uuid.UUID          `json:"stationId"`
@@ -439,12 +439,12 @@ type ServerSellOrderBody struct {
 	Item         ServerItemViewBody `json:"item"`
 }
 
-//ServerOpenSellOrdersUpdateBody Body containing a response to a request to view open sell orders at their station from a client
+// Body containing a response to a request to view open sell orders at their station from a client
 type ServerOpenSellOrdersUpdateBody struct {
 	Orders []ServerSellOrderBody `json:"orders"`
 }
 
-//ClientBuySellOrderBody Body containing a request to buy an item listed for sale as a sell order at their station
+// Body containing a request to buy an item listed for sale as a sell order at their station
 type ClientBuySellOrderBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	OrderID   uuid.UUID `json:"orderID"`

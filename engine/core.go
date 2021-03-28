@@ -13,12 +13,12 @@ import (
 //Will cause all system goroutines to stop when true
 var shutdownSignal = false
 
-//HeliaEngine Structure representing the core server-side game engine
+// Structure representing the core server-side game engine
 type HeliaEngine struct {
 	Universe *universe.Universe
 }
 
-//Initialize Initializes a new instance of the game engine
+// Initializes a new instance of the game engine
 func (e *HeliaEngine) Initialize() *HeliaEngine {
 	log.Println("Loading game universe from database...")
 
@@ -38,7 +38,7 @@ func (e *HeliaEngine) Initialize() *HeliaEngine {
 	return &engine
 }
 
-//Start Start the goroutines for each system
+// Start the goroutines for each system
 func (e *HeliaEngine) Start() {
 	log.Println("Starting system goroutines...")
 
@@ -95,7 +95,7 @@ func (e *HeliaEngine) Start() {
 	log.Println("System goroutines started!")
 }
 
-//Shutdown Saves the current state of the simulation and halts
+// Saves the current state of the simulation and halts
 func (e *HeliaEngine) Shutdown() {
 	log.Println("! Server shutdown initiated")
 

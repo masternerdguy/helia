@@ -14,7 +14,7 @@ func makeTimestamp() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
-//CreateNoobShipForPlayer Creates a noob (starter) ship for a player and put them in it
+// Creates a noob (starter) ship for a player and put them in it
 func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sql.User, error) {
 	const moduleCreationReason = "Module for new noob ship for player"
 

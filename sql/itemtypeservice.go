@@ -7,15 +7,15 @@ import (
 	"github.com/google/uuid"
 )
 
-//ItemTypeService Facility for interacting with the ItemTypes table in the database
+// Facility for interacting with the ItemTypes table in the database
 type ItemTypeService struct{}
 
-//GetItemTypeService Returns a ItemType service for interacting with ItemTypes in the database
+// Returns a ItemType service for interacting with ItemTypes in the database
 func GetItemTypeService() ItemTypeService {
 	return ItemTypeService{}
 }
 
-//ItemType Structure representing a row in the ItemTypes table
+// Structure representing a row in the ItemTypes table
 type ItemType struct {
 	ID     uuid.UUID
 	Family string
@@ -23,7 +23,7 @@ type ItemType struct {
 	Meta   Meta `json:"meta"`
 }
 
-//GetItemTypeByID Finds and returns an ItemType by its id
+// Finds and returns an ItemType by its id
 func (s ItemTypeService) GetItemTypeByID(ItemTypeID uuid.UUID) (*ItemType, error) {
 	//get db handle
 	db, err := connect()

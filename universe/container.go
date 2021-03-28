@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//Container Structure representing a container in the running game simulation.
+// Structure representing a container in the running game simulation.
 type Container struct {
 	ID      uuid.UUID
 	Meta    Meta

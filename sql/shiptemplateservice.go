@@ -10,15 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
-//ShipTemplateService Facility for interacting with the shiptemplates table
+// Facility for interacting with the shiptemplates table
 type ShipTemplateService struct{}
 
-//GetShipTemplateService Gets a shipTemplate service for interacting with shiptemplates in the database
+// Gets a shipTemplate service for interacting with shiptemplates in the database
 func GetShipTemplateService() *ShipTemplateService {
 	return &ShipTemplateService{}
 }
 
-//ShipTemplate Structure representing a row in the shiptemplates table
+// Structure representing a row in the shiptemplates table
 type ShipTemplate struct {
 	ID                 uuid.UUID
 	Created            time.Time
@@ -42,26 +42,26 @@ type ShipTemplate struct {
 	BaseCargoBayVolume float64
 }
 
-//SlotLayout JSON structure representing the slot layout available for fitting modules to this ship
+// JSON structure representing the slot layout available for fitting modules to this ship
 type SlotLayout struct {
 	ASlots []Slot `json:"a_slots"`
 	BSlots []Slot `json:"b_slots"`
 	CSlots []Slot `json:"c_slots"`
 }
 
-//Slot JSON structure representing a slot in a SlotLayout
+// JSON structure representing a slot in a SlotLayout
 type Slot struct {
 	Family          string `json:"mod_family"`
 	Volume          int    `json:"volume"`
 	TexturePosition []int  `json:"hp_pos"`
 }
 
-//Value Converts from a SlotLayout to JSON
+// Converts from a SlotLayout to JSON
 func (a SlotLayout) Value() (driver.Value, error) {
 	return json.Marshal(a)
 }
 
-//Scan Converts from JSON to a SlotLayout
+// Converts from JSON to a SlotLayout
 func (a *SlotLayout) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
@@ -71,7 +71,7 @@ func (a *SlotLayout) Scan(value interface{}) error {
 	return json.Unmarshal(b, &a)
 }
 
-//GetShipTemplateByID Finds and returns a ship template by its id
+// Finds and returns a ship template by its id
 func (s ShipTemplateService) GetShipTemplateByID(shipTemplateID uuid.UUID) (*ShipTemplate, error) {
 	//get db handle
 	db, err := connect()

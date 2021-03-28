@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//Jumphole Structure representing a jumphole
+// Structure representing a jumphole
 type Jumphole struct {
 	ID           uuid.UUID
 	SystemID     uuid.UUID
@@ -25,7 +25,7 @@ type Jumphole struct {
 	Lock        sync.Mutex
 }
 
-//ToPhysicsDummy Returns a new physics dummy structure representing this jumphole
+// Returns a new physics dummy structure representing this jumphole
 func (s *Jumphole) ToPhysicsDummy() physics.Dummy {
 	return physics.Dummy{
 		VelX: 0,
@@ -36,7 +36,7 @@ func (s *Jumphole) ToPhysicsDummy() physics.Dummy {
 	}
 }
 
-//CopyJumphole Returns a copy of the jumphole
+// Returns a copy of the jumphole
 func (s *Jumphole) CopyJumphole() Jumphole {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()

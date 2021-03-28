@@ -4,18 +4,18 @@ import (
 	"github.com/google/uuid"
 )
 
-//Heartbeat Sleep interval between solar system periodic updates in ms
+// Sleep interval between solar system periodic updates in ms
 const Heartbeat = 20
 
-//SpaceDrag Space drag coefficient :)
+// Space drag coefficient :)
 const SpaceDrag float64 = 0.025
 
-//Universe Structure representing the current game universe
+// Structure representing the current game universe
 type Universe struct {
 	Regions map[string]*Region
 }
 
-//FindShip Finds the ship with the specified ID in the running game simulation
+// Finds the ship with the specified ID in the running game simulation
 func (u *Universe) FindShip(shipID uuid.UUID) *Ship {
 	//iterate over all systems in all regions
 	for _, r := range u.Regions {
@@ -32,7 +32,7 @@ func (u *Universe) FindShip(shipID uuid.UUID) *Ship {
 	return nil
 }
 
-//FindCurrentPlayerShip Finds the ship currently being flown by the specified player in the running game simulation
+// Finds the ship currently being flown by the specified player in the running game simulation
 func (u *Universe) FindCurrentPlayerShip(userID uuid.UUID) *Ship {
 	//iterate over all systems in all regions
 	for _, r := range u.Regions {
@@ -52,7 +52,7 @@ func (u *Universe) FindCurrentPlayerShip(userID uuid.UUID) *Ship {
 	return nil
 }
 
-//FindStation Finds the station with the specified ID in the running game simulation
+// Finds the station with the specified ID in the running game simulation
 func (u *Universe) FindStation(stationID uuid.UUID) *Station {
 	//iterate over all systems in all regions
 	for _, r := range u.Regions {

@@ -56,7 +56,8 @@ func (s *Station) Initialize() {
 				// get industrial market metadata
 				marketLimits := x.GetIndustrialMetadata()
 
-				log.Println(fmt.Sprintf("REEE %v", marketLimits))
+				log.Println(fmt.Sprintf("%v", marketLimits))
+
 				// randomize
 			}
 		}

@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//loadUniverse Loads the state of the universe from the database
+// Loads the state of the universe from the database
 func loadUniverse() (*universe.Universe, error) {
 	//get services
 	regionSvc := sql.GetRegionService()
@@ -328,7 +328,7 @@ func loadUniverse() (*universe.Universe, error) {
 	return &u, nil
 }
 
-//saveUniverse Saves the current state of dynamic entities in the simulation to the database
+// Saves the current state of dynamic entities in the simulation to the database
 func saveUniverse(u *universe.Universe) {
 	//get services
 	stationSvc := sql.GetStationService()
@@ -375,7 +375,7 @@ func saveUniverse(u *universe.Universe) {
 	}
 }
 
-//SlotLayoutFromSQL Converts a SlotLayout from the SQL type to the engine type
+// Converts a SlotLayout from the SQL type to the engine type
 func SlotLayoutFromSQL(value *sql.SlotLayout) universe.SlotLayout {
 	//set up empty layout
 	layout := universe.SlotLayout{}
@@ -406,7 +406,7 @@ func SlotLayoutFromSQL(value *sql.SlotLayout) universe.SlotLayout {
 	return layout
 }
 
-//SlotFromSQL Converts a Slot from the SQL type to the engine type
+// Converts a Slot from the SQL type to the engine type
 func SlotFromSQL(value *sql.Slot) universe.Slot {
 	//set up empty slot
 	slot := universe.Slot{}
@@ -426,7 +426,7 @@ func SlotFromSQL(value *sql.Slot) universe.Slot {
 	return slot
 }
 
-//FittingFromSQL Converts a Fitting from the SQL type to the engine type
+// Converts a Fitting from the SQL type to the engine type
 func FittingFromSQL(value *sql.Fitting) (*universe.Fitting, error) {
 	//set up empty layout
 	fitting := universe.Fitting{}
@@ -475,7 +475,7 @@ func FittingFromSQL(value *sql.Fitting) (*universe.Fitting, error) {
 	return &fitting, nil
 }
 
-//FittedSlotFromSQL Converts a FittedSlot from the SQL type to the engine type
+// Converts a FittedSlot from the SQL type to the engine type
 func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
 	// get default uuid
 	emptyUUID := uuid.UUID{}
@@ -538,7 +538,7 @@ func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
 	return &slot, nil
 }
 
-//SQLFromFitting Converts a Fitting from the engine type to the SQL type
+// Converts a Fitting from the engine type to the SQL type
 func SQLFromFitting(value *universe.Fitting) sql.Fitting {
 	//set up empty layout
 	fitting := sql.Fitting{}
@@ -569,7 +569,7 @@ func SQLFromFitting(value *universe.Fitting) sql.Fitting {
 	return fitting
 }
 
-//SQLFromFittedSlot Converts a FittedSlot from the engine type to the SQL type
+// Converts a FittedSlot from the engine type to the SQL type
 func SQLFromFittedSlot(value *universe.FittedSlot) sql.FittedSlot {
 	//set up empty slot
 	slot := sql.FittedSlot{}
@@ -588,7 +588,7 @@ func SQLFromFittedSlot(value *universe.FittedSlot) sql.FittedSlot {
 	return slot
 }
 
-//MetaFromSQL Converts generic metadata from the SQL type to the engine type
+// Converts generic metadata from the SQL type to the engine type
 func MetaFromSQL(value *sql.Meta) universe.Meta {
 	//set up empty metadata
 	meta := universe.Meta{}
@@ -608,7 +608,7 @@ func MetaFromSQL(value *sql.Meta) universe.Meta {
 	return meta
 }
 
-//SQLFromMeta Converts generic metadata from the SQL type to the engine type
+// Converts generic metadata from the SQL type to the engine type
 func SQLFromMeta(value *universe.Meta) sql.Meta {
 	//set up empty metadata
 	meta := sql.Meta{}
@@ -628,7 +628,7 @@ func SQLFromMeta(value *universe.Meta) sql.Meta {
 	return meta
 }
 
-//StartFittingFromSQL Converts a StartFitting from the SQL type to the engine type
+// Converts a StartFitting from the SQL type to the engine type
 func StartFittingFromSQL(value *sql.StartFitting) universe.StartFitting {
 	//set up empty layout
 	layout := universe.StartFitting{}
@@ -659,7 +659,7 @@ func StartFittingFromSQL(value *sql.StartFitting) universe.StartFitting {
 	return layout
 }
 
-//StartFittedSlotFromSQL Converts a StartFittedSlot from the SQL type to the engine type
+// Converts a StartFittedSlot from the SQL type to the engine type
 func StartFittedSlotFromSQL(value *sql.StartFittedSlot) universe.StartFittedSlot {
 	//set up empty slot
 	slot := universe.StartFittedSlot{}
@@ -677,7 +677,7 @@ func StartFittedSlotFromSQL(value *sql.StartFittedSlot) universe.StartFittedSlot
 	return slot
 }
 
-//ContainerFromSQL Converts a Container from the SQL type to the engine type
+// Converts a Container from the SQL type to the engine type
 func ContainerFromSQL(value *sql.Container) *universe.Container {
 	//set up empty container
 	container := universe.Container{}
@@ -697,7 +697,7 @@ func ContainerFromSQL(value *sql.Container) *universe.Container {
 	return &container
 }
 
-//SellOrderFromSQL Converts a SellOrder from the SQL type to the engine type
+// Converts a SellOrder from the SQL type to the engine type
 func SellOrderFromSQL(value *sql.SellOrder) *universe.SellOrder {
 	//set up empty sell order
 	order := universe.SellOrder{}
@@ -722,7 +722,7 @@ func SellOrderFromSQL(value *sql.SellOrder) *universe.SellOrder {
 	return &order
 }
 
-//SQLFromSellOrder Converts a SellOrder from the engine type to the SQL type
+// Converts a SellOrder from the engine type to the SQL type
 func SQLFromSellOrder(value *universe.SellOrder) *sql.SellOrder {
 	//set up empty sell order
 	order := sql.SellOrder{}
@@ -747,7 +747,7 @@ func SQLFromSellOrder(value *universe.SellOrder) *sql.SellOrder {
 	return &order
 }
 
-//ItemFromSQL Converts an Item from the SQL type to the engine type
+// Converts an Item from the SQL type to the engine type
 func ItemFromSQL(value *sql.Item) *universe.Item {
 	//set up empty item
 	item := universe.Item{}
@@ -773,7 +773,7 @@ func ItemFromSQL(value *sql.Item) *universe.Item {
 	return &item
 }
 
-//SQLFromItem Converts an item from the engine type to the SQL type
+// Converts an item from the engine type to the SQL type
 func SQLFromItem(value *universe.Item) *sql.Item {
 	//set up empty item
 	item := sql.Item{}
@@ -793,7 +793,7 @@ func SQLFromItem(value *universe.Item) *sql.Item {
 	return &item
 }
 
-//LoadItem Loads an item with some type and family data for use in the simulation.
+// Loads an item with some type and family data for use in the simulation.
 func LoadItem(i *sql.Item) (*universe.Item, error) {
 	itemTypeSvc := sql.GetItemTypeService()
 	itemFamilySvc := sql.GetItemFamilyService()
@@ -832,7 +832,7 @@ func LoadItem(i *sql.Item) (*universe.Item, error) {
 	return ei, nil
 }
 
-//LoadContainer Takes a SQL Container and converts it, and items it loads, into the engine type ready for insertion into the universe.
+// Takes a SQL Container and converts it, and items it loads, into the engine type ready for insertion into the universe.
 func LoadContainer(c *sql.Container) (*universe.Container, error) {
 	//load base container
 	container := ContainerFromSQL(c)
@@ -867,7 +867,7 @@ func LoadContainer(c *sql.Container) (*universe.Container, error) {
 	return container, nil
 }
 
-//LoadProcess Takes a SQL Process and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
+// Takes a SQL Process and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
 func LoadProcess(p *sql.Process) (*universe.Process, error) {
 	inputSvc := sql.GetProcessInputService()
 	outputSvc := sql.GetProcessOutputService()
@@ -960,7 +960,7 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 	return &process, nil
 }
 
-//LoadStationProcess Takes a SQL Station Process and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
+// Takes a SQL Station Process and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
 func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error) {
 	procesSvc := sql.GetProcessService()
 
@@ -992,7 +992,7 @@ func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error
 	return &o, nil
 }
 
-//LoadShip Takes a SQL Ship and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
+// Takes a SQL Ship and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
 func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 	shipTmpSvc := sql.GetShipTemplateService()
 	userSvc := sql.GetUserService()
@@ -1124,7 +1124,7 @@ func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 	return sp, nil
 }
 
-//saveShip Updates a ship in the database
+// Updates a ship in the database
 func saveShip(ship *universe.Ship) error {
 	//get ship service
 	shipSvc := sql.GetShipService()
@@ -1172,31 +1172,31 @@ func saveShip(ship *universe.Ship) error {
 	return err
 }
 
-//saveItemLocation Moves an item to a different container in the database
+// Moves an item to a different container in the database
 func saveItemLocation(itemID uuid.UUID, containerID uuid.UUID) error {
 	itemSvc := sql.GetItemService()
 	return itemSvc.SetContainerID(itemID, containerID)
 }
 
-//packageItem Marks an item as packaged in the database
+// Marks an item as packaged in the database
 func packageItem(itemID uuid.UUID) error {
 	itemSvc := sql.GetItemService()
 	return itemSvc.PackageItem(itemID)
 }
 
-//unpackageItem Marks an item as unpackaged in the database
+// Marks an item as unpackaged in the database
 func unpackageItem(itemID uuid.UUID, meta universe.Meta) error {
 	itemSvc := sql.GetItemService()
 	return itemSvc.UnpackageItem(itemID, SQLFromMeta(&meta))
 }
 
-//changeQuantity Changes the quantity of an item stack in the database
+// Changes the quantity of an item stack in the database
 func changeQuantity(itemID uuid.UUID, quantity int) error {
 	itemSvc := sql.GetItemService()
 	return itemSvc.ChangeQuantity(itemID, quantity)
 }
 
-//newItem Saves a new item to the database
+// Saves a new item to the database
 func newItem(item *universe.Item) (*uuid.UUID, error) {
 	itemSvc := sql.GetItemService()
 
@@ -1213,7 +1213,7 @@ func newItem(item *universe.Item) (*uuid.UUID, error) {
 	return &o.ID, err
 }
 
-//newSellOrder Saves a new sell order to the database
+// Saves a new sell order to the database
 func newSellOrder(sellOrder *universe.SellOrder) (*uuid.UUID, error) {
 	sellOrderSvc := sql.GetSellOrderService()
 
@@ -1230,7 +1230,7 @@ func newSellOrder(sellOrder *universe.SellOrder) (*uuid.UUID, error) {
 	return &o.ID, err
 }
 
-//newSellOrder Saves a new sell order to the database
+// Saves a new sell order to the database
 func markSellOrderAsBought(sellOrder *universe.SellOrder) error {
 	sellOrderSvc := sql.GetSellOrderService()
 

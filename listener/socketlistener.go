@@ -21,14 +21,14 @@ var upgrader = websocket.Upgrader{
 	},
 } // use default options
 
-//SocketListener Listener for handling and dispatching incoming websocket messages
+// Listener for handling and dispatching incoming websocket messages
 type SocketListener struct {
 	Engine  *engine.HeliaEngine
 	clients []*shared.GameClient
 	lock    sync.Mutex
 }
 
-//HandleConnect Handles a client joining the server
+// Handles a client joining the server
 func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 	var upgrader = websocket.Upgrader{}
 
@@ -792,7 +792,7 @@ func (l *SocketListener) handleClientBuySellOrder(client *shared.GameClient, bod
 	}
 }
 
-//addClient Adds a client to the server
+// Adds a client to the server
 func (l *SocketListener) addClient(c *shared.GameClient) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
@@ -800,7 +800,7 @@ func (l *SocketListener) addClient(c *shared.GameClient) {
 	l.clients = append(l.clients, c)
 }
 
-//removeClient Removes a client from the server
+// Removes a client from the server
 func (l *SocketListener) removeClient(c *shared.GameClient) {
 	l.lock.Lock()
 	defer l.lock.Unlock()

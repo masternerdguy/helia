@@ -2,15 +2,15 @@ package sql
 
 import "github.com/google/uuid"
 
-//StarService Facility for interacting with the universe_stars table
+// Facility for interacting with the universe_stars table
 type StarService struct{}
 
-//GetStarService Gets a star service for interacting with stars in the database
+// Gets a star service for interacting with stars in the database
 func GetStarService() *StarService {
 	return &StarService{}
 }
 
-//Star Structure representing a row in the universe_stars table
+// Structure representing a row in the universe_stars table
 type Star struct {
 	ID       uuid.UUID
 	SystemID uuid.UUID
@@ -22,7 +22,7 @@ type Star struct {
 	Theta    float64
 }
 
-//GetAllStars Retrieves all stars from the database
+// Retrieves all stars from the database
 func (s StarService) GetAllStars() ([]Star, error) {
 	stars := make([]Star, 0)
 
@@ -60,7 +60,7 @@ func (s StarService) GetAllStars() ([]Star, error) {
 	return stars, err
 }
 
-//GetStarsBySolarSystem Retrieves all stars in a given solar system from the database
+// Retrieves all stars in a given solar system from the database
 func (s StarService) GetStarsBySolarSystem(systemID uuid.UUID) ([]Star, error) {
 	stars := make([]Star, 0)
 

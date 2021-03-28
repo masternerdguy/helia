@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//Item Structure representing the most basic features of an item in the running game simulation
+//Structure representing the most basic features of an item in the running game simulation
 type Item struct {
 	ID            uuid.UUID
 	ItemTypeID    uuid.UUID

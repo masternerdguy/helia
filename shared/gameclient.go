@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-//GameClient Structure representing a game client connected to the server
+// Structure representing a game client connected to the server
 type GameClient struct {
 	SID  *uuid.UUID
 	UID  *uuid.UUID
@@ -27,7 +27,7 @@ type GameClient struct {
 	EscrowContainerID uuid.UUID
 }
 
-//Initialize Initializes the internals of a GameClient
+// Initializes the internals of a GameClient
 func (c *GameClient) Initialize() {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -38,7 +38,7 @@ func (c *GameClient) Initialize() {
 	}
 }
 
-//WriteMessage Writes a message to a client
+// Writes a message to a client
 func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -55,7 +55,7 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 	}
 }
 
-//WriteErrorMessage Send an error string to the client to be displayed
+// Send an error string to the client to be displayed
 func (c *GameClient) WriteErrorMessage(msg string) {
 	//get message registry
 	msgRegistry := models.NewMessageRegistry()
@@ -76,7 +76,7 @@ func (c *GameClient) WriteErrorMessage(msg string) {
 	c.WriteMessage(&cu)
 }
 
-//PushShipEvent Adds an event to the ship event queue
+// Adds an event to the ship event queue
 func (c *GameClient) PushShipEvent(evt interface{}, eventType int) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -87,7 +87,7 @@ func (c *GameClient) PushShipEvent(evt interface{}, eventType int) {
 	})
 }
 
-//PopShipEvent Gets the latest event for the player's current ship
+// Gets the latest event for the player's current ship
 func (c *GameClient) PopShipEvent() *Event {
 	c.lock.Lock()
 	defer c.lock.Unlock()

@@ -10,15 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
-//StartService Facility for interacting with the Starts table
+// Facility for interacting with the Starts table
 type StartService struct{}
 
-//GetStartService Gets a Start service for interacting with Starts in the database
+// Gets a Start service for interacting with Starts in the database
 func GetStartService() *StartService {
 	return &StartService{}
 }
 
-//Start Structure representing a row in the Starts table
+// Structure representing a row in the Starts table
 type Start struct {
 	ID             uuid.UUID
 	Name           string
@@ -31,24 +31,24 @@ type Start struct {
 	Wallet         float64
 }
 
-//StartFitting Structure representing the initial fitting of a starter ship of a given start
+// Structure representing the initial fitting of a starter ship of a given start
 type StartFitting struct {
 	ARack []StartFittedSlot `json:"a_rack"`
 	BRack []StartFittedSlot `json:"b_rack"`
 	CRack []StartFittedSlot `json:"c_rack"`
 }
 
-//StartFittedSlot Structure representing a slot within the initial fitting of a starter ship of a given start
+// Structure representing a slot within the initial fitting of a starter ship of a given start
 type StartFittedSlot struct {
 	ItemTypeID uuid.UUID `json:"item_type_id"`
 }
 
-//Value Converts from a SlotLayout to JSON
+// Converts from a SlotLayout to JSON
 func (a StartFitting) Value() (driver.Value, error) {
 	return json.Marshal(a)
 }
 
-//Scan Converts from JSON to a SlotLayout
+// Converts from JSON to a SlotLayout
 func (a *StartFitting) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
@@ -58,7 +58,7 @@ func (a *StartFitting) Scan(value interface{}) error {
 	return json.Unmarshal(b, &a)
 }
 
-//GetStartByID Finds and returns a start by its id
+// Finds and returns a start by its id
 func (s StartService) GetStartByID(StartID uuid.UUID) (*Start, error) {
 	//get db handle
 	db, err := connect()
@@ -91,7 +91,7 @@ func (s StartService) GetStartByID(StartID uuid.UUID) (*Start, error) {
 	}
 }
 
-//GetAllStarts Retrieves all starts from the database
+// Retrieves all starts from the database
 func (s StartService) GetAllStarts() ([]Start, error) {
 	starts := make([]Start, 0)
 

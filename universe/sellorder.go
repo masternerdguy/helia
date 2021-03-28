@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//SellOrder Structure representing a sell order in the game universe
+// Structure representing a sell order in the game universe
 type SellOrder struct {
 	ID           uuid.UUID
 	StationID    uuid.UUID

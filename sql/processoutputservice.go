@@ -2,15 +2,15 @@ package sql
 
 import "github.com/google/uuid"
 
-//ProcessOutputService Facility for interacting with the processoutputs table
+// Facility for interacting with the processoutputs table
 type ProcessOutputService struct{}
 
-//GetProcessOutputService Gets a processoutput service for interacting with processoutputs in the database
+// Gets a processoutput service for interacting with processoutputs in the database
 func GetProcessOutputService() *ProcessOutputService {
 	return &ProcessOutputService{}
 }
 
-//ProcessOutput Structure representing a row in the processoutputs table
+// Structure representing a row in the processoutputs table
 type ProcessOutput struct {
 	ID         uuid.UUID
 	ItemTypeID uuid.UUID
@@ -19,7 +19,7 @@ type ProcessOutput struct {
 	ProcessID  uuid.UUID
 }
 
-//GetAllProcessOutputs Retrieves all processoutputs from the database
+// Retrieves all processoutputs from the database
 func (s ProcessOutputService) GetAllProcessOutputs() ([]ProcessOutput, error) {
 	processoutputs := make([]ProcessOutput, 0)
 
@@ -57,7 +57,7 @@ func (s ProcessOutputService) GetAllProcessOutputs() ([]ProcessOutput, error) {
 	return processoutputs, err
 }
 
-//GetProcessOutputsByProcess Retrieves all processoutputs for a given process from the database
+// Retrieves all processoutputs for a given process from the database
 func (s ProcessOutputService) GetProcessOutputsByProcess(processID uuid.UUID) ([]ProcessOutput, error) {
 	processoutputs := make([]ProcessOutput, 0)
 

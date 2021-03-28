@@ -10,15 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
-//ShipService Facility for interacting with the ships table in the database
+// Facility for interacting with the ships table in the database
 type ShipService struct{}
 
-//GetShipService Returns a ship service for interacting with ships in the database
+// Returns a ship service for interacting with ships in the database
 func GetShipService() ShipService {
 	return ShipService{}
 }
 
-//Ship Structure representing a row in the ships table
+// Structure representing a row in the ships table
 type Ship struct {
 	ID                    uuid.UUID
 	UserID                uuid.UUID
@@ -49,25 +49,25 @@ type Ship struct {
 	Wallet                float64
 }
 
-//Fitting JSON structure representing the module racks of a ship and what is fitted to them
+// JSON structure representing the module racks of a ship and what is fitted to them
 type Fitting struct {
 	ARack []FittedSlot `json:"a_rack"`
 	BRack []FittedSlot `json:"b_rack"`
 	CRack []FittedSlot `json:"c_rack"`
 }
 
-//FittedSlot JSON structure representing a slot within a ship's fitting rack
+// JSON structure representing a slot within a ship's fitting rack
 type FittedSlot struct {
 	ItemTypeID uuid.UUID `json:"item_type_id"`
 	ItemID     uuid.UUID `json:"item_id"`
 }
 
-//Value Converts from a Fitting to JSON
+// Converts from a Fitting to JSON
 func (a Fitting) Value() (driver.Value, error) {
 	return json.Marshal(a)
 }
 
-//Scan Converts from JSON to a Fitting
+// Converts from JSON to a Fitting
 func (a *Fitting) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
@@ -77,7 +77,7 @@ func (a *Fitting) Scan(value interface{}) error {
 	return json.Unmarshal(b, &a)
 }
 
-//NewShip Creates a new ship
+// Creates a new ship
 func (s ShipService) NewShip(e Ship) (*Ship, error) {
 	//get db handle
 	db, err := connect()
@@ -119,7 +119,7 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 	return &e, nil
 }
 
-//GetShipByID Finds and returns a ship by its id
+// Finds and returns a ship by its id
 func (s ShipService) GetShipByID(shipID uuid.UUID, isDestroyed bool) (*Ship, error) {
 	//get db handle
 	db, err := connect()
@@ -156,7 +156,7 @@ func (s ShipService) GetShipByID(shipID uuid.UUID, isDestroyed bool) (*Ship, err
 	}
 }
 
-//GetShipsBySolarSystem Retrieves all ships in a solar system from the database
+// Retrieves all ships in a solar system from the database
 func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID, isDestroyed bool) ([]Ship, error) {
 	systems := make([]Ship, 0)
 
@@ -201,7 +201,7 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID, isDestroyed bool)
 	return systems, err
 }
 
-//UpdateShip Updates a ship in the database
+// Updates a ship in the database
 func (s ShipService) UpdateShip(ship Ship) error {
 	//get db handle
 	db, err := connect()

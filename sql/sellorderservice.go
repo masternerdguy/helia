@@ -8,15 +8,15 @@ import (
 	"github.com/google/uuid"
 )
 
-//SellOrderService Facility for interacting with the SellOrders table in the database
+// Facility for interacting with the SellOrders table in the database
 type SellOrderService struct{}
 
-//GetSellOrderService Returns a SellOrder service for interacting with SellOrders in the database
+// Returns a SellOrder service for interacting with SellOrders in the database
 func GetSellOrderService() SellOrderService {
 	return SellOrderService{}
 }
 
-//SellOrder Structure representing a row in the SellOrders table
+// Structure representing a row in the SellOrders table
 type SellOrder struct {
 	ID           uuid.UUID
 	StationID    uuid.UUID
@@ -28,7 +28,7 @@ type SellOrder struct {
 	BuyerUserID  *uuid.UUID
 }
 
-//GetSellOrderByID Finds and returns a sell order by its id
+// Finds and returns a sell order by its id
 func (s SellOrderService) GetSellOrderByID(SellOrderID uuid.UUID) (*SellOrder, error) {
 	//get db handle
 	db, err := connect()
@@ -60,7 +60,7 @@ func (s SellOrderService) GetSellOrderByID(SellOrderID uuid.UUID) (*SellOrder, e
 	}
 }
 
-//GetOpenSellOrdersByStation Retrieves all sell orders at a given station that have not been bought yet
+// Retrieves all sell orders at a given station that have not been bought yet
 func (s SellOrderService) GetOpenSellOrdersByStation(containerID uuid.UUID) ([]SellOrder, error) {
 	sellOrders := make([]SellOrder, 0)
 
@@ -102,7 +102,7 @@ func (s SellOrderService) GetOpenSellOrdersByStation(containerID uuid.UUID) ([]S
 	return sellOrders, err
 }
 
-//NewSellOrder Creates a new sell order
+// Creates a new sell order
 func (s SellOrderService) NewSellOrder(e SellOrder) (*SellOrder, error) {
 	//get db handle
 	db, err := connect()
@@ -137,7 +137,7 @@ func (s SellOrderService) NewSellOrder(e SellOrder) (*SellOrder, error) {
 	return &e, nil
 }
 
-//MarkSellOrderAsBought Updates the buyer and buyer_userid on a sell order
+// Updates the buyer and buyer_userid on a sell order
 func (s SellOrderService) MarkSellOrderAsBought(e SellOrder) error {
 	//get db handle
 	db, err := connect()

@@ -8,22 +8,22 @@ import (
 	"github.com/google/uuid"
 )
 
-//ContainerService Facility for interacting with the containers table in the database
+// Facility for interacting with the containers table in the database
 type ContainerService struct{}
 
-//GetContainerService Returns a container service for interacting with containers in the database
+// Returns a container service for interacting with containers in the database
 func GetContainerService() ContainerService {
 	return ContainerService{}
 }
 
-//Container Structure representing a row in the containers table
+// Structure representing a row in the containers table
 type Container struct {
 	ID      uuid.UUID
 	Meta    Meta `json:"meta"`
 	Created time.Time
 }
 
-//NewContainer Creates a new container
+// Creates a new container
 func (s ContainerService) NewContainer(e Container) (*Container, error) {
 	//get db handle
 	db, err := connect()
@@ -59,7 +59,7 @@ func (s ContainerService) NewContainer(e Container) (*Container, error) {
 	return &e, nil
 }
 
-//GetContainerByID Finds and returns a container by its id
+// Finds and returns a container by its id
 func (s ContainerService) GetContainerByID(containerID uuid.UUID) (*Container, error) {
 	//get db handle
 	db, err := connect()
@@ -90,7 +90,7 @@ func (s ContainerService) GetContainerByID(containerID uuid.UUID) (*Container, e
 	}
 }
 
-//UpdateContainer Updates a container in the database
+// Updates a container in the database
 func (s ContainerService) UpdateContainer(container Container) error {
 	//get db handle
 	db, err := connect()

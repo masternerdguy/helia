@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-//Dummy Dummy structure used to pass key values in physics calculations
+// Dummy structure used to pass key values in physics calculations
 type Dummy struct {
 	PosX float64
 	PosY float64
@@ -13,7 +13,7 @@ type Dummy struct {
 	Mass float64
 }
 
-//ElasticCollide Calculates the result of a 2D elastic collission between two dummies and stores the result in those dummies
+// Calculates the result of a 2D elastic collission between two dummies and stores the result in those dummies
 func ElasticCollide(dummyA *Dummy, dummyB *Dummy) {
 	// safety check
 	if dummyA == nil || dummyB == nil {
@@ -51,7 +51,7 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy) {
 	dummyB.VelY = bVy2
 }
 
-//Distance Calculates the distance between the centers of 2 physics dummies and returns the result
+// Calculates the distance between the centers of 2 physics dummies and returns the result
 func Distance(dummyA Dummy, dummyB Dummy) float64 {
 	dx := dummyA.PosX - dummyB.PosX
 	dy := dummyA.PosY - dummyB.PosY

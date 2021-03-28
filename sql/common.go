@@ -6,15 +6,15 @@ import (
 	"errors"
 )
 
-//Meta Structure for generic JSON metadata
+// Structure for generic JSON metadata
 type Meta map[string]interface{}
 
-//Value Converts generic metadata into JSON
+// Converts generic metadata into JSON
 func (a Meta) Value() (driver.Value, error) {
 	return json.Marshal(a)
 }
 
-//Scan Converts JSON into generic metadata
+// Converts JSON into generic metadata
 func (a *Meta) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {

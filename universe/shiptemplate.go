@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//ShipTemplate Structure containing pre-modifier stats for a ship class
+// Structure containing pre-modifier stats for a ship class
 type ShipTemplate struct {
 	ID                 uuid.UUID
 	Created            time.Time
@@ -30,14 +30,14 @@ type ShipTemplate struct {
 	BaseCargoBayVolume float64
 }
 
-//SlotLayout Structure representing the slot layout available for fitting modules to this ship
+// Structure representing the slot layout available for fitting modules to this ship
 type SlotLayout struct {
 	ASlots []Slot
 	BSlots []Slot
 	CSlots []Slot
 }
 
-//Slot Structure representing a slot in a SlotLayout
+// Structure representing a slot in a SlotLayout
 type Slot struct {
 	Family          string
 	Volume          int

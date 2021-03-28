@@ -7,21 +7,21 @@ import (
 	"github.com/google/uuid"
 )
 
-//SessionService Facility for interacting with the sessions table in the database
+// Facility for interacting with the sessions table in the database
 type SessionService struct{}
 
-//GetSessionService Returns a Session service for interacting with sessions in the database
+// Returns a Session service for interacting with sessions in the database
 func GetSessionService() SessionService {
 	return SessionService{}
 }
 
-//Session Structure representing a row in the sessions table
+// Structure representing a row in the sessions table
 type Session struct {
 	ID     uuid.UUID
 	UserID uuid.UUID
 }
 
-//NewSession Creates a new session
+// Creates a new session
 func (s SessionService) NewSession(userid uuid.UUID) (*Session, error) {
 	//get db handle
 	db, err := connect()
@@ -58,7 +58,7 @@ func (s SessionService) NewSession(userid uuid.UUID) (*Session, error) {
 	return &Session, nil
 }
 
-//GetSessionByID Finds a session by its id
+// Finds a session by its id
 func (s SessionService) GetSessionByID(sessionid uuid.UUID) (*Session, error) {
 	//get db handle
 	db, err := connect()
@@ -90,7 +90,7 @@ func (s SessionService) GetSessionByID(sessionid uuid.UUID) (*Session, error) {
 	}
 }
 
-//DeleteSession Deletes existing sessions by userid
+// Deletes existing sessions by userid
 func (s SessionService) DeleteSession(userid uuid.UUID) error {
 	//get db handle
 	db, err := connect()

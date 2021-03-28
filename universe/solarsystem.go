@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//SolarSystem Structure representing a solar system
+// Structure representing a solar system
 type SolarSystem struct {
 	ID                uuid.UUID
 	SystemName        string
@@ -39,7 +39,7 @@ type SolarSystem struct {
 	BoughtSellOrders     map[string]*SellOrder         //sell orders that have been fulfilled in need of saving by core
 }
 
-//Initialize Initializes internal aspects of SolarSystem
+// Initializes internal aspects of SolarSystem
 func (s *SolarSystem) Initialize() {
 	//obtain lock
 	s.Lock.Lock()
@@ -68,7 +68,7 @@ func (s *SolarSystem) Initialize() {
 	s.pushPointEffects = make([]models.GlobalPushPointEffectBody, 0)
 }
 
-//PeriodicUpdate Processes the solar system for a tick
+// Processes the solar system for a tick
 func (s *SolarSystem) PeriodicUpdate() {
 	//obtain lock
 	s.Lock.Lock()
@@ -910,7 +910,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 	s.pushPointEffects = make([]models.GlobalPushPointEffectBody, 0)
 }
 
-//AddShip Adds a ship to the system
+// Adds a ship to the system
 func (s *SolarSystem) AddShip(c *Ship, lock bool) {
 	//safety check
 	if c == nil {
@@ -930,7 +930,7 @@ func (s *SolarSystem) AddShip(c *Ship, lock bool) {
 	s.ships[c.ID.String()] = c
 }
 
-//RemoveShip Removes a ship from the system
+// Removes a ship from the system
 func (s *SolarSystem) RemoveShip(c *Ship, lock bool) {
 	//safety check
 	if c == nil {
@@ -947,7 +947,7 @@ func (s *SolarSystem) RemoveShip(c *Ship, lock bool) {
 	delete(s.ships, c.ID.String())
 }
 
-//AddStar Adds a star to the system
+// Adds a star to the system
 func (s *SolarSystem) AddStar(c *Star) {
 	//safety check
 	if c == nil {
@@ -962,7 +962,7 @@ func (s *SolarSystem) AddStar(c *Star) {
 	s.stars[c.ID.String()] = c
 }
 
-//AddPlanet Adds a planet to the system
+// Adds a planet to the system
 func (s *SolarSystem) AddPlanet(c *Planet) {
 	//safety check
 	if c == nil {
@@ -977,7 +977,7 @@ func (s *SolarSystem) AddPlanet(c *Planet) {
 	s.planets[c.ID.String()] = c
 }
 
-//AddAsteroid Adds an asteroid to the system
+// Adds an asteroid to the system
 func (s *SolarSystem) AddAsteroid(c *Asteroid) {
 	//safety check
 	if c == nil {
@@ -992,7 +992,7 @@ func (s *SolarSystem) AddAsteroid(c *Asteroid) {
 	s.asteroids[c.ID.String()] = c
 }
 
-//AddJumphole Adds a jumphole to the system
+// Adds a jumphole to the system
 func (s *SolarSystem) AddJumphole(c *Jumphole) {
 	//safety check
 	if c == nil {
@@ -1007,7 +1007,7 @@ func (s *SolarSystem) AddJumphole(c *Jumphole) {
 	s.jumpholes[c.ID.String()] = c
 }
 
-//AddStation Adds an NPC station to the system
+// Adds an NPC station to the system
 func (s *SolarSystem) AddStation(c *Station) {
 	//safety check
 	if c == nil {
@@ -1022,7 +1022,7 @@ func (s *SolarSystem) AddStation(c *Station) {
 	s.stations[c.ID.String()] = c
 }
 
-//AddClient Adds a client to the system
+// Adds a client to the system
 func (s *SolarSystem) AddClient(c *shared.GameClient, lock bool) {
 	//safety check
 	if c == nil {
@@ -1039,7 +1039,7 @@ func (s *SolarSystem) AddClient(c *shared.GameClient, lock bool) {
 	s.clients[(*c.UID).String()] = c
 }
 
-//RemoveClient Removes a client from the server
+// Removes a client from the server
 func (s *SolarSystem) RemoveClient(c *shared.GameClient, lock bool) {
 	//safety check
 	if c == nil {
@@ -1056,7 +1056,7 @@ func (s *SolarSystem) RemoveClient(c *shared.GameClient, lock bool) {
 	delete(s.clients, (*c.UID).String())
 }
 
-//CopyShips Returns a copy of the ships in the system
+// Returns a copy of the ships in the system
 func (s *SolarSystem) CopyShips() map[string]*Ship {
 	//obtain lock
 	s.Lock.Lock()
@@ -1075,7 +1075,7 @@ func (s *SolarSystem) CopyShips() map[string]*Ship {
 	return copy
 }
 
-//CopyStations Returns a copy of the stations in the system
+// Returns a copy of the stations in the system
 func (s *SolarSystem) CopyStations() map[string]*Station {
 	//obtain lock
 	s.Lock.Lock()
@@ -1094,7 +1094,7 @@ func (s *SolarSystem) CopyStations() map[string]*Station {
 	return copy
 }
 
-//CopyJumpholes Returns a copy of the jumpholes in the system
+// Returns a copy of the jumpholes in the system
 func (s *SolarSystem) CopyJumpholes() map[string]*Jumphole {
 	//obtain lock
 	s.Lock.Lock()
@@ -1113,7 +1113,7 @@ func (s *SolarSystem) CopyJumpholes() map[string]*Jumphole {
 	return copy
 }
 
-//StoreOpenSellOrder Stores an open sell order on a station
+// Stores an open sell order on a station
 func (s *SolarSystem) StoreOpenSellOrder(order *SellOrder, lock bool) {
 	if lock {
 		//obtain lock

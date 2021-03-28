@@ -2,15 +2,15 @@ package sql
 
 import "github.com/google/uuid"
 
-//StationProcessService Facility for interacting with the stationprocesses table
+// Facility for interacting with the stationprocesses table
 type StationProcessService struct{}
 
-//GetStationProcessService Gets a stationprocess service for interacting with stationProcesses in the database
+// Gets a stationprocess service for interacting with stationProcesses in the database
 func GetStationProcessService() *StationProcessService {
 	return &StationProcessService{}
 }
 
-//StationProcess Structure representing a row in the stationprocesses table
+// Structure representing a row in the stationprocesses table
 type StationProcess struct {
 	ID            uuid.UUID
 	StationID     uuid.UUID
@@ -21,7 +21,7 @@ type StationProcess struct {
 	Meta          Meta
 }
 
-//GetAllStationProcesses Retrieves all station processes from the database
+// Retrieves all station processes from the database
 func (s StationProcessService) GetAllStationProcesses() ([]StationProcess, error) {
 	stationProcesses := make([]StationProcess, 0)
 
@@ -59,7 +59,7 @@ func (s StationProcessService) GetAllStationProcesses() ([]StationProcess, error
 	return stationProcesses, err
 }
 
-//GetStationProcessesByStation Retrieves all station processes in a given station from the database
+// Retrieves all station processes in a given station from the database
 func (s StationProcessService) GetStationProcessesByStation(stationID uuid.UUID) ([]StationProcess, error) {
 	stationProcesses := make([]StationProcess, 0)
 

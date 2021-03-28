@@ -2,21 +2,21 @@ package sql
 
 import "github.com/google/uuid"
 
-//RegionService Facility for interacting with the universe_regions table
+// Facility for interacting with the universe_regions table
 type RegionService struct{}
 
-//GetRegionService Gets a region service for interacting with regions in the database
+// Gets a region service for interacting with regions in the database
 func GetRegionService() *RegionService {
 	return &RegionService{}
 }
 
-//Region Structure representing a row in the universe_regions table
+// Structure representing a row in the universe_regions table
 type Region struct {
 	ID         uuid.UUID
 	RegionName string
 }
 
-//GetAllRegions Retrieves all regions from the database
+// Retrieves all regions from the database
 func (s RegionService) GetAllRegions() ([]Region, error) {
 	regions := make([]Region, 0)
 

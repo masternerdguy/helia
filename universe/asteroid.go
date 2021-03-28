@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//Asteroid Structure representing an asteroid
+// Structure representing an asteroid
 type Asteroid struct {
 	ID       uuid.UUID
 	SystemID uuid.UUID
@@ -27,7 +27,7 @@ type Asteroid struct {
 	ItemTypeMeta   Meta
 }
 
-//ToPhysicsDummy Returns a new physics dummy structure representing this station
+// Returns a new physics dummy structure representing this station
 func (a *Asteroid) ToPhysicsDummy() physics.Dummy {
 	return physics.Dummy{
 		VelX: 0,

@@ -12,40 +12,40 @@ import (
 	"github.com/google/uuid"
 )
 
-//ShipFuelTurn Scaler for the amount of fuel used turning
+// Scaler for the amount of fuel used turning
 const ShipFuelTurn = 0.001
 
-//ShipHeatTurn Scaler for the amount of heat generated turning
+// Scaler for the amount of heat generated turning
 const ShipHeatTurn = 0.003
 
-//ShipFuelBurn Scaler for the amount of fuel used thrusting
+// Scaler for the amount of fuel used thrusting
 const ShipFuelBurn = 0.003
 
-//ShipHeatBurn Scaler for the amount of heat generated thrusting
+// Scaler for the amount of heat generated thrusting
 const ShipHeatBurn = 0.06
 
-//ShipFuelEnergyRegen Scaler for the amount of fuel used regenerating energy
+// Scaler for the amount of fuel used regenerating energy
 const ShipFuelEnergyRegen = 0.09
 
-//ShipHeatEnergyRegen Scaler for the amount of heat generated regenerating energy
+// Scaler for the amount of heat generated regenerating energy
 const ShipHeatEnergyRegen = 0.1
 
-//ShipHeatDamage Scaler for damage inflicted by excess heat
+// Scaler for damage inflicted by excess heat
 const ShipHeatDamage = 0.01
 
-//ShipShieldRegenEnergyBurn Scaler for the amount of energy used regenerating shields
+// Scaler for the amount of energy used regenerating shields
 const ShipShieldRegenEnergyBurn = 0.5
 
-//ShipShieldRegenHeat Scaler for the amount of heat generated regenerating shields
+// Scaler for the amount of heat generated regenerating shields
 const ShipShieldRegenHeat = 1.5
 
-//ShipMinShieldRegenPercent Percentage of shield regen to be applied to a ship at 0% shields
+// Percentage of shield regen to be applied to a ship at 0% shields
 const ShipMinShieldRegenPercent = 0.05
 
-//ShipMinEnergyRegenPercent Percentage of energy regen to be applied to a ship at 100% energy
+// Percentage of energy regen to be applied to a ship at 100% energy
 const ShipMinEnergyRegenPercent = 0.07
 
-//AutopilotRegistry Autopilot states for ships
+// Autopilot states for ships
 type AutopilotRegistry struct {
 	None      int
 	ManualNav int
@@ -55,7 +55,7 @@ type AutopilotRegistry struct {
 	Undock    int
 }
 
-//NewAutopilotRegistry Returns a populated AutopilotRegistry struct for use as an enum
+// Returns a populated AutopilotRegistry struct for use as an enum
 func NewAutopilotRegistry() *AutopilotRegistry {
 	return &AutopilotRegistry{
 		None:      0,
@@ -67,19 +67,19 @@ func NewAutopilotRegistry() *AutopilotRegistry {
 	}
 }
 
-//ManualNavData Container structure for arguments of the ManualTurn autopilot mode
+// Container structure for arguments of the ManualTurn autopilot mode
 type ManualNavData struct {
 	Magnitude float64
 	Theta     float64
 }
 
-//GotoData Container structure for arguments of the Goto autopilot mode
+// Container structure for arguments of the Goto autopilot mode
 type GotoData struct {
 	TargetID uuid.UUID
 	Type     int
 }
 
-//OrbitData Container structure for arguments of the Orbit autopilot mode
+// Container structure for arguments of the Orbit autopilot mode
 type OrbitData struct {
 	TargetID uuid.UUID
 	Type     int
@@ -92,11 +92,11 @@ type DockData struct {
 	Type     int
 }
 
-//UndockData Container structure for arguments of the Undock autopilot mode
+// Container structure for arguments of the Undock autopilot mode
 type UndockData struct {
 }
 
-//Ship Structure representing a player ship in the game universe
+// Structure representing a player ship in the game universe
 type Ship struct {
 	ID                    uuid.UUID
 	UserID                uuid.UUID
@@ -145,14 +145,14 @@ type Ship struct {
 	Lock               sync.Mutex
 }
 
-//Fitting Structure representing the module racks of a ship and what is fitted to them
+// Structure representing the module racks of a ship and what is fitted to them
 type Fitting struct {
 	ARack []FittedSlot
 	BRack []FittedSlot
 	CRack []FittedSlot
 }
 
-//FittedSlot Structure representing a slot within a ship's fitting rack
+// Structure representing a slot within a ship's fitting rack
 type FittedSlot struct {
 	ItemTypeID uuid.UUID
 	ItemID     uuid.UUID
@@ -173,7 +173,7 @@ type FittedSlot struct {
 	cooldownProgress int
 }
 
-//LinkShip Links the ship the slot is on into the slot
+// Links the ship the slot is on into the slot
 func (m *FittedSlot) LinkShip(sp *Ship) {
 	m.shipMountedOn = sp
 }
@@ -216,7 +216,7 @@ func (f *Fitting) stripModuleFromFitting(itemID uuid.UUID) {
 	f.CRack = newC
 }
 
-//getFreeSlotIndex Determines whether a rack has a free slot suitable for fitting a given module and returns the index if found
+// Determines whether a rack has a free slot suitable for fitting a given module and returns the index if found
 func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (int, bool) {
 	// get default uuid
 	emptyUUID := uuid.UUID{}
@@ -293,7 +293,7 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (i
 	return -1, false
 }
 
-//CopyShip Returns a copy of the ship
+// Returns a copy of the ship
 func (s *Ship) CopyShip() *Ship {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
@@ -371,7 +371,7 @@ func (s *Ship) CopyShip() *Ship {
 	return &sc
 }
 
-//PeriodicUpdate Processes the ship for a tick
+// Processes the ship for a tick
 func (s *Ship) PeriodicUpdate() {
 	// lock entity
 	s.Lock.Lock()
@@ -482,7 +482,7 @@ func (s *Ship) PeriodicUpdate() {
 	}
 }
 
-//updateEnergy Updates the ship's energy level for a tick
+// Updates the ship's energy level for a tick
 func (s *Ship) updateEnergy() {
 	maxEnergy := s.GetRealMaxEnergy()
 
@@ -530,7 +530,7 @@ func (s *Ship) updateEnergy() {
 	}
 }
 
-//UpdateShield Updates the ship's shield level for a tick
+// Updates the ship's shield level for a tick
 func (s *Ship) updateShield() {
 	// get max shield
 	max := s.GetRealMaxShield()
@@ -590,7 +590,7 @@ func (s *Ship) updateShield() {
 	}
 }
 
-//updateHeat Updates the ship's heat level for a tick
+// Updates the ship's heat level for a tick
 func (s *Ship) updateHeat() {
 	// get max heat
 	maxHeat := s.GetRealMaxHeat()
@@ -622,7 +622,7 @@ func (s *Ship) updateHeat() {
 	}
 }
 
-//CmdAbort Abruptly ends the current autopilot mode
+// Abruptly ends the current autopilot mode
 func (s *Ship) CmdAbort() {
 	//stop autopilot
 	s.AutopilotMode = NewAutopilotRegistry().None
@@ -635,7 +635,7 @@ func (s *Ship) CmdAbort() {
 	s.AutopilotUndock = UndockData{}
 }
 
-//CmdManualNav Invokes manual nav autopilot on the ship
+// Invokes manual nav autopilot on the ship
 func (s *Ship) CmdManualNav(screenT float64, screenM float64) {
 	// get registry
 	registry := NewAutopilotRegistry()
@@ -653,7 +653,7 @@ func (s *Ship) CmdManualNav(screenT float64, screenM float64) {
 	s.AutopilotMode = registry.ManualNav
 }
 
-//CmdGoto Invokes goto autopilot on the ship
+// Invokes goto autopilot on the ship
 func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int) {
 	// get registry
 	registry := NewAutopilotRegistry()
@@ -671,7 +671,7 @@ func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int) {
 	s.AutopilotMode = registry.Goto
 }
 
-//CmdOrbit Invokes orbit autopilot on the ship
+// Invokes orbit autopilot on the ship
 func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int) {
 	// get registry
 	registry := NewAutopilotRegistry()
@@ -689,7 +689,7 @@ func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int) {
 	s.AutopilotMode = registry.Orbit
 }
 
-//CmdDock Invokes dock autopilot on the ship
+// Invokes dock autopilot on the ship
 func (s *Ship) CmdDock(targetID uuid.UUID, targetType int) {
 	// get registry
 	registry := NewAutopilotRegistry()
@@ -707,7 +707,7 @@ func (s *Ship) CmdDock(targetID uuid.UUID, targetType int) {
 	s.AutopilotMode = registry.Dock
 }
 
-//CmdUndock Invokes undock autopilot on the ship
+// Invokes undock autopilot on the ship
 func (s *Ship) CmdUndock() {
 	// get registry
 	registry := NewAutopilotRegistry()
@@ -722,7 +722,7 @@ func (s *Ship) CmdUndock() {
 	s.AutopilotMode = registry.Undock
 }
 
-//ToPhysicsDummy Returns a new physics dummy structure representing this ship
+// Returns a new physics dummy structure representing this ship
 func (s *Ship) ToPhysicsDummy() physics.Dummy {
 	return physics.Dummy{
 		VelX: s.VelX,
@@ -733,7 +733,7 @@ func (s *Ship) ToPhysicsDummy() physics.Dummy {
 	}
 }
 
-//ApplyPhysicsDummy Applies the values of a physics dummy to this ship
+// Applies the values of a physics dummy to this ship
 func (s *Ship) ApplyPhysicsDummy(dummy physics.Dummy) {
 	s.VelX = dummy.VelX
 	s.VelY = dummy.VelY
@@ -741,7 +741,7 @@ func (s *Ship) ApplyPhysicsDummy(dummy physics.Dummy) {
 	s.PosY = dummy.PosY
 }
 
-//ReMaxStatsForSpawn Resets some stats to their maximum (for use when spawning a new ship)
+// Resets some stats to their maximum (for use when spawning a new ship)
 func (s *Ship) ReMaxStatsForSpawn() {
 	if s.ReMaxDirty {
 		s.Shield = s.GetRealMaxShield()
@@ -753,32 +753,32 @@ func (s *Ship) ReMaxStatsForSpawn() {
 	}
 }
 
-//GetRealAccel Returns the real acceleration capability of a ship after modifiers
+// Returns the real acceleration capability of a ship after modifiers
 func (s *Ship) GetRealAccel() float64 {
 	return s.TemplateData.BaseAccel
 }
 
-//GetRealTurn Returns the real turning capability of a ship after modifiers
+// Returns the real turning capability of a ship after modifiers
 func (s *Ship) GetRealTurn() float64 {
 	return s.TemplateData.BaseTurn
 }
 
-//GetRealMass Returns the real mass of a ship after modifiers
+// Returns the real mass of a ship after modifiers
 func (s *Ship) GetRealMass() float64 {
 	return s.TemplateData.BaseMass
 }
 
-//GetRealMaxShield Returns the real max shield of the ship after modifiers
+// Returns the real max shield of the ship after modifiers
 func (s *Ship) GetRealMaxShield() float64 {
 	return s.TemplateData.BaseShield
 }
 
-//GetRealShieldRegen Returns the real shield regen rate after modifiers
+// Returns the real shield regen rate after modifiers
 func (s *Ship) GetRealShieldRegen() float64 {
 	return s.TemplateData.BaseShieldRegen
 }
 
-//GetRealMaxArmor Returns the real max armor of the ship after modifiers
+// Returns the real max armor of the ship after modifiers
 func (s *Ship) GetRealMaxArmor() float64 {
 	// get base max armor
 	a := s.TemplateData.BaseArmor
@@ -796,32 +796,32 @@ func (s *Ship) GetRealMaxArmor() float64 {
 	return a
 }
 
-//GetRealMaxHull Returns the real max hull of the ship after modifiers
+// Returns the real max hull of the ship after modifiers
 func (s *Ship) GetRealMaxHull() float64 {
 	return s.TemplateData.BaseHull
 }
 
-//GetRealMaxEnergy Returns the real max energy of the ship after modifiers
+// Returns the real max energy of the ship after modifiers
 func (s *Ship) GetRealMaxEnergy() float64 {
 	return s.TemplateData.BaseEnergy
 }
 
-//GetRealEnergyRegen Returns the real energy regeneration rate of the ship after modifiers
+// Returns the real energy regeneration rate of the ship after modifiers
 func (s *Ship) GetRealEnergyRegen() float64 {
 	return s.TemplateData.BaseEnergyRegen
 }
 
-//GetRealMaxHeat Returns the real max heat of the ship after modifiers
+// Returns the real max heat of the ship after modifiers
 func (s *Ship) GetRealMaxHeat() float64 {
 	return s.TemplateData.BaseHeatCap
 }
 
-//GetRealHeatSink Returns the real heat dissipation rate of the ship after modifiers
+// Returns the real heat dissipation rate of the ship after modifiers
 func (s *Ship) GetRealHeatSink() float64 {
 	return s.TemplateData.BaseHeatSink
 }
 
-//GetRealMaxFuel Returns the real max fuel of the ship after modifiers
+// Returns the real max fuel of the ship after modifiers
 func (s *Ship) GetRealMaxFuel() float64 {
 	// get base max fuel
 	f := s.TemplateData.BaseFuel
@@ -839,12 +839,12 @@ func (s *Ship) GetRealMaxFuel() float64 {
 	return f
 }
 
-//GetRealCargoBayVolume Returns the real max cargo bay volume of the ship after modifiers
+// Returns the real max cargo bay volume of the ship after modifiers
 func (s *Ship) GetRealCargoBayVolume() float64 {
 	return s.TemplateData.BaseCargoBayVolume
 }
 
-//TotalCargoBayVolumeUsed Returns the total amount of cargo bay space currently in use
+// Returns the total amount of cargo bay space currently in use
 func (s *Ship) TotalCargoBayVolumeUsed(lock bool) float64 {
 	if lock {
 		// lock entity
@@ -878,7 +878,7 @@ func (s *Ship) TotalCargoBayVolumeUsed(lock bool) float64 {
 	return tV
 }
 
-//DealDamage Deals damage to the ship
+// Deals damage to the ship
 func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) {
 	//apply shield damage
 	s.Shield -= shieldDmg
@@ -917,7 +917,7 @@ func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) 
 	}
 }
 
-//doUndockedAutopilot Flies the ship for you
+// Flies the ship for you
 func (s *Ship) doUndockedAutopilot() {
 	// get registry
 	registry := NewAutopilotRegistry()
@@ -936,7 +936,7 @@ func (s *Ship) doUndockedAutopilot() {
 	}
 }
 
-//doUndockedAutopilot Flies the ship for you
+// Flies the ship for you
 func (s *Ship) doDockedAutopilot() {
 	// get registry
 	registry := NewAutopilotRegistry()
@@ -949,7 +949,7 @@ func (s *Ship) doDockedAutopilot() {
 	}
 }
 
-//doAutopilotManualNav Causes ship to turn to face a target angle while accelerating
+// Causes ship to turn to face a target angle while accelerating
 func (s *Ship) doAutopilotManualNav() {
 	screenT := s.AutopilotManualNav.Theta
 
@@ -978,7 +978,7 @@ func (s *Ship) doAutopilotManualNav() {
 	}
 }
 
-//doAutopilotGoto Causes ship to turn to move towards a target and stop when within range
+// Causes ship to turn to move towards a target and stop when within range
 func (s *Ship) doAutopilotGoto() {
 	// get registry
 	targetTypeReg := models.NewTargetTypeRegistry()
@@ -1083,7 +1083,7 @@ func (s *Ship) doAutopilotGoto() {
 	s.flyToPoint(tX, tY, hold, 30)
 }
 
-//doAutopilotOrbit Causes ship to fly a circle around the target
+// Causes ship to fly a circle around the target
 func (s *Ship) doAutopilotOrbit() {
 	// get registry
 	targetTypeReg := models.NewTargetTypeRegistry()
@@ -1195,7 +1195,7 @@ func (s *Ship) doAutopilotOrbit() {
 	s.flyToPoint(nX+tX, nY+tY, 0, 3)
 }
 
-//doAutopilotDock Causes ship to dock with a target
+// Causes ship to dock with a target
 func (s *Ship) doAutopilotDock() {
 	// get registry
 	targetTypeReg := models.NewTargetTypeRegistry()
@@ -1228,7 +1228,7 @@ func (s *Ship) doAutopilotDock() {
 	}
 }
 
-//doAutopilotUndock Causes ship to undock from a target
+// Causes ship to undock from a target
 func (s *Ship) doAutopilotUndock() {
 	// verify that we are docked (currently only supports stations)
 	if s.DockedAtStationID != nil && s.DockedAtStation != nil {
@@ -1244,7 +1244,7 @@ func (s *Ship) doAutopilotUndock() {
 	}
 }
 
-//flyToPoint Reusable function to fly a ship towards a point
+// Reusable function to fly a ship towards a point
 func (s *Ship) flyToPoint(tX float64, tY float64, hold float64, caution float64) {
 	// face towards target
 	turnMag := s.facePoint(tX, tY)
@@ -1259,7 +1259,7 @@ func (s *Ship) flyToPoint(tX float64, tY float64, hold float64, caution float64)
 	}
 }
 
-//facePoint Reusable function to turn a ship towards a point (returns the turn magnitude needed in degrees)
+// Reusable function to turn a ship towards a point (returns the turn magnitude needed in degrees)
 func (s *Ship) facePoint(tX float64, tY float64) float64 {
 	// get relative position of target to ship
 	rX := s.PosX - tX
@@ -1284,7 +1284,7 @@ func (s *Ship) facePoint(tX float64, tY float64) float64 {
 	return turnMag
 }
 
-//rotate Turn the ship
+// Turn the ship
 func (s *Ship) rotate(scale float64) {
 	// do nothing if out of fuel
 	if s.Fuel <= 0 {
@@ -1313,7 +1313,7 @@ func (s *Ship) rotate(scale float64) {
 	s.Heat += math.Abs(burn) * ShipHeatTurn
 }
 
-//forwardThrust Fire the ship's thrusters
+// Fire the ship's thrusters
 func (s *Ship) forwardThrust(scale float64) {
 	// do nothing if out of fuel
 	if s.Fuel <= 0 {
@@ -1343,7 +1343,7 @@ func (s *Ship) forwardThrust(scale float64) {
 	s.Heat += math.Abs(burn) * ShipHeatBurn
 }
 
-//FindModule Finds a module fitted on this ship
+// Finds a module fitted on this ship
 func (s *Ship) FindModule(id uuid.UUID, rack string) *FittedSlot {
 	if rack == "A" {
 		for i, v := range s.Fitting.ARack {
@@ -1368,7 +1368,7 @@ func (s *Ship) FindModule(id uuid.UUID, rack string) *FittedSlot {
 	return nil
 }
 
-//FindItemInCargo Returns an item in the ship's cargo bay if it is present
+// Returns an item in the ship's cargo bay if it is present
 func (s *Ship) FindItemInCargo(id uuid.UUID) *Item {
 	//look for item
 	for i := range s.CargoBay.Items {
@@ -1384,7 +1384,7 @@ func (s *Ship) FindItemInCargo(id uuid.UUID) *Item {
 	return nil
 }
 
-//FitModule Removes an item from the cargo hold and fits it to the ship
+// Removes an item from the cargo hold and fits it to the ship
 func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	if lock {
 		//lock entity
@@ -1481,7 +1481,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	return nil
 }
 
-//UnfitModule Removes a module from a ship and places it in the cargo hold
+// Removes a module from a ship and places it in the cargo hold
 func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	if lock {
 		//lock entity
@@ -1557,7 +1557,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	return nil
 }
 
-//TrashItemInCargo Trashes an item in the ship's cargo bay if it exists
+// Trashes an item in the ship's cargo bay if it exists
 func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
 		//lock entity
@@ -1598,7 +1598,7 @@ func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
 	return nil
 }
 
-//PackageItemInCargo Packages an item in the ship's cargo bay if it exists
+// Packages an item in the ship's cargo bay if it exists
 func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
 		//lock entity
@@ -1655,7 +1655,7 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 	return nil
 }
 
-//BuyItemFromOrder Attempts to fulfill a sell order and place the item in cargo if successful
+// Attempts to fulfill a sell order and place the item in cargo if successful
 func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	if lock {
 		//lock entity
@@ -1781,7 +1781,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	return nil
 }
 
-//SellItemAsOrder Lists an item in the ship's cargo bay on the station order exchange if it exists
+// Lists an item in the ship's cargo bay on the station order exchange if it exists
 func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 	if lock {
 		//lock entity
@@ -1867,7 +1867,7 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 	return nil
 }
 
-//UnpackageItemInCargo Packages an item in the ship's cargo bay if it exists
+// Packages an item in the ship's cargo bay if it exists
 func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
 		//lock entity
@@ -1919,7 +1919,7 @@ func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 	return nil
 }
 
-//StackItemInCargo Stacks an item in the ship's cargo bay if it exists
+// Stacks an item in the ship's cargo bay if it exists
 func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
 		//lock entity
@@ -1995,7 +1995,7 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 	return nil
 }
 
-//SplitItemInCargo Splits an item stack in the ship's cargo bay if it exists
+// Splits an item stack in the ship's cargo bay if it exists
 func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 	if lock {
 		//lock entity
@@ -2075,7 +2075,7 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 	return nil
 }
 
-//PeriodicUpdate Updates a fitted slot on a ship
+// Updates a fitted slot on a ship
 func (m *FittedSlot) PeriodicUpdate() {
 	if m.IsCycling {
 		//update cycle timer

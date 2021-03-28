@@ -5,22 +5,22 @@ import (
 	"errors"
 )
 
-//ItemFamilyService Facility for interacting with the ItemFamilies table in the database
+// Facility for interacting with the ItemFamilies table in the database
 type ItemFamilyService struct{}
 
-//GetItemFamilyService Returns a ItemFamily service for interacting with ItemFamilies in the database
+// Returns a ItemFamily service for interacting with ItemFamilies in the database
 func GetItemFamilyService() ItemFamilyService {
 	return ItemFamilyService{}
 }
 
-//ItemFamily Structure representing a row in the ItemFamilies table
+// Structure representing a row in the ItemFamilies table
 type ItemFamily struct {
 	ID           string
 	FriendlyName string
 	Meta         Meta `json:"meta"`
 }
 
-//GetItemFamilyByID Finds and returns an ItemFamily by its id
+// Finds and returns an ItemFamily by its id
 func (s ItemFamilyService) GetItemFamilyByID(ItemFamilyID string) (*ItemFamily, error) {
 	//get db handle
 	db, err := connect()

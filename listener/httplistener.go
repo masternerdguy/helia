@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//HTTPListener Listener for handling and dispatching incoming http requests
+// Listener for handling and dispatching incoming http requests
 type HTTPListener struct {
 	Engine *engine.HeliaEngine
 }
@@ -20,7 +20,7 @@ func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
 
-//HandleRegister Handles a user registering
+// Handles a user registering
 func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	//enable cors
 	enableCors(&w)
@@ -104,7 +104,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-//HandleLogin Handles a user signing in
+// Handles a user signing in
 func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	//enable cors
 	enableCors(&w)
@@ -167,7 +167,7 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Write(o)
 }
 
-//HandleShutdown Shuts down the server after saving the game state
+// Shuts down the server after saving the game state
 func (l *HTTPListener) HandleShutdown(w http.ResponseWriter, r *http.Request) {
 	//enable cors
 	enableCors(&w)

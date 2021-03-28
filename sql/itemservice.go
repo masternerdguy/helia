@@ -8,15 +8,15 @@ import (
 	"github.com/google/uuid"
 )
 
-//ItemService Facility for interacting with the Items table in the database
+// Facility for interacting with the Items table in the database
 type ItemService struct{}
 
-//GetItemService Returns a Item service for interacting with Items in the database
+// Returns a Item service for interacting with Items in the database
 func GetItemService() ItemService {
 	return ItemService{}
 }
 
-//Item Structure representing a row in the Items table
+// Structure representing a row in the Items table
 type Item struct {
 	ID            uuid.UUID
 	ItemTypeID    uuid.UUID
@@ -29,7 +29,7 @@ type Item struct {
 	IsPackaged    bool
 }
 
-//GetItemByID Finds and returns an Item by its id
+// Finds and returns an Item by its id
 func (s ItemService) GetItemByID(ItemID uuid.UUID) (*Item, error) {
 	//get db handle
 	db, err := connect()
@@ -62,7 +62,7 @@ func (s ItemService) GetItemByID(ItemID uuid.UUID) (*Item, error) {
 	}
 }
 
-//GetItemsByContainer Retrieves all items in a given container
+// Retrieves all items in a given container
 func (s ItemService) GetItemsByContainer(containerID uuid.UUID) ([]Item, error) {
 	items := make([]Item, 0)
 
@@ -105,7 +105,7 @@ func (s ItemService) GetItemsByContainer(containerID uuid.UUID) ([]Item, error) 
 	return items, err
 }
 
-//NewItem Creates a new item
+// Creates a new item
 func (s ItemService) NewItem(e Item) (*Item, error) {
 	//get db handle
 	db, err := connect()
@@ -143,7 +143,7 @@ func (s ItemService) NewItem(e Item) (*Item, error) {
 	return &e, nil
 }
 
-//SetContainerID Updates the database with a new storage location for an item
+// Updates the database with a new storage location for an item
 func (s ItemService) SetContainerID(id uuid.UUID, containerID uuid.UUID) error {
 	//get db handle
 	db, err := connect()
@@ -168,7 +168,7 @@ func (s ItemService) SetContainerID(id uuid.UUID, containerID uuid.UUID) error {
 	return nil
 }
 
-//PackageItem Updates the database to make an item packaged
+// Updates the database to make an item packaged
 func (s ItemService) PackageItem(id uuid.UUID) error {
 	//get db handle
 	db, err := connect()
@@ -193,7 +193,7 @@ func (s ItemService) PackageItem(id uuid.UUID) error {
 	return nil
 }
 
-//UnpackageItem Updates the database to make an item unpackaged
+// Updates the database to make an item unpackaged
 func (s ItemService) UnpackageItem(id uuid.UUID, meta Meta) error {
 	//get db handle
 	db, err := connect()
@@ -218,7 +218,7 @@ func (s ItemService) UnpackageItem(id uuid.UUID, meta Meta) error {
 	return nil
 }
 
-//ChangeQuantity Updates the database to change the quantity of an item stack
+// Updates the database to change the quantity of an item stack
 func (s ItemService) ChangeQuantity(id uuid.UUID, quantity int) error {
 	//get db handle
 	db, err := connect()

@@ -10,15 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
-//UserService Facility for interacting with the users table in the database
+// Facility for interacting with the users table in the database
 type UserService struct{}
 
-//GetUserService Returns a user service for interacting with users in the database
+// Returns a user service for interacting with users in the database
 func GetUserService() UserService {
 	return UserService{}
 }
 
-//User Structure representing a row in the users table
+// Structure representing a row in the users table
 type User struct {
 	ID                uuid.UUID
 	Username          string
@@ -30,7 +30,7 @@ type User struct {
 	EscrowContainerID uuid.UUID
 }
 
-//Hashpass Hashes a user's password using their username and an internal constant as the salt
+// Hashes a user's password using their username and an internal constant as the salt
 func (s UserService) Hashpass(username string, pwd string) (hash *string, err error) {
 	const salt = "_4ppl3j4ck!_"
 	token := []byte(fmt.Sprintf("%s-xiwmg-%s-dnjij-%s", username, pwd, salt))
@@ -44,7 +44,7 @@ func (s UserService) Hashpass(username string, pwd string) (hash *string, err er
 	return &hp, nil
 }
 
-//NewUser Creates a new user
+// Creates a new user
 func (s UserService) NewUser(u string, p string, startID uuid.UUID, escrowContainerID uuid.UUID) (*User, error) {
 	//get db handle
 	db, err := connect()
@@ -91,7 +91,7 @@ func (s UserService) NewUser(u string, p string, startID uuid.UUID, escrowContai
 	return &user, nil
 }
 
-//SetCurrentShipID Sets current_shipid on a user in the database
+// Sets current_shipid on a user in the database
 func (s UserService) SetCurrentShipID(uid uuid.UUID, shipID *uuid.UUID) error {
 	//get db handle
 	db, err := connect()
@@ -116,7 +116,7 @@ func (s UserService) SetCurrentShipID(uid uuid.UUID, shipID *uuid.UUID) error {
 	return nil
 }
 
-//GetUserByLogin Finds the user with the supplied credentials
+// Finds the user with the supplied credentials
 func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) {
 	//get db handle
 	db, err := connect()
@@ -152,7 +152,7 @@ func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) 
 	}
 }
 
-//GetUserByID Finds a user by its id
+// Finds a user by its id
 func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 	//get db handle
 	db, err := connect()

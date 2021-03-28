@@ -2,15 +2,15 @@ package sql
 
 import "github.com/google/uuid"
 
-//JumpholeService Facility for interacting with the universe_jumpholes table
+// Facility for interacting with the universe_jumpholes table
 type JumpholeService struct{}
 
-//GetJumpholeService Gets a jumphole service for interacting with jumpholes in the database
+// Gets a jumphole service for interacting with jumpholes in the database
 func GetJumpholeService() *JumpholeService {
 	return &JumpholeService{}
 }
 
-//Jumphole Structure representing a row in the universe_jumpholes table
+// Structure representing a row in the universe_jumpholes table
 type Jumphole struct {
 	ID           uuid.UUID
 	SystemID     uuid.UUID
@@ -24,7 +24,7 @@ type Jumphole struct {
 	Theta        float64
 }
 
-//GetAllJumpholes Retrieves all jumpholes from the database
+// Retrieves all jumpholes from the database
 func (s JumpholeService) GetAllJumpholes() ([]Jumphole, error) {
 	jumpholes := make([]Jumphole, 0)
 
