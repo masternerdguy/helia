@@ -48,7 +48,7 @@ func (s ProcessInputService) GetAllProcessInputs() ([]ProcessInput, error) {
 		r := ProcessInput{}
 
 		//scan into processinput structure
-		rows.Scan(&r.ID, &r.ItemTypeID, r.Quantity, r.Meta, r.ProcessID)
+		rows.Scan(&r.ID, &r.ItemTypeID, &r.Quantity, &r.Meta, &r.ProcessID)
 
 		//append to processinput slice
 		processinputs = append(processinputs, r)
@@ -87,7 +87,7 @@ func (s ProcessInputService) GetProcessInputsByProcess(processID uuid.UUID) ([]P
 		r := ProcessInput{}
 
 		//scan into processinput structure
-		rows.Scan(&r.ID, &r.ItemTypeID, r.Quantity, r.Meta, r.ProcessID)
+		rows.Scan(&r.ID, &r.ItemTypeID, &r.Quantity, &r.Meta, &r.ProcessID)
 
 		//append to processinput slice
 		processinputs = append(processinputs, r)

@@ -22,6 +22,7 @@ type Station struct {
 	Lock           sync.Mutex
 	CurrentSystem  *SolarSystem
 	OpenSellOrders map[string]*SellOrder
+	Processes      []StationProcess
 }
 
 //Initialize Initializes internal aspects of Station

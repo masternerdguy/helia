@@ -2,7 +2,7 @@ package universe
 
 import "github.com/google/uuid"
 
-//StationProcess Structure representing the status of a manufaturing process in a specific station
+//StationProcess Structure representing the status of a manufacturing process in a specific station
 type StationProcess struct {
 	ID            uuid.UUID
 	StationID     uuid.UUID

@@ -48,7 +48,7 @@ func (s ProcessOutputService) GetAllProcessOutputs() ([]ProcessOutput, error) {
 		r := ProcessOutput{}
 
 		//scan into processoutput structure
-		rows.Scan(&r.ID, &r.ItemTypeID, r.Quantity, r.Meta, r.ProcessID)
+		rows.Scan(&r.ID, &r.ItemTypeID, &r.Quantity, &r.Meta, &r.ProcessID)
 
 		//append to processoutput slice
 		processoutputs = append(processoutputs, r)
@@ -87,7 +87,7 @@ func (s ProcessOutputService) GetProcessOutputsByProcess(processID uuid.UUID) ([
 		r := ProcessOutput{}
 
 		//scan into processoutput structure
-		rows.Scan(&r.ID, &r.ItemTypeID, r.Quantity, r.Meta, r.ProcessID)
+		rows.Scan(&r.ID, &r.ItemTypeID, &r.Quantity, &r.Meta, &r.ProcessID)
 
 		//append to processoutput slice
 		processoutputs = append(processoutputs, r)

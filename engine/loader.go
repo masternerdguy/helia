@@ -19,6 +19,7 @@ func loadUniverse() (*universe.Universe, error) {
 	starSvc := sql.GetStarService()
 	planetSvc := sql.GetPlanetService()
 	stationSvc := sql.GetStationService()
+	stationProcessSvc := sql.GetStationProcessService()
 	jumpholeSvc := sql.GetJumpholeService()
 	asteroidSvc := sql.GetAsteroidService()
 	itemTypeSvc := sql.GetItemTypeService()
@@ -215,6 +216,26 @@ func loadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, currStation := range stations {
+				//load station processes
+				sqlProcesses, err := stationProcessSvc.GetStationProcessesByStation(currStation.ID)
+
+				if err != nil {
+					return nil, err
+				}
+
+				processes := make([]universe.StationProcess, 0)
+
+				for _, sp := range sqlProcesses {
+					spx, err := LoadStationProcess(&sp)
+
+					if err != nil {
+						return nil, err
+					}
+
+					processes = append(processes, *spx)
+				}
+
+				//build station
 				station := universe.Station{
 					ID:          currStation.ID,
 					SystemID:    currStation.SystemID,
@@ -227,10 +248,13 @@ func loadUniverse() (*universe.Universe, error) {
 					Theta:       currStation.Theta,
 					//link solar system into station
 					CurrentSystem: &s,
+					Processes:     processes,
 				}
 
 				//initialize station
 				station.Initialize()
+
+				log.Println(fmt.Sprintf("%v", station.Processes))
 
 				//load open sell orders
 				sos, err := sellOrderSvc.GetOpenSellOrdersByStation(station.ID)
@@ -896,6 +920,38 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 	process.Outputs = o
 
 	return &process, nil
+}
+
+//LoadStationProcess Takes a SQL Station Process and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
+func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error) {
+	procesSvc := sql.GetProcessService()
+
+	// load process
+	sqlP, err := procesSvc.GetProcessByID(sp.ProcessID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	process, err := LoadProcess(sqlP)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// build station process
+	o := universe.StationProcess{
+		ID:            sp.ID,
+		StationID:     sp.StationID,
+		ProcessID:     sp.ProcessID,
+		Progress:      sp.Progress,
+		Installed:     sp.Installed,
+		InternalState: universe.Meta(sp.InternalState),
+		Meta:          universe.Meta(sp.Meta),
+		Process:       *process,
+	}
+
+	return &o, nil
 }
 
 //LoadShip Takes a SQL Ship and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
