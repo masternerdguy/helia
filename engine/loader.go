@@ -39,7 +39,7 @@ func loadUniverse() (*universe.Universe, error) {
 		return nil, err
 	}
 
-	regions := make(map[string]*universe.Region, 0)
+	regions := make(map[string]*universe.Region)
 	for _, e := range rs {
 		//load basic region information
 		r := universe.Region{
@@ -54,7 +54,7 @@ func loadUniverse() (*universe.Universe, error) {
 			return nil, err
 		}
 
-		systems := make(map[string]*universe.SolarSystem, 0)
+		systems := make(map[string]*universe.SolarSystem)
 
 		for _, f := range ss {
 			s := universe.SolarSystem{
@@ -244,7 +244,7 @@ func loadUniverse() (*universe.Universe, error) {
 					so := SellOrderFromSQL(&o)
 
 					if so == nil {
-						return nil, errors.New("Unable to load sell order")
+						return nil, errors.New("unable to load sell order")
 					}
 
 					// load item for sale
@@ -779,7 +779,7 @@ func LoadItem(i *sql.Item) (*universe.Item, error) {
 
 	//null check
 	if ei == nil {
-		return nil, errors.New("Item from SQL failed")
+		return nil, errors.New("item from SQL failed")
 	}
 
 	//load item type
@@ -832,7 +832,7 @@ func LoadContainer(c *sql.Container) (*universe.Container, error) {
 
 		//null check
 		if m == nil {
-			return nil, errors.New("Item argument was nil")
+			return nil, errors.New("item argument was nil")
 		}
 
 		//push into container
@@ -841,6 +841,61 @@ func LoadContainer(c *sql.Container) (*universe.Container, error) {
 
 	//return full container
 	return container, nil
+}
+
+//LoadProcess Takes a SQL Process and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
+func LoadProcess(p *sql.Process) (*universe.Process, error) {
+	inputSvc := sql.GetProcessInputService()
+	outputSvc := sql.GetProcessOutputService()
+
+	// get inputs
+	inputs, err := inputSvc.GetProcessInputsByProcess(p.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// get outputs
+	outputs, err := outputSvc.GetProcessOutputsByProcess(p.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// build in-memory process
+	process := universe.Process{
+		ID:   p.ID,
+		Name: p.Name,
+		Meta: universe.Meta(p.Meta),
+		Time: p.Time,
+	}
+
+	i := make([]universe.ProcessInput, 0)
+	for _, e := range inputs {
+		i = append(i, universe.ProcessInput{
+			ID:         e.ID,
+			ItemTypeID: e.ItemTypeID,
+			Quantity:   e.Quantity,
+			Meta:       universe.Meta(e.Meta),
+			ProcessID:  e.ProcessID,
+		})
+	}
+
+	o := make([]universe.ProcessOutput, 0)
+	for _, e := range outputs {
+		o = append(o, universe.ProcessOutput{
+			ID:         e.ID,
+			ItemTypeID: e.ItemTypeID,
+			Quantity:   e.Quantity,
+			Meta:       universe.Meta(e.Meta),
+			ProcessID:  e.ProcessID,
+		})
+	}
+
+	process.Inputs = i
+	process.Outputs = o
+
+	return &process, nil
 }
 
 //LoadShip Takes a SQL Ship and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
@@ -1055,7 +1110,7 @@ func newItem(item *universe.Item) (*uuid.UUID, error) {
 	sql := SQLFromItem(item)
 
 	if sql == nil {
-		return nil, errors.New("Error converting item to SQL type")
+		return nil, errors.New("error converting item to SQL type")
 	}
 
 	//save item
@@ -1072,7 +1127,7 @@ func newSellOrder(sellOrder *universe.SellOrder) (*uuid.UUID, error) {
 	sql := SQLFromSellOrder(sellOrder)
 
 	if sql == nil {
-		return nil, errors.New("Error converting sell order to SQL type")
+		return nil, errors.New("error converting sell order to SQL type")
 	}
 
 	//save sell order
@@ -1089,7 +1144,7 @@ func markSellOrderAsBought(sellOrder *universe.SellOrder) error {
 	sql := SQLFromSellOrder(sellOrder)
 
 	if sql == nil {
-		return errors.New("Error converting sell order to SQL type")
+		return errors.New("error converting sell order to SQL type")
 	}
 
 	//save sell order

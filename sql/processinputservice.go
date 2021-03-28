@@ -58,7 +58,7 @@ func (s ProcessInputService) GetAllProcessInputs() ([]ProcessInput, error) {
 }
 
 //GetProcessInputsByProcess Retrieves all processinputs for a given process from the database
-func (s ProcessInputService) GetProcessInputsByProcess(systemID uuid.UUID) ([]ProcessInput, error) {
+func (s ProcessInputService) GetProcessInputsByProcess(processID uuid.UUID) ([]ProcessInput, error) {
 	processinputs := make([]ProcessInput, 0)
 
 	//get db handle
@@ -75,7 +75,7 @@ func (s ProcessInputService) GetProcessInputsByProcess(systemID uuid.UUID) ([]Pr
 				WHERE processid = $1;
 			`
 
-	rows, err := db.Query(sql, systemID)
+	rows, err := db.Query(sql, processID)
 
 	if err != nil {
 		return nil, err

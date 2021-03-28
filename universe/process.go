@@ -8,6 +8,9 @@ type Process struct {
 	Name string
 	Meta Meta
 	Time int
+	// in-memory only
+	Inputs  []ProcessInput
+	Outputs []ProcessOutput
 }
 
 // Structure representing an input resource in a manufacturing process

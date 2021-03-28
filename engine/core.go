@@ -107,7 +107,7 @@ func (e *HeliaEngine) Shutdown() {
 	sleepStart := time.Now()
 
 	for {
-		if time.Now().Sub(sleepStart).Seconds() > 30 {
+		if time.Since(sleepStart).Seconds() > 30 {
 			break
 		}
 
@@ -138,7 +138,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	//iterate over moved items
 	for id := range sol.MovedItems {
 		//capture reference and remove from map
-		mi, _ := sol.MovedItems[id]
+		mi := sol.MovedItems[id]
 		delete(sol.MovedItems, id)
 
 		//handle escalation on another goroutine
@@ -166,7 +166,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	//iterate over packaged items
 	for id := range sol.PackagedItems {
 		//capture reference and remove from map
-		mi, _ := sol.PackagedItems[id]
+		mi := sol.PackagedItems[id]
 		delete(sol.PackagedItems, id)
 
 		//handle escalation on another goroutine
@@ -194,7 +194,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	//iterate over unpackaged items
 	for id := range sol.UnpackagedItems {
 		//capture reference and remove from map
-		mi, _ := sol.UnpackagedItems[id]
+		mi := sol.UnpackagedItems[id]
 		delete(sol.UnpackagedItems, id)
 
 		//handle escalation on another goroutine
@@ -222,7 +222,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	//iterate over changed quantity items
 	for id := range sol.ChangedQuantityItems {
 		//capture reference and remove from map
-		mi, _ := sol.ChangedQuantityItems[id]
+		mi := sol.ChangedQuantityItems[id]
 		delete(sol.ChangedQuantityItems, id)
 
 		//handle escalation on another goroutine
@@ -250,7 +250,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	//iterate over new items
 	for id := range sol.NewItems {
 		//capture reference and remove from map
-		mi, _ := sol.NewItems[id]
+		mi := sol.NewItems[id]
 		delete(sol.NewItems, id)
 
 		//handle escalation on another goroutine
@@ -278,7 +278,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	//iterate over new sell orders
 	for id := range sol.NewSellOrders {
 		//capture reference and remove from map
-		mi, _ := sol.NewSellOrders[id]
+		mi := sol.NewSellOrders[id]
 		delete(sol.NewSellOrders, id)
 
 		//handle escalation on another goroutine
@@ -309,7 +309,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	//iterate over bought sell orders
 	for id := range sol.BoughtSellOrders {
 		//capture reference and remove from map
-		mi, _ := sol.BoughtSellOrders[id]
+		mi := sol.BoughtSellOrders[id]
 		delete(sol.BoughtSellOrders, id)
 
 		//handle escalation on another goroutine
@@ -334,7 +334,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	//iterate over dead ships
 	for id := range sol.DeadShips {
 		//capture reference and remove from map
-		ds, _ := sol.DeadShips[id]
+		ds := sol.DeadShips[id]
 		delete(sol.DeadShips, id)
 
 		//handle escalation on another goroutine
@@ -363,7 +363,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	//iterate over clients in need of respawn
 	for id := range sol.NeedRespawn {
 		//capture reference and remove from map
-		rs, _ := sol.NeedRespawn[id]
+		rs := sol.NeedRespawn[id]
 		delete(sol.NeedRespawn, id)
 
 		//handle escalation on another goroutine

@@ -58,7 +58,7 @@ func (s ProcessOutputService) GetAllProcessOutputs() ([]ProcessOutput, error) {
 }
 
 //GetProcessOutputsByProcess Retrieves all processoutputs for a given process from the database
-func (s ProcessOutputService) GetProcessOutputsByProcess(systemID uuid.UUID) ([]ProcessOutput, error) {
+func (s ProcessOutputService) GetProcessOutputsByProcess(processID uuid.UUID) ([]ProcessOutput, error) {
 	processoutputs := make([]ProcessOutput, 0)
 
 	//get db handle
@@ -75,7 +75,7 @@ func (s ProcessOutputService) GetProcessOutputsByProcess(systemID uuid.UUID) ([]
 				WHERE processid = $1;
 			`
 
-	rows, err := db.Query(sql, systemID)
+	rows, err := db.Query(sql, processID)
 
 	if err != nil {
 		return nil, err
