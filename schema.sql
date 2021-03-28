@@ -80,6 +80,49 @@ CREATE TABLE public.itemtypes (
 ALTER TABLE public.itemtypes OWNER TO developer;
 
 --
+-- Name: processes; Type: TABLE; Schema: public; Owner: developer
+--
+
+CREATE TABLE public.processes (
+    id uuid NOT NULL,
+    name character varying(32) NOT NULL,
+    meta jsonb DEFAULT '{}'::jsonb NOT NULL
+);
+
+
+ALTER TABLE public.processes OWNER TO developer;
+
+--
+-- Name: processinputs; Type: TABLE; Schema: public; Owner: developer
+--
+
+CREATE TABLE public.processinputs (
+    id uuid NOT NULL,
+    itemtypeid uuid NOT NULL,
+    quantity integer DEFAULT 0 NOT NULL,
+    meta jsonb DEFAULT '{}'::jsonb NOT NULL,
+    processid uuid NOT NULL
+);
+
+
+ALTER TABLE public.processinputs OWNER TO developer;
+
+--
+-- Name: processoutputs; Type: TABLE; Schema: public; Owner: developer
+--
+
+CREATE TABLE public.processoutputs (
+    id uuid NOT NULL,
+    itemtypeid uuid NOT NULL,
+    quantity integer DEFAULT 0 NOT NULL,
+    meta jsonb DEFAULT '{}'::jsonb NOT NULL,
+    processid uuid NOT NULL
+);
+
+
+ALTER TABLE public.processoutputs OWNER TO developer;
+
+--
 -- Name: sellorders; Type: TABLE; Schema: public; Owner: developer
 --
 
@@ -346,6 +389,30 @@ CREATE TABLE public.users (
 
 
 ALTER TABLE public.users OWNER TO developer;
+
+--
+-- Name: processes pk_processes_uq; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.processes
+    ADD CONSTRAINT pk_processes_uq PRIMARY KEY (id);
+
+
+--
+-- Name: processinputs pk_processinputs_uq; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.processinputs
+    ADD CONSTRAINT pk_processinputs_uq PRIMARY KEY (id);
+
+
+--
+-- Name: processoutputs pk_processoutputs_uq; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.processoutputs
+    ADD CONSTRAINT pk_processoutputs_uq PRIMARY KEY (id);
+
 
 --
 -- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: developer
@@ -640,6 +707,38 @@ ALTER TABLE ONLY public.items
 
 ALTER TABLE ONLY public.itemtypes
     ADD CONSTRAINT fk_itemtypes_itemfamilies FOREIGN KEY (family) REFERENCES public.itemfamilies(id);
+
+
+--
+-- Name: processinputs fk_processinputs_itemtypes; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.processinputs
+    ADD CONSTRAINT fk_processinputs_itemtypes FOREIGN KEY (itemtypeid) REFERENCES public.itemtypes(id);
+
+
+--
+-- Name: processinputs fk_processinputs_processes; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.processinputs
+    ADD CONSTRAINT fk_processinputs_processes FOREIGN KEY (processid) REFERENCES public.processes(id);
+
+
+--
+-- Name: processoutputs fk_processoutputs_itemtypes; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.processoutputs
+    ADD CONSTRAINT fk_processoutputs_itemtypes FOREIGN KEY (itemtypeid) REFERENCES public.itemtypes(id);
+
+
+--
+-- Name: processoutputs fk_processoutputs_processes; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.processoutputs
+    ADD CONSTRAINT fk_processoutputs_processes FOREIGN KEY (processid) REFERENCES public.processes(id);
 
 
 --
