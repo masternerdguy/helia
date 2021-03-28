@@ -2,7 +2,7 @@ package universe
 
 import "github.com/google/uuid"
 
-//StationProcess Structure representing the status of a manufacturing process in a specific station
+// Structure representing the status of a manufacturing process in a specific station
 type StationProcess struct {
 	ID            uuid.UUID
 	StationID     uuid.UUID
@@ -52,4 +52,33 @@ type ProcessOutput struct {
 	ItemFamilyID   string
 	ItemFamilyName string
 	ItemTypeMeta   Meta
+}
+
+// Structure representing the standardized metadata for item types on the industrial market
+type IndustrialMetadata struct {
+	MinPrice int
+	MaxPrice int
+	SiloSize int
+}
+
+// Fetches industrial market limits from item type metadata
+func (p *ProcessInput) GetIndustrialMetadata() IndustrialMetadata {
+	// make empty metadata
+	d := IndustrialMetadata{}
+
+	// attempt to fetch from metadata
+	l, f := p.ItemTypeMeta.GetMap("industrialmarket")
+
+	if f {
+		// load from metadata
+		minprice, _ := l.GetInt("minprice")
+		maxprice, _ := l.GetInt("maxprice")
+		silosize, _ := l.GetInt("silosize")
+
+		d.MinPrice = minprice
+		d.MaxPrice = maxprice
+		d.SiloSize = silosize
+	}
+
+	return d
 }

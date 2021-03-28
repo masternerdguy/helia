@@ -1,7 +1,9 @@
 package universe
 
 import (
+	"fmt"
 	"helia/physics"
+	"log"
 	"sync"
 
 	"github.com/google/uuid"
@@ -25,7 +27,7 @@ type Station struct {
 	Processes      []StationProcess
 }
 
-//Initialize Initializes internal aspects of Station
+// Initializes internal aspects of Station
 func (s *Station) Initialize() {
 	//obtain lock
 	s.Lock.Lock()
@@ -49,12 +51,19 @@ func (s *Station) Initialize() {
 			 * a used universe.
 			 */
 
-			// randomize
+			// iterate over inputs
+			for _, x := range process.Process.Inputs {
+				// get industrial market metadata
+				marketLimits := x.GetIndustrialMetadata()
+
+				log.Println(fmt.Sprintf("REEE %v", marketLimits))
+				// randomize
+			}
 		}
 	}
 }
 
-//PeriodicUpdate Processes the ship for a tick
+// Processes the ship for a tick
 func (s *Station) PeriodicUpdate() {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
@@ -62,7 +71,7 @@ func (s *Station) PeriodicUpdate() {
 	//todo
 }
 
-//CopyStation Returns a copy of the station
+// Returns a copy of the station
 func (s *Station) CopyStation() Station {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
@@ -82,7 +91,7 @@ func (s *Station) CopyStation() Station {
 	}
 }
 
-//ToPhysicsDummy Returns a new physics dummy structure representing this station
+// Returns a new physics dummy structure representing this station
 func (s *Station) ToPhysicsDummy() physics.Dummy {
 	return physics.Dummy{
 		VelX: 0,
@@ -93,7 +102,7 @@ func (s *Station) ToPhysicsDummy() physics.Dummy {
 	}
 }
 
-//DealDamage Deals damage to the station (not yet implemented!)
+// Stub to absorb damage inflicted on station
 func (s *Station) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) {
-	// todo
+	// do nothing - NPC owned stations can't be destroyed
 }
