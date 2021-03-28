@@ -2,6 +2,19 @@ package universe
 
 import "github.com/google/uuid"
 
+//StationProcess Structure representing the status of a manufaturing process in a specific station
+type StationProcess struct {
+	ID            uuid.UUID
+	StationID     uuid.UUID
+	ProcessID     uuid.UUID
+	Progress      int
+	Installed     bool
+	InternalState Meta // todo: make a proper model for this
+	Meta          Meta
+	// in-memory only
+	Process Process
+}
+
 // Structure representing a manufacturing process
 type Process struct {
 	ID   uuid.UUID
