@@ -42,6 +42,9 @@ func (s *Station) Initialize() {
 
 		if !process.Installed {
 			// set up process for first time
+			is := StationProcessInternalState{}
+			is.Inputs = make(map[string]StationProcessInternalStateFactor)
+			is.Outputs = make(map[string]StationProcessInternalStateFactor)
 
 			/*
 			 * In Helia, "stations" are always NPC operated and indestructible. This is so that players
@@ -58,18 +61,49 @@ func (s *Station) Initialize() {
 
 				log.Println(fmt.Sprintf("%v", marketLimits))
 
-				// randomize
+				// randomize stack size based on market limit
+				sf := StationProcessInternalStateFactor{
+					Quantity: physics.RandInRange(0, marketLimits.SiloSize),
+				}
+
+				// store in state
+				is.Inputs[x.ItemTypeID.String()] = sf
 			}
+
+			for _, x := range process.Process.Outputs {
+				// get industrial market metadata
+				marketLimits := x.GetIndustrialMetadata()
+
+				log.Println(fmt.Sprintf("%v", marketLimits))
+
+				// randomize stack size based on market limit
+				sf := StationProcessInternalStateFactor{
+					Quantity: physics.RandInRange(0, marketLimits.SiloSize),
+				}
+
+				// store in state
+				is.Outputs[x.ItemTypeID.String()] = sf
+			}
+
+			// store state
+			process.InternalState = is
+
+			// mark as installed
+			process.Installed = true
 		}
 	}
+
+	// do initial price calculation
+	s.calculateIndustrialMarketPrices()
 }
 
-// Processes the ship for a tick
+// Processes the station for a tick
 func (s *Station) PeriodicUpdate() {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	// todo
+	// recalculate industrial market prices
+	s.calculateIndustrialMarketPrices()
 }
 
 // Returns a copy of the station
@@ -106,4 +140,78 @@ func (s *Station) ToPhysicsDummy() physics.Dummy {
 // Stub to absorb damage inflicted on station
 func (s *Station) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) {
 	// do nothing - NPC owned stations can't be destroyed
+}
+
+// Recalculates the prices of production factors based on a linear demand curve
+func (s *Station) calculateIndustrialMarketPrices() {
+	for i := range s.Processes {
+		// get process
+		process := &s.Processes[i]
+
+		// skip if not set up
+		if !process.Installed {
+			continue
+		}
+
+		// iterate over inputs and outputs
+		for x := range process.Process.Inputs {
+			o := process.Process.Inputs[x]
+
+			// get industrial data
+			marketLimits := o.GetIndustrialMetadata()
+
+			if marketLimits.SiloSize <= 0 {
+				// skip due to invalid silo size
+				continue
+			}
+
+			// get internal state
+			is := process.InternalState.Inputs[o.ItemTypeID.String()]
+
+			// get percentage of silo filled
+			filled := float32(is.Quantity) / float32(marketLimits.SiloSize)
+
+			// calculate current price
+			spread := marketLimits.MaxPrice - marketLimits.MinPrice
+			price := int(float32(spread)*(1.0-filled)) + marketLimits.MinPrice
+
+			// store price
+			is.Price = price
+
+			// update internal state
+			process.InternalState.Inputs[o.ItemTypeID.String()] = is
+
+			log.Println(fmt.Sprintf("%v", is))
+		}
+
+		for x := range process.Process.Outputs {
+			o := process.Process.Outputs[x]
+
+			// get industrial data
+			marketLimits := o.GetIndustrialMetadata()
+
+			if marketLimits.SiloSize <= 0 {
+				// skip due to invalid silo size
+				continue
+			}
+
+			// get internal state
+			is := process.InternalState.Outputs[o.ItemTypeID.String()]
+
+			// get percentage of silo filled
+			filled := float32(is.Quantity) / float32(marketLimits.SiloSize)
+
+			// calculate current price
+			spread := marketLimits.MaxPrice - marketLimits.MinPrice
+			price := int(float32(spread)*(1.0-filled)) + marketLimits.MinPrice
+
+			// store price
+			is.Price = price
+
+			// update internal state
+			process.InternalState.Outputs[o.ItemTypeID.String()] = is
+
+			log.Println(fmt.Sprintf("%v", is))
+		}
+	}
 }

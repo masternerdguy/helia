@@ -4,10 +4,16 @@ import (
 	"helia/engine"
 	"helia/listener"
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
 )
 
 func main() {
+	// initialize RNG
+	log.Println("Initializing RNG...")
+	rand.Seed(time.Now().UnixNano())
+
 	// initialize game engine
 	log.Println("Initializing engine...")
 	engine := engine.HeliaEngine{}

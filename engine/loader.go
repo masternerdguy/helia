@@ -254,8 +254,6 @@ func loadUniverse() (*universe.Universe, error) {
 				// initialize station
 				station.Initialize()
 
-				log.Println(fmt.Sprintf("%v", station.Processes))
-
 				// load open sell orders
 				sos, err := sellOrderSvc.GetOpenSellOrdersByStation(station.ID)
 

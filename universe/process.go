@@ -94,3 +94,25 @@ func (p *ProcessInput) GetIndustrialMetadata() IndustrialMetadata {
 
 	return d
 }
+
+// Fetches industrial market limits from item type metadata
+func (p *ProcessOutput) GetIndustrialMetadata() IndustrialMetadata {
+	// make empty metadata
+	d := IndustrialMetadata{}
+
+	// attempt to fetch from metadata
+	l, f := p.ItemTypeMeta.GetMap("industrialmarket")
+
+	if f {
+		// load from metadata
+		minprice, _ := l.GetInt("minprice")
+		maxprice, _ := l.GetInt("maxprice")
+		silosize, _ := l.GetInt("silosize")
+
+		d.MinPrice = minprice
+		d.MaxPrice = maxprice
+		d.SiloSize = silosize
+	}
+
+	return d
+}
