@@ -977,6 +977,25 @@ func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error
 		return nil, err
 	}
 
+	// convert internal state
+	internalState := universe.StationProcessInternalState{}
+
+	for key := range sp.InternalState.Inputs {
+		v := sp.InternalState.Inputs[key]
+		internalState.Inputs[key] = universe.StationProcessInternalStateFactor{
+			Quantity: v.Quantity,
+			Price:    v.Price,
+		}
+	}
+
+	for key := range sp.InternalState.Outputs {
+		v := sp.InternalState.Outputs[key]
+		internalState.Outputs[key] = universe.StationProcessInternalStateFactor{
+			Quantity: v.Quantity,
+			Price:    v.Price,
+		}
+	}
+
 	// build station process
 	o := universe.StationProcess{
 		ID:            sp.ID,
@@ -984,7 +1003,7 @@ func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error
 		ProcessID:     sp.ProcessID,
 		Progress:      sp.Progress,
 		Installed:     sp.Installed,
-		InternalState: universe.Meta(sp.InternalState),
+		InternalState: internalState,
 		Meta:          universe.Meta(sp.Meta),
 		Process:       *process,
 	}

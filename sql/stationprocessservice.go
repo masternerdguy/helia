@@ -1,6 +1,12 @@
 package sql
 
-import "github.com/google/uuid"
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+
+	"github.com/google/uuid"
+)
 
 // Facility for interacting with the stationprocesses table
 type StationProcessService struct{}
@@ -17,8 +23,35 @@ type StationProcess struct {
 	ProcessID     uuid.UUID
 	Progress      int
 	Installed     bool
-	InternalState Meta // todo: make a proper model for this
+	InternalState StationProcessInternalState
 	Meta          Meta
+}
+
+// JSON structure representing the internal state of the ware silos involved in the process
+type StationProcessInternalState struct {
+	Inputs  map[string]StationProcessInternalStateFactor `json:"inputs"`
+	Outputs map[string]StationProcessInternalStateFactor `json:"outputs"`
+}
+
+// JSON structure representing an input or output factor in a station process's internal state
+type StationProcessInternalStateFactor struct {
+	Quantity int `json:"quantity"`
+	Price    int `json:"price"`
+}
+
+// Converts from a StationProcessInternalState to JSON
+func (a StationProcessInternalState) Value() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a StationProcessInternalState
+func (a *StationProcessInternalState) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
 }
 
 // Retrieves all station processes from the database

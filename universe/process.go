@@ -9,10 +9,22 @@ type StationProcess struct {
 	ProcessID     uuid.UUID
 	Progress      int
 	Installed     bool
-	InternalState Meta // todo: make a proper model for this
+	InternalState StationProcessInternalState
 	Meta          Meta
 	// in-memory only
 	Process Process
+}
+
+// Structure representing the internal state of the ware silos involved in the process
+type StationProcessInternalState struct {
+	Inputs  map[string]StationProcessInternalStateFactor
+	Outputs map[string]StationProcessInternalStateFactor
+}
+
+// Structure representing an input or output factor in a station process's internal state
+type StationProcessInternalStateFactor struct {
+	Quantity int
+	Price    int
 }
 
 // Structure representing a manufacturing process
