@@ -267,8 +267,8 @@ CREATE TABLE public.stationprocesses (
     universe_stationid uuid NOT NULL,
     processid uuid NOT NULL,
     progress integer DEFAULT 0 NOT NULL,
-    container_inputs uuid NOT NULL,
-    container_outputs uuid NOT NULL,
+    installed boolean DEFAULT false NOT NULL,
+    internalstate jsonb DEFAULT '{}'::jsonb NOT NULL,
     meta jsonb DEFAULT '{}'::jsonb NOT NULL
 );
 
@@ -589,7 +589,8 @@ COPY public.starts (id, name, shiptemplateid, shipfitting, created, available, s
 -- Data for Name: stationprocesses; Type: TABLE DATA; Schema: public; Owner: developer
 --
 
-COPY public.stationprocesses (id, universe_stationid, processid, progress, container_inputs, container_outputs, meta) FROM stdin;
+COPY public.stationprocesses (id, universe_stationid, processid, progress, installed, internalstate, meta) FROM stdin;
+966aa59b-68d0-4328-8baf-30616900bcbd	cf07bba9-90b2-4599-b1e3-84d797a67f0a	0f33d5ce-2b0b-4f80-80eb-506dd803ac4c	0	f	{}	{}
 \.
 
 
@@ -1148,22 +1149,6 @@ ALTER TABLE ONLY public.starts
 
 ALTER TABLE ONLY public.starts
     ADD CONSTRAINT fk_starts_systems FOREIGN KEY (systemid) REFERENCES public.universe_systems(id);
-
-
---
--- Name: stationprocesses fk_stationprocess_container_input; Type: FK CONSTRAINT; Schema: public; Owner: developer
---
-
-ALTER TABLE ONLY public.stationprocesses
-    ADD CONSTRAINT fk_stationprocess_container_input FOREIGN KEY (container_inputs) REFERENCES public.containers(id);
-
-
---
--- Name: stationprocesses fk_stationprocess_container_output; Type: FK CONSTRAINT; Schema: public; Owner: developer
---
-
-ALTER TABLE ONLY public.stationprocesses
-    ADD CONSTRAINT fk_stationprocess_container_output FOREIGN KEY (container_outputs) REFERENCES public.containers(id);
 
 
 --
