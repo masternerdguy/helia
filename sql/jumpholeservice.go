@@ -62,7 +62,7 @@ func (s JumpholeService) GetAllJumpholes() ([]Jumphole, error) {
 	return jumpholes, err
 }
 
-// GetJumpholesBySolarSystem Retrieves all jumpholes in a given solar system from the database
+// Retrieves all jumpholes in a given solar system from the database
 func (s JumpholeService) GetJumpholesBySolarSystem(systemID uuid.UUID) ([]Jumphole, error) {
 	jumpholes := make([]Jumphole, 0)
 
