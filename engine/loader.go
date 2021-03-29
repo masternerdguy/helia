@@ -1025,6 +1025,9 @@ func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error
 		IsRunning: sp.InternalState.IsRunning,
 	}
 
+	internalState.Inputs = make(map[string]universe.StationProcessInternalStateFactor)
+	internalState.Outputs = make(map[string]universe.StationProcessInternalStateFactor)
+
 	for key := range sp.InternalState.Inputs {
 		v := sp.InternalState.Inputs[key]
 		internalState.Inputs[key] = universe.StationProcessInternalStateFactor{
