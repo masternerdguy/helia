@@ -131,3 +131,25 @@ func (s StationProcessService) GetStationProcessesByStation(stationID uuid.UUID)
 
 	return stationProcesses, err
 }
+
+// Updates a station process in the database
+func (s StationProcessService) UpdateStationProcess(process StationProcess) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update station process in database
+	sqlStatement :=
+		`
+			UPDATE public.stationprocesses
+			SET progress=$2, installed=$3, internalstate=$4
+			WHERE id=$1;
+		`
+
+	_, err = db.Exec(sqlStatement, process.ID, process.Progress, process.Installed, process.InternalState)
+
+	return err
+}

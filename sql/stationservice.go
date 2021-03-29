@@ -109,7 +109,7 @@ func (s StationService) UpdateStation(station Station) error {
 		return err
 	}
 
-	// update ship in database
+	// update station in database
 	sqlStatement :=
 		`
 			UPDATE public.universe_stations

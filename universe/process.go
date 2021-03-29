@@ -20,6 +20,7 @@ type StationProcess struct {
 	MSCounter int64
 }
 
+// Updates a station manufacturing process for a tick
 func (p *StationProcess) PeriodicUpdate(dT int64) {
 	if p.InternalState.IsRunning {
 		if p.Progress >= p.Process.Time {
@@ -43,6 +44,8 @@ func (p *StationProcess) PeriodicUpdate(dT int64) {
 				p.MSCounter -= 1000
 			}
 		}
+	} else {
+		// todo: check if manufacturing job can be started and start it if so
 	}
 }
 

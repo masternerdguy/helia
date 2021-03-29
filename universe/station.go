@@ -128,6 +128,13 @@ func (s *Station) CopyStation() Station {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
+	copiedProcesses := make([]*StationProcess, 0)
+
+	for _, p := range s.Processes {
+		copy := *p
+		copiedProcesses = append(copiedProcesses, &copy)
+	}
+
 	return Station{
 		ID:          s.ID,
 		StationName: s.StationName,
@@ -139,7 +146,8 @@ func (s *Station) CopyStation() Station {
 		Radius:      s.Radius,
 		Mass:        s.Mass,
 		// in-memory only
-		Lock: sync.Mutex{},
+		Lock:      sync.Mutex{},
+		Processes: copiedProcesses,
 	}
 }
 

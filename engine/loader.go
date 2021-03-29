@@ -330,6 +330,7 @@ func loadUniverse() (*universe.Universe, error) {
 func saveUniverse(u *universe.Universe) {
 	// get services
 	stationSvc := sql.GetStationService()
+	stationProcessSvc := sql.GetStationProcessService()
 
 	// iterate over systems
 	for _, r := range u.Regions {
@@ -367,6 +368,50 @@ func saveUniverse(u *universe.Universe) {
 
 				if err != nil {
 					log.Println(fmt.Sprintf("Error saving station: %v | %v", dbStation, err))
+				}
+
+				// save manufacturing processes
+				for _, p := range station.Processes {
+					// convert internal state to db model
+					dbState := sql.StationProcessInternalState{
+						IsRunning: p.InternalState.IsRunning,
+					}
+
+					dbState.Inputs = make(map[string]sql.StationProcessInternalStateFactor)
+					dbState.Outputs = make(map[string]sql.StationProcessInternalStateFactor)
+
+					for key := range p.InternalState.Inputs {
+						v := p.InternalState.Inputs[key]
+						dbState.Inputs[key] = sql.StationProcessInternalStateFactor{
+							Quantity: v.Quantity,
+							Price:    v.Price,
+						}
+					}
+
+					for key := range p.InternalState.Outputs {
+						v := p.InternalState.Outputs[key]
+						dbState.Outputs[key] = sql.StationProcessInternalStateFactor{
+							Quantity: v.Quantity,
+							Price:    v.Price,
+						}
+					}
+
+					// convert station process to db model
+					dbProcess := sql.StationProcess{
+						ID:            p.ID,
+						StationID:     p.StationID,
+						ProcessID:     p.ProcessID,
+						Progress:      p.Progress,
+						Installed:     p.Installed,
+						InternalState: dbState,
+						Meta:          sql.Meta(p.Meta),
+					}
+
+					err := stationProcessSvc.UpdateStationProcess(dbProcess)
+
+					if err != nil {
+						log.Println(fmt.Sprintf("Error saving station process: %v | %v", dbProcess, err))
+					}
 				}
 			}
 		}
