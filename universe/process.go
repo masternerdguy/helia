@@ -29,6 +29,18 @@ func (p *StationProcess) PeriodicUpdate(dT int64) {
 			p.MSCounter = 0
 			p.InternalState.IsRunning = false
 
+			// make sure there is enough room to deliver outputs
+			for k := range p.InternalState.Outputs {
+				o := p.InternalState.Outputs[k]
+				s := p.Process.Outputs[k]
+				m := s.GetIndustrialMetadata()
+
+				if s.Quantity+o.Quantity > m.SiloSize {
+					// no room - can't deliver
+					return
+				}
+			}
+
 			// deliver result
 			log.Println("process done!") // todo
 		} else {
