@@ -939,7 +939,7 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 		Time: p.Time,
 	}
 
-	i := make([]universe.ProcessInput, 0)
+	i := make(map[string]universe.ProcessInput)
 	for _, e := range inputs {
 		// get item type and family
 		itemType, err := itemTypeSvc.GetItemTypeByID(e.ItemTypeID)
@@ -955,7 +955,7 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 		}
 
 		// build model
-		i = append(i, universe.ProcessInput{
+		i[itemType.ID.String()] = universe.ProcessInput{
 			ID:             e.ID,
 			ItemTypeID:     e.ItemTypeID,
 			Quantity:       e.Quantity,
@@ -965,10 +965,10 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 			ItemFamilyName: itemFamily.FriendlyName,
 			ItemFamilyID:   itemType.Family,
 			ItemTypeMeta:   universe.Meta(itemType.Meta),
-		})
+		}
 	}
 
-	o := make([]universe.ProcessOutput, 0)
+	o := make(map[string]universe.ProcessOutput)
 	for _, e := range outputs {
 		// get item type and family
 		itemType, err := itemTypeSvc.GetItemTypeByID(e.ItemTypeID)
@@ -984,7 +984,7 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 		}
 
 		// build model
-		o = append(o, universe.ProcessOutput{
+		o[itemType.ID.String()] = universe.ProcessOutput{
 			ID:             e.ID,
 			ItemTypeID:     e.ItemTypeID,
 			Quantity:       e.Quantity,
@@ -994,7 +994,7 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 			ItemFamilyName: itemFamily.FriendlyName,
 			ItemFamilyID:   itemType.Family,
 			ItemTypeMeta:   universe.Meta(itemType.Meta),
-		})
+		}
 	}
 
 	process.Inputs = i
