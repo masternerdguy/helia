@@ -24,9 +24,6 @@ type StationProcess struct {
 func (p *StationProcess) PeriodicUpdate(dT int64) {
 	if p.InternalState.IsRunning {
 		if p.Progress >= p.Process.Time {
-			// reset process
-			p.Progress = 0
-			p.MSCounter = 0
 			p.InternalState.IsRunning = false
 
 			// make sure there is enough room to deliver outputs
@@ -43,6 +40,10 @@ func (p *StationProcess) PeriodicUpdate(dT int64) {
 
 			// deliver result
 			log.Println("process done!") // todo
+
+			// reset process
+			p.Progress = 0
+			p.MSCounter = 0
 		} else {
 			// advance clock
 			p.MSCounter += dT
