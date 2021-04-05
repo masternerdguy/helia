@@ -431,7 +431,7 @@ export class IndustrialMarketWindow extends GDIWindow {
           // add spacer
           oRows.push(buildOrderViewRowSpacer());
 
-          // add row to browse a specific order (todo: uncomment and update)
+          // add row to browse a specific order
           for (const g of this.industrialOrdersTree.families
             .get(this.depthStack[0])
             .groups.get(this.depthStack[1]).orders) {
@@ -453,11 +453,11 @@ export class IndustrialMarketWindow extends GDIWindow {
           // calculate unit volume
           let volume = 0;
 
-          if (order.item.isPackaged) {
-            volume = Number(order.item.itemTypeMeta['volume']);
-          } else {
-            volume = Number(order.item.meta['volume']);
-          }
+          // make a shim item
+          const shimItem = makeShimItem(order);
+
+          // get item volume
+          volume = Number(shimItem.itemTypeMeta['volume']);
 
           // NaN check
           if (Number.isNaN(volume)) {
@@ -468,13 +468,13 @@ export class IndustrialMarketWindow extends GDIWindow {
           oRows.push(buildOrderViewRowText('Basic Info', undefined));
           oRows.push(
             buildOrderViewRowText(
-              infoKeyValueString('Item Type', order.item.itemTypeName),
+              infoKeyValueString('Item Type', shimItem.itemTypeName),
               undefined
             )
           );
           oRows.push(
             buildOrderViewRowText(
-              infoKeyValueString('Item Family', order.item.itemFamilyName),
+              infoKeyValueString('Item Family', shimItem.itemFamilyName),
               undefined
             )
           );
@@ -486,7 +486,7 @@ export class IndustrialMarketWindow extends GDIWindow {
           oRows.push(buildOrderViewRowText('Order Details', undefined));
           oRows.push(
             buildOrderViewRowText(
-              infoKeyValueString('Ask Price', `${order.ask} CBN`),
+              infoKeyValueString(order.isSelling ? 'Ask Price' : order.isBuying ? 'Bid Price' : '', `${order.price} CBN`),
               undefined
             )
           );
@@ -494,22 +494,7 @@ export class IndustrialMarketWindow extends GDIWindow {
             buildOrderViewRowText(
               infoKeyValueString(
                 'Unit Price',
-                `${order.ask / order.item.quantity} CBN`
-              ),
-              undefined
-            )
-          );
-          oRows.push(
-            buildOrderViewRowText(
-              infoKeyValueString('Delivery Quantity', `${order.item.quantity}`),
-              undefined
-            )
-          );
-          oRows.push(
-            buildOrderViewRowText(
-              infoKeyValueString(
-                'Delivery Volume',
-                `${volume * order.item.quantity}`
+                `${order.price} CBN`
               ),
               undefined
             )
@@ -517,15 +502,6 @@ export class IndustrialMarketWindow extends GDIWindow {
           oRows.push(
             buildOrderViewRowText(
               infoKeyValueString('Unit Volume', `${volume}`),
-              undefined
-            )
-          );
-          oRows.push(
-            buildOrderViewRowText(
-              infoKeyValueString(
-                'Listed',
-                `${printHeliaDate(heliaDateFromString(order.createdAt))}`
-              ),
               undefined
             )
           );
@@ -538,11 +514,7 @@ export class IndustrialMarketWindow extends GDIWindow {
 
           const meta = {};
 
-          if (order.item.isPackaged) {
-            Object.assign(meta, order.item.itemTypeMeta);
-          } else {
-            Object.assign(meta, order.item.meta);
-          }
+          Object.assign(meta, shimItem.itemTypeMeta);
 
           for (const key in meta) {
             if (Object.prototype.hasOwnProperty.call(meta, key)) {
@@ -558,33 +530,6 @@ export class IndustrialMarketWindow extends GDIWindow {
 
           // add spacer
           oRows.push(buildOrderViewRowSpacer());
-
-          // item type metadata if unpackaged
-          if (!order.item.isPackaged) {
-            oRows.push(
-              buildOrderViewRowText('Item Type Base Metadata', undefined)
-            );
-
-            for (const key in order.item.itemTypeMeta) {
-              if (
-                Object.prototype.hasOwnProperty.call(
-                  order.item.itemTypeMeta,
-                  key
-                )
-              ) {
-                const value = order.item.itemTypeMeta[key];
-                oRows.push(
-                  buildOrderViewRowText(
-                    infoKeyValueString(key, `${value}`),
-                    undefined
-                  )
-                );
-              }
-            }
-
-            // add spacer
-            oRows.push(buildOrderViewRowSpacer());
-          }
         }
 
         // push rows to orders view
@@ -871,8 +816,5 @@ class SilosFamily {
 
 class SilosGroup {
   name: string;
-  orders: /*Map<string, WSOpenSellOrder> = new Map<string, WSOpenSellOrder>();*/ Map<
-    string,
-    any
-  > = new Map<string, any>();
+  orders: Map<string, WSIndustrialSilo> = new Map<string, WSIndustrialSilo>();
 }
