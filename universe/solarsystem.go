@@ -535,7 +535,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 		} else if evt.Type == models.NewMessageRegistry().ViewIndustrialOrders {
 			if sh != nil {
 				// extract data (currently nothing to process)
-				// data := evt.Body.(models.ClientViewOpenSellOrdersBody)
+				// data := evt.Body.(models.ViewIndustrialOrders)
 
 				// make sure the ship is docked
 				if sh.DockedAtStation == nil || sh.DockedAtStationID == nil {
