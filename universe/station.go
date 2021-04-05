@@ -131,8 +131,8 @@ func (s *Station) CopyStation() Station {
 	copiedProcesses := make([]*StationProcess, 0)
 
 	for _, p := range s.Processes {
-		copy := *p
-		copiedProcesses = append(copiedProcesses, &copy)
+		copy := p.CopyStationProcess()
+		copiedProcesses = append(copiedProcesses, copy)
 	}
 
 	return Station{

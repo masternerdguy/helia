@@ -1,6 +1,8 @@
 package universe
 
 import (
+	"sync"
+
 	"github.com/google/uuid"
 )
 
@@ -14,12 +16,18 @@ type StationProcess struct {
 	InternalState StationProcessInternalState
 	Meta          Meta
 	// in-memory only
+	Lock      sync.Mutex
 	Process   Process
 	MSCounter int64
 }
 
 // Updates a station manufacturing process for a tick
 func (p *StationProcess) PeriodicUpdate(dT int64) {
+	// obtain lock
+	p.Lock.Lock()
+	defer p.Lock.Unlock()
+
+	// check process status
 	if p.InternalState.IsRunning {
 		if p.Progress >= p.Process.Time {
 			p.InternalState.IsRunning = false
@@ -190,4 +198,22 @@ func (p *ProcessOutput) GetIndustrialMetadata() IndustrialMetadata {
 	}
 
 	return d
+}
+
+// Returns a copy of a station process
+func (p *StationProcess) CopyStationProcess() *StationProcess {
+	copy := StationProcess{
+		ID:            p.ID,
+		StationID:     p.StationID,
+		ProcessID:     p.ProcessID,
+		Progress:      p.Progress,
+		Installed:     p.Installed,
+		InternalState: p.InternalState,
+		Meta:          p.Meta,
+		Lock:          sync.Mutex{},
+		Process:       p.Process,
+		MSCounter:     p.MSCounter,
+	}
+
+	return &copy
 }
