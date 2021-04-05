@@ -10,8 +10,10 @@ export class WSIndustrialSilo {
   itemTypeName: string;
   itemFamilyID: string;
   itemFamilyName: string;
-  bid: number;
+  price: number;
   available: number;
   meta: any;
   itemTypeMeta: any;
+  isSelling: boolean;
+  isBuying: boolean;
 }

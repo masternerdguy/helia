@@ -462,10 +462,12 @@ type ServerIndustrialSiloBody struct {
 	ItemTypeName     string `json:"itemTypeName"`
 	ItemFamilyID     string `json:"itemFamilyID"`
 	ItemFamilyName   string `json:"itemFamilyName"`
-	Bid              int    `json:"bid"`
+	Price            int    `json:"price"`
 	Available        int    `json:"available"`
 	Meta             Meta   `json:"meta"`
 	ItemTypeMeta     Meta   `json:"itemTypeMeta"`
+	IsSelling        bool   `json:"isSelling"`
+	IsBuying         bool   `json:"isBuying"`
 }
 
 // Body containing a request from the client for information about the industrial silos at their current station

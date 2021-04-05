@@ -17,6 +17,7 @@ import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
 import { heliaDateFromString, printHeliaDate } from '../../engineMath';
 import { ClientViewIndustrialOrders } from '../../wsModels/bodies/viewIndustrialOrders';
 import { ServerIndustrialOrdersUpdate } from '../../wsModels/bodies/industrialOrdersUpdate';
+import { WSIndustrialOrdersUpdate, WSIndustrialSilo } from '../../wsModels/entities/wsIndustrialOrdersUpdate';
 
 export class IndustrialMarketWindow extends GDIWindow {
   // lists
@@ -45,7 +46,7 @@ export class IndustrialMarketWindow extends GDIWindow {
   private isDocked = false;
 
   // orders tree
-  private openSellOrdersTree: SilosTree;
+  private industrialOrdersTree: SilosTree;
 
   initialize() {
     // set dimensions
@@ -341,7 +342,7 @@ export class IndustrialMarketWindow extends GDIWindow {
       this.cargoView.setItems([]);
 
       // reset order view and tree
-      this.openSellOrdersTree = undefined;
+      this.industrialOrdersTree = undefined;
       this.orderView.setSelectedIndex(-1);
       this.orderView.setItems([]);
       this.depthStack = [];
@@ -397,7 +398,7 @@ export class IndustrialMarketWindow extends GDIWindow {
     this.cargoView.setItems(rows);
     this.cargoView.setSelectedIndex(i);
 
-    if (this.openSellOrdersTree && this.depthStack) {
+    if (this.industrialOrdersTree && this.depthStack) {
       try {
         // show orders tree at current depth
         const oRows: OrderViewRow[] = [];
@@ -406,7 +407,7 @@ export class IndustrialMarketWindow extends GDIWindow {
         const depth = this.depthStack.length;
 
         if (depth === 0) {
-          for (const f of this.openSellOrdersTree.families) {
+          for (const f of this.industrialOrdersTree.families) {
             // add row to browse a specific family
             oRows.push(buildOrderViewRowText(f[1].name, f[0]));
           }
@@ -418,7 +419,7 @@ export class IndustrialMarketWindow extends GDIWindow {
           oRows.push(buildOrderViewRowSpacer());
 
           // add row to browse a specific item type
-          for (const g of this.openSellOrdersTree.families.get(
+          for (const g of this.industrialOrdersTree.families.get(
             this.depthStack[0]
           ).groups) {
             oRows.push(buildOrderViewRowText(g[1].name, g[0]));
@@ -431,11 +432,11 @@ export class IndustrialMarketWindow extends GDIWindow {
           oRows.push(buildOrderViewRowSpacer());
 
           // add row to browse a specific order (todo: uncomment and update)
-          /*for (const g of this.openSellOrdersTree.families
+          for (const g of this.industrialOrdersTree.families
             .get(this.depthStack[0])
             .groups.get(this.depthStack[1]).orders) {
             oRows.push(buildOrderViewDetailRow(g[1]));
-          }*/
+          }
         } else if (depth === 3) {
           // add back button
           oRows.push(buildOrderViewRowText('<== Back to Orders', '--'));
@@ -444,7 +445,7 @@ export class IndustrialMarketWindow extends GDIWindow {
           oRows.push(buildOrderViewRowSpacer());
 
           // get order
-          const order = this.openSellOrdersTree.families
+          const order = this.industrialOrdersTree.families
             .get(this.depthStack[0])
             .groups.get(this.depthStack[1])
             .orders.get(this.depthStack[2]);
@@ -627,14 +628,14 @@ export class IndustrialMarketWindow extends GDIWindow {
   }
 
   private pushDepth(id: string) {
-    if (this.openSellOrdersTree) {
+    if (this.industrialOrdersTree) {
       this.depthStack.push(id);
       this.orderView.setItems([]);
     }
   }
 
   private popDepth() {
-    if (this.openSellOrdersTree) {
+    if (this.industrialOrdersTree) {
       this.depthStack.pop();
       this.orderView.setItems([]);
     }
@@ -749,6 +750,66 @@ function buildOrderViewRowSpacer(): OrderViewRow {
     next: undefined,
     listString: () => {
       return '';
+    },
+  };
+
+  return r;
+}
+
+function makeShimItem(silo: WSIndustrialSilo): WSContainerItem {
+  const i = new WSContainerItem();
+  i.id = '';
+  i.itemTypeID = silo.itemTypeID;
+  i.itemTypeName = silo.itemTypeName;
+  i.itemFamilyID = silo.itemFamilyID;
+  i.itemFamilyName = silo.itemFamilyName;
+  i.quantity = silo.available;
+  i.isPackaged = true;
+  i.meta = silo.meta;
+  i.itemTypeMeta = silo.itemTypeMeta;
+
+  return i;
+}
+
+function buildOrderViewDetailRow(order: WSIndustrialSilo): OrderViewRow {
+  // make a shim item to reuse the cargo info function
+  const shimItem = makeShimItem(order);
+
+  // build cargo info
+  const cargoString = buildCargoRowFromContainerItem(
+    shimItem,
+    true
+  ).listString();
+
+  // calculate volume
+  let volume = order.available * Number(order.itemTypeMeta['volume']);
+
+  // NaN check
+  if (Number.isNaN(volume)) {
+    volume = 0;
+  }
+
+  const actions: string[] = [];
+
+  // set actions
+  if (order.isBuying) {
+    actions.push('Sell');
+  }
+
+  if (order.isSelling) {
+    actions.push('Buy');
+  }
+
+  // build row
+  const r: OrderViewRow = {
+    object: order,
+    actions: actions,
+    next: `${order.stationProcessId}|${order.itemTypeID}`,
+    listString: () => {
+      return `${cargoString} ${fixedString(
+        order.price.toString() + ' CBN',
+        14
+      )} ${fixedString(cargoQuantity(volume), 8)}`;
     },
   };
 

@@ -558,10 +558,12 @@ func (s *SolarSystem) PeriodicUpdate() {
 							ItemTypeName:     t.ItemTypeName,
 							ItemFamilyID:     t.ItemFamilyID,
 							ItemFamilyName:   t.ItemFamilyName,
-							Bid:              s.Price,
+							Price:            s.Price,
 							Available:        s.Quantity,
 							Meta:             models.Meta(t.Meta),
 							ItemTypeMeta:     models.Meta(t.ItemTypeMeta),
+							IsSelling:        false,
+							IsBuying:         true,
 						})
 					}
 
@@ -576,10 +578,12 @@ func (s *SolarSystem) PeriodicUpdate() {
 							ItemTypeName:     t.ItemTypeName,
 							ItemFamilyID:     t.ItemFamilyID,
 							ItemFamilyName:   t.ItemFamilyName,
-							Bid:              s.Price,
+							Price:            s.Price,
 							Available:        s.Quantity,
 							Meta:             models.Meta(t.Meta),
 							ItemTypeMeta:     models.Meta(t.ItemTypeMeta),
+							IsSelling:        true,
+							IsBuying:         false,
 						})
 					}
 				}
