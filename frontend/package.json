@@ -11,7 +11,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "pretty": "prettier --write \"./**/*.{ts,js,jsx,json}\""
+    "pretty": "prettier --write \"./**/*.{ts,js,jsx,json}\"",
+    "ngupdate": "ng update @angular/core @angular/cli"
   },
   "private": true,
   "dependencies": {
