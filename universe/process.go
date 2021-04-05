@@ -1,8 +1,6 @@
 package universe
 
 import (
-	"log"
-
 	"github.com/google/uuid"
 )
 
@@ -38,8 +36,15 @@ func (p *StationProcess) PeriodicUpdate(dT int64) {
 				}
 			}
 
-			// deliver result
-			log.Println("process done!") // todo
+			// deliver results
+			for k := range p.InternalState.Outputs {
+				o := p.InternalState.Outputs[k]
+				s := p.Process.Outputs[k]
+
+				// store updated factor
+				o.Quantity += s.Quantity
+				p.InternalState.Outputs[k] = o
+			}
 
 			// reset process
 			p.Progress = 0
@@ -58,7 +63,29 @@ func (p *StationProcess) PeriodicUpdate(dT int64) {
 			}
 		}
 	} else {
-		// todo: check if manufacturing job can be started and start it if so
+		// check for all available inputs
+		for k := range p.InternalState.Inputs {
+			i := p.InternalState.Inputs[k]
+			s := p.Process.Inputs[k]
+
+			if i.Quantity-s.Quantity < 0 {
+				// insufficient input resources - can't start
+				return
+			}
+		}
+
+		// collect input resources from silos
+		for k := range p.InternalState.Inputs {
+			i := p.InternalState.Inputs[k]
+			s := p.Process.Inputs[k]
+
+			// store updated factor
+			i.Quantity -= s.Quantity
+			p.InternalState.Inputs[k] = i
+		}
+
+		// start process
+		p.InternalState.IsRunning = true
 	}
 }
 
