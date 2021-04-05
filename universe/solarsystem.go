@@ -5,6 +5,7 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"sync"
 	"time"
 
@@ -530,6 +531,33 @@ func (s *SolarSystem) PeriodicUpdate() {
 					// send error message to client
 					c.WriteErrorMessage(err.Error())
 				}
+			}
+		} else if evt.Type == models.NewMessageRegistry().ViewIndustrialOrders {
+			if sh != nil {
+				// extract data (currently nothing to process)
+				// data := evt.Body.(models.ClientViewOpenSellOrdersBody)
+
+				// make sure the ship is docked
+				if sh.DockedAtStation == nil || sh.DockedAtStationID == nil {
+					continue
+				}
+
+				// convert station's open industrial orders to an update message for the client
+				vw := models.ServerIndustrialOrdersUpdateBody{}
+
+				// todo: fill message
+				log.Println("received silo info request!")
+
+				// package message
+				b, _ := json.Marshal(&vw)
+
+				cu := models.GameMessage{
+					MessageType: msgRegistry.IndustrialOrdersUpdate,
+					MessageBody: string(b),
+				}
+
+				// write response to client
+				c.WriteMessage(&cu)
 			}
 		}
 	}

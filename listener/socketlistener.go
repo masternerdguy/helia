@@ -209,6 +209,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientBuySellOrder(&client, &b)
+		} else if m.MessageType == msgRegistry.ViewIndustrialOrders {
+			// decode body as ClientViewIndustrialOrdersBody
+			b := models.ClientViewIndustrialOrdersBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientViewIndustrialOrders(&client, &b)
 		}
 	}
 }
@@ -287,7 +294,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				// get their new noob ship from the db
 				dbShip, err = shipSvc.GetShipByID(*u.CurrentShipID, false)
 
-				if dbShip == nil {
+				if dbShip == nil || err == nil {
 					log.Println(fmt.Sprintf("player join recovery: unable to find recovery noob ship %v for %v", u.CurrentShipID, u.ID))
 					return
 				}
@@ -789,6 +796,29 @@ func (l *SocketListener) handleClientBuySellOrder(client *shared.GameClient, bod
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.BuySellOrder)
+	}
+}
+
+func (l *SocketListener) handleClientViewIndustrialOrders(client *shared.GameClient, body *models.ClientViewIndustrialOrdersBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientViewIndustrialOrders: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.ViewIndustrialOrders)
 	}
 }
 

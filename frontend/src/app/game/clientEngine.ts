@@ -31,6 +31,7 @@ import { OrdersMarketWindow } from './gdi/windows/ordersMarketWindow';
 import { ServerOpenSellOrdersUpdate } from './wsModels/bodies/openSellOrdersUpdate';
 import { PushErrorWindow } from './gdi/windows/pushErrorWindow';
 import { IndustrialMarketWindow } from './gdi/windows/industrialMarketWindow';
+import { ServerIndustrialOrdersUpdate } from './wsModels/bodies/industrialOrdersUpdate';
 
 class EngineSack {
   constructor() {}
@@ -206,6 +207,8 @@ export function clientStart(
       handleErrorMessageFromServer(d);
     } else if (d.type === MessageTypes.OpenSellOrdersUpdate) {
       handleOpenSellOrdersUpdateMessageFromServer(d);
+    } else if (d.type === MessageTypes.IndustrialOrdersUpdate) {
+      handleIndustrialOrdersUpdateMessageFromServer(d);
     }
   });
 }
@@ -652,6 +655,23 @@ function handleOpenSellOrdersUpdateMessageFromServer(d: GameMessage) {
 
   // update sell orders window
   engineSack.ordersMarketWindow.syncOpenSellOrders(msg);
+}
+
+function handleIndustrialOrdersUpdateMessageFromServer(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerIndustrialOrdersUpdate;
+
+  // null check
+  if (!msg.inSilos) {
+    msg.inSilos = [];
+  }
+
+  if (!msg.outSilos) {
+    msg.outSilos = [];
+  }
+
+  // update industrial orders window
+  engineSack.industrialMarketWindow.syncIndustrialOrders(msg);
 }
 
 function handleCurrentShipUpdate(d: GameMessage) {

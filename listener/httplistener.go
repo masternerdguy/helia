@@ -93,7 +93,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create their noob ship
-	u, err = engine.CreateNoobShipForPlayer(start, u.ID, true)
+	_, err = engine.CreateNoobShipForPlayer(start, u.ID, true)
 
 	if err != nil {
 		http.Error(w, "createnoobshipforplayer: "+err.Error(), 500)

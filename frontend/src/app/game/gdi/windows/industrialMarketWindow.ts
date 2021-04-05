@@ -15,6 +15,8 @@ import { ClientStackItem } from '../../wsModels/bodies/stackItem';
 import { ClientTrashItem } from '../../wsModels/bodies/trashItem';
 import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
 import { heliaDateFromString, printHeliaDate } from '../../engineMath';
+import { ClientViewIndustrialOrders } from '../../wsModels/bodies/viewIndustrialOrders';
+import { ServerIndustrialOrdersUpdate } from '../../wsModels/bodies/industrialOrdersUpdate';
 
 export class IndustrialMarketWindow extends GDIWindow {
   // lists
@@ -304,13 +306,12 @@ export class IndustrialMarketWindow extends GDIWindow {
   }
 
   private refreshSilos() {
-    //todo: uncomment and update
-    /*setTimeout(() => {
-      const b = new ClientViewOpenSellOrders();
+    setTimeout(() => {
+      const b = new ClientViewIndustrialOrders();
       b.sid = this.wsSvc.sid;
 
-      this.wsSvc.sendMessage(MessageTypes.ViewOpenSellOrders, b);
-    }, 200);*/
+      this.wsSvc.sendMessage(MessageTypes.ViewIndustrialOrders, b);
+    }, 200);
   }
 
   periodicUpdate() {
@@ -605,6 +606,10 @@ export class IndustrialMarketWindow extends GDIWindow {
 
   setPlayer(player: Player) {
     this.player = player;
+  }
+
+  syncIndustrialOrders(orders: ServerIndustrialOrdersUpdate) {
+    console.log(orders);
   }
 
   resetViews() {

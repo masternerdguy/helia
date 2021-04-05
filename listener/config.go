@@ -2,6 +2,7 @@ package listener
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 )
 
@@ -13,6 +14,11 @@ func loadConfiguration() (listenerConfig, error) {
 	var config listenerConfig
 
 	configFile, err := os.Open("listener-configuration.json")
+
+	if err != nil {
+		return config, errors.New("unable to load listener configuration")
+	}
+
 	defer configFile.Close()
 
 	if err != nil {
