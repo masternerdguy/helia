@@ -5,7 +5,6 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"sync"
 	"time"
 
@@ -545,8 +544,45 @@ func (s *SolarSystem) PeriodicUpdate() {
 				// convert station's open industrial orders to an update message for the client
 				vw := models.ServerIndustrialOrdersUpdateBody{}
 
-				// todo: fill message
-				log.Println("received silo info request!")
+				// fill message
+				for _, p := range sh.DockedAtStation.Processes {
+					// copy I/O silos
+					for k := range p.InternalState.Inputs {
+						s := p.InternalState.Inputs[k]
+						t := p.Process.Inputs[k]
+
+						vw.InSilos = append(vw.InSilos, models.ServerIndustrialSiloBody{
+							StationID:        p.StationID.String(),
+							StationProcessID: p.ID.String(),
+							ItemTypeID:       t.ItemTypeID.String(),
+							ItemTypeName:     t.ItemTypeName,
+							ItemFamilyID:     t.ItemFamilyID,
+							ItemFamilyName:   t.ItemFamilyName,
+							Bid:              s.Price,
+							Available:        s.Quantity,
+							Meta:             models.Meta(t.Meta),
+							ItemTypeMeta:     models.Meta(t.ItemTypeMeta),
+						})
+					}
+
+					for k := range p.InternalState.Outputs {
+						s := p.InternalState.Outputs[k]
+						t := p.Process.Outputs[k]
+
+						vw.OutSilos = append(vw.OutSilos, models.ServerIndustrialSiloBody{
+							StationID:        p.StationID.String(),
+							StationProcessID: p.ID.String(),
+							ItemTypeID:       t.ItemTypeID.String(),
+							ItemTypeName:     t.ItemTypeName,
+							ItemFamilyID:     t.ItemFamilyID,
+							ItemFamilyName:   t.ItemFamilyName,
+							Bid:              s.Price,
+							Available:        s.Quantity,
+							Meta:             models.Meta(t.Meta),
+							ItemTypeMeta:     models.Meta(t.ItemTypeMeta),
+						})
+					}
+				}
 
 				// package message
 				b, _ := json.Marshal(&vw)
