@@ -30,6 +30,7 @@ import { Asteroid } from './engineModels/asteroid';
 import { OrdersMarketWindow } from './gdi/windows/ordersMarketWindow';
 import { ServerOpenSellOrdersUpdate } from './wsModels/bodies/openSellOrdersUpdate';
 import { PushErrorWindow } from './gdi/windows/pushErrorWindow';
+import { IndustrialMarketWindow } from './gdi/windows/industrialMarketWindow';
 
 class EngineSack {
   constructor() {}
@@ -55,6 +56,7 @@ class EngineSack {
   overviewWindow: OverviewWindow;
   shipFittingWindow: ShipFittingWindow;
   ordersMarketWindow: OrdersMarketWindow;
+  industrialMarketWindow: IndustrialMarketWindow;
   lastShiftDown: number;
 
   windows: GDIWindow[];
@@ -130,6 +132,14 @@ export function clientStart(
   engineSack.ordersMarketWindow.setWsService(wsService);
   engineSack.ordersMarketWindow.setPlayer(engineSack.player);
 
+  engineSack.industrialMarketWindow = new IndustrialMarketWindow();
+  engineSack.industrialMarketWindow.setX(300);
+  engineSack.industrialMarketWindow.setY(300);
+  engineSack.industrialMarketWindow.initialize();
+  engineSack.industrialMarketWindow.pack();
+  engineSack.industrialMarketWindow.setWsService(wsService);
+  engineSack.industrialMarketWindow.setPlayer(engineSack.player);
+
   engineSack.targetInteractionWindow = new TargetInteractionWindow();
   engineSack.targetInteractionWindow.initialize();
   engineSack.targetInteractionWindow.setWsSvc(wsService);
@@ -161,6 +171,7 @@ export function clientStart(
   );
   engineSack.windowManager.manageWindow(engineSack.shipFittingWindow, 'Ʌ');
   engineSack.windowManager.manageWindow(engineSack.ordersMarketWindow, '₪');
+  engineSack.windowManager.manageWindow(engineSack.industrialMarketWindow, '⚙');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
@@ -170,6 +181,7 @@ export function clientStart(
     engineSack.overviewWindow,
     engineSack.shipFittingWindow,
     engineSack.ordersMarketWindow,
+    engineSack.industrialMarketWindow,
     engineSack.windowManager,
   ];
 
@@ -247,6 +259,7 @@ function handleJoin(d: GameMessage) {
   // hide initially hidden windows
   engineSack.shipFittingWindow.setHidden(true);
   engineSack.ordersMarketWindow.setHidden(true);
+  engineSack.industrialMarketWindow.setHidden(true);
   engineSack.pushErrorWindow.setHidden(true);
 
   // start game loop
@@ -678,6 +691,10 @@ function handleCurrentShipUpdate(d: GameMessage) {
   // update orders market window
   engineSack.ordersMarketWindow.setPlayer(engineSack.player);
   engineSack.ordersMarketWindow.setWsService(engineSack.wsSvc);
+
+  // update industrial market window
+  engineSack.industrialMarketWindow.setPlayer(engineSack.player);
+  engineSack.industrialMarketWindow.setWsService(engineSack.wsSvc);
 }
 
 // clears the screen
