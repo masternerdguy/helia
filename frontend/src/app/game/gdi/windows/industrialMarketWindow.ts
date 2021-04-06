@@ -17,7 +17,10 @@ import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
 import { heliaDateFromString, printHeliaDate } from '../../engineMath';
 import { ClientViewIndustrialOrders } from '../../wsModels/bodies/viewIndustrialOrders';
 import { ServerIndustrialOrdersUpdate } from '../../wsModels/bodies/industrialOrdersUpdate';
-import { WSIndustrialOrdersUpdate, WSIndustrialSilo } from '../../wsModels/entities/wsIndustrialOrdersUpdate';
+import {
+  WSIndustrialOrdersUpdate,
+  WSIndustrialSilo,
+} from '../../wsModels/entities/wsIndustrialOrdersUpdate';
 
 export class IndustrialMarketWindow extends GDIWindow {
   // lists
@@ -486,16 +489,16 @@ export class IndustrialMarketWindow extends GDIWindow {
           oRows.push(buildOrderViewRowText('Order Details', undefined));
           oRows.push(
             buildOrderViewRowText(
-              infoKeyValueString(order.isSelling ? 'Ask Price' : 'Bid Price', `${order.price} CBN`),
+              infoKeyValueString(
+                order.isSelling ? 'Ask Price' : 'Bid Price',
+                `${order.price} CBN`
+              ),
               undefined
             )
           );
           oRows.push(
             buildOrderViewRowText(
-              infoKeyValueString(
-                'Unit Price',
-                `${order.price} CBN`
-              ),
+              infoKeyValueString('Unit Price', `${order.price} CBN`),
               undefined
             )
           );
@@ -557,7 +560,7 @@ export class IndustrialMarketWindow extends GDIWindow {
   syncIndustrialOrders(orders: WSIndustrialOrdersUpdate) {
     const rawTree: any = {};
     const allOrders: WSIndustrialSilo[] = [];
-    
+
     // merge order lists
     for (const o of orders.inSilos) {
       allOrders.push(o);
@@ -588,7 +591,9 @@ export class IndustrialMarketWindow extends GDIWindow {
       }
 
       // store order
-      rawTree[o.itemFamilyID].types[o.itemTypeID].orders[`${o.stationProcessId}|${o.itemTypeID}`] = o;
+      rawTree[o.itemFamilyID].types[o.itemTypeID].orders[
+        `${o.stationProcessId}|${o.itemTypeID}`
+      ] = o;
     }
 
     // copy to safer structure
@@ -761,9 +766,11 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
       actions.push('Package');
     }
 
-    // spacer and sell
-    actions.push('');
-    actions.push('Sell');
+    if (m.isPackaged) {
+      // spacer and sell
+      actions.push('');
+      actions.push('Sell');
+    }
 
     // spacer
     actions.push('');
@@ -829,10 +836,7 @@ function buildOrderViewDetailRow(order: WSIndustrialSilo): OrderViewRow {
   const shimItem = makeShimItem(order);
 
   // build cargo info
-  let cargoString = buildCargoRowFromContainerItem(
-    shimItem,
-    true
-  ).listString();
+  let cargoString = buildCargoRowFromContainerItem(shimItem, true).listString();
 
   // calculate volume
   let volume = order.available * Number(order.itemTypeMeta['volume']);
@@ -848,7 +852,7 @@ function buildOrderViewDetailRow(order: WSIndustrialSilo): OrderViewRow {
   if (order.isSelling) {
     actions.push('Buy');
   }
-  
+
   // augment cargo string
   cargoString = `${order.isSelling ? '▼' : '▲'}${cargoString.substring(1)}`;
 
