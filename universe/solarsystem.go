@@ -563,7 +563,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 							Meta:             models.Meta(t.Meta),
 							ItemTypeMeta:     models.Meta(t.ItemTypeMeta),
 							IsSelling:        false,
-							IsBuying:         true,
 						})
 					}
 
@@ -583,7 +582,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 							Meta:             models.Meta(t.Meta),
 							ItemTypeMeta:     models.Meta(t.ItemTypeMeta),
 							IsSelling:        true,
-							IsBuying:         false,
 						})
 					}
 				}

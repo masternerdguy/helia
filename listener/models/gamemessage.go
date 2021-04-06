@@ -467,7 +467,6 @@ type ServerIndustrialSiloBody struct {
 	Meta             Meta   `json:"meta"`
 	ItemTypeMeta     Meta   `json:"itemTypeMeta"`
 	IsSelling        bool   `json:"isSelling"`
-	IsBuying         bool   `json:"isBuying"`
 }
 
 // Body containing a request from the client for information about the industrial silos at their current station

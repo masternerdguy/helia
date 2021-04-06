@@ -486,7 +486,7 @@ export class IndustrialMarketWindow extends GDIWindow {
           oRows.push(buildOrderViewRowText('Order Details', undefined));
           oRows.push(
             buildOrderViewRowText(
-              infoKeyValueString(order.isSelling ? 'Ask Price' : order.isBuying ? 'Bid Price' : '', `${order.price} CBN`),
+              infoKeyValueString(order.isSelling ? 'Ask Price' : 'Bid Price', `${order.price} CBN`),
               undefined
             )
           );

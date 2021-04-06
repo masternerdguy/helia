@@ -15,5 +15,4 @@ export class WSIndustrialSilo {
   meta: any;
   itemTypeMeta: any;
   isSelling: boolean;
-  isBuying: boolean;
 }
