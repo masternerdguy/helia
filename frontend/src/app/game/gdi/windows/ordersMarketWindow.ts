@@ -710,13 +710,16 @@ export class OrdersMarketWindow extends GDIWindow {
 
           for (const key in meta) {
             if (Object.prototype.hasOwnProperty.call(meta, key)) {
-              const value = meta[key];
-              oRows.push(
-                buildOrderViewRowText(
-                  infoKeyValueString(key, `${value}`),
-                  undefined
-                )
-              );
+              // exclude industrial market which is handled separately
+              if (key !== 'industrialmarket') {
+                const value = meta[key];
+                oRows.push(
+                  buildOrderViewRowText(
+                    infoKeyValueString(key, `${value}`),
+                    undefined
+                  )
+                );
+              }
             }
           }
 
@@ -736,10 +739,36 @@ export class OrdersMarketWindow extends GDIWindow {
                   key
                 )
               ) {
-                const value = order.item.itemTypeMeta[key];
+                // exclude industrial market which is handled separately
+                if (key !== 'industrialmarket') {
+                  const value = order.item.itemTypeMeta[key];
+                  oRows.push(
+                    buildOrderViewRowText(
+                      infoKeyValueString(key, `${value}`),
+                      undefined
+                    )
+                  );
+                }
+              }
+            }
+
+            // add spacer
+            oRows.push(buildOrderViewRowSpacer());
+          }
+
+          // industrial market
+          const industrialMeta = order.item.itemTypeMeta['industrialmarket'];
+          if (industrialMeta) {
+            oRows.push(buildOrderViewRowText('Industrial Limits', undefined));
+
+            for (const key in industrialMeta) {
+              if (Object.prototype.hasOwnProperty.call(industrialMeta, key)) {
+                const value = industrialMeta[key];
+                const addCBN = key === 'maxprice' || key === 'minprice';
+
                 oRows.push(
                   buildOrderViewRowText(
-                    infoKeyValueString(key, `${value}`),
+                    infoKeyValueString(key, `${value}${addCBN ? ' CBN' : ''}`),
                     undefined
                   )
                 );

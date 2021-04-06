@@ -557,14 +557,41 @@ function buildInfoRowsFromContainerItem(m: WSContainerItem): ShipViewRow[] {
 
   for (const prop in meta) {
     if (Object.prototype.hasOwnProperty.call(meta, prop)) {
-      const v = buildShipViewRowText(infoKeyValueString(prop, `${meta[prop]}`));
+      // exclude industrial market which is handled separately
+      if (prop !== 'industrialmarket') {
+        const v = buildShipViewRowText(
+          infoKeyValueString(prop, `${meta[prop]}`)
+        );
 
-      rows.push(v);
+        rows.push(v);
+      }
     }
   }
 
   // spacer after metadata info
   rows.push(buildShipViewRowSpacer());
+
+  // industrial market
+  const industrialMeta = m.itemTypeMeta['industrialmarket'];
+  if (industrialMeta) {
+    rows.push(buildShipViewRowText('Industrial Limits'));
+
+    for (const key in industrialMeta) {
+      if (Object.prototype.hasOwnProperty.call(industrialMeta, key)) {
+        const value = industrialMeta[key];
+        const addCBN = key === 'maxprice' || key === 'minprice';
+
+        const v = buildShipViewRowText(
+          infoKeyValueString(key, `${value}${addCBN ? ' CBN' : ''}`)
+        );
+
+        rows.push(v);
+      }
+    }
+
+    // add spacer
+    rows.push(buildShipViewRowSpacer());
+  }
 
   // return info rows
   return rows;
@@ -601,14 +628,16 @@ function buildInfoRowsFromModule(m: WSModule): ShipViewRow[] {
 
   for (const prop in meta) {
     if (Object.prototype.hasOwnProperty.call(meta, prop)) {
-      const v = buildShipViewRowText(infoKeyValueString(prop, `${meta[prop]}`));
+      // exclude industrial market which isn't shown on fitted modules
+      if (prop !== 'industrialmarket') {
+        const v = buildShipViewRowText(
+          infoKeyValueString(prop, `${meta[prop]}`)
+        );
 
-      rows.push(v);
+        rows.push(v);
+      }
     }
   }
-
-  // spacer after metadata info
-  rows.push(buildShipViewRowSpacer());
 
   // slot info
   rows.push(buildShipViewRowText('Slot Info'));
