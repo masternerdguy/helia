@@ -55,7 +55,7 @@ export class LoginComponent implements OnInit {
 
         // transfer control to game engine
         clientStart(this.wsService, gameCanvas, backCanvas, s.sid);
-      });
+      }, 100);
     } else {
       alert('Login failed: ' + s.message);
     }
