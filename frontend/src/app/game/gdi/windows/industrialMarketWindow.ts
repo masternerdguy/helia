@@ -829,7 +829,7 @@ function buildOrderViewDetailRow(order: WSIndustrialSilo): OrderViewRow {
   const shimItem = makeShimItem(order);
 
   // build cargo info
-  const cargoString = buildCargoRowFromContainerItem(
+  let cargoString = buildCargoRowFromContainerItem(
     shimItem,
     true
   ).listString();
@@ -842,16 +842,15 @@ function buildOrderViewDetailRow(order: WSIndustrialSilo): OrderViewRow {
     volume = 0;
   }
 
+  // build actions
   const actions: string[] = [];
-
-  // set actions
-  if (order.isBuying) {
-    actions.push('Sell');
-  }
 
   if (order.isSelling) {
     actions.push('Buy');
   }
+  
+  // augment cargo string
+  cargoString = `${order.isSelling ? '▼' : '▲'}${cargoString.substring(1)}`;
 
   // build row
   const r: OrderViewRow = {
