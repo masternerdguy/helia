@@ -525,6 +525,8 @@ export class IndustrialMarketWindow extends GDIWindow {
 
           for (const key in meta) {
             if (Object.prototype.hasOwnProperty.call(meta, key)) {
+              // exclude industrial market which is handled separately
+              if (key !== 'industrialmarket') {
               const value = meta[key];
               oRows.push(
                 buildOrderViewRowText(
@@ -532,6 +534,30 @@ export class IndustrialMarketWindow extends GDIWindow {
                   undefined
                 )
               );
+                }
+            }
+          }
+
+          // add spacer
+          oRows.push(buildOrderViewRowSpacer());
+
+          // industrial market
+          oRows.push(buildOrderViewRowText('Industrial Limits', undefined));
+
+          const industrialMeta = meta['industrialmarket'];
+          if (industrialMeta) {
+            for (const key in industrialMeta) {
+              if (Object.prototype.hasOwnProperty.call(industrialMeta, key)) {
+                const value = industrialMeta[key];
+                const addCBN = key === 'maxprice' || key === 'minprice'
+
+                oRows.push(
+                  buildOrderViewRowText(
+                    infoKeyValueString(key, `${value}${addCBN ? ' CBN' : ''}`),
+                    undefined
+                  )
+                );
+              }
             }
           }
 
