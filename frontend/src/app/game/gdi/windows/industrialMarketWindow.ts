@@ -446,7 +446,7 @@ export class IndustrialMarketWindow extends GDIWindow {
           }
         } else if (depth === 3) {
           // add back button
-          oRows.push(buildOrderViewRowText('<== Back to Orders', '--'));
+          oRows.push(buildOrderViewRowText('<== Back to Silos', '--'));
 
           // add spacer
           oRows.push(buildOrderViewRowSpacer());
