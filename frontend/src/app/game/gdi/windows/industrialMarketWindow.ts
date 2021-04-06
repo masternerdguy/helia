@@ -375,7 +375,11 @@ export class IndustrialMarketWindow extends GDIWindow {
 
     if (this.player.currentCargoView) {
       for (const ci of this.player.currentCargoView.items) {
-        const r = buildCargoRowFromContainerItem(ci, this.isDocked);
+        const r = buildCargoRowFromContainerItem(
+          ci,
+          this.isDocked,
+          this.depthStack
+        );
         cargo.push(r);
       }
     }
@@ -438,7 +442,7 @@ export class IndustrialMarketWindow extends GDIWindow {
           for (const g of this.industrialOrdersTree.families
             .get(this.depthStack[0])
             .groups.get(this.depthStack[1]).orders) {
-            oRows.push(buildOrderViewDetailRow(g[1]));
+            oRows.push(buildOrderViewDetailRow(g[1], this.depthStack));
           }
         } else if (depth === 3) {
           // add back button
@@ -733,11 +737,12 @@ function buildShipViewRowText(s: string): ShipViewRow {
 
 function buildCargoRowFromContainerItem(
   m: WSContainerItem,
-  isDocked: boolean
+  isDocked: boolean,
+  depthStack: string[]
 ): ShipViewRow {
   const r: ShipViewRow = {
     object: m,
-    actions: getCargoRowActions(m, isDocked),
+    actions: getCargoRowActions(m, isDocked, depthStack),
     listString: () => {
       return itemStatusString(m);
     },
@@ -746,7 +751,11 @@ function buildCargoRowFromContainerItem(
   return r;
 }
 
-function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
+function getCargoRowActions(
+  m: WSContainerItem,
+  isDocked: boolean,
+  depthStack: string[]
+) {
   const actions: string[] = [];
 
   if (m.isPackaged) {
@@ -767,9 +776,21 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
     }
 
     if (m.isPackaged) {
-      // spacer and sell
-      actions.push('');
-      actions.push('Sell');
+      if (depthStack.length > 0) {
+        // verify we are browsing something we can sell into
+        const top = depthStack[depthStack.length - 1];
+        const arr = top.split('|');
+
+        if (arr.length === 2) {
+          const typeId = arr[1];
+
+          if (typeId === m.itemTypeID) {
+            // spacer and sell
+            actions.push('');
+            actions.push('Sell');
+          }
+        }
+      }
     }
 
     // spacer
@@ -831,12 +852,19 @@ function makeShimItem(silo: WSIndustrialSilo): WSContainerItem {
   return i;
 }
 
-function buildOrderViewDetailRow(order: WSIndustrialSilo): OrderViewRow {
+function buildOrderViewDetailRow(
+  order: WSIndustrialSilo,
+  depthStack: string[]
+): OrderViewRow {
   // make a shim item to reuse the cargo info function
   const shimItem = makeShimItem(order);
 
   // build cargo info
-  let cargoString = buildCargoRowFromContainerItem(shimItem, true).listString();
+  let cargoString = buildCargoRowFromContainerItem(
+    shimItem,
+    true,
+    depthStack
+  ).listString();
 
   // calculate volume
   let volume = order.available * Number(order.itemTypeMeta['volume']);
