@@ -554,8 +554,116 @@ export class IndustrialMarketWindow extends GDIWindow {
     this.player = player;
   }
 
-  syncIndustrialOrders(orders: ServerIndustrialOrdersUpdate) {
-    console.log(orders);
+  syncIndustrialOrders(orders: WSIndustrialOrdersUpdate) {
+    const rawTree: any = {};
+    const allOrders: WSIndustrialSilo[] = [];
+    
+    // merge order lists
+    for (const o of orders.inSilos) {
+      allOrders.push(o);
+    }
+
+    for (const o of orders.outSilos) {
+      allOrders.push(o);
+    }
+
+    // build order tree
+    for (const o of allOrders) {
+      // check if family needs to be created in tree
+      if (!rawTree[o.itemFamilyID]) {
+        // create branch
+        rawTree[o.itemFamilyID] = {
+          types: {},
+          name: o.itemFamilyName,
+        };
+      }
+
+      // check if type needs to be created in tree
+      if (!rawTree[o.itemFamilyID].types[o.itemTypeID]) {
+        // create branch
+        rawTree[o.itemFamilyID].types[o.itemTypeID] = {
+          orders: {},
+          name: o.itemTypeName,
+        };
+      }
+
+      // store order
+      rawTree[o.itemFamilyID].types[o.itemTypeID].orders[`${o.stationProcessId}|${o.itemTypeID}`] = o;
+    }
+
+    // copy to safer structure
+    const safeTree = new SilosTree();
+
+    for (const f in rawTree) {
+      if (Object.prototype.hasOwnProperty.call(rawTree, f)) {
+        const fe = rawTree[f];
+
+        const family = new SilosFamily();
+        family.name = fe.name;
+
+        for (const g in fe.types) {
+          if (Object.prototype.hasOwnProperty.call(fe.types, g)) {
+            const te = fe.types[g];
+
+            const group = new SilosGroup();
+            group.name = te.name;
+
+            for (const d in te.orders) {
+              if (Object.prototype.hasOwnProperty.call(te.orders, d)) {
+                const de = te.orders[d] as WSIndustrialSilo;
+
+                // add to group
+                group.orders.set(d, de);
+              }
+            }
+
+            // add to family
+            family.groups.set(g, group);
+          }
+        }
+
+        // add to trunk
+        safeTree.families.set(f, family);
+      }
+    }
+
+    // sort trunk alphabetically
+    const trunkArr = Array.from(safeTree.families).sort((a, b) =>
+      a[1].name > b[1].name ? 1 : -1
+    );
+
+    safeTree.families.clear();
+
+    for (const f of trunkArr) {
+      // sort groups alphabetically
+      const groupArr = Array.from(f[1].groups).sort((a, b) =>
+        a[1].name > b[1].name ? 1 : -1
+      );
+
+      f[1].groups.clear();
+
+      for (const g of groupArr) {
+        // sort orders by their price per unit
+        const orderArr = Array.from(g[1].orders).sort((a, b) =>
+          a[1].price / a[1].available > b[1].price / b[1].available ? 1 : -1
+        );
+
+        g[1].orders.clear();
+
+        for (const od of orderArr) {
+          g[1].orders.set(od[0], od[1]);
+        }
+
+        // push sorted group to family
+        f[1].groups.set(g[0], g[1]);
+      }
+
+      // push sorted family to trunk
+      safeTree.families.set(f[0], f[1]);
+    }
+
+    // store
+    this.industrialOrdersTree = safeTree;
   }
 
   resetViews() {
