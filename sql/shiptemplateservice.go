@@ -98,7 +98,7 @@ func (s ShipTemplateService) GetShipTemplateByID(shipTemplateID uuid.UUID) (*Shi
 		&t.BaseShield, &t.BaseShieldRegen, &t.BaseArmor, &t.BaseHull, &t.BaseFuel, &t.BaseHeatCap, &t.BaseHeatSink,
 		&t.BaseEnergy, &t.BaseEnergyRegen, &t.ShipTypeID, &t.SlotLayout, &t.BaseCargoBayVolume); err {
 	case sql.ErrNoRows:
-		return nil, errors.New("Ship template not found")
+		return nil, errors.New("ship template not found")
 	case nil:
 		return &t, nil
 	default:

@@ -54,7 +54,7 @@ func (s ItemService) GetItemByID(ItemID uuid.UUID) (*Item, error) {
 	switch err := row.Scan(&item.ID, &item.ItemTypeID, &item.Meta, &item.Created, &item.CreatedBy, &item.CreatedReason, &item.ContainerID,
 		&item.Quantity, &item.IsPackaged); err {
 	case sql.ErrNoRows:
-		return nil, errors.New("Item not found")
+		return nil, errors.New("item not found")
 	case nil:
 		return &item, nil
 	default:

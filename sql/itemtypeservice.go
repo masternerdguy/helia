@@ -46,7 +46,7 @@ func (s ItemTypeService) GetItemTypeByID(ItemTypeID uuid.UUID) (*ItemType, error
 
 	switch err := row.Scan(&ItemType.ID, &ItemType.Family, &ItemType.Name, &ItemType.Meta); err {
 	case sql.ErrNoRows:
-		return nil, errors.New("ItemType not found")
+		return nil, errors.New("itemType not found")
 	case nil:
 		return &ItemType, nil
 	default:

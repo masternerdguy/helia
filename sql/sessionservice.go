@@ -82,7 +82,7 @@ func (s SessionService) GetSessionByID(sessionid uuid.UUID) (*Session, error) {
 
 	switch err := row.Scan(&Session.ID, &Session.UserID); err {
 	case sql.ErrNoRows:
-		return nil, errors.New("Session does not exist")
+		return nil, errors.New("session does not exist")
 	case nil:
 		return &Session, nil
 	default:

@@ -1408,7 +1408,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	item := s.FindItemInCargo(id)
 
 	if item == nil {
-		return errors.New("Item not found in cargo bay")
+		return errors.New("item not found in cargo bay")
 	}
 
 	// get module rack
@@ -1779,6 +1779,112 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 	return nil
 }
 
+// Attempts to sell an item in the cargo bay to a silo and removes it if successful
+func (s *Ship) SellItemToSilo(siloID uuid.UUID, itemId uuid.UUID, quantity int, lock bool) error {
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// lock cargo bay
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	// make sure ship is docked
+	if s.DockedAtStationID == nil {
+		return errors.New("you must be docked to sell an item on the industrial market")
+	}
+
+	// make sure there is an escrow container attached to this ship
+	if s.EscrowContainerID == nil {
+		return errors.New("no escrow container associated with this ship")
+	}
+
+	// get the item to be listed for sale
+	item := s.FindItemInCargo(itemId)
+
+	if item == nil {
+		return errors.New("item not found in cargo bay")
+	}
+
+	// lock item if needed
+	if lock {
+		item.Lock.Lock()
+		defer item.Lock.Unlock()
+	}
+
+	// make sure item is packaged
+	if !item.IsPackaged {
+		return errors.New("item must be packaged before selling on the industrial market")
+	}
+
+	// make sure quantity is positive
+	if quantity <= 0 {
+		return errors.New("quantity of stack to sell must be positive")
+	}
+
+	// make sure quantity is bound by stack size
+	if quantity > item.Quantity {
+		return errors.New("order quantity cannot exceed stack size")
+	}
+
+	// make sure item is clean
+	if item.CoreDirty {
+		return errors.New("item is dirty and waiting on an escalation to save its state")
+	}
+
+	// find the silo
+	var silo *StationProcess = nil
+
+	for _, px := range s.DockedAtStation.Processes {
+		if px.ID == siloID {
+			silo = px
+			break
+		}
+	}
+
+	// verify order exists
+	if silo == nil {
+		return errors.New("silo not found")
+	}
+
+	var input *ProcessInput = nil
+
+	// verify this silo is buying this item type
+	for _, t := range silo.Process.Inputs {
+		if t.ItemTypeID == item.ItemTypeID {
+			input = &t
+			break
+		}
+	}
+
+	if input == nil {
+		return errors.New("silo does not consume this item")
+	}
+
+	// verify there is enough room in the silo to deliver this order
+	state := silo.InternalState.Inputs[item.ItemTypeID.String()]
+	m := input.GetIndustrialMetadata()
+
+	if state.Quantity+quantity > m.SiloSize {
+		return errors.New("silo is too full to accept this order")
+	}
+
+	// adjust wallet
+	price := quantity * state.Price
+	s.Wallet += float64(price)
+
+	// reduce item quantity
+	item.Quantity -= quantity
+	item.CoreDirty = true
+
+	// save item
+	s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
+
+	return nil
+}
+
 // Attempts to fulfill a sell order and place the item in cargo if successful
 func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	if lock {
@@ -1931,12 +2037,12 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 	item := s.FindItemInCargo(id)
 
 	if item == nil {
-		return errors.New("Item not found in cargo bay")
+		return errors.New("item not found in cargo bay")
 	}
 
 	// make sure item is clean
 	if item.CoreDirty {
-		return errors.New("Item is dirty and waiting on an escalation to save its state")
+		return errors.New("item is dirty and waiting on an escalation to save its state")
 	}
 
 	// make sure the ask price is > 0
@@ -2012,17 +2118,17 @@ func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 	item := s.FindItemInCargo(id)
 
 	if item == nil {
-		return errors.New("Item not found in cargo bay")
+		return errors.New("item not found in cargo bay")
 	}
 
 	// make sure item is clean
 	if item.CoreDirty {
-		return errors.New("Item is dirty and waiting on an escalation to save its state")
+		return errors.New("item is dirty and waiting on an escalation to save its state")
 	}
 
 	// make sure the item is packaged
 	if !item.IsPackaged {
-		return errors.New("Item is already unpackaged")
+		return errors.New("item is already unpackaged")
 	}
 
 	// make sure there is only one in the stack
@@ -2059,12 +2165,12 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 	item := s.FindItemInCargo(id)
 
 	if item == nil {
-		return errors.New("Item not found in cargo bay")
+		return errors.New("item not found in cargo bay")
 	}
 
 	// make sure item is clean
 	if item.CoreDirty {
-		return errors.New("Item is dirty and waiting on an escalation to save its state")
+		return errors.New("item is dirty and waiting on an escalation to save its state")
 	}
 
 	// make sure the item is packaged
@@ -2135,12 +2241,12 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 	item := s.FindItemInCargo(id)
 
 	if item == nil {
-		return errors.New("Item not found in cargo bay")
+		return errors.New("item not found in cargo bay")
 	}
 
 	// make sure item is clean
 	if item.CoreDirty {
-		return errors.New("Item is dirty and waiting on an escalation to save its state")
+		return errors.New("item is dirty and waiting on an escalation to save its state")
 	}
 
 	// make sure the item is packaged

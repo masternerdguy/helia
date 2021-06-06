@@ -84,7 +84,7 @@ func (s ProcessService) GetProcessByID(processID uuid.UUID) (*Process, error) {
 
 	switch err := row.Scan(&process.ID, &process.Name, &process.Meta, &process.Time); err {
 	case sql.ErrNoRows:
-		return nil, errors.New("Process not found")
+		return nil, errors.New("process not found")
 	case nil:
 		return &process, nil
 	default:

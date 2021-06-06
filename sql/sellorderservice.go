@@ -52,7 +52,7 @@ func (s SellOrderService) GetSellOrderByID(SellOrderID uuid.UUID) (*SellOrder, e
 	switch err := row.Scan(&sellOrder.ID, &sellOrder.StationID, &sellOrder.ItemID, &sellOrder.SellerUserID,
 		&sellOrder.AskPrice, &sellOrder.Created, &sellOrder.Bought, &sellOrder.BuyerUserID); err {
 	case sql.ErrNoRows:
-		return nil, errors.New("SellOrder not found")
+		return nil, errors.New("sellOrder not found")
 	case nil:
 		return &sellOrder, nil
 	default:

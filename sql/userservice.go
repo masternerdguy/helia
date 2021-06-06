@@ -144,7 +144,7 @@ func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) 
 	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
 		&user.EscrowContainerID); err {
 	case sql.ErrNoRows:
-		return nil, errors.New("User does not exist or invalid credentials")
+		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:
 		return &user, nil
 	default:
@@ -173,7 +173,7 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
 		&user.StartID, &user.EscrowContainerID); err {
 	case sql.ErrNoRows:
-		return nil, errors.New("User does not exist or invalid credentials")
+		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:
 		return &user, nil
 	default:

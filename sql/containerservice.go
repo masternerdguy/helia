@@ -82,7 +82,7 @@ func (s ContainerService) GetContainerByID(containerID uuid.UUID) (*Container, e
 
 	switch err := row.Scan(&container.ID, &container.Meta, &container.Created); err {
 	case sql.ErrNoRows:
-		return nil, errors.New("Container not found")
+		return nil, errors.New("container not found")
 	case nil:
 		return &container, nil
 	default:

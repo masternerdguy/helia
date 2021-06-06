@@ -148,7 +148,7 @@ func (s ShipService) GetShipByID(shipID uuid.UUID, isDestroyed bool) (*Ship, err
 		&ship.DockedAtStationID, &ship.Fitting, &ship.Destroyed, &ship.DestroyedAt, &ship.CargoBayContainerID,
 		&ship.FittingBayContainerID, &ship.ReMaxDirty, &ship.TrashContainerID, &ship.Wallet); err {
 	case sql.ErrNoRows:
-		return nil, errors.New("Ship not found")
+		return nil, errors.New("ship not found")
 	case nil:
 		return &ship, nil
 	default:

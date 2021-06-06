@@ -2,11 +2,9 @@ package universe
 
 import (
 	"encoding/json"
-	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"sync"
 	"time"
 
@@ -618,16 +616,14 @@ func (s *SolarSystem) PeriodicUpdate() {
 				// extract data
 				data := evt.Body.(models.ClientSellToSiloBody)
 
-				log.Println(fmt.Sprintf("%v", data))
-
-				/*// sell item to silo
+				// sell item to silo
 				err := sh.SellItemToSilo(data.SiloID, data.ItemID, data.Quantity, false)
 
 				// there is a reason this could fail the player will need to know about
 				if err != nil {
 					// send error message to client
 					c.WriteErrorMessage(err.Error())
-				}*/
+				}
 			}
 		}
 	}

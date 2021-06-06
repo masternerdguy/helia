@@ -43,7 +43,7 @@ func (s ItemFamilyService) GetItemFamilyByID(ItemFamilyID string) (*ItemFamily, 
 
 	switch err := row.Scan(&ItemFamily.ID, &ItemFamily.FriendlyName, &ItemFamily.Meta); err {
 	case sql.ErrNoRows:
-		return nil, errors.New("ItemFamily not found")
+		return nil, errors.New("itemFamily not found")
 	case nil:
 		return &ItemFamily, nil
 	default:
