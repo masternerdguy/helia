@@ -206,6 +206,18 @@ export class IndustrialMarketWindow extends GDIWindow {
         });
 
         this.showModalInput();
+      } else if (a === 'Buy') {
+        // verify we are browsing something we can buy from
+        const top = this.depthStack[this.depthStack.length - 1];
+        const arr = top.split('|');
+
+        if (arr.length === 2) {
+          const siloId = arr[0];
+          const typeId = arr[1];
+
+          console.log(siloId);
+          console.log(typeId);
+        }
       }
     });
 
