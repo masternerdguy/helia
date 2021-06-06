@@ -1678,7 +1678,14 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 	}
 
 	// find the silo
-	silo := s.DockedAtStation.Processes[siloID.String()]
+	var silo *StationProcess = nil
+
+	for _, px := range s.DockedAtStation.Processes {
+		if px.ID == siloID {
+			silo = px
+			break
+		}
+	}
 
 	// verify order exists
 	if silo == nil {
@@ -1735,7 +1742,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 	s.Wallet -= cost
 
 	// reduce quantity
-	output.Quantity -= quantity
+	state.Quantity -= quantity
 
 	// make a new item stack of the given size
 	nid, err := uuid.NewUUID()

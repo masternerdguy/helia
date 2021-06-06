@@ -233,6 +233,9 @@ export class IndustrialMarketWindow extends GDIWindow {
   
               // request cargo bay refresh
               this.refreshCargoBay();
+
+              // request silo refresh
+              this.refreshSilos();
   
               // reset views
               this.resetViews();
