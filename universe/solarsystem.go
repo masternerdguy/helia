@@ -210,6 +210,11 @@ func (s *SolarSystem) PeriodicUpdate() {
 						continue
 					}
 
+					// skip if no quantity
+					if i.Quantity <= 0 {
+						continue
+					}
+
 					// add to message
 					r := models.ServerItemViewBody{
 						ID:             i.ID,
