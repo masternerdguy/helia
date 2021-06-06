@@ -223,7 +223,7 @@ func loadUniverse() (*universe.Universe, error) {
 					return nil, err
 				}
 
-				processes := make([]*universe.StationProcess, 0)
+				processes := make(map[string]*universe.StationProcess)
 
 				for _, sp := range sqlProcesses {
 					spx, err := LoadStationProcess(&sp)
@@ -232,7 +232,7 @@ func loadUniverse() (*universe.Universe, error) {
 						return nil, err
 					}
 
-					processes = append(processes, spx)
+					processes[spx.ProcessID.String()] = spx
 				}
 
 				// build station
@@ -1025,12 +1025,12 @@ func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error
 		IsRunning: sp.InternalState.IsRunning,
 	}
 
-	internalState.Inputs = make(map[string]universe.StationProcessInternalStateFactor)
-	internalState.Outputs = make(map[string]universe.StationProcessInternalStateFactor)
+	internalState.Inputs = make(map[string]*universe.StationProcessInternalStateFactor)
+	internalState.Outputs = make(map[string]*universe.StationProcessInternalStateFactor)
 
 	for key := range sp.InternalState.Inputs {
 		v := sp.InternalState.Inputs[key]
-		internalState.Inputs[key] = universe.StationProcessInternalStateFactor{
+		internalState.Inputs[key] = &universe.StationProcessInternalStateFactor{
 			Quantity: v.Quantity,
 			Price:    v.Price,
 		}
@@ -1038,7 +1038,7 @@ func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error
 
 	for key := range sp.InternalState.Outputs {
 		v := sp.InternalState.Outputs[key]
-		internalState.Outputs[key] = universe.StationProcessInternalStateFactor{
+		internalState.Outputs[key] = &universe.StationProcessInternalStateFactor{
 			Quantity: v.Quantity,
 			Price:    v.Price,
 		}

@@ -23,7 +23,7 @@ type Station struct {
 	Lock                   sync.Mutex
 	CurrentSystem          *SolarSystem
 	OpenSellOrders         map[string]*SellOrder
-	Processes              []*StationProcess
+	Processes              map[string]*StationProcess
 	lastPeriodicUpdateTime time.Time
 }
 
@@ -43,8 +43,8 @@ func (s *Station) Initialize() {
 		if !process.Installed {
 			// set up process for first time
 			is := StationProcessInternalState{}
-			is.Inputs = make(map[string]StationProcessInternalStateFactor)
-			is.Outputs = make(map[string]StationProcessInternalStateFactor)
+			is.Inputs = make(map[string]*StationProcessInternalStateFactor)
+			is.Outputs = make(map[string]*StationProcessInternalStateFactor)
 
 			/*
 			 * In Helia, "stations" are always NPC operated and indestructible. This is so that players
@@ -65,7 +65,7 @@ func (s *Station) Initialize() {
 				}
 
 				// store in state
-				is.Inputs[x.ItemTypeID.String()] = sf
+				is.Inputs[x.ItemTypeID.String()] = &sf
 			}
 
 			for _, x := range process.Process.Outputs {
@@ -78,7 +78,7 @@ func (s *Station) Initialize() {
 				}
 
 				// store in state
-				is.Outputs[x.ItemTypeID.String()] = sf
+				is.Outputs[x.ItemTypeID.String()] = &sf
 			}
 
 			// randomize job progress
@@ -128,11 +128,11 @@ func (s *Station) CopyStation() Station {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	copiedProcesses := make([]*StationProcess, 0)
+	copiedProcesses := make(map[string]*StationProcess)
 
-	for _, p := range s.Processes {
+	for i, p := range s.Processes {
 		copy := p.CopyStationProcess()
-		copiedProcesses = append(copiedProcesses, copy)
+		copiedProcesses[i] = copy
 	}
 
 	return Station{

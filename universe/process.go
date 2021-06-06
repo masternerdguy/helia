@@ -100,8 +100,8 @@ func (p *StationProcess) PeriodicUpdate(dT int64) {
 // Structure representing the internal state of the ware silos involved in the process
 type StationProcessInternalState struct {
 	IsRunning bool
-	Inputs    map[string]StationProcessInternalStateFactor
-	Outputs   map[string]StationProcessInternalStateFactor
+	Inputs    map[string]*StationProcessInternalStateFactor
+	Outputs   map[string]*StationProcessInternalStateFactor
 }
 
 // Structure representing an input or output factor in a station process's internal state

@@ -1655,6 +1655,123 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 	return nil
 }
 
+// Attempts to buy an output from a silo and places it in cargo if successful
+func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity int, lock bool) error {
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// lock cargo bay
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	// make sure ship is docked
+	if s.DockedAtStationID == nil {
+		return errors.New("you must be docked to buy an item from the station industrial market")
+	}
+
+	// make sure there is an escrow container attached to this ship
+	if s.EscrowContainerID == nil {
+		return errors.New("no escrow container associated with this ship")
+	}
+
+	// find the silo
+	silo := s.DockedAtStation.Processes[siloID.String()]
+
+	// verify order exists
+	if silo == nil {
+		return errors.New("silo not found")
+	}
+
+	var output *ProcessOutput = nil
+
+	// verify this silo is selling this item type
+	for _, t := range silo.Process.Outputs {
+		if t.ItemTypeID == itemTypeID {
+			output = &t
+			break
+		}
+	}
+
+	if output == nil {
+		return errors.New("silo does not produce this item")
+	}
+
+	// verify there is enough to satisfy the order
+	state := silo.InternalState.Outputs[itemTypeID.String()]
+
+	if state.Quantity < quantity {
+		return errors.New("silo doesn't contain enough of this item type to fulfill this order")
+	}
+
+	// lock silo if needed
+	if lock {
+		silo.Lock.Lock()
+		defer silo.Lock.Unlock()
+	}
+
+	// verify sufficient funds
+	cost := float64(state.Price * quantity)
+
+	if s.Wallet-cost < 0 {
+		return errors.New("insufficient CBN to fulfill order")
+	}
+
+	// calculate order volume
+	unitVolume, _ := output.ItemTypeMeta.GetFloat64("volume")
+	orderVolume := unitVolume * float64(quantity)
+
+	// verify sufficient cargo capacity
+	usedBay := s.TotalCargoBayVolumeUsed(lock)
+	maxBay := s.GetRealCargoBayVolume()
+
+	if usedBay+orderVolume > maxBay {
+		return errors.New("insufficient cargo space available")
+	}
+
+	// adjust wallet
+	s.Wallet -= cost
+
+	// reduce quantity
+	output.Quantity -= quantity
+
+	// make a new item stack of the given size
+	nid, err := uuid.NewUUID()
+
+	if err != nil {
+		return err
+	}
+
+	newItem := Item{
+		ID:             nid,
+		ItemTypeID:     output.ItemTypeID,
+		Meta:           output.ItemTypeMeta,
+		Created:        time.Now(),
+		CreatedBy:      &s.UserID,
+		CreatedReason:  "Bought from silo",
+		ContainerID:    s.CargoBayContainerID,
+		Quantity:       quantity,
+		IsPackaged:     true,
+		Lock:           sync.Mutex{},
+		ItemTypeName:   output.ItemTypeName,
+		ItemFamilyID:   output.ItemFamilyID,
+		ItemFamilyName: output.ItemFamilyName,
+		ItemTypeMeta:   output.ItemTypeMeta,
+		CoreDirty:      true,
+	}
+
+	// escalate order save request to core
+	s.CurrentSystem.NewItems[nid.String()] = &newItem
+
+	// place item in cargo bay
+	s.CargoBay.Items = append(s.CargoBay.Items, &newItem)
+
+	// success
+	return nil
+}
+
 // Attempts to fulfill a sell order and place the item in cargo if successful
 func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	if lock {
