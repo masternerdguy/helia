@@ -21,6 +21,7 @@ import {
   WSIndustrialOrdersUpdate,
   WSIndustrialSilo,
 } from '../../wsModels/entities/wsIndustrialOrdersUpdate';
+import { ClientBuyFromSilo } from '../../wsModels/bodies/buyFromSilo';
 
 export class IndustrialMarketWindow extends GDIWindow {
   // lists
@@ -215,8 +216,36 @@ export class IndustrialMarketWindow extends GDIWindow {
           const siloId = arr[0];
           const typeId = arr[1];
 
-          console.log(siloId);
-          console.log(typeId);
+          this.modalInput.setOnReturn((txt: string) => {
+            // convert text to an integer
+            const n = Math.round(Number(txt));
+  
+            if (!Number.isNaN(n)) {
+              // send buy request
+              const tiMsg: ClientBuyFromSilo = {
+                sid: this.wsSvc.sid,
+                siloId: siloId,
+                itemTypeId: typeId,
+                quantity: n,
+              };
+  
+              this.wsSvc.sendMessage(MessageTypes.BuyFromSilo, tiMsg);
+  
+              // request cargo bay refresh
+              this.refreshCargoBay();
+  
+              // reset views
+              this.resetViews();
+            }
+  
+            // clear input
+            this.modalInput.setText('');
+  
+            // hide modal overlay
+            this.hideModalInput();
+          });
+  
+          this.showModalInput();
         }
       }
     });

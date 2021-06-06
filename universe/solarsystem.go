@@ -2,9 +2,11 @@ package universe
 
 import (
 	"encoding/json"
+	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"sync"
 	"time"
 
@@ -596,6 +598,13 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 				// write response to client
 				c.WriteMessage(&cu)
+			}
+		} else if evt.Type == models.NewMessageRegistry().BuyFromSilo {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientBuyFromSiloBody)
+
+				log.Println(fmt.Sprintf("buy from silo %d", data))
 			}
 		}
 	}

@@ -34,6 +34,7 @@ type MessageRegistry struct {
 	BuySellOrder           int
 	ViewIndustrialOrders   int
 	IndustrialOrdersUpdate int
+	BuyFromSilo            int
 }
 
 // Registry of target types
@@ -75,6 +76,7 @@ func NewMessageRegistry() *MessageRegistry {
 		BuySellOrder:           22,
 		ViewIndustrialOrders:   23,
 		IndustrialOrdersUpdate: 24,
+		BuyFromSilo:            25,
 	}
 }
 
@@ -478,4 +480,12 @@ type ClientViewIndustrialOrdersBody struct {
 type ServerIndustrialOrdersUpdateBody struct {
 	OutSilos []ServerIndustrialSiloBody `json:"outSilos"`
 	InSilos  []ServerIndustrialSiloBody `json:"inSilos"`
+}
+
+// Body containing a request to buy an item for sale from a silo at their station
+type ClientBuyFromSiloBody struct {
+	SessionID  uuid.UUID `json:"sid"`
+	SiloID     uuid.UUID `json:"siloId"`
+	ItemTypeID uuid.UUID `json:"itemTypeId"`
+	Quantity   int       `json:"quantity"`
 }

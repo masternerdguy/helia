@@ -216,6 +216,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientViewIndustrialOrders(&client, &b)
+		} else if m.MessageType == msgRegistry.BuyFromSilo {
+			// decode body as ClientBuyFromSiloBody
+			b := models.ClientBuyFromSiloBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientBuyFromSilo(&client, &b)
 		}
 	}
 }
@@ -819,6 +826,29 @@ func (l *SocketListener) handleClientViewIndustrialOrders(client *shared.GameCli
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.ViewIndustrialOrders)
+	}
+}
+
+func (l *SocketListener) handleClientBuyFromSilo(client *shared.GameClient, body *models.ClientBuyFromSiloBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientBuyFromSilo: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.BuyFromSilo)
 	}
 }
 
