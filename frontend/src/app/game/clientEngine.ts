@@ -763,9 +763,8 @@ function gfxBackplate() {
 
     // get data url and convert to image
     engineSack.player.currentSystem.backplateImg = new Image();
-    engineSack.player.currentSystem.backplateImg.src = engineSack.backplateCanvas.toDataURL(
-      'image/png'
-    );
+    engineSack.player.currentSystem.backplateImg.src =
+      engineSack.backplateCanvas.toDataURL('image/png');
 
     // mark as valid
     engineSack.player.currentSystem.backplateValid = true;

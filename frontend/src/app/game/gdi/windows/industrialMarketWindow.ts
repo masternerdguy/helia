@@ -22,6 +22,7 @@ import {
   WSIndustrialSilo,
 } from '../../wsModels/entities/wsIndustrialOrdersUpdate';
 import { ClientBuyFromSilo } from '../../wsModels/bodies/buyFromSilo';
+import { ClientSellToSilo } from '../../wsModels/bodies/sellToSilo';
 
 export class IndustrialMarketWindow extends GDIWindow {
   // lists
@@ -219,7 +220,7 @@ export class IndustrialMarketWindow extends GDIWindow {
           this.modalInput.setOnReturn((txt: string) => {
             // convert text to an integer
             const n = Math.round(Number(txt));
-  
+
             if (!Number.isNaN(n)) {
               // send buy request
               const tiMsg: ClientBuyFromSilo = {
@@ -228,26 +229,72 @@ export class IndustrialMarketWindow extends GDIWindow {
                 itemTypeId: typeId,
                 quantity: n,
               };
-  
+
               this.wsSvc.sendMessage(MessageTypes.BuyFromSilo, tiMsg);
-  
+
               // request cargo bay refresh
               this.refreshCargoBay();
 
               // request silo refresh
               this.refreshSilos();
-  
+
               // reset views
               this.resetViews();
             }
-  
+
             // clear input
             this.modalInput.setText('');
-  
+
             // hide modal overlay
             this.hideModalInput();
           });
-  
+
+          this.showModalInput();
+        }
+      } else if (a === 'Sell') {
+        // verify we are browsing something we can sell to
+        const top = this.depthStack[this.depthStack.length - 1];
+        const arr = top.split('|');
+
+        if (arr.length === 2) {
+          const siloId = arr[0];
+
+          // get selected item
+          const i: ShipViewRow = this.cargoView.getSelectedItem();
+          const item = i.object as WSContainerItem;
+
+          this.modalInput.setOnReturn((txt: string) => {
+            // convert text to an integer
+            const n = Math.round(Number(txt));
+
+            if (!Number.isNaN(n)) {
+              // send sell request
+              const tiMsg: ClientSellToSilo = {
+                sid: this.wsSvc.sid,
+                siloId: siloId,
+                itemId: item.id,
+                quantity: n,
+              };
+
+              this.wsSvc.sendMessage(MessageTypes.SellToSilo, tiMsg);
+
+              // request cargo bay refresh
+              this.refreshCargoBay();
+
+              // request silo refresh
+              this.refreshSilos();
+
+              // reset views
+              this.resetViews();
+            }
+
+            // clear input
+            this.modalInput.setText('');
+
+            // hide modal overlay
+            this.hideModalInput();
+          });
+
           this.showModalInput();
         }
       }

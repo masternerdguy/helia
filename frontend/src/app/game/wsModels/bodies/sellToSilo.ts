@@ -1,6 +1,6 @@
-export class ClientBuyFromSilo {
+export class ClientSellToSilo {
   sid: string;
   siloId: string;
-  itemTypeId: string;
+  itemId: string;
   quantity: number;
 }

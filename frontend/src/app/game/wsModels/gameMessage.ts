@@ -31,4 +31,5 @@ export enum MessageTypes {
   ViewIndustrialOrders = 23,
   IndustrialOrdersUpdate = 24,
   BuyFromSilo = 25,
+  SellToSilo = 26,
 }

@@ -2,9 +2,11 @@ package universe
 
 import (
 	"encoding/json"
+	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"sync"
 	"time"
 
@@ -602,7 +604,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 				// extract data
 				data := evt.Body.(models.ClientBuyFromSiloBody)
 
-				// sell item stack as order
+				// buy product from silo
 				err := sh.BuyItemFromSilo(data.SiloID, data.ItemTypeID, data.Quantity, false)
 
 				// there is a reason this could fail the player will need to know about
@@ -610,6 +612,22 @@ func (s *SolarSystem) PeriodicUpdate() {
 					// send error message to client
 					c.WriteErrorMessage(err.Error())
 				}
+			}
+		} else if evt.Type == models.NewMessageRegistry().SellToSilo {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientSellToSiloBody)
+
+				log.Println(fmt.Sprintf("%v", data))
+
+				/*// sell item to silo
+				err := sh.SellItemToSilo(data.SiloID, data.ItemID, data.Quantity, false)
+
+				// there is a reason this could fail the player will need to know about
+				if err != nil {
+					// send error message to client
+					c.WriteErrorMessage(err.Error())
+				}*/
 			}
 		}
 	}
