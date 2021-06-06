@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://10.0.0.125:8080/api/',
-  wsUrl: 'ws://10.0.0.125:8080/ws/',
+  apiUrl: 'http://192.168.12.210:8080/api/',
+  wsUrl: 'ws://192.168.12.210:8080/ws/',
 };
 
 /*
