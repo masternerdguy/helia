@@ -10,11 +10,11 @@ export class WindowManager extends GDIWindow {
   }
 
   resize(height: number) {
-      // store new size
-      this.setHeight(height);
-  
-      // get new offscreen canvas
-      this.buildCanvas();
+    // store new size
+    this.setHeight(height);
+
+    // get new offscreen canvas
+    this.buildCanvas();
   }
 
   initialize() {

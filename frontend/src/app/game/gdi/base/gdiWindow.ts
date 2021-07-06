@@ -25,13 +25,13 @@ export class GDIWindow extends GDIBase {
   }
 
   buildCanvas() {
-      // initialize offscreen canvas
-      this.canvas = new OffscreenCanvas(
-        this.getWidth(),
-        this.getHeight() + GDIStyle.windowHandleHeight
-      );
+    // initialize offscreen canvas
+    this.canvas = new OffscreenCanvas(
+      this.getWidth(),
+      this.getHeight() + GDIStyle.windowHandleHeight
+    );
 
-      this.ctx = this.canvas.getContext('2d');    
+    this.ctx = this.canvas.getContext('2d');
   }
 
   periodicUpdate() {

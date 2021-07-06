@@ -34,9 +34,11 @@ export class LoginComponent implements OnInit {
 
       setTimeout(() => {
         // remove extra stuff from page to avoid interference with main canvas
-        const layoutContainer = document.getElementsByClassName('helia-game-top')[0].parentNode.parentNode as any;
+        const layoutContainer = document.getElementsByClassName(
+          'helia-game-top'
+        )[0].parentNode.parentNode as any;
         layoutContainer.removeAttribute('class');
-        
+
         const header = document.getElementsByTagName('h1')[0] as any;
         header.style.display = 'none';
 
@@ -59,7 +61,7 @@ export class LoginComponent implements OnInit {
           setTimeout(() => {
             // transfer control to game engine
             clientStart(this.wsService, gameCanvas, backCanvas, s.sid);
-          },100);
+          }, 100);
         }, 100);
       }, 100);
     } else {
