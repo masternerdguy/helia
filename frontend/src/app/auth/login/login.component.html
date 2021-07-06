@@ -10,6 +10,13 @@
             <input type="password" class="form-control" placeholder="Enter password" id="password" #password>
         </div>
         <button type="button" class="btn btn-primary" (click)="login()">Submit</button>
+        <div>
+            <br/>
+            <p>
+                Once you've logged in, you can resize your browser to adjust the game window, and enter fullscreen
+                using your browser's native facilities (on Chrome, this is usually F11).
+            </p>
+        </div>
     </form>
 </div>
 <div *ngIf="loginSuccess" class="helia-game-top">
