@@ -1076,6 +1076,25 @@ function handleWindowResize() {
   // resize window manager
   engineSack.windowManager.resize(clientHeight);
 
+  // make sure all windows are within the new viewport
+  for (const w of engineSack.windows) {
+    while (w.getX() + w.getWidth() + 1 > clientWidth) {
+      w.setX(w.getX() - 1);
+    }
+
+    while (w.getY() + w.getHeight() + 1 > clientHeight) {
+      w.setY(w.getY() - 1);
+    }
+
+    if (w.getX() < 0) {
+      w.setX(0);
+    }
+
+    if (w.getY() < 0) {
+      w.setY(0);
+    }
+  }
+
   // mark backplate as dirty
   engineSack.player.currentSystem.backplateValid = false;
 }
