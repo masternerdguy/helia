@@ -12,11 +12,11 @@
         <button type="button" class="btn btn-primary" (click)="login()">Submit</button>
     </form>
 </div>
-<div *ngIf="loginSuccess">
-    <canvas class="gameCanvas" width="{{screenWidth}}" height="{{screenHeight}}" tabindex='1'>
+<div *ngIf="loginSuccess" class="helia-game-top">
+    <canvas class="gameCanvas" width="0" height="0" tabindex='1'>
         A browser that supports HTML5 canvas is required to play Helia.
     </canvas>
-    <canvas class="backCanvas" width="{{screenWidth}}" height="{{screenHeight}}">
+    <canvas class="backCanvas" width="0" height="0" style="display: none;">
         A browser that supports HTML5 canvas is required to play Helia.
     </canvas>
 </div>

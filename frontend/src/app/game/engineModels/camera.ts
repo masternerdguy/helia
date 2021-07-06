@@ -7,6 +7,11 @@ export class Camera {
     this.y = 0;
   }
 
+  resizeViewport(width: number, height: number) {
+    this.w = width;
+    this.h = height;
+  }
+
   x: number;
   y: number;
   w: number;

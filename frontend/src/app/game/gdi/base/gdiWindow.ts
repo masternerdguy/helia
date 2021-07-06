@@ -18,14 +18,20 @@ export class GDIWindow extends GDIBase {
 
   initialize() {
     // initialize offscreen canvas
-    this.canvas = new OffscreenCanvas(
-      this.getWidth(),
-      this.getHeight() + GDIStyle.windowHandleHeight
-    );
-    this.ctx = this.canvas.getContext('2d');
+    this.buildCanvas();
 
     // initialize empty arrays
     this.components = [];
+  }
+
+  buildCanvas() {
+      // initialize offscreen canvas
+      this.canvas = new OffscreenCanvas(
+        this.getWidth(),
+        this.getHeight() + GDIStyle.windowHandleHeight
+      );
+
+      this.ctx = this.canvas.getContext('2d');    
   }
 
   periodicUpdate() {

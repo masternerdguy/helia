@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AccountService } from '../account.service';
 import { WsService } from 'src/app/game/ws.service';
-import { ServerJoinBody } from 'src/app/game/wsModels/bodies/join';
 import { clientStart } from 'src/app/game/clientEngine';
 
 @Component({
@@ -14,9 +13,6 @@ export class LoginComponent implements OnInit {
   @ViewChild('password') password: ElementRef;
 
   loginSuccess = false;
-
-  screenWidth = window.screen.width;
-  screenHeight = window.screen.height;
 
   constructor(
     private accountService: AccountService,
@@ -37,24 +33,34 @@ export class LoginComponent implements OnInit {
       this.loginSuccess = true;
 
       setTimeout(() => {
-        // get back canvas
-        const backCanvas = document.getElementsByClassName(
-          'backCanvas'
-        )[0] as any;
+        // remove extra stuff from page to avoid interference with main canvas
+        const layoutContainer = document.getElementsByClassName('helia-game-top')[0].parentNode.parentNode as any;
+        layoutContainer.removeAttribute('class');
+        
+        const header = document.getElementsByTagName('h1')[0] as any;
+        header.style.display = 'none';
 
-        // enter fullscreen
-        const gameCanvas = document.getElementsByClassName(
-          'gameCanvas'
-        )[0] as any;
+        // prevent overflow causing scroll in body
+        const documentBody = document.getElementsByTagName('body')[0] as any;
+        documentBody.style.overflow = 'hidden';
+        documentBody.style.height = '100%';
 
-        if (gameCanvas.webkitRequestFullScreen) {
-          gameCanvas.webkitRequestFullScreen();
-        } else {
-          gameCanvas.mozRequestFullScreen();
-        }
+        setTimeout(() => {
+          // get back canvas
+          const backCanvas = document.getElementsByClassName(
+            'backCanvas'
+          )[0] as any;
 
-        // transfer control to game engine
-        clientStart(this.wsService, gameCanvas, backCanvas, s.sid);
+          // get main canvas
+          const gameCanvas = document.getElementsByClassName(
+            'gameCanvas'
+          )[0] as any;
+
+          setTimeout(() => {
+            // transfer control to game engine
+            clientStart(this.wsService, gameCanvas, backCanvas, s.sid);
+          },100);
+        }, 100);
       }, 100);
     } else {
       alert('Login failed: ' + s.message);

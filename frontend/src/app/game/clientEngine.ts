@@ -86,9 +86,23 @@ export function clientStart(
   backCanvas: HTMLCanvasElement,
   sid: string
 ) {
-  // initialize
+  // set canvases to initial width
+  const clientWidth = document.documentElement.clientWidth;
+  const clientHeight = document.documentElement.clientHeight;
+
+  gameCanvas.width = clientWidth;
+  gameCanvas.height = clientHeight;
+
+  backCanvas.width = clientWidth;
+  backCanvas.height = clientHeight;
+
+  // initialize player
   engineSack.player = new Player();
+
+  // initialize camera
   engineSack.camera = new Camera(gameCanvas.width, gameCanvas.height, 1);
+
+  // initialize backplate
   engineSack.backplateRenderer = new Backplate(backCanvas);
 
   // initialize window manager
@@ -249,15 +263,10 @@ function handleJoin(d: GameMessage) {
     handleKeydown(event.key);
   });
 
-  // detect fullscreen loss
-  const exitHandler = () => {
-    window.location.href = '/auth/signin';
-  };
-
-  document.addEventListener('fullscreenchange', exitHandler, false);
-  document.addEventListener('mozfullscreenchange', exitHandler, false);
-  document.addEventListener('MSFullscreenChange', exitHandler, false);
-  document.addEventListener('webkitfullscreenchange', exitHandler, false);
+  // add window resize listener
+  window.addEventListener('resize', () => {
+    handleWindowResize();
+  });
 
   // hide initially hidden windows
   engineSack.shipFittingWindow.setHidden(true);
@@ -1047,4 +1056,26 @@ function handleKeydown(key: string) {
       return;
     }
   }
+}
+
+function handleWindowResize() {
+  // get current window size
+  const clientWidth = document.documentElement.clientWidth;
+  const clientHeight = document.documentElement.clientHeight;
+
+  // resize canvases
+  engineSack.gfx.width = clientWidth;
+  engineSack.gfx.height = clientHeight;
+
+  engineSack.backplateCanvas.width = clientWidth;
+  engineSack.backplateCanvas.height = clientHeight;
+
+  // resize camera viewport
+  engineSack.camera.resizeViewport(clientWidth, clientHeight);
+
+  // resize window manager
+  engineSack.windowManager.resize(clientHeight);
+
+  // mark backplate as dirty
+  engineSack.player.currentSystem.backplateValid = false;
 }

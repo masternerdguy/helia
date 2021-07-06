@@ -9,6 +9,14 @@ export class WindowManager extends GDIWindow {
     this.setHeight(height);
   }
 
+  resize(height: number) {
+      // store new size
+      this.setHeight(height);
+  
+      // get new offscreen canvas
+      this.buildCanvas();
+  }
+
   initialize() {
     // set dimensions
     this.setWidth(GDIStyle.giantFontSize);
