@@ -28,6 +28,7 @@ type User struct {
 	CurrentShipID     *uuid.UUID
 	StartID           uuid.UUID
 	EscrowContainerID uuid.UUID
+	CurrentFactionID  uuid.UUID
 }
 
 // Hashes a user's password using their username and an internal constant as the salt
@@ -45,7 +46,7 @@ func (s UserService) Hashpass(username string, pwd string) (hash *string, err er
 }
 
 // Creates a new user
-func (s UserService) NewUser(u string, p string, startID uuid.UUID, escrowContainerID uuid.UUID) (*User, error) {
+func (s UserService) NewUser(u string, p string, startID uuid.UUID, escrowContainerID uuid.UUID, factionID uuid.UUID) (*User, error) {
 	// get db handle
 	db, err := connect()
 
@@ -62,14 +63,14 @@ func (s UserService) NewUser(u string, p string, startID uuid.UUID, escrowContai
 
 	// insert user
 	sql := `
-				INSERT INTO public.users(id, username, hashpass, registered, banned, startid, escrow_containerid)
-				VALUES ($1, $2, $3, $4, $5, $6, $7);
+				INSERT INTO public.users(id, username, hashpass, registered, banned, startid, escrow_containerid, current_factionid)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 			`
 
 	uid := uuid.New()
 	createdAt := time.Now()
 
-	q, err := db.Query(sql, uid, u, *hp, createdAt, 0, startID, escrowContainerID)
+	q, err := db.Query(sql, uid, u, *hp, createdAt, 0, startID, escrowContainerID, factionID)
 
 	if err != nil {
 		return nil, err
@@ -79,13 +80,14 @@ func (s UserService) NewUser(u string, p string, startID uuid.UUID, escrowContai
 
 	// return user with inserted data
 	user := User{
-		ID:            uid,
-		Username:      u,
-		Hashpass:      *hp,
-		Registered:    createdAt,
-		Banned:        false,
-		CurrentShipID: nil,
-		StartID:       startID,
+		ID:               uid,
+		Username:         u,
+		Hashpass:         *hp,
+		Registered:       createdAt,
+		Banned:           false,
+		CurrentShipID:    nil,
+		StartID:          startID,
+		CurrentFactionID: factionID,
 	}
 
 	return &user, nil
@@ -135,14 +137,14 @@ func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) 
 	// check for user with these credentials
 	user := User{}
 
-	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, escrow_containerid
+	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid
 					 FROM users
 					 WHERE username=$1 AND hashpass=$2`
 
 	row := db.QueryRow(sqlStatement, username, *hp)
 
 	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
-		&user.EscrowContainerID); err {
+		&user.EscrowContainerID, &user.CurrentFactionID); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:
@@ -164,14 +166,14 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 	// check for user with these credentials
 	user := User{}
 
-	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, startid, escrow_containerid
+	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, startid, escrow_containerid, current_factionid
 					 FROM users
 					 WHERE id=$1`
 
 	row := db.QueryRow(sqlStatement, uid)
 
 	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
-		&user.StartID, &user.EscrowContainerID); err {
+		&user.StartID, &user.EscrowContainerID, &user.CurrentFactionID); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:

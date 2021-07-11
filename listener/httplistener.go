@@ -67,6 +67,13 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	start, err := startSvc.GetStartByID(startID)
+
+	if err != nil {
+		http.Error(w, "getstart: "+err.Error(), 500)
+		return
+	}
+
 	// create escrow container for user
 	ec, err := containerSvc.NewContainer(sql.Container{
 		Meta: sql.Meta{},
@@ -78,17 +85,10 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create user
-	u, err := userSvc.NewUser(m.Username, m.Password, startID, ec.ID)
+	u, err := userSvc.NewUser(m.Username, m.Password, startID, ec.ID, start.FactionID)
 
 	if err != nil {
 		http.Error(w, "createuser: "+err.Error(), 500)
-		return
-	}
-
-	start, err := startSvc.GetStartByID(startID)
-
-	if err != nil {
-		http.Error(w, "getstart: "+err.Error(), 500)
 		return
 	}
 

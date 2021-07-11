@@ -26,8 +26,37 @@ func loadUniverse() (*universe.Universe, error) {
 	itemFamilySvc := sql.GetItemFamilyService()
 	sellOrderSvc := sql.GetSellOrderService()
 	itemSvc := sql.GetItemService()
+	factionSvc := sql.GetFactionService()
 
+	// empty universe to fill
 	u := universe.Universe{}
+
+	// load factions
+	dfs, err := factionSvc.GetAllFactions()
+
+	if err != nil {
+		return nil, err
+	}
+
+	factions := make(map[string]*universe.Faction)
+
+	for _, f := range dfs {
+		uf := universe.Faction{
+			ID:          f.ID,
+			Name:        f.Name,
+			Description: f.Description,
+			IsNPC:       f.IsNPC,
+			IsJoinable:  f.IsJoinable,
+			IsClosed:    f.IsClosed,
+			CanHoldSov:  f.CanHoldSov,
+			Meta:        universe.Meta(f.Meta),
+			Ticker:      f.Ticker,
+		}
+
+		factions[f.ID.String()] = &uf
+	}
+
+	u.Factions = factions
 
 	// for linking jumpholes later
 	jhMap := make(map[string]*universe.Jumphole)

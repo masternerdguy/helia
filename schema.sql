@@ -34,6 +34,25 @@ CREATE TABLE public.containers (
 ALTER TABLE public.containers OWNER TO developer;
 
 --
+-- Name: factions; Type: TABLE; Schema: public; Owner: developer
+--
+
+CREATE TABLE public.factions (
+    id uuid NOT NULL,
+    name character varying(32) NOT NULL,
+    description character varying(512) NOT NULL,
+    isnpc bit(1) NOT NULL,
+    isjoinable bit(1) NOT NULL,
+    canholdsov bit(1) NOT NULL,
+    isclosed bit(1) NOT NULL,
+    meta jsonb NOT NULL,
+    ticker character varying(3) DEFAULT '???'::character varying NOT NULL
+);
+
+
+ALTER TABLE public.factions OWNER TO developer;
+
+--
 -- Name: itemfamilies; Type: TABLE; Schema: public; Owner: developer
 --
 
@@ -252,7 +271,8 @@ CREATE TABLE public.starts (
     available boolean DEFAULT true NOT NULL,
     systemid uuid NOT NULL,
     homestationid uuid NOT NULL,
-    wallet double precision DEFAULT 0 NOT NULL
+    wallet double precision DEFAULT 0 NOT NULL,
+    factionid uuid NOT NULL
 );
 
 
@@ -416,11 +436,20 @@ CREATE TABLE public.users (
     banned bit(1) NOT NULL,
     current_shipid uuid,
     startid uuid NOT NULL,
-    escrow_containerid uuid NOT NULL
+    escrow_containerid uuid NOT NULL,
+    current_factionid uuid NOT NULL
 );
 
 
 ALTER TABLE public.users OWNER TO developer;
+
+--
+-- Name: factions factions_pkey; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT factions_pkey PRIMARY KEY (id);
+
 
 --
 -- Name: processes pk_processes_uq; Type: CONSTRAINT; Schema: public; Owner: developer
@@ -580,6 +609,30 @@ ALTER TABLE ONLY public.universe_asteroids
 
 ALTER TABLE ONLY public.containers
     ADD CONSTRAINT uq_container_id PRIMARY KEY (id);
+
+
+--
+-- Name: factions uq_factions_name; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT uq_factions_name UNIQUE (name);
+
+
+--
+-- Name: factions uq_factions_pk; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT uq_factions_pk UNIQUE (id);
+
+
+--
+-- Name: factions uq_factions_ticker; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT uq_factions_ticker UNIQUE (ticker);
 
 
 --
@@ -878,6 +931,14 @@ ALTER TABLE ONLY public.shiptemplates
 
 
 --
+-- Name: starts fk_starts_factions; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.starts
+    ADD CONSTRAINT fk_starts_factions FOREIGN KEY (factionid) REFERENCES public.factions(id);
+
+
+--
 -- Name: starts fk_starts_homestations; Type: FK CONSTRAINT; Schema: public; Owner: developer
 --
 
@@ -931,6 +992,14 @@ ALTER TABLE ONLY public.stationprocesses
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT fk_users_containers_escrow FOREIGN KEY (escrow_containerid) REFERENCES public.containers(id);
+
+
+--
+-- Name: users fk_users_factions; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT fk_users_factions FOREIGN KEY (current_factionid) REFERENCES public.factions(id);
 
 
 --

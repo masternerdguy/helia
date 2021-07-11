@@ -34,6 +34,25 @@ CREATE TABLE public.containers (
 ALTER TABLE public.containers OWNER TO developer;
 
 --
+-- Name: factions; Type: TABLE; Schema: public; Owner: developer
+--
+
+CREATE TABLE public.factions (
+    id uuid NOT NULL,
+    name character varying(32) NOT NULL,
+    description character varying(512) NOT NULL,
+    isnpc bit(1) NOT NULL,
+    isjoinable bit(1) NOT NULL,
+    canholdsov bit(1) NOT NULL,
+    isclosed bit(1) NOT NULL,
+    meta jsonb NOT NULL,
+    ticker character varying(3) DEFAULT '???'::character varying NOT NULL
+);
+
+
+ALTER TABLE public.factions OWNER TO developer;
+
+--
 -- Name: itemfamilies; Type: TABLE; Schema: public; Owner: developer
 --
 
@@ -252,7 +271,8 @@ CREATE TABLE public.starts (
     available boolean DEFAULT true NOT NULL,
     systemid uuid NOT NULL,
     homestationid uuid NOT NULL,
-    wallet double precision DEFAULT 0 NOT NULL
+    wallet double precision DEFAULT 0 NOT NULL,
+    factionid uuid NOT NULL
 );
 
 
@@ -416,7 +436,8 @@ CREATE TABLE public.users (
     banned bit(1) NOT NULL,
     current_shipid uuid,
     startid uuid NOT NULL,
-    escrow_containerid uuid NOT NULL
+    escrow_containerid uuid NOT NULL,
+    current_factionid uuid NOT NULL
 );
 
 
@@ -435,6 +456,19 @@ bbc5a814-6bb1-4955-a0b5-d9580f692e2e	{}	2021-01-24 01:03:56.098964-05
 9d74eea6-b431-483e-8f06-8ac12b13ac62	{}	2021-02-15 18:27:15.88155-05
 2c208043-c129-4081-bf5d-e573c2e02ca3	{}	2021-02-15 18:27:15.882018-05
 15ca8ffc-af53-4aec-81f8-0c43a4b44383	{}	2021-02-15 18:27:15.882466-05
+0ad8ef6b-ece8-400a-bb98-cc0aec589414	{}	2021-06-06 17:19:16.617845-04
+508e0b20-462e-4324-bbfb-a0d60a96ceb9	{}	2021-06-06 17:19:16.661369-04
+9d4aac00-32e2-429c-ad3f-dbcb4dd4162d	{}	2021-06-06 17:19:16.662126-04
+00776c7b-9a1c-413a-8461-613c370c8c70	{}	2021-06-06 17:19:16.66289-04
+\.
+
+
+--
+-- Data for Name: factions; Type: TABLE DATA; Schema: public; Owner: developer
+--
+
+COPY public.factions (id, name, description, isnpc, isjoinable, canholdsov, isclosed, meta, ticker) FROM stdin;
+a8a28085-e7b4-48f5-b8cb-1465ccab82a5	Test Starter Faction	Temporary starter faction for use when a player is created.	0	0	0	0	{}	TSF
 \.
 
 
@@ -459,32 +493,6 @@ widget	Widget	{}
 --
 
 COPY public.items (id, itemtypeid, meta, created, createdby, createdreason, containerid, quantity, ispackaged) FROM stdin;
-cce56f8c-ac40-477a-87c7-5e23fc8f4f20	09172710-740c-4d1c-9fc0-43cb62e674e7	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "activation_energy": 15, "shield_boost_amount": 20, "activation_gfx_effect": "basic_shield_booster"}	2021-01-24 01:03:56.107989-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Module for new noob ship for player	82ffe4dd-7343-4191-9652-2940ae5a4f42	1	f
-4cfafc0a-85fa-490f-9a6b-5ea5c40641aa	b481a521-1b12-4ffa-ac2f-4da015036f7f	{"hp": 15, "rack": "c", "volume": 3, "fuel_max_add": 30}	2021-01-24 01:03:56.110175-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Module for new noob ship for player	82ffe4dd-7343-4191-9652-2940ae5a4f42	1	f
-5dae670e-482d-46b0-94b8-e4ab5e7a4737	c311df30-c21e-4895-acb0-d8808f99710e	{"hp": 75, "rack": "c", "volume": 6, "armor_max_add": 75}	2021-01-24 01:03:56.112507-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Module for new noob ship for player	82ffe4dd-7343-4191-9652-2940ae5a4f42	1	f
-a8fb8932-a2bb-47b7-ab6d-bd632a906d81	9d1014c5-3422-4a0f-9839-f585269b4b16	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}	2021-01-24 01:03:56.106008-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Module for new noob ship for player	82ffe4dd-7343-4191-9652-2940ae5a4f42	1	f
-58c57c2d-efea-4fdd-b4af-5a851ccec732	9d1014c5-3422-4a0f-9839-f585269b4b16	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}	2021-01-24 01:03:56.10364-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Module for new noob ship for player	82ffe4dd-7343-4191-9652-2940ae5a4f42	1	f
-8875f5c7-969c-4f4c-93a1-3325cc467d3b	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 20:36:05.755204-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	10f9eb73-7ede-4c60-909e-0a9341bf41cc	0	t
-43d0a901-9859-48c4-ab8f-e7d433867e72	9d1014c5-3422-4a0f-9839-f585269b4b16	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}	2021-02-15 18:27:15.883202-05	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	Module for new noob ship for player	15ca8ffc-af53-4aec-81f8-0c43a4b44383	1	f
-a3bb2fc1-6f73-44ac-af9a-8eb13cf7b4bd	9d1014c5-3422-4a0f-9839-f585269b4b16	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}	2021-02-15 18:27:15.884337-05	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	Module for new noob ship for player	15ca8ffc-af53-4aec-81f8-0c43a4b44383	1	f
-07cdc30b-d1a6-441c-8ed3-73d013c9902c	09172710-740c-4d1c-9fc0-43cb62e674e7	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "activation_energy": 15, "shield_boost_amount": 20, "activation_gfx_effect": "basic_shield_booster"}	2021-02-15 18:27:15.885215-05	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	Module for new noob ship for player	15ca8ffc-af53-4aec-81f8-0c43a4b44383	1	f
-677efe01-3e75-4653-a0f5-3f9827e5c10a	b481a521-1b12-4ffa-ac2f-4da015036f7f	{"hp": 15, "rack": "c", "volume": 3, "fuel_max_add": 30}	2021-02-15 18:27:15.886086-05	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	Module for new noob ship for player	15ca8ffc-af53-4aec-81f8-0c43a4b44383	1	f
-ba6788d8-4424-4ee0-883f-1dcde6ba0be7	c311df30-c21e-4895-acb0-d8808f99710e	{"hp": 75, "rack": "c", "volume": 6, "armor_max_add": 75}	2021-02-15 18:27:15.886871-05	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	Module for new noob ship for player	15ca8ffc-af53-4aec-81f8-0c43a4b44383	1	f
-540ac6ca-4566-4d29-aaaa-008d9d206cfd	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-01-24 01:12:46.345811-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Mined ore	9c283482-76d4-4139-ae6c-3138345ad19c	3	t
-ee9268a9-957e-48fa-9676-db2baa033f32	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 20:35:53.411537-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	9c283482-76d4-4139-ae6c-3138345ad19c	8	t
-1448ee9c-da29-4860-aaa9-72031d4cfbf6	e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3	{"volume": 1, "industrialmarket": {"maxprice": 15, "minprice": 10, "silosize": 1000}}	2021-06-05 21:48:18.601422-04	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	Bought from silo	9d74eea6-b431-483e-8f06-8ac12b13ac62	20	t
-99d9544d-3a2f-4879-ab62-67c94231d213	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{}	2021-02-12 20:37:06.337896-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	10f9eb73-7ede-4c60-909e-0a9341bf41cc	0	t
-ff33f34d-0265-4655-a7db-bd8e6227cf42	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 20:36:15.770344-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	10f9eb73-7ede-4c60-909e-0a9341bf41cc	6	t
-d35eacb2-81ec-408a-9bcc-cee58bdb9784	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 23:07:31.325767-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	10f9eb73-7ede-4c60-909e-0a9341bf41cc	0	t
-b3b69288-d2ae-41e6-a585-e630ba2b0ef1	e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3	{"volume": 1, "industrialmarket": {"maxprice": 15, "minprice": 10, "silosize": 1000}}	2021-06-05 21:42:46.877964-04	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	Bought from silo	2c208043-c129-4081-bf5d-e573c2e02ca3	0	t
-c2da71e5-3027-474f-8521-0be6c37cad98	e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3	{"volume": 1, "industrialmarket": {"maxprice": 15, "minprice": 10, "silosize": 1000}}	2021-06-05 21:41:05.709982-04	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	Bought from silo	2c208043-c129-4081-bf5d-e573c2e02ca3	0	t
-d4bea6aa-27d7-4e60-bf21-74b970290750	e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3	{"volume": 1, "industrialmarket": {"maxprice": 15, "minprice": 10, "silosize": 1000}}	2021-06-05 21:40:33.139451-04	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	Bought from silo	2c208043-c129-4081-bf5d-e573c2e02ca3	0	t
-13806188-e1c3-49a1-9ea4-079b76163f53	e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3	{"volume": 1, "industrialmarket": {"maxprice": 15, "minprice": 10, "silosize": 1000}}	2021-06-05 21:40:50.20179-04	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	Bought from silo	2c208043-c129-4081-bf5d-e573c2e02ca3	0	t
-1790dd22-46a6-4179-ae9b-1141019076b0	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-06-05 23:45:32.654494-04	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	Stack split	2c208043-c129-4081-bf5d-e573c2e02ca3	7	t
-41bdf879-616e-4712-ba34-b260ac7069fb	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 20:36:10.559523-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	2c208043-c129-4081-bf5d-e573c2e02ca3	0	t
-ed521728-522a-4740-9b0f-5c8e4b8230cb	e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3	{"volume": 1, "industrialmarket": {"maxprice": 15, "minprice": 10, "silosize": 1000}}	2021-06-05 21:46:37.48617-04	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	Bought from silo	9d74eea6-b431-483e-8f06-8ac12b13ac62	90	t
-1c4d59ae-da7c-44cd-8c0e-ba6bd591ad0b	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-06-05 23:44:04.200087-04	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	Stack split	2c208043-c129-4081-bf5d-e573c2e02ca3	0	t
-1e5905eb-83b4-461e-8c55-f466101579be	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1}	2021-02-12 23:07:25.333361-05	22e53c8f-d5ad-46dd-827f-03204644ddf7	Stack split	2c208043-c129-4081-bf5d-e573c2e02ca3	0	t
 \.
 
 
@@ -535,11 +543,6 @@ COPY public.processoutputs (id, itemtypeid, quantity, meta, processid) FROM stdi
 --
 
 COPY public.sellorders (id, universe_stationid, itemid, seller_userid, askprice, created, bought, buyer_userid) FROM stdin;
-33b4aa6c-09ed-4d20-a6a9-f0968ffa4bd7	cf07bba9-90b2-4599-b1e3-84d797a67f0a	41bdf879-616e-4712-ba34-b260ac7069fb	22e53c8f-d5ad-46dd-827f-03204644ddf7	45	2021-02-12 23:06:28.652443-05	2021-02-15 18:28:21.453825-05	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e
-19a8ce42-b095-4620-bdc8-8884a0138d25	cf07bba9-90b2-4599-b1e3-84d797a67f0a	1e5905eb-83b4-461e-8c55-f466101579be	22e53c8f-d5ad-46dd-827f-03204644ddf7	99	2021-02-12 23:25:22.784236-05	2021-02-15 18:31:04.675828-05	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e
-359b5fa7-e7a3-4ac0-ab44-ae820e470e50	526f57f5-09e0-41c7-9a89-cd803ec0a065	540ac6ca-4566-4d29-aaaa-008d9d206cfd	22e53c8f-d5ad-46dd-827f-03204644ddf7	20	2021-03-28 20:40:56.610679-04	\N	\N
-be51ae11-8b85-4f00-be29-ac080f537bd7	cf07bba9-90b2-4599-b1e3-84d797a67f0a	ee9268a9-957e-48fa-9676-db2baa033f32	22e53c8f-d5ad-46dd-827f-03204644ddf7	332	2021-04-05 21:46:09.593787-04	\N	\N
-a884dc99-c2ff-433e-a6c0-accd7fed4316	cf07bba9-90b2-4599-b1e3-84d797a67f0a	ff33f34d-0265-4655-a7db-bd8e6227cf42	22e53c8f-d5ad-46dd-827f-03204644ddf7	33	2021-02-12 23:00:35.293677-05	2021-04-05 21:46:25.891825-04	22e53c8f-d5ad-46dd-827f-03204644ddf7
 \.
 
 
@@ -548,8 +551,9 @@ a884dc99-c2ff-433e-a6c0-accd7fed4316	cf07bba9-90b2-4599-b1e3-84d797a67f0a	ff33f3
 --
 
 COPY public.sessions (id, userid) FROM stdin;
-f60095b3-2af2-4691-8efd-d3284e077fe1	22e53c8f-d5ad-46dd-827f-03204644ddf7
 d635d0b6-8cd2-4f46-b4d0-05509bb6548a	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e
+a26077b2-5b80-4db8-92de-bfec13236cc5	d4584b8b-cc90-46cc-bcdf-ca60d43904d2
+e1aadf62-8dd5-4d7e-92ee-dd1002eb8cf5	22e53c8f-d5ad-46dd-827f-03204644ddf7
 \.
 
 
@@ -558,8 +562,6 @@ d635d0b6-8cd2-4f46-b4d0-05509bb6548a	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e
 --
 
 COPY public.ships (id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid, dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid, fittingbay_containerid, remaxdirty, trash_containerid, wallet) FROM stdin;
-5452e22f-7e5c-4626-8828-696427c0ee8c	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	22e53c8f-d5ad-46dd-827f-03204644ddf7	24771.795632863843	-9938.30877953488	2021-01-24 01:03:56.114356-05	aaa's Starter Ship	Sparrow	240.68084555995088	0	0	208.98785634896979	244	135	295	0	137.99192645345065	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": [{"item_id": "58c57c2d-efea-4fdd-b4af-5a851ccec732", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "a8fb8932-a2bb-47b7-ab6d-bd632a906d81", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "cce56f8c-ac40-477a-87c7-5e23fc8f4f20", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "4cfafc0a-85fa-490f-9a6b-5ea5c40641aa", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "5dae670e-482d-46b0-94b8-e4ab5e7a4737", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	10f9eb73-7ede-4c60-909e-0a9341bf41cc	82ffe4dd-7343-4191-9652-2940ae5a4f42	f	bbc5a814-6bb1-4955-a0b5-d9580f692e2e	10144
-9ce71589-e05f-488a-bf5b-f435568b8341	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	24771.795632863843	-9938.30877953488	2021-02-15 18:27:15.887489-05	bbb's Starter Ship	Sparrow	344.8515059885274	0	0	208.8857870778012	244	135	295	0	137.99709236287742	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": [{"item_id": "43d0a901-9859-48c4-ab8f-e7d433867e72", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "a3bb2fc1-6f73-44ac-af9a-8eb13cf7b4bd", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "07cdc30b-d1a6-441c-8ed3-73d013c9902c", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "677efe01-3e75-4653-a0f5-3f9827e5c10a", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "ba6788d8-4424-4ee0-883f-1dcde6ba0be7", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	2c208043-c129-4081-bf5d-e573c2e02ca3	15ca8ffc-af53-4aec-81f8-0c43a4b44383	f	9d74eea6-b431-483e-8f06-8ac12b13ac62	8871
 \.
 
 
@@ -590,8 +592,8 @@ a7b8e2cf-9e69-480e-a5fa-dc19d8be9a57	Battleship
 -- Data for Name: starts; Type: TABLE DATA; Schema: public; Owner: developer
 --
 
-COPY public.starts (id, name, shiptemplateid, shipfitting, created, available, systemid, homestationid, wallet) FROM stdin;
-49f06e89-29fb-4a02-a034-4b5d0702adac	Test Start	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	{"a_rack": [{"item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {}], "b_rack": [{"item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {}], "c_rack": [{"item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	2020-11-23 15:31:55.475609-05	t	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	cf07bba9-90b2-4599-b1e3-84d797a67f0a	10000
+COPY public.starts (id, name, shiptemplateid, shipfitting, created, available, systemid, homestationid, wallet, factionid) FROM stdin;
+49f06e89-29fb-4a02-a034-4b5d0702adac	Test Start	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	{"a_rack": [{"item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {}], "b_rack": [{"item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {}], "c_rack": [{"item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	2020-11-23 15:31:55.475609-05	t	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	cf07bba9-90b2-4599-b1e3-84d797a67f0a	10000	a8a28085-e7b4-48f5-b8cb-1465ccab82a5
 \.
 
 
@@ -600,7 +602,7 @@ COPY public.starts (id, name, shiptemplateid, shipfitting, created, available, s
 --
 
 COPY public.stationprocesses (id, universe_stationid, processid, progress, installed, internalstate, meta) FROM stdin;
-966aa59b-68d0-4328-8baf-30616900bcbd	cf07bba9-90b2-4599-b1e3-84d797a67f0a	0f33d5ce-2b0b-4f80-80eb-506dd803ac4c	30	t	{"inputs": {"dd522f03-2f52-4e82-b2f8-d7e0029cb82f": {"price": 1, "quantity": 289610621}}, "outputs": {"e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3": {"price": 10, "quantity": 998}}, "isRunning": true}	{}
+966aa59b-68d0-4328-8baf-30616900bcbd	cf07bba9-90b2-4599-b1e3-84d797a67f0a	0f33d5ce-2b0b-4f80-80eb-506dd803ac4c	30	t	{"inputs": {"dd522f03-2f52-4e82-b2f8-d7e0029cb82f": {"price": 1, "quantity": 289595403}}, "outputs": {"e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3": {"price": 10, "quantity": 1000}}, "isRunning": false}	{}
 \.
 
 
@@ -657,8 +659,8 @@ COPY public.universe_stars (id, universe_systemid, pos_x, pos_y, texture, radius
 --
 
 COPY public.universe_stations (id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta) FROM stdin;
-526f57f5-09e0-41c7-9a89-cd803ec0a065	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Test Station	207460	-335230	Fleet Armory	810	65000	23.33
 cf07bba9-90b2-4599-b1e3-84d797a67f0a	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Another Station	24771.795632863843	-9938.30877953488	Sunfarm	740	25300	112.4
+526f57f5-09e0-41c7-9a89-cd803ec0a065	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Test Station	207460	-335230	Fleet Armory	810	65000	23.33
 \.
 
 
@@ -676,10 +678,16 @@ edf08406-0879-4141-8af1-f68d32e31c8d	Another System	bfca1f47-e182-4b4d-8632-48d8
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: developer
 --
 
-COPY public.users (id, username, hashpass, registered, banned, current_shipid, startid, escrow_containerid) FROM stdin;
-22e53c8f-d5ad-46dd-827f-03204644ddf7	aaa	09b6eea09b48ac41c136ef0515927f468dd413d64406b97660a4b1de14c15d0c	2021-01-24 01:03:56.094014-05	0	5452e22f-7e5c-4626-8828-696427c0ee8c	49f06e89-29fb-4a02-a034-4b5d0702adac	9c283482-76d4-4139-ae6c-3138345ad19c
-6b86ac37-bdd3-40c8-b958-ed1b0dc4f45e	bbb	80e6fd623cea60db763983c636dbeb91618681bc2e5217dd13fbd6be536eea8b	2021-02-15 18:27:15.879176-05	0	9ce71589-e05f-488a-bf5b-f435568b8341	49f06e89-29fb-4a02-a034-4b5d0702adac	3f8cb6d2-a5f0-4806-8b9b-5fd3b8a87083
+COPY public.users (id, username, hashpass, registered, banned, current_shipid, startid, escrow_containerid, current_factionid) FROM stdin;
 \.
+
+
+--
+-- Name: factions factions_pkey; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT factions_pkey PRIMARY KEY (id);
 
 
 --
@@ -840,6 +848,30 @@ ALTER TABLE ONLY public.universe_asteroids
 
 ALTER TABLE ONLY public.containers
     ADD CONSTRAINT uq_container_id PRIMARY KEY (id);
+
+
+--
+-- Name: factions uq_factions_name; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT uq_factions_name UNIQUE (name);
+
+
+--
+-- Name: factions uq_factions_pk; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT uq_factions_pk UNIQUE (id);
+
+
+--
+-- Name: factions uq_factions_ticker; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT uq_factions_ticker UNIQUE (ticker);
 
 
 --
@@ -1138,6 +1170,14 @@ ALTER TABLE ONLY public.shiptemplates
 
 
 --
+-- Name: starts fk_starts_factions; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.starts
+    ADD CONSTRAINT fk_starts_factions FOREIGN KEY (factionid) REFERENCES public.factions(id);
+
+
+--
 -- Name: starts fk_starts_homestations; Type: FK CONSTRAINT; Schema: public; Owner: developer
 --
 
@@ -1191,6 +1231,14 @@ ALTER TABLE ONLY public.stationprocesses
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT fk_users_containers_escrow FOREIGN KEY (escrow_containerid) REFERENCES public.containers(id);
+
+
+--
+-- Name: users fk_users_factions; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT fk_users_factions FOREIGN KEY (current_factionid) REFERENCES public.factions(id);
 
 
 --

@@ -12,7 +12,8 @@ const SpaceDrag float64 = 0.025
 
 // Structure representing the current game universe
 type Universe struct {
-	Regions map[string]*Region
+	Regions  map[string]*Region
+	Factions map[string]*Faction
 }
 
 // Finds the ship with the specified ID in the running game simulation
