@@ -430,6 +430,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 			// put ship in home system
 			home.CurrentSystem.AddShip(es, true)
 
+			// link player's faction into ship
+			es.FactionID = u.CurrentFactionID
+
 			// set client current ship to new noob ship
 			rs.CurrentShipID = es.ID
 			es.BeingFlownByPlayer = true

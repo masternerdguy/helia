@@ -21,6 +21,7 @@ type Station struct {
 	Radius      float64
 	Mass        float64
 	Theta       float64
+	FactionID   uuid.UUID
 }
 
 // Retrieves all stations from the database
@@ -36,7 +37,8 @@ func (s StationService) GetAllStations() ([]Station, error) {
 
 	// load stations
 	sql := `
-				SELECT id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta
+				SELECT id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta,
+				factionid
 				FROM public.universe_stations;
 			`
 
@@ -52,7 +54,8 @@ func (s StationService) GetAllStations() ([]Station, error) {
 		r := Station{}
 
 		// scan into station structure
-		rows.Scan(&r.ID, &r.SystemID, &r.StationName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta)
+		rows.Scan(&r.ID, &r.SystemID, &r.StationName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta,
+			&r.FactionID)
 
 		// append to station slice
 		stations = append(stations, r)
@@ -74,7 +77,8 @@ func (s StationService) GetStationsBySolarSystem(systemID uuid.UUID) ([]Station,
 
 	// load stations
 	sql := `
-				SELECT id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta
+				SELECT id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta,
+				factionid
 				FROM public.universe_stations
 				WHERE universe_systemid = $1;
 			`
@@ -91,7 +95,8 @@ func (s StationService) GetStationsBySolarSystem(systemID uuid.UUID) ([]Station,
 		r := Station{}
 
 		// scan into station structure
-		rows.Scan(&r.ID, &r.SystemID, &r.StationName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta)
+		rows.Scan(&r.ID, &r.SystemID, &r.StationName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta,
+			&r.FactionID)
 
 		// append to station slice
 		stations = append(stations, r)
@@ -114,12 +119,12 @@ func (s StationService) UpdateStation(station Station) error {
 		`
 			UPDATE public.universe_stations
 			SET universe_systemid=$2, stationname=$3, pos_x=$4, pos_y=$5, texture=$6, 
-				radius=$7, mass=$8, theta=$9
+				radius=$7, mass=$8, theta=$9, factionid=$10
 			WHERE id=$1;
 		`
 
 	_, err = db.Exec(sqlStatement, station.ID, station.SystemID, station.StationName, station.PosX, station.PosY, station.Texture,
-		station.Radius, station.Mass, station.Theta)
+		station.Radius, station.Mass, station.Theta, station.FactionID)
 
 	return err
 }

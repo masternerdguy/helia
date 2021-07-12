@@ -12,9 +12,10 @@ func GetSolarSystemService() SolarSystemService {
 
 // Structure representing a row in the universe_systems table
 type SolarSystem struct {
-	ID         uuid.UUID
-	SystemName string
-	RegionID   uuid.UUID
+	ID               uuid.UUID
+	SystemName       string
+	RegionID         uuid.UUID
+	HoldingFactionID uuid.UUID
 }
 
 // Retrieves all solar systems in a region from the database
@@ -29,7 +30,7 @@ func (s SolarSystemService) GetSolarSystemsByRegion(regionID uuid.UUID) ([]Solar
 	}
 
 	// load solar systems
-	sql := "select id, systemname, regionid from universe_systems where regionid = $1"
+	sql := "select id, systemname, regionid, holding_factionid from universe_systems where regionid = $1"
 
 	rows, err := db.Query(sql, regionID)
 
@@ -43,7 +44,7 @@ func (s SolarSystemService) GetSolarSystemsByRegion(regionID uuid.UUID) ([]Solar
 		r := SolarSystem{}
 
 		// scan into system structure
-		rows.Scan(&r.ID, &r.SystemName, &r.RegionID)
+		rows.Scan(&r.ID, &r.SystemName, &r.RegionID, &r.HoldingFactionID)
 
 		// append to system slice
 		systems = append(systems, r)

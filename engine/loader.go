@@ -88,9 +88,10 @@ func loadUniverse() (*universe.Universe, error) {
 
 		for _, f := range ss {
 			s := universe.SolarSystem{
-				ID:         f.ID,
-				SystemName: f.SystemName,
-				RegionID:   f.RegionID,
+				ID:               f.ID,
+				SystemName:       f.SystemName,
+				RegionID:         f.RegionID,
+				HoldingFactionID: f.HoldingFactionID,
 			}
 
 			// initialize and store system
@@ -275,6 +276,7 @@ func loadUniverse() (*universe.Universe, error) {
 					Radius:      currStation.Radius,
 					Mass:        currStation.Mass,
 					Theta:       currStation.Theta,
+					FactionID:   currStation.FactionID,
 					// link solar system into station
 					CurrentSystem: &s,
 					Processes:     processes,
@@ -391,6 +393,7 @@ func saveUniverse(u *universe.Universe) {
 					Theta:       station.Theta,
 					Mass:        station.Mass,
 					Radius:      station.Radius,
+					FactionID:   station.FactionID,
 				}
 
 				err := stationSvc.UpdateStation(dbStation)
@@ -1195,6 +1198,7 @@ func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 			SlotLayout:         SlotLayoutFromSQL(&temp.SlotLayout),
 			BaseCargoBayVolume: temp.BaseCargoBayVolume,
 		},
+		FactionID: owner.CurrentFactionID,
 	}
 
 	// get pointer to ship

@@ -19,6 +19,7 @@ type Station struct {
 	Radius      float64
 	Mass        float64
 	Theta       float64
+	FactionID   uuid.UUID
 	// in-memory only
 	Lock                   sync.Mutex
 	CurrentSystem          *SolarSystem
@@ -145,6 +146,7 @@ func (s *Station) CopyStation() Station {
 		Theta:       s.Theta,
 		Radius:      s.Radius,
 		Mass:        s.Mass,
+		FactionID:   s.FactionID,
 		// in-memory only
 		Lock:      sync.Mutex{},
 		Processes: copiedProcesses,

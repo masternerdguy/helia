@@ -126,6 +126,8 @@ type Ship struct {
 	Wallet                float64
 	// cache of base template
 	TemplateData ShipTemplate
+	// cache from controlling user
+	FactionID uuid.UUID
 	// docking
 	DockedAtStationID *uuid.UUID
 	// in-memory only
@@ -345,6 +347,7 @@ func (s *Ship) CopyShip() *Ship {
 			ShipTypeID:         s.TemplateData.ShipTypeID,
 			BaseCargoBayVolume: s.TemplateData.BaseCargoBayVolume,
 		},
+		FactionID: s.FactionID,
 		// in-memory only
 		Lock:               sync.Mutex{},
 		IsDocked:           s.IsDocked,

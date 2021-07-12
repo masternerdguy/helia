@@ -405,7 +405,8 @@ CREATE TABLE public.universe_stations (
     texture character varying(64) NOT NULL,
     radius double precision DEFAULT 0 NOT NULL,
     mass double precision DEFAULT 0 NOT NULL,
-    theta double precision DEFAULT 0 NOT NULL
+    theta double precision DEFAULT 0 NOT NULL,
+    factionid uuid NOT NULL
 );
 
 
@@ -418,7 +419,8 @@ ALTER TABLE public.universe_stations OWNER TO developer;
 CREATE TABLE public.universe_systems (
     id uuid NOT NULL,
     systemname character varying(32) NOT NULL,
-    regionid uuid NOT NULL
+    regionid uuid NOT NULL,
+    holding_factionid uuid DEFAULT '42b937ad-0000-46e9-9af9-fc7dbf878e6a'::uuid NOT NULL
 );
 
 
@@ -971,6 +973,14 @@ ALTER TABLE ONLY public.stationprocesses
 
 
 --
+-- Name: universe_systems fk_system_faction; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.universe_systems
+    ADD CONSTRAINT fk_system_faction FOREIGN KEY (holding_factionid) REFERENCES public.factions(id);
+
+
+--
 -- Name: universe_systems fk_system_region; Type: FK CONSTRAINT; Schema: public; Owner: developer
 --
 
@@ -1040,6 +1050,14 @@ ALTER TABLE ONLY public.universe_planets
 
 ALTER TABLE ONLY public.universe_stars
     ADD CONSTRAINT star_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
+
+
+--
+-- Name: universe_stations station_faction_fk; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.universe_stations
+    ADD CONSTRAINT station_faction_fk FOREIGN KEY (factionid) REFERENCES public.factions(id);
 
 
 --
