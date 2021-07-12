@@ -1,9 +1,13 @@
 import { Camera } from './camera';
 import { WSStation } from '../wsModels/entities/wsStation';
+import { Faction } from './faction';
+import { GetFactionCacheEntry } from '../wsModels/shared';
 
 export class Station extends WSStation {
   texture2d: HTMLImageElement;
   isTargeted: boolean;
+
+  faction: Faction;
 
   constructor(ws: WSStation) {
     super();
@@ -66,5 +70,9 @@ export class Station extends WSStation {
     this.radius = ws.radius;
     this.theta = ws.theta;
     this.factionId = ws.factionId;
+  }
+
+  getFaction(): Faction {
+    return GetFactionCacheEntry(this.factionId);
   }
 }

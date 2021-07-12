@@ -1,4 +1,5 @@
 import { Container } from './container';
+import { Faction } from './faction';
 import { Ship } from './ship';
 import { System } from './system';
 
@@ -12,6 +13,14 @@ export class Player {
 
   uid: string;
   sid: string;
+
+  getFaction(): Faction {
+    if (!this.currentShip) {
+      return null;
+    }
+
+    return this.currentShip.getFaction();
+  }
 }
 
 export enum TargetType {

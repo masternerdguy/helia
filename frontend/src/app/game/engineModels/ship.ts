@@ -1,11 +1,15 @@
 import { WSShip } from '../wsModels/entities/wsShip';
+import { GetFactionCacheEntry } from '../wsModels/shared';
 import { Camera } from './camera';
+import { Faction } from './faction';
 
 export class Ship extends WSShip {
   texture2d: HTMLImageElement;
   lastSeen: number;
   isTargeted: boolean;
   isPlayer: boolean;
+
+  faction: Faction;
 
   constructor(ws: WSShip) {
     super();
@@ -189,5 +193,9 @@ export class Ship extends WSShip {
     if (sh.wallet) {
       this.wallet = Math.round(sh.wallet);
     }
+  }
+
+  getFaction(): Faction {
+    return GetFactionCacheEntry(this.factionId);
   }
 }

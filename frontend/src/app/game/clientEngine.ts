@@ -33,8 +33,7 @@ import { PushErrorWindow } from './gdi/windows/pushErrorWindow';
 import { IndustrialMarketWindow } from './gdi/windows/industrialMarketWindow';
 import { ServerIndustrialOrdersUpdate } from './wsModels/bodies/industrialOrdersUpdate';
 import { ServerFactionUpdate } from './wsModels/bodies/factionUpdate';
-import { Faction } from './engineModels/faction';
-import { GetFactionCache, UpdateFactionCache } from './wsModels/shared';
+import { UpdateFactionCache } from './wsModels/shared';
 
 class EngineSack {
   constructor() {}
