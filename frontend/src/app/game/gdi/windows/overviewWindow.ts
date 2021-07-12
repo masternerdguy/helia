@@ -169,7 +169,7 @@ export class OverviewWindow extends GDIWindow {
           const faction = i.getFaction();
 
           return `${fixedString('STATION', 9)}${
-            fixedString("[" + faction.ticker + "]", 6)
+            fixedString("[" + faction?.ticker + "]", 6)
           }${fixedString(
             i.stationName,
             18
@@ -200,9 +200,9 @@ export class OverviewWindow extends GDIWindow {
         type: TargetType.Ship,
         listString: () => {
           const faction = i.getFaction();
-          
+
           return `${fixedString('SHIP', 9)}${
-            fixedString("[" + faction.ticker + "]", 6)
+            fixedString("[" + faction?.ticker + "]", 6)
           }${fixedString(
             i.ownerName,
             10
