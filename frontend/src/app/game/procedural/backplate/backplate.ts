@@ -51,6 +51,7 @@ export class Backplate {
 
     const width = this.canvas.width;
     const height = this.canvas.height;
+
     const viewport = { x: 0, y: 0, width, height };
     const scale = props.shortScale
       ? Math.min(width, height)
