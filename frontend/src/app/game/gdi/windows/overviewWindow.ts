@@ -166,9 +166,13 @@ export class OverviewWindow extends GDIWindow {
         object: i,
         type: TargetType.Station,
         listString: () => {
-          return `${fixedString('STATION', 9)}${fixedString(
+          const faction = i.getFaction();
+
+          return `${fixedString('STATION', 9)}${
+            fixedString("[" + faction.ticker + "]", 6)
+          }${fixedString(
             i.stationName,
-            24
+            18
           )} ${fixedString(od, 8)}`;
         },
       };
@@ -195,9 +199,13 @@ export class OverviewWindow extends GDIWindow {
         object: i,
         type: TargetType.Ship,
         listString: () => {
-          return `${fixedString('SHIP', 9)}${fixedString(
+          const faction = i.getFaction();
+          
+          return `${fixedString('SHIP', 9)}${
+            fixedString("[" + faction.ticker + "]", 6)
+          }${fixedString(
             i.ownerName,
-            16
+            10
           )} ${fixedString(i.texture, 7)} ${fixedString(od, 8)}`;
         },
       };

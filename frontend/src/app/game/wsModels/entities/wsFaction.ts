@@ -6,5 +6,5 @@ export class WSFaction {
   isJoinable: boolean;
   isClosed: boolean;
   canHoldSov: boolean;
-  ticker: boolean;
+  ticker: string;
 }

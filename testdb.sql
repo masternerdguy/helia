@@ -454,6 +454,10 @@ d5dc0b21-e586-4bf9-8ac6-f2a0ea0ca39c	{}	2021-07-11 20:05:33.487824-04
 ce37676b-0c76-4b54-96bc-d26e27e96b0a	{}	2021-07-11 20:05:33.498068-04
 fde1ef61-3019-4a0c-9ec1-f2c5b5400eef	{}	2021-07-11 20:05:33.500776-04
 5786d9a7-425f-4fae-a2d6-4a203c2dd595	{}	2021-07-11 20:05:33.503514-04
+e50b3ad5-dbb1-4c9e-83b7-fb90622477e9	{}	2021-07-11 21:32:29.960024-04
+e38d3dd2-0203-4440-8c33-230433913c26	{}	2021-07-11 21:32:29.969283-04
+4bc7c132-3b86-4287-8a64-a1296e8744f5	{}	2021-07-11 21:32:29.972384-04
+87a81fcb-9458-469f-8e72-975ab38d6041	{}	2021-07-11 21:32:29.976729-04
 \.
 
 
@@ -488,6 +492,11 @@ widget	Widget	{}
 --
 
 COPY public.items (id, itemtypeid, meta, created, createdby, createdreason, containerid, quantity, ispackaged) FROM stdin;
+467e020e-cc3e-4df5-bf0e-dc7d45aa569e	9d1014c5-3422-4a0f-9839-f585269b4b16	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "industrialmarket": {"maxprice": 210, "minprice": 125, "silosize": 1000}, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}	2021-07-11 21:32:29.980336-04	b943041a-3b82-445c-a0fa-d6a593472bab	Module for new noob ship for player	87a81fcb-9458-469f-8e72-975ab38d6041	1	f
+5e7e6957-f564-429d-8857-cf08d3915958	9d1014c5-3422-4a0f-9839-f585269b4b16	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "industrialmarket": {"maxprice": 210, "minprice": 125, "silosize": 1000}, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}	2021-07-11 21:32:29.984946-04	b943041a-3b82-445c-a0fa-d6a593472bab	Module for new noob ship for player	87a81fcb-9458-469f-8e72-975ab38d6041	1	f
+50c98642-c4c7-4d16-bfe6-162370cb10df	09172710-740c-4d1c-9fc0-43cb62e674e7	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "industrialmarket": {"maxprice": 650, "minprice": 275, "silosize": 1000}, "activation_energy": 15, "shield_boost_amount": 20, "activation_gfx_effect": "basic_shield_booster"}	2021-07-11 21:32:29.990246-04	b943041a-3b82-445c-a0fa-d6a593472bab	Module for new noob ship for player	87a81fcb-9458-469f-8e72-975ab38d6041	1	f
+7750e6f6-04a8-412c-929c-8bcdeecd8752	b481a521-1b12-4ffa-ac2f-4da015036f7f	{"hp": 15, "rack": "c", "volume": 3, "fuel_max_add": 30, "industrialmarket": {"maxprice": 25, "minprice": 10, "silosize": 1000}}	2021-07-11 21:32:29.994456-04	b943041a-3b82-445c-a0fa-d6a593472bab	Module for new noob ship for player	87a81fcb-9458-469f-8e72-975ab38d6041	1	f
+74386143-01b9-4eb1-87bb-0fd5139f4a59	c311df30-c21e-4895-acb0-d8808f99710e	{"hp": 75, "rack": "c", "volume": 6, "armor_max_add": 75, "industrialmarket": {"maxprice": 65, "minprice": 30, "silosize": 1000}}	2021-07-11 21:32:29.998222-04	b943041a-3b82-445c-a0fa-d6a593472bab	Module for new noob ship for player	87a81fcb-9458-469f-8e72-975ab38d6041	1	f
 006d352c-4fd2-4690-94c0-e938b0063b47	9d1014c5-3422-4a0f-9839-f585269b4b16	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "industrialmarket": {"maxprice": 210, "minprice": 125, "silosize": 1000}, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}	2021-07-11 20:05:33.507451-04	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	Module for new noob ship for player	5786d9a7-425f-4fae-a2d6-4a203c2dd595	1	f
 6ee35bd3-3337-40ab-a8c1-717d90e7f2e7	9d1014c5-3422-4a0f-9839-f585269b4b16	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "industrialmarket": {"maxprice": 210, "minprice": 125, "silosize": 1000}, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}	2021-07-11 20:05:33.514271-04	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	Module for new noob ship for player	5786d9a7-425f-4fae-a2d6-4a203c2dd595	1	f
 79a2e10d-9a63-4f6a-85de-7652b7d4e56e	09172710-740c-4d1c-9fc0-43cb62e674e7	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "industrialmarket": {"maxprice": 650, "minprice": 275, "silosize": 1000}, "activation_energy": 15, "shield_boost_amount": 20, "activation_gfx_effect": "basic_shield_booster"}	2021-07-11 20:05:33.519128-04	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	Module for new noob ship for player	5786d9a7-425f-4fae-a2d6-4a203c2dd595	1	f
@@ -551,7 +560,8 @@ COPY public.sellorders (id, universe_stationid, itemid, seller_userid, askprice,
 --
 
 COPY public.sessions (id, userid) FROM stdin;
-5f47e79d-d571-45d8-9dca-c34cea94286e	a49cb4c7-c7d3-4d89-b7b9-74215db417e3
+80259407-4af8-4a27-9f09-f52b3e515ef4	b943041a-3b82-445c-a0fa-d6a593472bab
+d833b70a-10f0-4174-8024-e296719a724e	a49cb4c7-c7d3-4d89-b7b9-74215db417e3
 \.
 
 
@@ -560,7 +570,8 @@ COPY public.sessions (id, userid) FROM stdin;
 --
 
 COPY public.ships (id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid, dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid, fittingbay_containerid, remaxdirty, trash_containerid, wallet) FROM stdin;
-046880ff-d59c-4b1f-9aff-e153d05338ac	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	24771.795632863843	-9938.30877953488	2021-07-11 20:05:33.531591-04	aaa's Starter Ship	Sparrow	124.93200320539722	0	0	209	244	135	295	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": [{"item_id": "006d352c-4fd2-4690-94c0-e938b0063b47", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "6ee35bd3-3337-40ab-a8c1-717d90e7f2e7", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "79a2e10d-9a63-4f6a-85de-7652b7d4e56e", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "b88ac39c-8f43-4761-be64-21d9596c25e1", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "d37f8734-99b3-4214-a730-a31d50af6dc4", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	fde1ef61-3019-4a0c-9ec1-f2c5b5400eef	5786d9a7-425f-4fae-a2d6-4a203c2dd595	f	ce37676b-0c76-4b54-96bc-d26e27e96b0a	10000
+046880ff-d59c-4b1f-9aff-e153d05338ac	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	207460	-335230	2021-07-11 20:05:33.531591-04	aaa's Starter Ship	Sparrow	60.6808455599452	0	0	209	244	135	295	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	526f57f5-09e0-41c7-9a89-cd803ec0a065	{"a_rack": [{"item_id": "006d352c-4fd2-4690-94c0-e938b0063b47", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "6ee35bd3-3337-40ab-a8c1-717d90e7f2e7", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "79a2e10d-9a63-4f6a-85de-7652b7d4e56e", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "b88ac39c-8f43-4761-be64-21d9596c25e1", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "d37f8734-99b3-4214-a730-a31d50af6dc4", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	fde1ef61-3019-4a0c-9ec1-f2c5b5400eef	5786d9a7-425f-4fae-a2d6-4a203c2dd595	f	ce37676b-0c76-4b54-96bc-d26e27e96b0a	10000
+89b45d8d-51ae-4a3e-9902-98b9158485eb	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	b943041a-3b82-445c-a0fa-d6a593472bab	-133305.26856343914	-6077.705005844882	2021-07-11 21:32:30.00111-04	bbb's Starter Ship	Sparrow	275.7309252088652	-0.5451628901540415	1.646705595097421	209	244	135	280.7301494998003	105.8188458699463	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "467e020e-cc3e-4df5-bf0e-dc7d45aa569e", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "5e7e6957-f564-429d-8857-cf08d3915958", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "50c98642-c4c7-4d16-bfe6-162370cb10df", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "7750e6f6-04a8-412c-929c-8bcdeecd8752", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "74386143-01b9-4eb1-87bb-0fd5139f4a59", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	4bc7c132-3b86-4287-8a64-a1296e8744f5	87a81fcb-9458-469f-8e72-975ab38d6041	f	e38d3dd2-0203-4440-8c33-230433913c26	10000
 \.
 
 
@@ -601,7 +612,7 @@ COPY public.starts (id, name, shiptemplateid, shipfitting, created, available, s
 --
 
 COPY public.stationprocesses (id, universe_stationid, processid, progress, installed, internalstate, meta) FROM stdin;
-966aa59b-68d0-4328-8baf-30616900bcbd	cf07bba9-90b2-4599-b1e3-84d797a67f0a	0f33d5ce-2b0b-4f80-80eb-506dd803ac4c	30	t	{"inputs": {"dd522f03-2f52-4e82-b2f8-d7e0029cb82f": {"price": 1, "quantity": 289593623}}, "outputs": {"e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3": {"price": 10, "quantity": 1000}}, "isRunning": true}	{}
+966aa59b-68d0-4328-8baf-30616900bcbd	cf07bba9-90b2-4599-b1e3-84d797a67f0a	0f33d5ce-2b0b-4f80-80eb-506dd803ac4c	30	t	{"inputs": {"dd522f03-2f52-4e82-b2f8-d7e0029cb82f": {"price": 1, "quantity": 289579603}}, "outputs": {"e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3": {"price": 10, "quantity": 1000}}, "isRunning": false}	{}
 \.
 
 
@@ -658,8 +669,8 @@ COPY public.universe_stars (id, universe_systemid, pos_x, pos_y, texture, radius
 --
 
 COPY public.universe_stations (id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta, factionid) FROM stdin;
-cf07bba9-90b2-4599-b1e3-84d797a67f0a	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Another Station	24771.795632863843	-9938.30877953488	Sunfarm	740	25300	112.4	a8a28085-e7b4-48f5-b8cb-1465ccab82a5
 526f57f5-09e0-41c7-9a89-cd803ec0a065	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Test Station	207460	-335230	Fleet Armory	810	65000	23.33	a8a28085-e7b4-48f5-b8cb-1465ccab82a5
+cf07bba9-90b2-4599-b1e3-84d797a67f0a	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	Another Station	24771.795632863843	-9938.30877953488	Sunfarm	740	25300	112.4	a8a28085-e7b4-48f5-b8cb-1465ccab82a5
 \.
 
 
@@ -679,6 +690,7 @@ edf08406-0879-4141-8af1-f68d32e31c8d	Another System	bfca1f47-e182-4b4d-8632-48d8
 
 COPY public.users (id, username, hashpass, registered, banned, current_shipid, startid, escrow_containerid, current_factionid) FROM stdin;
 a49cb4c7-c7d3-4d89-b7b9-74215db417e3	aaa	09b6eea09b48ac41c136ef0515927f468dd413d64406b97660a4b1de14c15d0c	2021-07-11 20:05:33.491602-04	0	046880ff-d59c-4b1f-9aff-e153d05338ac	49f06e89-29fb-4a02-a034-4b5d0702adac	d5dc0b21-e586-4bf9-8ac6-f2a0ea0ca39c	a8a28085-e7b4-48f5-b8cb-1465ccab82a5
+b943041a-3b82-445c-a0fa-d6a593472bab	bbb	80e6fd623cea60db763983c636dbeb91618681bc2e5217dd13fbd6be536eea8b	2021-07-11 21:32:29.9632-04	0	89b45d8d-51ae-4a3e-9902-98b9158485eb	49f06e89-29fb-4a02-a034-4b5d0702adac	e50b3ad5-dbb1-4c9e-83b7-fb90622477e9	a8a28085-e7b4-48f5-b8cb-1465ccab82a5
 \.
 
 
