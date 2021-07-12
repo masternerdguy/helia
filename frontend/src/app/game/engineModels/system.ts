@@ -15,6 +15,7 @@ export class System extends WSSystem {
     // copy from ws model
     this.id = ws.id;
     this.systemName = ws.systemName;
+    this.factionId = ws.factionId;
 
     // initialize self
     this.ships = [];

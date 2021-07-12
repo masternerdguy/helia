@@ -32,6 +32,9 @@ import { ServerOpenSellOrdersUpdate } from './wsModels/bodies/openSellOrdersUpda
 import { PushErrorWindow } from './gdi/windows/pushErrorWindow';
 import { IndustrialMarketWindow } from './gdi/windows/industrialMarketWindow';
 import { ServerIndustrialOrdersUpdate } from './wsModels/bodies/industrialOrdersUpdate';
+import { ServerFactionUpdate } from './wsModels/bodies/factionUpdate';
+import { Faction } from './engineModels/faction';
+import { GetFactionCache, UpdateFactionCache } from './wsModels/shared';
 
 class EngineSack {
   constructor() {}
@@ -223,6 +226,8 @@ export function clientStart(
       handleOpenSellOrdersUpdateMessageFromServer(d);
     } else if (d.type === MessageTypes.IndustrialOrdersUpdate) {
       handleIndustrialOrdersUpdateMessageFromServer(d);
+    } else if (d.type == MessageTypes.FactionUpdate) {
+      handleFactionUpdate(d);
     }
   });
 }
@@ -724,6 +729,14 @@ function handleCurrentShipUpdate(d: GameMessage) {
   // update industrial market window
   engineSack.industrialMarketWindow.setPlayer(engineSack.player);
   engineSack.industrialMarketWindow.setWsService(engineSack.wsSvc);
+}
+
+function handleFactionUpdate(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerFactionUpdate;
+
+  // update faction cache dictionary
+  UpdateFactionCache(msg.factions);
 }
 
 // clears the screen

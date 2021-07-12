@@ -18,6 +18,7 @@ export class Station extends WSStation {
     this.mass = ws.mass;
     this.radius = ws.radius;
     this.theta = ws.theta;
+    this.factionId = ws.factionId;
   }
 
   render(ctx: any, camera: Camera) {
@@ -64,5 +65,6 @@ export class Station extends WSStation {
     this.mass = ws.mass;
     this.radius = ws.radius;
     this.theta = ws.theta;
+    this.factionId = ws.factionId;
   }
 }

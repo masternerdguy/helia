@@ -330,24 +330,25 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		// build current ship info data for welcome message
 		shipInfo := models.CurrentShipInfo{
 			// global stuff
-			ID:       currShip.ID,
-			UserID:   currShip.UserID,
-			Created:  currShip.Created,
-			ShipName: currShip.ShipName,
-			PosX:     currShip.PosX,
-			PosY:     currShip.PosY,
-			SystemID: currShip.SystemID,
-			Texture:  currShip.Texture,
-			Theta:    currShip.Theta,
-			VelX:     currShip.VelX,
-			VelY:     currShip.VelY,
-			Accel:    currShip.GetRealAccel(),
-			Mass:     currShip.GetRealMass(),
-			Radius:   currShip.TemplateData.Radius,
-			Turn:     currShip.GetRealTurn(),
-			ShieldP:  (currShip.Shield / currShip.GetRealMaxShield()) * 100,
-			ArmorP:   (currShip.Armor / currShip.GetRealMaxArmor()) * 100,
-			HullP:    (currShip.Hull / currShip.GetRealMaxHull()) * 100,
+			ID:        currShip.ID,
+			UserID:    currShip.UserID,
+			Created:   currShip.Created,
+			ShipName:  currShip.ShipName,
+			PosX:      currShip.PosX,
+			PosY:      currShip.PosY,
+			SystemID:  currShip.SystemID,
+			Texture:   currShip.Texture,
+			Theta:     currShip.Theta,
+			VelX:      currShip.VelX,
+			VelY:      currShip.VelY,
+			Accel:     currShip.GetRealAccel(),
+			Mass:      currShip.GetRealMass(),
+			Radius:    currShip.TemplateData.Radius,
+			Turn:      currShip.GetRealTurn(),
+			ShieldP:   (currShip.Shield / currShip.GetRealMaxShield()) * 100,
+			ArmorP:    (currShip.Armor / currShip.GetRealMaxArmor()) * 100,
+			HullP:     (currShip.Hull / currShip.GetRealMaxHull()) * 100,
+			FactionID: u.CurrentFactionID,
 			// secret stuff
 			EnergyP: (currShip.Energy / currShip.GetRealMaxEnergy()) * 100,
 			HeatP:   (currShip.Heat / currShip.GetRealMaxHeat()) * 100,
@@ -389,6 +390,37 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		}
 
 		// send welcome message to client
+		client.WriteMessage(&msg)
+
+		// prepare initial faction info for client
+		af := models.ServerFactionUpdateBody{
+			Factions: make([]models.ServerFactionBody, 0),
+		}
+
+		factions := l.Engine.Universe.Factions
+
+		for _, f := range factions {
+			af.Factions = append(af.Factions, models.ServerFactionBody{
+				ID:          f.ID,
+				Name:        f.Name,
+				Description: f.Description,
+				IsNPC:       f.IsNPC,
+				IsJoinable:  f.IsJoinable,
+				IsClosed:    f.IsClosed,
+				CanHoldSov:  f.CanHoldSov,
+				Ticker:      f.Ticker,
+			})
+		}
+
+		// package faction data
+		b, _ = json.Marshal(&af)
+
+		msg = models.GameMessage{
+			MessageType: msgRegistry.FactionUpdate,
+			MessageBody: string(b),
+		}
+
+		// send all faction update message to client
 		client.WriteMessage(&msg)
 
 		// debug out

@@ -8,4 +8,5 @@ export class WSStation {
   radius: number;
   mass: number;
   theta: number;
+  factionId: string;
 }

@@ -36,6 +36,7 @@ type MessageRegistry struct {
 	IndustrialOrdersUpdate int
 	BuyFromSilo            int
 	SellToSilo             int
+	FactionUpdate          int
 }
 
 // Registry of target types
@@ -79,6 +80,7 @@ func NewMessageRegistry() *MessageRegistry {
 		IndustrialOrdersUpdate: 24,
 		BuyFromSilo:            25,
 		SellToSilo:             26,
+		FactionUpdate:          27,
 	}
 }
 
@@ -96,22 +98,23 @@ func NewTargetTypeRegistry() *TargetTypeRegistry {
 
 // Information about the user's current ship
 type CurrentShipInfo struct {
-	ID       uuid.UUID `json:"id"`
-	UserID   uuid.UUID `json:"uid"`
-	Created  time.Time `json:"createdAt"`
-	ShipName string    `json:"shipName"`
-	PosX     float64   `json:"x"`
-	PosY     float64   `json:"y"`
-	SystemID uuid.UUID `json:"systemId"`
-	Texture  string    `json:"texture"`
-	Theta    float64   `json:"theta"`
-	VelX     float64   `json:"velX"`
-	VelY     float64   `json:"velY"`
-	Mass     float64   `json:"mass"`
-	Radius   float64   `json:"radius"`
-	ShieldP  float64   `json:"shieldP"`
-	ArmorP   float64   `json:"armorP"`
-	HullP    float64   `json:"hullP"`
+	ID        uuid.UUID `json:"id"`
+	UserID    uuid.UUID `json:"uid"`
+	Created   time.Time `json:"createdAt"`
+	ShipName  string    `json:"shipName"`
+	PosX      float64   `json:"x"`
+	PosY      float64   `json:"y"`
+	SystemID  uuid.UUID `json:"systemId"`
+	Texture   string    `json:"texture"`
+	Theta     float64   `json:"theta"`
+	VelX      float64   `json:"velX"`
+	VelY      float64   `json:"velY"`
+	Mass      float64   `json:"mass"`
+	Radius    float64   `json:"radius"`
+	ShieldP   float64   `json:"shieldP"`
+	ArmorP    float64   `json:"armorP"`
+	HullP     float64   `json:"hullP"`
+	FactionID uuid.UUID `json:"factionId"`
 	// secrets that should not be globally known
 	Accel             float64                 `json:"accel"`
 	Turn              float64                 `json:"turn"`
@@ -143,6 +146,7 @@ type GlobalShipInfo struct {
 	ShieldP   float64   `json:"shieldP"`
 	ArmorP    float64   `json:"armorP"`
 	HullP     float64   `json:"hullP"`
+	FactionID uuid.UUID `json:"factionId"`
 }
 
 // Structure for passing non-secret information about a star
@@ -208,12 +212,14 @@ type GlobalStationInfo struct {
 	Radius      float64   `json:"radius"`
 	Mass        float64   `json:"mass"`
 	Theta       float64   `json:"theta"`
+	FactionID   uuid.UUID `json:"factionId"`
 }
 
 // CurrentSystemInfo Information about the user's current location
 type CurrentSystemInfo struct {
 	ID         uuid.UUID `json:"id"`
 	SystemName string    `json:"systemName"`
+	FactionID  uuid.UUID `json:"factionId"`
 }
 
 // Message container exchanged between client and server
@@ -498,4 +504,21 @@ type ClientSellToSiloBody struct {
 	SiloID    uuid.UUID `json:"siloId"`
 	ItemID    uuid.UUID `json:"itemId"`
 	Quantity  int       `json:"quantity"`
+}
+
+// Body containing information about a faction for the client
+type ServerFactionBody struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	IsNPC       bool      `json:"isNPC"`
+	IsJoinable  bool      `json:"isJoinable"`
+	IsClosed    bool      `json:"isClosed"`
+	CanHoldSov  bool      `json:"canHoldSov"`
+	Ticker      string    `json:"ticker"`
+}
+
+// Body containing an update on some or all of the unviverse's current factions for the client
+type ServerFactionUpdateBody struct {
+	Factions []ServerFactionBody `json:"factions"`
 }

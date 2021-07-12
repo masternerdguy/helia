@@ -23,6 +23,7 @@ export class Ship extends WSShip {
     this.velX = ws.velX;
     this.velY = ws.velY;
     this.radius = ws.radius;
+    this.factionId = ws.factionId;
     this.lastSeen = Date.now();
 
     if (ws.accel) {

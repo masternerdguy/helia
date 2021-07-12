@@ -18,6 +18,7 @@ export class WSShip {
   shieldP: number;
   armorP: number;
   hullP: number;
+  factionId: string;
   energyP: number;
   heatP: number;
   fuelP: number;

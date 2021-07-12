@@ -776,6 +776,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 	gu.CurrentSystemInfo = models.CurrentSystemInfo{
 		ID:         s.ID,
 		SystemName: s.SystemName,
+		FactionID:  s.HoldingFactionID,
 	}
 
 	for _, d := range s.ships {
@@ -808,6 +809,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 			ShieldP:   ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
 			ArmorP:    ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
 			HullP:     ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
+			FactionID: d.FactionID,
 		})
 	}
 
@@ -878,6 +880,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 			Radius:      d.Radius,
 			Mass:        d.Mass,
 			Theta:       d.Theta,
+			FactionID:   d.FactionID,
 		})
 	}
 
@@ -966,22 +969,23 @@ func (s *SolarSystem) PeriodicUpdate() {
 		si := models.ServerCurrentShipUpdate{
 			CurrentShipInfo: models.CurrentShipInfo{
 				// global stuff
-				ID:       d.ID,
-				UserID:   d.UserID,
-				Created:  d.Created,
-				ShipName: d.ShipName,
-				PosX:     d.PosX,
-				PosY:     d.PosY,
-				SystemID: d.SystemID,
-				Texture:  d.Texture,
-				Theta:    d.Theta,
-				VelX:     d.VelX,
-				VelY:     d.VelY,
-				Mass:     d.GetRealMass(),
-				Radius:   d.TemplateData.Radius,
-				ShieldP:  ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
-				ArmorP:   ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
-				HullP:    ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
+				ID:        d.ID,
+				UserID:    d.UserID,
+				Created:   d.Created,
+				ShipName:  d.ShipName,
+				PosX:      d.PosX,
+				PosY:      d.PosY,
+				SystemID:  d.SystemID,
+				Texture:   d.Texture,
+				Theta:     d.Theta,
+				VelX:      d.VelX,
+				VelY:      d.VelY,
+				Mass:      d.GetRealMass(),
+				Radius:    d.TemplateData.Radius,
+				ShieldP:   ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
+				ArmorP:    ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
+				HullP:     ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
+				FactionID: d.FactionID,
 				// secret stuff
 				EnergyP:           ((d.Energy / d.GetRealMaxEnergy()) * 100) + Epsilon,
 				HeatP:             ((d.Heat / d.GetRealMaxHeat()) * 100) + Epsilon,
