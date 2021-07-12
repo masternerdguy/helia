@@ -502,10 +502,10 @@ COPY public.items (id, itemtypeid, meta, created, createdby, createdreason, cont
 79a2e10d-9a63-4f6a-85de-7652b7d4e56e	09172710-740c-4d1c-9fc0-43cb62e674e7	{"hp": 5, "rack": "b", "volume": 4, "cooldown": 7, "needs_target": false, "activation_heat": 65, "industrialmarket": {"maxprice": 650, "minprice": 275, "silosize": 1000}, "activation_energy": 15, "shield_boost_amount": 20, "activation_gfx_effect": "basic_shield_booster"}	2021-07-11 20:05:33.519128-04	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	Module for new noob ship for player	5786d9a7-425f-4fae-a2d6-4a203c2dd595	1	f
 b88ac39c-8f43-4761-be64-21d9596c25e1	b481a521-1b12-4ffa-ac2f-4da015036f7f	{"hp": 15, "rack": "c", "volume": 3, "fuel_max_add": 30, "industrialmarket": {"maxprice": 25, "minprice": 10, "silosize": 1000}}	2021-07-11 20:05:33.523607-04	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	Module for new noob ship for player	5786d9a7-425f-4fae-a2d6-4a203c2dd595	1	f
 d37f8734-99b3-4214-a730-a31d50af6dc4	c311df30-c21e-4895-acb0-d8808f99710e	{"hp": 75, "rack": "c", "volume": 6, "armor_max_add": 75, "industrialmarket": {"maxprice": 65, "minprice": 30, "silosize": 1000}}	2021-07-11 20:05:33.528289-04	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	Module for new noob ship for player	5786d9a7-425f-4fae-a2d6-4a203c2dd595	1	f
-735c5a77-dae9-44c1-bf9b-b411270083ce	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1, "industrialmarket": {"maxprice": 3, "minprice": 1, "silosize": 300000000}}	2021-07-11 21:48:41.450207-04	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	Stack split	d5dc0b21-e586-4bf9-8ac6-f2a0ea0ca39c	5	t
 915b4230-a69b-456a-b2c7-f61a96836bcb	e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3	{"volume": 1, "industrialmarket": {"maxprice": 15, "minprice": 10, "silosize": 1000}}	2021-07-11 21:49:42.824962-04	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	Bought from silo	fde1ef61-3019-4a0c-9ec1-f2c5b5400eef	1	t
 d5eea8f0-f7f7-44db-9d14-5166665c401d	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1, "industrialmarket": {"maxprice": 3, "minprice": 1, "silosize": 300000000}}	2021-07-11 21:46:50.866504-04	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	Mined ore	fde1ef61-3019-4a0c-9ec1-f2c5b5400eef	0	t
 3d9c379c-293c-480a-b034-dbfc27bf369b	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1, "industrialmarket": {"maxprice": 3, "minprice": 1, "silosize": 300000000}}	2021-07-11 21:48:37.14313-04	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	Stack split	fde1ef61-3019-4a0c-9ec1-f2c5b5400eef	19	t
+735c5a77-dae9-44c1-bf9b-b411270083ce	dd522f03-2f52-4e82-b2f8-d7e0029cb82f	{"hp": 1, "volume": 1, "industrialmarket": {"maxprice": 3, "minprice": 1, "silosize": 300000000}}	2021-07-11 21:48:41.450207-04	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	Stack split	4bc7c132-3b86-4287-8a64-a1296e8744f5	0	t
 \.
 
 
@@ -556,7 +556,7 @@ COPY public.processoutputs (id, itemtypeid, quantity, meta, processid) FROM stdi
 --
 
 COPY public.sellorders (id, universe_stationid, itemid, seller_userid, askprice, created, bought, buyer_userid) FROM stdin;
-57b03405-f8c3-45d8-bbce-81b316a88876	cf07bba9-90b2-4599-b1e3-84d797a67f0a	735c5a77-dae9-44c1-bf9b-b411270083ce	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	4	2021-07-11 21:48:48.751368-04	\N	\N
+57b03405-f8c3-45d8-bbce-81b316a88876	cf07bba9-90b2-4599-b1e3-84d797a67f0a	735c5a77-dae9-44c1-bf9b-b411270083ce	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	4	2021-07-11 21:48:48.751368-04	2021-07-11 22:05:09.616786-04	b943041a-3b82-445c-a0fa-d6a593472bab
 \.
 
 
@@ -565,8 +565,8 @@ COPY public.sellorders (id, universe_stationid, itemid, seller_userid, askprice,
 --
 
 COPY public.sessions (id, userid) FROM stdin;
-a34c968d-4f46-4ed2-aab3-c3e650e12143	a49cb4c7-c7d3-4d89-b7b9-74215db417e3
-5acc3891-13c1-4646-ab08-fe8d0c24bb4e	b943041a-3b82-445c-a0fa-d6a593472bab
+6547590d-28e3-47da-9864-feedd8814685	a49cb4c7-c7d3-4d89-b7b9-74215db417e3
+0ea6798c-5397-418c-8ce6-7fd1669300c2	b943041a-3b82-445c-a0fa-d6a593472bab
 \.
 
 
@@ -575,8 +575,8 @@ a34c968d-4f46-4ed2-aab3-c3e650e12143	a49cb4c7-c7d3-4d89-b7b9-74215db417e3
 --
 
 COPY public.ships (id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid, dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid, fittingbay_containerid, remaxdirty, trash_containerid, wallet) FROM stdin;
-046880ff-d59c-4b1f-9aff-e153d05338ac	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	24771.795632863843	-9938.30877953488	2021-07-11 20:05:33.531591-04	aaa's Starter Ship	Sparrow	338.656008863844	0	0	209	244	135	295	0	137.99896320927223	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": [{"item_id": "006d352c-4fd2-4690-94c0-e938b0063b47", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "6ee35bd3-3337-40ab-a8c1-717d90e7f2e7", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "79a2e10d-9a63-4f6a-85de-7652b7d4e56e", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "b88ac39c-8f43-4761-be64-21d9596c25e1", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "d37f8734-99b3-4214-a730-a31d50af6dc4", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	fde1ef61-3019-4a0c-9ec1-f2c5b5400eef	5786d9a7-425f-4fae-a2d6-4a203c2dd595	f	ce37676b-0c76-4b54-96bc-d26e27e96b0a	9998
-89b45d8d-51ae-4a3e-9902-98b9158485eb	edf08406-0879-4141-8af1-f68d32e31c8d	b943041a-3b82-445c-a0fa-d6a593472bab	-595898.0723051307	353352.3589804203	2021-07-11 21:32:30.00111-04	bbb's Starter Ship	Sparrow	129.00461319592455	-3.55440953492616e-173	-3.6457566151579816e-173	209	244	135	267.5000172310267	0	138	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "467e020e-cc3e-4df5-bf0e-dc7d45aa569e", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "5e7e6957-f564-429d-8857-cf08d3915958", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "50c98642-c4c7-4d16-bfe6-162370cb10df", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "7750e6f6-04a8-412c-929c-8bcdeecd8752", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "74386143-01b9-4eb1-87bb-0fd5139f4a59", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	4bc7c132-3b86-4287-8a64-a1296e8744f5	87a81fcb-9458-469f-8e72-975ab38d6041	f	e38d3dd2-0203-4440-8c33-230433913c26	10000
+046880ff-d59c-4b1f-9aff-e153d05338ac	edf08406-0879-4141-8af1-f68d32e31c8d	a49cb4c7-c7d3-4d89-b7b9-74215db417e3	-602482.707258158	353346.91820482496	2021-07-11 20:05:33.531591-04	aaa's Starter Ship	Sparrow	132.511614816078	-16.400655978187988	-12.10216182345237	209	244	135	259.86237515489023	4.223153066725283	137.98864830555343	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "006d352c-4fd2-4690-94c0-e938b0063b47", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "6ee35bd3-3337-40ab-a8c1-717d90e7f2e7", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "79a2e10d-9a63-4f6a-85de-7652b7d4e56e", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "b88ac39c-8f43-4761-be64-21d9596c25e1", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "d37f8734-99b3-4214-a730-a31d50af6dc4", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	fde1ef61-3019-4a0c-9ec1-f2c5b5400eef	5786d9a7-425f-4fae-a2d6-4a203c2dd595	f	ce37676b-0c76-4b54-96bc-d26e27e96b0a	10002
+89b45d8d-51ae-4a3e-9902-98b9158485eb	1d4e0a33-9f67-4f24-8b7b-1af4d5aa2ef1	b943041a-3b82-445c-a0fa-d6a593472bab	24771.795632863843	-9938.30877953488	2021-07-11 21:32:30.00111-04	bbb's Starter Ship	Sparrow	91.48628319809903	0	0	208.93159198898329	244	135	295	0	137.9976605929599	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	cf07bba9-90b2-4599-b1e3-84d797a67f0a	{"a_rack": [{"item_id": "467e020e-cc3e-4df5-bf0e-dc7d45aa569e", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "5e7e6957-f564-429d-8857-cf08d3915958", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "50c98642-c4c7-4d16-bfe6-162370cb10df", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "7750e6f6-04a8-412c-929c-8bcdeecd8752", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "74386143-01b9-4eb1-87bb-0fd5139f4a59", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	4bc7c132-3b86-4287-8a64-a1296e8744f5	87a81fcb-9458-469f-8e72-975ab38d6041	f	e38d3dd2-0203-4440-8c33-230433913c26	10001
 \.
 
 
@@ -617,7 +617,7 @@ COPY public.starts (id, name, shiptemplateid, shipfitting, created, available, s
 --
 
 COPY public.stationprocesses (id, universe_stationid, processid, progress, installed, internalstate, meta) FROM stdin;
-966aa59b-68d0-4328-8baf-30616900bcbd	cf07bba9-90b2-4599-b1e3-84d797a67f0a	0f33d5ce-2b0b-4f80-80eb-506dd803ac4c	30	t	{"inputs": {"dd522f03-2f52-4e82-b2f8-d7e0029cb82f": {"price": 1, "quantity": 289569693}}, "outputs": {"e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3": {"price": 10, "quantity": 999}}, "isRunning": false}	{}
+966aa59b-68d0-4328-8baf-30616900bcbd	cf07bba9-90b2-4599-b1e3-84d797a67f0a	0f33d5ce-2b0b-4f80-80eb-506dd803ac4c	30	t	{"inputs": {"dd522f03-2f52-4e82-b2f8-d7e0029cb82f": {"price": 1, "quantity": 289555176}}, "outputs": {"e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3": {"price": 10, "quantity": 999}}, "isRunning": true}	{}
 \.
 
 
