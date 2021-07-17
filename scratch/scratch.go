@@ -40,7 +40,7 @@ func main() {
 
 	f, _ := factionSvc.GetAllFactions()
 
-	a := "506286f5-6613-4481-ac26-caa9940fbe68"
+	a := "5db2bec7-37c3-4f1c-ab88-21024c12d639"
 	b := "b3d3fa9c-b21e-490f-b39e-128b3af12128"
 
 	for _, e := range f {
@@ -66,7 +66,7 @@ func main() {
 			e.ReputationSheet.Entries[dest] = sql.ReputationSheetEntry{
 				SourceFactionID:  srcID,
 				TargetFactionID:  destID,
-				StandingValue:    -0.05,
+				StandingValue:    0,
 				AreOpenlyHostile: false,
 			}
 		}
