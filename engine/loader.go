@@ -44,8 +44,6 @@ func loadUniverse() (*universe.Universe, error) {
 		uf := FactionFromSQL(&f)
 
 		factions[f.ID.String()] = uf
-
-		log.Println(fmt.Sprintf("%v", uf))
 	}
 
 	u.Factions = factions
