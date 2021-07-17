@@ -41,19 +41,11 @@ func loadUniverse() (*universe.Universe, error) {
 	factions := make(map[string]*universe.Faction)
 
 	for _, f := range dfs {
-		uf := universe.Faction{
-			ID:          f.ID,
-			Name:        f.Name,
-			Description: f.Description,
-			IsNPC:       f.IsNPC,
-			IsJoinable:  f.IsJoinable,
-			IsClosed:    f.IsClosed,
-			CanHoldSov:  f.CanHoldSov,
-			Meta:        universe.Meta(f.Meta),
-			Ticker:      f.Ticker,
-		}
+		uf := FactionFromSQL(&f)
 
-		factions[f.ID.String()] = &uf
+		factions[f.ID.String()] = uf
+
+		log.Println(fmt.Sprintf("%v", uf))
 	}
 
 	u.Factions = factions
@@ -770,6 +762,57 @@ func ContainerFromSQL(value *sql.Container) *universe.Container {
 
 	// return filled container
 	return &container
+}
+
+// Converts a Faction from the SQL type to the engine type
+func FactionFromSQL(value *sql.Faction) *universe.Faction {
+	// set up empty faction
+	faction := universe.Faction{}
+
+	// null check
+	if value == nil {
+		// return nil
+		return nil
+	}
+
+	// copy basic data
+	faction.ID = value.ID
+	faction.Name = value.Name
+	faction.Description = value.Description
+	faction.IsNPC = value.IsNPC
+	faction.IsJoinable = value.IsJoinable
+	faction.IsClosed = value.IsClosed
+	faction.CanHoldSov = value.CanHoldSov
+	faction.Meta = universe.Meta(value.Meta)
+	faction.Ticker = value.Ticker
+
+	// copy reputation sheet entries
+	faction.ReputationSheet = universe.FactionReputationSheet{
+		Entries:        make(map[string]universe.ReputationSheetEntry),
+		HostFactionIDs: make([]uuid.UUID, 0),
+		WorldPercent:   0,
+	}
+
+	if value.ReputationSheet.Entries != nil {
+		for k, v := range value.ReputationSheet.Entries {
+			faction.ReputationSheet.Entries[k] = universe.ReputationSheetEntry{
+				SourceFactionID:  v.SourceFactionID,
+				TargetFactionID:  v.TargetFactionID,
+				StandingValue:    v.StandingValue,
+				AreOpenlyHostile: v.AreOpenlyHostile,
+			}
+		}
+	}
+
+	// copy world data
+	if value.ReputationSheet.HostFactionIDs != nil {
+		faction.ReputationSheet.HostFactionIDs = append(faction.ReputationSheet.HostFactionIDs, value.ReputationSheet.HostFactionIDs...)
+	}
+
+	faction.ReputationSheet.WorldPercent = value.ReputationSheet.WorldPercent
+
+	// return filled faction
+	return &faction
 }
 
 // Converts a SellOrder from the SQL type to the engine type
