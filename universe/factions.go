@@ -18,6 +18,7 @@ type Faction struct {
 	Ticker          string
 }
 
+// Structure representing a relationship this faction has to another faction
 type ReputationSheetEntry struct {
 	SourceFactionID  uuid.UUID
 	TargetFactionID  uuid.UUID
@@ -25,8 +26,19 @@ type ReputationSheetEntry struct {
 	AreOpenlyHostile bool
 }
 
+// Structure containing information about this faction's relationship with the world
 type FactionReputationSheet struct {
 	Entries        map[string]ReputationSheetEntry
 	HostFactionIDs []uuid.UUID
 	WorldPercent   float64
+}
+
+// Given a faction to compare against, returns the standing and whether they have declared open hostilities
+func (s *Faction) CheckStandings(factionID uuid.UUID) (float64, bool) {
+	// try to find faction relationship
+	if val, ok := s.ReputationSheet.Entries[factionID.String()]; ok {
+		return val.StandingValue, val.AreOpenlyHostile
+	} else {
+		return 0, false
+	}
 }
