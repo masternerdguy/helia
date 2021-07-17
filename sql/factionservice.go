@@ -2,6 +2,8 @@ package sql
 
 import (
 	"database/sql"
+	"database/sql/driver"
+	"encoding/json"
 	"errors"
 
 	"github.com/google/uuid"
@@ -17,21 +19,22 @@ func GetFactionService() *FactionService {
 
 // Structure representing a row in the Factions table
 type Faction struct {
-	ID          uuid.UUID
-	Name        string
-	Description string
-	IsNPC       bool
-	IsJoinable  bool
-	IsClosed    bool
-	CanHoldSov  bool
-	Meta        Meta `json:"meta"`
-	Ticker      string
+	ID              uuid.UUID
+	Name            string
+	Description     string
+	IsNPC           bool
+	IsJoinable      bool
+	IsClosed        bool
+	CanHoldSov      bool
+	Meta            Meta `json:"meta"`
+	ReputationSheet FactionReputationSheet
+	Ticker          string
 }
 
 type ReputationSheetEntry struct {
 	SourceFactionID  uuid.UUID `json:"sourceId"`
 	TargetFactionID  uuid.UUID `json:"targetId"`
-	Value            float64   `json:"value"`
+	StandingValue    float64   `json:"value"`
 	AreOpenlyHostile bool      `json:"areOpenlyHostile"`
 }
 
@@ -39,6 +42,36 @@ type FactionReputationSheet struct {
 	Entries        map[string]ReputationSheetEntry `json:"entries"`
 	HostFactionIDs []uuid.UUID                     `json:"hostFactionIds"`
 	WorldPercent   float64                         `json:"worldPercent"`
+}
+
+// Converts from a ReputationSheetEntry to JSON
+func (a ReputationSheetEntry) Value() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a ReputationSheetEntry
+func (a *ReputationSheetEntry) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
+}
+
+// Converts from a FactionReputationSheet to JSON
+func (a FactionReputationSheet) Value() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a FactionReputationSheet
+func (a *FactionReputationSheet) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
 }
 
 // Finds and returns a faction by its id
@@ -55,7 +88,7 @@ func (s FactionService) GetFactionByID(FactionID uuid.UUID) (*Faction, error) {
 
 	sqlStatement :=
 		`
-			SELECT id, name, description, isnpc, isjoinable, isclosed, canholdsov, meta, ticker
+			SELECT id, name, description, isnpc, isjoinable, isclosed, canholdsov, meta, ticker, reputationsheet
 			FROM public.Factions
 			WHERE id = $1
 		`
@@ -63,7 +96,7 @@ func (s FactionService) GetFactionByID(FactionID uuid.UUID) (*Faction, error) {
 	row := db.QueryRow(sqlStatement, FactionID)
 
 	switch err := row.Scan(&t.ID, &t.Name, &t.Description, &t.IsNPC, &t.IsJoinable, &t.IsClosed, &t.CanHoldSov,
-		&t.Meta, &t.Ticker); err {
+		&t.Meta, &t.Ticker, &t.ReputationSheet); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("faction not found")
 	case nil:
@@ -86,7 +119,7 @@ func (s FactionService) GetAllFactions() ([]Faction, error) {
 
 	// load factions
 	sql := `
-				SELECT id, name, description, isnpc, isjoinable, isclosed, canholdsov, meta, ticker
+				SELECT id, name, description, isnpc, isjoinable, isclosed, canholdsov, meta, ticker, reputationsheet
 				FROM public.Factions
 			`
 
@@ -103,7 +136,7 @@ func (s FactionService) GetAllFactions() ([]Faction, error) {
 
 		// scan into faction structure
 		rows.Scan(&s.ID, &s.Name, &s.Description, &s.IsNPC, &s.IsJoinable, &s.IsClosed, &s.CanHoldSov,
-			&s.Meta, &s.Ticker)
+			&s.Meta, &s.Ticker, &s.ReputationSheet)
 
 		// append to ship slice
 		factions = append(factions, s)
@@ -124,13 +157,13 @@ func (s FactionService) NewFaction(e Faction) (*Faction, error) {
 	// insert faction
 	sql := `
 				INSERT INTO public.factions(
-					id, name, description, isnpc, isjoinable, canholdsov, isclosed, meta, ticker)
-					VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+					id, name, description, isnpc, isjoinable, canholdsov, isclosed, meta, ticker, reputationsheet)
+					VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
 			`
 
 	uid := uuid.New()
 
-	q, err := db.Query(sql, uid, e.Name, e.Description, e.IsNPC, e.IsJoinable, e.CanHoldSov, e.IsClosed, e.Meta, e.Ticker)
+	q, err := db.Query(sql, uid, e.Name, e.Description, e.IsNPC, e.IsJoinable, e.CanHoldSov, e.IsClosed, e.Meta, e.Ticker, e.ReputationSheet)
 
 	if err != nil {
 		return nil, err
@@ -143,4 +176,31 @@ func (s FactionService) NewFaction(e Faction) (*Faction, error) {
 
 	// return pointer to inserted faction model
 	return &e, nil
+}
+
+// Save changes to a faction to the database
+func (s FactionService) SaveFaction(e Faction) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update faction
+	sql := `
+				UPDATE public.factions
+				SET name=$2, description=$3, meta=$4, ticker=$5, isnpc=$6, isjoinable=$7, canholdsov=$8, isclosed=$9, reputationsheet=$10
+				WHERE id=$1;
+			`
+
+	q, err := db.Query(sql, e.ID, e.Name, e.Description, e.Meta, e.Ticker, e.IsNPC, e.IsJoinable, e.CanHoldSov, e.IsClosed, e.ReputationSheet)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
 }

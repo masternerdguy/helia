@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"helia/sql"
-	"log"
 
 	"github.com/google/uuid"
 )
@@ -16,7 +14,67 @@ func main() {
 	// get faction service
 	factionSvc := sql.GetFactionService()
 
-	// add faction
+	/*
+
+	   id	name	description
+	   a8a28085-e7b4-48f5-b8cb-1465ccab82a5	Test Starter Faction	Temporary starter faction for use when a player is created.
+	   42b937ad-0000-46e9-9af9-fc7dbf878e6a	Neutral	Not associated with any faction.
+
+	   bdeffd9a-3cab-408c-9cd7-32fce1124f7a	Ozouka Accord	todo (side A empire faction, lawful)
+	   5db2bec7-37c3-4f1c-ab88-21024c12d639	Tenevan Coalition	todo (side A empire faction, lawful)
+
+	   a0152cbb-8a78-45a4-ae9b-2ad2b60b583b	Kingdom of Antaria	todo (side B empire faction, lawful)
+	   27a53dfc-a321-4c12-bf7c-bb177955c95b	Vierra Federation	todo (side B empire faction, lawful)
+
+	   7decfd86-9c82-4a17-af3b-5d4af8c4e2ad	Bad Rabbits	todo (high pirate faction, unlawful)
+	   30bc70eb-2692-47e6-a7e3-2772e131c3d7	Pappa Fly Reloaded	todo (low pirate faction, unlawful)
+
+	   559d7fc1-5470-4ab4-8c66-fa2f0b89a523	Interstar Corporation	todo (high corporate, quasi-lawful)
+	   506286f5-6613-4481-ac26-caa9940fbe68	Alvaca	todo (low corporate, quasi-lawful)
+
+	   b3d3fa9c-b21e-490f-b39e-128b3af12128	Sanctuary Systems	todo (freeport league)
+
+
+
+	*/
+
+	f, _ := factionSvc.GetAllFactions()
+
+	a := "bdeffd9a-3cab-408c-9cd7-32fce1124f7a"
+	b := "27a53dfc-a321-4c12-bf7c-bb177955c95b"
+
+	for _, e := range f {
+		if e.ID.String() == a || e.ID.String() == b {
+			src := ""
+			dest := ""
+
+			if e.ID.String() == a {
+				src = a
+				dest = b
+			} else {
+				src = b
+				dest = a
+			}
+
+			srcID, _ := uuid.Parse(src)
+			destID, _ := uuid.Parse(dest)
+
+			if e.ReputationSheet.Entries == nil {
+				e.ReputationSheet.Entries = make(map[string]sql.ReputationSheetEntry)
+			}
+
+			e.ReputationSheet.Entries[dest] = sql.ReputationSheetEntry{
+				SourceFactionID:  srcID,
+				TargetFactionID:  destID,
+				StandingValue:    -2.126786,
+				AreOpenlyHostile: false,
+			}
+		}
+
+		_ = factionSvc.SaveFaction(e)
+	}
+
+	/*// add faction
 	f := sql.Faction{}
 	f.Meta = make(sql.Meta)
 
@@ -39,15 +97,28 @@ func main() {
 	// save faction
 	t, u := factionSvc.NewFaction(f)
 
-	log.Println(fmt.Sprintf("%v, %v", t, u))
+	log.Println(fmt.Sprintf("%v, %v", t, u))*/
 }
 
 /*
 
-Ageiran Federation
-Orin Federation
+id	name	description
+a8a28085-e7b4-48f5-b8cb-1465ccab82a5	Test Starter Faction	Temporary starter faction for use when a player is created.
+42b937ad-0000-46e9-9af9-fc7dbf878e6a	Neutral	Not associated with any faction.
 
-ITC
-Caina Conglemerate
+bdeffd9a-3cab-408c-9cd7-32fce1124f7a	Ozouka Accord	todo (side A empire faction, lawful)
+5db2bec7-37c3-4f1c-ab88-21024c12d639	Tenevan Coalition	todo (side A empire faction, lawful)
+a0152cbb-8a78-45a4-ae9b-2ad2b60b583b	Kingdom of Antaria	todo (side B empire faction, lawful)
+27a53dfc-a321-4c12-bf7c-bb177955c95b	Vierra Federation	todo (side B empire faction, lawful)
+
+7decfd86-9c82-4a17-af3b-5d4af8c4e2ad	Bad Rabbits	todo (high pirate faction, unlawful)
+30bc70eb-2692-47e6-a7e3-2772e131c3d7	Pappa Fly Reloaded	todo (low pirate faction, unlawful)
+
+559d7fc1-5470-4ab4-8c66-fa2f0b89a523	Interstar Corporation	todo (high corporate, quasi-lawful)
+506286f5-6613-4481-ac26-caa9940fbe68	Alvaca	todo (low corporate, quasi-lawful)
+
+b3d3fa9c-b21e-490f-b39e-128b3af12128	Sanctuary Systems	todo (freeport league)
+
+
 
 */
