@@ -2555,6 +2555,11 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		}
 	}
 
+	/*
+	 * todo: we should be using the item's meta before the item type's meta when
+	 * determining stats of a fitted module.
+	 */
+
 	// get damage values
 	shieldDmg, _ := m.ItemTypeMeta.GetFloat64("shield_damage")
 	armorDmg, _ := m.ItemTypeMeta.GetFloat64("armor_damage")

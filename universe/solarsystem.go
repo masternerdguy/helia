@@ -651,6 +651,12 @@ func (s *SolarSystem) PeriodicUpdate() {
 				if c.CurrentShipID == e.ID {
 					// escalate respawn request to core
 					s.NeedRespawn[e.UserID.String()] = c
+
+					/*
+					 * todo: there is a bug here in which a logged out player will not spawn in their station when they log back in
+					 * because we are only escalating if their game client is curently attached to this system. we need to handle the
+					 * case where they died in space while logged out gracefully.
+					 */
 				}
 			}
 
