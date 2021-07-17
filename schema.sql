@@ -46,7 +46,8 @@ CREATE TABLE public.factions (
     isnpc boolean DEFAULT false NOT NULL,
     isjoinable boolean DEFAULT false NOT NULL,
     canholdsov boolean DEFAULT false NOT NULL,
-    isclosed boolean DEFAULT false NOT NULL
+    isclosed boolean DEFAULT false NOT NULL,
+    reputationsheet jsonb DEFAULT '{}'::jsonb NOT NULL
 );
 
 

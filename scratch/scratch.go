@@ -40,8 +40,8 @@ func main() {
 
 	f, _ := factionSvc.GetAllFactions()
 
-	a := "bdeffd9a-3cab-408c-9cd7-32fce1124f7a"
-	b := "27a53dfc-a321-4c12-bf7c-bb177955c95b"
+	a := "506286f5-6613-4481-ac26-caa9940fbe68"
+	b := "b3d3fa9c-b21e-490f-b39e-128b3af12128"
 
 	for _, e := range f {
 		if e.ID.String() == a || e.ID.String() == b {
@@ -66,7 +66,7 @@ func main() {
 			e.ReputationSheet.Entries[dest] = sql.ReputationSheetEntry{
 				SourceFactionID:  srcID,
 				TargetFactionID:  destID,
-				StandingValue:    -2.126786,
+				StandingValue:    -0.05,
 				AreOpenlyHostile: false,
 			}
 		}
@@ -77,6 +77,8 @@ func main() {
 	/*// add faction
 	f := sql.Faction{}
 	f.Meta = make(sql.Meta)
+
+	this is bad and needs to use the new repsheet column instead!
 
 	f.Name = "Sanctuary Systems"
 	f.Description = "todo (freeport league)"
