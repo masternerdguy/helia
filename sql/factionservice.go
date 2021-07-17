@@ -24,8 +24,21 @@ type Faction struct {
 	IsJoinable  bool
 	IsClosed    bool
 	CanHoldSov  bool
-	Meta        Meta
+	Meta        Meta `json:"meta"`
 	Ticker      string
+}
+
+type ReputationSheetEntry struct {
+	SourceFactionID  uuid.UUID `json:"sourceId"`
+	TargetFactionID  uuid.UUID `json:"targetId"`
+	Value            float64   `json:"value"`
+	AreOpenlyHostile bool      `json:"areOpenlyHostile"`
+}
+
+type FactionReputationSheet struct {
+	Entries        map[string]ReputationSheetEntry `json:"entries"`
+	HostFactionIDs []uuid.UUID                     `json:"hostFactionIds"`
+	WorldPercent   float64                         `json:"worldPercent"`
 }
 
 // Finds and returns a faction by its id
@@ -97,4 +110,37 @@ func (s FactionService) GetAllFactions() ([]Faction, error) {
 	}
 
 	return factions, err
+}
+
+// Creates a new faction
+func (s FactionService) NewFaction(e Faction) (*Faction, error) {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// insert faction
+	sql := `
+				INSERT INTO public.factions(
+					id, name, description, isnpc, isjoinable, canholdsov, isclosed, meta, ticker)
+					VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+			`
+
+	uid := uuid.New()
+
+	q, err := db.Query(sql, uid, e.Name, e.Description, e.IsNPC, e.IsJoinable, e.CanHoldSov, e.IsClosed, e.Meta, e.Ticker)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer q.Close()
+
+	// update id in model
+	e.ID = uid
+
+	// return pointer to inserted faction model
+	return &e, nil
 }

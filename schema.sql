@@ -41,12 +41,12 @@ CREATE TABLE public.factions (
     id uuid NOT NULL,
     name character varying(32) NOT NULL,
     description character varying(512) NOT NULL,
-    isnpc bit(1) NOT NULL,
-    isjoinable bit(1) NOT NULL,
-    canholdsov bit(1) NOT NULL,
-    isclosed bit(1) NOT NULL,
     meta jsonb NOT NULL,
-    ticker character varying(3) DEFAULT '???'::character varying NOT NULL
+    ticker character varying(3) DEFAULT '???'::character varying NOT NULL,
+    isnpc boolean DEFAULT false NOT NULL,
+    isjoinable boolean DEFAULT false NOT NULL,
+    canholdsov boolean DEFAULT false NOT NULL,
+    isclosed boolean DEFAULT false NOT NULL
 );
 
 

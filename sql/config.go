@@ -67,7 +67,13 @@ func connect() (*sql.DB, error) {
 func loadConfiguration() (dbConfig, error) {
 	var config dbConfig
 
+	// try to load under main.go position
 	configFile, err := os.Open("db-configuration.json")
+
+	if err != nil {
+		// try to load under a child position
+		configFile, err = os.Open("../db-configuration.json")
+	}
 
 	if err != nil {
 		return dbConfig{}, err

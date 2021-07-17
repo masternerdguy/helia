@@ -41,12 +41,12 @@ CREATE TABLE public.factions (
     id uuid NOT NULL,
     name character varying(32) NOT NULL,
     description character varying(512) NOT NULL,
-    isnpc bit(1) NOT NULL,
-    isjoinable bit(1) NOT NULL,
-    canholdsov bit(1) NOT NULL,
-    isclosed bit(1) NOT NULL,
     meta jsonb NOT NULL,
-    ticker character varying(3) DEFAULT '???'::character varying NOT NULL
+    ticker character varying(3) DEFAULT '???'::character varying NOT NULL,
+    isnpc boolean DEFAULT false NOT NULL,
+    isjoinable boolean DEFAULT false NOT NULL,
+    canholdsov boolean DEFAULT false NOT NULL,
+    isclosed boolean DEFAULT false NOT NULL
 );
 
 
@@ -465,9 +465,18 @@ e38d3dd2-0203-4440-8c33-230433913c26	{}	2021-07-11 21:32:29.969283-04
 -- Data for Name: factions; Type: TABLE DATA; Schema: public; Owner: developer
 --
 
-COPY public.factions (id, name, description, isnpc, isjoinable, canholdsov, isclosed, meta, ticker) FROM stdin;
-a8a28085-e7b4-48f5-b8cb-1465ccab82a5	Test Starter Faction	Temporary starter faction for use when a player is created.	0	0	0	0	{}	TSF
-42b937ad-0000-46e9-9af9-fc7dbf878e6a	Neutral	Not associated with any faction.	0	0	0	1	{}	   
+COPY public.factions (id, name, description, meta, ticker, isnpc, isjoinable, canholdsov, isclosed) FROM stdin;
+a8a28085-e7b4-48f5-b8cb-1465ccab82a5	Test Starter Faction	Temporary starter faction for use when a player is created.	{}	TSF	f	f	f	f
+42b937ad-0000-46e9-9af9-fc7dbf878e6a	Neutral	Not associated with any faction.	{}	   	f	f	f	f
+bdeffd9a-3cab-408c-9cd7-32fce1124f7a	Ozouka Accord	todo (side A empire faction, lawful)	{"reputationSheet": {"entries": {}, "worldPercent": 0.17, "hostFactionIds": []}}	OZA	t	t	t	f
+5db2bec7-37c3-4f1c-ab88-21024c12d639	Tenevan Coalition	todo (side A empire faction, lawful)	{"reputationSheet": {"entries": {}, "worldPercent": 0.12, "hostFactionIds": []}}	TVC	t	t	t	f
+a0152cbb-8a78-45a4-ae9b-2ad2b60b583b	Kingdom of Antaria	todo (side B empire faction, lawful)	{"reputationSheet": {"entries": {}, "worldPercent": 0.19, "hostFactionIds": []}}	KoA	t	t	t	f
+27a53dfc-a321-4c12-bf7c-bb177955c95b	Vierra Federation	todo (side B empire faction, lawful)	{"reputationSheet": {"entries": {}, "worldPercent": 0.11, "hostFactionIds": []}}	VRF	t	t	t	f
+7decfd86-9c82-4a17-af3b-5d4af8c4e2ad	Bad Rabbits	todo (high pirate faction, unlawful)	{"reputationSheet": {"entries": {}, "worldPercent": 0.09, "hostFactionIds": []}}	-R-	t	t	t	f
+30bc70eb-2692-47e6-a7e3-2772e131c3d7	Pappa Fly Reloaded	todo (low pirate faction, unlawful)	{"reputationSheet": {"entries": {}, "worldPercent": 0.12, "hostFactionIds": []}}	fly	t	t	t	f
+559d7fc1-5470-4ab4-8c66-fa2f0b89a523	Interstar Corporation	todo (high corporate, quasi-lawful)	{"reputationSheet": {"entries": {}, "worldPercent": 0.08, "hostFactionIds": []}}	IC*	t	t	t	f
+506286f5-6613-4481-ac26-caa9940fbe68	Alvaca	todo (low corporate, quasi-lawful)	{"reputationSheet": {"entries": {}, "worldPercent": 0.07, "hostFactionIds": []}}	AV.	t	t	t	f
+b3d3fa9c-b21e-490f-b39e-128b3af12128	Sanctuary Systems	todo (freeport league)	{"reputationSheet": {"entries": {}, "worldPercent": 0.05, "hostFactionIds": []}}	_S_	t	t	t	f
 \.
 
 
