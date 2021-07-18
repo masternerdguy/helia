@@ -3,7 +3,6 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"helia/physics"
 	"helia/sql"
 	"time"
 
@@ -208,6 +207,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sq
 	// create starter ship
 	t := sql.Ship{
 		SystemID:              start.SystemID,
+		DockedAtStationID:     &start.HomeStationID,
 		UserID:                u.ID,
 		ShipName:              fmt.Sprintf("%s's Starter Ship", u.Username),
 		Texture:               temp.Texture,
@@ -219,8 +219,6 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID, newUser bool) (*sq
 		Heat:                  0,
 		Energy:                temp.BaseEnergy,
 		ShipTemplateID:        temp.ID,
-		PosX:                  float64(physics.RandInRange(-50000, 50000)),
-		PosY:                  float64(physics.RandInRange(-50000, 50000)),
 		Fitting:               fitting,
 		Destroyed:             false,
 		CargoBayContainerID:   cb.ID,

@@ -915,8 +915,6 @@ func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) 
 	// clamp hull
 	if s.Hull < 0 {
 		s.Hull = 0
-
-		// todo: handle death of player and respawn in noob ship at nearest station
 	}
 }
 

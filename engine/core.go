@@ -402,8 +402,6 @@ func handleEscalations(sol *universe.SolarSystem) {
 				return
 			}
 
-			ns.DockedAtStationID = &start.HomeStationID
-
 			// save noob ship
 			err = shipSvc.UpdateShip(*ns)
 

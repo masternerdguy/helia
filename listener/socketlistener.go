@@ -308,7 +308,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				// get their new noob ship from the db
 				dbShip, err = shipSvc.GetShipByID(*u.CurrentShipID, false)
 
-				if dbShip == nil || err == nil {
+				if dbShip == nil || err != nil {
 					log.Println(fmt.Sprintf("player join recovery: unable to find recovery noob ship %v for %v", u.CurrentShipID, u.ID))
 					return
 				}
