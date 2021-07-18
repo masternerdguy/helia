@@ -788,7 +788,7 @@ func (s *Ship) GetRealMaxArmor() float64 {
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {
-		armorMaxAdd, s := e.ItemTypeMeta.GetFloat64("armor_max_add")
+		armorMaxAdd, s := e.ItemMeta.GetFloat64("armor_max_add")
 
 		if s {
 			// include in real max
@@ -831,7 +831,7 @@ func (s *Ship) GetRealMaxFuel() float64 {
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {
-		fuelMaxAdd, s := e.ItemTypeMeta.GetFloat64("fuel_max_add")
+		fuelMaxAdd, s := e.ItemMeta.GetFloat64("fuel_max_add")
 
 		if s {
 			// include in real max
@@ -2312,7 +2312,7 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 func (m *FittedSlot) PeriodicUpdate() {
 	if m.IsCycling {
 		// update cycle timer
-		cooldown, found := m.ItemTypeMeta.GetFloat64("cooldown")
+		cooldown, found := m.ItemMeta.GetFloat64("cooldown")
 
 		if !found {
 			// module has no cooldown - deactivate
@@ -2427,7 +2427,7 @@ func (m *FittedSlot) PeriodicUpdate() {
 			}
 
 			// check for sufficient activation energy
-			activationEnergy, found := m.ItemTypeMeta.GetFloat64("activation_energy")
+			activationEnergy, found := m.ItemMeta.GetFloat64("activation_energy")
 
 			if found {
 				if m.shipMountedOn.Energy-activationEnergy < 0 {
@@ -2453,7 +2453,7 @@ func (m *FittedSlot) PeriodicUpdate() {
 				m.IsCycling = true
 
 				// apply activation heating
-				activationHeat, found := m.ItemTypeMeta.GetFloat64("activation_heat")
+				activationHeat, found := m.ItemMeta.GetFloat64("activation_heat")
 
 				if found {
 					m.shipMountedOn.Heat += activationHeat
@@ -2536,7 +2536,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	}
 
 	// check for max range
-	modRange, found := m.ItemTypeMeta.GetFloat64("range")
+	modRange, found := m.ItemMeta.GetFloat64("range")
 	var d float64 = 0
 
 	if found {
@@ -2555,15 +2555,10 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		}
 	}
 
-	/*
-	 * todo: we should be using the item's meta before the item type's meta when
-	 * determining stats of a fitted module.
-	 */
-
 	// get damage values
-	shieldDmg, _ := m.ItemTypeMeta.GetFloat64("shield_damage")
-	armorDmg, _ := m.ItemTypeMeta.GetFloat64("armor_damage")
-	hullDmg, _ := m.ItemTypeMeta.GetFloat64("hull_damage")
+	shieldDmg, _ := m.ItemMeta.GetFloat64("shield_damage")
+	armorDmg, _ := m.ItemMeta.GetFloat64("armor_damage")
+	hullDmg, _ := m.ItemMeta.GetFloat64("hull_damage")
 
 	// determine angular velocity for tracking
 	dvX := m.shipMountedOn.VelX - tgtDummy.VelX
@@ -2577,7 +2572,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	}
 
 	// get tracking value
-	tracking, _ := m.ItemTypeMeta.GetFloat64("tracking")
+	tracking, _ := m.ItemMeta.GetFloat64("tracking")
 
 	// calculate tracking ratio
 	trackingRatio := 1.0 // default to 100% tracking
@@ -2597,7 +2592,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	hullDmg *= trackingRatio
 
 	// account for falloff if present
-	falloff, found := m.ItemTypeMeta.GetString("falloff")
+	falloff, found := m.ItemMeta.GetString("falloff")
 
 	rangeRatio := 1.0 // default to 100% damage (or ore pull if asteroid)
 
@@ -2626,7 +2621,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 
 		if f && canMineOre {
 			// get mining volume
-			miningVolume, _ := m.ItemTypeMeta.GetFloat64("ore_mining_volume")
+			miningVolume, _ := m.ItemMeta.GetFloat64("ore_mining_volume")
 
 			// get ore type and volume
 			c := tgtI.(*Asteroid)
@@ -2717,7 +2712,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 
 func (m *FittedSlot) activateAsShieldBooster() bool {
 	// get shield boost amount
-	shieldBoost, _ := m.ItemTypeMeta.GetFloat64("shield_boost_amount")
+	shieldBoost, _ := m.ItemMeta.GetFloat64("shield_boost_amount")
 
 	// apply boost to mounting ship
 	m.shipMountedOn.DealDamage(-shieldBoost, 0, 0)
