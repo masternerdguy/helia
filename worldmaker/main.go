@@ -55,8 +55,8 @@ func main() {
 	log.Println(dumpAcc)
 }
 
-func generateEmptyRegions(systems []*Sysling, regionCount int) []Regionling {
-	o := make([]Regionling, 0)
+func generateEmptyRegions(systems []*Sysling, regionCount int) []*Regionling {
+	o := make([]*Regionling, 0)
 
 	for p := 0; p < regionCount; p++ {
 		id := uuid.New()
@@ -82,7 +82,7 @@ func generateEmptyRegions(systems []*Sysling, regionCount int) []Regionling {
 				r.Systems = append(r.Systems, s)
 
 				// store region
-				o = append(o, r)
+				o = append(o, &r)
 
 				// done
 				exit = true
