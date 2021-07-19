@@ -43,7 +43,7 @@ func main() {
 	emptySystems := generateEmptySystems(extent, systemCount)
 
 	// sort into regions
-	regions := generateRegions(emptySystems, regionCount)
+	regions := generateEmptyRegions(emptySystems, regionCount)
 
 	// dump
 	dumpAcc := ""
@@ -55,11 +55,12 @@ func main() {
 	log.Println(dumpAcc)
 }
 
-func generateRegions(systems []Sysling, regionCount int) []Regionling {
+func generateEmptyRegions(systems []*Sysling, regionCount int) []Regionling {
 	o := make([]Regionling, 0)
-	id := uuid.New()
 
 	for p := 0; p < regionCount; p++ {
+		id := uuid.New()
+
 		// pick a system at random that doesn't have a region
 		for {
 			exit := false
@@ -69,15 +70,18 @@ func generateRegions(systems []Sysling, regionCount int) []Regionling {
 
 			if s.RegionID == nil {
 				s.RegionID = &id
-				systems[sIdx] = s
 
 				// this will be the first system in the region
 				r := Regionling{
-					ID:   s.ID,
-					PosX: s.PosX,
-					PosY: s.PosY,
+					ID:      s.ID,
+					PosX:    s.PosX,
+					PosY:    s.PosY,
+					Systems: make([]*Sysling, 0),
 				}
 
+				r.Systems = append(r.Systems, s)
+
+				// store region
 				o = append(o, r)
 
 				// done
@@ -94,8 +98,8 @@ func generateRegions(systems []Sysling, regionCount int) []Regionling {
 	return o
 }
 
-func generateEmptySystems(extent int, systemCount int) []Sysling {
-	o := make([]Sysling, 0)
+func generateEmptySystems(extent int, systemCount int) []*Sysling {
+	o := make([]*Sysling, 0)
 
 	for p := 0; p < systemCount; p++ {
 		r := math.Sqrt(rand.Float64()) * float64(extent)
@@ -103,7 +107,7 @@ func generateEmptySystems(extent int, systemCount int) []Sysling {
 		x := float64(SpiralFactor)*r*math.Cos(r) + (2*float64(SpiralFactor)*rand.Float64() - float64(SpiralFactor))
 		y := float64(SpiralFactor)*r*math.Sin(r) + (2*float64(SpiralFactor)*rand.Float64() - float64(SpiralFactor))
 
-		o = append(o, Sysling{
+		o = append(o, &Sysling{
 			ID:   uuid.New(),
 			PosX: x,
 			PosY: y,
@@ -126,5 +130,5 @@ type Regionling struct {
 	ID      uuid.UUID
 	PosX    float64
 	PosY    float64
-	Systems []Sysling
+	Systems []*Sysling
 }
