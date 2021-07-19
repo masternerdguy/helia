@@ -25,6 +25,69 @@ const connectivity = 6
 
 const SpiralFactor = 30
 
+var StarTextures = [...]string{
+	"vh_main_sequence/star_blue01.png",
+	"vh_main_sequence/star_orange02.png",
+	"vh_main_sequence/star_red03.png",
+	"vh_main_sequence/star_white04.png",
+	"vh_main_sequence/star_blue02.png",
+	"vh_main_sequence/star_orange03.png",
+	"vh_main_sequence/star_red04.png",
+	"vh_main_sequence/star_yellow01.png",
+	"vh_main_sequence/star_blue03.png",
+	"vh_main_sequence/star_orange04.png",
+	"vh_main_sequence/star_white01.png",
+	"vh_main_sequence/star_yellow02.png",
+	"vh_main_sequence/star_blue04.png",
+	"vh_main_sequence/star_red01.png",
+	"vh_main_sequence/star_white02.png",
+	"vh_main_sequence/star_yellow03.png",
+	"vh_main_sequence/star_orange01.png",
+	"vh_main_sequence/star_red02.png",
+	"vh_main_sequence/star_white03.png",
+	"vh_main_sequence/star_yellow04.png",
+}
+
+var PlanetTextures = [...]string{
+	"vh_unshaded/planet11.png",
+	"vh_unshaded/planet22.png",
+	"vh_unshaded/planet31.png",
+	"vh_unshaded/planet43.png",
+	"vh_unshaded/planet02.png",
+	"vh_unshaded/planet13.png",
+	"vh_unshaded/planet24.png",
+	"vh_unshaded/planet32.png",
+	"vh_unshaded/planet44.png",
+	"vh_unshaded/planet03.png",
+	"vh_unshaded/planet16.png",
+	"vh_unshaded/planet25.png",
+	"vh_unshaded/planet33.png",
+	"vh_unshaded/planet45.png",
+	"vh_unshaded/planet06.png",
+	"vh_unshaded/planet17.png",
+	"vh_unshaded/planet26.png",
+	"vh_unshaded/planet38.png",
+	"vh_unshaded/planet46.png",
+	"vh_unshaded/planet07.png",
+	"vh_unshaded/planet18.png",
+	"vh_unshaded/planet27.png",
+	"vh_unshaded/planet39.png",
+	"vh_unshaded/planet47.png",
+	"vh_unshaded/planet08.png",
+	"vh_unshaded/planet19.png",
+	"vh_unshaded/planet28.png",
+	"vh_unshaded/planet40.png",
+	"vh_unshaded/planet48.png",
+	"vh_unshaded/planet09.png",
+	"vh_unshaded/planet20.png",
+	"vh_unshaded/planet29.png",
+	"vh_unshaded/planet41.png",
+	"vh_unshaded/planet10.png",
+	"vh_unshaded/planet21.png",
+	"vh_unshaded/planet30.png",
+	"vh_unshaded/planet42.png",
+}
+
 func main() {
 	// initialize RNG
 	rand.Seed(101)
@@ -74,18 +137,6 @@ func main() {
 			closest.Systems = append(closest.Systems, s)
 		}
 	}
-
-	/*// dump
-	for _, r := range regions {
-		dumpAcc := ""
-
-		for _, s := range r.Systems {
-			dumpAcc = fmt.Sprintf("%v(%v,%v)", dumpAcc, s.PosX, s.PosY)
-		}
-
-		log.Println("==========")
-		log.Println(dumpAcc)
-	}*/
 
 	// name systems
 	usedSystemNames := make(map[string]*Sysling)
@@ -175,6 +226,8 @@ func main() {
 	for _, e := range jumpNetworkEdges {
 		log.Println(fmt.Sprintf("%v :: %v", e.A.Name, e.B.Name))
 	}
+
+	/* todo: save all of this to the DB */
 }
 
 func randomPlaceholderName() string {
