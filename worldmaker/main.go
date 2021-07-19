@@ -14,14 +14,14 @@ import (
  * Contains routines for procedurally generating the universe
  */
 
-const MinSystemCount = 250
-const MaxSystemCount = 500
-const MinRegions = 9
-const MaxRegions = 27
-const MinExtent = 30
-const MaxExtent = 100
+const MinSystemCount = 1250
+const MaxSystemCount = 1500
+const MinRegions = 27
+const MaxRegions = 45
+const MinExtent = 3
+const MaxExtent = 10
 
-const SpiralFactor = 3
+const SpiralFactor = 30
 
 func main() {
 	// initialize RNG
