@@ -42,17 +42,48 @@ func main() {
 	// generate empty systems in a spiral
 	emptySystems := generateEmptySystems(extent, systemCount)
 
-	// sort into regions
+	// generate empty regions in map
 	regions := generateEmptyRegions(emptySystems, regionCount)
 
-	// dump
-	dumpAcc := ""
+	// sort each system into the region closest to it
+	for _, s := range emptySystems {
+		if s.RegionID == nil {
+			var closest *Regionling = nil
+			var distance float64 = 0.0
 
-	for _, e := range regions {
-		dumpAcc = fmt.Sprintf("%v(%v,%v)", dumpAcc, e.PosX, e.PosY)
+			for _, r := range regions {
+				// initialize if needed
+				if closest == nil {
+					closest = r
+					distance = physics.Distance(physics.Dummy{PosX: r.PosX, PosY: r.PosY}, physics.Dummy{PosX: s.PosX, PosY: s.PosY})
+				}
+
+				// check distance to region
+				d := physics.Distance(physics.Dummy{PosX: r.PosX, PosY: r.PosY}, physics.Dummy{PosX: s.PosX, PosY: s.PosY})
+
+				if d < distance {
+					// new closest region
+					closest = r
+					distance = d
+				}
+			}
+
+			s.RegionID = &closest.ID
+			closest.Systems = append(closest.Systems, s)
+		}
 	}
 
-	log.Println(dumpAcc)
+	// dump
+	for _, r := range regions {
+		dumpAcc := ""
+
+		for _, s := range r.Systems {
+			dumpAcc = fmt.Sprintf("%v(%v,%v)", dumpAcc, s.PosX, s.PosY)
+		}
+
+		log.Println("==========")
+		log.Println(dumpAcc)
+	}
 }
 
 func generateEmptyRegions(systems []*Sysling, regionCount int) []*Regionling {
