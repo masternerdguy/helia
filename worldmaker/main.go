@@ -347,6 +347,7 @@ type Planetling struct {
 	ID      uuid.UUID
 	PosX    float64
 	PosY    float64
+	Theta   float64
 	Name    string
 	Texture string
 }
@@ -356,6 +357,7 @@ type Starling struct {
 	ID      uuid.UUID
 	PosX    float64
 	PosY    float64
+	Theta   float64
 	Name    string
 	Texture string
 }
