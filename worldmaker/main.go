@@ -169,11 +169,11 @@ func main() {
 				})
 			}
 		}
+	}
 
-		// dump
-		for _, e := range jumpNetworkEdges {
-			log.Println(fmt.Sprintf("%v :: %v", e.A.Name, e.B.Name))
-		}
+	// dump
+	for _, e := range jumpNetworkEdges {
+		log.Println(fmt.Sprintf("%v :: %v", e.A.Name, e.B.Name))
 	}
 }
 
