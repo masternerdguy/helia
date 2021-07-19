@@ -227,6 +227,8 @@ func main() {
 		log.Println(fmt.Sprintf("%v :: %v", e.A.Name, e.B.Name))
 	}
 
+	// todo: generate stars + planets
+
 	/* todo: save all of this to the DB */
 }
 
@@ -338,4 +340,22 @@ type Regionling struct {
 type Edgeling struct {
 	A *Sysling
 	B *Sysling
+}
+
+// Represents a scaffolding for a planet
+type Planetling struct {
+	ID      uuid.UUID
+	PosX    float64
+	PosY    float64
+	Name    string
+	Texture string
+}
+
+// Represents a scaffolding for a star
+type Starling struct {
+	ID      uuid.UUID
+	PosX    float64
+	PosY    float64
+	Name    string
+	Texture string
 }
