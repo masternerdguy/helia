@@ -14,6 +14,8 @@ func GetRegionService() *RegionService {
 type Region struct {
 	ID         uuid.UUID
 	RegionName string
+	PosX       float64
+	PosY       float64
 }
 
 // Retrieves all regions from the database
@@ -28,7 +30,7 @@ func (s RegionService) GetAllRegions() ([]Region, error) {
 	}
 
 	// load regions
-	sql := "select id, regionname from universe_regions"
+	sql := "select id, regionname, pos_x, pos_y from universe_regions"
 
 	rows, err := db.Query(sql)
 
@@ -42,7 +44,7 @@ func (s RegionService) GetAllRegions() ([]Region, error) {
 		r := Region{}
 
 		// scan into region structure
-		rows.Scan(&r.ID, &r.RegionName)
+		rows.Scan(&r.ID, &r.RegionName, &r.PosX, &r.PosY)
 
 		// append to region slice
 		regions = append(regions, r)

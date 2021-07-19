@@ -65,6 +65,8 @@ func loadUniverse() (*universe.Universe, error) {
 		r := universe.Region{
 			ID:         e.ID,
 			RegionName: e.RegionName,
+			PosX:       e.PosX,
+			PosY:       e.PosY,
 		}
 
 		// load systems in region
@@ -82,6 +84,8 @@ func loadUniverse() (*universe.Universe, error) {
 				SystemName:       f.SystemName,
 				RegionID:         f.RegionID,
 				HoldingFactionID: f.HoldingFactionID,
+				PosX:             f.PosX,
+				PosY:             f.PosY,
 			}
 
 			// initialize and store system

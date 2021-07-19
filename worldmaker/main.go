@@ -73,7 +73,7 @@ func main() {
 		}
 	}
 
-	// dump
+	/*// dump
 	for _, r := range regions {
 		dumpAcc := ""
 
@@ -83,7 +83,10 @@ func main() {
 
 		log.Println("==========")
 		log.Println(dumpAcc)
-	}
+	}*/
+
+	// save empty systems and their regions to the db
+
 }
 
 func generateEmptyRegions(systems []*Sysling, regionCount int) []*Regionling {

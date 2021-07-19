@@ -7,4 +7,6 @@ type Region struct {
 	ID         uuid.UUID
 	RegionName string
 	Systems    map[string]*SolarSystem
+	PosX       float64
+	PosY       float64
 }

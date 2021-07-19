@@ -369,7 +369,9 @@ ALTER TABLE public.universe_planets OWNER TO developer;
 
 CREATE TABLE public.universe_regions (
     id uuid NOT NULL,
-    regionname character varying(32) NOT NULL
+    regionname character varying(32) NOT NULL,
+    pos_x double precision DEFAULT 0 NOT NULL,
+    pos_y double precision DEFAULT 0 NOT NULL
 );
 
 
@@ -421,7 +423,9 @@ CREATE TABLE public.universe_systems (
     id uuid NOT NULL,
     systemname character varying(32) NOT NULL,
     regionid uuid NOT NULL,
-    holding_factionid uuid DEFAULT '42b937ad-0000-46e9-9af9-fc7dbf878e6a'::uuid NOT NULL
+    holding_factionid uuid DEFAULT '42b937ad-0000-46e9-9af9-fc7dbf878e6a'::uuid NOT NULL,
+    pos_x double precision DEFAULT 0 NOT NULL,
+    pos_y double precision DEFAULT 0 NOT NULL
 );
 
 
