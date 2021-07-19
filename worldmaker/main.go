@@ -85,8 +85,61 @@ func main() {
 		log.Println(dumpAcc)
 	}*/
 
-	// save empty systems and their regions to the db
+	// name systems
+	usedSystemNames := make(map[string]*Sysling)
 
+	for _, s := range emptySystems {
+		for {
+			n := randomPlaceholderName()
+
+			if usedSystemNames[n] == nil {
+				s.Name = n
+				usedSystemNames[n] = s
+
+				break
+			}
+		}
+	}
+
+	// name regions
+	usedRegionNames := make(map[string]*Regionling)
+
+	for _, s := range regions {
+		for {
+			n := randomPlaceholderName()
+
+			if usedRegionNames[n] == nil {
+				s.Name = n
+				usedRegionNames[n] = s
+
+				break
+			}
+		}
+	}
+}
+
+func randomPlaceholderName() string {
+	letters := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	numbers := []rune("1234567890")
+
+	acc := ""
+
+	firstLength := physics.RandInRange(1, 5)
+	secondLength := physics.RandInRange(1, 5)
+
+	for i := 0; i < firstLength; i++ {
+		idx := physics.RandInRange(0, len(letters))
+		acc = fmt.Sprintf("%v%v", acc, string(letters[idx]))
+	}
+
+	acc = fmt.Sprintf("%v%v", acc, "-")
+
+	for i := 0; i < secondLength; i++ {
+		idx := physics.RandInRange(0, len(numbers))
+		acc = fmt.Sprintf("%v%v", acc, string(numbers[idx]))
+	}
+
+	return acc
 }
 
 func generateEmptyRegions(systems []*Sysling, regionCount int) []*Regionling {
@@ -157,6 +210,7 @@ type Sysling struct {
 	PosX     float64
 	PosY     float64
 	RegionID *uuid.UUID
+	Name     string
 }
 
 // Represents a scaffolding for a region
@@ -165,4 +219,5 @@ type Regionling struct {
 	PosX    float64
 	PosY    float64
 	Systems []*Sysling
+	Name    string
 }
