@@ -6,6 +6,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"sort"
 
 	"github.com/google/uuid"
 )
@@ -20,6 +21,7 @@ const MinRegions = 27
 const MaxRegions = 45
 const MinExtent = 3
 const MaxExtent = 10
+const connectivity = 6
 
 const SpiralFactor = 30
 
@@ -40,13 +42,13 @@ func main() {
 	log.Println(fmt.Sprintf("Extent: %v, Regions: %v, Systems: %v", extent, regionCount, systemCount))
 
 	// generate empty systems in a spiral
-	emptySystems := generateEmptySystems(extent, systemCount)
+	systems := generateEmptySystems(extent, systemCount)
 
 	// generate empty regions in map
-	regions := generateEmptyRegions(emptySystems, regionCount)
+	regions := generateEmptyRegions(systems, regionCount)
 
 	// sort each system into the region closest to it
-	for _, s := range emptySystems {
+	for _, s := range systems {
 		if s.RegionID == nil {
 			var closest *Regionling = nil
 			var distance float64 = 0.0
@@ -88,7 +90,7 @@ func main() {
 	// name systems
 	usedSystemNames := make(map[string]*Sysling)
 
-	for _, s := range emptySystems {
+	for _, s := range systems {
 		for {
 			n := randomPlaceholderName()
 
@@ -114,6 +116,63 @@ func main() {
 
 				break
 			}
+		}
+	}
+
+	// generate jumphole connections
+	jumpNetworkEdges := make([]Edgeling, 0)
+
+	for _, s := range systems {
+		systemsTmp := systems
+
+		// sort by distance from this system
+		sort.SliceStable(systemsTmp, func(i, j int) bool {
+			ie := systemsTmp[i]
+			je := systemsTmp[j]
+
+			d1 := physics.Distance(physics.Dummy{PosX: s.PosX, PosY: s.PosY}, physics.Dummy{PosX: ie.PosX, PosY: ie.PosY})
+			d2 := physics.Distance(physics.Dummy{PosX: s.PosX, PosY: s.PosY}, physics.Dummy{PosX: je.PosX, PosY: je.PosY})
+
+			return d1 < d2
+		})
+
+		// get top entries
+		linkCount := physics.RandInRange(1, connectivity)
+		links := make([]*Sysling, 0)
+
+		for v := 1; v < linkCount+1; v++ {
+			links = append(links, systemsTmp[v])
+		}
+
+		// insert edges into network map
+		for _, l := range links {
+			// make sure there isn't already an equivalent edge
+			safe := true
+
+			for _, e := range jumpNetworkEdges {
+				if e.A == s && e.B == l {
+					safe = false
+					break
+				}
+
+				if e.A == l && e.B == s {
+					safe = false
+					break
+				}
+			}
+
+			if safe {
+				// insert edge
+				jumpNetworkEdges = append(jumpNetworkEdges, Edgeling{
+					A: s,
+					B: l,
+				})
+			}
+		}
+
+		// dump
+		for _, e := range jumpNetworkEdges {
+			log.Println(fmt.Sprintf("%v :: %v", e.A.Name, e.B.Name))
 		}
 	}
 }
@@ -220,4 +279,10 @@ type Regionling struct {
 	PosY    float64
 	Systems []*Sysling
 	Name    string
+}
+
+// Represents an edge in the jumphole network
+type Edgeling struct {
+	A *Sysling
+	B *Sysling
 }
