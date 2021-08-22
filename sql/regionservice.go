@@ -52,3 +52,30 @@ func (s RegionService) GetAllRegions() ([]Region, error) {
 
 	return regions, err
 }
+
+// Creates a new region in the database (for worldmaker)
+func (s RegionService) NewRegionWorldMaker(r *Region) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update item
+	sql := `
+			INSERT INTO public.universe_regions(
+				id, regionname, pos_x, pos_y)
+				VALUES ($1, $2, $3, $4);
+			`
+
+	q, err := db.Query(sql, r.ID, r.RegionName, r.PosX, r.PosY)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}

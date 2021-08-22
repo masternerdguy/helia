@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"helia/physics"
+	"helia/sql"
 	"log"
 	"math"
 	"math/rand"
@@ -261,13 +262,27 @@ func main() {
 		}
 	}
 
-	f := 1
+	/* NOTE: THE UNIVERSE IN THE DB SHOULD BE ESSENTIALLY EMPTY AT THIS POINT!!! */
 
-	if f == 1 {
+	regionSvc := sql.GetRegionService()
 
+	// save regions
+	for _, r := range regions {
+		o := sql.Region{
+			PosX:       r.PosX,
+			PosY:       r.PosY,
+			RegionName: r.Name,
+			ID:         r.ID,
+		}
+
+		err := regionSvc.NewRegionWorldMaker(
+			&o,
+		)
+
+		if err != nil {
+			panic(err)
+		}
 	}
-
-	/* todo: save all of this to the DB */
 }
 
 func randomPlaceholderName() string {
