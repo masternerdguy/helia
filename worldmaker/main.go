@@ -232,9 +232,46 @@ func main() {
 		}
 	}
 
-	// dump
-	for _, e := range jumpNetworkEdges {
-		log.Println(fmt.Sprintf("%v :: %v", e.A.Name, e.B.Name))
+	// re-sort any systems that somehow didn't get into a real region
+	unsafe := make([]*Sysling, 0)
+
+	for _, s := range systems {
+		safe := false
+
+		for _, r := range regions {
+			if r.ID == *s.RegionID {
+				safe = true
+			}
+		}
+
+		if !safe {
+			unsafe = append(unsafe, s)
+		}
+	}
+
+	for _, s := range unsafe {
+		var closest *Regionling = nil
+		var distance float64 = 0.0
+
+		for _, r := range regions {
+			// initialize if needed
+			if closest == nil {
+				closest = r
+				distance = physics.Distance(physics.Dummy{PosX: r.PosX, PosY: r.PosY}, physics.Dummy{PosX: s.PosX, PosY: s.PosY})
+			}
+
+			// check distance to region
+			d := physics.Distance(physics.Dummy{PosX: r.PosX, PosY: r.PosY}, physics.Dummy{PosX: s.PosX, PosY: s.PosY})
+
+			if d < distance {
+				// new closest region
+				closest = r
+				distance = d
+			}
+		}
+
+		s.RegionID = &closest.ID
+		closest.Systems = append(closest.Systems, s)
 	}
 
 	// generate stars + planets
@@ -265,8 +302,9 @@ func main() {
 	/* NOTE: THE UNIVERSE IN THE DB SHOULD BE ESSENTIALLY EMPTY AT THIS POINT!!! */
 
 	regionSvc := sql.GetRegionService()
+	systemSvc := sql.GetSolarSystemService()
 
-	// save regions
+	// save empty regions
 	for _, r := range regions {
 		o := sql.Region{
 			PosX:       r.PosX,
@@ -275,9 +313,32 @@ func main() {
 			ID:         r.ID,
 		}
 
-		err := regionSvc.NewRegionWorldMaker(
-			&o,
-		)
+		err := regionSvc.NewRegionWorldMaker(&o)
+
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	// temporarily using neutral for all holdings
+	nID, err := uuid.Parse("42b937ad-0000-46e9-9af9-fc7dbf878e6a")
+
+	if err != nil {
+		panic(err)
+	}
+
+	// save empty solar systems
+	for _, s := range systems {
+		o := sql.SolarSystem{
+			PosX:             s.PosX,
+			PosY:             s.PosY,
+			SystemName:       s.Name,
+			RegionID:         *s.RegionID,
+			HoldingFactionID: nID,
+			ID:               s.ID,
+		}
+
+		err := systemSvc.NewSolarSystemWorldMaker(&o)
 
 		if err != nil {
 			panic(err)
@@ -490,12 +551,13 @@ func generateEmptySystems(extent int, systemCount int) []*Sysling {
 		ri := physics.RandInRange(MinSystemRadius, MaxSystemRadius)
 
 		o = append(o, &Sysling{
-			ID:      uuid.New(),
-			PosX:    x,
-			PosY:    y,
-			Stars:   make([]*Starling, 0),
-			Planets: make([]*Planetling, 0),
-			Radius:  ri,
+			ID:       uuid.New(),
+			PosX:     x,
+			PosY:     y,
+			Stars:    make([]*Starling, 0),
+			Planets:  make([]*Planetling, 0),
+			Radius:   ri,
+			RegionID: nil,
 		})
 	}
 

@@ -62,7 +62,7 @@ func (s RegionService) NewRegionWorldMaker(r *Region) error {
 		return err
 	}
 
-	// update item
+	// insert region
 	sql := `
 			INSERT INTO public.universe_regions(
 				id, regionname, pos_x, pos_y)
