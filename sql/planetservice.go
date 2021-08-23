@@ -100,7 +100,7 @@ func (s PlanetService) GetPlanetsBySolarSystem(systemID uuid.UUID) ([]Planet, er
 	return planets, err
 }
 
-// Creates a new star in the database (for worldmaker)
+// Creates a new planet in the database (for worldmaker)
 func (s PlanetService) NewPlanetWorldMaker(r *Planet) error {
 	// get db handle
 	db, err := connect()
