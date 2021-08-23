@@ -77,6 +77,11 @@ func (s *SolarSystem) PeriodicUpdate() {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
+	// skip if nobody in system
+	if len(s.ships) == 0 {
+		return
+	}
+
 	// get message registry
 	msgRegistry := models.NewMessageRegistry()
 
