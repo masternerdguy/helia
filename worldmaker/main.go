@@ -34,6 +34,10 @@ const MinPlanetRadius = 500
 const MaxPlanetRadius = 5000
 const MinStarRadius = 6000
 const MaxStarRadius = 10000
+const MinStarMass = 500000000
+const MaxStarMass = 30000000000
+const MinPlanetMass = 950000
+const MaxPlanetMass = 80000000
 
 var StarTextures = [...]string{
 	"vh_main_sequence/star_blue01.png",
@@ -303,6 +307,8 @@ func main() {
 
 	regionSvc := sql.GetRegionService()
 	systemSvc := sql.GetSolarSystemService()
+	starSvc := sql.GetStarService()
+	planetSvc := sql.GetPlanetService()
 
 	// save empty regions
 	for _, r := range regions {
@@ -344,6 +350,48 @@ func main() {
 			panic(err)
 		}
 	}
+
+	// save planets and stars in solar systems
+	for _, s := range systems {
+		for _, st := range s.Stars {
+			o := sql.Star{
+				ID:       st.ID,
+				SystemID: s.ID,
+				PosX:     st.PosX,
+				PosY:     st.PosY,
+				Texture:  st.Texture,
+				Radius:   st.Radius,
+				Mass:     st.Mass,
+				Theta:    st.Theta,
+			}
+
+			err := starSvc.NewStarWorldMaker(&o)
+
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		for _, st := range s.Planets {
+			o := sql.Planet{
+				ID:         st.ID,
+				SystemID:   s.ID,
+				PlanetName: st.Name,
+				PosX:       st.PosX,
+				PosY:       st.PosY,
+				Texture:    st.Texture,
+				Radius:     st.Radius,
+				Mass:       st.Mass,
+				Theta:      st.Theta,
+			}
+
+			err := planetSvc.NewPlanetWorldMaker(&o)
+
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
 }
 
 func randomPlaceholderName() string {
@@ -383,6 +431,7 @@ func generateStar(system *Sysling, seq int) *Starling {
 		y := float64(physics.RandInRange(-system.Radius, system.Radius))
 		r := float64(physics.RandInRange(MinStarRadius, MaxStarRadius))
 		t := float64(rand.Float64() * math.Pi * 2.0)
+		m := float64(physics.RandInRange(MinStarMass, MaxStarMass))
 
 		a := physics.Dummy{
 			PosX: x,
@@ -420,6 +469,7 @@ func generateStar(system *Sysling, seq int) *Starling {
 			star.PosY = y
 			star.Theta = t
 			star.Radius = r
+			star.Mass = m
 
 			break
 		}
@@ -446,6 +496,7 @@ func generatePlanet(system *Sysling, seq int) *Planetling {
 		y := float64(physics.RandInRange(-system.Radius, system.Radius))
 		r := float64(physics.RandInRange(MinPlanetRadius, MaxPlanetRadius))
 		t := float64(rand.Float64() * math.Pi * 2.0)
+		m := float64(physics.RandInRange(MinPlanetMass, MaxPlanetMass))
 
 		a := physics.Dummy{
 			PosX: x,
@@ -483,6 +534,7 @@ func generatePlanet(system *Sysling, seq int) *Planetling {
 			planet.PosY = y
 			planet.Theta = t
 			planet.Radius = r
+			planet.Mass = m
 
 			break
 		}
@@ -597,6 +649,7 @@ type Planetling struct {
 	PosX    float64
 	PosY    float64
 	Radius  float64
+	Mass    float64
 	Theta   float64
 	Name    string
 	Texture string
@@ -608,6 +661,7 @@ type Starling struct {
 	PosX    float64
 	PosY    float64
 	Radius  float64
+	Mass    float64
 	Theta   float64
 	Name    string
 	Texture string

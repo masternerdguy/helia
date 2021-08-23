@@ -98,3 +98,30 @@ func (s StarService) GetStarsBySolarSystem(systemID uuid.UUID) ([]Star, error) {
 
 	return stars, err
 }
+
+// Creates a new star in the database (for worldmaker)
+func (s StarService) NewStarWorldMaker(r *Star) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// insert star
+	sql := `
+			INSERT INTO public.universe_stars(
+				id, universe_systemid, pos_x, pos_y, texture, radius, mass, theta)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+			`
+
+	q, err := db.Query(sql, r.ID, r.SystemID, r.PosX, r.PosY, r.Texture, r.Radius, r.Mass, r.Theta)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}

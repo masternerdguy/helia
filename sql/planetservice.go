@@ -99,3 +99,30 @@ func (s PlanetService) GetPlanetsBySolarSystem(systemID uuid.UUID) ([]Planet, er
 
 	return planets, err
 }
+
+// Creates a new star in the database (for worldmaker)
+func (s PlanetService) NewPlanetWorldMaker(r *Planet) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// insert planet
+	sql := `
+			INSERT INTO public.universe_planets(
+				id, universe_systemid, planetname, pos_x, pos_y, texture, radius, mass, theta)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+			`
+
+	q, err := db.Query(sql, r.ID, r.SystemID, r.PlanetName, r.PosX, r.PosY, r.Texture, r.Radius, r.Mass, r.Theta)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}
