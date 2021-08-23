@@ -38,6 +38,10 @@ const MinStarMass = 500000000
 const MaxStarMass = 30000000000
 const MinPlanetMass = 950000
 const MaxPlanetMass = 80000000
+const MinJumpholeRadius = 150
+const MaxJumpholeRadius = 425
+const MinJumpholeMass = 200000
+const MaxJumpholeMass = 900000
 
 var StarTextures = [...]string{
 	"vh_main_sequence/star_blue01.png",
@@ -303,6 +307,11 @@ func main() {
 		}
 	}
 
+	// generate jumpholes from edges
+	for _, e := range jumpNetworkEdges {
+		injectJumpholes(&e)
+	}
+
 	/* NOTE: THE UNIVERSE IN THE DB SHOULD BE ESSENTIALLY EMPTY AT THIS POINT!!! */
 
 	regionSvc := sql.GetRegionService()
@@ -418,6 +427,162 @@ func randomPlaceholderName() string {
 	return acc
 }
 
+func injectJumpholes(edge *Edgeling) {
+	r := float64(physics.RandInRange(MinJumpholeRadius, MaxJumpholeRadius))
+	t := float64(rand.Float64() * 360.0)
+	m := float64(physics.RandInRange(MinJumpholeMass, MaxJumpholeMass))
+
+	// system A
+	{
+		jumphole := Jumpling{
+			ID:          uuid.New(),
+			Name:        fmt.Sprintf("%v Jumphole", edge.B.Name),
+			OutSystemID: edge.B.ID,
+			Texture:     "Jumphole",
+		}
+
+		system := edge.A
+
+		for {
+			safe := true
+
+			x := float64(physics.RandInRange(-system.Radius*3, system.Radius*3))
+			y := float64(physics.RandInRange(-system.Radius*3, system.Radius*3))
+
+			a := physics.Dummy{
+				PosX: x,
+				PosY: y,
+			}
+
+			for _, l := range system.Jumpholes {
+				b := physics.Dummy{
+					PosX: l.PosX,
+					PosY: l.PosY,
+				}
+
+				d := physics.Distance(a, b)
+
+				if d <= math.Max(r*2, l.Radius*2) {
+					safe = false
+				}
+			}
+
+			for _, l := range system.Stars {
+				b := physics.Dummy{
+					PosX: l.PosX,
+					PosY: l.PosY,
+				}
+
+				d := physics.Distance(a, b)
+
+				if d <= math.Max(r*5, l.Radius*5) {
+					safe = false
+				}
+			}
+
+			for _, l := range system.Planets {
+				b := physics.Dummy{
+					PosX: l.PosX,
+					PosY: l.PosY,
+				}
+
+				d := physics.Distance(a, b)
+
+				if d <= math.Max(r*3, l.Radius*3) {
+					safe = false
+				}
+			}
+
+			if safe {
+				jumphole.PosX = x
+				jumphole.PosY = y
+				jumphole.Theta = t
+				jumphole.Radius = r
+				jumphole.Mass = m
+
+				system.Jumpholes = append(system.Jumpholes, &jumphole)
+
+				break
+			}
+		}
+	}
+
+	// system B
+	{
+		jumphole := Jumpling{
+			ID:          uuid.New(),
+			Name:        fmt.Sprintf("%v Jumphole", edge.A.Name),
+			OutSystemID: edge.A.ID,
+			Texture:     "Jumphole",
+		}
+
+		system := edge.B
+
+		for {
+			safe := true
+
+			x := float64(physics.RandInRange(-system.Radius*3, system.Radius*3))
+			y := float64(physics.RandInRange(-system.Radius*3, system.Radius*3))
+
+			a := physics.Dummy{
+				PosX: x,
+				PosY: y,
+			}
+
+			for _, l := range system.Jumpholes {
+				b := physics.Dummy{
+					PosX: l.PosX,
+					PosY: l.PosY,
+				}
+
+				d := physics.Distance(a, b)
+
+				if d <= math.Max(r*2, l.Radius*2) {
+					safe = false
+				}
+			}
+
+			for _, l := range system.Stars {
+				b := physics.Dummy{
+					PosX: l.PosX,
+					PosY: l.PosY,
+				}
+
+				d := physics.Distance(a, b)
+
+				if d <= math.Max(r*5, l.Radius*5) {
+					safe = false
+				}
+			}
+
+			for _, l := range system.Planets {
+				b := physics.Dummy{
+					PosX: l.PosX,
+					PosY: l.PosY,
+				}
+
+				d := physics.Distance(a, b)
+
+				if d <= math.Max(r*3, l.Radius*3) {
+					safe = false
+				}
+			}
+
+			if safe {
+				jumphole.PosX = x
+				jumphole.PosY = y
+				jumphole.Theta = t
+				jumphole.Radius = r
+				jumphole.Mass = m
+
+				system.Jumpholes = append(system.Jumpholes, &jumphole)
+
+				break
+			}
+		}
+	}
+}
+
 func generateStar(system *Sysling, seq int) *Starling {
 	star := Starling{
 		ID:   uuid.New(),
@@ -430,7 +595,7 @@ func generateStar(system *Sysling, seq int) *Starling {
 		x := float64(physics.RandInRange(-system.Radius, system.Radius))
 		y := float64(physics.RandInRange(-system.Radius, system.Radius))
 		r := float64(physics.RandInRange(MinStarRadius, MaxStarRadius))
-		t := float64(rand.Float64() * math.Pi * 2.0)
+		t := float64(rand.Float64() * 360.0)
 		m := float64(physics.RandInRange(MinStarMass, MaxStarMass))
 
 		a := physics.Dummy{
@@ -495,7 +660,7 @@ func generatePlanet(system *Sysling, seq int) *Planetling {
 		x := float64(physics.RandInRange(-system.Radius, system.Radius))
 		y := float64(physics.RandInRange(-system.Radius, system.Radius))
 		r := float64(physics.RandInRange(MinPlanetRadius, MaxPlanetRadius))
-		t := float64(rand.Float64() * math.Pi * 2.0)
+		t := float64(rand.Float64() * 360.0)
 		m := float64(physics.RandInRange(MinPlanetMass, MaxPlanetMass))
 
 		a := physics.Dummy{
@@ -618,14 +783,15 @@ func generateEmptySystems(extent int, systemCount int) []*Sysling {
 
 // Represents a scaffolding for a solar system
 type Sysling struct {
-	ID       uuid.UUID
-	PosX     float64
-	PosY     float64
-	RegionID *uuid.UUID
-	Name     string
-	Stars    []*Starling
-	Planets  []*Planetling
-	Radius   int
+	ID        uuid.UUID
+	PosX      float64
+	PosY      float64
+	RegionID  *uuid.UUID
+	Name      string
+	Stars     []*Starling
+	Planets   []*Planetling
+	Jumpholes []*Jumpling
+	Radius    int
 }
 
 // Represents a scaffolding for a region
@@ -641,6 +807,19 @@ type Regionling struct {
 type Edgeling struct {
 	A *Sysling
 	B *Sysling
+}
+
+// Represents a jumphole in the jumphole network
+type Jumpling struct {
+	ID          uuid.UUID
+	OutSystemID uuid.UUID
+	PosX        float64
+	PosY        float64
+	Radius      float64
+	Mass        float64
+	Theta       float64
+	Name        string
+	Texture     string
 }
 
 // Represents a scaffolding for a planet
