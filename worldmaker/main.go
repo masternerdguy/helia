@@ -318,6 +318,7 @@ func main() {
 	systemSvc := sql.GetSolarSystemService()
 	starSvc := sql.GetStarService()
 	planetSvc := sql.GetPlanetService()
+	jumpholeSvc := sql.GetJumpholeService()
 
 	// save empty regions
 	for _, r := range regions {
@@ -360,7 +361,7 @@ func main() {
 		}
 	}
 
-	// save planets and stars in solar systems
+	// save planets, stars, and jumpholes in solar systems
 	for _, s := range systems {
 		for _, st := range s.Stars {
 			o := sql.Star{
@@ -395,6 +396,27 @@ func main() {
 			}
 
 			err := planetSvc.NewPlanetWorldMaker(&o)
+
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		for _, st := range s.Jumpholes {
+			o := sql.Jumphole{
+				ID:           st.ID,
+				SystemID:     s.ID,
+				OutSystemID:  st.OutSystemID,
+				JumpholeName: st.Name,
+				PosX:         st.PosX,
+				PosY:         st.PosY,
+				Texture:      st.Texture,
+				Radius:       st.Radius,
+				Mass:         st.Mass,
+				Theta:        st.Theta,
+			}
+
+			err := jumpholeSvc.NewJumpHoleWorldMaker(&o)
 
 			if err != nil {
 				panic(err)

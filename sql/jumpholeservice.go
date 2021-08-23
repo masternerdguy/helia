@@ -100,3 +100,30 @@ func (s JumpholeService) GetJumpholesBySolarSystem(systemID uuid.UUID) ([]Jumpho
 
 	return jumpholes, err
 }
+
+// Creates a new jumphole in the database (for worldmaker)
+func (s JumpholeService) NewJumpHoleWorldMaker(r *Jumphole) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// insert jumphole
+	sql := `
+			INSERT INTO public.universe_jumpholes(
+				id, universe_systemid, out_systemid, jumpholename, pos_x, pos_y, texture, radius, mass, theta)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
+			`
+
+	q, err := db.Query(sql, r.ID, r.SystemID, r.OutSystemID, r.JumpholeName, r.PosX, r.PosY, r.Texture, r.Radius, r.Mass, r.Theta)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}
