@@ -531,6 +531,17 @@ b481a521-1b12-4ffa-ac2f-4da015036f7f	fuel_tank	Basic Fuel Tank	{"hp": 15, "rack"
 dd522f03-2f52-4e82-b2f8-d7e0029cb82f	ore	Testite	{"hp": 1, "volume": 1, "industrialmarket": {"maxprice": 3, "minprice": 1, "silosize": 300000000}}
 e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3	widget	Widget	{"volume": 1, "industrialmarket": {"maxprice": 15, "minprice": 10, "silosize": 1000}}
 9d1014c5-3422-4a0f-9839-f585269b4b16	gun_turret	Basic Laser Tool	{"hp": 10, "rack": "a", "range": 1528, "volume": 4, "falloff": "linear", "cooldown": 5, "tracking": 4.2, "hull_damage": 4, "armor_damage": 1, "can_mine_gas": false, "can_mine_ice": false, "can_mine_ore": true, "needs_target": true, "shield_damage": 2, "activation_heat": 30, "industrialmarket": {"maxprice": 210, "minprice": 125, "silosize": 1000}, "activation_energy": 5, "ore_mining_volume": 1, "activation_gfx_effect": "basic_laser_tool"}
+56617d30-6c30-425c-84bf-2484ae8c1156	ore	Alri	{"hp": 1, "volume": 1, "industrialmarket": {"maxprice": 5, "minprice": 2, "silosize": 250000000}}
+26a3fc9e-db2f-439d-a929-ba755d11d09c	ore	Feymar	{"hp": 1, "volume": 3, "industrialmarket": {"maxprice": 55, "minprice": 25, "silosize": 200000000}}
+1d0d344b-ef28-43c8-a7a6-3275936b2dea	ore	Listine	{"hp": 1, "volume": 2, "industrialmarket": {"maxprice": 47, "minprice": 32, "silosize": 150000000}}
+0cd04eea-a150-410c-91eb-6af00d8c6eae	ore	Hetrone	{"hp": 1, "volume": 7, "industrialmarket": {"maxprice": 115, "minprice": 81, "silosize": 100000000}}
+39b8eedf-ef80-4c29-a4bf-99abc4d84fa6	ore	Novum	{"hp": 1, "volume": 8, "industrialmarket": {"maxprice": 85, "minprice": 60, "silosize": 50000000}}
+dd0c9b0a-279e-418e-b3b6-2f569fda0186	ore	Suemetrium	{"hp": 1, "volume": 15, "industrialmarket": {"maxprice": 503, "minprice": 244, "silosize": 25000000}}
+7dcd5138-d7e0-419f-867a-6f0f23b99b5b	ore	Jutrick	{"hp": 1, "volume": 19, "industrialmarket": {"maxprice": 313, "minprice": 176, "silosize": 20000000}}
+61f52ba3-654b-45cf-88e3-33399d12350d	ore	Ovan	{"hp": 1, "volume": 36, "industrialmarket": {"maxprice": 1500, "minprice": 860, "silosize": 15000000}}
+11688112-f3d4-4d30-864a-684a8b96ea23	ore	Caiqua	{"hp": 1, "volume": 41, "industrialmarket": {"maxprice": 1130, "minprice": 450, "silosize": 10000000}}
+2ce48bef-f06b-4550-b20c-0e64864db051	ore	Zvitis	{"hp": 1, "volume": 79, "industrialmarket": {"maxprice": 4225, "minprice": 1000, "silosize": 5000000}}
+66b7a322-8cfc-4467-9410-492e6b58f159	ore	Ichre	{"hp": 1, "volume": 117, "industrialmarket": {"maxprice": 1900, "minprice": 1200, "silosize": 2500000}}
 \.
 
 
@@ -574,8 +585,8 @@ COPY public.sellorders (id, universe_stationid, itemid, seller_userid, askprice,
 --
 
 COPY public.sessions (id, userid) FROM stdin;
-53c02c79-6846-4809-86cb-79aa0b4f62fc	34e83f08-4e7b-40f4-ad82-207cf23c0df8
-cb7d7e1a-3820-4a88-9e9c-2fda0573aafd	97b3797c-dac8-4899-83ca-50fb9da56f1d
+e8e14399-05c3-4f63-ba39-3de4b436c3c1	97b3797c-dac8-4899-83ca-50fb9da56f1d
+471709b1-01a3-4c0f-932a-1733d6a9029a	34e83f08-4e7b-40f4-ad82-207cf23c0df8
 \.
 
 
@@ -584,8 +595,8 @@ cb7d7e1a-3820-4a88-9e9c-2fda0573aafd	97b3797c-dac8-4899-83ca-50fb9da56f1d
 --
 
 COPY public.ships (id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid, dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid, fittingbay_containerid, remaxdirty, trash_containerid, wallet) FROM stdin;
-52375a33-e68e-4bac-af66-677c1bb19a03	665e2abe-b176-429c-a647-bb3c3aca0a14	34e83f08-4e7b-40f4-ad82-207cf23c0df8	33381.30403817249	-7080.169572563657	2021-08-22 22:51:52.67958-04	aaa's Starter Ship	Sparrow	44.2729463937564	0.06643317680831097	-0.11170172171089096	209	244	135	292.99000573316766	132.92177422427469	115.53324212729656	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "2c7ec6f3-9f7b-46cc-96be-18ba38326f80", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "23908201-0866-4c25-9d3a-72953a5d9ddf", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "72eb7997-628e-481b-9824-fac02e6005c4", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "10e9a085-6ff4-4914-b81f-9fc7cb16993d", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "27070d8b-425d-48b0-909d-dcf079d7fbd8", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	90cbf6a9-5818-4775-b29a-6e4ce16801f9	b9b420de-f47f-48ef-8997-0178354642b7	f	179a5685-f545-4a54-84ec-9bf466a8983b	10000
-1de087f0-4527-41cf-b2c9-a4ccdd79dc9c	665e2abe-b176-429c-a647-bb3c3aca0a14	97b3797c-dac8-4899-83ca-50fb9da56f1d	33405.67704469386	-7064.774208057832	2021-08-22 22:52:25.611616-04	bbb's Starter Ship	Sparrow	193.35163641457018	-1.2235066141642607e-14	3.989762317655853e-15	207.9809366981414	244	135	293.4338360756115	0.7633125765018147	137.75088188896135	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "8f5d4920-4b97-4157-b656-f4119d07538a", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "6f8c9433-9b31-4f3a-9108-eb46171c0a45", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "9ba44f3a-b530-44c6-b234-4ca88297689a", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "05350ea0-c298-4b2c-915d-56f507d7dfa3", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "f24902d8-18c5-4ed0-8788-410d724826a3", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	0c6e3ea5-6d7a-4366-a8cc-d2d89cc4dfa8	3f81f616-4119-430e-90a3-85b8d14372e3	f	b9a40d8b-2278-47d3-85bc-492308c72138	10000
+1de087f0-4527-41cf-b2c9-a4ccdd79dc9c	a2eddc21-99de-4285-abd6-f5d94bcda9a9	97b3797c-dac8-4899-83ca-50fb9da56f1d	276549.92479882395	-1752466.9957076292	2021-08-22 22:52:25.611616-04	bbb's Starter Ship	Sparrow	261.8411491387167	-6.942156242726096e-115	3.428085080614303e-114	208.9326721052184	244	135	202.28236732584222	0	137.99782324938954	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "8f5d4920-4b97-4157-b656-f4119d07538a", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "6f8c9433-9b31-4f3a-9108-eb46171c0a45", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "9ba44f3a-b530-44c6-b234-4ca88297689a", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "05350ea0-c298-4b2c-915d-56f507d7dfa3", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "f24902d8-18c5-4ed0-8788-410d724826a3", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	0c6e3ea5-6d7a-4366-a8cc-d2d89cc4dfa8	3f81f616-4119-430e-90a3-85b8d14372e3	f	b9a40d8b-2278-47d3-85bc-492308c72138	10000
+52375a33-e68e-4bac-af66-677c1bb19a03	665e2abe-b176-429c-a647-bb3c3aca0a14	34e83f08-4e7b-40f4-ad82-207cf23c0df8	35583.68317645022	-7665.4243739785825	2021-08-22 22:51:52.67958-04	aaa's Starter Ship	Sparrow	52.14557457532959	2.427971913970704e-23	-2.918360889128153e-23	209	244	135	290.10325654216075	0	137.99948525128008	8d9e032c-d9b1-4a36-8bbf-1448fa60a09a	\N	{"a_rack": [{"item_id": "2c7ec6f3-9f7b-46cc-96be-18ba38326f80", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "23908201-0866-4c25-9d3a-72953a5d9ddf", "item_type_id": "9d1014c5-3422-4a0f-9839-f585269b4b16"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "b_rack": [{"item_id": "72eb7997-628e-481b-9824-fac02e6005c4", "item_type_id": "09172710-740c-4d1c-9fc0-43cb62e674e7"}, {"item_id": "00000000-0000-0000-0000-000000000000", "item_type_id": "00000000-0000-0000-0000-000000000000"}], "c_rack": [{"item_id": "10e9a085-6ff4-4914-b81f-9fc7cb16993d", "item_type_id": "b481a521-1b12-4ffa-ac2f-4da015036f7f"}, {"item_id": "27070d8b-425d-48b0-909d-dcf079d7fbd8", "item_type_id": "c311df30-c21e-4895-acb0-d8808f99710e"}]}	f	\N	90cbf6a9-5818-4775-b29a-6e4ce16801f9	b9b420de-f47f-48ef-8997-0178354642b7	f	179a5685-f545-4a54-84ec-9bf466a8983b	10000
 \.
 
 
@@ -626,7 +637,7 @@ COPY public.starts (id, name, shiptemplateid, shipfitting, created, available, s
 --
 
 COPY public.stationprocesses (id, universe_stationid, processid, progress, installed, internalstate, meta) FROM stdin;
-966aa59b-68d0-4328-8baf-30616900bcbd	cf07bba9-90b2-4599-b1e3-84d797a67f0a	0f33d5ce-2b0b-4f80-80eb-506dd803ac4c	30	t	{"inputs": {"dd522f03-2f52-4e82-b2f8-d7e0029cb82f": {"price": 1, "quantity": 289526678}}, "outputs": {"e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3": {"price": 10, "quantity": 999}}, "isRunning": false}	{}
+966aa59b-68d0-4328-8baf-30616900bcbd	cf07bba9-90b2-4599-b1e3-84d797a67f0a	0f33d5ce-2b0b-4f80-80eb-506dd803ac4c	30	t	{"inputs": {"dd522f03-2f52-4e82-b2f8-d7e0029cb82f": {"price": 1, "quantity": 289513620}}, "outputs": {"e2d342a9-d3f2-4f60-8dcf-0ed5bece0da3": {"price": 10, "quantity": 999}}, "isRunning": false}	{}
 \.
 
 
@@ -15943,8 +15954,8 @@ d6a014a1-358d-47cc-b33d-83e205765ec5	e502acb8-94b4-4b24-91ae-fb5603adc0eb	223057
 --
 
 COPY public.universe_stations (id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta, factionid) FROM stdin;
-cf07bba9-90b2-4599-b1e3-84d797a67f0a	665e2abe-b176-429c-a647-bb3c3aca0a14	Another Station	24771.795632863843	-9938.30877953488	Sunfarm	740	25300	112.4	a8a28085-e7b4-48f5-b8cb-1465ccab82a5
 526f57f5-09e0-41c7-9a89-cd803ec0a065	d776d8b1-fc02-426a-9348-2b35d93e81e6	Test Station	207460	-335230	Fleet Armory	810	65000	23.33	a8a28085-e7b4-48f5-b8cb-1465ccab82a5
+cf07bba9-90b2-4599-b1e3-84d797a67f0a	665e2abe-b176-429c-a647-bb3c3aca0a14	Another Station	24771.795632863843	-9938.30877953488	Sunfarm	740	25300	112.4	a8a28085-e7b4-48f5-b8cb-1465ccab82a5
 \.
 
 
