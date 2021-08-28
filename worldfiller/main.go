@@ -68,7 +68,4 @@ func dropAsteroids(u *universe.Universe) {
 			log.Println(fmt.Sprintf("%v | scarcity: %v", s.SystemName, scarcity))
 		}
 	}
-
-	// use uuid to get the system's random seed
-
 }
