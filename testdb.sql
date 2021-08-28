@@ -542,6 +542,7 @@ dd0c9b0a-279e-418e-b3b6-2f569fda0186	ore	Suemetrium	{"hp": 1, "volume": 15, "ind
 11688112-f3d4-4d30-864a-684a8b96ea23	ore	Caiqua	{"hp": 1, "volume": 41, "industrialmarket": {"maxprice": 1130, "minprice": 450, "silosize": 10000000}}
 2ce48bef-f06b-4550-b20c-0e64864db051	ore	Zvitis	{"hp": 1, "volume": 79, "industrialmarket": {"maxprice": 4225, "minprice": 1000, "silosize": 5000000}}
 66b7a322-8cfc-4467-9410-492e6b58f159	ore	Ichre	{"hp": 1, "volume": 117, "industrialmarket": {"maxprice": 1900, "minprice": 1200, "silosize": 2500000}}
+d1866be4-5c3e-4b95-b6d9-020832338014	ore	Betro	{"hp": 1, "volume": 4, "industrialmarket": {"maxprice": 2302, "minprice": 1006, "silosize": 15000}}
 \.
 
 
