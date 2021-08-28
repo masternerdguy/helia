@@ -13,7 +13,8 @@ import (
 )
 
 /*
- * Contains routines for procedurally generating the universe
+ * Contains routines for procedurally generating the scaffolding of a universe
+ * (Designed to be run against a database with no systems in it)
  */
 
 const MinSystemCount = 1250

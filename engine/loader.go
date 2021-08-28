@@ -11,7 +11,7 @@ import (
 )
 
 // Loads the state of the universe from the database
-func loadUniverse() (*universe.Universe, error) {
+func LoadUniverse() (*universe.Universe, error) {
 	// get services
 	regionSvc := sql.GetRegionService()
 	systemSvc := sql.GetSolarSystemService()

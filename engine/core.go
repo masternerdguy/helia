@@ -23,7 +23,7 @@ func (e *HeliaEngine) Initialize() *HeliaEngine {
 	log.Println("Loading game universe from database...")
 
 	// load universe
-	u, err := loadUniverse()
+	u, err := LoadUniverse()
 
 	if err != nil {
 		panic(fmt.Sprintf("Unable to load game universe: %v", err))
