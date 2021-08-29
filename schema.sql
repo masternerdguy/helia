@@ -311,7 +311,7 @@ CREATE TABLE public.universe_asteroids (
     id uuid NOT NULL,
     universe_systemid uuid NOT NULL,
     ore_itemtypeid uuid NOT NULL,
-    name character varying(8) NOT NULL,
+    name character varying(16) NOT NULL,
     texture character varying(255) NOT NULL,
     radius double precision NOT NULL,
     theta double precision NOT NULL,
