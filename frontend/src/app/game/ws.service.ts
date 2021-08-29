@@ -3,6 +3,7 @@ import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
 import { environment } from 'src/environments/environment';
 import { GameMessage, MessageTypes } from './wsModels/gameMessage';
 import { ClientJoinBody } from './wsModels/bodies/join';
+import * as pako from 'pako';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +21,10 @@ export class WsService {
   ) {
     this.ws = webSocket({
       url: environment.wsUrl + 'connect',
-      deserializer: (e: MessageEvent) => JSON.parse(e.data),
+      deserializer: (e: MessageEvent) => {
+        const decompressed = pako.inflate(this.base64ToArrayBuffer(e.data), { to: 'string' })
+        return JSON.parse(decompressed);
+      },
       serializer: (value: GameMessage) => JSON.stringify(value),
     });
 
@@ -49,5 +53,17 @@ export class WsService {
 
   isStale(): boolean {
     return Date.now() - this.lastMessageReceivedAt > 5000;
+  }
+
+  base64ToArrayBuffer(base64: string) {
+    var bs = window.atob(base64);
+    var len = bs.length;
+    var bytes = new Uint8Array(len);
+
+    for (var i = 0; i < len; i++) {
+        bytes[i] = bs.charCodeAt(i);
+    }
+
+    return bytes.buffer;
   }
 }

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --host 192.168.12.210",
+    "start": "ng serve --host 192.168.12.210 --disable-host-check",
     "build": "ng build",
     "backup-db": "pg_dump -d helia -f ../schema.sql -s && pg_dump -d helia -f ../testdb.sql",
     "restore-db": "echo 'drop owned by developer;' | psql -d helia && psql -d helia < ../testdb.sql",
@@ -28,6 +28,7 @@
     "bootstrap": "^5.1.0",
     "gl-vec2": "^1.3.0",
     "jquery": "^3.6.0",
+    "pako": "^2.0.4",
     "prettier": "^2.3.2",
     "regl": "^2.1.0",
     "rng": "^0.2.2",

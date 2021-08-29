@@ -1,6 +1,9 @@
 package shared
 
 import (
+	"bytes"
+	"compress/gzip"
+	"encoding/base64"
 	"encoding/json"
 	"helia/listener/models"
 	"log"
@@ -47,8 +50,27 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 	json, err := json.Marshal(msg)
 
 	if err == nil {
+		// compress message
+		var b bytes.Buffer
+		gz := gzip.NewWriter(&b)
+
+		if _, err := gz.Write([]byte(json)); err != nil {
+			// dump error message to console
+			log.Println(err)
+			return
+		}
+
+		if err := gz.Close(); err != nil {
+			// dump error message to console
+			log.Println(err)
+			return
+		}
+
+		// convert to string
+		o := base64.RawStdEncoding.EncodeToString(b.Bytes())
+
 		// send message
-		c.Conn.WriteMessage(1, json)
+		c.Conn.WriteMessage(1, []byte(o))
 	} else {
 		// dump error message to console
 		log.Println(err)
