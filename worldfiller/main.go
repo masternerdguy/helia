@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"helia/engine"
 	"helia/physics"
+	"helia/sql"
 	"helia/universe"
 	"log"
 	"math"
@@ -344,14 +345,49 @@ func dropAsteroids(u *universe.Universe) {
 		}
 	}
 
-	xx := 1
+	// save generated asteroids
+	astSvc := sql.GetAsteroidService()
 
-	if xx == 1 {
+	for _, ast := range globalAsteroids {
+		id, err := uuid.Parse(ast.ID)
 
+		if err != nil {
+			panic(err)
+		}
+
+		systemID, err := uuid.Parse(ast.SystemID)
+
+		if err != nil {
+			panic(err)
+		}
+
+		oreID, err := uuid.Parse(ast.OreItemTypeID)
+
+		if err != nil {
+			panic(err)
+		}
+
+		f := sql.Asteroid{
+			ID:         id,
+			SystemID:   systemID,
+			ItemTypeID: oreID,
+			Name:       ast.Name,
+			Texture:    ast.Texture,
+			Radius:     ast.Radius,
+			Theta:      ast.Theta,
+			PosX:       ast.PosX,
+			PosY:       ast.PosY,
+			Yield:      ast.Yield,
+			Mass:       ast.Mass,
+		}
+
+		err = astSvc.NewAsteroidWorldFiller(&f)
+
+		if err != nil {
+			panic(err)
+		}
 	}
 }
-
-//id, universe_systemid, ore_itemtypeid, name, texture, radius, theta, pos_x, pos_y, yield, mass)
 
 // Structure representing a scaffold for an asteroid for worldfiller
 type Astling struct {
