@@ -86,6 +86,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 	// check tick counter to determine whether to send static world data
 	sendStatic := s.tickCounter > 50
 
+	// check tick counter to determine whether to send secret updates
+	sendSecret := s.tickCounter%4 == 0
+
 	if sendStatic {
 		// reset tick counter
 		s.tickCounter = 0
@@ -830,6 +833,13 @@ func (s *SolarSystem) PeriodicUpdate() {
 	}
 
 	if sendStatic {
+		/*
+		 * Performance note: This data is very static and can be sent rarely. Once every second is fine,
+		 * and saves a significant amount of bandwidth. Note it needs to be sent often enough for someone
+		 * jumping into the system to receive data about the celestial objects it contains within a
+		 * reasonable amount of time (which I feel is ~1 second).
+		 */
+
 		for _, d := range s.stars {
 			gu.Stars = append(gu.Stars, models.GlobalStarInfo{
 				ID:       d.ID,
@@ -915,116 +925,130 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	// write global update to clients
 	for _, c := range s.clients {
+		/*
+		 * Performance note: This message must be sent to every client in the
+		 * system in every tick. Otherwise, movement will be choppy and the
+		 * game will feel laggy and unresponsive.
+		 */
+
 		c.WriteMessage(&msg)
 	}
 
 	// write secret current ship updates to individual clients
-	for _, c := range s.clients {
-		// find current ship
-		d := s.ships[c.CurrentShipID.String()]
+	if sendSecret {
+		/*
+		 * Performance note: This message is sent less often than the global update because the data
+		 * contained doesn't need to be as fresh for the game to feel smooth and responsive, and
+		 * sending it just a little less often significantly reduced bandwidth usage.
+		 */
 
-		if d == nil {
-			continue
+		for _, c := range s.clients {
+			// find current ship
+			d := s.ships[c.CurrentShipID.String()]
+
+			if d == nil {
+				continue
+			}
+
+			// build fitting status info
+			fs := models.ServerFittingStatusBody{}
+
+			// rack a
+			rackA := models.ServerRackStatusBody{}
+
+			for idx, v := range d.Fitting.ARack {
+				// build module statusinfo
+				module := copyModuleInfo(v)
+
+				// include slot info
+				slot := d.TemplateData.SlotLayout.ASlots[idx]
+				module.HardpointFamily = slot.Family
+				module.HardpointVolume = slot.Volume
+
+				// store on message
+				rackA.Modules = append(rackA.Modules, module)
+			}
+
+			// rack b
+			rackB := models.ServerRackStatusBody{}
+
+			for idx, v := range d.Fitting.BRack {
+				// build module statusinfo
+				module := copyModuleInfo(v)
+
+				// include slot info
+				slot := d.TemplateData.SlotLayout.BSlots[idx]
+				module.HardpointFamily = slot.Family
+				module.HardpointVolume = slot.Volume
+
+				// store on message
+				rackB.Modules = append(rackB.Modules, module)
+			}
+
+			// rack c
+			rackC := models.ServerRackStatusBody{}
+
+			for idx, v := range d.Fitting.CRack {
+				// build module statusinfo
+				module := copyModuleInfo(v)
+
+				// include slot info
+				slot := d.TemplateData.SlotLayout.CSlots[idx]
+				module.HardpointFamily = slot.Family
+				module.HardpointVolume = slot.Volume
+
+				// store on message
+				rackC.Modules = append(rackC.Modules, module)
+			}
+
+			// store rack info on fitting info
+			fs.ARack = rackA
+			fs.BRack = rackB
+			fs.CRack = rackC
+
+			// build current ship info message
+			si := models.ServerCurrentShipUpdate{
+				CurrentShipInfo: models.CurrentShipInfo{
+					// global stuff
+					ID:        d.ID,
+					UserID:    d.UserID,
+					Created:   d.Created,
+					ShipName:  d.ShipName,
+					PosX:      d.PosX,
+					PosY:      d.PosY,
+					SystemID:  d.SystemID,
+					Texture:   d.Texture,
+					Theta:     d.Theta,
+					VelX:      d.VelX,
+					VelY:      d.VelY,
+					Mass:      d.GetRealMass(),
+					Radius:    d.TemplateData.Radius,
+					ShieldP:   ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
+					ArmorP:    ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
+					HullP:     ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
+					FactionID: d.FactionID,
+					// secret stuff
+					EnergyP:           ((d.Energy / d.GetRealMaxEnergy()) * 100) + Epsilon,
+					HeatP:             ((d.Heat / d.GetRealMaxHeat()) * 100) + Epsilon,
+					FuelP:             ((d.Fuel / d.GetRealMaxFuel()) * 100) + Epsilon,
+					FitStatus:         fs,
+					DockedAtStationID: d.DockedAtStationID,
+					CargoP:            ((d.TotalCargoBayVolumeUsed(false) / d.GetRealCargoBayVolume()) * 100) + Epsilon,
+					Wallet:            d.Wallet,
+				},
+			}
+
+			// serialize secret current ship update
+			b, _ := json.Marshal(&si)
+
+			sct := models.GameMessage{
+				MessageType: msgRegistry.CurrentShipUpdate,
+				MessageBody: string(b),
+			}
+
+			// write message to client
+			c.WriteMessage(&sct)
 		}
-
-		// build fitting status info
-		fs := models.ServerFittingStatusBody{}
-
-		// rack a
-		rackA := models.ServerRackStatusBody{}
-
-		for idx, v := range d.Fitting.ARack {
-			// build module statusinfo
-			module := copyModuleInfo(v)
-
-			// include slot info
-			slot := d.TemplateData.SlotLayout.ASlots[idx]
-			module.HardpointFamily = slot.Family
-			module.HardpointVolume = slot.Volume
-
-			// store on message
-			rackA.Modules = append(rackA.Modules, module)
-		}
-
-		// rack b
-		rackB := models.ServerRackStatusBody{}
-
-		for idx, v := range d.Fitting.BRack {
-			// build module statusinfo
-			module := copyModuleInfo(v)
-
-			// include slot info
-			slot := d.TemplateData.SlotLayout.BSlots[idx]
-			module.HardpointFamily = slot.Family
-			module.HardpointVolume = slot.Volume
-
-			// store on message
-			rackB.Modules = append(rackB.Modules, module)
-		}
-
-		// rack c
-		rackC := models.ServerRackStatusBody{}
-
-		for idx, v := range d.Fitting.CRack {
-			// build module statusinfo
-			module := copyModuleInfo(v)
-
-			// include slot info
-			slot := d.TemplateData.SlotLayout.CSlots[idx]
-			module.HardpointFamily = slot.Family
-			module.HardpointVolume = slot.Volume
-
-			// store on message
-			rackC.Modules = append(rackC.Modules, module)
-		}
-
-		// store rack info on fitting info
-		fs.ARack = rackA
-		fs.BRack = rackB
-		fs.CRack = rackC
-
-		// build current ship info message
-		si := models.ServerCurrentShipUpdate{
-			CurrentShipInfo: models.CurrentShipInfo{
-				// global stuff
-				ID:        d.ID,
-				UserID:    d.UserID,
-				Created:   d.Created,
-				ShipName:  d.ShipName,
-				PosX:      d.PosX,
-				PosY:      d.PosY,
-				SystemID:  d.SystemID,
-				Texture:   d.Texture,
-				Theta:     d.Theta,
-				VelX:      d.VelX,
-				VelY:      d.VelY,
-				Mass:      d.GetRealMass(),
-				Radius:    d.TemplateData.Radius,
-				ShieldP:   ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
-				ArmorP:    ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
-				HullP:     ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
-				FactionID: d.FactionID,
-				// secret stuff
-				EnergyP:           ((d.Energy / d.GetRealMaxEnergy()) * 100) + Epsilon,
-				HeatP:             ((d.Heat / d.GetRealMaxHeat()) * 100) + Epsilon,
-				FuelP:             ((d.Fuel / d.GetRealMaxFuel()) * 100) + Epsilon,
-				FitStatus:         fs,
-				DockedAtStationID: d.DockedAtStationID,
-				CargoP:            ((d.TotalCargoBayVolumeUsed(false) / d.GetRealCargoBayVolume()) * 100) + Epsilon,
-				Wallet:            d.Wallet,
-			},
-		}
-
-		// serialize secret current ship update
-		b, _ := json.Marshal(&si)
-
-		sct := models.GameMessage{
-			MessageType: msgRegistry.CurrentShipUpdate,
-			MessageBody: string(b),
-		}
-
-		// write message to client
-		c.WriteMessage(&sct)
 	}
 
 	// reset new visual effects for next tick
