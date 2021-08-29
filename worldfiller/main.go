@@ -8,6 +8,8 @@ import (
 	"log"
 	"math"
 	"math/rand"
+
+	"github.com/google/uuid"
 )
 
 /*
@@ -38,6 +40,10 @@ const MinAsteroidsPerSystem = 0
 const MaxAsteroidsPerSystem = 100
 const MinAsteroidYield = 0.1
 const MaxAsteroidYield = 5.0
+const MinAsteroidRadius = 120
+const MaxAsteroidRadius = 315
+const MinAsteroidMass = 6000
+const MaxAsteroidMass = 75000
 
 /*
 ============ ORE RARITY TABLE ========================================
@@ -62,8 +68,9 @@ actual = (1-scarcity^0.35) * potential
 */
 
 type OreStop struct {
-	ID   string
-	Stop float64
+	ID      string
+	Stop    float64
+	Texture string
 }
 
 func GetOreStops() []OreStop {
@@ -75,68 +82,81 @@ func GetOreStops() []OreStop {
 	})
 
 	o = append(o, OreStop{
-		ID:   "dd522f03-2f52-4e82-b2f8-d7e0029cb82f",
-		Stop: 0.1875,
+		ID:      "dd522f03-2f52-4e82-b2f8-d7e0029cb82f",
+		Stop:    0.1875,
+		Texture: "Mega/asteroidR4",
 	})
 
 	o = append(o, OreStop{
-		ID:   "56617d30-6c30-425c-84bf-2484ae8c1156",
-		Stop: 0.3618,
+		ID:      "56617d30-6c30-425c-84bf-2484ae8c1156",
+		Stop:    0.3618,
+		Texture: "Mega/asteroidR2",
 	})
 
 	o = append(o, OreStop{
-		ID:   "26a3fc9e-db2f-439d-a929-ba755d11d09c",
-		Stop: 0.5227,
+		ID:      "26a3fc9e-db2f-439d-a929-ba755d11d09c",
+		Stop:    0.5227,
+		Texture: "Mega/asteroidR6",
 	})
 
 	o = append(o, OreStop{
-		ID:   "1d0d344b-ef28-43c8-a7a6-3275936b2dea",
-		Stop: 0.6070,
+		ID:      "1d0d344b-ef28-43c8-a7a6-3275936b2dea",
+		Stop:    0.6070,
+		Texture: "Mega/asteroidR3",
 	})
 
 	o = append(o, OreStop{
-		ID:   "0cd04eea-a150-410c-91eb-6af00d8c6eae",
-		Stop: 0.6684,
+		ID:      "0cd04eea-a150-410c-91eb-6af00d8c6eae",
+		Stop:    0.6684,
+		Texture: "Mega/asteroidR9",
 	})
 
 	o = append(o, OreStop{
-		ID:   "39b8eedf-ef80-4c29-a4bf-99abc4d84fa6",
-		Stop: 0.7216,
+		ID:      "39b8eedf-ef80-4c29-a4bf-99abc4d84fa6",
+		Stop:    0.7216,
+		Texture: "Mega/asteroidR7",
 	})
 
 	o = append(o, OreStop{
-		ID:   "dd0c9b0a-279e-418e-b3b6-2f569fda0186",
-		Stop: 0.7500,
+		ID:      "dd0c9b0a-279e-418e-b3b6-2f569fda0186",
+		Stop:    0.7500,
+		Texture: "Mega/asteroidR1",
 	})
 
 	o = append(o, OreStop{
-		ID:   "7dcd5138-d7e0-419f-867a-6f0f23b99b5b",
-		Stop: 0.8333,
+		ID:      "7dcd5138-d7e0-419f-867a-6f0f23b99b5b",
+		Stop:    0.8333,
+		Texture: "Mega/asteroidR12",
 	})
 
 	o = append(o, OreStop{
-		ID:   "61f52ba3-654b-45cf-88e3-33399d12350d",
-		Stop: 0.8954,
+		ID:      "61f52ba3-654b-45cf-88e3-33399d12350d",
+		Stop:    0.8954,
+		Texture: "Mega/asteroidR5",
 	})
 
 	o = append(o, OreStop{
-		ID:   "11688112-f3d4-4d30-864a-684a8b96ea23",
-		Stop: 0.9336,
+		ID:      "11688112-f3d4-4d30-864a-684a8b96ea23",
+		Stop:    0.9336,
+		Texture: "Mega/asteroidR11",
 	})
 
 	o = append(o, OreStop{
-		ID:   "2ce48bef-f06b-4550-b20c-0e64864db051",
-		Stop: 0.9634,
+		ID:      "2ce48bef-f06b-4550-b20c-0e64864db051",
+		Stop:    0.9634,
+		Texture: "Mega/asteroidR8",
 	})
 
 	o = append(o, OreStop{
-		ID:   "66b7a322-8cfc-4467-9410-492e6b58f159",
-		Stop: 0.9865,
+		ID:      "66b7a322-8cfc-4467-9410-492e6b58f159",
+		Stop:    0.9865,
+		Texture: "Mega/asteroidR13",
 	})
 
 	o = append(o, OreStop{
-		ID:   "d1866be4-5c3e-4b95-b6d9-020832338014",
-		Stop: 1.0000,
+		ID:      "d1866be4-5c3e-4b95-b6d9-020832338014",
+		Stop:    1.0000,
+		Texture: "Mega/asteroidR10",
 	})
 
 	return o
@@ -199,8 +219,24 @@ func dropAsteroids(u *universe.Universe) {
 					ceiling := stops[x]
 
 					if floor.Stop < p && p <= ceiling.Stop {
-						// chosen ore type
-						log.Println(fmt.Sprintf("ast -> %v :: %v @ %v", p, stops[x], y))
+						ast := Astling{
+							ID:            uuid.New().String(),
+							SystemID:      s.ID.String(),
+							OreItemTypeID: stops[x].ID,
+							Name:          fmt.Sprintf("A%v%v%v-%v", stops[x].ID[0], stops[x].ID[1], stops[x].ID[2], physics.RandInRange(1000, 9999)),
+							Texture:       stops[x].Texture,
+							Radius:        float64(physics.RandInRange(MinAsteroidRadius, MaxAsteroidRadius)),
+							Theta:         float64(rand.Float64() * 360.0),
+							//PosX:          string,
+							//PosY:          string,
+							Yield: y,
+							Mass:  float64(physics.RandInRange(MinAsteroidMass, MaxAsteroidMass)),
+						}
+
+						log.Println(fmt.Sprintf("ast -> %v", ast))
+
+						// next asteroid
+						break
 					}
 				}
 			}
@@ -217,10 +253,10 @@ type Astling struct {
 	OreItemTypeID string
 	Name          string
 	Texture       string
-	Radius        string
-	Theta         string
-	PosX          string
-	PosY          string
-	Yield         string
-	Mass          string
+	Radius        float64
+	Theta         float64
+	PosX          float64
+	PosY          float64
+	Yield         float64
+	Mass          float64
 }
