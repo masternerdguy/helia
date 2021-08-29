@@ -5,7 +5,6 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"sync"
 	"time"
 
@@ -90,7 +89,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 	if sendStatic {
 		// reset tick counter
 		s.tickCounter = 0
-		log.Println("resetting tick counter")
 	}
 
 	// get message registry
