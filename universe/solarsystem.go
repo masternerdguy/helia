@@ -5,6 +5,7 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"sync"
 	"time"
 
@@ -29,6 +30,7 @@ type SolarSystem struct {
 	clients           map[string]*shared.GameClient       // clients in this system
 	pushModuleEffects []models.GlobalPushModuleEffectBody // module visual effect aggregation for tick
 	pushPointEffects  []models.GlobalPushPointEffectBody  // non-module point visual effect aggregation for tick
+	tickCounter       int                                 // counter that is used to control frequency of certain global updates
 	Lock              sync.Mutex
 	// event escalations to engine core
 	NeedRespawn          map[string]*shared.GameClient // clients in need of a respawn by core
@@ -80,6 +82,15 @@ func (s *SolarSystem) PeriodicUpdate() {
 	// skip if nobody in system
 	if len(s.ships) == 0 {
 		return
+	}
+
+	// check tick counter to determine whether to send static world data
+	sendStatic := s.tickCounter > 50
+
+	if sendStatic {
+		// reset tick counter
+		s.tickCounter = 0
+		log.Println("resetting tick counter")
 	}
 
 	// get message registry
@@ -820,75 +831,77 @@ func (s *SolarSystem) PeriodicUpdate() {
 		})
 	}
 
-	for _, d := range s.stars {
-		gu.Stars = append(gu.Stars, models.GlobalStarInfo{
-			ID:       d.ID,
-			SystemID: d.SystemID,
-			PosX:     d.PosX,
-			PosY:     d.PosY,
-			Texture:  d.Texture,
-			Radius:   d.Radius,
-			Mass:     d.Mass,
-			Theta:    d.Theta,
-		})
-	}
+	if sendStatic {
+		for _, d := range s.stars {
+			gu.Stars = append(gu.Stars, models.GlobalStarInfo{
+				ID:       d.ID,
+				SystemID: d.SystemID,
+				PosX:     d.PosX,
+				PosY:     d.PosY,
+				Texture:  d.Texture,
+				Radius:   d.Radius,
+				Mass:     d.Mass,
+				Theta:    d.Theta,
+			})
+		}
 
-	for _, d := range s.planets {
-		gu.Planets = append(gu.Planets, models.GlobalPlanetInfo{
-			ID:         d.ID,
-			SystemID:   d.SystemID,
-			PlanetName: d.PlanetName,
-			PosX:       d.PosX,
-			PosY:       d.PosY,
-			Texture:    d.Texture,
-			Radius:     d.Radius,
-			Mass:       d.Mass,
-			Theta:      d.Theta,
-		})
-	}
+		for _, d := range s.planets {
+			gu.Planets = append(gu.Planets, models.GlobalPlanetInfo{
+				ID:         d.ID,
+				SystemID:   d.SystemID,
+				PlanetName: d.PlanetName,
+				PosX:       d.PosX,
+				PosY:       d.PosY,
+				Texture:    d.Texture,
+				Radius:     d.Radius,
+				Mass:       d.Mass,
+				Theta:      d.Theta,
+			})
+		}
 
-	for _, d := range s.asteroids {
-		gu.Asteroids = append(gu.Asteroids, models.GlobalAsteroidInfo{
-			ID:       d.ID,
-			SystemID: d.SystemID,
-			Name:     d.Name,
-			PosX:     d.PosX,
-			PosY:     d.PosY,
-			Texture:  d.Texture,
-			Radius:   d.Radius,
-			Mass:     d.Mass,
-			Theta:    d.Theta,
-		})
-	}
+		for _, d := range s.asteroids {
+			gu.Asteroids = append(gu.Asteroids, models.GlobalAsteroidInfo{
+				ID:       d.ID,
+				SystemID: d.SystemID,
+				Name:     d.Name,
+				PosX:     d.PosX,
+				PosY:     d.PosY,
+				Texture:  d.Texture,
+				Radius:   d.Radius,
+				Mass:     d.Mass,
+				Theta:    d.Theta,
+			})
+		}
 
-	for _, d := range s.jumpholes {
-		gu.Jumpholes = append(gu.Jumpholes, models.GlobalJumpholeInfo{
-			ID:           d.ID,
-			SystemID:     d.SystemID,
-			OutSystemID:  d.OutSystemID,
-			JumpholeName: d.JumpholeName,
-			PosX:         d.PosX,
-			PosY:         d.PosY,
-			Texture:      d.Texture,
-			Radius:       d.Radius,
-			Mass:         d.Mass,
-			Theta:        d.Theta,
-		})
-	}
+		for _, d := range s.jumpholes {
+			gu.Jumpholes = append(gu.Jumpholes, models.GlobalJumpholeInfo{
+				ID:           d.ID,
+				SystemID:     d.SystemID,
+				OutSystemID:  d.OutSystemID,
+				JumpholeName: d.JumpholeName,
+				PosX:         d.PosX,
+				PosY:         d.PosY,
+				Texture:      d.Texture,
+				Radius:       d.Radius,
+				Mass:         d.Mass,
+				Theta:        d.Theta,
+			})
+		}
 
-	for _, d := range s.stations {
-		gu.Stations = append(gu.Stations, models.GlobalStationInfo{
-			ID:          d.ID,
-			SystemID:    d.SystemID,
-			StationName: d.StationName,
-			PosX:        d.PosX,
-			PosY:        d.PosY,
-			Texture:     d.Texture,
-			Radius:      d.Radius,
-			Mass:        d.Mass,
-			Theta:       d.Theta,
-			FactionID:   d.FactionID,
-		})
+		for _, d := range s.stations {
+			gu.Stations = append(gu.Stations, models.GlobalStationInfo{
+				ID:          d.ID,
+				SystemID:    d.SystemID,
+				StationName: d.StationName,
+				PosX:        d.PosX,
+				PosY:        d.PosY,
+				Texture:     d.Texture,
+				Radius:      d.Radius,
+				Mass:        d.Mass,
+				Theta:       d.Theta,
+				FactionID:   d.FactionID,
+			})
+		}
 	}
 
 	gu.NewModuleEffects = append(gu.NewModuleEffects, s.pushModuleEffects...)
@@ -1019,6 +1032,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 	// reset new visual effects for next tick
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
 	s.pushPointEffects = make([]models.GlobalPushPointEffectBody, 0)
+
+	// increment tick counter
+	s.tickCounter++
 }
 
 // Adds a ship to the system
