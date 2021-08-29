@@ -1224,6 +1224,44 @@ func (s *SolarSystem) CopyJumpholes() map[string]*Jumphole {
 	return copy
 }
 
+// Returns a copy of the stars in the system
+func (s *SolarSystem) CopyStars() map[string]*Star {
+	// obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	// make map for copies
+	copy := make(map[string]*Star)
+
+	// copy star into copy map
+	for k, v := range s.stars {
+		c := v.CopyStar()
+		copy[k] = &c
+	}
+
+	// return copy map
+	return copy
+}
+
+// Returns a copy of the planets in the system
+func (s *SolarSystem) CopyPlanets() map[string]*Planet {
+	// obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	// make map for copies
+	copy := make(map[string]*Planet)
+
+	// copy plant into copy map
+	for k, v := range s.planets {
+		c := v.CopyPlanet()
+		copy[k] = &c
+	}
+
+	// return copy map
+	return copy
+}
+
 // Stores an open sell order on a station
 func (s *SolarSystem) StoreOpenSellOrder(order *SellOrder, lock bool) {
 	if lock {

@@ -14,3 +14,17 @@ type Planet struct {
 	Mass       float64
 	Theta      float64
 }
+
+// Returns a copy of the planet
+func (s *Planet) CopyPlanet() Planet {
+	return Planet{
+		ID:       s.ID,
+		PosX:     s.PosX,
+		PosY:     s.PosY,
+		SystemID: s.SystemID,
+		Texture:  s.Texture,
+		Theta:    s.Theta,
+		Radius:   s.Radius,
+		Mass:     s.Mass,
+	}
+}

@@ -44,6 +44,10 @@ const MinAsteroidRadius = 120
 const MaxAsteroidRadius = 315
 const MinAsteroidMass = 6000
 const MaxAsteroidMass = 75000
+const MinBeltRadius = 25000
+const MaxBeltRadius = 1350000
+const MinBeltWidth = 1000
+const MaxBeltWidth = 10000
 
 /*
 ============ ORE RARITY TABLE ========================================
@@ -176,6 +180,8 @@ func calculateSystemSeed(s *universe.SolarSystem) int {
 
 // Inserts minable asteroids into the universe
 func dropAsteroids(u *universe.Universe) {
+	globalAsteroids := make([]Astling, 0)
+
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
 			// get system internal seed
@@ -190,15 +196,32 @@ func dropAsteroids(u *universe.Universe) {
 			// get scarcity level
 			scarcity := rand.Float64()
 
+			// get obstacles in system
+			stars := s.CopyStars()
+			planets := s.CopyPlanets()
+			jumpholes := s.CopyJumpholes()
+
 			// determine total number of asteroids in system
 			potentialAsteroids := physics.RandInRange(MinAsteroidsPerSystem, MaxAsteroidsPerSystem)
 			actualAsteroids := int((1.0 - math.Pow(scarcity, 0.35)) * float64(potentialAsteroids))
 
-			// print level
-			log.Println(fmt.Sprintf("%v | asteroids: %v scarcity: %v", s.SystemName, actualAsteroids, scarcity))
+			// determine asteroid distribution scale
+			beltRadius := physics.RandInRange(MinBeltRadius, MaxBeltRadius)
+
+			// use first star as belt center
+			beltX := 0.0
+			beltY := 0.0
+
+			for _, e := range stars {
+				beltX = e.PosX
+				beltY = e.PosY
+			}
 
 			// get ore stops
 			stops := GetOreStops()
+
+			// generated localAsteroids
+			localAsteroids := make([]Astling, 0)
 
 			// make asteroids
 			for i := 0; i < actualAsteroids; i++ {
@@ -227,20 +250,104 @@ func dropAsteroids(u *universe.Universe) {
 							Texture:       stops[x].Texture,
 							Radius:        float64(physics.RandInRange(MinAsteroidRadius, MaxAsteroidRadius)),
 							Theta:         float64(rand.Float64() * 360.0),
-							//PosX:          string,
-							//PosY:          string,
-							Yield: y,
-							Mass:  float64(physics.RandInRange(MinAsteroidMass, MaxAsteroidMass)),
+							Yield:         y,
+							Mass:          float64(physics.RandInRange(MinAsteroidMass, MaxAsteroidMass)),
 						}
 
-						log.Println(fmt.Sprintf("ast -> %v", ast))
+						// determine position
+						for {
+							// generate random position in belt
+							dW := float64(physics.RandInRange(MinBeltWidth, MaxBeltWidth))
+							mag := dW + float64(beltRadius)
+							the := 2.0 * math.Pi * rand.Float64()
+
+							ast.PosX = (mag * math.Cos(the)) + beltX
+							ast.PosY = (mag * math.Sin(the)) + beltY
+
+							// check for overlap with forbidden objects
+							sB := physics.Dummy{
+								PosX: ast.PosX,
+								PosY: ast.PosY,
+							}
+
+							for _, v := range stars {
+								sA := physics.Dummy{
+									PosX: v.PosX,
+									PosY: v.PosY,
+								}
+
+								dst := physics.Distance(sA, sB)
+
+								if dst < (1+rand.Float64())*(v.Radius+ast.Radius) {
+									// not safe, try again
+									continue
+								}
+							}
+
+							for _, v := range planets {
+								sA := physics.Dummy{
+									PosX: v.PosX,
+									PosY: v.PosY,
+								}
+
+								dst := physics.Distance(sA, sB)
+
+								if dst < (1+rand.Float64())*(v.Radius+ast.Radius) {
+									// not safe, try again
+									continue
+								}
+							}
+
+							for _, v := range jumpholes {
+								sA := physics.Dummy{
+									PosX: v.PosX,
+									PosY: v.PosY,
+								}
+
+								dst := physics.Distance(sA, sB)
+
+								if dst < (1+rand.Float64())*(v.Radius+ast.Radius) {
+									// not safe, try again
+									continue
+								}
+							}
+
+							for _, v := range localAsteroids {
+								sA := physics.Dummy{
+									PosX: v.PosX,
+									PosY: v.PosY,
+								}
+
+								dst := physics.Distance(sA, sB)
+
+								if dst < (1+rand.Float64())*(v.Radius+ast.Radius) {
+									// not safe, try again
+									continue
+								}
+							}
+
+							// safe to store asteroid
+							break
+						}
+
+						// store asteroid
+						localAsteroids = append(localAsteroids, ast)
 
 						// next asteroid
 						break
 					}
 				}
 			}
+
+			// store asteroids to save
+			globalAsteroids = append(globalAsteroids, localAsteroids...)
 		}
+	}
+
+	xx := 1
+
+	if xx == 1 {
+
 	}
 }
 
