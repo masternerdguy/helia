@@ -36,6 +36,8 @@ func main() {
 /* Parameters for asteroid generation */
 const MinAsteroidsPerSystem = 0
 const MaxAsteroidsPerSystem = 100
+const MinAsteroidYield = 0.1
+const MaxAsteroidYield = 5.0
 
 /*
 ============ ORE RARITY TABLE ========================================
@@ -66,6 +68,11 @@ type OreStop struct {
 
 func GetOreStops() []OreStop {
 	o := make([]OreStop, 0)
+
+	o = append(o, OreStop{
+		ID:   "dummy",
+		Stop: 0,
+	})
 
 	o = append(o, OreStop{
 		ID:   "dd522f03-2f52-4e82-b2f8-d7e0029cb82f",
@@ -169,6 +176,51 @@ func dropAsteroids(u *universe.Universe) {
 
 			// print level
 			log.Println(fmt.Sprintf("%v | asteroids: %v scarcity: %v", s.SystemName, actualAsteroids, scarcity))
+
+			// get ore stops
+			stops := GetOreStops()
+
+			// make asteroids
+			for i := 0; i < actualAsteroids; i++ {
+				// roll to determine yield
+				y := math.Max(rand.Float64()*MaxAsteroidYield, MinAsteroidYield) * (1 - scarcity)
+
+				// roll to determine ore type
+				p := rand.Float64()
+
+				for x := range stops {
+					// skip dummy stop
+					if x == 0 {
+						continue
+					}
+
+					// determine if this stop captures the roll
+					floor := stops[x-1]
+					ceiling := stops[x]
+
+					if floor.Stop < p && p <= ceiling.Stop {
+						// chosen ore type
+						log.Println(fmt.Sprintf("ast -> %v :: %v @ %v", p, stops[x], y))
+					}
+				}
+			}
 		}
 	}
+}
+
+//id, universe_systemid, ore_itemtypeid, name, texture, radius, theta, pos_x, pos_y, yield, mass)
+
+// Structure representing a scaffold for an asteroid for worldfiller
+type Astling struct {
+	ID            string
+	SystemID      string
+	OreItemTypeID string
+	Name          string
+	Texture       string
+	Radius        string
+	Theta         string
+	PosX          string
+	PosY          string
+	Yield         string
+	Mass          string
 }
