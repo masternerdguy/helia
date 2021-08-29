@@ -127,6 +127,24 @@ export class GDITabPane extends GDIBase {
     }
   }
 
+  handleScroll(x: number, y: number, d: number) {
+    // make sure this is a relevant scroll
+    if (!this.containsPoint(x, y)) {
+      return;
+    }
+
+    // adjust input to be relative to tab
+    const rX = x - this.getX();
+    const rY = y - (this.getY() + GDIStyle.tabHandleHeight);
+
+    // send event to selected tab
+    const t = this.tabs.get(this.selectedTab);
+
+    if (t) {
+      t.handleScroll(rX, rY, d);
+    }
+  }
+
   setFont(font: FontSize) {
     this.font = font;
   }
