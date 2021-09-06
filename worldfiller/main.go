@@ -33,7 +33,7 @@ func main() {
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	dropAsteroids(universe)
+	// dropAsteroids(universe)
 }
 
 /* Parameters for asteroid generation */
