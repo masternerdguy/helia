@@ -117,8 +117,6 @@ export class StarMapWindow extends GDIWindow {
       if(Math.abs(vx) > 0.1 || Math.abs(vy) > 0.1) {
         this.camera.x += vx * (this.camera.zoom * 0.75 * Math.sign(d));
         this.camera.y += vy * (this.camera.zoom * 0.75 * Math.sign(d));
-
-        console.log(dx + " " + dy);
       }
     }
   }

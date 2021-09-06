@@ -57,7 +57,7 @@ export class GDIStyle {
 
   // starmap
   static starMapEdgeColor = '#00091a';
-  static starMapEdgeWidth = 1.3;
+  static starMapEdgeWidth = 0.15;
 
   // underlying font sizes
   static smallFontSize = 7.25;
