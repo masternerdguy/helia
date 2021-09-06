@@ -2,7 +2,7 @@
 Helia is going to be a harsh, massively multiplayer, single world space game with nonconsensual PVP everywhere.
 
 # Restoring the database
-Helia uses PostgreSQL 12 as its database. 
+Helia uses PostgreSQL 13 as its database. 
 
 Use the `schema.sql` script to scaffold an empty database.
 Use the `testdb.sql` script to scaffold a test database.
