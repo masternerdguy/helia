@@ -650,6 +650,13 @@ func (s *SolarSystem) PeriodicUpdate() {
 					c.WriteErrorMessage(err.Error())
 				}
 			}
+		} else if evt.Type == models.NewMessageRegistry().ViewStarMap {
+			if sh != nil {
+				// extract data
+				// data := evt.Body.(models.ClientViewStarMapBody)
+
+				c.WriteErrorMessage("not yet implemented")
+			}
 		}
 	}
 

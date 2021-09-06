@@ -230,6 +230,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientSellToSilo(&client, &b)
+		} else if m.MessageType == msgRegistry.ViewStarMap {
+			// decode body as ClientViewStarMapBody
+			b := models.ClientViewStarMapBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientViewStarMap(&client, &b)
 		}
 	}
 }
@@ -911,6 +918,29 @@ func (l *SocketListener) handleClientSellToSilo(client *shared.GameClient, body 
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.SellToSilo)
+	}
+}
+
+func (l *SocketListener) handleClientViewStarMap(client *shared.GameClient, body *models.ClientViewStarMapBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientViewStarMap: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.ViewStarMap)
 	}
 }
 
