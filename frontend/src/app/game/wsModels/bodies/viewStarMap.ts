@@ -7,8 +7,9 @@ export class ServerStarMapUpdate {
 }
 
 export class UnwrappedStarMapData {
-  regions: StarMapRegion[];
-  edges: StarMapEdge[];
+  regions: StarMapRegion[] = [];
+  edges: StarMapEdge[] = [];
+  flattened: StarMapFlatSystem[] = [];
 
   constructor(cachedMapData: string) {
     // decode as JSON
@@ -20,9 +21,51 @@ export class UnwrappedStarMapData {
     // store edges
     this.edges = asJSON.edges;
 
+    // flatten for quick reference
+    for (let region of this.regions) {
+      for (let system of region.systems) {
+        // build flattened systtem
+        const flat: StarMapFlatSystem = {
+          region: region,
+          system: system,
+          edges: []
+        }
+
+        // get all edges
+        for (let edge of this.edges) {
+          if (edge.aID == system.id) {
+            flat.edges.push([edge, this.findRawSystemByID(edge.bID)]);
+          }
+
+          if (edge.bID == system.id) {
+            flat.edges.push([edge, this.findRawSystemByID(edge.aID)]);
+          }
+        }
+
+        // store flattened system
+        this.flattened.push(flat);
+      }
+    }
+
     // debug out
     console.log(this);
   }
+
+  findRawSystemByID(id: string): StarMapSolarSystem {
+    for (let region of this.regions) {
+      for (let system of region.systems) {
+        if (system.id == id) {
+          return system;
+        }
+      }
+    }
+  }
+}
+
+export class StarMapFlatSystem {
+  system: StarMapSolarSystem;
+  region: StarMapRegion;
+  edges: [StarMapEdge, StarMapSolarSystem][];
 }
 
 export class StarMapSolarSystem {
@@ -41,6 +84,6 @@ export class StarMapRegion {
 }
 
 export class StarMapEdge {
-  a: string;
-  b: string;
+  aID: string;
+  bID: string;
 }
