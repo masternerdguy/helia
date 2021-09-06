@@ -79,6 +79,10 @@ export class StarMapWindow extends GDIWindow {
 
         // draw system dots
         for (let row of map.flattened) {
+          if (row.system.factionId == "27a53dfc-a321-4c12-bf7c-bb177955c95b") {
+            ctx.strokeStyle = 'limegreen';
+            ctx.fillStyle = 'limegreen';
+          } else {
           if (row.system.id != this.player.currentSystem.id) {
             ctx.strokeStyle = GDIStyle.starMapSystemColor;
             ctx.fillStyle = GDIStyle.starMapSystemColor;
@@ -86,6 +90,7 @@ export class StarMapWindow extends GDIWindow {
             ctx.strokeStyle = 'yellow';
             ctx.fillStyle = 'yellow';
           }
+        }
 
           // project position
           const ax = this.camera.projectX(row.system.x);
