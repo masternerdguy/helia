@@ -89,7 +89,7 @@ export class Ship extends WSShip {
 
     // draw debug bounding circle
     ctx.beginPath();
-    ctx.arc(sx, sy, sr, 0, 2 * Math.PI, false);
+    ctx.arc(sx, sy, Math.max(sr, 1.3), 0, 2 * Math.PI, false);
     ctx.lineWidth = 2;
 
     // select color by status and owner

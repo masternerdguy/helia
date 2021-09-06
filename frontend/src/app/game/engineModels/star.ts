@@ -39,7 +39,7 @@ export class Star extends WSStar {
     }
 
     ctx.beginPath();
-    ctx.arc(sx, sy, sr, 0, 2 * Math.PI, false);
+    ctx.arc(sx, sy, Math.max(sr, 3), 0, 2 * Math.PI, false);
     ctx.lineWidth = 2;
     ctx.stroke();
 

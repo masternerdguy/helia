@@ -41,7 +41,7 @@ export class Asteroid extends WSAsteroid {
 
     ctx.beginPath();
     // use a 10% padding due to irregular shapes
-    ctx.arc(sx, sy, sr * 1.1, 0, 2 * Math.PI, false);
+    ctx.arc(sx, sy, Math.max(sr * 1.1, 1.5), 0, 2 * Math.PI, false);
     ctx.lineWidth = 2;
     ctx.stroke();
 
