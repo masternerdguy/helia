@@ -57,7 +57,7 @@ export class GDIStyle {
 
   // starmap
   static starMapEdgeColor = 'white';
-  static starMapEdgeTransientColor = "#78281F";
+  static starMapEdgeTransientColor = '#78281F';
   static starMapCurrentSystemColor = 'yellow';
   static starMapSystemColor = '#336699';
   static starMapSystemLabelColor = 'white';

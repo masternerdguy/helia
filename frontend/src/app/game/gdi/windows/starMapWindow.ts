@@ -56,15 +56,12 @@ export class StarMapWindow extends GDIWindow {
         // draw transient edges first
         ctx.strokeStyle = GDIStyle.starMapEdgeTransientColor;
 
-
-        console.log(map)
-
         for (let row of map.flattened) {
           for (let edge of row.edges) {
             // highlight transient connections
             if (edge[0].transient == false) {
               continue;
-            } 
+            }
 
             // get endpoint
             const b = edge[1];
@@ -92,7 +89,7 @@ export class StarMapWindow extends GDIWindow {
           for (let edge of row.edges) {
             if (edge[0].transient) {
               continue;
-            } 
+            }
 
             // get endpoint
             const b = edge[1];
