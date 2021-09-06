@@ -107,15 +107,15 @@ export class StarMapWindow extends GDIWindow {
         // draw system labels if zoomed in enough
         if (this.camera.zoom > 15) {
           for (let row of map.flattened) {
-                      // project position
-          const ax = this.camera.projectX(row.system.x);
-          const ay = this.camera.projectY(row.system.y);
+            // project position
+            const ax = this.camera.projectX(row.system.x);
+            const ay = this.camera.projectY(row.system.y);
 
             // draw text
             ctx.strokeStyle = GDIStyle.starMapSystemLabelColor;
             ctx.fillStyle = GDIStyle.starMapSystemLabelColor;
             ctx.font = GDIStyle.normalFont;
-            
+
             ctx.fillText(row.system.name, ax, ay);
           }
         }
