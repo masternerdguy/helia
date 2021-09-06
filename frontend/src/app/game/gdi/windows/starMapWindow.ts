@@ -74,6 +74,26 @@ export class StarMapWindow extends GDIWindow {
             ctx.stroke();
           }
         }
+
+        // draw system dots
+        for (let row of map.flattened) {
+          if(row.system.id != this.player.currentSystem.id) {
+          ctx.strokeStyle = GDIStyle.starMapSystemColor;
+          ctx.fillStyle = GDIStyle.starMapSystemColor;
+          } else {
+            ctx.strokeStyle = "yellow";
+            ctx.fillStyle = "yellow";
+          }
+
+          // project position
+          const ax = this.camera.projectX(row.system.x);
+          const ay = this.camera.projectY(row.system.y);
+
+          ctx.beginPath();
+          ctx.arc(ax, ay, GDIStyle.starMapSystemWidth * 2, 0, 2 * Math.PI, false);
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
       }
     });
   }
