@@ -37,7 +37,7 @@ export class Station extends WSStation {
     const sy = camera.projectY(this.y);
     const sr = camera.projectR(this.radius);
 
-    // draw debug bounding circle
+    // draw bounding circle
     ctx.beginPath();
     ctx.arc(sx, sy, Math.max(sr, 1.5), 0, 2 * Math.PI, false);
     ctx.lineWidth = 2;

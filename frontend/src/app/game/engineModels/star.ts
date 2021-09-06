@@ -31,7 +31,7 @@ export class Star extends WSStar {
     const sy = camera.projectY(this.y);
     const sr = camera.projectR(this.radius);
 
-    // draw debug bounding circle
+    // draw bounding circle
     if (this.isTargeted) {
       ctx.strokeStyle = 'yellow';
     } else {
