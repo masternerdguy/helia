@@ -179,6 +179,13 @@ func (u *Universe) BuildTransientCelestials() {
 			Transient:    true,
 		}
 
+		// link jumpholes
+		jhA.OutJumphole = &jhB
+		jhA.OutSystem = sysB
+
+		jhB.OutJumphole = &jhA
+		jhB.OutSystem = sysA
+
 		// inject into universe
 		sysA.jumpholes[jhA.ID.String()] = &jhA
 		sysB.jumpholes[jhB.ID.String()] = &jhB
