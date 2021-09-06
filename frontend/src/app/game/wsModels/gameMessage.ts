@@ -33,4 +33,5 @@ export enum MessageTypes {
   BuyFromSilo = 25,
   SellToSilo = 26,
   FactionUpdate = 27,
+  ViewStarMap = 28,
 }

@@ -34,6 +34,7 @@ import { IndustrialMarketWindow } from './gdi/windows/industrialMarketWindow';
 import { ServerIndustrialOrdersUpdate } from './wsModels/bodies/industrialOrdersUpdate';
 import { ServerFactionUpdate } from './wsModels/bodies/factionUpdate';
 import { UpdateFactionCache } from './wsModels/shared';
+import { StarMapWindow } from './gdi/windows/starMapWindow';
 
 class EngineSack {
   constructor() {}
@@ -60,6 +61,7 @@ class EngineSack {
   shipFittingWindow: ShipFittingWindow;
   ordersMarketWindow: OrdersMarketWindow;
   industrialMarketWindow: IndustrialMarketWindow;
+  starMapWindow: StarMapWindow;
   lastShiftDown: number;
 
   windows: GDIWindow[];
@@ -179,6 +181,14 @@ export function clientStart(
   );
   engineSack.overviewWindow.pack();
 
+  engineSack.starMapWindow = new StarMapWindow();
+  engineSack.starMapWindow.setX(300);
+  engineSack.starMapWindow.setY(300);
+  engineSack.starMapWindow.initialize();
+  engineSack.starMapWindow.pack();
+  engineSack.starMapWindow.setWsService(wsService);
+  engineSack.starMapWindow.setPlayer(engineSack.player);
+
   // link windows to window manager
   engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☀');
   engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☍');
@@ -189,6 +199,7 @@ export function clientStart(
   engineSack.windowManager.manageWindow(engineSack.shipFittingWindow, 'Ʌ');
   engineSack.windowManager.manageWindow(engineSack.ordersMarketWindow, '₪');
   engineSack.windowManager.manageWindow(engineSack.industrialMarketWindow, '⚙');
+  engineSack.windowManager.manageWindow(engineSack.starMapWindow, '⊞');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
@@ -199,6 +210,7 @@ export function clientStart(
     engineSack.shipFittingWindow,
     engineSack.ordersMarketWindow,
     engineSack.industrialMarketWindow,
+    engineSack.starMapWindow,
     engineSack.windowManager,
   ];
 
@@ -277,6 +289,7 @@ function handleJoin(d: GameMessage) {
   engineSack.ordersMarketWindow.setHidden(true);
   engineSack.industrialMarketWindow.setHidden(true);
   engineSack.pushErrorWindow.setHidden(true);
+  engineSack.starMapWindow.setHidden(true);
 
   // start game loop
   engineSack.lastFrameTime = Date.now();

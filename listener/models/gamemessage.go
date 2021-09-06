@@ -37,6 +37,7 @@ type MessageRegistry struct {
 	BuyFromSilo            int
 	SellToSilo             int
 	FactionUpdate          int
+	ViewStarMap            int
 }
 
 // Registry of target types
@@ -81,6 +82,7 @@ func NewMessageRegistry() *MessageRegistry {
 		BuyFromSilo:            25,
 		SellToSilo:             26,
 		FactionUpdate:          27,
+		ViewStarMap:            28,
 	}
 }
 
@@ -521,4 +523,9 @@ type ServerFactionBody struct {
 // Body containing an update on some or all of the unviverse's current factions for the client
 type ServerFactionUpdateBody struct {
 	Factions []ServerFactionBody `json:"factions"`
+}
+
+// Body containing a request from the client for the star map
+type ClientViewStarMapBody struct {
+	SessionID uuid.UUID `json:"sid"`
 }
