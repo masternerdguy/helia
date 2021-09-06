@@ -2,7 +2,7 @@ export class ClientViewStarMap {
   sid: string;
 }
 
-export class ServerViewStarMap {
+export class ServerStarMapUpdate {
   cachedMapData: string;
 }
 

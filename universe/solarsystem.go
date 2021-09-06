@@ -655,7 +655,20 @@ func (s *SolarSystem) PeriodicUpdate() {
 				// extract data
 				// data := evt.Body.(models.ClientViewStarMapBody)
 
-				c.WriteErrorMessage("not yet implemented")
+				// build message with cached map data
+				m := models.ServerStarMapUpdateBody{
+					CachedMapData: s.Universe.CachedMapData,
+				}
+
+				b, _ := json.Marshal(&m)
+
+				cu := models.GameMessage{
+					MessageType: msgRegistry.StarMapUpdate,
+					MessageBody: string(b),
+				}
+
+				// write response to client
+				c.WriteMessage(&cu)
 			}
 		}
 	}

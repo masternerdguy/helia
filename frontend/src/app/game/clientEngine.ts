@@ -35,6 +35,7 @@ import { ServerIndustrialOrdersUpdate } from './wsModels/bodies/industrialOrders
 import { ServerFactionUpdate } from './wsModels/bodies/factionUpdate';
 import { UpdateFactionCache } from './wsModels/shared';
 import { StarMapWindow } from './gdi/windows/starMapWindow';
+import { ServerStarMapUpdate, UnwrappedStarMapData } from './wsModels/bodies/viewStarMap';
 
 class EngineSack {
   constructor() {}
@@ -239,6 +240,8 @@ export function clientStart(
       handleIndustrialOrdersUpdateMessageFromServer(d);
     } else if (d.type == MessageTypes.FactionUpdate) {
       handleFactionUpdate(d);
+    } else if (d.type == MessageTypes.StarMapUpdate) {
+      handleStarMapUpdate(d);
     }
   });
 }
@@ -668,6 +671,17 @@ function handleCargoBayUpdate(d: GameMessage) {
   // update current cargo view cache
   const vw = new Container(msg);
   engineSack.player.currentCargoView = vw;
+}
+
+function handleStarMapUpdate(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerStarMapUpdate;
+
+  // null check
+  if (msg.cachedMapData) {
+    // update starmap cache
+    engineSack.player.currentStarMap = new UnwrappedStarMapData(msg.cachedMapData);
+  }
 }
 
 function handleOpenSellOrdersUpdateMessageFromServer(d: GameMessage) {

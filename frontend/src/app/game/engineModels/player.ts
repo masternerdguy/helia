@@ -1,3 +1,4 @@
+import { UnwrappedStarMapData } from '../wsModels/bodies/viewStarMap';
 import { Container } from './container';
 import { Faction } from './faction';
 import { Ship } from './ship';
@@ -6,6 +7,7 @@ import { System } from './system';
 export class Player {
   currentShip: Ship;
   currentCargoView: Container;
+  currentStarMap: UnwrappedStarMapData;
   currentSystem: System;
 
   currentTargetID: string;

@@ -38,6 +38,7 @@ type MessageRegistry struct {
 	SellToSilo             int
 	FactionUpdate          int
 	ViewStarMap            int
+	StarMapUpdate          int
 }
 
 // Registry of target types
@@ -83,6 +84,7 @@ func NewMessageRegistry() *MessageRegistry {
 		SellToSilo:             26,
 		FactionUpdate:          27,
 		ViewStarMap:            28,
+		StarMapUpdate:          29,
 	}
 }
 
@@ -525,12 +527,12 @@ type ServerFactionUpdateBody struct {
 	Factions []ServerFactionBody `json:"factions"`
 }
 
-// Body containing a request from the client for the star map
+// Body containing a request from the client for the starmap
 type ClientViewStarMapBody struct {
 	SessionID uuid.UUID `json:"sid"`
 }
 
-// Body containing the star map for the client
-type ServerViewStarMapBody struct {
+// Body containing the starmap for the client
+type ServerStarMapUpdateBody struct {
 	CachedMapData string `json:"cachedMapData"`
 }
