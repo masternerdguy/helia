@@ -32,6 +32,17 @@ export class StarMapWindow extends GDIWindow {
         this.wsSvc.sendMessage(MessageTypes.ViewStarMap, msg);
         this.needInitialFetch = false;
       }
+
+      setTimeout(() => {
+        // with current star map
+        const map = this.player.currentStarMap;
+
+        // center map camera on player's current system
+        const currentSystemEntry = map.findRawSystemByID(this.player.currentSystem.id);
+
+        this.camera.x = currentSystemEntry.x;
+        this.camera.y = currentSystemEntry.y;
+      }, 100);
     });
 
     super.setOnPreHandleRender((ctx) => {
@@ -39,11 +50,6 @@ export class StarMapWindow extends GDIWindow {
       if (this.player.currentStarMap) {
         // with current star map
         const map = this.player.currentStarMap;
-
-        // center map camera on player's current system
-        const currentSystemEntry = map.findRawSystemByID(this.player.currentSystem.id);
-        this.camera.x = currentSystemEntry.x;
-        this.camera.y = currentSystemEntry.y;
 
         // draw edges first
         ctx.fillStyle = GDIStyle.starMapEdgeColor;
@@ -86,5 +92,34 @@ export class StarMapWindow extends GDIWindow {
 
   setPlayer(player: Player) {
     this.player = player;
+  }
+
+  handleScroll(x: number, y: number, d: number) {
+    // adjust camera zoom
+    if (d < 0) {
+      this.camera.zoom *= 1.1;
+    } else if (d > 0) {
+      this.camera.zoom *= 0.9;
+    }
+
+    if (d < 0) {
+      // ease camera towards point
+      const hw = this.getWidth() / 2;
+      const hh = this.getHeight() / 2;
+
+      const dx = hw - (x - this.getX());
+      const dy = hh - (y - this.getY());
+
+      const vx = dx / hw;
+      const vy = dy / hh;
+
+      // make sure we aren't in the deadzone
+      if(Math.abs(vx) > 0.1 || Math.abs(vy) > 0.1) {
+        this.camera.x += vx * (this.camera.zoom * 0.75 * Math.sign(d));
+        this.camera.y += vy * (this.camera.zoom * 0.75 * Math.sign(d));
+
+        console.log(dx + " " + dy);
+      }
+    }
   }
 }
