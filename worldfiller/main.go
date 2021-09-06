@@ -34,6 +34,7 @@ func main() {
 	 */
 
 	// dropAsteroids(universe)
+	dropSanctuaryStations(universe)
 }
 
 /* Parameters for asteroid generation */
@@ -177,6 +178,147 @@ func calculateSystemSeed(s *universe.SolarSystem) int {
 	}
 
 	return seed
+}
+
+func dropSanctuaryStations(u *universe.Universe) {
+	fID, err := uuid.Parse("b3d3fa9c-b21e-490f-b39e-128b3af12128")
+
+	if err != nil {
+		panic(err)
+	}
+
+	toSave := make([]sql.Station, 0)
+
+	for _, r := range u.Regions {
+		for _, s := range r.Systems {
+			rand.Seed(int64(calculateSystemSeed(s)))
+
+			// is owned by sanctuary?
+			if s.HoldingFactionID == fID {
+				stars := s.CopyStars()
+				planets := s.CopyPlanets()
+				jumpholes := s.CopyJumpholes()
+				asteroids := s.CopyAsteroids()
+				stations := s.CopyStations()
+
+				// build sanctuary station for the system
+				stat := sql.Station{
+					ID:          uuid.New(),
+					SystemID:    s.ID,
+					StationName: "Sanctuary Outpost",
+					Texture:     "sanctuary-1",
+					Radius:      525,
+					Mass:        23700,
+					Theta:       float64(physics.RandInRange(0, 360)),
+					FactionID:   fID,
+				}
+
+				// determine position
+				for {
+					// generate random position in belt
+					dW := float64(physics.RandInRange(25000, 75000))
+					mag := dW
+					the := 2.0 * math.Pi * rand.Float64()
+
+					stat.PosX = (mag * math.Cos(the))
+					stat.PosY = (mag * math.Sin(the))
+
+					// check for overlap with forbidden objects
+					sB := physics.Dummy{
+						PosX: stat.PosX,
+						PosY: stat.PosY,
+					}
+
+					for _, v := range stars {
+						sA := physics.Dummy{
+							PosX: v.PosX,
+							PosY: v.PosY,
+						}
+
+						dst := physics.Distance(sA, sB)
+
+						if dst < (1+rand.Float64())*(v.Radius+stat.Radius) {
+							// not safe, try again
+							continue
+						}
+					}
+
+					for _, v := range planets {
+						sA := physics.Dummy{
+							PosX: v.PosX,
+							PosY: v.PosY,
+						}
+
+						dst := physics.Distance(sA, sB)
+
+						if dst < (1+rand.Float64())*(v.Radius+stat.Radius) {
+							// not safe, try again
+							continue
+						}
+					}
+
+					for _, v := range stations {
+						sA := physics.Dummy{
+							PosX: v.PosX,
+							PosY: v.PosY,
+						}
+
+						dst := physics.Distance(sA, sB)
+
+						if dst < (1+rand.Float64())*(v.Radius+stat.Radius) {
+							// not safe, try again
+							continue
+						}
+					}
+
+					for _, v := range jumpholes {
+						sA := physics.Dummy{
+							PosX: v.PosX,
+							PosY: v.PosY,
+						}
+
+						dst := physics.Distance(sA, sB)
+
+						if dst < (1+rand.Float64())*(v.Radius+stat.Radius) {
+							// not safe, try again
+							continue
+						}
+					}
+
+					for _, v := range asteroids {
+						sA := physics.Dummy{
+							PosX: v.PosX,
+							PosY: v.PosY,
+						}
+
+						dst := physics.Distance(sA, sB)
+
+						if dst < (1+rand.Float64())*(v.Radius+stat.Radius) {
+							// not safe, try again
+							continue
+						}
+					}
+
+					// safe to store asteroid
+					break
+				}
+
+				toSave = append(toSave, stat)
+			}
+		}
+	}
+
+	// get service
+	stationSvc := sql.GetStationService()
+
+	// save new stations
+	for _, st := range toSave {
+		err := stationSvc.NewStationWorldFiller(&st)
+
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 // Inserts minable asteroids into the universe

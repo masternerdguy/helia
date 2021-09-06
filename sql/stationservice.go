@@ -128,3 +128,30 @@ func (s StationService) UpdateStation(station Station) error {
 
 	return err
 }
+
+// Creates a new station in the database (for worldfiller)
+func (s StationService) NewStationWorldFiller(r *Station) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// insert asteroid
+	sql := `
+			INSERT INTO public.universe_stations(
+				id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta, factionid)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
+			`
+
+	q, err := db.Query(sql, r.ID, r.SystemID, r.StationName, r.PosX, r.PosY, r.Texture, r.Radius, r.Mass, r.Theta, r.FactionID)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}

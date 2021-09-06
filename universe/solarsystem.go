@@ -1282,6 +1282,25 @@ func (s *SolarSystem) CopyJumpholes() map[string]*Jumphole {
 	return copy
 }
 
+// Returns a copy of the asteroids in the system
+func (s *SolarSystem) CopyAsteroids() map[string]*Asteroid {
+	// obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	// make map for copies
+	copy := make(map[string]*Asteroid)
+
+	// copy asteroids into copy map
+	for k, v := range s.asteroids {
+		c := v.CopyAsteroid()
+		copy[k] = &c
+	}
+
+	// return copy map
+	return copy
+}
+
 // Returns a copy of the stars in the system
 func (s *SolarSystem) CopyStars() map[string]*Star {
 	// obtain lock

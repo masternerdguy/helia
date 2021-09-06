@@ -2,6 +2,7 @@ package universe
 
 import (
 	"helia/physics"
+	"sync"
 
 	"github.com/google/uuid"
 )
@@ -25,6 +26,8 @@ type Asteroid struct {
 	ItemFamilyID   string
 	ItemFamilyName string
 	ItemTypeMeta   Meta
+	// in-memory only
+	Lock sync.Mutex
 }
 
 // Returns a new physics dummy structure representing this station
@@ -35,5 +38,33 @@ func (a *Asteroid) ToPhysicsDummy() physics.Dummy {
 		PosX: a.PosX,
 		PosY: a.PosY,
 		Mass: a.Mass,
+	}
+}
+
+// Returns a copy of the asteroid
+func (s *Asteroid) CopyAsteroid() Asteroid {
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	return Asteroid{
+		ID:       s.ID,
+		SystemID: s.SystemID,
+		Name:     s.Name,
+		Texture:  s.Texture,
+		Radius:   s.Radius,
+		Theta:    s.Theta,
+		PosX:     s.PosX,
+		PosY:     s.PosY,
+		Mass:     s.Mass,
+		// secret, do not expose to player in global update
+		Yield: s.Yield,
+		// secret (ore details)
+		ItemTypeID:     s.ItemTypeID,
+		ItemTypeName:   s.ItemTypeName,
+		ItemFamilyID:   s.ItemFamilyID,
+		ItemFamilyName: s.ItemFamilyName,
+		ItemTypeMeta:   s.ItemTypeMeta,
+		// in-memory only
+		Lock: sync.Mutex{},
 	}
 }
