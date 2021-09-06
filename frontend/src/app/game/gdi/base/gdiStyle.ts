@@ -55,6 +55,10 @@ export class GDIStyle {
   static inputTextColor = 'white';
   static inputBorderSize = 2;
 
+  // starmap
+  static starMapEdgeColor = '#00091a';
+  static starMapEdgeWidth = 1.3;
+
   // underlying font sizes
   static smallFontSize = 7.25;
   static smallNormalFontSize = 9.25;

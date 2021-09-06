@@ -15,7 +15,7 @@ export class GDIWindow extends GDIBase {
   private hidden = false;
   private onHide = () => {};
   private onShow = () => {};
-  private onLastRenderStep = (ctx: any) => {};
+  private onPreHandleRender = (ctx: any) => {};
 
   initialize() {
     // initialize offscreen canvas
@@ -61,6 +61,24 @@ export class GDIWindow extends GDIBase {
   }
 
   render(): ImageBitmap {
+    // render background
+    this.ctx.fillStyle = GDIStyle.windowFillColor;
+    this.ctx.fillRect(
+      0,
+      GDIStyle.windowHandleHeight,
+      this.getWidth(),
+      this.getHeight()
+    );
+
+    // render components
+    for (const c of this.components) {
+      const b = c.render();
+      this.ctx.drawImage(b, c.getX(), c.getY() + GDIStyle.windowHandleHeight);
+    }
+
+    // run any arbitrary rendering before adding window decorations
+    this.onPreHandleRender(this.ctx);
+
     // render handle background
     if (this.dragMode) {
       this.ctx.fillStyle = GDIStyle.windowHandleDraggingColor;
@@ -90,21 +108,6 @@ export class GDIWindow extends GDIBase {
       GDIStyle.windowHandleHeight / 2
     );
 
-    // render background
-    this.ctx.fillStyle = GDIStyle.windowFillColor;
-    this.ctx.fillRect(
-      0,
-      GDIStyle.windowHandleHeight,
-      this.getWidth(),
-      this.getHeight()
-    );
-
-    // render components
-    for (const c of this.components) {
-      const b = c.render();
-      this.ctx.drawImage(b, c.getX(), c.getY() + GDIStyle.windowHandleHeight);
-    }
-
     if (!this.borderless) {
       // render border
       this.ctx.lineWidth = GDIStyle.windowBorderSize;
@@ -117,15 +120,12 @@ export class GDIWindow extends GDIBase {
       );
     }
 
-    // run final arbitrary render step
-    this.onLastRenderStep(this.ctx);
-
     // convert to image and return
     return this.canvas.transferToImageBitmap();
   }
 
-  setOnLastRenderStep(f: (ctx: any) => void) {
-    this.onLastRenderStep = f
+  setOnPreHandleRender(f: (ctx: any) => void) {
+    this.onPreHandleRender = f
   }
 
   handleClick(x: number, y: number) {
