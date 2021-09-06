@@ -22,11 +22,11 @@ type Universe struct {
 
 // Structure representing a region in a starmap
 type MapDataRegion struct {
-	ID      uuid.UUID `json:"id"`
-	PosX    float64   `json:"x"`
-	PosY    float64   `json:"y"`
-	Name    string    `json:"name"`
-	Systems []MapDataSystem
+	ID      uuid.UUID       `json:"id"`
+	PosX    float64         `json:"x"`
+	PosY    float64         `json:"y"`
+	Name    string          `json:"name"`
+	Systems []MapDataSystem `json:"systems"`
 }
 
 // Structure representing a solar system in a starmap

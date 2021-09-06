@@ -36,7 +36,10 @@ export class StarMapWindow extends GDIWindow {
   }
 
   periodicUpdate() {
-    //
+    // check if map exists
+    if (this.player.currentStarMap) {
+      
+    }
   }
 
   setWsService(wsSvc: WsService) {
