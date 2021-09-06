@@ -31,10 +31,11 @@ type MapDataRegion struct {
 
 // Structure representing a solar system in a starmap
 type MapDataSystem struct {
-	ID   uuid.UUID `json:"id"`
-	PosX float64   `json:"x"`
-	PosY float64   `json:"y"`
-	Name string    `json:"name"`
+	ID        uuid.UUID `json:"id"`
+	PosX      float64   `json:"x"`
+	PosY      float64   `json:"y"`
+	Name      string    `json:"name"`
+	FactionID uuid.UUID `json:"factionId"`
 }
 
 // Structure representing a jumphole connection in a starmap
@@ -70,10 +71,11 @@ func (u *Universe) BuildMapWithCache() error {
 
 			// map system into region
 			sys := MapDataSystem{
-				ID:   s.ID,
-				PosX: s.PosX,
-				PosY: s.PosY,
-				Name: s.SystemName,
+				ID:        s.ID,
+				PosX:      s.PosX,
+				PosY:      s.PosY,
+				Name:      s.SystemName,
+				FactionID: s.HoldingFactionID,
 			}
 
 			reg.Systems = append(reg.Systems, sys)

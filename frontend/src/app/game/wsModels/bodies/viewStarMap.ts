@@ -66,6 +66,7 @@ export class StarMapFlatSystem {
 }
 
 export class StarMapSolarSystem {
+  factionId: string;
   x: number;
   y: number;
   name: string;
