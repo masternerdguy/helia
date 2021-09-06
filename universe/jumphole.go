@@ -19,6 +19,7 @@ type Jumphole struct {
 	Radius       float64
 	Mass         float64
 	Theta        float64
+	Transient    bool
 	// in-memory only
 	OutSystem   *SolarSystem
 	OutJumphole *Jumphole
@@ -52,6 +53,7 @@ func (s *Jumphole) CopyJumphole() Jumphole {
 		Theta:        s.Theta,
 		Radius:       s.Radius,
 		Mass:         s.Mass,
+		Transient:    s.Transient,
 		// in-memory only
 		Lock: sync.Mutex{},
 		// intentionally not copying pointers

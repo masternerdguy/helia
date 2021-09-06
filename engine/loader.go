@@ -348,13 +348,6 @@ func LoadUniverse() (*universe.Universe, error) {
 	// link regions into universe
 	u.Regions = regions
 
-	// cache starmap
-	err = u.BuildMapWithCache()
-
-	if err != nil {
-		return nil, err
-	}
-
 	// return universe
 	return &u, nil
 }

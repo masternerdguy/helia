@@ -84,4 +84,5 @@ export class StarMapRegion {
 export class StarMapEdge {
   aID: string;
   bID: string;
+  transient: boolean;
 }

@@ -29,10 +29,22 @@ func (e *HeliaEngine) Initialize() *HeliaEngine {
 		panic(fmt.Sprintf("Unable to load game universe: %v", err))
 	}
 
+	// generate transient celestials
+	log.Println("Generating transient celestials...")
+	u.BuildTransientCelestials()
+
+	// cache starmap
+	log.Println("Building starmap...")
+	err = u.BuildMapWithCache()
+
+	if err != nil {
+		panic(fmt.Sprintf("Unable to build starmap: %v", err))
+	}
+
 	e.Universe = u
 
 	// instantiate engine
-	log.Println("Universe loaded!")
+	log.Println("Universe ready!")
 	engine := HeliaEngine{}
 
 	return &engine

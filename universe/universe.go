@@ -2,6 +2,8 @@ package universe
 
 import (
 	"encoding/json"
+	"fmt"
+	"helia/physics"
 
 	"github.com/google/uuid"
 )
@@ -11,6 +13,12 @@ const Heartbeat = 20
 
 // Space drag coefficient :)
 const SpaceDrag float64 = 0.025
+
+// Minimum transient jumphole pairs at startup
+const MinTransientEdges = 5
+
+// Maximum transient jumphole pairs at startup
+const MaxTransientEdges = 25
 
 // Structure representing the current game universe
 type Universe struct {
@@ -42,6 +50,7 @@ type MapDataSystem struct {
 type MapDataEdge struct {
 	StartSystemId uuid.UUID `json:"aID"`
 	EndSystemId   uuid.UUID `json:"bID"`
+	Transient     bool      `json:"transient"`
 }
 
 // Structure representing a starmap
@@ -85,6 +94,7 @@ func (u *Universe) BuildMapWithCache() error {
 				edge := MapDataEdge{
 					StartSystemId: j.SystemID,
 					EndSystemId:   j.OutSystemID,
+					Transient:     j.Transient,
 				}
 
 				data.Edges = append(data.Edges, edge)
@@ -103,6 +113,76 @@ func (u *Universe) BuildMapWithCache() error {
 	u.CachedMapData = string(b)
 
 	return err
+}
+
+// Generates transient objects that are not stored in the DB and will go away upon server restart
+func (u *Universe) BuildTransientCelestials() {
+	// capture region list
+	allRegions := make([]*Region, 0)
+
+	for _, e := range u.Regions {
+		allRegions = append(allRegions, e)
+	}
+
+	// capture global system list
+	allSystems := make([]*SolarSystem, 0)
+
+	for _, r := range allRegions {
+		for _, s := range r.Systems {
+			allSystems = append(allSystems, s)
+		}
+	}
+
+	// build transient jumpholes
+	edgeCount := physics.RandInRange(MinTransientEdges, MaxTransientEdges)
+
+	for i := 0; i < edgeCount; i++ {
+		// pick random A system
+		sysAIDX := physics.RandInRange(0, len(allSystems))
+		sysA := allSystems[sysAIDX]
+
+		// pick random B system
+		sysBIDX := physics.RandInRange(0, len(allSystems))
+		sysB := allSystems[sysBIDX]
+
+		// make sure this isn't the same system
+		if sysA.ID == sysB.ID {
+			continue
+		}
+
+		// create transient jumpholes
+		jhA := Jumphole{
+			ID:           uuid.New(),
+			SystemID:     sysA.ID,
+			OutSystemID:  sysB.ID,
+			JumpholeName: fmt.Sprintf("⚠ %v Jumphole", sysB.SystemName),
+			PosX:         float64(physics.RandInRange(-10000000, 10000000)),
+			PosY:         float64(physics.RandInRange(-10000000, 10000000)),
+			Texture:      "Jumphole-Transient",
+			Radius:       float64(physics.RandInRange(50, 400)),
+			Mass:         float64(physics.RandInRange(1000, 10000)),
+			Theta:        float64(physics.RandInRange(0, 360)),
+			Transient:    true,
+		}
+
+		jhB := Jumphole{
+			ID:           uuid.New(),
+			SystemID:     sysB.ID,
+			OutSystemID:  sysA.ID,
+			JumpholeName: fmt.Sprintf("⚠ %v Jumphole", sysA.SystemName),
+			PosX:         float64(physics.RandInRange(-10000000, 10000000)),
+			PosY:         float64(physics.RandInRange(-10000000, 10000000)),
+			Texture:      "Jumphole-Transient",
+			Radius:       float64(physics.RandInRange(50, 400)),
+			Mass:         float64(physics.RandInRange(1000, 10000)),
+			Theta:        float64(physics.RandInRange(0, 360)),
+			Transient:    true,
+		}
+
+		// inject into universe
+		sysA.jumpholes[jhA.ID.String()] = &jhA
+		sysB.jumpholes[jhB.ID.String()] = &jhB
+	}
 }
 
 // Finds the ship with the specified ID in the running game simulation

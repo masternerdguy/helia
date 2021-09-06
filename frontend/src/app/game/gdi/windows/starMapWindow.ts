@@ -53,11 +53,47 @@ export class StarMapWindow extends GDIWindow {
         // with current star map
         const map = this.player.currentStarMap;
 
-        // draw edges first
-        ctx.fillStyle = GDIStyle.starMapEdgeColor;
+        // draw transient edges first
+        ctx.strokeStyle = GDIStyle.starMapEdgeTransientColor;
+
+
+        console.log(map)
 
         for (let row of map.flattened) {
           for (let edge of row.edges) {
+            // highlight transient connections
+            if (edge[0].transient == false) {
+              continue;
+            } 
+
+            // get endpoint
+            const b = edge[1];
+
+            // project endpoints
+            const ax = this.camera.projectX(row.system.x);
+            const ay = this.camera.projectY(row.system.y);
+
+            const bx = this.camera.projectX(b.x);
+            const by = this.camera.projectY(b.y);
+
+            // draw line
+            ctx.beginPath();
+            ctx.moveTo(ax, ay);
+            ctx.lineTo(bx, by);
+            ctx.lineWidth = GDIStyle.starMapEdgeWidth;
+            ctx.stroke();
+          }
+        }
+
+        // draw static edges next
+        ctx.strokeStyle = GDIStyle.starMapEdgeColor;
+
+        for (let row of map.flattened) {
+          for (let edge of row.edges) {
+            if (edge[0].transient) {
+              continue;
+            } 
+
             // get endpoint
             const b = edge[1];
 
@@ -79,12 +115,16 @@ export class StarMapWindow extends GDIWindow {
 
         // draw system dots
         for (let row of map.flattened) {
+          if (row.edges.length == 1) {
+            continue;
+          }
+
           if (row.system.id != this.player.currentSystem.id) {
             ctx.strokeStyle = GDIStyle.starMapSystemColor;
             ctx.fillStyle = GDIStyle.starMapSystemColor;
           } else {
-            ctx.strokeStyle = 'yellow';
-            ctx.fillStyle = 'yellow';
+            ctx.strokeStyle = GDIStyle.starMapCurrentSystemColor;
+            ctx.fillStyle = GDIStyle.starMapCurrentSystemColor;
           }
 
           // project position
