@@ -529,3 +529,8 @@ type ServerFactionUpdateBody struct {
 type ClientViewStarMapBody struct {
 	SessionID uuid.UUID `json:"sid"`
 }
+
+// Body containing the star map for the client
+type ServerViewStarMapBody struct {
+	CachedMapData string `json:"cachedMapData"`
+}
