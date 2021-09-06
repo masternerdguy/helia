@@ -15,6 +15,7 @@ export class GDIWindow extends GDIBase {
   private hidden = false;
   private onHide = () => {};
   private onShow = () => {};
+  private onLastRenderStep = (ctx: any) => {};
 
   initialize() {
     // initialize offscreen canvas
@@ -116,8 +117,15 @@ export class GDIWindow extends GDIBase {
       );
     }
 
+    // run final arbitrary render step
+    this.onLastRenderStep(this.ctx);
+
     // convert to image and return
     return this.canvas.transferToImageBitmap();
+  }
+
+  setOnLastRenderStep(f: (ctx: any) => void) {
+    this.onLastRenderStep = f
   }
 
   handleClick(x: number, y: number) {

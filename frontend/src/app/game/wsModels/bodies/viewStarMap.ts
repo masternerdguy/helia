@@ -46,9 +46,6 @@ export class UnwrappedStarMapData {
         this.flattened.push(flat);
       }
     }
-
-    // debug out
-    console.log(this);
   }
 
   findRawSystemByID(id: string): StarMapSolarSystem {

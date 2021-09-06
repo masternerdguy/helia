@@ -29,6 +29,17 @@ export class StarMapWindow extends GDIWindow {
         this.needInitialFetch = false;
       }
     });
+
+    super.setOnLastRenderStep((ctx) => {
+      // check if map exists
+      if (this.player.currentStarMap) {
+        // with current star map
+        const map = this.player.currentStarMap;
+
+        // debug out
+        console.log(map);
+      }
+    });
   }
 
   pack() {
@@ -36,10 +47,7 @@ export class StarMapWindow extends GDIWindow {
   }
 
   periodicUpdate() {
-    // check if map exists
-    if (this.player.currentStarMap) {
-      
-    }
+    //
   }
 
   setWsService(wsSvc: WsService) {
