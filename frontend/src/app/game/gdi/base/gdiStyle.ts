@@ -58,6 +58,7 @@ export class GDIStyle {
   // starmap
   static starMapEdgeColor = '#00091a';
   static starMapSystemColor = '#336699';
+  static starMapSystemLabelColor = 'white';
   static starMapEdgeWidth = 0.15;
   static starMapSystemWidth = 1.5;
 
