@@ -10,7 +10,7 @@ import { Asteroid } from './asteroid';
 import { GetFactionCacheEntry } from '../wsModels/shared';
 import { Faction } from './faction';
 
-export class System extends WSSystem { 
+export class System extends WSSystem {
   constructor(ws: WSSystem) {
     super();
 

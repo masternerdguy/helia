@@ -125,7 +125,7 @@ export class GDIWindow extends GDIBase {
   }
 
   setOnPreHandleRender(f: (ctx: any) => void) {
-    this.onPreHandleRender = f
+    this.onPreHandleRender = f;
   }
 
   handleClick(x: number, y: number) {

@@ -28,8 +28,8 @@ export class UnwrappedStarMapData {
         const flat: StarMapFlatSystem = {
           region: region,
           system: system,
-          edges: []
-        }
+          edges: [],
+        };
 
         // get all edges
         for (let edge of this.edges) {

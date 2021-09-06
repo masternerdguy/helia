@@ -168,12 +168,10 @@ export class OverviewWindow extends GDIWindow {
         listString: () => {
           const faction = i.getFaction();
 
-          return `${fixedString('STATION', 9)}${
-            fixedString("[" + faction?.ticker + "]", 6)
-          }${fixedString(
-            i.stationName,
-            18
-          )} ${fixedString(od, 8)}`;
+          return `${fixedString('STATION', 9)}${fixedString(
+            '[' + faction?.ticker + ']',
+            6
+          )}${fixedString(i.stationName, 18)} ${fixedString(od, 8)}`;
         },
       };
 
@@ -201,12 +199,13 @@ export class OverviewWindow extends GDIWindow {
         listString: () => {
           const faction = i.getFaction();
 
-          return `${fixedString('SHIP', 9)}${
-            fixedString("[" + faction?.ticker + "]", 6)
-          }${fixedString(
-            i.ownerName,
-            10
-          )} ${fixedString(i.texture, 7)} ${fixedString(od, 8)}`;
+          return `${fixedString('SHIP', 9)}${fixedString(
+            '[' + faction?.ticker + ']',
+            6
+          )}${fixedString(i.ownerName, 10)} ${fixedString(
+            i.texture,
+            7
+          )} ${fixedString(od, 8)}`;
         },
       };
 

@@ -35,7 +35,10 @@ import { ServerIndustrialOrdersUpdate } from './wsModels/bodies/industrialOrders
 import { ServerFactionUpdate } from './wsModels/bodies/factionUpdate';
 import { UpdateFactionCache } from './wsModels/shared';
 import { StarMapWindow } from './gdi/windows/starMapWindow';
-import { ServerStarMapUpdate, UnwrappedStarMapData } from './wsModels/bodies/viewStarMap';
+import {
+  ServerStarMapUpdate,
+  UnwrappedStarMapData,
+} from './wsModels/bodies/viewStarMap';
 
 class EngineSack {
   constructor() {}
@@ -680,7 +683,9 @@ function handleStarMapUpdate(d: GameMessage) {
   // null check
   if (msg.cachedMapData) {
     // update starmap cache
-    engineSack.player.currentStarMap = new UnwrappedStarMapData(msg.cachedMapData);
+    engineSack.player.currentStarMap = new UnwrappedStarMapData(
+      msg.cachedMapData
+    );
   }
 }
 

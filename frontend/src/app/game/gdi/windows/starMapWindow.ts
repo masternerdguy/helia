@@ -26,7 +26,7 @@ export class StarMapWindow extends GDIWindow {
       // fetch map if needed
       if (this.needInitialFetch) {
         const msg: ClientViewStarMap = {
-          sid: this.wsSvc.sid
+          sid: this.wsSvc.sid,
         };
 
         this.wsSvc.sendMessage(MessageTypes.ViewStarMap, msg);
@@ -38,7 +38,9 @@ export class StarMapWindow extends GDIWindow {
         const map = this.player.currentStarMap;
 
         // center map camera on player's current system
-        const currentSystemEntry = map.findRawSystemByID(this.player.currentSystem.id);
+        const currentSystemEntry = map.findRawSystemByID(
+          this.player.currentSystem.id
+        );
 
         this.camera.x = currentSystemEntry.x;
         this.camera.y = currentSystemEntry.y;
@@ -77,12 +79,12 @@ export class StarMapWindow extends GDIWindow {
 
         // draw system dots
         for (let row of map.flattened) {
-          if(row.system.id != this.player.currentSystem.id) {
-          ctx.strokeStyle = GDIStyle.starMapSystemColor;
-          ctx.fillStyle = GDIStyle.starMapSystemColor;
+          if (row.system.id != this.player.currentSystem.id) {
+            ctx.strokeStyle = GDIStyle.starMapSystemColor;
+            ctx.fillStyle = GDIStyle.starMapSystemColor;
           } else {
-            ctx.strokeStyle = "yellow";
-            ctx.fillStyle = "yellow";
+            ctx.strokeStyle = 'yellow';
+            ctx.fillStyle = 'yellow';
           }
 
           // project position
@@ -90,7 +92,14 @@ export class StarMapWindow extends GDIWindow {
           const ay = this.camera.projectY(row.system.y);
 
           ctx.beginPath();
-          ctx.arc(ax, ay, GDIStyle.starMapSystemWidth * 2, 0, 2 * Math.PI, false);
+          ctx.arc(
+            ax,
+            ay,
+            GDIStyle.starMapSystemWidth * 2,
+            0,
+            2 * Math.PI,
+            false
+          );
           ctx.lineWidth = 2;
           ctx.stroke();
         }
@@ -134,7 +143,7 @@ export class StarMapWindow extends GDIWindow {
       const vy = dy / hh;
 
       // make sure we aren't in the deadzone
-      if(Math.abs(vx) > 0.1 || Math.abs(vy) > 0.1) {
+      if (Math.abs(vx) > 0.1 || Math.abs(vy) > 0.1) {
         this.camera.x += vx * (this.camera.zoom * 0.75 * Math.sign(d));
         this.camera.y += vy * (this.camera.zoom * 0.75 * Math.sign(d));
       }

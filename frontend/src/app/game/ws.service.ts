@@ -22,7 +22,9 @@ export class WsService {
     this.ws = webSocket({
       url: environment.wsUrl + 'connect',
       deserializer: (e: MessageEvent) => {
-        const decompressed = pako.inflate(this.base64ToArrayBuffer(e.data), { to: 'string' })
+        const decompressed = pako.inflate(this.base64ToArrayBuffer(e.data), {
+          to: 'string',
+        });
         return JSON.parse(decompressed);
       },
       serializer: (value: GameMessage) => JSON.stringify(value),
@@ -61,7 +63,7 @@ export class WsService {
     var bytes = new Uint8Array(len);
 
     for (var i = 0; i < len; i++) {
-        bytes[i] = bs.charCodeAt(i);
+      bytes[i] = bs.charCodeAt(i);
     }
 
     return bytes.buffer;
