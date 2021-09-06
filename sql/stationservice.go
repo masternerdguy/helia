@@ -138,7 +138,7 @@ func (s StationService) NewStationWorldFiller(r *Station) error {
 		return err
 	}
 
-	// insert asteroid
+	// insert station
 	sql := `
 			INSERT INTO public.universe_stations(
 				id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta, factionid)
