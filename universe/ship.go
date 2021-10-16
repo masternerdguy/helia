@@ -2689,7 +2689,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 					}
 				}
 
-				if !found {
+				if !found && q > 0 {
 					// create a new stack of ore / ice
 					newItem := Item{
 						ID:             uuid.New(),
@@ -2715,7 +2715,11 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 					// add new item to cargo hold
 					m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, &newItem)
 				}
+			} else {
+				return false
 			}
+		} else {
+			return false
 		}
 	}
 
