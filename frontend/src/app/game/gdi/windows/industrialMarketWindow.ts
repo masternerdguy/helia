@@ -1010,7 +1010,7 @@ function buildOrderViewDetailRow(
       return `${cargoString} ${fixedString(
         order.price.toString() + ' CBN',
         14
-      )} ${fixedString(cargoQuantity(volume), 8)}`;
+      )}`;
     },
   };
 
