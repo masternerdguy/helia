@@ -2618,7 +2618,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		}
 	}
 
-	// apply damage (or ore pulled if asteroid) to target
+	// apply damage (or ore / ice pulled if asteroid) to target
 	if *m.TargetType == tgtReg.Ship {
 		c := tgtI.(*Ship)
 		c.DealDamage(shieldDmg, armorDmg, hullDmg)
@@ -2630,7 +2630,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		canMineOre, _ := m.ItemTypeMeta.GetBool("can_mine_ore")
 		canMineIce, _ := m.ItemTypeMeta.GetBool("can_mine_ice")
 
-		// get ore type and volume
+		// get ore / ice type and volume
 		c := tgtI.(*Asteroid)
 
 		// can this module mine this type?
