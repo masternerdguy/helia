@@ -256,7 +256,7 @@ func LoadUniverse() (*universe.Universe, error) {
 						return nil, err
 					}
 
-					processes[spx.ProcessID.String()] = spx
+					processes[spx.ID.String()] = spx
 				}
 
 				// build station
