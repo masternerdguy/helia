@@ -35,6 +35,8 @@ export class ModuleEffect extends WsPushModuleEffect {
 
     if (b.gfxEffect === 'basic_laser_tool') {
       this.vfxData = repo.basicLaserTool();
+    } else if (b.gfxEffect === 'basic_ice_miner') {
+      this.vfxData = repo.basicIceMiner();
     } else if (b.gfxEffect === 'basic_shield_booster') {
       this.vfxData = repo.basicShieldBooster();
     }

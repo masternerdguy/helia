@@ -2,6 +2,7 @@ package universe
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"sync"
 	"time"
@@ -2597,8 +2598,19 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	if found {
 		// adjust based on falloff style
 		if falloff == "linear" {
-			// damage dealt (or ore pulled if asteroid) is a proportion of the distance to target over max range (closer is higher)
+			// damage dealt (or ore / ice pulled if asteroid) is a proportion of the distance to target over max range (closer is higher)
 			rangeRatio = 1 - (d / modRange)
+
+			shieldDmg *= rangeRatio
+			armorDmg *= rangeRatio
+			hullDmg *= rangeRatio
+		} else if falloff == "reverse_linear" {
+			// damage dealt (or ore / ice pulled if asteroid) is a proportion of the distance to target over max range (further is higher)
+			rangeRatio = (d / modRange)
+
+			if d > modRange {
+				rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+			}
 
 			shieldDmg *= rangeRatio
 			armorDmg *= rangeRatio
@@ -2614,37 +2626,57 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		c := tgtI.(*Station)
 		c.DealDamage(shieldDmg, armorDmg, hullDmg)
 	} else if *m.TargetType == tgtReg.Asteroid {
-		// target is an asteroid - is this a miner?
-		canMineOre, f := m.ItemTypeMeta.GetBool("can_mine_ore")
+		// target is an asteroid - what can this module mine?
+		canMineOre, _ := m.ItemTypeMeta.GetBool("can_mine_ore")
+		canMineIce, _ := m.ItemTypeMeta.GetBool("can_mine_ice")
 
-		if f && canMineOre {
+		// get ore type and volume
+		c := tgtI.(*Asteroid)
+
+		// can this module mine this type?
+		canMine := false
+
+		if c.ItemFamilyID == "ore" && canMineOre {
+			canMine = true
+		} else if c.ItemFamilyID == "ice" && canMineIce {
+			canMine = true
+		}
+
+		if canMine {
 			// get mining volume
-			miningVolume, _ := m.ItemMeta.GetFloat64("ore_mining_volume")
+			oreMiningVolume, _ := m.ItemMeta.GetFloat64("ore_mining_volume")
+			iceMiningVolume, _ := m.ItemMeta.GetFloat64("ice_mining_volume")
 
-			// get ore type and volume
-			c := tgtI.(*Asteroid)
+			miningVolume := 0.0
 
-			oreType := c.ItemTypeID
-			oreVol, _ := c.ItemTypeMeta.GetFloat64("volume")
+			if c.ItemFamilyID == "ore" && canMineOre {
+				miningVolume = oreMiningVolume
+			} else if c.ItemFamilyID == "ice" && canMineIce {
+				miningVolume = iceMiningVolume
+			}
+
+			// get type and volume of ore / ice being collected
+			unitType := c.ItemTypeID
+			unitVol, _ := c.ItemTypeMeta.GetFloat64("volume")
 
 			// get available space in cargo hold
 			free := m.shipMountedOn.GetRealCargoBayVolume() - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
 
-			// calculate effective ore volume pulled
+			// calculate effective ore / ice volume pulled
 			pulled := miningVolume * c.Yield * rangeRatio
 
-			// make sure there is sufficient room to deposit the ore
+			// make sure there is sufficient room to deposit the ore / ice
 			if free-pulled >= 0 {
 				found := false
 
 				// quantity to be placed in cargo bay
-				q := int((miningVolume * c.Yield) / oreVol)
+				q := int((miningVolume * c.Yield) / unitVol)
 
-				// is there already packaged ore of this type in the hold?
+				// is there already packaged ore / ice of this type in the hold?
 				for idx := range m.shipMountedOn.CargoBay.Items {
 					itm := m.shipMountedOn.CargoBay.Items[idx]
 
-					if itm.ItemTypeID == oreType && itm.IsPackaged && !itm.CoreDirty {
+					if itm.ItemTypeID == unitType && itm.IsPackaged && !itm.CoreDirty {
 						// increase the size of this stack
 						itm.Quantity += q
 
@@ -2658,14 +2690,14 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 				}
 
 				if !found {
-					// create a new stack of ore
+					// create a new stack of ore / ice
 					newItem := Item{
 						ID:             uuid.New(),
-						ItemTypeID:     oreType,
+						ItemTypeID:     unitType,
 						Meta:           c.ItemTypeMeta,
 						Created:        time.Now(),
 						CreatedBy:      &m.shipMountedOn.UserID,
-						CreatedReason:  "Mined ore",
+						CreatedReason:  fmt.Sprintf("Mined %v", c.ItemFamilyID),
 						ContainerID:    m.shipMountedOn.CargoBayContainerID,
 						Quantity:       q,
 						IsPackaged:     true,

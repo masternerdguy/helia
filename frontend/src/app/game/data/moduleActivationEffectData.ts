@@ -9,6 +9,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  basicIceMiner(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 1500,
+      color: 'blue',
+      filter: 'blur(2px)', // "feather"
+      thickness: 0.65,
+    };
+  }
+
   basicShieldBooster(): ModuleActivationEffectData {
     return {
       type: 'bubble_shield_boost',
