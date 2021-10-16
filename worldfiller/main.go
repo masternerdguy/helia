@@ -34,7 +34,8 @@ func main() {
 	 */
 
 	// dropAsteroids(universe)
-	dropSanctuaryStations(universe)
+	//dropSanctuaryStations(universe)
+	injectProcess(universe)
 }
 
 /* Parameters for asteroid generation */
@@ -178,6 +179,60 @@ func calculateSystemSeed(s *universe.SolarSystem) int {
 	}
 
 	return seed
+}
+
+func injectProcess(u *universe.Universe) {
+	pID, err := uuid.Parse("638a1828-7ed9-41ee-a298-263845f65aea")
+	prob := 200
+
+	stationProcessSvc := sql.GetStationProcessService()
+
+	if err != nil {
+		panic(err)
+	}
+
+	var textures = [...]string{
+		"federation-7",
+		"kingdom-2",
+		"kingdom-6",
+		"sanctuary-1",
+	}
+
+	toSave := make([]sql.StationProcess, 0)
+
+	for _, r := range u.Regions {
+		for _, s := range r.Systems {
+			rand.Seed(int64(calculateSystemSeed(s)))
+
+			stations := s.CopyStations()
+
+			for _, st := range stations {
+				for _, t := range textures {
+					if st.Texture == t {
+						roll := physics.RandInRange(0, 100)
+
+						if roll <= prob {
+							sp := sql.StationProcess{
+								StationID: st.ID,
+								ProcessID: pID,
+								ID:        uuid.New(),
+							}
+
+							toSave = append(toSave, sp)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for _, o := range toSave {
+		err := stationProcessSvc.NewStationProcessWorldMaker(&o)
+
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 func dropSanctuaryStations(u *universe.Universe) {
