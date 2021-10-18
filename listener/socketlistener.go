@@ -237,6 +237,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientViewStarMap(&client, &b)
+		} else if m.MessageType == msgRegistry.ConsumeFuel {
+			// decode body as ClientConsumeFuelBody
+			b := models.ClientConsumeFuelBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientConsumeFuel(&client, &b)
 		}
 	}
 }
@@ -941,6 +948,29 @@ func (l *SocketListener) handleClientViewStarMap(client *shared.GameClient, body
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.ViewStarMap)
+	}
+}
+
+func (l *SocketListener) handleClientConsumeFuel(client *shared.GameClient, body *models.ClientConsumeFuelBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientConsumeFuel: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.ConsumeFuel)
 	}
 }
 

@@ -39,6 +39,7 @@ type MessageRegistry struct {
 	FactionUpdate          int
 	ViewStarMap            int
 	StarMapUpdate          int
+	ConsumeFuel            int
 }
 
 // Registry of target types
@@ -85,6 +86,7 @@ func NewMessageRegistry() *MessageRegistry {
 		FactionUpdate:          27,
 		ViewStarMap:            28,
 		StarMapUpdate:          29,
+		ConsumeFuel:            30,
 	}
 }
 
@@ -535,4 +537,10 @@ type ClientViewStarMapBody struct {
 // Body containing the starmap for the client
 type ServerStarMapUpdateBody struct {
 	CachedMapData string `json:"cachedMapData"`
+}
+
+// Body containing a request to consume a fuel pellet and convert it into fuel for the current ship
+type ClientConsumeFuelBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	ItemID    uuid.UUID `json:"itemId"`
 }

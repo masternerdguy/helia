@@ -17,6 +17,7 @@ import { GDIOverlay } from '../components/gdiOverlay';
 import { ClientSplitItem } from '../../wsModels/bodies/splitItem';
 import { ClientFitModule } from '../../wsModels/bodies/fitModule';
 import { GDIBar } from '../components/gdiBar';
+import { ClientConsumeFuel } from '../../wsModels/bodies/consumeFuel';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -254,6 +255,23 @@ export class ShipFittingWindow extends GDIWindow {
         };
 
         this.wsSvc.sendMessage(MessageTypes.FitModule, tiMsg);
+
+        // request cargo bay refresh
+        this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
+      } else if (a === 'Load Fuel') {
+        // get selected item
+        const i: ShipViewRow = this.shipView.getSelectedItem();
+
+        // send consume request
+        const tiMsg: ClientConsumeFuel = {
+          sid: this.wsSvc.sid,
+          itemId: (i.object as WSContainerItem).id,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.ConsumeFuel, tiMsg);
 
         // request cargo bay refresh
         this.refreshCargoBay();
@@ -689,6 +707,15 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
       if (isModule) {
         // offer fit action
         actions.push('Fit');
+      }
+
+      // determine whether or not this is fuel
+      const isFuel =
+        m.itemFamilyID === "fuel";
+
+      if (isFuel) {
+        // offer load fuel action
+        actions.push('Load Fuel');
       }
     }
 

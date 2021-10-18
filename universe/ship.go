@@ -2307,6 +2307,65 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 	return nil
 }
 
+// Attempts to buy an output from a silo and places it in cargo if successful
+func (s *Ship) ConsumeFuelFromCargo(itemID uuid.UUID, lock bool) error {
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// lock cargo bay
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	// make sure ship is docked
+	if s.DockedAtStationID == nil {
+		return errors.New("you must be docked to consume a fuel pellet")
+	}
+
+	// find item in cargo bay
+	item := s.FindItemInCargo(itemID)
+
+	if item == nil {
+		return errors.New("item not found in cargo bay")
+	}
+
+	// make sure item is clean
+	if item.CoreDirty {
+		return errors.New("item is dirty and waiting on an escalation to save its state")
+	}
+
+	// make sure item is a fuel pellet
+	if item.ItemFamilyID != "fuel" {
+		return errors.New("item is not a fuel pellet")
+	}
+
+	// make sure item is unpackaged
+	if item.IsPackaged {
+		return errors.New("only unpackaged pellets can be consumed")
+	}
+
+	// determine fuel quantity to add
+	factor, f := item.Meta.GetInt("fuelconversion")
+
+	if !f {
+		return errors.New("missing conversion factor")
+	}
+
+	// add fuel to tank
+	s.Fuel += float64(factor)
+
+	// reduce quantity of item to 0 (always unpackaged)
+	item.Quantity = 0
+	item.CoreDirty = true
+
+	// escalate to core for saving in db
+	s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
+
+	return nil
+}
+
 // Updates a fitted slot on a ship
 func (m *FittedSlot) PeriodicUpdate() {
 	if m.IsCycling {
