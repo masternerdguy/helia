@@ -478,9 +478,6 @@ func (s *Ship) PeriodicUpdate() {
 		s.PosX = s.DockedAtStation.PosX
 		s.PosY = s.DockedAtStation.PosY
 
-		// reset fuel
-		s.Fuel = math.Abs(s.GetRealMaxFuel())
-
 		// check autopilot
 		s.doDockedAutopilot()
 	}
