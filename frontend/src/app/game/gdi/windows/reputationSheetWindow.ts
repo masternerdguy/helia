@@ -6,6 +6,7 @@ import { Faction } from '../../engineModels/faction';
 
 export class ReputationSheetWindow extends GDIWindow {
   private factionList = new GDIList();
+  private actionList = new GDIList();
 
   initialize() {
     // set dimensions
@@ -27,21 +28,38 @@ export class ReputationSheetWindow extends GDIWindow {
     this.factionList.setX(0);
     this.factionList.setY(0);
 
-    this.factionList.setFont(FontSize.large);
+    this.factionList.setFont(FontSize.normal);
     this.factionList.setOnClick((item) => {
-      console.log(item);
+      const o = item as FactionRepViewRow;
+
+      this.actionList.setItems(o.actions)
     });
 
     this.addComponent(this.factionList);
+
+    // action list
+    this.actionList.setWidth(100);
+    this.actionList.setHeight(200);
+    this.actionList.initialize();
+
+    this.actionList.setX(300);
+    this.actionList.setY(0);
+
+    this.actionList.setFont(FontSize.normal);
+    this.actionList.setOnClick((item) => {
+      console.log(item); // todo
+    });
+
+    this.addComponent(this.actionList);
   }
 
   periodicUpdate() {
     if (!this.isHidden()) {
       // get factions
-      const factions = GetFactionCache()
+      const factions = GetFactionCache();
 
       // build rows
-      const factionRows: FactionRepViewRow[] = []
+      const factionRows: FactionRepViewRow[] = [];
 
       for (const f of factions) {
         factionRows.push({
@@ -52,12 +70,12 @@ export class ReputationSheetWindow extends GDIWindow {
       }
 
       // update faction list
-      const sp = this.factionList.getScroll()
-      const si = this.factionList.getSelectedIndex()
+      const sp = this.factionList.getScroll();
+      const si = this.factionList.getSelectedIndex();
 
-      this.factionList.setItems(factionRows)
-      this.factionList.setScroll(sp)
-      this.factionList.setSelectedIndex(si)
+      this.factionList.setItems(factionRows);
+      this.factionList.setScroll(sp);
+      this.factionList.setSelectedIndex(si);
     }
   }
 }
