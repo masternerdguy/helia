@@ -33,7 +33,10 @@ import { PushErrorWindow } from './gdi/windows/pushErrorWindow';
 import { IndustrialMarketWindow } from './gdi/windows/industrialMarketWindow';
 import { ServerIndustrialOrdersUpdate } from './wsModels/bodies/industrialOrdersUpdate';
 import { ServerFactionUpdate } from './wsModels/bodies/factionUpdate';
-import { UpdateFactionCache, UpdatePlayerFactionRelationshipCache } from './wsModels/shared';
+import {
+  UpdateFactionCache,
+  UpdatePlayerFactionRelationshipCache,
+} from './wsModels/shared';
 import { StarMapWindow } from './gdi/windows/starMapWindow';
 import {
   ServerStarMapUpdate,

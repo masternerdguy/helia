@@ -49,7 +49,9 @@ export function GetFactionCacheEntry(id: string): Faction {
   return (window as any).factionDictionary[id] as Faction;
 }
 
-export function UpdatePlayerFactionRelationshipCache(playerFactions: WSPlayerFactionRelationship[]) {
+export function UpdatePlayerFactionRelationshipCache(
+  playerFactions: WSPlayerFactionRelationship[]
+) {
   if (!(window as any).playerFactionDictionary) {
     (window as any).playerFactionDictionary = {};
   }
@@ -68,9 +70,14 @@ export function GetPlayerFactionRelationshipCache(): WSPlayerFactionRelationship
 
   for (const f in (window as any).playerFactionDictionary) {
     if (
-      Object.prototype.hasOwnProperty.call((window as any).playerFactionDictionary, f)
+      Object.prototype.hasOwnProperty.call(
+        (window as any).playerFactionDictionary,
+        f
+      )
     ) {
-      const e = (window as any).playerFactionDictionary[f] as WSPlayerFactionRelationship;
+      const e = (window as any).playerFactionDictionary[
+        f
+      ] as WSPlayerFactionRelationship;
       cache.push(e);
     }
   }
@@ -78,10 +85,14 @@ export function GetPlayerFactionRelationshipCache(): WSPlayerFactionRelationship
   return cache;
 }
 
-export function GetPlayerFactionRelationshipCacheEntry(id: string): WSPlayerFactionRelationship {
+export function GetPlayerFactionRelationshipCacheEntry(
+  id: string
+): WSPlayerFactionRelationship {
   if (!(window as any).playerFactionDictionary) {
     return null;
   }
 
-  return (window as any).playerFactionDictionary[id] as WSPlayerFactionRelationship;
+  return (window as any).playerFactionDictionary[
+    id
+  ] as WSPlayerFactionRelationship;
 }

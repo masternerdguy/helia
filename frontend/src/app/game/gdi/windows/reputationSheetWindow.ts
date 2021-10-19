@@ -1,7 +1,10 @@
 import { GDIWindow } from '../base/gdiWindow';
 import { FontSize } from '../base/gdiStyle';
 import { GDIList } from '../components/gdiList';
-import { GetFactionCache, GetPlayerFactionRelationshipCache } from '../../wsModels/shared';
+import {
+  GetFactionCache,
+  GetPlayerFactionRelationshipCache,
+} from '../../wsModels/shared';
 import { Faction } from '../../engineModels/faction';
 import { WSPlayerFactionRelationship } from '../../wsModels/entities/wsPlayerFaction';
 import { WSFactionRelationship } from '../../wsModels/entities/wsFaction';
@@ -200,7 +203,10 @@ class FactionInfoViewRow {
   listString: () => string;
 }
 
-function factionListRowString(rel: WSPlayerFactionRelationship, faction: Faction) {
+function factionListRowString(
+  rel: WSPlayerFactionRelationship,
+  faction: Faction
+) {
   if (rel == null || faction == null) {
     return;
   }
@@ -214,7 +220,7 @@ function factionListRowString(rel: WSPlayerFactionRelationship, faction: Faction
 
   // determine whether or not the player is a member
   let memberFlag = '';
-  
+
   if (rel.isMember) {
     memberFlag = '✪';
   }
