@@ -36,4 +36,5 @@ export enum MessageTypes {
   ViewStarMap = 28,
   StarMapUpdate = 29,
   ConsumeFuel = 30,
+  PlayerFactionUpdate = 31,
 }

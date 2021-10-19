@@ -89,6 +89,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 	// check tick counter to determine whether to send secret updates
 	sendSecret := s.tickCounter%4 == 0
 
+	// check tick counter to determine whether to send player rep sheets
+	sendPlayerRepSheets := s.tickCounter%8 == 0
+
 	if sendStatic {
 		// reset tick counter
 		s.tickCounter = 0
@@ -1077,6 +1080,50 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 			sct := models.GameMessage{
 				MessageType: msgRegistry.CurrentShipUpdate,
+				MessageBody: string(b),
+			}
+
+			// write message to client
+			c.WriteMessage(&sct)
+		}
+	}
+
+	// write secret player rep sheet updates to individual clients
+	if sendPlayerRepSheets {
+		/*
+		 * Performance note: This message is sent less often than the global update because the data
+		 * contained doesn't need to be as fresh for the game to feel smooth and responsive, and
+		 * sending it just a little less often significantly reduced bandwidth usage.
+		 */
+
+		for _, c := range s.clients {
+			// find current ship
+			d := s.ships[c.CurrentShipID.String()]
+
+			if d == nil {
+				continue
+			}
+
+			// build relationship message
+			rm := models.ServerPlayerFactionUpdateBody{}
+			rels := make([]models.ServerPlayerFactionRelationship, 0)
+
+			for _, v := range c.ReputationSheet.FactionEntries {
+				rels = append(rels, models.ServerPlayerFactionRelationship{
+					FactionID:        v.FactionID,
+					AreOpenlyHostile: v.AreOpenlyHostile,
+					StandingValue:    v.StandingValue,
+					IsMember:         v.FactionID == d.FactionID,
+				})
+			}
+
+			rm.Factions = rels
+
+			// serialize player-faction rep sheet update
+			b, _ := json.Marshal(&rm)
+
+			sct := models.GameMessage{
+				MessageType: msgRegistry.PlayerFactionUpdate,
 				MessageBody: string(b),
 			}
 

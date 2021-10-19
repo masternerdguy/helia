@@ -1,4 +1,5 @@
 import { Faction } from '../engineModels/faction';
+import { WSPlayerFactionRelationship } from './entities/wsPlayerFaction';
 
 export class CurrentSystemInfo {
   id: string;
@@ -46,4 +47,41 @@ export function GetFactionCacheEntry(id: string): Faction {
   }
 
   return (window as any).factionDictionary[id] as Faction;
+}
+
+export function UpdatePlayerFactionRelationshipCache(playerFactions: WSPlayerFactionRelationship[]) {
+  if (!(window as any).playerFactionDictionary) {
+    (window as any).playerFactionDictionary = {};
+  }
+
+  for (const f of playerFactions) {
+    (window as any).playerFactionDictionary[f.factionId] = f;
+  }
+}
+
+export function GetPlayerFactionRelationshipCache(): WSPlayerFactionRelationship[] {
+  const cache: WSPlayerFactionRelationship[] = [];
+
+  if (!(window as any).playerFactionDictionary) {
+    return cache;
+  }
+
+  for (const f in (window as any).playerFactionDictionary) {
+    if (
+      Object.prototype.hasOwnProperty.call((window as any).playerFactionDictionary, f)
+    ) {
+      const e = (window as any).playerFactionDictionary[f] as WSPlayerFactionRelationship;
+      cache.push(e);
+    }
+  }
+
+  return cache;
+}
+
+export function GetPlayerFactionRelationshipCacheEntry(id: string): WSPlayerFactionRelationship {
+  if (!(window as any).playerFactionDictionary) {
+    return null;
+  }
+
+  return (window as any).playerFactionDictionary[id] as WSPlayerFactionRelationship;
 }

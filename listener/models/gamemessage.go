@@ -40,6 +40,7 @@ type MessageRegistry struct {
 	ViewStarMap            int
 	StarMapUpdate          int
 	ConsumeFuel            int
+	PlayerFactionUpdate    int
 }
 
 // Registry of target types
@@ -87,6 +88,7 @@ func NewMessageRegistry() *MessageRegistry {
 		ViewStarMap:            28,
 		StarMapUpdate:          29,
 		ConsumeFuel:            30,
+		PlayerFactionUpdate:    31,
 	}
 }
 
@@ -532,9 +534,22 @@ type ServerFactionRelationship struct {
 	StandingValue    float64   `json:"standingValue"`
 }
 
-// Body containing an update on some or all of the unviverse's current factions for the client
+// Body containing an update on some or all of the universe's current factions for the client
 type ServerFactionUpdateBody struct {
 	Factions []ServerFactionBody `json:"factions"`
+}
+
+// Structure representing a relationship between two factions for the client
+type ServerPlayerFactionRelationship struct {
+	FactionID        uuid.UUID `json:"factionId"`
+	AreOpenlyHostile bool      `json:"openlyHostile"`
+	StandingValue    float64   `json:"standingValue"`
+	IsMember         bool      `json:"isMember"`
+}
+
+// Body containing an update on their relationship to some or all of the universe's current factions for the client
+type ServerPlayerFactionUpdateBody struct {
+	Factions []ServerPlayerFactionRelationship `json:"factions"`
 }
 
 // Body containing a request from the client for the starmap

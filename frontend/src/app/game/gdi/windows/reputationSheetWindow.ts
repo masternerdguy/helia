@@ -1,8 +1,10 @@
 import { GDIWindow } from '../base/gdiWindow';
 import { FontSize } from '../base/gdiStyle';
 import { GDIList } from '../components/gdiList';
-import { GetFactionCache } from '../../wsModels/shared';
+import { GetFactionCache, GetPlayerFactionRelationshipCache } from '../../wsModels/shared';
 import { Faction } from '../../engineModels/faction';
+import { WSPlayerFactionRelationship } from '../../wsModels/entities/wsPlayerFaction';
+import { WSFactionRelationship } from '../../wsModels/entities/wsFaction';
 
 export class ReputationSheetWindow extends GDIWindow {
   private factionList = new GDIList();
@@ -152,14 +154,27 @@ export class ReputationSheetWindow extends GDIWindow {
       // get factions
       const factions = GetFactionCache();
 
+      // get player-faction relationships
+      const playerFactionRelationships = GetPlayerFactionRelationshipCache();
+
       // build rows
       const factionRows: FactionRepViewRow[] = [];
 
       for (const f of factions) {
+        let playerRel: WSPlayerFactionRelationship = null;
+
+        // find relationship to player
+        for (const rel of playerFactionRelationships) {
+          if (rel.factionId == f.id) {
+            playerRel = rel;
+            break;
+          }
+        }
+
         factionRows.push({
           faction: f,
           actions: [],
-          listString: () => `${f.name}`,
+          listString: () => factionListRowString(playerRel, f),
         });
       }
 
@@ -185,12 +200,38 @@ class FactionInfoViewRow {
   listString: () => string;
 }
 
+function factionListRowString(rel: WSPlayerFactionRelationship, faction: Faction) {
+  if (rel == null || faction == null) {
+    return;
+  }
+
+  // determine whether or not to show hostility flag
+  let openHostileFlag = '';
+
+  if (rel.openlyHostile) {
+    openHostileFlag = '⚔';
+  }
+
+  // determine whether or not the player is a member
+  let memberFlag = '';
+  
+  if (rel.isMember) {
+    memberFlag = '✪';
+  }
+
+  // build string
+  return `${fixedString(faction.name, 24)} ${fixedString(
+    `[${rel.standingValue.toFixed(2)}] `,
+    10
+  )} ${fixedString(memberFlag, 1)}${fixedString(openHostileFlag, 1)}~`;
+}
+
 function infoKeyValueString(key: string, value: string) {
   // build string
   return `${fixedString('', 1)} ${fixedString(key, 24)} ${fixedString(
     value,
     24
-  )}~`;
+  )}`;
 }
 
 function fixedString(str: string, width: number) {

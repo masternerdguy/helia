@@ -33,13 +33,14 @@ import { PushErrorWindow } from './gdi/windows/pushErrorWindow';
 import { IndustrialMarketWindow } from './gdi/windows/industrialMarketWindow';
 import { ServerIndustrialOrdersUpdate } from './wsModels/bodies/industrialOrdersUpdate';
 import { ServerFactionUpdate } from './wsModels/bodies/factionUpdate';
-import { UpdateFactionCache } from './wsModels/shared';
+import { UpdateFactionCache, UpdatePlayerFactionRelationshipCache } from './wsModels/shared';
 import { StarMapWindow } from './gdi/windows/starMapWindow';
 import {
   ServerStarMapUpdate,
   UnwrappedStarMapData,
 } from './wsModels/bodies/viewStarMap';
 import { ReputationSheetWindow } from './gdi/windows/reputationSheetWindow';
+import { ServerPlayerFactionUpdate } from './wsModels/bodies/playerFactionUpdate';
 
 class EngineSack {
   constructor() {}
@@ -255,6 +256,8 @@ export function clientStart(
       handleFactionUpdate(d);
     } else if (d.type == MessageTypes.StarMapUpdate) {
       handleStarMapUpdate(d);
+    } else if (d.type == MessageTypes.PlayerFactionUpdate) {
+      handlePlayerFactionUpdate(d);
     }
   });
 }
@@ -778,6 +781,14 @@ function handleFactionUpdate(d: GameMessage) {
 
   // update faction cache dictionary
   UpdateFactionCache(msg.factions);
+}
+
+function handlePlayerFactionUpdate(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerPlayerFactionUpdate;
+
+  // update faction cache dictionary
+  UpdatePlayerFactionRelationshipCache(msg.factions);
 }
 
 // clears the screen
