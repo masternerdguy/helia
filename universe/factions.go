@@ -1,6 +1,8 @@
 package universe
 
 import (
+	"helia/shared"
+
 	"github.com/google/uuid"
 )
 
@@ -14,23 +16,8 @@ type Faction struct {
 	IsClosed        bool
 	CanHoldSov      bool
 	Meta            Meta
-	ReputationSheet FactionReputationSheet
+	ReputationSheet shared.FactionReputationSheet
 	Ticker          string
-}
-
-// Structure representing a relationship this faction has to another faction
-type ReputationSheetEntry struct {
-	SourceFactionID  uuid.UUID
-	TargetFactionID  uuid.UUID
-	StandingValue    float64
-	AreOpenlyHostile bool
-}
-
-// Structure containing information about this faction's relationship with the world
-type FactionReputationSheet struct {
-	Entries        map[string]ReputationSheetEntry
-	HostFactionIDs []uuid.UUID
-	WorldPercent   float64
 }
 
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities

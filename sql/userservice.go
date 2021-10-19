@@ -3,6 +3,8 @@ package sql
 import (
 	"crypto/sha256"
 	"database/sql"
+	"database/sql/driver"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -29,6 +31,47 @@ type User struct {
 	StartID           uuid.UUID
 	EscrowContainerID uuid.UUID
 	CurrentFactionID  uuid.UUID
+	ReputationSheet   PlayerReputationSheet
+}
+
+type PlayerReputationSheetEntry struct {
+	FactionID        uuid.UUID
+	StandingValue    float64
+	AreOpenlyHostile bool
+}
+
+type PlayerReputationSheet struct {
+	FactionEntries map[string]PlayerReputationSheetEntry `json:"factionEntries"`
+}
+
+// Converts from a PlayerReputationSheetEntry to JSON
+func (a PlayerReputationSheetEntry) Value() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a PlayerReputationSheetEntry
+func (a *PlayerReputationSheetEntry) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
+}
+
+// Converts from a PlayerReputationSheet to JSON
+func (a PlayerReputationSheet) Value() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a PlayerReputationSheet
+func (a *PlayerReputationSheet) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
 }
 
 // Hashes a user's password using their username and an internal constant as the salt

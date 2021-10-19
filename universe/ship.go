@@ -9,6 +9,7 @@ import (
 
 	"helia/listener/models"
 	"helia/physics"
+	"helia/shared"
 
 	"github.com/google/uuid"
 )
@@ -145,6 +146,7 @@ type Ship struct {
 	FittingBay         *Container
 	EscrowContainerID  *uuid.UUID
 	BeingFlownByPlayer bool
+	ReputationSheet    *shared.PlayerReputationSheet
 	Lock               sync.Mutex
 }
 
@@ -913,6 +915,26 @@ func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) 
 	// clamp hull
 	if s.Hull < 0 {
 		s.Hull = 0
+	}
+}
+
+// Given a faction to compare against, returns the standing and whether they have declared open hostilities
+func (s *Ship) CheckStandings(factionID uuid.UUID) (float64, bool) {
+	// null check
+	if s.ReputationSheet == nil {
+		// open season :)
+		return shared.MIN_STANDING, true
+	}
+
+	// obtain lock (pointer to player's entry on their game client)
+	s.ReputationSheet.Lock.Lock()
+	defer s.ReputationSheet.Lock.Unlock()
+
+	// try to find faction relationship
+	if val, ok := s.ReputationSheet.FactionEntries[factionID.String()]; ok {
+		return val.StandingValue, val.AreOpenlyHostile
+	} else {
+		return 0, false
 	}
 }
 

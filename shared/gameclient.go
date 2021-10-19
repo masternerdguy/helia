@@ -20,6 +20,9 @@ type GameClient struct {
 	Conn *websocket.Conn
 	lock sync.Mutex
 
+	// standing to be kept in sync with flown ship(s)
+	ReputationSheet PlayerReputationSheet
+
 	// local event queue for player's current ship
 	shipEventQueue *eventQueue
 

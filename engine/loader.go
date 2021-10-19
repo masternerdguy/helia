@@ -3,6 +3,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"helia/shared"
 	"helia/sql"
 	"helia/universe"
 	"log"
@@ -274,6 +275,7 @@ func LoadUniverse() (*universe.Universe, error) {
 					// link solar system into station
 					CurrentSystem: &s,
 					Processes:     processes,
+					Faction:       *u.Factions[currStation.FactionID.String()],
 				}
 
 				// initialize station
@@ -790,15 +792,15 @@ func FactionFromSQL(value *sql.Faction) *universe.Faction {
 	faction.Ticker = value.Ticker
 
 	// copy reputation sheet entries
-	faction.ReputationSheet = universe.FactionReputationSheet{
-		Entries:        make(map[string]universe.ReputationSheetEntry),
+	faction.ReputationSheet = shared.FactionReputationSheet{
+		Entries:        make(map[string]shared.FactionReputationSheetEntry),
 		HostFactionIDs: make([]uuid.UUID, 0),
 		WorldPercent:   0,
 	}
 
 	if value.ReputationSheet.Entries != nil {
 		for k, v := range value.ReputationSheet.Entries {
-			faction.ReputationSheet.Entries[k] = universe.ReputationSheetEntry{
+			faction.ReputationSheet.Entries[k] = shared.FactionReputationSheetEntry{
 				SourceFactionID:  v.SourceFactionID,
 				TargetFactionID:  v.TargetFactionID,
 				StandingValue:    v.StandingValue,

@@ -341,6 +341,22 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		currShip.Lock.Lock()
 		defer currShip.Lock.Unlock()
 
+		// load reputation sheet
+		client.ReputationSheet = shared.PlayerReputationSheet{
+			FactionEntries: make(map[string]*shared.PlayerReputationSheetFactionEntry),
+		}
+
+		for k, v := range u.ReputationSheet.FactionEntries {
+			client.ReputationSheet.FactionEntries[k] = &shared.PlayerReputationSheetFactionEntry{
+				FactionID:        v.FactionID,
+				StandingValue:    v.StandingValue,
+				AreOpenlyHostile: v.AreOpenlyHostile,
+			}
+		}
+
+		// inject reputation sheet
+		currShip.ReputationSheet = &client.ReputationSheet
+
 		// build current ship info data for welcome message
 		shipInfo := models.CurrentShipInfo{
 			// global stuff
@@ -424,6 +440,17 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				CanHoldSov:  f.CanHoldSov,
 				Ticker:      f.Ticker,
 			})
+
+			// fill neutral entry into rep sheet if missing
+			r := client.ReputationSheet.FactionEntries[f.ID.String()]
+
+			if r == nil {
+				client.ReputationSheet.FactionEntries[f.ID.String()] = &shared.PlayerReputationSheetFactionEntry{
+					FactionID:        f.ID,
+					StandingValue:    0,
+					AreOpenlyHostile: false,
+				}
+			}
 		}
 
 		// package faction data
@@ -439,6 +466,8 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 		// debug out
 		log.Println(fmt.Sprintf("player joined: %v", &body.SessionID))
+
+		log.Println(fmt.Sprintf("fs: %v", client.ReputationSheet))
 	} else {
 		// dump error to console
 		log.Println(fmt.Sprintf("player join error: %v", err))
