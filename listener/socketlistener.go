@@ -430,15 +430,27 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		factions := l.Engine.Universe.Factions
 
 		for _, f := range factions {
+			// include relationship data
+			rels := make([]models.ServerFactionRelationship, 0)
+
+			for _, rel := range f.ReputationSheet.Entries {
+				rels = append(rels, models.ServerFactionRelationship{
+					FactionID:        rel.TargetFactionID,
+					AreOpenlyHostile: rel.AreOpenlyHostile,
+					StandingValue:    rel.StandingValue,
+				})
+			}
+
 			af.Factions = append(af.Factions, models.ServerFactionBody{
-				ID:          f.ID,
-				Name:        f.Name,
-				Description: f.Description,
-				IsNPC:       f.IsNPC,
-				IsJoinable:  f.IsJoinable,
-				IsClosed:    f.IsClosed,
-				CanHoldSov:  f.CanHoldSov,
-				Ticker:      f.Ticker,
+				ID:            f.ID,
+				Name:          f.Name,
+				Description:   f.Description,
+				IsNPC:         f.IsNPC,
+				IsJoinable:    f.IsJoinable,
+				IsClosed:      f.IsClosed,
+				CanHoldSov:    f.CanHoldSov,
+				Ticker:        f.Ticker,
+				Relationships: rels,
 			})
 
 			// fill neutral entry into rep sheet if missing

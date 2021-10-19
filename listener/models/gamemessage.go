@@ -514,14 +514,22 @@ type ClientSellToSiloBody struct {
 
 // Body containing information about a faction for the client
 type ServerFactionBody struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	IsNPC       bool      `json:"isNPC"`
-	IsJoinable  bool      `json:"isJoinable"`
-	IsClosed    bool      `json:"isClosed"`
-	CanHoldSov  bool      `json:"canHoldSov"`
-	Ticker      string    `json:"ticker"`
+	ID            uuid.UUID                   `json:"id"`
+	Name          string                      `json:"name"`
+	Description   string                      `json:"description"`
+	IsNPC         bool                        `json:"isNPC"`
+	IsJoinable    bool                        `json:"isJoinable"`
+	IsClosed      bool                        `json:"isClosed"`
+	CanHoldSov    bool                        `json:"canHoldSov"`
+	Relationships []ServerFactionRelationship `json:"relationships"`
+	Ticker        string                      `json:"ticker"`
+}
+
+// Structure representing a relationship between two factions for the client
+type ServerFactionRelationship struct {
+	FactionID        uuid.UUID `json:"factionId"`
+	AreOpenlyHostile bool      `json:"openlyHostile"`
+	StandingValue    float64   `json:"standingValue"`
 }
 
 // Body containing an update on some or all of the unviverse's current factions for the client

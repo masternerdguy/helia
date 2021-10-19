@@ -7,4 +7,11 @@ export class WSFaction {
   isClosed: boolean;
   canHoldSov: boolean;
   ticker: string;
+  relationships: WSFactionRelationship[];
+}
+
+export class WSFactionRelationship {
+  factionId: string;
+  openlyHostile: boolean;
+  standingValue: number;
 }
