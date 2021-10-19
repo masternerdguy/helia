@@ -466,8 +466,6 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 		// debug out
 		log.Println(fmt.Sprintf("player joined: %v", &body.SessionID))
-
-		log.Println(fmt.Sprintf("fs: %v", client.ReputationSheet))
 	} else {
 		// dump error to console
 		log.Println(fmt.Sprintf("player join error: %v", err))

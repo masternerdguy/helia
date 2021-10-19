@@ -359,10 +359,18 @@ func saveUniverse(u *universe.Universe) {
 	// get services
 	stationSvc := sql.GetStationService()
 	stationProcessSvc := sql.GetStationProcessService()
+	userSvc := sql.GetUserService()
+
+	// for aggregating connected clients
+	clients := make([]*shared.GameClient, 0)
 
 	// iterate over systems
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
+			// stash clients in system
+			lc := s.CopyClients(true)
+			clients = append(clients, lc...)
+
 			// get ships in system
 			ships := s.CopyShips()
 
@@ -445,6 +453,40 @@ func saveUniverse(u *universe.Universe) {
 			}
 		}
 	}
+
+	// iterate over clients
+	for _, v := range clients {
+		// save reputation sheet
+		sheet := SQLFromPlayerReputationSheet(&v.ReputationSheet)
+		err := userSvc.SaveReputationSheet(*v.UID, sheet)
+
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func SQLFromPlayerReputationSheet(value *shared.PlayerReputationSheet) sql.PlayerReputationSheet {
+	sheet := sql.PlayerReputationSheet{
+		FactionEntries: make(map[string]sql.PlayerReputationSheetFactionEntry),
+	}
+
+	// null check
+	if value == nil {
+		// return empty sheet
+		return sheet
+	}
+
+	// copy into sheet
+	for k, v := range value.FactionEntries {
+		sheet.FactionEntries[k] = sql.PlayerReputationSheetFactionEntry{
+			FactionID:        v.FactionID,
+			StandingValue:    v.StandingValue,
+			AreOpenlyHostile: v.AreOpenlyHostile,
+		}
+	}
+
+	return sheet
 }
 
 // Converts a SlotLayout from the SQL type to the engine type

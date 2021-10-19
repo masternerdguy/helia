@@ -34,23 +34,23 @@ type User struct {
 	ReputationSheet   PlayerReputationSheet
 }
 
-type PlayerReputationSheetEntry struct {
+type PlayerReputationSheetFactionEntry struct {
 	FactionID        uuid.UUID
 	StandingValue    float64
 	AreOpenlyHostile bool
 }
 
 type PlayerReputationSheet struct {
-	FactionEntries map[string]PlayerReputationSheetEntry `json:"factionEntries"`
+	FactionEntries map[string]PlayerReputationSheetFactionEntry `json:"factionEntries"`
 }
 
 // Converts from a PlayerReputationSheetEntry to JSON
-func (a PlayerReputationSheetEntry) Value() (driver.Value, error) {
+func (a PlayerReputationSheetFactionEntry) Value() (driver.Value, error) {
 	return json.Marshal(a)
 }
 
 // Converts from JSON to a PlayerReputationSheetEntry
-func (a *PlayerReputationSheetEntry) Scan(value interface{}) error {
+func (a *PlayerReputationSheetFactionEntry) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")
@@ -161,6 +161,31 @@ func (s UserService) SetCurrentShipID(uid uuid.UUID, shipID *uuid.UUID) error {
 	return nil
 }
 
+// Sets reputationsheet on a user in the database
+func (s UserService) SaveReputationSheet(uid uuid.UUID, repsheet PlayerReputationSheet) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update user
+	sql := `
+				UPDATE public.users SET reputationsheet = $1 WHERE id = $2;
+			`
+
+	q, err := db.Query(sql, repsheet, uid)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}
+
 // Finds the user with the supplied credentials
 func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) {
 	// get db handle
@@ -180,14 +205,14 @@ func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) 
 	// check for user with these credentials
 	user := User{}
 
-	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid
+	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid, reputationsheet
 					 FROM users
 					 WHERE username=$1 AND hashpass=$2`
 
 	row := db.QueryRow(sqlStatement, username, *hp)
 
 	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
-		&user.EscrowContainerID, &user.CurrentFactionID); err {
+		&user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:
@@ -209,14 +234,14 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 	// check for user with these credentials
 	user := User{}
 
-	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, startid, escrow_containerid, current_factionid
+	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, startid, escrow_containerid, current_factionid, reputationsheet
 					 FROM users
 					 WHERE id=$1`
 
 	row := db.QueryRow(sqlStatement, uid)
 
 	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
-		&user.StartID, &user.EscrowContainerID, &user.CurrentFactionID); err {
+		&user.StartID, &user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:

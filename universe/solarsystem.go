@@ -1239,6 +1239,50 @@ func (s *SolarSystem) RemoveClient(c *shared.GameClient, lock bool) {
 	delete(s.clients, (*c.UID).String())
 }
 
+// Returns a copy of clients in the system minus their connection / event queue
+func (s *SolarSystem) CopyClients(lock bool) []*shared.GameClient {
+	o := make([]*shared.GameClient, 0)
+
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// copy clients minus connection fields
+	for _, c := range s.clients {
+		sid := *c.SID
+		uid := *c.UID
+
+		v := shared.GameClient{
+			SID:  &sid,
+			UID:  &uid,
+			Conn: nil,
+			ReputationSheet: shared.PlayerReputationSheet{
+				FactionEntries: make(map[string]*shared.PlayerReputationSheetFactionEntry),
+			},
+			CurrentShipID:     c.CurrentShipID,
+			CurrentSystemID:   c.CurrentSystemID,
+			StartID:           c.StartID,
+			EscrowContainerID: c.EscrowContainerID,
+		}
+
+		for k, f := range c.ReputationSheet.FactionEntries {
+			if f != nil {
+				v.ReputationSheet.FactionEntries[k] = &shared.PlayerReputationSheetFactionEntry{
+					FactionID:        f.FactionID,
+					StandingValue:    f.StandingValue,
+					AreOpenlyHostile: f.AreOpenlyHostile,
+				}
+			}
+		}
+
+		o = append(o, &v)
+	}
+
+	return o
+}
+
 // Returns a copy of the ships in the system
 func (s *SolarSystem) CopyShips() map[string]*Ship {
 	// obtain lock
