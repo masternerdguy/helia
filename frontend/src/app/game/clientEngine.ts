@@ -39,6 +39,7 @@ import {
   ServerStarMapUpdate,
   UnwrappedStarMapData,
 } from './wsModels/bodies/viewStarMap';
+import { ReputationSheetWindow } from './gdi/windows/reputationSheetWindow';
 
 class EngineSack {
   constructor() {}
@@ -66,6 +67,7 @@ class EngineSack {
   ordersMarketWindow: OrdersMarketWindow;
   industrialMarketWindow: IndustrialMarketWindow;
   starMapWindow: StarMapWindow;
+  reputationSheetWindow: ReputationSheetWindow;
   lastShiftDown: number;
 
   windows: GDIWindow[];
@@ -193,6 +195,12 @@ export function clientStart(
   engineSack.starMapWindow.setWsService(wsService);
   engineSack.starMapWindow.setPlayer(engineSack.player);
 
+  engineSack.reputationSheetWindow = new ReputationSheetWindow();
+  engineSack.reputationSheetWindow.setX(350);
+  engineSack.reputationSheetWindow.setY(350);
+  engineSack.reputationSheetWindow.initialize();
+  engineSack.reputationSheetWindow.pack();
+
   // link windows to window manager
   engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☀');
   engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☍');
@@ -204,6 +212,7 @@ export function clientStart(
   engineSack.windowManager.manageWindow(engineSack.ordersMarketWindow, '₪');
   engineSack.windowManager.manageWindow(engineSack.industrialMarketWindow, '⚙');
   engineSack.windowManager.manageWindow(engineSack.starMapWindow, '⊞');
+  engineSack.windowManager.manageWindow(engineSack.reputationSheetWindow, '❉');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
@@ -215,6 +224,7 @@ export function clientStart(
     engineSack.ordersMarketWindow,
     engineSack.industrialMarketWindow,
     engineSack.starMapWindow,
+    engineSack.reputationSheetWindow,
     engineSack.windowManager,
   ];
 
