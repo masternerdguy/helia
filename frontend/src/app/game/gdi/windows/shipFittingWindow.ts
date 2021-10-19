@@ -710,8 +710,7 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
       }
 
       // determine whether or not this is fuel
-      const isFuel =
-        m.itemFamilyID === "fuel";
+      const isFuel = m.itemFamilyID === 'fuel';
 
       if (isFuel) {
         // offer load fuel action

@@ -77,13 +77,13 @@ export class ReputationSheetWindow extends GDIWindow {
     const rows: string[] = [];
 
     // basic info
-    rows.push("Basic");
-    rows.push(infoKeyValueString("Name", r.faction.name));
-    rows.push(infoKeyValueString("Ticker", `[${r.faction.ticker}]`));
-    rows.push("");
+    rows.push('Basic');
+    rows.push(infoKeyValueString('Name', r.faction.name));
+    rows.push(infoKeyValueString('Ticker', `[${r.faction.ticker}]`));
+    rows.push('');
 
     // relationships
-    rows.push("Liked By");
+    rows.push('Liked By');
     for (const f of factions) {
       if (f.id != r.faction.id && !f.isClosed) {
         // find relationship
@@ -93,15 +93,17 @@ export class ReputationSheetWindow extends GDIWindow {
           }
 
           if (rel.standingValue > 0) {
-            rows.push(infoKeyValueString(f.name, `[${rel.standingValue.toFixed(2)}] `))
+            rows.push(
+              infoKeyValueString(f.name, `[${rel.standingValue.toFixed(2)}] `)
+            );
           }
         }
       }
     }
 
-    rows.push("");
+    rows.push('');
 
-    rows.push("Disliked By");
+    rows.push('Disliked By');
     for (const f of factions) {
       if (f.id != r.faction.id && !f.isClosed) {
         // find relationship
@@ -111,13 +113,18 @@ export class ReputationSheetWindow extends GDIWindow {
           }
 
           if (rel.standingValue < 0) {
-            let openHostileFlag = "";
-            
+            let openHostileFlag = '';
+
             if (rel.openlyHostile) {
-              openHostileFlag = "⚔";
+              openHostileFlag = '⚔';
             }
 
-            rows.push(infoKeyValueString(f.name, `[${rel.standingValue.toFixed(2)}] ` + openHostileFlag))
+            rows.push(
+              infoKeyValueString(
+                f.name,
+                `[${rel.standingValue.toFixed(2)}] ` + openHostileFlag
+              )
+            );
           }
         }
       }
@@ -127,17 +134,17 @@ export class ReputationSheetWindow extends GDIWindow {
     const dRows: FactionInfoViewRow[] = [];
 
     for (const r of rows) {
-      dRows.push(this.infoRowFromString(r))
+      dRows.push(this.infoRowFromString(r));
     }
 
     // return converted rows
-    return dRows
+    return dRows;
   }
 
   private infoRowFromString(s: string): FactionInfoViewRow {
     return {
-      listString: () => s
-    }
+      listString: () => s,
+    };
   }
 
   periodicUpdate() {
@@ -152,8 +159,8 @@ export class ReputationSheetWindow extends GDIWindow {
         factionRows.push({
           faction: f,
           actions: [],
-          listString: () => `${f.name}`
-        })
+          listString: () => `${f.name}`,
+        });
       }
 
       // update faction list
