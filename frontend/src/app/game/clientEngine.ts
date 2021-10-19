@@ -309,6 +309,7 @@ function handleJoin(d: GameMessage) {
   engineSack.industrialMarketWindow.setHidden(true);
   engineSack.pushErrorWindow.setHidden(true);
   engineSack.starMapWindow.setHidden(true);
+  engineSack.reputationSheetWindow.setHidden(true);
 
   // start game loop
   engineSack.lastFrameTime = Date.now();

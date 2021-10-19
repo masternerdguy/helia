@@ -223,7 +223,7 @@ function factionListRowString(rel: WSPlayerFactionRelationship, faction: Faction
   return `${fixedString(faction.name, 24)} ${fixedString(
     `[${rel.standingValue.toFixed(2)}] `,
     10
-  )} ${fixedString(memberFlag, 1)}${fixedString(openHostileFlag, 1)}~`;
+  )} ${fixedString(memberFlag, 1)}${fixedString(openHostileFlag, 1)}`;
 }
 
 function infoKeyValueString(key: string, value: string) {
