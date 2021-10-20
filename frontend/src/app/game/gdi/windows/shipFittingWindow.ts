@@ -286,6 +286,9 @@ export class ShipFittingWindow extends GDIWindow {
         };
 
         this.wsSvc.sendMessage(MessageTypes.SelfDestruct, tiMsg);
+
+        // reset views
+        this.resetViews();
       }
     });
 
