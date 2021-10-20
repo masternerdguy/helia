@@ -463,7 +463,6 @@ export class ShipFittingWindow extends GDIWindow {
 
     // fix wallet
     if (!this.player.currentShip.wallet) {
-      console.log(this.player.currentShip)
       this.player.currentShip.wallet = 0;
     }
 
