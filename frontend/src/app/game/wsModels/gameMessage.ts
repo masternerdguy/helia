@@ -37,4 +37,5 @@ export enum MessageTypes {
   StarMapUpdate = 29,
   ConsumeFuel = 30,
   PlayerFactionUpdate = 31,
+  SelfDestruct = 32,
 }

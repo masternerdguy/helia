@@ -41,6 +41,7 @@ type MessageRegistry struct {
 	StarMapUpdate          int
 	ConsumeFuel            int
 	PlayerFactionUpdate    int
+	SelfDestruct           int
 }
 
 // Registry of target types
@@ -89,6 +90,7 @@ func NewMessageRegistry() *MessageRegistry {
 		StarMapUpdate:          29,
 		ConsumeFuel:            30,
 		PlayerFactionUpdate:    31,
+		SelfDestruct:           32,
 	}
 }
 
@@ -566,4 +568,9 @@ type ServerStarMapUpdateBody struct {
 type ClientConsumeFuelBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemId"`
+}
+
+// Body containing a request to self destruct the current ship
+type ClientSelfDestructBody struct {
+	SessionID uuid.UUID `json:"sid"`
 }

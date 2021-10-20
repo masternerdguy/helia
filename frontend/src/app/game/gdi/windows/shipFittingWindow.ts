@@ -18,6 +18,7 @@ import { ClientSplitItem } from '../../wsModels/bodies/splitItem';
 import { ClientFitModule } from '../../wsModels/bodies/fitModule';
 import { GDIBar } from '../components/gdiBar';
 import { ClientConsumeFuel } from '../../wsModels/bodies/consumeFuel';
+import { ClientSelfDestruct } from '../../wsModels/bodies/selfDestruct';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -278,6 +279,13 @@ export class ShipFittingWindow extends GDIWindow {
 
         // reset views
         this.resetViews();
+      } else if (a === 'Destruct ☠') {
+        // send self destruct request
+        const tiMsg: ClientSelfDestruct = {
+          sid: this.wsSvc.sid
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.SelfDestruct, tiMsg);
       }
     });
 
@@ -455,6 +463,14 @@ export class ShipFittingWindow extends GDIWindow {
     rows.push(buildShipViewRowText(`  ${this.player.currentShip.wallet} CBN`));
 
     rows.push(buildShipViewRowSpacer());
+
+    if (!docked) {
+      // layout danger zone
+      rows.push(buildShipViewRowText('Danger Zone'));
+      rows.push(buildActionRow(`  Self Destruct ☠`, ['Destruct ☠']));
+
+      rows.push(buildShipViewRowSpacer());
+    }
 
     // push to view
     const i = this.shipView.getSelectedIndex();
@@ -737,6 +753,21 @@ function buildFittingRowFromModule(
     actions: getFittingRowActions(isDocked, m),
     listString: () => {
       return moduleStatusString(m);
+    },
+  };
+
+  return r;
+}
+
+function buildActionRow(
+  text: string,
+  actions: string[]
+): ShipViewRow {
+  const r: ShipViewRow = {
+    object: {},
+    actions: actions,
+    listString: () => {
+      return text;
     },
   };
 

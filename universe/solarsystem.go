@@ -687,6 +687,20 @@ func (s *SolarSystem) PeriodicUpdate() {
 					c.WriteErrorMessage(err.Error())
 				}
 			}
+		} else if evt.Type == models.NewMessageRegistry().SelfDestruct {
+			if sh != nil {
+				// extract data
+				//data := evt.Body.(models.ClientSelfDestructBody)
+
+				// self destruct
+				err := sh.SelfDestruct(false)
+
+				// there is a reason this could fail the player will need to know about
+				if err != nil {
+					// send error message to client
+					c.WriteErrorMessage(err.Error())
+				}
+			}
 		}
 	}
 
@@ -1155,6 +1169,9 @@ func (s *SolarSystem) AddShip(c *Ship, lock bool) {
 
 	// store pointer to system
 	c.CurrentSystem = s
+
+	// disarm self destruct
+	c.DestructArmed = false
 
 	// add ship
 	s.ships[c.ID.String()] = c

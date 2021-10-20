@@ -147,6 +147,7 @@ type Ship struct {
 	EscrowContainerID  *uuid.UUID
 	BeingFlownByPlayer bool
 	ReputationSheet    *shared.PlayerReputationSheet
+	DestructArmed      bool
 	Lock               sync.Mutex
 }
 
@@ -457,6 +458,9 @@ func (s *Ship) PeriodicUpdate() {
 				s.DockedAtStation = station
 			}
 		}
+
+		// disarm self destruct
+		s.DestructArmed = false
 
 		// make sure ship is still linked into frozen modules
 		for i := range s.Fitting.ARack {
@@ -2322,6 +2326,30 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 
 	// add new item to cargo hold
 	s.CargoBay.Items = append(s.CargoBay.Items, &newItem)
+
+	return nil
+}
+
+func (s *Ship) SelfDestruct(lock bool) error {
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// make sure ship is undocked
+	if s.DockedAtStationID != nil {
+		return errors.New("you must be undocked to self destruct")
+	}
+
+	// arm if needed
+	if !s.DestructArmed {
+		s.DestructArmed = true
+		return errors.New("issue self destruct again to detonate")
+	}
+
+	// blow it up
+	s.DealDamage(s.GetRealMaxShield()+1, s.GetRealMaxArmor()+1, s.GetRealMaxHull()+1)
 
 	return nil
 }
