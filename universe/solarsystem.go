@@ -150,6 +150,32 @@ func (s *SolarSystem) PeriodicUpdate() {
 				// extract data
 				data := evt.Body.(models.ClientDockBody)
 
+				// get registry
+				targetTypeReg := models.NewTargetTypeRegistry()
+
+				if data.Type == targetTypeReg.Station {
+					// find station
+					station := s.stations[string(data.TargetID.String())]
+
+					if station == nil {
+						c.WriteErrorMessage("docking denied - station not found")
+						return
+					}
+
+					// check standings
+					v, oh := sh.CheckStandings(station.FactionID)
+
+					if oh {
+						c.WriteErrorMessage("docking denied - openly hostile")
+						return
+					}
+
+					if v < shared.MIN_DOCK_STANDING {
+						c.WriteErrorMessage("docking denied - reputation too low")
+						return
+					}
+				}
+
 				// apply effect to player's current ship
 				sh.CmdDock(data.TargetID, data.Type)
 			}

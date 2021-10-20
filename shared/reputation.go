@@ -8,6 +8,7 @@ import (
 
 const MIN_STANDING = -10
 const MAX_STANDING = 10
+const MIN_DOCK_STANDING = -1.999
 
 // Structure representing a relationship this faction has to another faction
 type FactionReputationSheetEntry struct {
