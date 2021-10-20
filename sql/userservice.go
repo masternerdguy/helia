@@ -32,6 +32,9 @@ type User struct {
 	EscrowContainerID uuid.UUID
 	CurrentFactionID  uuid.UUID
 	ReputationSheet   PlayerReputationSheet
+	// for special NPC "users"
+	IsNPC         bool
+	BehaviourMode *int
 }
 
 type PlayerReputationSheetFactionEntry struct {
@@ -205,14 +208,15 @@ func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) 
 	// check for user with these credentials
 	user := User{}
 
-	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid, reputationsheet
+	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid, reputationsheet,
+							isnpc, behaviourmode
 					 FROM users
 					 WHERE username=$1 AND hashpass=$2`
 
 	row := db.QueryRow(sqlStatement, username, *hp)
 
 	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
-		&user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet); err {
+		&user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet, &user.IsNPC, &user.BehaviourMode); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:
@@ -234,14 +238,15 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 	// check for user with these credentials
 	user := User{}
 
-	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, startid, escrow_containerid, current_factionid, reputationsheet
+	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, startid, escrow_containerid, current_factionid, reputationsheet,
+							isnpc, behaviourmode
 					 FROM users
 					 WHERE id=$1`
 
 	row := db.QueryRow(sqlStatement, uid)
 
 	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
-		&user.StartID, &user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet); err {
+		&user.StartID, &user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet, &user.IsNPC, &user.BehaviourMode); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:

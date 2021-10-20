@@ -318,7 +318,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 					return
 				}
 
-				u, err = engine.CreateNoobShipForPlayer(nStart, u.ID, false)
+				u, err = engine.CreateNoobShipForPlayer(nStart, u.ID)
 
 				if err != nil {
 					// dump error to console
@@ -336,7 +336,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			}
 
 			// build in-memory ship
-			currShip, err = engine.LoadShip(dbShip)
+			currShip, err = engine.LoadShip(dbShip, l.Engine.Universe)
 
 			if dbShip == nil {
 				log.Println(fmt.Sprintf("player join error: %v", err))

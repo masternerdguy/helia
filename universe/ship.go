@@ -69,6 +69,18 @@ func NewAutopilotRegistry() *AutopilotRegistry {
 	}
 }
 
+// Autopilot states for ships
+type BehaviourRegistry struct {
+	None int
+}
+
+// Returns a populated AutopilotRegistry struct for use as an enum
+func NewBehaviourRegistry() *BehaviourRegistry {
+	return &BehaviourRegistry{
+		None: 0,
+	}
+}
+
 // Container structure for arguments of the ManualTurn autopilot mode
 type ManualNavData struct {
 	Magnitude float64
@@ -133,13 +145,16 @@ type Ship struct {
 	// docking
 	DockedAtStationID *uuid.UUID
 	// in-memory only
+	IsNPC              bool
 	IsDocked           bool
+	Faction            *Faction
 	AutopilotMode      int
 	AutopilotManualNav ManualNavData
 	AutopilotGoto      GotoData
 	AutopilotOrbit     OrbitData
 	AutopilotDock      DockData
 	AutopilotUndock    UndockData
+	BehaviourMode      *int
 	CurrentSystem      *SolarSystem
 	DockedAtStation    *Station
 	CargoBay           *Container
@@ -363,6 +378,8 @@ func (s *Ship) CopyShip() *Ship {
 		AutopilotUndock:    s.AutopilotUndock,
 		EscrowContainerID:  s.EscrowContainerID,
 		BeingFlownByPlayer: s.BeingFlownByPlayer,
+		BehaviourMode:      s.BehaviourMode,
+		IsNPC:              s.IsNPC,
 	}
 
 	if s.DockedAtStationID != nil {
@@ -397,6 +414,9 @@ func (s *Ship) PeriodicUpdate() {
 
 	// update heat
 	s.updateHeat()
+
+	// run behaviour routine if applicable
+	s.behave()
 
 	// check if docked or undocked at a station (docking with other objects not yet supported)
 	if s.DockedAtStationID == nil {
@@ -924,7 +944,19 @@ func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) 
 
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities
 func (s *Ship) CheckStandings(factionID uuid.UUID) (float64, bool) {
-	// null check
+	// handle NPC case first
+	if s.IsNPC {
+		// null check
+		if s.Faction != nil {
+			// redirect to faction
+			return s.Faction.CheckStandings(factionID)
+		}
+
+		// open season :)
+		return shared.MIN_STANDING, true
+	}
+
+	// null check for human player case
 	if s.ReputationSheet == nil {
 		// open season :)
 		return shared.MIN_STANDING, true
@@ -942,7 +974,22 @@ func (s *Ship) CheckStandings(factionID uuid.UUID) (float64, bool) {
 	}
 }
 
-// Flies the ship for you
+// Run routine to control ship using autopilot commands to achieve a goal
+func (s *Ship) behave() {
+	if s.BehaviourMode != nil {
+		// get registry
+		registry := NewBehaviourRegistry()
+
+		switch *s.BehaviourMode {
+		case registry.None:
+			// unset mode
+			s.BehaviourMode = nil
+			return
+		}
+	}
+}
+
+// Flies the ship automatically
 func (s *Ship) doUndockedAutopilot() {
 	// get registry
 	registry := NewAutopilotRegistry()

@@ -2,6 +2,7 @@ package listener
 
 import (
 	"encoding/json"
+	"errors"
 	"helia/engine"
 	"helia/listener/models"
 	"helia/sql"
@@ -93,7 +94,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create their noob ship
-	_, err = engine.CreateNoobShipForPlayer(start, u.ID, true)
+	_, err = engine.CreateNoobShipForPlayer(start, u.ID)
 
 	if err != nil {
 		http.Error(w, "createnoobshipforplayer: "+err.Error(), 500)
@@ -134,6 +135,13 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	// attempt login
 	res := models.APILoginResponseModel{}
 	user, err := userSvc.GetUserByLogin(m.Username, m.Password)
+
+	// verify not an NPC account
+	if err == nil {
+		if user.IsNPC {
+			err = errors.New("logins not allowed for NPC accounts")
+		}
+	}
 
 	if err != nil {
 		res.Success = false

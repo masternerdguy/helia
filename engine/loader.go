@@ -107,7 +107,7 @@ func LoadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, sh := range ships {
-				es, err := LoadShip(&sh)
+				es, err := LoadShip(&sh, &u)
 
 				if err != nil {
 					return nil, err
@@ -1181,8 +1181,24 @@ func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error
 	return &o, nil
 }
 
+func LoadReputationSheet(u *sql.User) *shared.PlayerReputationSheet {
+	repSheet := shared.PlayerReputationSheet{
+		FactionEntries: make(map[string]*shared.PlayerReputationSheetFactionEntry),
+	}
+
+	for k, v := range u.ReputationSheet.FactionEntries {
+		repSheet.FactionEntries[k] = &shared.PlayerReputationSheetFactionEntry{
+			FactionID:        v.FactionID,
+			StandingValue:    v.StandingValue,
+			AreOpenlyHostile: v.AreOpenlyHostile,
+		}
+	}
+
+	return &repSheet
+}
+
 // Takes a SQL Ship and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
-func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
+func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 	shipTmpSvc := sql.GetShipTemplateService()
 	userSvc := sql.GetUserService()
 	containerSvc := sql.GetContainerService()
@@ -1288,8 +1304,18 @@ func LoadShip(sh *sql.Ship) (*universe.Ship, error) {
 			SlotLayout:         SlotLayoutFromSQL(&temp.SlotLayout),
 			BaseCargoBayVolume: temp.BaseCargoBayVolume,
 		},
-		FactionID: owner.CurrentFactionID,
+		FactionID:     owner.CurrentFactionID,
+		IsNPC:         owner.IsNPC,
+		BehaviourMode: owner.BehaviourMode,
 	}
+
+	// load and inject reputation sheet
+	repSheet := LoadReputationSheet(owner)
+	es.ReputationSheet = repSheet
+
+	// inject faction
+	faction := *u.Factions[owner.CurrentFactionID.String()]
+	es.Faction = &faction
 
 	// get pointer to ship
 	sp := &es

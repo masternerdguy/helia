@@ -445,7 +445,9 @@ CREATE TABLE public.users (
     startid uuid NOT NULL,
     escrow_containerid uuid NOT NULL,
     current_factionid uuid NOT NULL,
-    reputationsheet jsonb DEFAULT '{}'::jsonb NOT NULL
+    reputationsheet jsonb DEFAULT '{}'::jsonb NOT NULL,
+    isnpc boolean DEFAULT false NOT NULL,
+    behaviourmode integer
 );
 
 
