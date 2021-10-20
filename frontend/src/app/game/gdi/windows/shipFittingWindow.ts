@@ -461,6 +461,12 @@ export class ShipFittingWindow extends GDIWindow {
 
     rows.push(buildShipViewRowSpacer());
 
+    // fix wallet
+    if (!this.player.currentShip.wallet) {
+      console.log(this.player.currentShip)
+      this.player.currentShip.wallet = 0;
+    }
+
     // layout wallet
     rows.push(buildShipViewRowText('Wallet'));
     rows.push(buildShipViewRowText(`  ${this.player.currentShip.wallet} CBN`));
