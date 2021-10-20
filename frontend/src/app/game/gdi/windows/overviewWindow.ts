@@ -15,7 +15,7 @@ export class OverviewWindow extends GDIWindow {
 
   initialize() {
     // set dimensions
-    this.setWidth(310);
+    this.setWidth(370);
     this.setHeight(this.getHeight());
 
     // initialize
@@ -126,7 +126,7 @@ export class OverviewWindow extends GDIWindow {
         listString: () => {
           return `${fixedString('STAR', 9)}${fixedString(
             player.currentSystem.systemName,
-            24
+            32
           )} ${fixedString(od, 8)}`;
         },
       });
@@ -147,7 +147,7 @@ export class OverviewWindow extends GDIWindow {
         listString: () => {
           return `${fixedString('PLANET', 9)}${fixedString(
             i.planetName,
-            24
+            32
           )} ${fixedString(od, 8)}`;
         },
       });
@@ -171,7 +171,7 @@ export class OverviewWindow extends GDIWindow {
           return `${fixedString('STATION', 9)}${fixedString(
             '[' + faction?.ticker + ']',
             6
-          )}${fixedString(i.stationName, 18)} ${fixedString(od, 8)}`;
+          )}${fixedString(i.stationName, 26)} ${fixedString(od, 8)}`;
         },
       };
 
@@ -202,7 +202,7 @@ export class OverviewWindow extends GDIWindow {
           return `${fixedString('SHIP', 9)}${fixedString(
             '[' + faction?.ticker + ']',
             6
-          )}${fixedString(i.ownerName, 10)} ${fixedString(
+          )}${fixedString(i.ownerName, 18)} ${fixedString(
             i.texture,
             7
           )} ${fixedString(od, 8)}`;
@@ -228,7 +228,7 @@ export class OverviewWindow extends GDIWindow {
         listString: () => {
           return `${fixedString('JUMPHOLE', 9)}${fixedString(
             i.jumpholeName,
-            24
+            32
           )} ${fixedString(od, 8)}`;
         },
       };
@@ -252,7 +252,7 @@ export class OverviewWindow extends GDIWindow {
         listString: () => {
           return `${fixedString('ASTEROID', 9)}${fixedString(
             i.name,
-            24
+            32
           )} ${fixedString(od, 8)}`;
         },
       };
