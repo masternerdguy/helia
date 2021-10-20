@@ -129,7 +129,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 				data := evt.Body.(models.ClientNavClickBody)
 
 				// apply effect to player's current ship
-				sh.CmdManualNav(data.ScreenTheta, data.ScreenMagnitude)
+				sh.CmdManualNav(data.ScreenTheta, data.ScreenMagnitude, false)
 			}
 		} else if evt.Type == models.NewMessageRegistry().Goto {
 			if sh != nil {
@@ -137,7 +137,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 				data := evt.Body.(models.ClientGotoBody)
 
 				// apply effect to player's current ship
-				sh.CmdGoto(data.TargetID, data.Type)
+				sh.CmdGoto(data.TargetID, data.Type, false)
 			}
 		} else if evt.Type == models.NewMessageRegistry().Orbit {
 			if sh != nil {
@@ -145,7 +145,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 				data := evt.Body.(models.ClientOrbitBody)
 
 				// apply effect to player's current ship
-				sh.CmdOrbit(data.TargetID, data.Type)
+				sh.CmdOrbit(data.TargetID, data.Type, false)
 			}
 		} else if evt.Type == models.NewMessageRegistry().Dock {
 			if sh != nil {
@@ -179,7 +179,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 				}
 
 				// apply effect to player's current ship
-				sh.CmdDock(data.TargetID, data.Type)
+				sh.CmdDock(data.TargetID, data.Type, false)
 			}
 		} else if evt.Type == models.NewMessageRegistry().Undock {
 			if sh != nil {
@@ -187,7 +187,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 				// data := evt.Body.(models.ClientUndockBody)
 
 				// apply effect to player's current ship
-				sh.CmdUndock()
+				sh.CmdUndock(false)
 			}
 		} else if evt.Type == models.NewMessageRegistry().ActivateModule {
 			if sh != nil {

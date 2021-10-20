@@ -676,13 +676,15 @@ func (s *Ship) CmdAbort() {
 }
 
 // Invokes manual nav autopilot on the ship
-func (s *Ship) CmdManualNav(screenT float64, screenM float64) {
+func (s *Ship) CmdManualNav(screenT float64, screenM float64, lock bool) {
 	// get registry
 	registry := NewAutopilotRegistry()
 
-	// lock entity
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	// stash manual nav and activate autopilot
 	s.AutopilotManualNav = ManualNavData{
@@ -694,13 +696,15 @@ func (s *Ship) CmdManualNav(screenT float64, screenM float64) {
 }
 
 // Invokes goto autopilot on the ship
-func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int) {
+func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int, lock bool) {
 	// get registry
 	registry := NewAutopilotRegistry()
 
-	// lock entity
-	/*s.Lock.Lock()
-	defer s.Lock.Unlock()*/
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	// stash goto and activate autopilot
 	s.AutopilotGoto = GotoData{
@@ -712,13 +716,15 @@ func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int) {
 }
 
 // Invokes orbit autopilot on the ship
-func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int) {
+func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int, lock bool) {
 	// get registry
 	registry := NewAutopilotRegistry()
 
-	// lock entity
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	// stash orbit and activate autopilot
 	s.AutopilotOrbit = OrbitData{
@@ -730,13 +736,15 @@ func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int) {
 }
 
 // Invokes dock autopilot on the ship
-func (s *Ship) CmdDock(targetID uuid.UUID, targetType int) {
+func (s *Ship) CmdDock(targetID uuid.UUID, targetType int, lock bool) {
 	// get registry
 	registry := NewAutopilotRegistry()
 
-	// lock entity
-	/*s.Lock.Lock()
-	defer s.Lock.Unlock()*/
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	// stash dock and activate autopilot
 	s.AutopilotDock = DockData{
@@ -748,13 +756,15 @@ func (s *Ship) CmdDock(targetID uuid.UUID, targetType int) {
 }
 
 // Invokes undock autopilot on the ship
-func (s *Ship) CmdUndock() {
+func (s *Ship) CmdUndock(lock bool) {
 	// get registry
 	registry := NewAutopilotRegistry()
 
-	// lock entity
-	/*s.Lock.Lock()
-	defer s.Lock.Unlock()*/
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	// stash dock and activate autopilot
 	s.AutopilotUndock = UndockData{}
@@ -1031,7 +1041,7 @@ func (s *Ship) behaviourWander() {
 			if roll == 1 {
 				log.Println("c")
 				// undock
-				s.CmdUndock()
+				s.CmdUndock(false)
 				return
 			}
 		} else {
@@ -1063,7 +1073,7 @@ func (s *Ship) behaviourWander() {
 						if v > shared.MIN_DOCK_STANDING && !oh {
 							log.Println("g")
 							// dock at it
-							s.CmdDock(e.ID, tgtReg.Station)
+							s.CmdDock(e.ID, tgtReg.Station, false)
 							return
 						}
 					}
@@ -1090,7 +1100,7 @@ func (s *Ship) behaviourWander() {
 					if idx == tgt {
 						log.Println("j")
 						// fly through it
-						s.CmdGoto(e.ID, tgtReg.Jumphole)
+						s.CmdGoto(e.ID, tgtReg.Jumphole, false)
 
 						hold := 0
 						caution := 0
