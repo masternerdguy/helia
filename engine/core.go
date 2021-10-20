@@ -142,6 +142,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	// get services
 	startSvc := sql.GetStartService()
 	shipSvc := sql.GetShipService()
+	userSvc := sql.GetUserService()
 
 	// obtain lock
 	sol.Lock.Lock()
@@ -372,11 +373,97 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(ds, sol)
 	}
 
-	// iterate over clients in need of respawn
-	for id := range sol.NeedRespawn {
+	// iterate over NPCs in need of respawn
+	for id := range sol.NPCNeedRespawn {
 		// capture reference and remove from map
-		rs := sol.NeedRespawn[id]
-		delete(sol.NeedRespawn, id)
+		rs := sol.NPCNeedRespawn[id]
+		delete(sol.NPCNeedRespawn, id)
+
+		// handle escalation on another goroutine
+		go func(rs *universe.Ship, sol *universe.SolarSystem) {
+			// find their starting conditions
+			user, err := userSvc.GetUserByID(rs.UserID)
+
+			if err != nil {
+				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - no associated user!", rs.UserID))
+				return
+			}
+
+			start, err := startSvc.GetStartByID(user.StartID)
+
+			if err != nil {
+				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - no associated start!", rs.UserID))
+				return
+			}
+
+			// find their home station
+			home := sol.Universe.FindStation(start.HomeStationID)
+
+			if home == nil {
+				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - no home station!", rs.UserID))
+				return
+			}
+
+			// create their ship docked in that station
+			u, err := CreateNoobShipForPlayer(start, rs.UserID)
+
+			if err != nil || u.CurrentShipID == nil {
+				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - failed to create noob ship (%v | %v)!", rs.UserID, err, u.CurrentShipID))
+				return
+			}
+
+			ns, err := shipSvc.GetShipByID(*u.CurrentShipID, false)
+
+			if err != nil || ns == nil {
+				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - no noob ship!", rs.UserID))
+				return
+			}
+
+			// save ship
+			err = shipSvc.UpdateShip(*ns)
+
+			if home == nil {
+				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - couldn't save noob ship changes (%v)!", rs.UserID, err))
+				return
+			}
+
+			// load the ship into the home station's system
+			ns, err = shipSvc.GetShipByID(*u.CurrentShipID, false)
+
+			if err != nil || ns == nil {
+				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - no noob ship again!", rs.UserID))
+				return
+			}
+
+			es, err := LoadShip(ns, sol.Universe)
+
+			if err != nil || es == nil {
+				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - couldn't load new noobship into universe (%v)!", rs.UserID, err))
+				return
+			}
+
+			// set up as NPC
+			es.BehaviourMode = user.BehaviourMode
+			es.IsNPC = true
+			es.BeingFlownByPlayer = false
+
+			// link NPC's faction into ship
+			es.FactionID = u.CurrentFactionID
+			es.Faction = sol.Universe.Factions[u.CurrentFactionID.String()]
+
+			// link NPC's reputation sheet into ship (not that this will be used by anything...)
+			es.ReputationSheet = LoadReputationSheet(user)
+
+			// put ship in home system
+			home.CurrentSystem.AddShip(es, true)
+		}(rs, sol)
+	}
+
+	// iterate over clients in need of respawn
+	for id := range sol.PlayerNeedRespawn {
+		// capture reference and remove from map
+		rs := sol.PlayerNeedRespawn[id]
+		delete(sol.PlayerNeedRespawn, id)
 
 		// handle escalation on another goroutine
 		go func(rs *shared.GameClient, sol *universe.SolarSystem) {

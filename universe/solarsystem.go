@@ -32,7 +32,8 @@ type SolarSystem struct {
 	tickCounter       int                                 // counter that is used to control frequency of certain global updates
 	Lock              sync.Mutex
 	// event escalations to engine core
-	NeedRespawn          map[string]*shared.GameClient // clients in need of a respawn by core
+	PlayerNeedRespawn    map[string]*shared.GameClient // clients in need of a respawn by core
+	NPCNeedRespawn       map[string]*Ship              // NPCs in need of a respawn by core
 	DeadShips            map[string]*Ship              // dead ships in need of cleanup by core
 	MovedItems           map[string]*Item              // items moved to a new container in need of saving by core
 	PackagedItems        map[string]*Item              // items packaged in need of saving by core
@@ -58,7 +59,8 @@ func (s *SolarSystem) Initialize() {
 	s.stations = make(map[string]*Station)
 	s.asteroids = make(map[string]*Asteroid)
 	s.DeadShips = make(map[string]*Ship)
-	s.NeedRespawn = make(map[string]*shared.GameClient)
+	s.PlayerNeedRespawn = make(map[string]*shared.GameClient)
+	s.NPCNeedRespawn = make(map[string]*Ship)
 	s.MovedItems = make(map[string]*Item)
 	s.PackagedItems = make(map[string]*Item)
 	s.UnpackagedItems = make(map[string]*Item)
@@ -746,7 +748,13 @@ func (s *SolarSystem) PeriodicUpdate() {
 			if c != nil {
 				if c.CurrentShipID == e.ID {
 					// escalate respawn request to core
-					s.NeedRespawn[e.UserID.String()] = c
+					s.PlayerNeedRespawn[e.UserID.String()] = c
+				}
+			} else {
+				// check if an NPC
+				if e.IsNPC {
+					// escalate NPC respawn request to core
+					s.NPCNeedRespawn[e.UserID.String()] = e
 				}
 			}
 

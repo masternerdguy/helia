@@ -71,13 +71,15 @@ func NewAutopilotRegistry() *AutopilotRegistry {
 
 // Autopilot states for ships
 type BehaviourRegistry struct {
-	None int
+	None   int
+	Wander int
 }
 
 // Returns a populated AutopilotRegistry struct for use as an enum
 func NewBehaviourRegistry() *BehaviourRegistry {
 	return &BehaviourRegistry{
-		None: 0,
+		None:   0,
+		Wander: 1,
 	}
 }
 
@@ -91,6 +93,8 @@ type ManualNavData struct {
 type GotoData struct {
 	TargetID uuid.UUID
 	Type     int
+	Hold     *int
+	Caution  *int
 }
 
 // Container structure for arguments of the Orbit autopilot mode
@@ -404,6 +408,14 @@ func (s *Ship) PeriodicUpdate() {
 	// remax some stats if needed for spawning
 	if s.ReMaxDirty {
 		s.ReMaxStatsForSpawn()
+	}
+
+	// special cheats NPCs get to make things easier to implement for now (i do want to eliminate these)
+	if s.IsNPC {
+		if s.Fuel <= 0 {
+			// infinite fuel via refill at 0
+			s.Fuel = s.GetRealMaxFuel()
+		}
 	}
 
 	// update energy
@@ -976,6 +988,11 @@ func (s *Ship) CheckStandings(factionID uuid.UUID) (float64, bool) {
 
 // Run routine to control ship using autopilot commands to achieve a goal
 func (s *Ship) behave() {
+	// NPC-only routine
+	if !s.IsNPC {
+		return
+	}
+
 	if s.BehaviourMode != nil {
 		// get registry
 		registry := NewBehaviourRegistry()
@@ -985,6 +1002,95 @@ func (s *Ship) behave() {
 			// unset mode
 			s.BehaviourMode = nil
 			return
+		case registry.Wander:
+			s.behaviourWander()
+		}
+	}
+}
+
+// wanders around the universe aimlessly
+func (s *Ship) behaviourWander() {
+	// get registry
+	autoReg := NewAutopilotRegistry()
+
+	// check if idle
+	if s.AutopilotMode == autoReg.None {
+		// get registry
+		tgtReg := models.NewTargetTypeRegistry()
+
+		// check if docked
+		if s.DockedAtStationID != nil {
+			// 1% chance of undocking per tick
+			roll := physics.RandInRange(0, 100)
+
+			if roll == 1 {
+				// undock
+				s.CmdUndock()
+				return
+			}
+		} else {
+			// 50% chance of docking at a station, 50% chance of flying through a jumphole
+			roll := physics.RandInRange(0, 100)
+
+			if roll < 50 {
+				// get and count stations in system
+				stations := s.CurrentSystem.CopyStations()
+				count := len(stations)
+
+				// verify there are candidates
+				if count == 0 {
+					return
+				}
+
+				// pick random station to dock at
+				tgt := physics.RandInRange(0, count)
+
+				idx := 0
+				for _, e := range stations {
+					if idx == tgt {
+						// check standings
+						v, oh := s.CheckStandings(e.FactionID)
+
+						if v > shared.MIN_DOCK_STANDING && !oh {
+							// dock at it
+							s.CmdDock(e.ID, tgtReg.Station)
+							return
+						}
+					}
+
+					idx++
+				}
+			} else {
+				// get and count jumholes in system
+				jumpholes := s.CurrentSystem.CopyJumpholes()
+				count := len(jumpholes)
+
+				// verify there are candidates
+				if count == 0 {
+					return
+				}
+
+				// pick random jumphole to fly through
+				tgt := physics.RandInRange(0, count)
+
+				idx := 0
+				for _, e := range jumpholes {
+					if idx == tgt {
+						// fly through it
+						s.CmdGoto(e.ID, tgtReg.Jumphole)
+
+						hold := 0
+						caution := 0
+
+						s.AutopilotGoto.Hold = &hold
+						s.AutopilotGoto.Caution = &caution
+
+						return
+					}
+
+					idx++
+				}
+			}
 		}
 	}
 }
@@ -1150,9 +1256,21 @@ func (s *Ship) doAutopilotGoto() {
 		return
 	}
 
-	// fly towards target
+	// get hold / caution overrides if provided
 	hold := (s.TemplateData.Radius + tR)
-	s.flyToPoint(tX, tY, hold, 30)
+
+	if s.AutopilotGoto.Hold != nil {
+		hold = float64(*s.AutopilotGoto.Hold)
+	}
+
+	caution := 30.0
+
+	if s.AutopilotGoto.Caution != nil {
+		caution = float64(*s.AutopilotGoto.Caution)
+	}
+
+	// fly towards target
+	s.flyToPoint(tX, tY, hold, caution)
 }
 
 // Causes ship to fly a circle around the target
