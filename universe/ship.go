@@ -3,7 +3,6 @@ package universe
 import (
 	"errors"
 	"fmt"
-	"log"
 	"math"
 	"sync"
 	"time"
@@ -1026,8 +1025,6 @@ func (s *Ship) behaviourWander() {
 
 	// check if idle
 	if s.AutopilotMode == autoReg.None {
-		log.Println("a")
-
 		// get registry
 		tgtReg := models.NewTargetTypeRegistry()
 
@@ -1036,28 +1033,22 @@ func (s *Ship) behaviourWander() {
 			// 1% chance of undocking per tick
 			roll := physics.RandInRange(0, 100)
 
-			log.Println("b")
-
 			if roll == 1 {
-				log.Println("c")
 				// undock
 				s.CmdUndock(false)
 				return
 			}
 		} else {
-			log.Println("d")
 			// 50% chance of docking at a station, 50% chance of flying through a jumphole
 			roll := physics.RandInRange(0, 100)
 
 			if roll < 50 {
-				log.Println("e")
 				// get and count stations in system
 				stations := s.CurrentSystem.stations
 				count := len(stations)
 
 				// verify there are candidates
 				if count == 0 {
-					log.Println("f")
 					return
 				}
 
@@ -1071,7 +1062,6 @@ func (s *Ship) behaviourWander() {
 						v, oh := s.CheckStandings(e.FactionID)
 
 						if v > shared.MIN_DOCK_STANDING && !oh {
-							log.Println("g")
 							// dock at it
 							s.CmdDock(e.ID, tgtReg.Station, false)
 							return
@@ -1081,14 +1071,12 @@ func (s *Ship) behaviourWander() {
 					idx++
 				}
 			} else {
-				log.Println("h")
 				// get and count jumholes in system
 				jumpholes := s.CurrentSystem.jumpholes
 				count := len(jumpholes)
 
 				// verify there are candidates
 				if count == 0 {
-					log.Println("i")
 					return
 				}
 
@@ -1098,7 +1086,6 @@ func (s *Ship) behaviourWander() {
 				idx := 0
 				for _, e := range jumpholes {
 					if idx == tgt {
-						log.Println("j")
 						// fly through it
 						s.CmdGoto(e.ID, tgtReg.Jumphole, false)
 
@@ -1118,7 +1105,7 @@ func (s *Ship) behaviourWander() {
 	}
 }
 
-// Flies the ship automatically
+// Flies the ship automatically when undocked
 func (s *Ship) doUndockedAutopilot() {
 	// get registry
 	registry := NewAutopilotRegistry()
@@ -1137,7 +1124,7 @@ func (s *Ship) doUndockedAutopilot() {
 	}
 }
 
-// Flies the ship for you
+// Flies the ship automatically when docked
 func (s *Ship) doDockedAutopilot() {
 	// get registry
 	registry := NewAutopilotRegistry()
