@@ -112,11 +112,21 @@ export class OverviewWindow extends GDIWindow {
     const jumpholes: OverviewRow[] = [];
 
     // sort entities
-    const sortedJumpholes = player.currentSystem.jumpholes.sort((a, b) => (a.jumpholeName ?? "").localeCompare(b.jumpholeName ?? ""));
-    const sortedAsteroids = player.currentSystem.asteroids.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
-    const sortedPlanets = player.currentSystem.planets.sort((a, b) => (a.planetName ?? "").localeCompare(b.planetName ?? ""));
-    const sortedStations = player.currentSystem.stations.sort((a, b) => (a.stationName ?? "").localeCompare(b.stationName ?? ""));
-    const sortedShips = player.currentSystem.ships.sort((a, b) => (a.ownerName ?? "").localeCompare(b.ownerName ?? ""));
+    const sortedJumpholes = player.currentSystem.jumpholes.sort((a, b) =>
+      (a.jumpholeName ?? '').localeCompare(b.jumpholeName ?? '')
+    );
+    const sortedAsteroids = player.currentSystem.asteroids.sort((a, b) =>
+      (a.name ?? '').localeCompare(b.name ?? '')
+    );
+    const sortedPlanets = player.currentSystem.planets.sort((a, b) =>
+      (a.planetName ?? '').localeCompare(b.planetName ?? '')
+    );
+    const sortedStations = player.currentSystem.stations.sort((a, b) =>
+      (a.stationName ?? '').localeCompare(b.stationName ?? '')
+    );
+    const sortedShips = player.currentSystem.ships.sort((a, b) =>
+      (a.ownerName ?? '').localeCompare(b.ownerName ?? '')
+    );
 
     // include stars
     for (const i of player.currentSystem.stars) {

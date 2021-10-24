@@ -282,7 +282,7 @@ export class ShipFittingWindow extends GDIWindow {
       } else if (a === 'Destruct ☠') {
         // send self destruct request
         const tiMsg: ClientSelfDestruct = {
-          sid: this.wsSvc.sid
+          sid: this.wsSvc.sid,
         };
 
         this.wsSvc.sendMessage(MessageTypes.SelfDestruct, tiMsg);
@@ -767,10 +767,7 @@ function buildFittingRowFromModule(
   return r;
 }
 
-function buildActionRow(
-  text: string,
-  actions: string[]
-): ShipViewRow {
+function buildActionRow(text: string, actions: string[]): ShipViewRow {
   const r: ShipViewRow = {
     object: {},
     actions: actions,

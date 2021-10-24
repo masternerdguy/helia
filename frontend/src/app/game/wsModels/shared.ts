@@ -18,7 +18,9 @@ export function UpdateFactionCache(factions: Faction[]) {
   }
 
   for (const f of factions) {
-    f.relationships = f.relationships.sort((a, b) => b.standingValue - a.standingValue);
+    f.relationships = f.relationships.sort(
+      (a, b) => b.standingValue - a.standingValue
+    );
     (window as any).factionDictionary[f.id] = new Faction(f);
   }
 }
@@ -39,7 +41,7 @@ export function GetFactionCache(): Faction[] {
     }
   }
 
-  return cache.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+  return cache.sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
 }
 
 export function GetFactionCacheEntry(id: string): Faction {
@@ -83,7 +85,7 @@ export function GetPlayerFactionRelationshipCache(): WSPlayerFactionRelationship
     }
   }
 
-  return cache.sort((a, b) => b.standingValue - a.standingValue);;
+  return cache.sort((a, b) => b.standingValue - a.standingValue);
 }
 
 export function GetPlayerFactionRelationshipCacheEntry(

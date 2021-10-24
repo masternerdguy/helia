@@ -78,11 +78,13 @@ export class ReputationSheetWindow extends GDIWindow {
   }
 
   private buildDetails(r: FactionRepViewRow): FactionInfoViewRow[] {
-    const relationships = r.faction.relationships.sort((a, b) => a.standingValue - b.standingValue);
+    const relationships = r.faction.relationships.sort(
+      (a, b) => a.standingValue - b.standingValue
+    );
     const factions = GetFactionCache().sort((a, b) => {
       // get standing entries
-      const aStanding = relationships.filter(x => x.factionId == a.id);
-      const bStanding = relationships.filter(x => x.factionId == b.id);
+      const aStanding = relationships.filter((x) => x.factionId == a.id);
+      const bStanding = relationships.filter((x) => x.factionId == b.id);
 
       // extract values
       var aVal = 0;
@@ -181,8 +183,12 @@ export class ReputationSheetWindow extends GDIWindow {
       // get factions
       const factions = GetFactionCache().sort((a, b) => {
         // get standing entries
-        const aStanding = playerFactionRelationships.filter(x => x.factionId == a.id);
-        const bStanding = playerFactionRelationships.filter(x => x.factionId == b.id);
+        const aStanding = playerFactionRelationships.filter(
+          (x) => x.factionId == a.id
+        );
+        const bStanding = playerFactionRelationships.filter(
+          (x) => x.factionId == b.id
+        );
 
         // extract values
         var aVal = 0;
