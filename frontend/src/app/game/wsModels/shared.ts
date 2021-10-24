@@ -38,7 +38,7 @@ export function GetFactionCache(): Faction[] {
     }
   }
 
-  return cache;
+  return cache.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
 }
 
 export function GetFactionCacheEntry(id: string): Faction {
@@ -82,7 +82,7 @@ export function GetPlayerFactionRelationshipCache(): WSPlayerFactionRelationship
     }
   }
 
-  return cache;
+  return cache.sort((a, b) => a.standingValue - b.standingValue);;
 }
 
 export function GetPlayerFactionRelationshipCacheEntry(

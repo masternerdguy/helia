@@ -78,7 +78,28 @@ export class ReputationSheetWindow extends GDIWindow {
   }
 
   private buildDetails(r: FactionRepViewRow): FactionInfoViewRow[] {
-    const factions = GetFactionCache();
+    const relationships = r.faction.relationships.sort((a, b) => a.standingValue - b.standingValue);
+    const factions = GetFactionCache().sort((a, b) => {
+      // get standing entries
+      const aStanding = relationships.filter(x => x.factionId == a.id);
+      const bStanding = relationships.filter(x => x.factionId == b.id);
+
+      // extract values
+      var aVal = 0;
+      var bVal = 0;
+
+      if (aStanding.length > 0) {
+        aVal = aStanding[0].standingValue;
+      }
+
+      if (bStanding.length > 0) {
+        bVal = bStanding[0].standingValue;
+      }
+
+      // sort by standing desc
+      return bVal - aVal;
+    });
+
     const rows: string[] = [];
 
     // basic info
@@ -154,11 +175,30 @@ export class ReputationSheetWindow extends GDIWindow {
 
   periodicUpdate() {
     if (!this.isHidden()) {
-      // get factions
-      const factions = GetFactionCache();
-
       // get player-faction relationships
       const playerFactionRelationships = GetPlayerFactionRelationshipCache();
+
+      // get factions
+      const factions = GetFactionCache().sort((a, b) => {
+        // get standing entries
+        const aStanding = playerFactionRelationships.filter(x => x.factionId == a.id);
+        const bStanding = playerFactionRelationships.filter(x => x.factionId == b.id);
+
+        // extract values
+        var aVal = 0;
+        var bVal = 0;
+
+        if (aStanding.length > 0) {
+          aVal = aStanding[0].standingValue;
+        }
+
+        if (bStanding.length > 0) {
+          bVal = bStanding[0].standingValue;
+        }
+
+        // sort by standing desc
+        return bVal - aVal;
+      });
 
       // build rows
       const factionRows: FactionRepViewRow[] = [];
