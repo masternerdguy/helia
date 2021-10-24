@@ -18,6 +18,7 @@ export function UpdateFactionCache(factions: Faction[]) {
   }
 
   for (const f of factions) {
+    f.relationships = f.relationships.sort((a, b) => b.standingValue - a.standingValue);
     (window as any).factionDictionary[f.id] = new Faction(f);
   }
 }
@@ -82,7 +83,7 @@ export function GetPlayerFactionRelationshipCache(): WSPlayerFactionRelationship
     }
   }
 
-  return cache.sort((a, b) => a.standingValue - b.standingValue);;
+  return cache.sort((a, b) => b.standingValue - a.standingValue);;
 }
 
 export function GetPlayerFactionRelationshipCacheEntry(
