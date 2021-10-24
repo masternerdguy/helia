@@ -186,6 +186,7 @@ export class ReputationSheetWindow extends GDIWindow {
         const aStanding = playerFactionRelationships.filter(
           (x) => x.factionId == a.id
         );
+
         const bStanding = playerFactionRelationships.filter(
           (x) => x.factionId == b.id
         );
