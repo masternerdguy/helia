@@ -81,6 +81,7 @@ export class ReputationSheetWindow extends GDIWindow {
     const relationships = r.faction.relationships.sort(
       (a, b) => a.standingValue - b.standingValue
     );
+
     const factions = GetFactionCache().sort((a, b) => {
       // get standing entries
       const aStanding = relationships.filter((x) => x.factionId == a.id);
