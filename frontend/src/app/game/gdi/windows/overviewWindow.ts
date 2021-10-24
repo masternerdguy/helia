@@ -111,6 +111,13 @@ export class OverviewWindow extends GDIWindow {
     const stations: OverviewRow[] = [];
     const jumpholes: OverviewRow[] = [];
 
+    // sort entities
+    const sortedJumpholes = player.currentSystem.jumpholes.sort((a, b) => (a.jumpholeName ?? "").localeCompare(b.jumpholeName ?? ""));
+    const sortedAsteroids = player.currentSystem.asteroids.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+    const sortedPlanets = player.currentSystem.planets.sort((a, b) => (a.planetName ?? "").localeCompare(b.planetName ?? ""));
+    const sortedStations = player.currentSystem.stations.sort((a, b) => (a.stationName ?? "").localeCompare(b.stationName ?? ""));
+    const sortedShips = player.currentSystem.ships.sort((a, b) => (a.ownerName ?? "").localeCompare(b.ownerName ?? ""));
+
     // include stars
     for (const i of player.currentSystem.stars) {
       const od = overviewDistance(
@@ -133,7 +140,7 @@ export class OverviewWindow extends GDIWindow {
     }
 
     // include planets
-    for (const i of player.currentSystem.planets) {
+    for (const i of sortedPlanets) {
       const od = overviewDistance(
         player.currentShip.x,
         player.currentShip.y,
@@ -154,7 +161,7 @@ export class OverviewWindow extends GDIWindow {
     }
 
     // include stations
-    for (const i of player.currentSystem.stations) {
+    for (const i of sortedStations) {
       const od = overviewDistance(
         player.currentShip.x,
         player.currentShip.y,
@@ -180,7 +187,7 @@ export class OverviewWindow extends GDIWindow {
     }
 
     // include ships
-    for (const i of player.currentSystem.ships) {
+    for (const i of sortedShips) {
       // skip if player ship
       if (i.id === player.currentShip.id) {
         continue;
@@ -214,7 +221,7 @@ export class OverviewWindow extends GDIWindow {
     }
 
     // include jumpholes
-    for (const i of player.currentSystem.jumpholes) {
+    for (const i of sortedJumpholes) {
       const od = overviewDistance(
         player.currentShip.x,
         player.currentShip.y,
@@ -238,7 +245,7 @@ export class OverviewWindow extends GDIWindow {
     }
 
     // include asteroids
-    for (const i of player.currentSystem.asteroids) {
+    for (const i of sortedAsteroids) {
       const od = overviewDistance(
         player.currentShip.x,
         player.currentShip.y,
