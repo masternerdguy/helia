@@ -109,6 +109,11 @@ func (e *HeliaEngine) Start() {
 	// start watchdog goroutine (to alert of any deadlocks for debugging purposes)
 	go func(e *HeliaEngine) {
 		for {
+			if shutdownSignal {
+				log.Println("* Deadlock Check Halted!")
+				break
+			}
+
 			log.Println("* Deadlock Check Starting")
 
 			// iterate over systems
