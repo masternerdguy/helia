@@ -1507,6 +1507,32 @@ func (s *SolarSystem) StoreOpenSellOrder(order *SellOrder, lock bool) {
 	s.stations[order.StationID.String()].OpenSellOrders[order.ID.String()] = order
 }
 
+// Attempt to lock every entity in the system, and the system itself - never call from within the system!
+func (s *SolarSystem) TestLocks() {
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	for _, e := range s.asteroids {
+		e.Lock.Lock()
+		defer e.Lock.Unlock()
+	}
+
+	for _, e := range s.jumpholes {
+		e.Lock.Lock()
+		defer e.Lock.Unlock()
+	}
+
+	for _, e := range s.stations {
+		e.Lock.Lock()
+		defer e.Lock.Unlock()
+	}
+
+	for _, e := range s.ships {
+		e.Lock.Lock()
+		defer e.Lock.Unlock()
+	}
+}
+
 func copyModuleInfo(v FittedSlot) models.ServerModuleStatusBody {
 	module := models.ServerModuleStatusBody{}
 

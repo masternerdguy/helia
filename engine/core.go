@@ -105,6 +105,32 @@ func (e *HeliaEngine) Start() {
 	}
 
 	log.Println("System goroutines started!")
+
+	// start watchdog goroutine (to alert of any deadlocks for debugging purposes)
+	go func(e *HeliaEngine) {
+		for {
+			log.Println("* Deadlock Check Starting")
+
+			// iterate over systems
+			for _, r := range e.Universe.Regions {
+				for _, s := range r.Systems {
+					log.Println(fmt.Sprintf("* Testing [%v]", s.SystemName))
+
+					// test locks
+					s.TestLocks()
+					log.Println(fmt.Sprintf("* [%v] Passed", s.SystemName))
+				}
+
+				// small sleep between systems
+				time.Sleep(20 * time.Millisecond)
+			}
+
+			log.Println("* All systems passed deadlock check!")
+
+			// wait 60 seconds
+			time.Sleep(time.Second * 60)
+		}
+	}(e)
 }
 
 // Saves the current state of the simulation and halts
