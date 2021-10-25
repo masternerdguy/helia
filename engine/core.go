@@ -110,7 +110,7 @@ func (e *HeliaEngine) Start() {
 	go func(e *HeliaEngine) {
 		for {
 			if shutdownSignal {
-				log.Println("* Deadlock Check Halted!")
+				log.Println("! Deadlock Check [goroutine] Halted!")
 				break
 			}
 
