@@ -1584,6 +1584,30 @@ func (s *Ship) FindItemInCargo(id uuid.UUID) *Item {
 	return nil
 }
 
+// Returns the first available (clean and nonzero quantity) item of a given type and packaging state in the cargo bay
+func (s *Ship) FindFirstAvailableItemOfTypeInCargo(typeID uuid.UUID, packaged bool) *Item {
+	// look for item
+	for i := range s.CargoBay.Items {
+		item := s.CargoBay.Items[i]
+
+		if item.CoreDirty {
+			continue
+		}
+
+		if item.Quantity <= 0 {
+			continue
+		}
+
+		if item.ItemTypeID == typeID && item.IsPackaged == packaged {
+			// return item
+			return item
+		}
+	}
+
+	// nothing found
+	return nil
+}
+
 // Removes an item from the cargo hold and fits it to the ship
 func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	if lock {
@@ -2835,6 +2859,25 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		}
 	}
 
+	// check if ammunition required to fire
+	ammoTypeRaw, found := m.ItemMeta.GetString("ammunition_type")
+	var ammoItem *Item = nil
+
+	if found {
+		// parse type id
+		typeID, _ := uuid.Parse(ammoTypeRaw)
+
+		// verify there is enough ammunition to fire
+		x := m.shipMountedOn.FindFirstAvailableItemOfTypeInCargo(typeID, true)
+
+		if x == nil {
+			return false
+		}
+
+		// store item to take from
+		ammoItem = x
+	}
+
 	// get damage values
 	shieldDmg, _ := m.ItemMeta.GetFloat64("shield_damage")
 	armorDmg, _ := m.ItemMeta.GetFloat64("armor_damage")
@@ -2897,6 +2940,15 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 			armorDmg *= rangeRatio
 			hullDmg *= rangeRatio
 		}
+	}
+
+	// reduce ammunition count if needed
+	if ammoItem != nil {
+		ammoItem.Quantity--
+		ammoItem.CoreDirty = true
+
+		// escalate for saving
+		m.shipMountedOn.CurrentSystem.ChangedQuantityItems[ammoItem.ID.String()] = ammoItem
 	}
 
 	// apply damage (or ore / ice pulled if asteroid) to target
