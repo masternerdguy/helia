@@ -681,6 +681,8 @@ function buildInfoRowsFromModule(m: WSModule): ShipViewRow[] {
     }
   }
 
+  rows.push(buildShipViewRowSpacer());
+
   // slot info
   rows.push(buildShipViewRowText('Slot Info'));
 
