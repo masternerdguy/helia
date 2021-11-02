@@ -1020,11 +1020,24 @@ func (s *Ship) behave() {
 
 // wanders around the universe aimlessly
 func (s *Ship) behaviourWander() {
+	// pause if heat too high
+	maxHeat := s.GetRealMaxHeat()
+	heatLevel := s.Heat / maxHeat
+
+	if heatLevel > 0.95 {
+		s.CmdAbort()
+	}
+
 	// get registry
 	autoReg := NewAutopilotRegistry()
 
 	// check if idle
 	if s.AutopilotMode == autoReg.None {
+		// allow time to cool off :)
+		if heatLevel > 0.25 {
+			return
+		}
+
 		// get registry
 		tgtReg := models.NewTargetTypeRegistry()
 
