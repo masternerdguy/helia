@@ -2553,7 +2553,7 @@ func (s *Ship) SelfDestruct(lock bool) error {
 	return nil
 }
 
-// Attempts to buy an output from a silo and places it in cargo if successful
+// Attempts to consume a fuel pellet from cargo and add it to the fuel tank
 func (s *Ship) ConsumeFuelFromCargo(itemID uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
@@ -2601,6 +2601,75 @@ func (s *Ship) ConsumeFuelFromCargo(itemID uuid.UUID, lock bool) error {
 
 	// add fuel to tank
 	s.Fuel += float64(factor)
+
+	// reduce quantity of item to 0 (always unpackaged)
+	item.Quantity = 0
+	item.CoreDirty = true
+
+	// escalate to core for saving in db
+	s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
+
+	return nil
+}
+
+// Attempts to consume a repair kit from cargo and apply it to health
+func (s *Ship) ConsumeRepairKitFromCargo(itemID uuid.UUID, lock bool) error {
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// lock cargo bay
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	// make sure ship is docked
+	if s.DockedAtStationID == nil {
+		return errors.New("you must be docked to consume a repair kit")
+	}
+
+	// find item in cargo bay
+	item := s.FindItemInCargo(itemID)
+
+	if item == nil {
+		return errors.New("item not found in cargo bay")
+	}
+
+	// make sure item is clean
+	if item.CoreDirty {
+		return errors.New("item is dirty and waiting on an escalation to save its state")
+	}
+
+	// make sure item is a repair kit
+	if item.ItemFamilyID != "repair_kit" {
+		return errors.New("item is not a repair kit")
+	}
+
+	// make sure item is unpackaged
+	if item.IsPackaged {
+		return errors.New("only unpackaged repair kits can be consumed")
+	}
+
+	// determine armor and hull quantity to add
+	armorFactor, _ := item.Meta.GetInt("armorconversion")
+	hullFactor, _ := item.Meta.GetInt("hullconversion")
+
+	// add to health
+	s.Armor += float64(armorFactor)
+	s.Hull += float64(hullFactor)
+
+	// limit health
+	maxArmor := s.GetRealMaxArmor()
+	maxHull := s.GetRealMaxHull()
+
+	if s.Armor > maxArmor {
+		s.Armor = maxArmor
+	}
+
+	if s.Hull > maxHull {
+		s.Hull = maxHull
+	}
 
 	// reduce quantity of item to 0 (always unpackaged)
 	item.Quantity = 0

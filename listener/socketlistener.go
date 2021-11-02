@@ -251,6 +251,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientSelfDestruct(&client, &b)
+		} else if m.MessageType == msgRegistry.ConsumeRepairKit {
+			// decode body as ClientConsumeRepairKitBody
+			b := models.ClientConsumeRepairKitBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientConsumeRepairKit(&client, &b)
 		}
 	}
 }
@@ -1040,6 +1047,29 @@ func (l *SocketListener) handleClientSelfDestruct(client *shared.GameClient, bod
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.SelfDestruct)
+	}
+}
+
+func (l *SocketListener) handleClientConsumeRepairKit(client *shared.GameClient, body *models.ClientConsumeRepairKitBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientConsumeRepairKit: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.ConsumeRepairKit)
 	}
 }
 

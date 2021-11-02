@@ -729,6 +729,20 @@ func (s *SolarSystem) PeriodicUpdate() {
 					c.WriteErrorMessage(err.Error())
 				}
 			}
+		} else if evt.Type == models.NewMessageRegistry().ConsumeRepairKit {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientConsumeRepairKitBody)
+
+				// consume repair kit
+				err := sh.ConsumeRepairKitFromCargo(data.ItemID, false)
+
+				// there is a reason this could fail the player will need to know about
+				if err != nil {
+					// send error message to client
+					c.WriteErrorMessage(err.Error())
+				}
+			}
 		}
 	}
 

@@ -19,6 +19,7 @@ import { ClientFitModule } from '../../wsModels/bodies/fitModule';
 import { GDIBar } from '../components/gdiBar';
 import { ClientConsumeFuel } from '../../wsModels/bodies/consumeFuel';
 import { ClientSelfDestruct } from '../../wsModels/bodies/selfDestruct';
+import { ClientConsumeRepairKit } from '../../wsModels/bodies/consumeRepairKit';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -273,6 +274,23 @@ export class ShipFittingWindow extends GDIWindow {
         };
 
         this.wsSvc.sendMessage(MessageTypes.ConsumeFuel, tiMsg);
+
+        // request cargo bay refresh
+        this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
+      } else if (a === 'Repair Ship') {
+        // get selected item
+        const i: ShipViewRow = this.shipView.getSelectedItem();
+
+        // send consume request
+        const tiMsg: ClientConsumeRepairKit = {
+          sid: this.wsSvc.sid,
+          itemId: (i.object as WSContainerItem).id,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.ConsumeRepairKit, tiMsg);
 
         // request cargo bay refresh
         this.refreshCargoBay();
@@ -741,6 +759,14 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
       if (isFuel) {
         // offer load fuel action
         actions.push('Load Fuel');
+      }
+
+      // determine whether or not this is a repair kit
+      const isRepairKit = m.itemFamilyID === 'repair_kit';
+
+      if (isRepairKit) {
+        // offer repair ship action
+        actions.push('Repair Ship');
       }
     }
 

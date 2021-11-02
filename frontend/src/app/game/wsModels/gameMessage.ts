@@ -38,4 +38,5 @@ export enum MessageTypes {
   ConsumeFuel = 30,
   PlayerFactionUpdate = 31,
   SelfDestruct = 32,
+  ConsumeRepairKit = 33,
 }
