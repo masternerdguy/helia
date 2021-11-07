@@ -159,6 +159,17 @@ export class ReputationSheetWindow extends GDIWindow {
       }
     }
 
+    // description
+    rows.push('');
+    rows.push('Encyclopedia Summary');
+    rows.push('');
+
+    const displayDescription = this.infoList.breakText(r.faction.description ?? "");
+    
+    for (const i of displayDescription) {
+      rows.push(i.text);
+    }
+
     // convert to display rows
     const dRows: FactionInfoViewRow[] = [];
 

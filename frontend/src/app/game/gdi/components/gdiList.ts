@@ -199,7 +199,7 @@ export class GDIList extends GDIBase {
     this.setItems(rows);
   }
 
-  private breakText(text: string) {
+  breakText(text: string): any[] {
     const rows = [];
 
     // first break text by newlines
