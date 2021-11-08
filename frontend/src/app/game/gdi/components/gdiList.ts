@@ -199,51 +199,76 @@ export class GDIList extends GDIBase {
     this.setItems(rows);
   }
 
-  breakText(text: string): any[] {
+  breakText(rawText: string): any[] {
+    // capture argument
+    let text = `${rawText}`;
     const rows = [];
 
-    // first break text by newlines
-    const byNewLines = text.split('\n');
-
-    // then break by row width
+    // first break by row width
     const fontWidth = getCharWidth(
       ' ',
       GDIStyle.getUnderlyingFont(this.getFont())
     );
+    
     const breakCol =
       Math.round(
-        (this.getWidth() -
+        ((this.getWidth() -
           (GDIStyle.listScrollWidth + 2 * (GDIStyle.listBorderSize + 3))) /
           fontWidth -
-          0.5
-      ) - 1;
+          0.5)
+      );
 
-    for (const lbRow of byNewLines) {
-      let acc = '';
-      let accIdx = 0;
+    let accIdx = 0;
 
-      for (var i = 0; i < lbRow.length; i++) {
-        if (accIdx > breakCol) {
-          const sAcc = `${acc}`;
-
-          rows.push({
-            text: `${acc}`,
-            listString: () => sAcc,
-          });
-
-          accIdx = 0;
-          acc = '';
-        }
-
-        acc += lbRow.charAt(i);
-        accIdx++;
+    for (let i = 0; i < `${text}`.length; i++) {
+      // reset if line break encountered
+      if (text[i] == '\n') {
+        accIdx = 0;
+        continue;
       }
 
-      const lAcc = `${acc}`;
+      // determine whether to back-insert a break and back-track
+      if (accIdx == breakCol) {
+        accIdx = 0;
 
+        if (text[i] != '\n') {
+          for (let j = breakCol; j >= 0; j--) {
+            let x = (i - breakCol) + j;
+  
+            // break on previous space and back-track to last space position
+            if (text[x] == ' ') {
+              const s1 = text.substring(0, x);
+              const s2 = text.substring(x)
+  
+              text = `${s1.trim()}ⶤⶤ${s2.trim()}`;
+              i = x;
+  
+              break;
+            }
+          }
+        }
+      }
+
+      accIdx++;
+    }
+
+    const lBreaks = text.split('ⶤⶤ');
+    let nText = '';
+
+    console.log(lBreaks);
+
+    for (const ln of lBreaks) {
+      nText += ln + "\n";
+    }
+
+    // then break text by newlines
+    const byNewLines = nText.split('\n');
+    console.log(byNewLines);
+
+    for (const lbRow of byNewLines) {
       rows.push({
-        text: `${acc}`,
-        listString: () => lAcc,
+        text: `${lbRow}`,
+        listString: () => lbRow,
       });
     }
 
