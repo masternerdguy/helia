@@ -73,6 +73,7 @@ export class ReputationSheetWindow extends GDIWindow {
     this.infoList.setY(200);
 
     this.infoList.setFont(FontSize.normal);
+    this.infoList.setOnClick(() => {});
 
     this.addComponent(this.infoList);
   }
