@@ -7,7 +7,6 @@ import {
 } from '../../wsModels/shared';
 import { Faction } from '../../engineModels/faction';
 import { WSPlayerFactionRelationship } from '../../wsModels/entities/wsPlayerFaction';
-import { WSFactionRelationship } from '../../wsModels/entities/wsFaction';
 
 export class ReputationSheetWindow extends GDIWindow {
   private factionList = new GDIList();
