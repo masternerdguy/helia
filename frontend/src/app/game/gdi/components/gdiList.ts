@@ -254,15 +254,12 @@ export class GDIList extends GDIBase {
     const lBreaks = text.split('ⶤⶤ');
     let nText = '';
 
-    console.log(lBreaks);
-
     for (const ln of lBreaks) {
       nText += ln + '\n';
     }
 
     // then break text by newlines
     const byNewLines = nText.split('\n');
-    console.log(byNewLines);
 
     for (const lbRow of byNewLines) {
       rows.push({
