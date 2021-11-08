@@ -209,14 +209,13 @@ export class GDIList extends GDIBase {
       ' ',
       GDIStyle.getUnderlyingFont(this.getFont())
     );
-    
-    const breakCol =
-      Math.round(
-        ((this.getWidth() -
-          (GDIStyle.listScrollWidth + 2 * (GDIStyle.listBorderSize + 3))) /
-          fontWidth -
-          0.5)
-      );
+
+    const breakCol = Math.round(
+      (this.getWidth() -
+        (GDIStyle.listScrollWidth + 2 * (GDIStyle.listBorderSize + 3))) /
+        fontWidth -
+        0.5
+    );
 
     let accIdx = 0;
 
@@ -233,16 +232,16 @@ export class GDIList extends GDIBase {
 
         if (text[i] != '\n') {
           for (let j = breakCol; j >= 0; j--) {
-            let x = (i - breakCol) + j;
-  
+            let x = i - breakCol + j;
+
             // break on previous space and back-track to last space position
             if (text[x] == ' ') {
               const s1 = text.substring(0, x);
-              const s2 = text.substring(x)
-  
+              const s2 = text.substring(x);
+
               text = `${s1.trim()}ⶤⶤ${s2.trim()}`;
               i = x;
-  
+
               break;
             }
           }
@@ -258,7 +257,7 @@ export class GDIList extends GDIBase {
     console.log(lBreaks);
 
     for (const ln of lBreaks) {
-      nText += ln + "\n";
+      nText += ln + '\n';
     }
 
     // then break text by newlines

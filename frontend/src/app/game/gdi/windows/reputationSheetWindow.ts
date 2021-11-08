@@ -164,8 +164,10 @@ export class ReputationSheetWindow extends GDIWindow {
     rows.push('Encyclopedia Summary');
     rows.push('');
 
-    const displayDescription = this.infoList.breakText(r.faction.description ?? "");
-    
+    const displayDescription = this.infoList.breakText(
+      r.faction.description ?? ''
+    );
+
     for (const i of displayDescription) {
       rows.push(i.text);
     }

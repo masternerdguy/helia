@@ -214,7 +214,7 @@ export class ModuleEffect extends WsPushModuleEffect {
           const ty = camera.projectY(dest[1]);
 
           // project gauss trail thickness
-          const decay = 1 - (this.lifeElapsed / this.maxLifeTime);
+          const decay = 1 - this.lifeElapsed / this.maxLifeTime;
           const lt = camera.projectR(this.vfxData.thickness * decay);
 
           // style line
