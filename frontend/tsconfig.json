@@ -12,7 +12,7 @@
     "importHelpers": true,
     "target": "es2020",
     "lib": ["es2020", "dom"],
-    "types": ["offscreencanvas"],
+    "types": ["offscreencanvas"]
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
