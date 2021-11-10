@@ -10,8 +10,9 @@
     "module": "es2020",
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2015",
-    "lib": ["es2018", "dom"]
+    "target": "es2020",
+    "lib": ["es2020", "dom"],
+    "types": ["offscreencanvas"],
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
