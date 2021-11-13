@@ -259,6 +259,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientConsumeRepairKit(&client, &b)
+		} else if m.MessageType == msgRegistry.ViewProperty {
+			// decode body as ClientViewPropertyBody
+			b := models.ClientViewPropertyBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientViewProperty(&client, &b)
 		}
 	}
 }
@@ -1071,6 +1078,29 @@ func (l *SocketListener) handleClientConsumeRepairKit(client *shared.GameClient,
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.ConsumeRepairKit)
+	}
+}
+
+func (l *SocketListener) handleClientViewProperty(client *shared.GameClient, body *models.ClientViewPropertyBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientViewProperty: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.ViewProperty)
 	}
 }
 

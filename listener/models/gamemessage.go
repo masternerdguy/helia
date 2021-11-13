@@ -43,6 +43,8 @@ type MessageRegistry struct {
 	PlayerFactionUpdate    int
 	SelfDestruct           int
 	ConsumeRepairKit       int
+	ViewProperty           int
+	PropertyUpdate         int
 }
 
 // Registry of target types
@@ -93,6 +95,8 @@ func NewMessageRegistry() *MessageRegistry {
 		PlayerFactionUpdate:    31,
 		SelfDestruct:           32,
 		ConsumeRepairKit:       33,
+		ViewProperty:           34,
+		PropertyUpdate:         35,
 	}
 }
 
@@ -581,4 +585,13 @@ type ClientSelfDestructBody struct {
 type ClientConsumeRepairKitBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemId"`
+}
+
+// Body containing a request from the client for a summary of the player's owned property
+type ClientViewPropertyBody struct {
+	SessionID uuid.UUID `json:"sid"`
+}
+
+// Body containing a summary of the property owned by a player
+type ServerPropertyUpdateBody struct {
 }

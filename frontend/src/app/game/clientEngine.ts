@@ -44,6 +44,7 @@ import {
 } from './wsModels/bodies/viewStarMap';
 import { ReputationSheetWindow } from './gdi/windows/reputationSheetWindow';
 import { ServerPlayerFactionUpdate } from './wsModels/bodies/playerFactionUpdate';
+import { PropertySheetWindow } from './gdi/windows/propertySheetWindow';
 
 class EngineSack {
   constructor() {}
@@ -72,6 +73,7 @@ class EngineSack {
   industrialMarketWindow: IndustrialMarketWindow;
   starMapWindow: StarMapWindow;
   reputationSheetWindow: ReputationSheetWindow;
+  propertySheetWindow: PropertySheetWindow;
   lastShiftDown: number;
 
   windows: GDIWindow[];
@@ -146,24 +148,24 @@ export function clientStart(
   engineSack.shipStatusWindow.setPlayer(engineSack.player);
 
   engineSack.shipFittingWindow = new ShipFittingWindow();
-  engineSack.shipFittingWindow.setX(300);
-  engineSack.shipFittingWindow.setY(300);
+  engineSack.shipFittingWindow.setX(375);
+  engineSack.shipFittingWindow.setY(375);
   engineSack.shipFittingWindow.initialize();
   engineSack.shipFittingWindow.pack();
   engineSack.shipFittingWindow.setWsService(wsService);
   engineSack.shipFittingWindow.setPlayer(engineSack.player);
 
   engineSack.ordersMarketWindow = new OrdersMarketWindow();
-  engineSack.ordersMarketWindow.setX(300);
-  engineSack.ordersMarketWindow.setY(300);
+  engineSack.ordersMarketWindow.setX(425);
+  engineSack.ordersMarketWindow.setY(425);
   engineSack.ordersMarketWindow.initialize();
   engineSack.ordersMarketWindow.pack();
   engineSack.ordersMarketWindow.setWsService(wsService);
   engineSack.ordersMarketWindow.setPlayer(engineSack.player);
 
   engineSack.industrialMarketWindow = new IndustrialMarketWindow();
-  engineSack.industrialMarketWindow.setX(300);
-  engineSack.industrialMarketWindow.setY(300);
+  engineSack.industrialMarketWindow.setX(325);
+  engineSack.industrialMarketWindow.setY(325);
   engineSack.industrialMarketWindow.initialize();
   engineSack.industrialMarketWindow.pack();
   engineSack.industrialMarketWindow.setWsService(wsService);
@@ -192,18 +194,24 @@ export function clientStart(
   engineSack.overviewWindow.pack();
 
   engineSack.starMapWindow = new StarMapWindow();
-  engineSack.starMapWindow.setX(300);
-  engineSack.starMapWindow.setY(300);
+  engineSack.starMapWindow.setX(455);
+  engineSack.starMapWindow.setY(455);
   engineSack.starMapWindow.initialize();
   engineSack.starMapWindow.pack();
   engineSack.starMapWindow.setWsService(wsService);
   engineSack.starMapWindow.setPlayer(engineSack.player);
 
   engineSack.reputationSheetWindow = new ReputationSheetWindow();
-  engineSack.reputationSheetWindow.setX(350);
-  engineSack.reputationSheetWindow.setY(350);
+  engineSack.reputationSheetWindow.setX(355);
+  engineSack.reputationSheetWindow.setY(355);
   engineSack.reputationSheetWindow.initialize();
   engineSack.reputationSheetWindow.pack();
+
+  engineSack.propertySheetWindow = new PropertySheetWindow();
+  engineSack.propertySheetWindow.setX(365);
+  engineSack.propertySheetWindow.setY(365);
+  engineSack.propertySheetWindow.initialize();
+  engineSack.propertySheetWindow.pack();
 
   // link windows to window manager
   engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☀');
@@ -217,6 +225,7 @@ export function clientStart(
   engineSack.windowManager.manageWindow(engineSack.industrialMarketWindow, '⚙');
   engineSack.windowManager.manageWindow(engineSack.starMapWindow, '⊞');
   engineSack.windowManager.manageWindow(engineSack.reputationSheetWindow, '❉');
+  engineSack.windowManager.manageWindow(engineSack.propertySheetWindow, '⬢');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
@@ -229,6 +238,7 @@ export function clientStart(
     engineSack.industrialMarketWindow,
     engineSack.starMapWindow,
     engineSack.reputationSheetWindow,
+    engineSack.propertySheetWindow,
     engineSack.windowManager,
   ];
 
@@ -313,6 +323,7 @@ function handleJoin(d: GameMessage) {
   engineSack.pushErrorWindow.setHidden(true);
   engineSack.starMapWindow.setHidden(true);
   engineSack.reputationSheetWindow.setHidden(true);
+  engineSack.propertySheetWindow.setHidden(true);
 
   // start game loop
   engineSack.lastFrameTime = Date.now();
@@ -777,6 +788,9 @@ function handleCurrentShipUpdate(d: GameMessage) {
   // update industrial market window
   engineSack.industrialMarketWindow.setPlayer(engineSack.player);
   engineSack.industrialMarketWindow.setWsService(engineSack.wsSvc);
+
+  // update property window
+  engineSack.propertySheetWindow.setWsService(engineSack.wsSvc);
 }
 
 function handleFactionUpdate(d: GameMessage) {

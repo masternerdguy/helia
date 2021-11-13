@@ -39,4 +39,6 @@ export enum MessageTypes {
   PlayerFactionUpdate = 31,
   SelfDestruct = 32,
   ConsumeRepairKit = 33,
+  ViewProperty = 34,
+  PropertyUpdate = 35,
 }
