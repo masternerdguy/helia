@@ -45,6 +45,7 @@ import {
 import { ReputationSheetWindow } from './gdi/windows/reputationSheetWindow';
 import { ServerPlayerFactionUpdate } from './wsModels/bodies/playerFactionUpdate';
 import { PropertySheetWindow } from './gdi/windows/propertySheetWindow';
+import { ServerPropertyUpdate } from './wsModels/bodies/propertyUpdate';
 
 class EngineSack {
   constructor() {}
@@ -812,7 +813,10 @@ function handlePlayerFactionUpdate(d: GameMessage) {
 }
 
 function handlePropertyUpdate(d: GameMessage) {
-  console.log(d);
+  // parse body
+  const msg = JSON.parse(d.body) as ServerPropertyUpdate;
+
+  console.log(msg);
 }
 
 // clears the screen
