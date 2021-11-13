@@ -271,6 +271,8 @@ export function clientStart(
       handleStarMapUpdate(d);
     } else if (d.type == MessageTypes.PlayerFactionUpdate) {
       handlePlayerFactionUpdate(d);
+    } else if (d.type == MessageTypes.PropertyUpdate) {
+      handlePropertyUpdate(d);
     }
   });
 }
@@ -807,6 +809,10 @@ function handlePlayerFactionUpdate(d: GameMessage) {
 
   // update faction cache dictionary
   UpdatePlayerFactionRelationshipCache(msg.factions);
+}
+
+function handlePropertyUpdate(d: GameMessage) {
+  console.log(d);
 }
 
 // clears the screen

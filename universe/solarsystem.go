@@ -2,11 +2,9 @@ package universe
 
 import (
 	"encoding/json"
-	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"sync"
 	"time"
 
@@ -762,7 +760,34 @@ func (s *SolarSystem) PeriodicUpdate() {
 				// extract data
 				// data := evt.Body.(models.ClientViewPropertyBody)
 
-				log.Println(fmt.Sprintf("property view request %v", sh))
+				// get property summary from client
+				ps := c.GetPropertyCache()
+
+				// build update for client
+				cu := models.ServerPropertyUpdateBody{}
+
+				for _, x := range ps.ShipCaches {
+					cu.Ships = append(cu.Ships, models.ServerShipPropertyCacheEntry{
+						Name:                x.Name,
+						Texture:             x.Texture,
+						ShipID:              x.ShipID,
+						SolarSystemID:       x.SolarSystemID,
+						SolarSystemName:     x.SolarSystemName,
+						DockedAtStationID:   x.DockedAtStationID,
+						DockedAtStationName: x.DockedAtStationName,
+					})
+				}
+
+				// package message
+				b, _ := json.Marshal(&cu)
+
+				z := models.GameMessage{
+					MessageType: msgRegistry.PropertyUpdate,
+					MessageBody: string(b),
+				}
+
+				// write response to client
+				c.WriteMessage(&z)
 			}
 		}
 	}

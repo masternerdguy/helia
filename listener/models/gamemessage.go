@@ -594,4 +594,15 @@ type ClientViewPropertyBody struct {
 
 // Body containing a summary of the property owned by a player
 type ServerPropertyUpdateBody struct {
+	Ships []ServerShipPropertyCacheEntry `json:"ships"`
+}
+
+type ServerShipPropertyCacheEntry struct {
+	Name                string     `json:"name"`
+	Texture             string     `json:"texture"`
+	ShipID              uuid.UUID  `json:"id"`
+	SolarSystemID       uuid.UUID  `json:"systemId"`
+	SolarSystemName     string     `json:"systemName"`
+	DockedAtStationID   *uuid.UUID `json:"dockedAtID"`
+	DockedAtStationName *string    `json:"dockedAtName"`
 }
