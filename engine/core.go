@@ -64,6 +64,7 @@ func (e *HeliaEngine) Start() {
 				for {
 					// check for shutdown signal
 					if shutdownSignal {
+						sol.HandleShutdownSignal()
 						break
 					}
 

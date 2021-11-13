@@ -5,7 +5,6 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"sync"
 	"time"
 
@@ -73,6 +72,18 @@ func (s *SolarSystem) Initialize() {
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
 	s.pushPointEffects = make([]models.GlobalPushPointEffectBody, 0)
+}
+
+// Performs one-time shutdown actions when the server is stopping
+func (s *SolarSystem) HandleShutdownSignal() {
+	// obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	// propagate shutdown to connected clients
+	for _, c := range s.clients {
+		c.Dead = true
+	}
 }
 
 // Processes the solar system for a tick
@@ -1579,29 +1590,21 @@ func (s *SolarSystem) TestLocks() {
 	defer s.Lock.Unlock()
 
 	for _, e := range s.asteroids {
-		log.Println(e.Name)
-
 		e.Lock.Lock()
 		defer e.Lock.Unlock()
 	}
 
 	for _, e := range s.jumpholes {
-		log.Println(e.JumpholeName)
-
 		e.Lock.Lock()
 		defer e.Lock.Unlock()
 	}
 
 	for _, e := range s.stations {
-		log.Println(e.StationName)
-
 		e.Lock.Lock()
 		defer e.Lock.Unlock()
 	}
 
 	for _, e := range s.ships {
-		log.Println(e.ShipName)
-
 		e.Lock.Lock()
 		defer e.Lock.Unlock()
 	}
