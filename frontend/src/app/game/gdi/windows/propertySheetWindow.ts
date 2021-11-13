@@ -4,6 +4,8 @@ import { GDIList } from '../components/gdiList';
 import { ClientViewProperty } from '../../wsModels/bodies/viewProperty';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { WsService } from '../../ws.service';
+import { ServerPropertyUpdate } from '../../wsModels/bodies/propertyUpdate';
+import { Player } from '../../engineModels/player';
 
 export class PropertySheetWindow extends GDIWindow {
   private propertyList = new GDIList();
@@ -11,6 +13,9 @@ export class PropertySheetWindow extends GDIWindow {
 
   // last cargo bay refresh
   private lastPropertyView = 0;
+
+  // player
+  private player: Player;
 
   // ws service
   private wsSvc: WsService;
@@ -73,6 +78,15 @@ export class PropertySheetWindow extends GDIWindow {
 
   setWsService(wsSvc: WsService) {
     this.wsSvc = wsSvc;
+  }
+
+  setPlayer(player: Player) {
+    this.player = player;
+  }
+
+  sync(cache: ServerPropertyUpdate) {
+    // todo
+    console.log(cache);
   }
 
   private refreshPropertySummary() {

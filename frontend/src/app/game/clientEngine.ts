@@ -213,6 +213,7 @@ export function clientStart(
   engineSack.propertySheetWindow.setY(365);
   engineSack.propertySheetWindow.initialize();
   engineSack.propertySheetWindow.pack();
+  engineSack.propertySheetWindow.setPlayer(engineSack.player);
 
   // link windows to window manager
   engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☀');
@@ -794,6 +795,7 @@ function handleCurrentShipUpdate(d: GameMessage) {
 
   // update property window
   engineSack.propertySheetWindow.setWsService(engineSack.wsSvc);
+  engineSack.propertySheetWindow.setPlayer(engineSack.player);
 }
 
 function handleFactionUpdate(d: GameMessage) {
@@ -816,7 +818,8 @@ function handlePropertyUpdate(d: GameMessage) {
   // parse body
   const msg = JSON.parse(d.body) as ServerPropertyUpdate;
 
-  console.log(msg);
+  // update property sheet window
+  engineSack.propertySheetWindow.sync(msg);
 }
 
 // clears the screen
