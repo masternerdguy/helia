@@ -306,7 +306,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		client.EscrowContainerID = u.EscrowContainerID
 
 		// lookup current ship in memory
-		currShip := l.Engine.Universe.FindShip(*u.CurrentShipID)
+		currShip := l.Engine.Universe.FindShip(*u.CurrentShipID, nil)
 
 		if currShip == nil {
 			// they must have registered today - get their ship from the db
@@ -1079,6 +1079,53 @@ func (l *SocketListener) addClient(c *shared.GameClient) {
 	defer l.lock.Unlock()
 
 	l.clients = append(l.clients, c)
+
+	// start client cache update goroutine
+	go func(c *shared.GameClient) {
+		for !c.Dead {
+			if c.UID == nil {
+				continue
+			}
+
+			// lookup all ships belonging to this player
+			ownedShips := l.Engine.Universe.FindShipsByUserID(*c.UID, nil)
+
+			// build property cache
+			pc := shared.PropertyCache{}
+
+			for _, os := range ownedShips {
+				// copy entry
+				osc := os.CopyShip()
+
+				// copy guaranteed fields
+				z := shared.ShipPropertyCacheEntry{
+					Name:    osc.ShipName,
+					Texture: osc.Texture,
+					ShipID:  osc.ID,
+				}
+
+				z.SolarSystemID = osc.SystemID
+				z.SolarSystemName = osc.SystemName
+
+				// copy possibly null fields
+				if osc.DockedAtStationID != nil {
+					if osc.DockedAtStation != nil {
+						n := osc.DockedAtStation.StationName
+
+						z.DockedAtStationID = osc.DockedAtStationID
+						z.DockedAtStationName = &n
+					}
+				}
+
+				pc.ShipCaches = append(pc.ShipCaches, z)
+			}
+
+			// update property cache
+			c.SetPropertyCache(pc)
+
+			log.Println(fmt.Sprintf("%v", pc))
+		}
+	}(c)
 }
 
 // Removes a client from the server
@@ -1104,4 +1151,7 @@ func (l *SocketListener) removeClient(c *shared.GameClient) {
 
 		l.clients = l.clients[:t-1]
 	}
+
+	// mark as dead
+	c.Dead = true
 }

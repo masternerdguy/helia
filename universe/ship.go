@@ -124,6 +124,7 @@ type Ship struct {
 	PosX                  float64
 	PosY                  float64
 	SystemID              uuid.UUID
+	SystemName            string
 	Texture               string
 	Theta                 float64
 	VelX                  float64
@@ -332,6 +333,7 @@ func (s *Ship) CopyShip() *Ship {
 		PosX:                  s.PosX,
 		PosY:                  s.PosY,
 		SystemID:              s.SystemID,
+		SystemName:            s.SystemName,
 		Texture:               s.Texture,
 		Theta:                 s.Theta,
 		VelX:                  s.VelX,
@@ -389,6 +391,11 @@ func (s *Ship) CopyShip() *Ship {
 	if s.DockedAtStationID != nil {
 		g := &s.DockedAtStationID
 		sc.DockedAtStationID = *g
+
+		if s.DockedAtStation != nil {
+			cs := s.DockedAtStation.CopyStation()
+			sc.DockedAtStation = &cs
+		}
 	}
 
 	if s.DestroyedAt != nil {
@@ -404,6 +411,11 @@ func (s *Ship) PeriodicUpdate() {
 	// lock entity
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
+
+	// cache system name
+	if s.CurrentSystem != nil {
+		s.SystemName = s.CurrentSystem.SystemName
+	}
 
 	// remax some stats if needed for spawning
 	if s.ReMaxDirty {
@@ -2204,7 +2216,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	}
 
 	// find the ship currently being flown by the seller so we can deposit funds in their wallet
-	seller := s.CurrentSystem.Universe.FindCurrentPlayerShip(order.SellerUserID)
+	seller := s.CurrentSystem.Universe.FindCurrentPlayerShip(order.SellerUserID, &s.CurrentSystem.ID)
 
 	if seller == nil {
 		return errors.New("seller ship not found")

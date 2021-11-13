@@ -76,7 +76,7 @@ func (u *Universe) BuildMapWithCache() error {
 
 		for _, s := range r.Systems {
 			// copy jumpholes
-			jhs := s.CopyJumpholes()
+			jhs := s.CopyJumpholes(true)
 
 			// map system into region
 			sys := MapDataSystem{
@@ -193,12 +193,22 @@ func (u *Universe) BuildTransientCelestials() {
 }
 
 // Finds the ship with the specified ID in the running game simulation
-func (u *Universe) FindShip(shipID uuid.UUID) *Ship {
+func (u *Universe) FindShip(shipID uuid.UUID, noLockSystemID *uuid.UUID) *Ship {
 	// iterate over all systems in all regions
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
+			// do not if system is exempted
+			var lock = true
+
+			if noLockSystemID != nil {
+				lock = s.ID != *noLockSystemID
+			}
+
+			// get raw pointers to ships in system
+			ships := s.MirrorShipMap(lock)
+
 			// look for ship in system
-			sh := s.ships[shipID.String()]
+			sh := ships[shipID.String()]
 
 			if sh != nil {
 				return sh
@@ -209,13 +219,53 @@ func (u *Universe) FindShip(shipID uuid.UUID) *Ship {
 	return nil
 }
 
-// Finds the ship currently being flown by the specified player in the running game simulation
-func (u *Universe) FindCurrentPlayerShip(userID uuid.UUID) *Ship {
+// Finds the ship with the specified ID in the running game simulation
+func (u *Universe) FindShipsByUserID(userID uuid.UUID, noLockSystemID *uuid.UUID) []*Ship {
+	o := make([]*Ship, 0)
+
 	// iterate over all systems in all regions
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
+			// do not if system is exempted
+			var lock = true
+
+			if noLockSystemID != nil {
+				lock = s.ID != *noLockSystemID
+			}
+
+			// get raw pointers to ships in system
+			ships := s.MirrorShipMap(lock)
+
+			// look for ships in system owned by this user
+			for _, u := range ships {
+				if u.UserID == userID {
+					// store reference
+					o = append(o, u)
+				}
+			}
+		}
+	}
+
+	return o
+}
+
+// Finds the ship currently being flown by the specified player in the running game simulation
+func (u *Universe) FindCurrentPlayerShip(userID uuid.UUID, noLockSystemID *uuid.UUID) *Ship {
+	// iterate over all systems in all regions
+	for _, r := range u.Regions {
+		for _, s := range r.Systems {
+			// do not if system is exempted
+			var lock = true
+
+			if noLockSystemID != nil {
+				lock = s.ID != *noLockSystemID
+			}
+
+			// get raw pointers to ships in system
+			ships := s.MirrorShipMap(lock)
+
 			// look for ship in system
-			for _, shx := range s.ships {
+			for _, shx := range ships {
 				if shx != nil {
 					// id and flown check
 					if shx.BeingFlownByPlayer && shx.UserID == userID {
@@ -230,12 +280,22 @@ func (u *Universe) FindCurrentPlayerShip(userID uuid.UUID) *Ship {
 }
 
 // Finds the station with the specified ID in the running game simulation
-func (u *Universe) FindStation(stationID uuid.UUID) *Station {
+func (u *Universe) FindStation(stationID uuid.UUID, noLockSystemID *uuid.UUID) *Station {
 	// iterate over all systems in all regions
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
+			// do not if system is exempted
+			var lock = true
+
+			if noLockSystemID != nil {
+				lock = s.ID != *noLockSystemID
+			}
+
+			// get raw pointers to ships in system
+			stations := s.MirrorStationMap(lock)
+
 			// look for station in system
-			sh := s.stations[stationID.String()]
+			sh := stations[stationID.String()]
 
 			if sh != nil {
 				return sh

@@ -332,7 +332,7 @@ func LoadUniverse() (*universe.Universe, error) {
 		o := sMap[j.OutSystemID.String()]
 
 		// copy jumpholes
-		jhs := o.CopyJumpholes()
+		jhs := o.CopyJumpholes(true)
 
 		// find and link destination jumphole into jumphole
 		for _, k := range jhs {
@@ -372,7 +372,7 @@ func saveUniverse(u *universe.Universe) {
 			clients = append(clients, lc...)
 
 			// get ships in system
-			ships := s.CopyShips()
+			ships := s.CopyShips(true)
 
 			// save ships to database
 			for _, ship := range ships {
@@ -380,7 +380,7 @@ func saveUniverse(u *universe.Universe) {
 			}
 
 			// get npc stations in system
-			stations := s.CopyStations()
+			stations := s.CopyStations(true)
 
 			// save npc stations to database
 			for _, station := range stations {

@@ -31,6 +31,26 @@ type GameClient struct {
 	CurrentSystemID   uuid.UUID
 	StartID           uuid.UUID
 	EscrowContainerID uuid.UUID
+
+	// property cache
+	propertyCache PropertyCache
+
+	// kill switch
+	Dead bool
+}
+
+type PropertyCache struct {
+	ShipCaches []ShipPropertyCacheEntry
+}
+
+type ShipPropertyCacheEntry struct {
+	Name                string
+	Texture             string
+	ShipID              uuid.UUID
+	SolarSystemID       uuid.UUID
+	SolarSystemName     string
+	DockedAtStationID   *uuid.UUID
+	DockedAtStationName *string
 }
 
 // Initializes the internals of a GameClient
@@ -129,4 +149,18 @@ func (c *GameClient) PopShipEvent() *Event {
 	}
 
 	return nil
+}
+
+func (c *GameClient) GetPropertyCache() PropertyCache {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	return c.propertyCache
+}
+
+func (c *GameClient) SetPropertyCache(x PropertyCache) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	c.propertyCache = x
 }

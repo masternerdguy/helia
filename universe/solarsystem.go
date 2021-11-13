@@ -5,6 +5,7 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"sync"
 	"time"
 
@@ -1396,10 +1397,12 @@ func (s *SolarSystem) CopyClients(lock bool) []*shared.GameClient {
 }
 
 // Returns a copy of the ships in the system
-func (s *SolarSystem) CopyShips() map[string]*Ship {
-	// obtain lock
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+func (s *SolarSystem) CopyShips(lock bool) map[string]*Ship {
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	// make map for copies
 	copy := make(map[string]*Ship)
@@ -1414,11 +1417,33 @@ func (s *SolarSystem) CopyShips() map[string]*Ship {
 	return copy
 }
 
+// Returns a new map containing pointers to the ships in the system - use with care!
+func (s *SolarSystem) MirrorShipMap(lock bool) map[string]*Ship {
+
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// copy pointers into new map
+	m := make(map[string]*Ship)
+
+	for k, v := range s.ships {
+		m[k] = v
+	}
+
+	// return new map
+	return m
+}
+
 // Returns a copy of the stations in the system
-func (s *SolarSystem) CopyStations() map[string]*Station {
-	// obtain lock
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+func (s *SolarSystem) CopyStations(lock bool) map[string]*Station {
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	// make map for copies
 	copy := make(map[string]*Station)
@@ -1433,11 +1458,32 @@ func (s *SolarSystem) CopyStations() map[string]*Station {
 	return copy
 }
 
+// Returns a new map containing pointers to the stations in the system - use with care!
+func (s *SolarSystem) MirrorStationMap(lock bool) map[string]*Station {
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// copy pointers into new map
+	m := make(map[string]*Station)
+
+	for k, v := range s.stations {
+		m[k] = v
+	}
+
+	// return new map
+	return m
+}
+
 // Returns a copy of the jumpholes in the system
-func (s *SolarSystem) CopyJumpholes() map[string]*Jumphole {
-	// obtain lock
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+func (s *SolarSystem) CopyJumpholes(lock bool) map[string]*Jumphole {
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	// make map for copies
 	copy := make(map[string]*Jumphole)
@@ -1453,10 +1499,12 @@ func (s *SolarSystem) CopyJumpholes() map[string]*Jumphole {
 }
 
 // Returns a copy of the asteroids in the system
-func (s *SolarSystem) CopyAsteroids() map[string]*Asteroid {
-	// obtain lock
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+func (s *SolarSystem) CopyAsteroids(lock bool) map[string]*Asteroid {
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	// make map for copies
 	copy := make(map[string]*Asteroid)
@@ -1472,10 +1520,12 @@ func (s *SolarSystem) CopyAsteroids() map[string]*Asteroid {
 }
 
 // Returns a copy of the stars in the system
-func (s *SolarSystem) CopyStars() map[string]*Star {
-	// obtain lock
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+func (s *SolarSystem) CopyStars(lock bool) map[string]*Star {
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	// make map for copies
 	copy := make(map[string]*Star)
@@ -1491,10 +1541,12 @@ func (s *SolarSystem) CopyStars() map[string]*Star {
 }
 
 // Returns a copy of the planets in the system
-func (s *SolarSystem) CopyPlanets() map[string]*Planet {
-	// obtain lock
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+func (s *SolarSystem) CopyPlanets(lock bool) map[string]*Planet {
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
 
 	// make map for copies
 	copy := make(map[string]*Planet)
@@ -1527,21 +1579,29 @@ func (s *SolarSystem) TestLocks() {
 	defer s.Lock.Unlock()
 
 	for _, e := range s.asteroids {
+		log.Println(e.Name)
+
 		e.Lock.Lock()
 		defer e.Lock.Unlock()
 	}
 
 	for _, e := range s.jumpholes {
+		log.Println(e.JumpholeName)
+
 		e.Lock.Lock()
 		defer e.Lock.Unlock()
 	}
 
 	for _, e := range s.stations {
+		log.Println(e.StationName)
+
 		e.Lock.Lock()
 		defer e.Lock.Unlock()
 	}
 
 	for _, e := range s.ships {
+		log.Println(e.ShipName)
+
 		e.Lock.Lock()
 		defer e.Lock.Unlock()
 	}

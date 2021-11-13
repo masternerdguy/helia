@@ -209,7 +209,7 @@ func injectProcess(u *universe.Universe) {
 		for _, s := range r.Systems {
 			rand.Seed(int64(calculateSystemSeed(s)) - 872958)
 
-			stations := s.CopyStations()
+			stations := s.CopyStations(true)
 
 			for _, st := range stations {
 				for _, t := range textures {
@@ -255,11 +255,11 @@ func dropSanctuaryStations(u *universe.Universe) {
 
 			// is owned by sanctuary?
 			if s.HoldingFactionID == fID {
-				stars := s.CopyStars()
-				planets := s.CopyPlanets()
-				jumpholes := s.CopyJumpholes()
-				asteroids := s.CopyAsteroids()
-				stations := s.CopyStations()
+				stars := s.CopyStars(true)
+				planets := s.CopyPlanets(true)
+				jumpholes := s.CopyJumpholes(true)
+				asteroids := s.CopyAsteroids(true)
+				stations := s.CopyStations(true)
 
 				// build sanctuary station for the system
 				stat := sql.Station{
@@ -400,9 +400,9 @@ func dropAsteroids(u *universe.Universe) {
 			scarcity := rand.Float64()
 
 			// get obstacles in system
-			stars := s.CopyStars()
-			planets := s.CopyPlanets()
-			jumpholes := s.CopyJumpholes()
+			stars := s.CopyStars(true)
+			planets := s.CopyPlanets(true)
+			jumpholes := s.CopyJumpholes(true)
 
 			// determine total number of asteroids in system
 			potentialAsteroids := physics.RandInRange(MinAsteroidsPerSystem, MaxAsteroidsPerSystem)

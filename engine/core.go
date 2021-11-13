@@ -428,7 +428,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			}
 
 			// find their home station
-			home := sol.Universe.FindStation(start.HomeStationID)
+			home := sol.Universe.FindStation(start.HomeStationID, &sol.ID)
 
 			if home == nil {
 				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - no home station!", rs.UserID))
@@ -510,7 +510,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			}
 
 			// find their home station
-			home := sol.Universe.FindStation(start.HomeStationID)
+			home := sol.Universe.FindStation(start.HomeStationID, &sol.ID)
 
 			if home == nil {
 				log.Println(fmt.Sprintf("! Unable to respawn player %v - no home station!", rs.UID))
