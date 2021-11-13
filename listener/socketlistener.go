@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -1124,6 +1125,9 @@ func (l *SocketListener) addClient(c *shared.GameClient) {
 			c.SetPropertyCache(pc)
 
 			log.Println(fmt.Sprintf("%v", pc))
+
+			// wait 5 seconds
+			time.Sleep(time.Second * 5)
 		}
 	}(c)
 }
