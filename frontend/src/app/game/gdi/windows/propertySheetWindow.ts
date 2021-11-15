@@ -4,7 +4,10 @@ import { GDIList } from '../components/gdiList';
 import { ClientViewProperty } from '../../wsModels/bodies/viewProperty';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { WsService } from '../../ws.service';
-import { ServerPropertyShipCacheEntry, ServerPropertyUpdate } from '../../wsModels/bodies/propertyUpdate';
+import {
+  ServerPropertyShipCacheEntry,
+  ServerPropertyUpdate,
+} from '../../wsModels/bodies/propertyUpdate';
 import { Player } from '../../engineModels/player';
 
 export class PropertySheetWindow extends GDIWindow {
@@ -100,7 +103,7 @@ export class PropertySheetWindow extends GDIWindow {
 
       rows.push(r);
     }
-    
+
     // update list
     this.propertyList.setItems(rows);
 
@@ -124,27 +127,28 @@ class PropertySheetViewRow {
 }
 
 function propertySheetViewRowStringFromShip(
-    s: ServerPropertyShipCacheEntry,
-    p: Player
-  ): string {
-
+  s: ServerPropertyShipCacheEntry,
+  p: Player
+): string {
   if (s == null) {
     return;
   }
 
   // marker if current ship
-  let flyingMarker = "";
+  let flyingMarker = '';
 
   if (s.id == p.currentShip.id) {
-    flyingMarker = "=>";
+    flyingMarker = '=>';
   }
 
   // build string
-  return `${fixedString(flyingMarker, 2)} `
-    + `${fixedString(s.name, 32)} `
-    + `${fixedString(s.texture, 12)} `
-    + `${fixedString(s.systemName, 12)} ` 
-    + `${fixedString(s.dockedAtName, 24)}`;
+  return (
+    `${fixedString(flyingMarker, 2)} ` +
+    `${fixedString(s.name, 32)} ` +
+    `${fixedString(s.texture, 12)} ` +
+    `${fixedString(s.systemName, 12)} ` +
+    `${fixedString(s.dockedAtName, 24)}`
+  );
 }
 
 function fixedString(str: string, width: number): string {
