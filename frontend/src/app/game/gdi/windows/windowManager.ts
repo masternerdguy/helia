@@ -4,9 +4,11 @@ import { GDIToggleButton } from '../components/gdiToggleButton';
 
 export class WindowManager extends GDIWindow {
   windowToggles: [any, any] = [null, null];
+  private showHideCallback: (w: GDIWindow) => void;
 
-  preinit(height: number) {
+  preinit(height: number, showHideCallback: (w: GDIWindow) => void) {
     this.setHeight(height);
+    this.showHideCallback = showHideCallback;
   }
 
   resize(height: number) {
@@ -63,6 +65,7 @@ export class WindowManager extends GDIWindow {
     wt.setText(i);
     wt.setOnClick(() => {
       w.setHidden(!wt.isToggled());
+      this.showHideCallback(w);
     });
 
     wt.setFont(FontSize.giant);

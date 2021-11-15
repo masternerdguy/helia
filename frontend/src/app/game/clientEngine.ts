@@ -124,7 +124,14 @@ export function clientStart(
 
   // initialize window manager
   engineSack.windowManager = new WindowManager();
-  engineSack.windowManager.preinit(gameCanvas.height);
+  engineSack.windowManager.preinit(gameCanvas.height, (w: GDIWindow) => {
+    // move latest toggled window to top
+    engineSack.windows = [
+      w,
+      ...engineSack.windows.filter((item) => item !== w),
+    ];
+  });
+
   engineSack.windowManager.setX(0);
   engineSack.windowManager.setY(Number.NEGATIVE_INFINITY);
   engineSack.windowManager.initialize();
