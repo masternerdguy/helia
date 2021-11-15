@@ -373,7 +373,7 @@ function overviewDistance(
   return o;
 }
 
-function fixedString(str: string, width: number) {
+function fixedString(str: string, width: number): string {
   if (str === undefined || str == null) {
     return ''.padEnd(width);
   }

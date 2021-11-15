@@ -267,7 +267,7 @@ class FactionInfoViewRow {
 function factionListRowString(
   rel: WSPlayerFactionRelationship,
   faction: Faction
-) {
+): string {
   if (rel == null || faction == null) {
     return;
   }
@@ -301,7 +301,7 @@ function infoKeyValueString(key: string, value: string) {
   )}`;
 }
 
-function fixedString(str: string, width: number) {
+function fixedString(str: string, width: number): string {
   if (str === undefined || str == null) {
     return ''.padEnd(width);
   }

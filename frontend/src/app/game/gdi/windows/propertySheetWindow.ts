@@ -4,7 +4,7 @@ import { GDIList } from '../components/gdiList';
 import { ClientViewProperty } from '../../wsModels/bodies/viewProperty';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { WsService } from '../../ws.service';
-import { ServerPropertyUpdate } from '../../wsModels/bodies/propertyUpdate';
+import { ServerPropertyShipCacheEntry, ServerPropertyUpdate } from '../../wsModels/bodies/propertyUpdate';
 import { Player } from '../../engineModels/player';
 
 export class PropertySheetWindow extends GDIWindow {
@@ -22,7 +22,7 @@ export class PropertySheetWindow extends GDIWindow {
 
   initialize() {
     // set dimensions
-    this.setWidth(400);
+    this.setWidth(700);
     this.setHeight(400);
 
     // initialize
@@ -33,7 +33,7 @@ export class PropertySheetWindow extends GDIWindow {
     this.setTitle('Property Sheet');
 
     // property list
-    this.propertyList.setWidth(300);
+    this.propertyList.setWidth(700);
     this.propertyList.setHeight(400);
     this.propertyList.initialize();
 
@@ -52,7 +52,7 @@ export class PropertySheetWindow extends GDIWindow {
     this.actionList.setHeight(400);
     this.actionList.initialize();
 
-    this.actionList.setX(300);
+    this.actionList.setX(600);
     this.actionList.setY(0);
 
     this.actionList.setFont(FontSize.normal);
@@ -85,8 +85,27 @@ export class PropertySheetWindow extends GDIWindow {
   }
 
   sync(cache: ServerPropertyUpdate) {
-    // todo
-    console.log(cache);
+    // stash selected index
+    const sIdx = this.propertyList.getSelectedIndex();
+
+    const rows: PropertySheetViewRow[] = [];
+
+    // build ship entries
+    for (const s of cache.ships) {
+      const r = new PropertySheetViewRow();
+      const ls = propertySheetViewRowStringFromShip(s, this.player);
+
+      r.listString = () => ls;
+      r.ship = s;
+
+      rows.push(r);
+    }
+    
+    // update list
+    this.propertyList.setItems(rows);
+
+    // re-select index
+    this.propertyList.setSelectedIndex(sIdx);
   }
 
   private refreshPropertySummary() {
@@ -99,7 +118,36 @@ export class PropertySheetWindow extends GDIWindow {
   }
 }
 
-function fixedString(str: string, width: number) {
+class PropertySheetViewRow {
+  listString: () => string;
+  ship: ServerPropertyShipCacheEntry;
+}
+
+function propertySheetViewRowStringFromShip(
+    s: ServerPropertyShipCacheEntry,
+    p: Player
+  ): string {
+
+  if (s == null) {
+    return;
+  }
+
+  // marker if current ship
+  let flyingMarker = "";
+
+  if (s.id == p.currentShip.id) {
+    flyingMarker = "=>";
+  }
+
+  // build string
+  return `${fixedString(flyingMarker, 2)} `
+    + `${fixedString(s.name, 32)} `
+    + `${fixedString(s.texture, 12)} `
+    + `${fixedString(s.systemName, 12)} ` 
+    + `${fixedString(s.dockedAtName, 24)}`;
+}
+
+function fixedString(str: string, width: number): string {
   if (str === undefined || str == null) {
     return ''.padEnd(width);
   }
