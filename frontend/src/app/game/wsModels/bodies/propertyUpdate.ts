@@ -10,4 +10,5 @@ export class ServerPropertyShipCacheEntry {
   systemName: string;
   dockedAtID: string;
   dockedAtName: string;
+  wallet: number;
 }

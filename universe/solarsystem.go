@@ -775,6 +775,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 						SolarSystemName:     x.SolarSystemName,
 						DockedAtStationID:   x.DockedAtStationID,
 						DockedAtStationName: x.DockedAtStationName,
+						Wallet:              x.Wallet,
 					})
 				}
 

@@ -51,6 +51,7 @@ type ShipPropertyCacheEntry struct {
 	SolarSystemName     string
 	DockedAtStationID   *uuid.UUID
 	DockedAtStationName *string
+	Wallet              float64
 }
 
 // Initializes the internals of a GameClient

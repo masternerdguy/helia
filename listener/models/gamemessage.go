@@ -605,4 +605,5 @@ type ServerShipPropertyCacheEntry struct {
 	SolarSystemName     string     `json:"systemName"`
 	DockedAtStationID   *uuid.UUID `json:"dockedAtID"`
 	DockedAtStationName *string    `json:"dockedAtName"`
+	Wallet              float64    `json:"wallet"`
 }

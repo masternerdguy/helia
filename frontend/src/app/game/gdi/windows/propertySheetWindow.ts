@@ -25,7 +25,7 @@ export class PropertySheetWindow extends GDIWindow {
 
   initialize() {
     // set dimensions
-    this.setWidth(700);
+    this.setWidth(815);
     this.setHeight(400);
 
     // initialize
@@ -36,7 +36,7 @@ export class PropertySheetWindow extends GDIWindow {
     this.setTitle('Property Sheet');
 
     // property list
-    this.propertyList.setWidth(700);
+    this.propertyList.setWidth(715);
     this.propertyList.setHeight(400);
     this.propertyList.initialize();
 
@@ -55,7 +55,7 @@ export class PropertySheetWindow extends GDIWindow {
     this.actionList.setHeight(400);
     this.actionList.initialize();
 
-    this.actionList.setX(600);
+    this.actionList.setX(715);
     this.actionList.setY(0);
 
     this.actionList.setFont(FontSize.normal);
@@ -147,7 +147,8 @@ function propertySheetViewRowStringFromShip(
     `${fixedString(s.name, 32)} ` +
     `${fixedString(s.texture, 12)} ` +
     `${fixedString(s.systemName, 12)} ` +
-    `${fixedString(s.dockedAtName, 24)}`
+    `${fixedString(s.dockedAtName, 24)} ` +
+    `${fixedString(shortWallet(s.wallet), 10)}`
   );
 }
 
@@ -157,4 +158,25 @@ function fixedString(str: string, width: number): string {
   }
 
   return str.substr(0, width).padEnd(width);
+}
+
+function shortWallet(
+  d: number
+): string {
+  let o = `${d}`;
+
+  // include metric prefix if needed
+  if (d >= 1000000000000000) {
+    o = `${(d / 1000000000000000).toFixed(2)}P`;
+  } else if (d >= 1000000000000) {
+    o = `${(d / 1000000000000).toFixed(2)}T`;
+  } else if (d >= 1000000000) {
+    o = `${(d / 1000000000).toFixed(2)}G`;
+  } else if (d >= 1000000) {
+    o = `${(d / 1000000).toFixed(2)}M`;
+  } else if (d >= 1000) {
+    o = `${(d / 1000).toFixed(2)}k`;
+  }
+
+  return o + " CBN";
 }

@@ -1133,6 +1133,7 @@ func (l *SocketListener) addClient(c *shared.GameClient) {
 					Name:    osc.ShipName,
 					Texture: osc.Texture,
 					ShipID:  osc.ID,
+					Wallet:  osc.Wallet,
 				}
 
 				z.SolarSystemID = osc.SystemID
