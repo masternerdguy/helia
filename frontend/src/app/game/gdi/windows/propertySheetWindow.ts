@@ -160,9 +160,7 @@ function fixedString(str: string, width: number): string {
   return str.substr(0, width).padEnd(width);
 }
 
-function shortWallet(
-  d: number
-): string {
+function shortWallet(d: number): string {
   let o = `${d}`;
 
   // include metric prefix if needed
@@ -178,5 +176,5 @@ function shortWallet(
     o = `${(d / 1000).toFixed(2)}k`;
   }
 
-  return o + " CBN";
+  return o + ' CBN';
 }
