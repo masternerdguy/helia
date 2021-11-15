@@ -402,7 +402,7 @@ ALTER TABLE public.universe_stars OWNER TO developer;
 CREATE TABLE public.universe_stations (
     id uuid NOT NULL,
     universe_systemid uuid NOT NULL,
-    stationname character varying(64) NOT NULL,
+    stationname character varying(24) NOT NULL,
     pos_x double precision NOT NULL,
     pos_y double precision NOT NULL,
     texture character varying(64) NOT NULL,
@@ -421,7 +421,7 @@ ALTER TABLE public.universe_stations OWNER TO developer;
 
 CREATE TABLE public.universe_systems (
     id uuid NOT NULL,
-    systemname character varying(32) NOT NULL,
+    systemname character varying(12) NOT NULL,
     regionid uuid NOT NULL,
     holding_factionid uuid DEFAULT '42b937ad-0000-46e9-9af9-fc7dbf878e6a'::uuid NOT NULL,
     pos_x double precision DEFAULT 0 NOT NULL,
