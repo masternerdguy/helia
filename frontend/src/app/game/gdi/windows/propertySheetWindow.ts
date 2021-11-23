@@ -93,8 +93,13 @@ export class PropertySheetWindow extends GDIWindow {
 
     const rows: PropertySheetViewRow[] = [];
 
+    // sort cache by system name, then station name, then ship name
+    const sorted = cache.ships.sort((a, b) =>
+      this.getShipSortKey(a).localeCompare(this.getShipSortKey(b))
+    );
+
     // build ship entries
-    for (const s of cache.ships) {
+    for (const s of sorted) {
       const r = new PropertySheetViewRow();
       const ls = propertySheetViewRowStringFromShip(s, this.player);
 
@@ -109,6 +114,10 @@ export class PropertySheetWindow extends GDIWindow {
 
     // re-select index
     this.propertyList.setSelectedIndex(sIdx);
+  }
+
+  private getShipSortKey(a: ServerPropertyShipCacheEntry): string {
+    return `${a.systemName}::${a.dockedAtName}::${a.name}::${a.id}`;
   }
 
   private refreshPropertySummary() {
@@ -148,7 +157,7 @@ function propertySheetViewRowStringFromShip(
     `${fixedString(s.texture, 12)} ` +
     `${fixedString(s.systemName, 12)} ` +
     `${fixedString(s.dockedAtName, 24)} ` +
-    `${fixedString(shortWallet(s.wallet), 10)}`
+    `${fixedString(shortWallet(s.wallet), 11)}`
   );
 }
 
