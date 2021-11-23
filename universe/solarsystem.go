@@ -42,6 +42,7 @@ type SolarSystem struct {
 	NewItems             map[string]*Item              // stacks of items that are newly created and need to be saved by core
 	NewSellOrders        map[string]*SellOrder         // new sell orders in need of saving by core
 	BoughtSellOrders     map[string]*SellOrder         // sell orders that have been fulfilled in need of saving by core
+	NewShipPurchases     map[string]*NewShipPurchase   // newly purchased ships that need to be generated and saved by core
 }
 
 // Initializes internal aspects of SolarSystem
@@ -68,6 +69,7 @@ func (s *SolarSystem) Initialize() {
 	s.NewItems = make(map[string]*Item)
 	s.NewSellOrders = make(map[string]*SellOrder)
 	s.BoughtSellOrders = make(map[string]*SellOrder)
+	s.NewShipPurchases = make(map[string]*NewShipPurchase)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)

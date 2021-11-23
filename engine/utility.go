@@ -14,6 +14,108 @@ func makeTimestamp() int64 {
 }
 
 // Creates a noob (starter) ship for a player and put them in it
+func CreatePurchasedShipForPlayer(ownerID uuid.UUID, templateID uuid.UUID, stationID uuid.UUID, systemID uuid.UUID) (*sql.Ship, error) {
+	// get services
+	userSvc := sql.GetUserService()
+	shipSvc := sql.GetShipService()
+	shipTmpSvc := sql.GetShipTemplateService()
+	containerSvc := sql.GetContainerService()
+
+	// get user by id
+	u, err := userSvc.GetUserByID(ownerID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// get ship template from start
+	temp, err := shipTmpSvc.GetShipTemplateByID(templateID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// create container for trashed items
+	tb, err := containerSvc.NewContainer(sql.Container{
+		Meta: sql.Meta{},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// create container for cargo bay
+	cb, err := containerSvc.NewContainer(sql.Container{
+		Meta: sql.Meta{},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// create container for fitting bay
+	fb, err := containerSvc.NewContainer(sql.Container{
+		Meta: sql.Meta{},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// initialize empty fitting
+	fitting := sql.Fitting{
+		ARack: []sql.FittedSlot{},
+		BRack: []sql.FittedSlot{},
+		CRack: []sql.FittedSlot{},
+	}
+
+	for range temp.SlotLayout.ASlots {
+		fitting.ARack = append(fitting.ARack, sql.FittedSlot{})
+	}
+
+	for range temp.SlotLayout.BSlots {
+		fitting.BRack = append(fitting.BRack, sql.FittedSlot{})
+	}
+
+	for range temp.SlotLayout.CSlots {
+		fitting.CRack = append(fitting.CRack, sql.FittedSlot{})
+	}
+
+	// create ship
+	t := sql.Ship{
+		SystemID:              systemID,
+		DockedAtStationID:     &stationID,
+		UserID:                u.ID,
+		ShipName:              fmt.Sprintf("%s's %s", u.Username, temp.Texture),
+		Texture:               temp.Texture,
+		Theta:                 0,
+		Shield:                temp.BaseShield,
+		Armor:                 temp.BaseArmor,
+		Hull:                  temp.BaseHull,
+		Fuel:                  temp.BaseFuel,
+		Heat:                  0,
+		Energy:                temp.BaseEnergy,
+		ShipTemplateID:        temp.ID,
+		Fitting:               fitting,
+		Destroyed:             false,
+		CargoBayContainerID:   cb.ID,
+		FittingBayContainerID: fb.ID,
+		ReMaxDirty:            true,
+		TrashContainerID:      tb.ID,
+		Wallet:                0,
+	}
+
+	newShip, err := shipSvc.NewShip(t)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// success!
+	return newShip, nil
+}
+
+// Creates a noob (starter) ship for a player and put them in it
 func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error) {
 	const moduleCreationReason = "Module for new noob ship for player"
 

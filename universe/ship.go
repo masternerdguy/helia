@@ -171,6 +171,14 @@ type Ship struct {
 	Lock               sync.Mutex
 }
 
+// Structure representing a newly purchased ship, not yet materialized
+type NewShipPurchase struct {
+	ID             uuid.UUID
+	ShipTemplateID uuid.UUID
+	UserID         uuid.UUID
+	StationID      uuid.UUID
+}
+
 // Structure representing the module racks of a ship and what is fitted to them
 type Fitting struct {
 	ARack []FittedSlot
@@ -1979,12 +1987,40 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 	unitVolume, _ := output.ItemTypeMeta.GetFloat64("volume")
 	orderVolume := unitVolume * float64(quantity)
 
-	// verify sufficient cargo capacity
-	usedBay := s.TotalCargoBayVolumeUsed(lock)
-	maxBay := s.GetRealCargoBayVolume()
+	// determine if this is a ship
+	stIDStr, isShip := output.ItemTypeMeta.GetString("shiptemplateid")
 
-	if usedBay+orderVolume > maxBay {
-		return errors.New("insufficient cargo space available")
+	if !isShip {
+		// verify sufficient cargo capacity
+		usedBay := s.TotalCargoBayVolumeUsed(lock)
+		maxBay := s.GetRealCargoBayVolume()
+
+		if usedBay+orderVolume > maxBay {
+			return errors.New("insufficient cargo space available")
+		}
+	} else {
+		// verify quantity requested is 1
+		if quantity != 1 {
+			return errors.New("ships must be purchased one at a time")
+		}
+
+		// verify this won't put more than 5 ships belonging to this player in this station
+		dockedCount := 0
+		sysShips := s.CurrentSystem.CopyShips(lock)
+
+		for _, ds := range sysShips {
+			if ds.UserID == s.UserID {
+				if ds.DockedAtStationID != nil {
+					if *ds.DockedAtStationID == *s.DockedAtStationID {
+						dockedCount++
+					}
+				}
+			}
+		}
+
+		if dockedCount > 4 {
+			return errors.New("purchase would exceed 5 of your ships docked in the same station")
+		}
 	}
 
 	// adjust wallet
@@ -1993,36 +2029,56 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 	// reduce quantity
 	state.Quantity -= quantity
 
-	// make a new item stack of the given size
+	// generate a new uuid
 	nid, err := uuid.NewUUID()
 
 	if err != nil {
 		return err
 	}
 
-	newItem := Item{
-		ID:             nid,
-		ItemTypeID:     output.ItemTypeID,
-		Meta:           output.ItemTypeMeta,
-		Created:        time.Now(),
-		CreatedBy:      &s.UserID,
-		CreatedReason:  "Bought from silo",
-		ContainerID:    s.CargoBayContainerID,
-		Quantity:       quantity,
-		IsPackaged:     true,
-		Lock:           sync.Mutex{},
-		ItemTypeName:   output.ItemTypeName,
-		ItemFamilyID:   output.ItemFamilyID,
-		ItemFamilyName: output.ItemFamilyName,
-		ItemTypeMeta:   output.ItemTypeMeta,
-		CoreDirty:      true,
+	if !isShip {
+		// make a new item stack of the given size
+		newItem := Item{
+			ID:             nid,
+			ItemTypeID:     output.ItemTypeID,
+			Meta:           output.ItemTypeMeta,
+			Created:        time.Now(),
+			CreatedBy:      &s.UserID,
+			CreatedReason:  "Bought from silo",
+			ContainerID:    s.CargoBayContainerID,
+			Quantity:       quantity,
+			IsPackaged:     true,
+			Lock:           sync.Mutex{},
+			ItemTypeName:   output.ItemTypeName,
+			ItemFamilyID:   output.ItemFamilyID,
+			ItemFamilyName: output.ItemFamilyName,
+			ItemTypeMeta:   output.ItemTypeMeta,
+			CoreDirty:      true,
+		}
+
+		// escalate order save request to core
+		s.CurrentSystem.NewItems[nid.String()] = &newItem
+
+		// place item in cargo bay
+		s.CargoBay.Items = append(s.CargoBay.Items, &newItem)
+	} else {
+		// parse template id
+		stID, err := uuid.Parse(stIDStr)
+
+		if err != nil {
+			return err
+		}
+
+		// request a new ship to be generated from this purchase
+		newShip := NewShipPurchase{
+			UserID:         s.UserID,
+			ShipTemplateID: stID,
+			StationID:      *s.DockedAtStationID,
+		}
+
+		// escalate order save request to core
+		s.CurrentSystem.NewShipPurchases[nid.String()] = &newShip
 	}
-
-	// escalate order save request to core
-	s.CurrentSystem.NewItems[nid.String()] = &newItem
-
-	// place item in cargo bay
-	s.CargoBay.Items = append(s.CargoBay.Items, &newItem)
 
 	// success
 	return nil

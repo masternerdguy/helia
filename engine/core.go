@@ -573,4 +573,38 @@ func handleEscalations(sol *universe.SolarSystem) {
 			home.CurrentSystem.AddClient(rs, true)
 		}(rs, sol)
 	}
+
+	// iterate over new ship purchases
+	for id := range sol.NewShipPurchases {
+		// capture reference and remove from map
+		rs := sol.NewShipPurchases[id]
+		delete(sol.NewShipPurchases, id)
+
+		// handle escalation on another goroutine
+		go func(rs *universe.NewShipPurchase, sol *universe.SolarSystem) {
+			// create new ship for player
+			ps, err := CreatePurchasedShipForPlayer(
+				rs.UserID,
+				rs.ShipTemplateID,
+				rs.StationID,
+				sol.ID,
+			)
+
+			if err != nil || ps == nil {
+				log.Println(fmt.Sprintf("! Unable to complete ship purchase for %v - failure saving (%v)!", rs.UserID, err))
+				return
+			}
+
+			// load into universe
+			es, err := LoadShip(ps, sol.Universe)
+
+			if err != nil || es == nil {
+				log.Println(fmt.Sprintf("! Unable to complete ship purchase for %v - failure loading (%v)!", rs.UserID, err))
+				return
+			}
+
+			// put ship in system
+			sol.AddShip(es, true)
+		}(rs, sol)
+	}
 }
