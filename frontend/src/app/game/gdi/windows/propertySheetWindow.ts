@@ -102,8 +102,11 @@ export class PropertySheetWindow extends GDIWindow {
 
         this.wsSvc.sendMessage(MessageTypes.Board, b);
 
-        // reset and close property sheet window
-        this.resetAndHide();
+        // request refresh
+        this.refreshPropertySummary();
+
+        // reset views
+        this.resetViews();
       } else if (action.listString() == 'Move CBN') {
         this.modalInput.setOnReturn((txt: string) => {
           // convert text to an integer
@@ -119,8 +122,11 @@ export class PropertySheetWindow extends GDIWindow {
 
             this.wsSvc.sendMessage(MessageTypes.TransferCredits, tiMsg);
 
-            // reset and close property sheet window
-            this.resetAndHide();
+            // request refresh
+            this.refreshPropertySummary();
+
+            // reset views
+            this.resetViews();
           }
 
           // hide modal overlay
@@ -149,18 +155,6 @@ export class PropertySheetWindow extends GDIWindow {
     );
     this.modalInput.setFont(FontSize.large);
     this.modalInput.initialize();
-  }
-
-  private resetAndHide() {
-    // reset list views
-    this.resetViews();
-    this.lastPropertyView = 0;
-
-    // clear input
-    this.modalInput.setText('');
-
-    // hide
-    this.setHidden(true);
   }
 
   private showModalInput() {
@@ -243,6 +237,9 @@ export class PropertySheetWindow extends GDIWindow {
   private resetViews() {
     this.actionList.setItems([]);
     this.propertyList.setItems([]);
+
+    // clear input
+    this.modalInput.setText('');
   }
 }
 

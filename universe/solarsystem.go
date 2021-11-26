@@ -898,6 +898,19 @@ func (s *SolarSystem) PeriodicUpdate() {
 				// update balances
 				sh.Wallet = newSrcBalance
 				toExchange.Wallet = newTgtBalance
+
+				// update property cache with new amounts (so it shows up immediately instead of as part of the periodic rebuild)
+				pc := c.GetPropertyCache()
+
+				for i, e := range pc.ShipCaches {
+					if e.ShipID == sh.ID {
+						pc.ShipCaches[i].Wallet = newSrcBalance
+					} else if e.ShipID == toExchange.ID {
+						pc.ShipCaches[i].Wallet = newTgtBalance
+					}
+				}
+
+				c.SetPropertyCache(pc)
 			}
 		}
 	}
