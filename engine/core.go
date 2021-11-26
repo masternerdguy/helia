@@ -607,4 +607,38 @@ func handleEscalations(sol *universe.SolarSystem) {
 			sol.AddShip(es, true)
 		}(rs, sol)
 	}
+
+	// iterate over ship switches
+	for id := range sol.ShipSwitches {
+		// capture reference and remove from map
+		rs := sol.ShipSwitches[id]
+		delete(sol.ShipSwitches, id)
+
+		// handle escalation on another goroutine
+		go func(rs *universe.ShipSwitch, sol *universe.SolarSystem) {
+			// update currently flown ship in database
+			err := userSvc.SetCurrentShipID(*rs.Client.UID, &rs.Target.ID)
+
+			if err != nil {
+				log.Println(fmt.Sprintf("! Unable to complete ship switch for %v - failure saving (%v)!", rs.Client.UID, err))
+				return
+			}
+
+			tgt := rs.Target
+			src := rs.Source
+
+			// link player's faction into target ship
+			tgt.FactionID = src.FactionID
+
+			// link player's reputation sheet into target ship
+			tgt.ReputationSheet = &rs.Client.ReputationSheet
+
+			// set client current ship to target ship
+			rs.Client.CurrentShipID = tgt.ID
+			tgt.BeingFlownByPlayer = true
+
+			// unmark source ship as being flown by player
+			src.BeingFlownByPlayer = false
+		}(rs, sol)
+	}
 }

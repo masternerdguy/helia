@@ -41,4 +41,5 @@ export enum MessageTypes {
   ConsumeRepairKit = 33,
   ViewProperty = 34,
   PropertyUpdate = 35,
+  Board = 36,
 }

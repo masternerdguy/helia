@@ -2,6 +2,7 @@ package universe
 
 import (
 	"encoding/json"
+	"fmt"
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
@@ -43,6 +44,7 @@ type SolarSystem struct {
 	NewSellOrders        map[string]*SellOrder         // new sell orders in need of saving by core
 	BoughtSellOrders     map[string]*SellOrder         // sell orders that have been fulfilled in need of saving by core
 	NewShipPurchases     map[string]*NewShipPurchase   // newly purchased ships that need to be generated and saved by core
+	ShipSwitches         map[string]*ShipSwitch        // approved requests to switch a client to another ship in need of saving by core
 }
 
 // Initializes internal aspects of SolarSystem
@@ -70,6 +72,7 @@ func (s *SolarSystem) Initialize() {
 	s.NewSellOrders = make(map[string]*SellOrder)
 	s.BoughtSellOrders = make(map[string]*SellOrder)
 	s.NewShipPurchases = make(map[string]*NewShipPurchase)
+	s.ShipSwitches = make(map[string]*ShipSwitch)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -791,6 +794,56 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 				// write response to client
 				c.WriteMessage(&z)
+			}
+		} else if evt.Type == models.NewMessageRegistry().Board {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientBoardBody)
+
+				// verify player is docked
+				if sh.DockedAtStation == nil {
+					c.WriteErrorMessage("you must be docked to switch ships")
+					continue
+				}
+
+				// get ship to board and verify it is owned by the player
+				toBoard := s.ships[data.ShipID.String()]
+
+				if toBoard == nil {
+					c.WriteErrorMessage("ship not available to board")
+					continue
+				}
+
+				if toBoard.UserID != sh.UserID {
+					c.WriteErrorMessage("ship not available to board")
+					continue
+				}
+
+				// verify it is docked at the same station as the player
+				if toBoard.DockedAtStation == nil {
+					c.WriteErrorMessage("both ships must be docked at the same station to switch ships")
+					continue
+				}
+
+				if toBoard.DockedAtStation.ID != sh.DockedAtStation.ID {
+					c.WriteErrorMessage("both ships must be docked at the same station to switch ships")
+					continue
+				}
+
+				// verify it isn't the same ship
+				if toBoard.ID == sh.ID {
+					c.WriteErrorMessage("you are already flying this ship")
+					continue
+				}
+
+				// escalate ship switch request to core
+				key := fmt.Sprintf("%v>>%v", sh.ID, toBoard.ID)
+
+				s.ShipSwitches[key] = &ShipSwitch{
+					Client: c,
+					Source: sh,
+					Target: toBoard,
+				}
 			}
 		}
 	}

@@ -179,6 +179,13 @@ type NewShipPurchase struct {
 	StationID      uuid.UUID
 }
 
+// Structure representing the owner boarding a different ship, not yet materialized
+type ShipSwitch struct {
+	Client *shared.GameClient
+	Source *Ship
+	Target *Ship
+}
+
 // Structure representing the module racks of a ship and what is fitted to them
 type Fitting struct {
 	ARack []FittedSlot
@@ -1895,7 +1902,7 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 
 	if f && g {
 		if iHp < tHp {
-			return errors.New("Item must be fully repaired before packaging")
+			return errors.New("item must be fully repaired before packaging")
 		}
 	}
 

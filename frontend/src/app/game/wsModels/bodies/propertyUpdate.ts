@@ -8,7 +8,7 @@ export class ServerPropertyShipCacheEntry {
   id: string;
   systemId: string;
   systemName: string;
-  dockedAtID: string;
+  dockedAtId: string;
   dockedAtName: string;
   wallet: number;
 }

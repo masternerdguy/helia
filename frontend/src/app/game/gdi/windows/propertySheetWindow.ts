@@ -9,6 +9,7 @@ import {
   ServerPropertyUpdate,
 } from '../../wsModels/bodies/propertyUpdate';
 import { Player } from '../../engineModels/player';
+import { ClientBoardBody } from '../../wsModels/bodies/board';
 
 export class PropertySheetWindow extends GDIWindow {
   private propertyList = new GDIList();
@@ -45,7 +46,26 @@ export class PropertySheetWindow extends GDIWindow {
 
     this.propertyList.setFont(FontSize.normal);
     this.propertyList.setOnClick((item) => {
-      // todo
+      const row = item as PropertySheetViewRow;
+      const ship = row.ship;
+
+      const actions: PropertySheetActionRow[] = [];
+
+      // actions only possible when player is docked
+      if (this.player.currentShip.dockedAtStationID) {
+        // actions only possible when player has selected a different ship than the one they are flying
+        if (this.player.currentShip.id != ship.id) {
+          // actions only possible if both ships are docked at the same station
+          if (this.player.currentShip.dockedAtStationID == ship.dockedAtId) {
+            actions.push({
+              listString: () => 'Board',
+              ship: ship,
+            });
+          }
+        }
+      }
+
+      this.actionList.setItems(actions);
     });
 
     this.addComponent(this.propertyList);
@@ -60,7 +80,16 @@ export class PropertySheetWindow extends GDIWindow {
 
     this.actionList.setFont(FontSize.normal);
     this.actionList.setOnClick((item) => {
-      // todo
+      const action = item as PropertySheetActionRow;
+
+      if (action.listString() == 'Board') {
+        // issue request to board owned ship
+        const b = new ClientBoardBody();
+        b.sid = this.wsSvc.sid;
+        b.shipId = action.ship.id;
+
+        this.wsSvc.sendMessage(MessageTypes.Board, b);
+      }
     });
 
     this.addComponent(this.actionList);
@@ -131,6 +160,11 @@ export class PropertySheetWindow extends GDIWindow {
 }
 
 class PropertySheetViewRow {
+  listString: () => string;
+  ship: ServerPropertyShipCacheEntry;
+}
+
+class PropertySheetActionRow {
   listString: () => string;
   ship: ServerPropertyShipCacheEntry;
 }

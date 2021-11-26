@@ -45,6 +45,7 @@ type MessageRegistry struct {
 	ConsumeRepairKit       int
 	ViewProperty           int
 	PropertyUpdate         int
+	Board                  int
 }
 
 // Registry of target types
@@ -97,6 +98,7 @@ func NewMessageRegistry() *MessageRegistry {
 		ConsumeRepairKit:       33,
 		ViewProperty:           34,
 		PropertyUpdate:         35,
+		Board:                  36,
 	}
 }
 
@@ -603,7 +605,13 @@ type ServerShipPropertyCacheEntry struct {
 	ShipID              uuid.UUID  `json:"id"`
 	SolarSystemID       uuid.UUID  `json:"systemId"`
 	SolarSystemName     string     `json:"systemName"`
-	DockedAtStationID   *uuid.UUID `json:"dockedAtID"`
+	DockedAtStationID   *uuid.UUID `json:"dockedAtId"`
 	DockedAtStationName *string    `json:"dockedAtName"`
 	Wallet              float64    `json:"wallet"`
+}
+
+// Body containing a request to board a ship owned by the player in the player's current station
+type ClientBoardBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	ShipID    uuid.UUID `json:"shipId"`
 }
