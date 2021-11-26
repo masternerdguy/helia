@@ -89,6 +89,12 @@ export class PropertySheetWindow extends GDIWindow {
         b.shipId = action.ship.id;
 
         this.wsSvc.sendMessage(MessageTypes.Board, b);
+
+        // reset and close property sheet window
+        this.resetViews();
+        this.lastPropertyView = 0;
+
+        this.setHidden(true);
       }
     });
 
@@ -156,6 +162,11 @@ export class PropertySheetWindow extends GDIWindow {
 
       this.wsSvc.sendMessage(MessageTypes.ViewProperty, b);
     }, 200);
+  }
+
+  private resetViews() {
+    this.actionList.setItems([]);
+    this.propertyList.setItems([]);
   }
 }
 
