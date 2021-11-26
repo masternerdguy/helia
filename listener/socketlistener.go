@@ -273,6 +273,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientBoard(&client, &b)
+		} else if m.MessageType == msgRegistry.TransferCredits {
+			// decode body as ClientTransferCreditsBody
+			b := models.ClientTransferCreditsBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientTransferCredits(&client, &b)
 		}
 	}
 }
@@ -1131,6 +1138,29 @@ func (l *SocketListener) handleClientBoard(client *shared.GameClient, body *mode
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.Board)
+	}
+}
+
+func (l *SocketListener) handleClientTransferCredits(client *shared.GameClient, body *models.ClientTransferCreditsBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientTransferCredits: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.TransferCredits)
 	}
 }
 

@@ -845,6 +845,60 @@ func (s *SolarSystem) PeriodicUpdate() {
 					Target: toBoard,
 				}
 			}
+		} else if evt.Type == models.NewMessageRegistry().TransferCredits {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientTransferCreditsBody)
+
+				// verify player is docked
+				if sh.DockedAtStation == nil {
+					c.WriteErrorMessage("you must be docked to transfer money")
+					continue
+				}
+
+				// get ship to exchange with and verify it is owned by the player
+				toExchange := s.ships[data.ShipID.String()]
+
+				if toExchange == nil {
+					c.WriteErrorMessage("ship not available to exchange money with")
+					continue
+				}
+
+				if toExchange.UserID != sh.UserID {
+					c.WriteErrorMessage("ship not available to exchange money with")
+					continue
+				}
+
+				// verify it is docked at the same station as the player
+				if toExchange.DockedAtStation == nil {
+					c.WriteErrorMessage("both ships must be docked at the same station to exchange money")
+					continue
+				}
+
+				if toExchange.DockedAtStation.ID != sh.DockedAtStation.ID {
+					c.WriteErrorMessage("both ships must be docked at the same station to exchange money")
+					continue
+				}
+
+				// verify it isn't the same ship
+				if toExchange.ID == sh.ID {
+					c.WriteErrorMessage("you are currently flying this ship")
+					continue
+				}
+
+				// verify this will not put either ship's balance below zero
+				newSrcBalance := sh.Wallet - float64(data.Amount)
+				newTgtBalance := toExchange.Wallet + float64(data.Amount)
+
+				if newSrcBalance < 0 || newTgtBalance < 0 {
+					c.WriteErrorMessage("insufficient funds")
+					continue
+				}
+
+				// update balances
+				sh.Wallet = newSrcBalance
+				toExchange.Wallet = newTgtBalance
+			}
 		}
 	}
 

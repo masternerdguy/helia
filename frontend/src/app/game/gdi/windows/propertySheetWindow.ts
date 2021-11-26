@@ -1,5 +1,5 @@
 import { GDIWindow } from '../base/gdiWindow';
-import { FontSize } from '../base/gdiStyle';
+import { FontSize, GDIStyle } from '../base/gdiStyle';
 import { GDIList } from '../components/gdiList';
 import { ClientViewProperty } from '../../wsModels/bodies/viewProperty';
 import { MessageTypes } from '../../wsModels/gameMessage';
@@ -10,10 +10,17 @@ import {
 } from '../../wsModels/bodies/propertyUpdate';
 import { Player } from '../../engineModels/player';
 import { ClientBoardBody } from '../../wsModels/bodies/board';
+import { GDIOverlay } from '../components/gdiOverlay';
+import { GDIInput } from '../components/gdiInput';
+import { ClientTransferCreditsBody } from '../../wsModels/bodies/transferCredits';
 
 export class PropertySheetWindow extends GDIWindow {
   private propertyList = new GDIList();
   private actionList = new GDIList();
+
+  // inputs
+  private modalOverlay: GDIOverlay = new GDIOverlay();
+  private modalInput: GDIInput = new GDIInput();
 
   // last cargo bay refresh
   private lastPropertyView = 0;
@@ -61,6 +68,11 @@ export class PropertySheetWindow extends GDIWindow {
               listString: () => 'Board',
               ship: ship,
             });
+
+            actions.push({
+              listString: () => 'Move CBN',
+              ship: ship,
+            });
           }
         }
       }
@@ -91,14 +103,78 @@ export class PropertySheetWindow extends GDIWindow {
         this.wsSvc.sendMessage(MessageTypes.Board, b);
 
         // reset and close property sheet window
-        this.resetViews();
-        this.lastPropertyView = 0;
+        this.resetAndHide();
+      } else if (action.listString() == 'Move CBN') {
+        this.modalInput.setOnReturn((txt: string) => {
+          // convert text to an integer
+          const n = Math.round(Number(txt));
 
-        this.setHidden(true);
+          if (!Number.isNaN(n)) {
+            // send credit transfer request
+            const tiMsg: ClientTransferCreditsBody = {
+              sid: this.wsSvc.sid,
+              shipId: action.ship.id,
+              amount: n
+            };
+
+            this.wsSvc.sendMessage(MessageTypes.TransferCredits, tiMsg);
+
+            // reset and close property sheet window
+            this.resetAndHide();
+          }
+
+          // hide modal overlay
+          this.hideModalInput();
+        });
+
+        this.showModalInput();
       }
     });
 
     this.addComponent(this.actionList);
+
+    // setup modal input
+    this.modalOverlay.setWidth(this.getWidth());
+    this.modalOverlay.setHeight(this.getHeight());
+    this.modalOverlay.setX(0);
+    this.modalOverlay.setY(0);
+    this.modalOverlay.initialize();
+
+    const fontSize = GDIStyle.getUnderlyingFontSize(FontSize.large);
+    this.modalInput.setWidth(100);
+    this.modalInput.setHeight(Math.round(fontSize + 0.5));
+    this.modalInput.setX(this.getWidth() / 2 - this.modalInput.getWidth() / 2);
+    this.modalInput.setY(
+      this.getHeight() / 2 - this.modalInput.getHeight() / 2
+    );
+    this.modalInput.setFont(FontSize.large);
+    this.modalInput.initialize();
+  }
+
+  private resetAndHide() {
+    // reset list views
+    this.resetViews();
+    this.lastPropertyView = 0;
+
+    // clear input
+    this.modalInput.setText('');
+
+    // hide
+    this.setHidden(true);
+  }
+
+  private showModalInput() {
+    this.removeComponent(this.propertyList);
+    this.removeComponent(this.actionList);
+    this.addComponent(this.modalOverlay);
+    this.addComponent(this.modalInput);
+  }
+
+  private hideModalInput() {
+    this.addComponent(this.propertyList);
+    this.addComponent(this.actionList);
+    this.removeComponent(this.modalOverlay);
+    this.removeComponent(this.modalInput);
   }
 
   periodicUpdate() {

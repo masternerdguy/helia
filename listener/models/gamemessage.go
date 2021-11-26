@@ -46,6 +46,7 @@ type MessageRegistry struct {
 	ViewProperty           int
 	PropertyUpdate         int
 	Board                  int
+	TransferCredits        int
 }
 
 // Registry of target types
@@ -99,6 +100,7 @@ func NewMessageRegistry() *MessageRegistry {
 		ViewProperty:           34,
 		PropertyUpdate:         35,
 		Board:                  36,
+		TransferCredits:        37,
 	}
 }
 
@@ -614,4 +616,11 @@ type ServerShipPropertyCacheEntry struct {
 type ClientBoardBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ShipID    uuid.UUID `json:"shipId"`
+}
+
+// Body containing a request to transfer credits between another ship owned by the player in the player's current station
+type ClientTransferCreditsBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	ShipID    uuid.UUID `json:"shipId"`
+	Amount    int       `json:"amount"`
 }

@@ -42,4 +42,5 @@ export enum MessageTypes {
   ViewProperty = 34,
   PropertyUpdate = 35,
   Board = 36,
+  TransferCredits = 37,
 }
