@@ -117,7 +117,7 @@ export class PropertySheetWindow extends GDIWindow {
             const tiMsg: ClientTransferCreditsBody = {
               sid: this.wsSvc.sid,
               shipId: action.ship.id,
-              amount: n
+              amount: n,
             };
 
             this.wsSvc.sendMessage(MessageTypes.TransferCredits, tiMsg);
