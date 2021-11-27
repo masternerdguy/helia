@@ -26,7 +26,10 @@ export class PropertySheetWindow extends GDIWindow {
   private modalInput: GDIInput = new GDIInput();
 
   // last cargo bay refresh
-  private lastPropertyView = 0;
+  private lastPropertyView: number = 0;
+
+  // dock state
+  private isDocked: boolean = undefined;
 
   // player
   private player: Player;
@@ -69,6 +72,12 @@ export class PropertySheetWindow extends GDIWindow {
             listString: () => 'Rename',
             ship: ship,
           });
+
+                      // spacer
+                      actions.push({
+                        listString: () => '',
+                        ship: null,
+                      });
 
           // actions only possible when player has also selected a different ship than the one they are flying
           if (this.player.currentShip.id != ship.id) {
@@ -233,7 +242,7 @@ export class PropertySheetWindow extends GDIWindow {
     this.modalOverlay.initialize();
 
     const fontSize = GDIStyle.getUnderlyingFontSize(FontSize.large);
-    this.modalInput.setWidth(100);
+    this.modalInput.setWidth(200);
     this.modalInput.setHeight(Math.round(fontSize + 0.5));
     this.modalInput.setX(this.getWidth() / 2 - this.modalInput.getWidth() / 2);
     this.modalInput.setY(
@@ -258,6 +267,18 @@ export class PropertySheetWindow extends GDIWindow {
   }
 
   periodicUpdate() {
+    // check for dock state change
+    let isDocked: boolean = undefined;
+    this.player.currentShip.dockedAtStationID ? isDocked = true : false;
+
+    if (isDocked != this.isDocked) {
+      // reset views
+      this.resetViews();
+    }
+
+    // store current dock state
+    this.isDocked = isDocked;
+
     if (!this.isHidden()) {
       // check if property view is stale
       const now = Date.now();
