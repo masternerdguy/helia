@@ -984,6 +984,73 @@ func (s *SolarSystem) PeriodicUpdate() {
 					c.SetPropertyCache(pc)
 				}
 			}
+		} else if evt.Type == models.NewMessageRegistry().TrashShip {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientTrashShipBody)
+
+				// verify player is docked
+				if sh.DockedAtStation == nil {
+					c.WriteErrorMessage("you must be docked to trash a ship")
+					continue
+				}
+
+				// get ship to sell and verify it is owned by the player
+				toTrash := s.ships[data.ShipID.String()]
+
+				if toTrash == nil {
+					c.WriteErrorMessage("ship not available to trash")
+					continue
+				}
+
+				if toTrash.UserID != sh.UserID {
+					c.WriteErrorMessage("ship not available to trash")
+					continue
+				}
+
+				// verify it is docked at the same station as the player
+				if toTrash.DockedAtStation == nil {
+					c.WriteErrorMessage("you must be docked at the same station as the ship being trashed")
+					continue
+				}
+
+				if toTrash.DockedAtStation.ID != sh.DockedAtStation.ID {
+					c.WriteErrorMessage("you must be docked at the same station as the ship being trashed")
+					continue
+				}
+
+				// verify it isn't the same ship
+				if toTrash.ID == sh.ID {
+					c.WriteErrorMessage("you are currently flying this ship")
+					continue
+				}
+
+				// unhook ship from system
+				s.RemoveShip(toTrash, false)
+
+				// escalate for saving in core
+				nl := ShipNoLoadSet{
+					ID:   toTrash.ID,
+					Flag: true,
+				}
+
+				s.SetNoLoad[toTrash.ID.String()] = &nl
+
+				// remove trashed ship from property cache (so it goes away immediately instead of as part of the periodic rebuild)
+				pc := c.GetPropertyCache()
+				no := make([]shared.ShipPropertyCacheEntry, 0)
+
+				for _, e := range pc.ShipCaches {
+					if e.ShipID == toTrash.ID {
+						continue
+					}
+
+					no = append(no, e)
+				}
+
+				pc.ShipCaches = no
+				c.SetPropertyCache(pc)
+			}
 		}
 	}
 

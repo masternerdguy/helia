@@ -14,6 +14,7 @@ import { GDIOverlay } from '../components/gdiOverlay';
 import { GDIInput } from '../components/gdiInput';
 import { ClientTransferCreditsBody } from '../../wsModels/bodies/transferCredits';
 import { ClientSellShipAsOrderBody } from '../../wsModels/bodies/sellShipAsOrder';
+import { ClientTrashShipBody } from '../../wsModels/bodies/trashShip';
 
 export class PropertySheetWindow extends GDIWindow {
   private propertyList = new GDIList();
@@ -83,6 +84,11 @@ export class PropertySheetWindow extends GDIWindow {
 
             actions.push({
               listString: () => 'Sell',
+              ship: ship,
+            });
+
+            actions.push({
+              listString: () => 'Trash',
               ship: ship,
             });
           }
@@ -173,6 +179,19 @@ export class PropertySheetWindow extends GDIWindow {
         });
 
         this.showModalInput();
+      } else if (action.listString() == 'Trash') {
+        // issue request to trash owned ship
+        const b = new ClientTrashShipBody();
+        b.sid = this.wsSvc.sid;
+        b.shipId = action.ship.id;
+
+        this.wsSvc.sendMessage(MessageTypes.TrashShip, b);
+
+        // request refresh
+        this.refreshPropertySummary();
+
+        // reset views
+        this.resetViews();
       }
     });
 
