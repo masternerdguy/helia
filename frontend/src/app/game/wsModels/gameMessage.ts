@@ -43,4 +43,5 @@ export enum MessageTypes {
   PropertyUpdate = 35,
   Board = 36,
   TransferCredits = 37,
+  SellShipAsOrder = 38,
 }

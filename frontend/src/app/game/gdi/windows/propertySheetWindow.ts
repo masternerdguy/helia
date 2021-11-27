@@ -13,6 +13,7 @@ import { ClientBoardBody } from '../../wsModels/bodies/board';
 import { GDIOverlay } from '../components/gdiOverlay';
 import { GDIInput } from '../components/gdiInput';
 import { ClientTransferCreditsBody } from '../../wsModels/bodies/transferCredits';
+import { ClientSellShipAsOrderBody } from '../../wsModels/bodies/sellShipAsOrder';
 
 export class PropertySheetWindow extends GDIWindow {
   private propertyList = new GDIList();
@@ -73,6 +74,17 @@ export class PropertySheetWindow extends GDIWindow {
               listString: () => 'Move CBN',
               ship: ship,
             });
+
+            // spacer
+            actions.push({
+              listString: () => '',
+              ship: null,
+            });
+
+            actions.push({
+              listString: () => 'Sell',
+              ship: ship,
+            });
           }
         }
       }
@@ -121,6 +133,33 @@ export class PropertySheetWindow extends GDIWindow {
             };
 
             this.wsSvc.sendMessage(MessageTypes.TransferCredits, tiMsg);
+
+            // request refresh
+            this.refreshPropertySummary();
+
+            // reset views
+            this.resetViews();
+          }
+
+          // hide modal overlay
+          this.hideModalInput();
+        });
+
+        this.showModalInput();
+      } else if (action.listString() == 'Sell') {
+        this.modalInput.setOnReturn((txt: string) => {
+          // convert text to an integer
+          const n = Math.round(Number(txt));
+
+          if (!Number.isNaN(n)) {
+            // send sell as order request
+            const tiMsg: ClientSellShipAsOrderBody = {
+              sid: this.wsSvc.sid,
+              shipId: action.ship.id,
+              price: n,
+            };
+
+            this.wsSvc.sendMessage(MessageTypes.SellShipAsOrder, tiMsg);
 
             // request refresh
             this.refreshPropertySummary();
