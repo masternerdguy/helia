@@ -272,3 +272,25 @@ func (s ShipService) SetOwner(id uuid.UUID, userID uuid.UUID) error {
 
 	return err
 }
+
+// Updates the name of a ship in the database
+func (s ShipService) Rename(id uuid.UUID, name string) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update ship in database
+	sqlStatement :=
+		`
+			UPDATE public.ships
+			SET shipname = $2
+			WHERE id = $1
+		`
+
+	_, err = db.Exec(sqlStatement, id, name)
+
+	return err
+}

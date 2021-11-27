@@ -740,4 +740,22 @@ func handleEscalations(sol *universe.SolarSystem) {
 			sol.AddShip(sh, true)
 		}(rs, sol)
 	}
+
+	// iterate over ship renames
+	for id := range sol.ShipRenames {
+		// capture reference and remove from map
+		rs := sol.ShipRenames[id]
+		delete(sol.ShipRenames, id)
+
+		// handle escalation on another goroutine
+		go func(rs *universe.ShipRename, sol *universe.SolarSystem) {
+			// update name in database
+			err := shipSvc.Rename(rs.ShipID, rs.Name)
+
+			if err != nil {
+				log.Println(fmt.Sprintf("! Unable to rename ship %v - failure saving (%v)!", rs.ShipID.ID(), err))
+				return
+			}
+		}(rs, sol)
+	}
 }

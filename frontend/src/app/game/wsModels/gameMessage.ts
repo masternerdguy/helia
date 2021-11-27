@@ -45,4 +45,5 @@ export enum MessageTypes {
   TransferCredits = 37,
   SellShipAsOrder = 38,
   TrashShip = 39,
+  RenameShip = 40,
 }

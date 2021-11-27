@@ -185,6 +185,12 @@ type UsedShipPurchase struct {
 	UserID uuid.UUID
 }
 
+// Structure representing a renamed ship, not yet materialized
+type ShipRename struct {
+	ShipID uuid.UUID
+	Name   string
+}
+
 // Structure representing the owner boarding a different ship, not yet materialized
 type ShipSwitch struct {
 	Client *shared.GameClient

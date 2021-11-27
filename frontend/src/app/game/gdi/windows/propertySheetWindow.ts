@@ -15,6 +15,7 @@ import { GDIInput } from '../components/gdiInput';
 import { ClientTransferCreditsBody } from '../../wsModels/bodies/transferCredits';
 import { ClientSellShipAsOrderBody } from '../../wsModels/bodies/sellShipAsOrder';
 import { ClientTrashShipBody } from '../../wsModels/bodies/trashShip';
+import { ClientRenameShipBody } from '../../wsModels/bodies/renameShip';
 
 export class PropertySheetWindow extends GDIWindow {
   private propertyList = new GDIList();
@@ -62,10 +63,15 @@ export class PropertySheetWindow extends GDIWindow {
 
       // actions only possible when player is docked
       if (this.player.currentShip.dockedAtStationID) {
-        // actions only possible when player has selected a different ship than the one they are flying
-        if (this.player.currentShip.id != ship.id) {
-          // actions only possible if both ships are docked at the same station
-          if (this.player.currentShip.dockedAtStationID == ship.dockedAtId) {
+        // actions only possible if both ships are also docked at the same station
+        if (this.player.currentShip.dockedAtStationID == ship.dockedAtId) {
+          actions.push({
+            listString: () => 'Rename',
+            ship: ship,
+          });
+
+          // actions only possible when player has also selected a different ship than the one they are flying
+          if (this.player.currentShip.id != ship.id) {
             actions.push({
               listString: () => 'Board',
               ship: ship,
@@ -192,6 +198,28 @@ export class PropertySheetWindow extends GDIWindow {
 
         // reset views
         this.resetViews();
+      } else if (action.listString() == 'Rename') {
+        this.modalInput.setOnReturn((txt: string) => {
+          // send rename request
+          const tiMsg: ClientRenameShipBody = {
+            sid: this.wsSvc.sid,
+            shipId: action.ship.id,
+            name: txt,
+          };
+
+          this.wsSvc.sendMessage(MessageTypes.RenameShip, tiMsg);
+
+          // request refresh
+          this.refreshPropertySummary();
+
+          // reset views
+          this.resetViews();
+
+          // hide modal overlay
+          this.hideModalInput();
+        });
+
+        this.showModalInput();
       }
     });
 

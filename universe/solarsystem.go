@@ -47,6 +47,7 @@ type SolarSystem struct {
 	ShipSwitches         map[string]*ShipSwitch        // approved requests to switch a client to another ship in need of saving by core
 	SetNoLoad            map[string]*ShipNoLoadSet     // updates to the no load flag in need of saving by core
 	UsedShipPurchases    map[string]*UsedShipPurchase  // purchased used ships that need to be hooked in and saved by core
+	ShipRenames          map[string]*ShipRename        // renamed ships that need to be saved by core
 }
 
 // Initializes internal aspects of SolarSystem
@@ -77,6 +78,7 @@ func (s *SolarSystem) Initialize() {
 	s.ShipSwitches = make(map[string]*ShipSwitch)
 	s.SetNoLoad = make(map[string]*ShipNoLoadSet)
 	s.UsedShipPurchases = make(map[string]*UsedShipPurchase)
+	s.ShipRenames = make(map[string]*ShipRename)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -1043,6 +1045,73 @@ func (s *SolarSystem) PeriodicUpdate() {
 				for _, e := range pc.ShipCaches {
 					if e.ShipID == toTrash.ID {
 						continue
+					}
+
+					no = append(no, e)
+				}
+
+				pc.ShipCaches = no
+				c.SetPropertyCache(pc)
+			}
+		} else if evt.Type == models.NewMessageRegistry().RenameShip {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientRenameShipBody)
+
+				// verify player is docked
+				if sh.DockedAtStation == nil {
+					c.WriteErrorMessage("you must be docked to rename a ship")
+					continue
+				}
+
+				// get ship to sell and verify it is owned by the player
+				toRename := s.ships[data.ShipID.String()]
+
+				if toRename == nil {
+					c.WriteErrorMessage("ship not available to rename")
+					continue
+				}
+
+				if toRename.UserID != sh.UserID {
+					c.WriteErrorMessage("ship not available to rename")
+					continue
+				}
+
+				// verify it is docked at the same station as the player
+				if toRename.DockedAtStation == nil {
+					c.WriteErrorMessage("you must be docked at the same station as the ship being renamed")
+					continue
+				}
+
+				if toRename.DockedAtStation.ID != sh.DockedAtStation.ID {
+					c.WriteErrorMessage("you must be docked at the same station as the ship being renamed")
+					continue
+				}
+
+				// verify length constraint on new name
+				if len(data.Name) > 32 {
+					c.WriteErrorMessage("ship names must be 32 characters or less")
+					continue
+				}
+
+				// update name in memory
+				toRename.ShipName = data.Name
+
+				// escalate rename save request
+				rn := ShipRename{
+					ShipID: toRename.ID,
+					Name:   data.Name,
+				}
+
+				s.ShipRenames[toRename.ID.String()] = &rn
+
+				// update renamed ship in property cache (so it goes away immediately instead of as part of the periodic rebuild)
+				pc := c.GetPropertyCache()
+				no := make([]shared.ShipPropertyCacheEntry, 0)
+
+				for _, e := range pc.ShipCaches {
+					if e.ShipID == toRename.ID {
+						e.Name = data.Name
 					}
 
 					no = append(no, e)

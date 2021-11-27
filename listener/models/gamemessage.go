@@ -49,6 +49,7 @@ type MessageRegistry struct {
 	TransferCredits        int
 	SellShipAsOrder        int
 	TrashShip              int
+	RenameShip             int
 }
 
 // Registry of target types
@@ -105,6 +106,7 @@ func NewMessageRegistry() *MessageRegistry {
 		TransferCredits:        37,
 		SellShipAsOrder:        38,
 		TrashShip:              39,
+		RenameShip:             40,
 	}
 }
 
@@ -640,4 +642,11 @@ type ClientSellShipAsOrderBody struct {
 type ClientTrashShipBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ShipID    uuid.UUID `json:"shipId"`
+}
+
+// Body containing a request to rename a ship owned by the player in the player's current station
+type ClientRenameShipBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	ShipID    uuid.UUID `json:"shipId"`
+	Name      string    `json:"name"`
 }
