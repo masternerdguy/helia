@@ -1303,6 +1303,7 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 			ShipTypeID:         temp.ShipTypeID,
 			SlotLayout:         SlotLayoutFromSQL(&temp.SlotLayout),
 			BaseCargoBayVolume: temp.BaseCargoBayVolume,
+			ItemTypeID:         temp.ItemTypeID,
 		},
 		FactionID:     owner.CurrentFactionID,
 		IsNPC:         owner.IsNPC,
@@ -1426,6 +1427,10 @@ func newItem(item *universe.Item) (*uuid.UUID, error) {
 	// save item
 	o, err := itemSvc.NewItem(*sql)
 
+	if err != nil || o == nil {
+		return nil, err
+	}
+
 	return &o.ID, err
 }
 
@@ -1442,6 +1447,10 @@ func newSellOrder(sellOrder *universe.SellOrder) (*uuid.UUID, error) {
 
 	// save sell order
 	o, err := sellOrderSvc.NewSellOrder(*sql)
+
+	if err != nil || o == nil {
+		return nil, err
+	}
 
 	return &o.ID, err
 }

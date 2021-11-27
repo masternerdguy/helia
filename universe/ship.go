@@ -186,6 +186,12 @@ type ShipSwitch struct {
 	Target *Ship
 }
 
+// Structure representing a change to the no load flag, not yet materialized
+type ShipNoLoadSet struct {
+	ID   uuid.UUID
+	Flag bool
+}
+
 // Structure representing the module racks of a ship and what is fitted to them
 type Fitting struct {
 	ARack []FittedSlot
@@ -386,6 +392,7 @@ func (s *Ship) CopyShip() *Ship {
 			BaseEnergyRegen:    s.TemplateData.BaseEnergyRegen,
 			ShipTypeID:         s.TemplateData.ShipTypeID,
 			BaseCargoBayVolume: s.TemplateData.BaseCargoBayVolume,
+			ItemTypeID:         s.TemplateData.ItemTypeID,
 		},
 		FactionID: s.FactionID,
 		// in-memory only
@@ -2320,6 +2327,117 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	s.CargoBay.Items = append(s.CargoBay.Items, order.Item)
 
 	// success
+	return nil
+}
+
+// Lists this ship on the station order exchange
+func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// lock cargo bay
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	// make sure ship is docked
+	if s.DockedAtStationID == nil {
+		return errors.New("you must be docked to list an item on the station orders exchange")
+	}
+
+	// make sure there is an escrow container attached to this ship
+	if s.EscrowContainerID == nil {
+		return errors.New("no escrow container associated with this ship")
+	}
+
+	// make sure the ask price is > 0
+	if price <= 0 {
+		return errors.New("items must be sold at a price greater than 0")
+	}
+
+	// remove self from system
+	s.CurrentSystem.RemoveShip(s, lock)
+
+	// create a stub item for this ship
+	stubID := uuid.New()
+
+	meta := Meta{}
+	meta["shipid"] = s.ID
+	meta["wallet"] = s.Wallet
+	meta["armor"] = s.Armor
+	meta["hull"] = s.Hull
+	meta["fuel"] = s.Fuel
+	meta["seller"] = s.OwnerName
+
+	for i, e := range s.Fitting.ARack {
+		k := fmt.Sprintf("rackA[%v]", i)
+		meta[k] = e.ItemTypeName
+	}
+
+	for i, e := range s.Fitting.BRack {
+		k := fmt.Sprintf("rackB[%v]", i)
+		meta[k] = e.ItemTypeName
+	}
+
+	for i, e := range s.Fitting.CRack {
+		k := fmt.Sprintf("rackC[%v]", i)
+		meta[k] = e.ItemTypeName
+	}
+
+	for i, e := range s.CargoBay.Items {
+		v := fmt.Sprintf("%v x%v", e.ItemTypeName, e.Quantity)
+		k := fmt.Sprintf("cargo[%v]", i)
+
+		meta[k] = v
+	}
+
+	stub := Item{
+		ID:            stubID,
+		ItemTypeID:    s.TemplateData.ItemTypeID,
+		Created:       time.Now(),
+		CreatedBy:     &s.UserID,
+		CreatedReason: "Ship listed for sale",
+		ContainerID:   *s.EscrowContainerID,
+		Meta:          meta,
+		Quantity:      1,
+		IsPackaged:    false,
+		CoreDirty:     true,
+	}
+
+	// escalate ship and stub item for saving in db
+	s.CurrentSystem.NewItems[stub.ID.String()] = &stub
+	s.CurrentSystem.SetNoLoad[s.ID.String()] = &ShipNoLoadSet{
+		ID:   s.ID,
+		Flag: true,
+	}
+
+	// create sell order for stub item
+	nid, err := uuid.NewUUID()
+
+	if err != nil {
+		return err
+	}
+
+	newOrder := SellOrder{
+		ID:           nid,
+		StationID:    *s.DockedAtStationID,
+		ItemID:       stub.ID,
+		SellerUserID: s.UserID,
+		AskPrice:     price,
+		Created:      time.Now(),
+		CoreDirty:    true,
+		CoreWait:     20, // defer for 20 cycles so that the stub item can be saved first
+	}
+
+	// link stub into sell order
+	newOrder.Item = &stub
+	newOrder.GetItemIDFromItem = true // we won't know the real item id until after it saves
+
+	// escalate to core for saving in db
+	s.CurrentSystem.NewSellOrders[newOrder.ID.String()] = &newOrder
+
 	return nil
 }
 

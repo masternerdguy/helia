@@ -175,6 +175,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	startSvc := sql.GetStartService()
 	shipSvc := sql.GetShipService()
 	userSvc := sql.GetUserService()
+	itemSvc := sql.GetItemService()
 
 	// obtain lock
 	sol.Lock.Lock()
@@ -314,16 +315,45 @@ func handleEscalations(sol *universe.SolarSystem) {
 				// store corrected id from db insert
 				mi.ID = *id
 
-				// mark as clean
-				mi.CoreDirty = false
+				// load new item
+				ni, err := itemSvc.GetItemByID(*id)
+
+				if err != nil || id == nil {
+					log.Println(fmt.Sprintf("Unable to load new item %v: %v", mi.ID, err))
+				} else {
+					fi, err := LoadItem(ni)
+
+					if err != nil || id == nil {
+						log.Println(fmt.Sprintf("Unable to integrate new item %v: %v", mi.ID, err))
+					} else {
+						// copy loaded values
+						mi.Meta = fi.Meta
+						mi.ItemTypeMeta = fi.ItemTypeMeta
+						mi.ItemTypeName = fi.ItemTypeName
+						mi.ItemFamilyID = fi.ItemFamilyID
+						mi.ItemFamilyName = fi.ItemFamilyName
+
+						// mark as clean
+						mi.CoreDirty = false
+					}
+				}
 			}
 		}(mi, sol)
 	}
 
 	// iterate over new sell orders
 	for id := range sol.NewSellOrders {
-		// capture reference and remove from map
+		// capture reference
 		mi := sol.NewSellOrders[id]
+
+		// make sure we have waited long enough
+		mi.CoreWait--
+
+		if mi.CoreWait > -1 {
+			continue
+		}
+
+		// remove from map
 		delete(sol.NewSellOrders, id)
 
 		// handle escalation on another goroutine
@@ -331,6 +361,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 			// lock sell order
 			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
+
+			// get item id from item if linked and flag set
+			if mi.Item != nil && mi.GetItemIDFromItem {
+				mi.ItemID = mi.Item.ID
+			}
 
 			// save new sell order to db
 			id, err := newSellOrder(mi)
@@ -639,6 +674,24 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// unmark source ship as being flown by player
 			src.BeingFlownByPlayer = false
+		}(rs, sol)
+	}
+
+	// iterate over ship no load flag sets
+	for id := range sol.SetNoLoad {
+		// capture reference and remove from map
+		rs := sol.SetNoLoad[id]
+		delete(sol.SetNoLoad, id)
+
+		// handle escalation on another goroutine
+		go func(rs *universe.ShipNoLoadSet, sol *universe.SolarSystem) {
+			// update flag in database
+			err := shipSvc.SetNoLoad(rs.ID, rs.Flag)
+
+			if err != nil {
+				log.Println(fmt.Sprintf("! Unable to set no load switch for %v - failure saving (%v)!", rs.ID, err))
+				return
+			}
 		}(rs, sol)
 	}
 }

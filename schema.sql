@@ -211,7 +211,8 @@ CREATE TABLE public.ships (
     fittingbay_containerid uuid NOT NULL,
     remaxdirty boolean DEFAULT true NOT NULL,
     trash_containerid uuid NOT NULL,
-    wallet double precision DEFAULT 0 NOT NULL
+    wallet double precision DEFAULT 0 NOT NULL,
+    noload boolean DEFAULT false NOT NULL
 );
 
 
@@ -241,7 +242,8 @@ CREATE TABLE public.shiptemplates (
     baseenergyregen double precision DEFAULT 0 NOT NULL,
     shiptypeid uuid NOT NULL,
     slotlayout jsonb DEFAULT '{}'::jsonb NOT NULL,
-    basecargobayvolume double precision DEFAULT 0 NOT NULL
+    basecargobayvolume double precision DEFAULT 0 NOT NULL,
+    itemtypeid uuid NOT NULL
 );
 
 
@@ -737,6 +739,13 @@ CREATE INDEX fki_fk_ships_containers_trash ON public.ships USING btree (trash_co
 
 
 --
+-- Name: fki_fk_shiptemplates_itemtypes; Type: INDEX; Schema: public; Owner: developer
+--
+
+CREATE INDEX fki_fk_shiptemplates_itemtypes ON public.shiptemplates USING btree (itemtypeid);
+
+
+--
 -- Name: fki_fk_starts_homestations; Type: INDEX; Schema: public; Owner: developer
 --
 
@@ -930,6 +939,14 @@ ALTER TABLE ONLY public.ships
 
 ALTER TABLE ONLY public.ships
     ADD CONSTRAINT fk_ships_users FOREIGN KEY (userid) REFERENCES public.users(id);
+
+
+--
+-- Name: shiptemplates fk_shiptemplates_itemtypes; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.shiptemplates
+    ADD CONSTRAINT fk_shiptemplates_itemtypes FOREIGN KEY (itemtypeid) REFERENCES public.itemtypes(id);
 
 
 --

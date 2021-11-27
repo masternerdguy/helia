@@ -28,6 +28,7 @@ type ShipTemplate struct {
 	ShipTypeID         uuid.UUID
 	SlotLayout         SlotLayout
 	BaseCargoBayVolume float64
+	ItemTypeID         uuid.UUID
 }
 
 // Structure representing the slot layout available for fitting modules to this ship

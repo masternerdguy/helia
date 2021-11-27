@@ -45,6 +45,7 @@ type SolarSystem struct {
 	BoughtSellOrders     map[string]*SellOrder         // sell orders that have been fulfilled in need of saving by core
 	NewShipPurchases     map[string]*NewShipPurchase   // newly purchased ships that need to be generated and saved by core
 	ShipSwitches         map[string]*ShipSwitch        // approved requests to switch a client to another ship in need of saving by core
+	SetNoLoad            map[string]*ShipNoLoadSet     // updates to the no load flag in need of saving by core
 }
 
 // Initializes internal aspects of SolarSystem
@@ -73,6 +74,7 @@ func (s *SolarSystem) Initialize() {
 	s.BoughtSellOrders = make(map[string]*SellOrder)
 	s.NewShipPurchases = make(map[string]*NewShipPurchase)
 	s.ShipSwitches = make(map[string]*ShipSwitch)
+	s.SetNoLoad = make(map[string]*ShipNoLoadSet)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -911,6 +913,74 @@ func (s *SolarSystem) PeriodicUpdate() {
 				}
 
 				c.SetPropertyCache(pc)
+			}
+		} else if evt.Type == models.NewMessageRegistry().SellShipAsOrder {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientSellShipAsOrderBody)
+
+				// verify player is docked
+				if sh.DockedAtStation == nil {
+					c.WriteErrorMessage("you must be docked to sell a ship")
+					continue
+				}
+
+				// get ship to sell and verify it is owned by the player
+				toSell := s.ships[data.ShipID.String()]
+
+				if toSell == nil {
+					c.WriteErrorMessage("ship not available to sell")
+					continue
+				}
+
+				if toSell.UserID != sh.UserID {
+					c.WriteErrorMessage("ship not available to sell")
+					continue
+				}
+
+				// verify it is docked at the same station as the player
+				if toSell.DockedAtStation == nil {
+					c.WriteErrorMessage("you must be docked at the same station as the ship being sold")
+					continue
+				}
+
+				if toSell.DockedAtStation.ID != sh.DockedAtStation.ID {
+					c.WriteErrorMessage("you must be docked at the same station as the ship being sold")
+					continue
+				}
+
+				// verify it isn't the same ship
+				if toSell.ID == sh.ID {
+					c.WriteErrorMessage("you are currently flying this ship")
+					continue
+				}
+
+				// associate escrow container id with ship being sold
+				toSell.EscrowContainerID = &c.EscrowContainerID
+
+				// list ship on orders market
+				err := toSell.SellSelfAsOrder(float64(data.Price), false)
+
+				// there is a reason this could fail the player will need to know about
+				if err != nil {
+					// send error message to client
+					c.WriteErrorMessage(err.Error())
+				} else {
+					// remove sold ship from property cache (so it goes away immediately instead of as part of the periodic rebuild)
+					pc := c.GetPropertyCache()
+					no := make([]shared.ShipPropertyCacheEntry, 0)
+
+					for _, e := range pc.ShipCaches {
+						if e.ShipID == toSell.ID {
+							continue
+						}
+
+						no = append(no, e)
+					}
+
+					pc.ShipCaches = no
+					c.SetPropertyCache(pc)
+				}
 			}
 		}
 	}
