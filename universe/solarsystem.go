@@ -46,6 +46,7 @@ type SolarSystem struct {
 	NewShipPurchases     map[string]*NewShipPurchase   // newly purchased ships that need to be generated and saved by core
 	ShipSwitches         map[string]*ShipSwitch        // approved requests to switch a client to another ship in need of saving by core
 	SetNoLoad            map[string]*ShipNoLoadSet     // updates to the no load flag in need of saving by core
+	UsedShipPurchases    map[string]*UsedShipPurchase  // purchased used ships that need to be hooked in and saved by core
 }
 
 // Initializes internal aspects of SolarSystem
@@ -75,6 +76,7 @@ func (s *SolarSystem) Initialize() {
 	s.NewShipPurchases = make(map[string]*NewShipPurchase)
 	s.ShipSwitches = make(map[string]*ShipSwitch)
 	s.SetNoLoad = make(map[string]*ShipNoLoadSet)
+	s.UsedShipPurchases = make(map[string]*UsedShipPurchase)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)

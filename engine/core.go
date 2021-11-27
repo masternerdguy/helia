@@ -694,4 +694,50 @@ func handleEscalations(sol *universe.SolarSystem) {
 			}
 		}(rs, sol)
 	}
+
+	// iterate over used ship purchases
+	for id := range sol.UsedShipPurchases {
+		// capture reference and remove from map
+		rs := sol.UsedShipPurchases[id]
+		delete(sol.UsedShipPurchases, id)
+
+		// handle escalation on another goroutine
+		go func(rs *universe.UsedShipPurchase, sol *universe.SolarSystem) {
+			// update owner in database
+			err := shipSvc.SetOwner(rs.ShipID, rs.UserID)
+
+			if err != nil {
+				log.Println(fmt.Sprintf("! Unable to set new owner for %v - failure saving (%v)!", rs.ShipID, err))
+				return
+
+			}
+
+			// update noload flag in database
+			err = shipSvc.SetNoLoad(rs.ShipID, false)
+
+			if err != nil {
+				log.Println(fmt.Sprintf("! Unable to set no load switch for %v - failure saving (%v)!", rs.ShipID, err))
+				return
+
+			}
+
+			// load ship
+			shd, err := shipSvc.GetShipByID(rs.ShipID, false)
+
+			if err != nil {
+				log.Println(fmt.Sprintf("! Unable to load used ship for %v - failure saving (%v)! [part 1]", rs.ShipID, err))
+				return
+			}
+
+			sh, err := LoadShip(shd, sol.Universe)
+
+			if err != nil {
+				log.Println(fmt.Sprintf("! Unable to load used ship for %v - failure saving (%v)! [part 2]", rs.ShipID, err))
+				return
+			}
+
+			// inject into system
+			sol.AddShip(sh, true)
+		}(rs, sol)
+	}
 }

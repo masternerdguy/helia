@@ -179,6 +179,12 @@ type NewShipPurchase struct {
 	StationID      uuid.UUID
 }
 
+// Structure representing a purchased used ship, not yet materialized
+type UsedShipPurchase struct {
+	ShipID uuid.UUID
+	UserID uuid.UUID
+}
+
 // Structure representing the owner boarding a different ship, not yet materialized
 type ShipSwitch struct {
 	Client *shared.GameClient
@@ -2258,31 +2264,33 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 		return errors.New("insufficient CBN to fulfill order")
 	}
 
-	// calculate order volume
-	var unitVolume float64 = 0.0
+	if order.Item.ItemFamilyID != "ship" {
+		// calculate order volume
+		var unitVolume float64 = 0.0
 
-	if order.Item.IsPackaged {
-		v, f := order.Item.ItemTypeMeta.GetFloat64("volume")
+		if order.Item.IsPackaged {
+			v, f := order.Item.ItemTypeMeta.GetFloat64("volume")
 
-		if f {
-			unitVolume = v
+			if f {
+				unitVolume = v
+			}
+		} else {
+			v, f := order.Item.Meta.GetFloat64("volume")
+
+			if f {
+				unitVolume = v
+			}
 		}
-	} else {
-		v, f := order.Item.Meta.GetFloat64("volume")
 
-		if f {
-			unitVolume = v
+		orderVolume := unitVolume * float64(order.Item.Quantity)
+
+		// verify sufficient cargo capacity
+		usedBay := s.TotalCargoBayVolumeUsed(lock)
+		maxBay := s.GetRealCargoBayVolume()
+
+		if usedBay+orderVolume > maxBay {
+			return errors.New("insufficient cargo space available")
 		}
-	}
-
-	orderVolume := unitVolume * float64(order.Item.Quantity)
-
-	// verify sufficient cargo capacity
-	usedBay := s.TotalCargoBayVolumeUsed(lock)
-	maxBay := s.GetRealCargoBayVolume()
-
-	if usedBay+orderVolume > maxBay {
-		return errors.New("insufficient cargo space available")
 	}
 
 	// find the ship currently being flown by the seller so we can deposit funds in their wallet
@@ -2316,15 +2324,35 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	// escalate order save request to core
 	s.CurrentSystem.BoughtSellOrders[order.ID.String()] = order
 
-	// mark item as dirty and place it in the cargo container
-	order.Item.CoreDirty = true
-	order.Item.ContainerID = s.CargoBayContainerID
+	if order.Item.ItemFamilyID != "ship" {
+		// mark item as dirty and place it in the cargo container
+		order.Item.CoreDirty = true
+		order.Item.ContainerID = s.CargoBayContainerID
 
-	// escalate item for saving in db
-	s.CurrentSystem.MovedItems[order.Item.ID.String()] = order.Item
+		// escalate item for saving in db
+		s.CurrentSystem.MovedItems[order.Item.ID.String()] = order.Item
 
-	// place item in cargo bay
-	s.CargoBay.Items = append(s.CargoBay.Items, order.Item)
+		// place item in cargo bay
+		s.CargoBay.Items = append(s.CargoBay.Items, order.Item)
+	} else {
+		// escalate request to complete purchase to core
+		purShipIDStr, _ := order.Item.Meta.GetString("shipid")
+		purShipID := uuid.MustParse(purShipIDStr)
+
+		r := UsedShipPurchase{
+			UserID: s.UserID,
+			ShipID: purShipID,
+		}
+
+		s.CurrentSystem.UsedShipPurchases[order.ID.String()] = &r
+
+		// mark stub item as dirty and place it in the trash container
+		order.Item.CoreDirty = true
+		order.Item.ContainerID = s.TrashContainerID
+
+		// escalate stub item for saving in db
+		s.CurrentSystem.MovedItems[order.Item.ID.String()] = order.Item
+	}
 
 	// success
 	return nil

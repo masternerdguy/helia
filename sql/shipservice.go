@@ -250,3 +250,25 @@ func (s ShipService) SetNoLoad(id uuid.UUID, noLoad bool) error {
 
 	return err
 }
+
+// Updates the owner of a ship in the database
+func (s ShipService) SetOwner(id uuid.UUID, userID uuid.UUID) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update ship in database
+	sqlStatement :=
+		`
+			UPDATE public.ships
+			SET userid = $2
+			WHERE id = $1
+		`
+
+	_, err = db.Exec(sqlStatement, id, userID)
+
+	return err
+}
