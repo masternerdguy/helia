@@ -73,11 +73,11 @@ export class PropertySheetWindow extends GDIWindow {
             ship: ship,
           });
 
-                      // spacer
-                      actions.push({
-                        listString: () => '',
-                        ship: null,
-                      });
+          // spacer
+          actions.push({
+            listString: () => '',
+            ship: null,
+          });
 
           // actions only possible when player has also selected a different ship than the one they are flying
           if (this.player.currentShip.id != ship.id) {
@@ -269,7 +269,7 @@ export class PropertySheetWindow extends GDIWindow {
   periodicUpdate() {
     // check for dock state change
     let isDocked: boolean = undefined;
-    this.player.currentShip.dockedAtStationID ? isDocked = true : false;
+    this.player.currentShip.dockedAtStationID ? (isDocked = true) : false;
 
     if (isDocked != this.isDocked) {
       // reset views
