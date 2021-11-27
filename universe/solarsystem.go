@@ -1105,7 +1105,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 				s.ShipRenames[toRename.ID.String()] = &rn
 
-				// update renamed ship in property cache (so it goes away immediately instead of as part of the periodic rebuild)
+				// update renamed ship in property cache (so it changes immediately instead of as part of the periodic rebuild)
 				pc := c.GetPropertyCache()
 				no := make([]shared.ShipPropertyCacheEntry, 0)
 
