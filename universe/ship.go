@@ -3432,6 +3432,124 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	return true
 }
 
+func (m *FittedSlot) activateAsMissileLauncher() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.NewTargetTypeRegistry()
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	if *m.TargetType == tgtReg.Ship {
+		// find ship
+		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+	} else if *m.TargetType == tgtReg.Station {
+		// find station
+		tgt, f := m.shipMountedOn.CurrentSystem.stations[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+	}
+
+	// check if ammunition required to fire
+	ammoTypeRaw, found := m.ItemMeta.GetString("ammunition_type")
+	var ammoItem *Item = nil
+
+	if found {
+		// parse type id
+		typeID, _ := uuid.Parse(ammoTypeRaw)
+
+		// verify there is enough ammunition to fire
+		x := m.shipMountedOn.FindFirstAvailableItemOfTypeInCargo(typeID, true)
+
+		if x == nil {
+			return false
+		}
+
+		// store item to take from
+		ammoItem = x
+	}
+
+	// reduce ammunition count if needed
+	if ammoItem != nil {
+		ammoItem.Quantity--
+		ammoItem.CoreDirty = true
+
+		// escalate for saving
+		m.shipMountedOn.CurrentSystem.ChangedQuantityItems[ammoItem.ID.String()] = ammoItem
+	}
+
+	// build and hook missile projectile stub
+	missileGfxEffect, _ := m.ItemTypeMeta.GetString("missile_gfx_effect")
+	stubID := uuid.New()
+
+	stub := Missile{
+		ID:      stubID,
+		PosX:    m.shipMountedOn.PosX,
+		PosY:    m.shipMountedOn.PosY,
+		Texture: missileGfxEffect,
+		Module:  m,
+	}
+
+	m.shipMountedOn.CurrentSystem.missiles[stub.ID.String()] = &stub
+
+	// module activates!
+	return true
+}
+
 func (m *FittedSlot) activateAsShieldBooster() bool {
 	// get shield boost amount
 	shieldBoost, _ := m.ItemMeta.GetFloat64("shield_boost_amount")

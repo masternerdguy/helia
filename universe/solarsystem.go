@@ -28,6 +28,7 @@ type SolarSystem struct {
 	stations          map[string]*Station
 	asteroids         map[string]*Asteroid
 	clients           map[string]*shared.GameClient       // clients in this system
+	missiles          map[string]*Missile                 // missiles in flight in this system
 	pushModuleEffects []models.GlobalPushModuleEffectBody // module visual effect aggregation for tick
 	pushPointEffects  []models.GlobalPushPointEffectBody  // non-module point visual effect aggregation for tick
 	tickCounter       int                                 // counter that is used to control frequency of certain global updates
@@ -58,6 +59,7 @@ func (s *SolarSystem) Initialize() {
 
 	// initialize maps
 	s.clients = make(map[string]*shared.GameClient)
+	s.missiles = make(map[string]*Missile)
 	s.ships = make(map[string]*Ship)
 	s.stars = make(map[string]*Star)
 	s.planets = make(map[string]*Planet)
@@ -1172,6 +1174,49 @@ func (s *SolarSystem) PeriodicUpdate() {
 		e.PeriodicUpdate()
 	}
 
+	// get target type registry
+	tgtTypeReg := models.NewTargetTypeRegistry()
+
+	// missile collission testing
+	dropMissiles := make([]string, 0)
+
+	for _, mA := range s.missiles {
+		if mA.TargetType == tgtTypeReg.Ship {
+			// get target ship
+			sB := s.ships[mA.TargetID.String()]
+
+			if sB != nil {
+				// get physics dummies
+				dummyA := mA.ToPhysicsDummy()
+				dummyB := sB.ToPhysicsDummy()
+
+				// get distance between ships
+				d := physics.Distance(dummyA, dummyB)
+
+				// check for radius intersection
+				if d <= sB.TemplateData.Radius {
+					m := mA.Module
+
+					// get damage values
+					shieldDmg, _ := m.ItemMeta.GetFloat64("shield_damage")
+					armorDmg, _ := m.ItemMeta.GetFloat64("armor_damage")
+					hullDmg, _ := m.ItemMeta.GetFloat64("hull_damage")
+
+					// apply damage to ship
+					sB.DealDamage(shieldDmg, armorDmg, hullDmg)
+
+					// schedule missile removal
+					dropMissiles = append(dropMissiles, mA.ID.String())
+				}
+			}
+		}
+	}
+
+	// remove dropped missiles
+	for _, k := range dropMissiles {
+		delete(s.missiles, k)
+	}
+
 	// ship collission testing
 	for _, sA := range s.ships {
 		// skip dead ships
@@ -1305,6 +1350,15 @@ func (s *SolarSystem) PeriodicUpdate() {
 			ArmorP:    ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
 			HullP:     ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
 			FactionID: d.FactionID,
+		})
+	}
+
+	for _, d := range s.missiles {
+		gu.Missiles = append(gu.Missiles, models.GlobalMissileBody{
+			ID:      d.ID,
+			PosX:    d.PosX,
+			PosY:    d.PosY,
+			Texture: d.Texture,
 		})
 	}
 
@@ -1613,6 +1667,22 @@ func (s *SolarSystem) RemoveShip(c *Ship, lock bool) {
 		// obtain lock
 		s.Lock.Lock()
 		defer s.Lock.Unlock()
+	}
+
+	// get target type registry
+	tgtRegistry := models.NewTargetTypeRegistry()
+
+	// remove missiles tracking ship
+	dropMissiles := make([]string, 0)
+
+	for k, m := range s.missiles {
+		if m.TargetType == tgtRegistry.Ship && m.TargetID == c.ID {
+			dropMissiles = append(dropMissiles, k)
+		}
+	}
+
+	for _, k := range dropMissiles {
+		delete(s.missiles, k)
 	}
 
 	// remove ship

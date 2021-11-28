@@ -277,6 +277,7 @@ type ServerGlobalUpdateBody struct {
 	Asteroids         []GlobalAsteroidInfo         `json:"asteroids"`
 	NewModuleEffects  []GlobalPushModuleEffectBody `json:"newModuleEffects"`
 	NewPointEffects   []GlobalPushPointEffectBody  `json:"newPointEffects"`
+	Missiles          []GlobalMissileBody          `json:"missiles"`
 }
 
 // Body containing a click-in-space move event from the client
@@ -376,6 +377,14 @@ type GlobalPushPointEffectBody struct {
 	PosX      float64 `json:"x"`
 	PosY      float64 `json:"y"`
 	Radius    float64 `json:"r"`
+}
+
+// Body containing a missile to be rendered by the client
+type GlobalMissileBody struct {
+	ID      uuid.UUID `json:"id"`
+	PosX    float64   `json:"x"`
+	PosY    float64   `json:"y"`
+	Texture string    `json:"texture"`
 }
 
 // Body containing a request for the contents of the ship's cargo bay
