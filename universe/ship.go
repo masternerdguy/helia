@@ -3536,6 +3536,7 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 
 	// build and hook missile projectile stub
 	missileGfxEffect, _ := m.ItemTypeMeta.GetString("missile_gfx_effect")
+	missileRadius, _ := m.ItemTypeMeta.GetFloat64("missile_radius")
 	stubID := uuid.New()
 
 	stub := Missile{
@@ -3546,6 +3547,7 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 		Module:     m,
 		TargetID:   *m.TargetID,
 		TargetType: *m.TargetType,
+		Radius:     missileRadius,
 	}
 
 	m.shipMountedOn.CurrentSystem.missiles[stub.ID.String()] = &stub

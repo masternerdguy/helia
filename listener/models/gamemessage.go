@@ -384,7 +384,8 @@ type GlobalMissileBody struct {
 	ID      uuid.UUID `json:"id"`
 	PosX    float64   `json:"x"`
 	PosY    float64   `json:"y"`
-	Texture string    `json:"texture"`
+	Texture string    `json:"t"`
+	Radius  float64   `json:"r"`
 }
 
 // Body containing a request for the contents of the ship's cargo bay
