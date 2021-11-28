@@ -746,7 +746,8 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
         m.itemFamilyID === 'missile_launcher' ||
         m.itemFamilyID === 'shield_booster' ||
         m.itemFamilyID === 'fuel_tank' ||
-        m.itemFamilyID === 'armor_plate';
+        m.itemFamilyID === 'armor_plate' ||
+        m.itemFamilyID === 'eng_oc';
 
       if (isModule) {
         // offer fit action
