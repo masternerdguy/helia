@@ -46,6 +46,7 @@ import { ReputationSheetWindow } from './gdi/windows/reputationSheetWindow';
 import { ServerPlayerFactionUpdate } from './wsModels/bodies/playerFactionUpdate';
 import { PropertySheetWindow } from './gdi/windows/propertySheetWindow';
 import { ServerPropertyUpdate } from './wsModels/bodies/propertyUpdate';
+import { Missile } from './engineModels/missile';
 
 class EngineSack {
   constructor() {}
@@ -396,6 +397,10 @@ function handleGlobalUpdate(d: GameMessage) {
       msg.newPointEffects = [];
     }
 
+    if (!msg.missiles || msg.missiles == null) {
+      msg.missiles = [];
+    }
+
     // update system
     engineSack.player.currentSystem.id = msg.currentSystemInfo.id;
     engineSack.player.currentSystem.systemName =
@@ -450,6 +455,29 @@ function handleGlobalUpdate(d: GameMessage) {
       if (!match) {
         // add ship to memory
         engineSack.player.currentSystem.ships.push(new Ship(sh));
+      }
+    }
+
+    // update missiles
+    for (const sh of msg.missiles) {
+      let match = false;
+
+      // find missile in memory
+      for (const sm of engineSack.player.currentSystem.missiles) {
+        if (sh.id === sm.id) {
+          match = true;
+
+          // sync missile in memory
+          sm.sync(sh);
+
+          // exit loop
+          break;
+        }
+      }
+
+      if (!match) {
+        // add ship to memory
+        engineSack.player.currentSystem.missiles.push(new Missile(sh));
       }
     }
 
@@ -970,6 +998,16 @@ function clientRender() {
     }
   }
 
+  // draw missiles
+  const keepMissiles: Missile[] = [];
+  for (const sh of engineSack.player.currentSystem.missiles) {
+    // only draw missiles we've recently seen
+    if (sh.lastSeen > engineSack.lastSyncTime - (engineSack.tpf - 2)) {
+      sh.render(engineSack.ctx, engineSack.camera);
+      keepMissiles.push(sh);
+    }
+  }
+
   // draw module visual effects
   for (const ef of engineSack.player.currentSystem.moduleEffects) {
     ef.render(engineSack.ctx, engineSack.camera);
@@ -980,8 +1018,9 @@ function clientRender() {
     ef.render(engineSack.ctx, engineSack.camera);
   }
 
-  // keep only ships that were drawable in-memory
+  // keep only ships / missiles that were drawable in-memory
   engineSack.player.currentSystem.ships = keepShips;
+  engineSack.player.currentSystem.missiles = keepMissiles;
 
   // draw overlay if docked
   if (!!engineSack.player.currentShip.dockedAtStationID) {

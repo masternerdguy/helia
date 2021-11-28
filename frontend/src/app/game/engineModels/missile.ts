@@ -1,13 +1,13 @@
 import { angleBetween } from '../engineMath';
 import { WSMissile } from '../wsModels/entities/wsMissile';
-import { WSStar } from '../wsModels/entities/wsStar';
 import { Camera } from './camera';
 
-export class Star extends WSMissile {
+export class Missile extends WSMissile {
   texture2d: HTMLImageElement;
   isTargeted: boolean;
   lastX: number;
   lastY: number;
+  lastSeen: number;
 
   constructor(ws: WSMissile) {
     super();
@@ -44,6 +44,8 @@ export class Star extends WSMissile {
   }
 
   sync(ws: WSMissile) {
+    this.lastSeen = Date.now()
+
     // stash current position
     this.lastX = this.x;
     this.lastY = this.y;
