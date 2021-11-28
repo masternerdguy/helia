@@ -281,11 +281,22 @@ export class OverviewWindow extends GDIWindow {
       objects.push(d);
     }
 
+    // spacers at end
+    const spacers: OverviewRow[] = [];
+    for(let i = 0; i < 2; i++) {
+      const spacerObject = new OverviewRow();
+      spacerObject.object = {};
+      spacerObject.listString = () => "";
+      spacerObject.type = TargetType.Nothing;
+
+      spacers.push(spacerObject);
+    }
+
     // store on lists
-    this.globalList.setItems(objects);
-    this.shipList.setItems(ships);
-    this.stationList.setItems(stations);
-    this.jumpholeList.setItems(jumpholes);
+    this.globalList.setItems([...objects, ...spacers]);
+    this.shipList.setItems([...ships, ...spacers]);
+    this.stationList.setItems([...stations, ...spacers]);
+    this.jumpholeList.setItems([...jumpholes, ...spacers]);
 
     // reselect row in global list
     const gItems = this.globalList.getItems() as OverviewRow[];
