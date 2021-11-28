@@ -168,7 +168,14 @@ type Ship struct {
 	BeingFlownByPlayer bool
 	ReputationSheet    *shared.PlayerReputationSheet
 	DestructArmed      bool
+	TemporaryModifiers []TemporaryShipModifier
 	Lock               sync.Mutex
+}
+
+type TemporaryShipModifier struct {
+	Attribute      string
+	Percentage     float64
+	RemainingTicks int
 }
 
 // Structure representing a newly purchased ship, not yet materialized
@@ -465,6 +472,24 @@ func (s *Ship) PeriodicUpdate() {
 			s.Fuel = s.GetRealMaxFuel()
 		}
 	}
+
+	// handle temporary modifiers
+	keptTemporaryModifiers := make([]TemporaryShipModifier, len(s.TemporaryModifiers))
+
+	for _, e := range s.TemporaryModifiers {
+		// eliminate if expired
+		if e.RemainingTicks <= 0 {
+			continue
+		}
+
+		// tick down
+		e.RemainingTicks--
+
+		// store
+		keptTemporaryModifiers = append(keptTemporaryModifiers, e)
+	}
+
+	s.TemporaryModifiers = keptTemporaryModifiers
 
 	// update energy
 	s.updateEnergy()
@@ -852,7 +877,23 @@ func (s *Ship) ReMaxStatsForSpawn() {
 
 // Returns the real acceleration capability of a ship after modifiers
 func (s *Ship) GetRealAccel() float64 {
-	return s.TemplateData.BaseAccel
+	// temporary modifier percentage accumulator
+	tpm := 1.0
+
+	// apply temporary modifiers
+	for _, e := range s.TemporaryModifiers {
+		if e.Attribute == "accel" {
+			tpm += e.Percentage
+		}
+	}
+
+	// floor percentage modifier at 0
+	if tpm < 0 {
+		tpm = 0
+	}
+
+	// return true acceleration
+	return s.TemplateData.BaseAccel * tpm
 }
 
 // Returns the real turning capability of a ship after modifiers
@@ -3060,6 +3101,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsGunTurret()
 			} else if m.ItemTypeFamily == "shield_booster" {
 				canActivate = m.activateAsShieldBooster()
+			} else if m.ItemTypeFamily == "eng_oc" {
+				canActivate = m.activateAsEngineOvercharger()
 			}
 
 			if canActivate {
@@ -3411,6 +3454,33 @@ func (m *FittedSlot) activateAsShieldBooster() bool {
 		// push to solar system list for next update
 		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
 	}
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsEngineOvercharger() bool {
+	// get activation energy and duration (same as cooldown for engine overchargers)
+	activationEnergy, _ := m.ItemMeta.GetFloat64("activation_energy")
+	cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
+
+	// get ship mass
+	mx := m.shipMountedOn.GetRealMass()
+
+	// calculate engine boost amount
+	dA := (activationEnergy / mx) * 10
+
+	// calculate effect duration in ticks
+	dT := (cooldown * 1000) / Heartbeat
+
+	// add temporary modifier
+	modifier := TemporaryShipModifier{
+		Attribute:      "accel",
+		Percentage:     dA,
+		RemainingTicks: int(dT),
+	}
+
+	m.shipMountedOn.TemporaryModifiers = append(m.shipMountedOn.TemporaryModifiers, modifier)
 
 	// module activates!
 	return true
