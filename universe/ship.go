@@ -429,6 +429,7 @@ func (s *Ship) CopyShip() *Ship {
 		BeingFlownByPlayer: s.BeingFlownByPlayer,
 		BehaviourMode:      s.BehaviourMode,
 		IsNPC:              s.IsNPC,
+		TemporaryModifiers: s.TemporaryModifiers,
 	}
 
 	if s.DockedAtStationID != nil {
