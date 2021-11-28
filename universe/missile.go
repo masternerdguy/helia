@@ -13,6 +13,7 @@ type Missile struct {
 	PosX       float64
 	PosY       float64
 	Texture    string
+	Radius     float64
 	Module     *FittedSlot
 }
 

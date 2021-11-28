@@ -3104,6 +3104,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsShieldBooster()
 			} else if m.ItemTypeFamily == "eng_oc" {
 				canActivate = m.activateAsEngineOvercharger()
+			} else if m.ItemTypeFamily == "missile_launcher" {
+				canActivate = m.activateAsMissileLauncher()
 			}
 
 			if canActivate {
@@ -3537,11 +3539,13 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 	stubID := uuid.New()
 
 	stub := Missile{
-		ID:      stubID,
-		PosX:    m.shipMountedOn.PosX,
-		PosY:    m.shipMountedOn.PosY,
-		Texture: missileGfxEffect,
-		Module:  m,
+		ID:         stubID,
+		PosX:       m.shipMountedOn.PosX,
+		PosY:       m.shipMountedOn.PosY,
+		Texture:    missileGfxEffect,
+		Module:     m,
+		TargetID:   *m.TargetID,
+		TargetType: *m.TargetType,
 	}
 
 	m.shipMountedOn.CurrentSystem.missiles[stub.ID.String()] = &stub

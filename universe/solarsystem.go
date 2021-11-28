@@ -1209,11 +1209,57 @@ func (s *SolarSystem) PeriodicUpdate() {
 					dropMissiles = append(dropMissiles, mA.ID.String())
 				}
 			}
+		} else if mA.TargetType == tgtTypeReg.Station {
+			// get target station
+			sB := s.stations[mA.TargetID.String()]
+
+			if sB != nil {
+				// get physics dummies
+				dummyA := mA.ToPhysicsDummy()
+				dummyB := sB.ToPhysicsDummy()
+
+				// get distance between ships
+				d := physics.Distance(dummyA, dummyB)
+
+				// check for half radius intersection
+				if d <= sB.Radius/2 {
+					m := mA.Module
+
+					// get damage values
+					shieldDmg, _ := m.ItemMeta.GetFloat64("shield_damage")
+					armorDmg, _ := m.ItemMeta.GetFloat64("armor_damage")
+					hullDmg, _ := m.ItemMeta.GetFloat64("hull_damage")
+
+					// apply damage to station
+					sB.DealDamage(shieldDmg, armorDmg, hullDmg)
+
+					// schedule missile removal
+					dropMissiles = append(dropMissiles, mA.ID.String())
+				}
+			}
 		}
 	}
 
 	// remove dropped missiles
 	for _, k := range dropMissiles {
+		// get missile and backing module
+		mA := s.missiles[k]
+		m := mA.Module
+
+		// drop explosion for missile
+		expEffect, _ := m.ItemMeta.GetString("missile_explosion_effect")
+		expRad, _ := m.ItemMeta.GetFloat64("missile_explosion_radius")
+
+		exp := models.GlobalPushPointEffectBody{
+			GfxEffect: expEffect,
+			PosX:      mA.PosX,
+			PosY:      mA.PosY,
+			Radius:    expRad,
+		}
+
+		s.pushPointEffects = append(s.pushPointEffects, exp)
+
+		// remove from map
 		delete(s.missiles, k)
 	}
 
