@@ -3762,7 +3762,7 @@ func (m *FittedSlot) activateAsAetherDragger() bool {
 			RemainingTicks: int(dT),
 		}
 
-		c.TemporaryModifiers = append(m.shipMountedOn.TemporaryModifiers, modifier)
+		c.TemporaryModifiers = append(c.TemporaryModifiers, modifier)
 	}
 
 	// include visual effect if present
