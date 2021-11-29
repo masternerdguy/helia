@@ -8,6 +8,7 @@ import (
 )
 
 var MutexFreeze bool
+var ShutdownSignal bool
 
 // A mutex that contains information about what it locks
 type LabeledMutex struct {
@@ -44,6 +45,11 @@ func (m *LabeledMutex) Lock() {
 
 		// wait ~5 seconds
 		for {
+			// exit goroutine if shutting down
+			if ShutdownSignal {
+				break
+			}
+
 			// exit goroutine if lock released
 			if !m.isLocked {
 				break

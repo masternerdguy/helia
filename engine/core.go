@@ -153,11 +153,17 @@ func (e *HeliaEngine) Start() {
 
 // Saves the current state of the simulation and halts
 func (e *HeliaEngine) Shutdown() {
+	// guard against duplicate requests
+	if shutdownSignal {
+		return
+	}
+
 	log.Println("! Server shutdown initiated")
 
 	// shut down simulation
 	log.Println("Stopping simulation...")
 	shutdownSignal = true
+	shared.ShutdownSignal = true
 
 	// wait for 30 seconds to give everything a chance to exit
 	sleepStart := time.Now()
