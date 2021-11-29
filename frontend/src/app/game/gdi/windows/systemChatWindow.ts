@@ -6,6 +6,7 @@ import { GDIInput } from '../components/gdiInput';
 import { WSSystemChatMessage } from '../../wsModels/entities/wsSystemChatMessage';
 import { ClientPostSystemChatMessage } from '../../wsModels/bodies/postSystemChatMessage';
 import { MessageTypes } from '../../wsModels/gameMessage';
+import { heliaDate, printHeliaDate } from '../../engineMath';
 
 export class SystemChatWindow extends GDIWindow {
   private chatList = new GDIList();
@@ -39,19 +40,17 @@ export class SystemChatWindow extends GDIWindow {
     this.chatInput.setFont(FontSize.large);
     this.chatInput.initialize();
 
-    this.chatInput.setOnReturn(
-      (txt: string) => {
-        // send chat message
-        const b = new ClientPostSystemChatMessage();
-        b.sid = this.wsSvc.sid;
-        b.message = txt;
+    this.chatInput.setOnReturn((txt: string) => {
+      // send chat message
+      const b = new ClientPostSystemChatMessage();
+      b.sid = this.wsSvc.sid;
+      b.message = txt;
 
-        this.wsSvc.sendMessage(MessageTypes.PostSystemChatMessage, b);
+      this.wsSvc.sendMessage(MessageTypes.PostSystemChatMessage, b);
 
-        // clear input
-        this.chatInput.setText('');
-      }
-    );
+      // clear input
+      this.chatInput.setText('');
+    });
 
     // setup chat message list
     this.chatList.setWidth(400);
@@ -63,7 +62,7 @@ export class SystemChatWindow extends GDIWindow {
 
     // pack
     this.addComponent(this.chatList);
-    this.addComponent(this.chatInput)
+    this.addComponent(this.chatInput);
   }
 
   periodicUpdate() {
@@ -91,14 +90,25 @@ export class SystemChatWindow extends GDIWindow {
     this.chatList.setItems([]);
     const rows: ChatViewRow[] = [];
 
+    let lastSenderId = '';
     for (const m of this.knownMessages) {
-      // append sender info
-      rows.push({
-        listString: () => `[${m.message.senderName}]`
-      });
+      if (lastSenderId != m.message.senderId) {
+        lastSenderId = m.message.senderId;
+
+        // append sender info
+        rows.push({
+          listString: () => `[${m.message.senderName}]`,
+        });
+      }
+
+      // parse timestamp as helia date
+      const date = heliaDate(new Date(m.received));
+
+      // include timestamp
+      const stamped = `${printHeliaDate(date)}\n${m.message.message}`;
 
       // break text to fit
-      const broken = this.chatList.breakText(m.message.message);
+      const broken = this.chatList.breakText(stamped);
 
       // append message text
       for (const b of broken) {

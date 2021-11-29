@@ -228,7 +228,12 @@ export function clientStart(
   engineSack.systemChatWindow = new SystemChatWindow();
   engineSack.systemChatWindow.initialize();
   engineSack.systemChatWindow.setX(engineSack.windowManager.getWidth());
-  engineSack.systemChatWindow.setY(gameCanvas.height - engineSack.systemChatWindow.getHeight() - GDIStyle.windowHandleHeight - 1);
+  engineSack.systemChatWindow.setY(
+    gameCanvas.height -
+      engineSack.systemChatWindow.getHeight() -
+      GDIStyle.windowHandleHeight -
+      1
+  );
   engineSack.systemChatWindow.pack();
 
   // link windows to window manager
