@@ -1,9 +1,12 @@
 package universe
 
 import (
+	"fmt"
 	"helia/listener/models"
 	"helia/physics"
+	"log"
 	"math"
+	"math/rand"
 
 	"github.com/google/uuid"
 )
@@ -21,11 +24,25 @@ type Missile struct {
 	Module         *FittedSlot
 	TicksRemaining int
 	MaxVelocity    float64
+	FaultTolerance float64
 }
 
 // Processes the missile for a tick
 func (s *Missile) PeriodicUpdate() {
 	if s.TicksRemaining <= 0 {
+		return
+	}
+
+	// determine whether missile exploded early
+	failureChance := 1 - s.FaultTolerance
+	failureChancePerTick := failureChance / float64(s.TicksRemaining)
+
+	roll := rand.Float64()
+
+	log.Println(fmt.Sprintf("%v <= %v :: %v", roll, failureChancePerTick, s.TicksRemaining))
+
+	if roll <= failureChancePerTick {
+		s.TicksRemaining = 0
 		return
 	}
 

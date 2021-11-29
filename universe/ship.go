@@ -3534,9 +3534,10 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 		m.shipMountedOn.CurrentSystem.ChangedQuantityItems[ammoItem.ID.String()] = ammoItem
 	}
 
-	// build and hook missile projectile stub
+	// build and hook missile projectile
 	missileGfxEffect, _ := m.ItemTypeMeta.GetString("missile_gfx_effect")
 	missileRadius, _ := m.ItemTypeMeta.GetFloat64("missile_radius")
+	faultTolerance, _ := m.ItemMeta.GetFloat64("fault_tolerance")
 	flightTime, _ := m.ItemMeta.GetFloat64("flight_time")
 	maxVelocity := (modRange / flightTime)
 
@@ -3555,6 +3556,7 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 		FiredByID:      m.shipMountedOn.ID,
 		TicksRemaining: flightTicks,
 		MaxVelocity:    maxVelocity,
+		FaultTolerance: faultTolerance,
 	}
 
 	m.shipMountedOn.CurrentSystem.missiles[stub.ID.String()] = &stub
