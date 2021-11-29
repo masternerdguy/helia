@@ -29,6 +29,12 @@ type SocketListener struct {
 	lock    shared.LabeledMutex
 }
 
+// Initializes the internals of the SocketListener
+func (s *SocketListener) Initialize() {
+	s.lock.Structure = "SocketListener"
+	s.lock.UID = fmt.Sprintf("%v :: %v :: %v", "core", time.Now(), rand.Float64())
+}
+
 // Handles a client joining the server
 func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 	var upgrader = websocket.Upgrader{}

@@ -58,12 +58,13 @@ type ShipPropertyCacheEntry struct {
 
 // Initializes the internals of a GameClient
 func (c *GameClient) Initialize() {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
 	// label mutex
 	c.lock.Structure = "GameClient"
 	c.lock.UID = fmt.Sprintf("%v :: %v :: %v", c.UID, time.Now(), rand.Float64())
+
+	// obtain lock
+	c.lock.Lock()
+	defer c.lock.Unlock()
 
 	// initialize empty event queue
 	c.shipEventQueue = &eventQueue{

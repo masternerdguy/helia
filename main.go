@@ -22,6 +22,7 @@ func main() {
 	// instantiate socket listener
 	log.Println("Initializing socket listener...")
 	socketListener := &listener.SocketListener{}
+	socketListener.Initialize()
 	socketListener.Engine = &engine
 
 	log.Println("Wiring up socket handlers...")
