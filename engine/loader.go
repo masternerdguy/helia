@@ -479,7 +479,7 @@ func saveUniverse(u *universe.Universe) {
 		err := userSvc.SaveReputationSheet(*v.UID, sheet)
 
 		if err != nil {
-			panic(err)
+			log.Println(fmt.Sprintf("Error saving reputation sheet: %v | %v", v, err))
 		}
 	}
 }
