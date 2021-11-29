@@ -52,7 +52,7 @@ export class Missile extends WSMissile {
   }
 
   sync(ws: WSMissile) {
-    this.lastSeen = Date.now()
+    this.lastSeen = Date.now();
 
     // stash current position
     this.lastX = this.x;

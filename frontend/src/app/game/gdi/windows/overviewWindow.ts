@@ -283,10 +283,10 @@ export class OverviewWindow extends GDIWindow {
 
     // spacers at end
     const spacers: OverviewRow[] = [];
-    for(let i = 0; i < 2; i++) {
+    for (let i = 0; i < 2; i++) {
       const spacerObject = new OverviewRow();
       spacerObject.object = {};
-      spacerObject.listString = () => "";
+      spacerObject.listString = () => '';
       spacerObject.type = TargetType.Nothing;
 
       spacers.push(spacerObject);
