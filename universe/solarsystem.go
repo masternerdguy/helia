@@ -6,7 +6,6 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,7 +31,7 @@ type SolarSystem struct {
 	pushModuleEffects []models.GlobalPushModuleEffectBody // module visual effect aggregation for tick
 	pushPointEffects  []models.GlobalPushPointEffectBody  // non-module point visual effect aggregation for tick
 	tickCounter       int                                 // counter that is used to control frequency of certain global updates
-	Lock              sync.Mutex
+	Lock              shared.LabeledMutex
 	// event escalations to engine core
 	PlayerNeedRespawn    map[string]*shared.GameClient // clients in need of a respawn by core
 	NPCNeedRespawn       map[string]*Ship              // NPCs in need of a respawn by core

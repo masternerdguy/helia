@@ -1,8 +1,11 @@
 package universe
 
 import (
+	"fmt"
 	"helia/physics"
-	"sync"
+	"helia/shared"
+	"math/rand"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -27,7 +30,7 @@ type Asteroid struct {
 	ItemFamilyName string
 	ItemTypeMeta   Meta
 	// in-memory only
-	Lock sync.Mutex
+	Lock shared.LabeledMutex
 }
 
 // Returns a new physics dummy structure representing this station
@@ -65,6 +68,9 @@ func (s *Asteroid) CopyAsteroid() Asteroid {
 		ItemFamilyName: s.ItemFamilyName,
 		ItemTypeMeta:   s.ItemTypeMeta,
 		// in-memory only
-		Lock: sync.Mutex{},
+		Lock: shared.LabeledMutex{
+			Structure: "Asteroid",
+			UID:       fmt.Sprintf("%v :: %v :: %v", s.ID, time.Now(), rand.Float64()),
+		},
 	}
 }

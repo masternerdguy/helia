@@ -1,7 +1,7 @@
 package universe
 
 import (
-	"sync"
+	"helia/shared"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,7 +18,7 @@ type SellOrder struct {
 	Bought       *time.Time
 	BuyerUserID  *uuid.UUID
 	// in-memory only
-	Lock              sync.Mutex
+	Lock              shared.LabeledMutex
 	Item              *Item
 	CoreDirty         bool
 	CoreWait          int

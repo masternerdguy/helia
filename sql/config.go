@@ -4,15 +4,20 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"helia/shared"
 	"os"
-	"sync"
 
 	_ "github.com/lib/pq" // driver
 )
 
-// sharedConfig Shared database connection for services
+// Shared database connection for services
 var sharedConfig *sql.DB = nil
-var sharedDbLock sync.Mutex = sync.Mutex{}
+
+// Shared mutex for connection with db
+var sharedDbLock shared.LabeledMutex = shared.LabeledMutex{
+	Structure: "dbConfig",
+	UID:       "dbConfig",
+}
 
 type dbConfig struct {
 	DbName string `json:"dbname"`

@@ -1,7 +1,10 @@
 package universe
 
 import (
-	"sync"
+	"fmt"
+	"helia/shared"
+	"math/rand"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -16,7 +19,7 @@ type StationProcess struct {
 	InternalState StationProcessInternalState
 	Meta          Meta
 	// in-memory only
-	Lock      sync.Mutex
+	Lock      shared.LabeledMutex
 	Process   Process
 	MSCounter int64
 }
@@ -210,9 +213,12 @@ func (p *StationProcess) CopyStationProcess() *StationProcess {
 		Installed:     p.Installed,
 		InternalState: p.InternalState,
 		Meta:          p.Meta,
-		Lock:          sync.Mutex{},
-		Process:       p.Process,
-		MSCounter:     p.MSCounter,
+		Lock: shared.LabeledMutex{
+			Structure: "StationProcess",
+			UID:       fmt.Sprintf("%v :: %v :: %v", p.ID, time.Now(), rand.Float64()),
+		},
+		Process:   p.Process,
+		MSCounter: p.MSCounter,
 	}
 
 	return &copy

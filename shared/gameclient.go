@@ -5,9 +5,11 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"helia/listener/models"
 	"log"
-	"sync"
+	"math/rand"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -18,7 +20,7 @@ type GameClient struct {
 	SID  *uuid.UUID
 	UID  *uuid.UUID
 	Conn *websocket.Conn
-	lock sync.Mutex
+	lock LabeledMutex
 
 	// standing to be kept in sync with flown ship(s)
 	ReputationSheet PlayerReputationSheet
@@ -58,6 +60,10 @@ type ShipPropertyCacheEntry struct {
 func (c *GameClient) Initialize() {
 	c.lock.Lock()
 	defer c.lock.Unlock()
+
+	// label mutex
+	c.lock.Structure = "GameClient"
+	c.lock.UID = fmt.Sprintf("%v :: %v :: %v", c.UID, time.Now(), rand.Float64())
 
 	// initialize empty event queue
 	c.shipEventQueue = &eventQueue{

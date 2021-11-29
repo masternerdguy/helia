@@ -1,7 +1,7 @@
 package universe
 
 import (
-	"sync"
+	"helia/shared"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,6 +13,6 @@ type Container struct {
 	Meta    Meta
 	Created time.Time
 	// in-memory only
-	Lock  sync.Mutex
+	Lock  shared.LabeledMutex
 	Items []*Item
 }

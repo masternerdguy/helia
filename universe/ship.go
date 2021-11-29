@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"sync"
+	"math/rand"
 	"time"
 
 	"helia/listener/models"
@@ -169,7 +169,7 @@ type Ship struct {
 	ReputationSheet    *shared.PlayerReputationSheet
 	DestructArmed      bool
 	TemporaryModifiers []TemporaryShipModifier
-	Lock               sync.Mutex
+	Lock               shared.LabeledMutex
 }
 
 type TemporaryShipModifier struct {
@@ -421,7 +421,10 @@ func (s *Ship) CopyShip() *Ship {
 		},
 		FactionID: s.FactionID,
 		// in-memory only
-		Lock:               sync.Mutex{},
+		Lock: shared.LabeledMutex{
+			Structure: "Ship",
+			UID:       fmt.Sprintf("%v :: %v :: %v", s.ID, time.Now(), rand.Float64()),
+		},
 		IsDocked:           s.IsDocked,
 		AutopilotMode:      s.AutopilotMode,
 		AutopilotManualNav: s.AutopilotManualNav,
@@ -2163,16 +2166,19 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 	if !isShip {
 		// make a new item stack of the given size
 		newItem := Item{
-			ID:             nid,
-			ItemTypeID:     output.ItemTypeID,
-			Meta:           output.ItemTypeMeta,
-			Created:        time.Now(),
-			CreatedBy:      &s.UserID,
-			CreatedReason:  "Bought from silo",
-			ContainerID:    s.CargoBayContainerID,
-			Quantity:       quantity,
-			IsPackaged:     true,
-			Lock:           sync.Mutex{},
+			ID:            nid,
+			ItemTypeID:    output.ItemTypeID,
+			Meta:          output.ItemTypeMeta,
+			Created:       time.Now(),
+			CreatedBy:     &s.UserID,
+			CreatedReason: "Bought from silo",
+			ContainerID:   s.CargoBayContainerID,
+			Quantity:      quantity,
+			IsPackaged:    true,
+			Lock: shared.LabeledMutex{
+				Structure: "Item",
+				UID:       fmt.Sprintf("%v :: %v :: %v", nid, time.Now(), rand.Float64()),
+			},
 			ItemTypeName:   output.ItemTypeName,
 			ItemFamilyID:   output.ItemFamilyID,
 			ItemFamilyName: output.ItemFamilyName,
@@ -2536,6 +2542,10 @@ func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 		Quantity:      1,
 		IsPackaged:    false,
 		CoreDirty:     true,
+		Lock: shared.LabeledMutex{
+			Structure: "Item",
+			UID:       fmt.Sprintf("%v :: %v :: %v", stubID, time.Now(), rand.Float64()),
+		},
 	}
 
 	// escalate ship and stub item for saving in db
@@ -2561,6 +2571,10 @@ func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 		Created:      time.Now(),
 		CoreDirty:    true,
 		CoreWait:     20, // defer for 20 cycles so that the stub item can be saved first
+		Lock: shared.LabeledMutex{
+			Structure: "SellOrder",
+			UID:       fmt.Sprintf("%v :: %v :: %v", nid, time.Now(), rand.Float64()),
+		},
 	}
 
 	// link stub into sell order
@@ -2648,6 +2662,10 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 		AskPrice:     price,
 		Created:      time.Now(),
 		CoreDirty:    true,
+		Lock: shared.LabeledMutex{
+			Structure: "SellOrder",
+			UID:       fmt.Sprintf("%v :: %v :: %v", nid, time.Now(), rand.Float64()),
+		},
 	}
 
 	// link item into sell order
@@ -2841,17 +2859,19 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 	}
 
 	newItem := Item{
-		ID:             nid,
-		ItemTypeID:     item.ItemTypeID,
-		Meta:           item.Meta,
-		Created:        time.Now(),
-		CreatedBy:      &s.UserID,
-		CreatedReason:  "Stack split",
-		ContainerID:    s.CargoBayContainerID,
-		Quantity:       size,
-		IsPackaged:     true,
-		Lock:           sync.Mutex{},
-		ItemTypeName:   item.ItemTypeName,
+		ID:            nid,
+		ItemTypeID:    item.ItemTypeID,
+		Meta:          item.Meta,
+		Created:       time.Now(),
+		CreatedBy:     &s.UserID,
+		CreatedReason: "Stack split",
+		ContainerID:   s.CargoBayContainerID,
+		Quantity:      size,
+		IsPackaged:    true,
+		Lock: shared.LabeledMutex{
+			Structure: "Item",
+			UID:       fmt.Sprintf("%v :: %v :: %v", nid, time.Now(), rand.Float64()),
+		}, ItemTypeName: item.ItemTypeName,
 		ItemFamilyID:   item.ItemFamilyID,
 		ItemFamilyName: item.ItemFamilyName,
 		ItemTypeMeta:   item.ItemTypeMeta,
@@ -3437,18 +3457,22 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 
 				if !found && q > 0 {
 					// create a new stack of ore / ice
+					nid := uuid.New()
+
 					newItem := Item{
-						ID:             uuid.New(),
-						ItemTypeID:     unitType,
-						Meta:           c.ItemTypeMeta,
-						Created:        time.Now(),
-						CreatedBy:      &m.shipMountedOn.UserID,
-						CreatedReason:  fmt.Sprintf("Mined %v", c.ItemFamilyID),
-						ContainerID:    m.shipMountedOn.CargoBayContainerID,
-						Quantity:       q,
-						IsPackaged:     true,
-						Lock:           sync.Mutex{},
-						ItemTypeName:   c.ItemTypeName,
+						ID:            nid,
+						ItemTypeID:    unitType,
+						Meta:          c.ItemTypeMeta,
+						Created:       time.Now(),
+						CreatedBy:     &m.shipMountedOn.UserID,
+						CreatedReason: fmt.Sprintf("Mined %v", c.ItemFamilyID),
+						ContainerID:   m.shipMountedOn.CargoBayContainerID,
+						Quantity:      q,
+						IsPackaged:    true,
+						Lock: shared.LabeledMutex{
+							Structure: "Item",
+							UID:       fmt.Sprintf("%v :: %v :: %v", nid, time.Now(), rand.Float64()),
+						}, ItemTypeName: c.ItemTypeName,
 						ItemFamilyID:   c.ItemFamilyID,
 						ItemFamilyName: c.ItemFamilyName,
 						ItemTypeMeta:   c.ItemTypeMeta,

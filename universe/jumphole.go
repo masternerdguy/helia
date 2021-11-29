@@ -1,8 +1,11 @@
 package universe
 
 import (
+	"fmt"
 	"helia/physics"
-	"sync"
+	"helia/shared"
+	"math/rand"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -23,7 +26,7 @@ type Jumphole struct {
 	// in-memory only
 	OutSystem   *SolarSystem
 	OutJumphole *Jumphole
-	Lock        sync.Mutex
+	Lock        shared.LabeledMutex
 }
 
 // Returns a new physics dummy structure representing this jumphole
@@ -55,7 +58,10 @@ func (s *Jumphole) CopyJumphole() Jumphole {
 		Mass:         s.Mass,
 		Transient:    s.Transient,
 		// in-memory only
-		Lock: sync.Mutex{},
+		Lock: shared.LabeledMutex{
+			Structure: "Jumphole",
+			UID:       fmt.Sprintf("%v :: %v :: %v", s.ID, time.Now(), rand.Float64()),
+		},
 		// intentionally not copying pointers
 	}
 }

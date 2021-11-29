@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"helia/physics"
+	"helia/shared"
+	"math/rand"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -151,8 +154,10 @@ func (u *Universe) BuildTransientCelestials() {
 		}
 
 		// create transient jumpholes
+		nidA := uuid.New()
+
 		jhA := Jumphole{
-			ID:           uuid.New(),
+			ID:           nidA,
 			SystemID:     sysA.ID,
 			OutSystemID:  sysB.ID,
 			JumpholeName: fmt.Sprintf("⚠ %v Jumphole", sysB.SystemName),
@@ -163,10 +168,16 @@ func (u *Universe) BuildTransientCelestials() {
 			Mass:         float64(physics.RandInRange(1000, 10000)),
 			Theta:        float64(physics.RandInRange(0, 360)),
 			Transient:    true,
+			Lock: shared.LabeledMutex{
+				Structure: "Jumphole",
+				UID:       fmt.Sprintf("%v :: %v :: %v", nidA, time.Now(), rand.Float64()),
+			},
 		}
 
+		nidB := uuid.New()
+
 		jhB := Jumphole{
-			ID:           uuid.New(),
+			ID:           nidB,
 			SystemID:     sysB.ID,
 			OutSystemID:  sysA.ID,
 			JumpholeName: fmt.Sprintf("⚠ %v Jumphole", sysA.SystemName),
@@ -177,6 +188,10 @@ func (u *Universe) BuildTransientCelestials() {
 			Mass:         float64(physics.RandInRange(1000, 10000)),
 			Theta:        float64(physics.RandInRange(0, 360)),
 			Transient:    true,
+			Lock: shared.LabeledMutex{
+				Structure: "Jumphole",
+				UID:       fmt.Sprintf("%v :: %v :: %v", nidB, time.Now(), rand.Float64()),
+			},
 		}
 
 		// link jumpholes

@@ -1,8 +1,6 @@
 package shared
 
 import (
-	"sync"
-
 	"github.com/google/uuid"
 )
 
@@ -36,7 +34,7 @@ type PlayerReputationSheetFactionEntry struct {
 // Structure containing information about this player's relationship with factions
 type PlayerReputationSheet struct {
 	FactionEntries map[string]*PlayerReputationSheetFactionEntry // map key is faction id string
-	Lock           sync.Mutex
+	Lock           LabeledMutex
 }
 
 // Enforces standing bounds on reputation entries

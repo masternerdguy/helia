@@ -8,8 +8,8 @@ import (
 	"helia/shared"
 	"helia/sql"
 	"log"
+	"math/rand"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -26,7 +26,7 @@ var upgrader = websocket.Upgrader{
 type SocketListener struct {
 	Engine  *engine.HeliaEngine
 	clients []*shared.GameClient
-	lock    sync.Mutex
+	lock    shared.LabeledMutex
 }
 
 // Handles a client joining the server
@@ -402,6 +402,10 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		client.ReputationSheet = shared.PlayerReputationSheet{
 			FactionEntries: make(map[string]*shared.PlayerReputationSheetFactionEntry),
 		}
+
+		// label mutex
+		client.ReputationSheet.Lock.Structure = "PlayerReputationSheet"
+		client.ReputationSheet.Lock.UID = fmt.Sprintf("%v :: %v :: %v", u.ID, time.Now(), rand.Float64())
 
 		for k, v := range u.ReputationSheet.FactionEntries {
 			client.ReputationSheet.FactionEntries[k] = &shared.PlayerReputationSheetFactionEntry{

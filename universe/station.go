@@ -1,8 +1,10 @@
 package universe
 
 import (
+	"fmt"
 	"helia/physics"
-	"sync"
+	"helia/shared"
+	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,7 +23,7 @@ type Station struct {
 	Theta       float64
 	FactionID   uuid.UUID
 	// in-memory only
-	Lock                   sync.Mutex
+	Lock                   shared.LabeledMutex
 	CurrentSystem          *SolarSystem
 	OpenSellOrders         map[string]*SellOrder
 	Processes              map[string]*StationProcess
@@ -149,7 +151,10 @@ func (s *Station) CopyStation() Station {
 		Mass:        s.Mass,
 		FactionID:   s.FactionID,
 		// in-memory only
-		Lock:      sync.Mutex{},
+		Lock: shared.LabeledMutex{
+			Structure: "Station",
+			UID:       fmt.Sprintf("%v :: %v :: %v", s.ID, time.Now(), rand.Float64()),
+		},
 		Processes: copiedProcesses,
 	}
 }
