@@ -50,6 +50,7 @@ type MessageRegistry struct {
 	SellShipAsOrder        int
 	TrashShip              int
 	RenameShip             int
+	PostSystemChatMessage  int
 }
 
 // Registry of target types
@@ -107,6 +108,7 @@ func NewMessageRegistry() *MessageRegistry {
 		SellShipAsOrder:        38,
 		TrashShip:              39,
 		RenameShip:             40,
+		PostSystemChatMessage:  41,
 	}
 }
 
@@ -278,6 +280,20 @@ type ServerGlobalUpdateBody struct {
 	NewModuleEffects  []GlobalPushModuleEffectBody `json:"newModuleEffects"`
 	NewPointEffects   []GlobalPushPointEffectBody  `json:"newPointEffects"`
 	Missiles          []GlobalMissileBody          `json:"missiles"`
+	SystemChat        []ServerSystemChatBody       `json:"systemChat"`
+}
+
+// Body containing a new chat message to push to clients in a system
+type ServerSystemChatBody struct {
+	SenderID   uuid.UUID `json:"senderId"`
+	SenderName string    `json:"senderName"`
+	Message    string    `json:"message"`
+}
+
+// Body containing a message posted to system chat from the client
+type ClientPostSystemChatMessageBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	Message   string    `json:"message"`
 }
 
 // Body containing a click-in-space move event from the client

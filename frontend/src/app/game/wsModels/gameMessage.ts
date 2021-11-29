@@ -46,4 +46,5 @@ export enum MessageTypes {
   SellShipAsOrder = 38,
   TrashShip = 39,
   RenameShip = 40,
+  PostSystemChatMessage = 41,
 }

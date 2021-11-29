@@ -47,6 +47,7 @@ import { ServerPlayerFactionUpdate } from './wsModels/bodies/playerFactionUpdate
 import { PropertySheetWindow } from './gdi/windows/propertySheetWindow';
 import { ServerPropertyUpdate } from './wsModels/bodies/propertyUpdate';
 import { Missile } from './engineModels/missile';
+import { SystemChatWindow } from './gdi/windows/systemChatWindow';
 
 class EngineSack {
   constructor() {}
@@ -76,6 +77,7 @@ class EngineSack {
   starMapWindow: StarMapWindow;
   reputationSheetWindow: ReputationSheetWindow;
   propertySheetWindow: PropertySheetWindow;
+  systemChatWindow: SystemChatWindow;
   lastShiftDown: number;
 
   windows: GDIWindow[];
@@ -223,6 +225,12 @@ export function clientStart(
   engineSack.propertySheetWindow.pack();
   engineSack.propertySheetWindow.setPlayer(engineSack.player);
 
+  engineSack.systemChatWindow = new SystemChatWindow();
+  engineSack.systemChatWindow.initialize();
+  engineSack.systemChatWindow.setX(engineSack.windowManager.getWidth());
+  engineSack.systemChatWindow.setY(gameCanvas.height - engineSack.systemChatWindow.getHeight() - GDIStyle.windowHandleHeight - 1);
+  engineSack.systemChatWindow.pack();
+
   // link windows to window manager
   engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☀');
   engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☍');
@@ -236,6 +244,7 @@ export function clientStart(
   engineSack.windowManager.manageWindow(engineSack.starMapWindow, '⊞');
   engineSack.windowManager.manageWindow(engineSack.reputationSheetWindow, '❉');
   engineSack.windowManager.manageWindow(engineSack.propertySheetWindow, '⬢');
+  engineSack.windowManager.manageWindow(engineSack.systemChatWindow, '⋉');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
@@ -249,6 +258,7 @@ export function clientStart(
     engineSack.starMapWindow,
     engineSack.reputationSheetWindow,
     engineSack.propertySheetWindow,
+    engineSack.systemChatWindow,
     engineSack.windowManager,
   ];
 
@@ -399,6 +409,10 @@ function handleGlobalUpdate(d: GameMessage) {
 
     if (!msg.missiles || msg.missiles == null) {
       msg.missiles = [];
+    }
+
+    if (!msg.systemChat || msg.systemChat == null) {
+      msg.systemChat = [];
     }
 
     // update system
@@ -712,6 +726,9 @@ function handleGlobalUpdate(d: GameMessage) {
 
   // update overview window
   engineSack.overviewWindow.sync(engineSack.player);
+
+  // update overview window
+  engineSack.systemChatWindow.sync(msg.systemChat);
 }
 
 function handleErrorMessageFromServer(d: GameMessage) {
@@ -831,6 +848,9 @@ function handleCurrentShipUpdate(d: GameMessage) {
   // update property window
   engineSack.propertySheetWindow.setWsService(engineSack.wsSvc);
   engineSack.propertySheetWindow.setPlayer(engineSack.player);
+
+  // update system chat window
+  engineSack.systemChatWindow.setWsService(engineSack.wsSvc);
 }
 
 function handleFactionUpdate(d: GameMessage) {

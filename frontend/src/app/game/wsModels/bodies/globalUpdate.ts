@@ -8,6 +8,7 @@ import { WsPushModuleEffect } from '../entities/wsPushModuleEffect';
 import { WsPushPointEffect } from '../entities/wsPushPointEffect';
 import { WSAsteroid } from '../entities/wsAsteroid';
 import { WSMissile } from '../entities/wsMissile';
+import { WSSystemChatMessage } from '../entities/wsSystemChatMessage';
 
 export class ServerGlobalUpdateBody {
   currentSystemInfo: WSSystem;
@@ -20,4 +21,5 @@ export class ServerGlobalUpdateBody {
   newModuleEffects: WsPushModuleEffect[];
   newPointEffects: WsPushPointEffect[];
   missiles: WSMissile[];
+  systemChat: WSSystemChatMessage[];
 }

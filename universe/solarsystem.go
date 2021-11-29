@@ -127,6 +127,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 	// get message registry
 	msgRegistry := models.NewMessageRegistry()
 
+	// for aggregating new system chat messages
+	newSystemChatMessages := make([]models.ServerSystemChatBody, 0)
+
 	// process player current ship event queue
 	for _, c := range s.clients {
 		evt := c.PopShipEvent()
@@ -1122,6 +1125,29 @@ func (s *SolarSystem) PeriodicUpdate() {
 				pc.ShipCaches = no
 				c.SetPropertyCache(pc)
 			}
+		} else if evt.Type == models.NewMessageRegistry().PostSystemChatMessage {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientPostSystemChatMessageBody)
+
+				// verify message constraints
+				if len(data.Message) > 57 {
+					c.WriteErrorMessage("chat messages must be 57 characters or less")
+					continue
+				}
+
+				if len(data.Message) == 0 {
+					c.WriteErrorMessage("message must have content")
+					continue
+				}
+
+				// store message
+				newSystemChatMessages = append(newSystemChatMessages, models.ServerSystemChatBody{
+					SenderID:   sh.UserID,
+					SenderName: sh.OwnerName,
+					Message:    data.Message,
+				})
+			}
 		}
 	}
 
@@ -1368,7 +1394,10 @@ func (s *SolarSystem) PeriodicUpdate() {
 	}
 
 	// build global update of non-secret info for clients
-	gu := models.ServerGlobalUpdateBody{}
+	gu := models.ServerGlobalUpdateBody{
+		SystemChat: newSystemChatMessages,
+	}
+
 	gu.CurrentSystemInfo = models.CurrentSystemInfo{
 		ID:         s.ID,
 		SystemName: s.SystemName,
