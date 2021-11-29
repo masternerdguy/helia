@@ -94,7 +94,9 @@ export class SystemChatWindow extends GDIWindow {
     let lastMessageReceived = 0;
 
     for (const m of this.knownMessages) {
-      if (lastSenderId != m.message.senderId) {
+      const stampNeeded = (m.received - lastMessageReceived) / 1000 > 60;
+
+      if (lastSenderId != m.message.senderId || stampNeeded) {
         lastSenderId = m.message.senderId;
 
         // append sender info
@@ -107,7 +109,7 @@ export class SystemChatWindow extends GDIWindow {
       const date = heliaDate(new Date(m.received));
       let broken: any[];
 
-      if ((m.received - lastMessageReceived) / 1000 > 60) {
+      if (stampNeeded) {
         // include timestamp
         const stamped = `${printHeliaDate(date)}\n${m.message.message}`;
 
