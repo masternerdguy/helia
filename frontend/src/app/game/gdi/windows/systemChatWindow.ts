@@ -91,6 +91,8 @@ export class SystemChatWindow extends GDIWindow {
     const rows: ChatViewRow[] = [];
 
     let lastSenderId = '';
+    let lastMessageReceived = 0;
+
     for (const m of this.knownMessages) {
       if (lastSenderId != m.message.senderId) {
         lastSenderId = m.message.senderId;
@@ -103,12 +105,18 @@ export class SystemChatWindow extends GDIWindow {
 
       // parse timestamp as helia date
       const date = heliaDate(new Date(m.received));
+      let broken: any[];
 
-      // include timestamp
-      const stamped = `${printHeliaDate(date)}\n${m.message.message}`;
+      if ((m.received - lastMessageReceived) / 1000 > 60) {
+        // include timestamp
+        const stamped = `${printHeliaDate(date)}\n${m.message.message}`;
 
-      // break text to fit
-      const broken = this.chatList.breakText(stamped);
+        // break text to fit
+        broken = this.chatList.breakText(stamped);
+      } else {
+        // break text to fit
+        broken = this.chatList.breakText(m.message.message);
+      }
 
       // append message text
       for (const b of broken) {
@@ -116,6 +124,9 @@ export class SystemChatWindow extends GDIWindow {
           listString: () => b.text,
         });
       }
+
+      // update timestamp tracker
+      lastMessageReceived = m.received;
     }
 
     // store and scroll to bottom
