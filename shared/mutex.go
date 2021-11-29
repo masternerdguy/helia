@@ -13,23 +13,32 @@ var ShutdownSignal bool
 
 // A mutex that contains information about what it locks
 type LabeledMutex struct {
-	Structure    string
-	UID          string
-	lastCaller   string
-	lastLocked   int64
-	lastUnlocked int64
-	isLocked     bool
-	mutex        sync.Mutex
+	Structure       string
+	UID             string
+	lastCaller      string
+	lastLocker      string
+	lastLocked      int64
+	lastUnlocked    int64
+	isLocked        bool
+	mutex           sync.Mutex
+	lastCallerMutex sync.Mutex
 }
 
 func (m *LabeledMutex) Lock(caller string) {
+	// store most recent caller (this will likely be the one causing the freeze)
+	m.lastCallerMutex.Lock()
+	m.lastCaller = caller
+	m.lastCallerMutex.Unlock()
+
 	// obtain lock
 	m.mutex.Lock()
 
 	// store lock timestamp
 	m.lastLocked = time.Now().UnixNano()
 	m.isLocked = true
-	m.lastCaller = caller
+
+	// store last locker
+	m.lastLocker = caller
 
 	// kill process if not labeled
 	if len(m.Structure) == 0 || len(m.UID) == 0 {

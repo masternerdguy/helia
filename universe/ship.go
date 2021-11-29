@@ -3708,7 +3708,7 @@ func (m *FittedSlot) activateAsAetherDragger() bool {
 	}
 
 	//debugging
-	//m.shipMountedOn.Lock.Lock()
+	m.shipMountedOn.Lock.Lock("ship.activateAsAetherDragger")
 
 	// get target
 	tgtReg := models.NewTargetTypeRegistry()
