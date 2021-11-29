@@ -1410,6 +1410,10 @@ func (s *SolarSystem) PeriodicUpdate() {
 	}
 
 	for _, d := range s.missiles {
+		if d.TicksRemaining <= 0 {
+			continue
+		}
+
 		gu.Missiles = append(gu.Missiles, models.GlobalMissileBody{
 			ID:      d.ID,
 			PosX:    d.PosX,

@@ -3538,7 +3538,7 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 	missileGfxEffect, _ := m.ItemTypeMeta.GetString("missile_gfx_effect")
 	missileRadius, _ := m.ItemTypeMeta.GetFloat64("missile_radius")
 	flightTime, _ := m.ItemMeta.GetFloat64("flight_time")
-	maxVelocity := (modRange / flightTime) / 1000
+	maxVelocity := (modRange / flightTime)
 
 	stubID := uuid.New()
 	flightTicks := int((flightTime * 1000) / Heartbeat)

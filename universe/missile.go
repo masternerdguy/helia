@@ -62,8 +62,8 @@ func (s *Missile) PeriodicUpdate() {
 	dY := sB.PosY - mA.PosY
 	t := math.Atan2(dY, dX)
 
-	// get velocity
-	dP := math.Min(d*1.01, s.MaxVelocity)
+	// get velocity to apply
+	dP := math.Min(d, s.MaxVelocity/(1000/Heartbeat))
 
 	// apply to position
 	s.PosX += math.Cos(t) * dP

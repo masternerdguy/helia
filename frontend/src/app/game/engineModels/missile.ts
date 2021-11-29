@@ -32,6 +32,13 @@ export class Missile extends WSMissile {
     const sy = camera.projectY(this.y);
     const sr = camera.projectR(this.r);
 
+    // draw bounding circle
+    ctx.strokeStyle = 'pink';
+    ctx.beginPath();
+    ctx.arc(sx, sy, Math.max(sr, 3), 0, 2 * Math.PI, false);
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
     // determine direction
     const theta = angleBetween(this.lastX, this.lastY, this.x, this.y);
 
