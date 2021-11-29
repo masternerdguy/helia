@@ -196,7 +196,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	itemSvc := sql.GetItemService()
 
 	// obtain lock
-	sol.Lock.Lock()
+	sol.Lock.Lock("core.handleEscalations")
 	defer sol.Lock.Unlock()
 
 	// iterate over moved items
@@ -208,7 +208,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
-			mi.Lock.Lock()
+			mi.Lock.Lock("core.handleEscalations::MovedItems")
 			defer mi.Lock.Unlock()
 
 			// mark as dirty if not marked already
@@ -236,7 +236,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
-			mi.Lock.Lock()
+			mi.Lock.Lock("core.handleEscalations::PackagedItems")
 			defer mi.Lock.Unlock()
 
 			// mark as dirty if not marked already
@@ -264,7 +264,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
-			mi.Lock.Lock()
+			mi.Lock.Lock("core.handleEscalations::UnpackagedItems")
 			defer mi.Lock.Unlock()
 
 			// mark as dirty if not marked already
@@ -292,7 +292,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
-			mi.Lock.Lock()
+			mi.Lock.Lock("core.handleEscalations::ChangedQuantityItems")
 			defer mi.Lock.Unlock()
 
 			// mark as dirty if not marked already
@@ -320,7 +320,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
-			mi.Lock.Lock()
+			mi.Lock.Lock("core.handleEscalations::NewItems")
 			defer mi.Lock.Unlock()
 
 			// save new item to db
@@ -377,7 +377,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.SellOrder, sol *universe.SolarSystem) {
 			// lock sell order
-			mi.Lock.Lock()
+			mi.Lock.Lock("core.handleEscalations::NewSellOrders")
 			defer mi.Lock.Unlock()
 
 			// get item id from item if linked and flag set
@@ -413,7 +413,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.SellOrder, sol *universe.SolarSystem) {
 			// lock sell order
-			mi.Lock.Lock()
+			mi.Lock.Lock("core.handleEscalations::BoughtSellOrders")
 			defer mi.Lock.Unlock()
 
 			// mark sell order as bought in db

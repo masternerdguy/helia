@@ -40,7 +40,7 @@ type PlayerReputationSheet struct {
 // Enforces standing bounds on reputation entries
 func (s *PlayerReputationSheet) EnforceBounds(lock bool) {
 	if lock {
-		s.Lock.Lock()
+		s.Lock.Lock("reputation.EnforceBounds")
 		defer s.Lock.Unlock()
 	}
 

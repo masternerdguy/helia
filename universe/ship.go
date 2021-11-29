@@ -367,7 +367,7 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (i
 
 // Returns a copy of the ship
 func (s *Ship) CopyShip() *Ship {
-	s.Lock.Lock()
+	s.Lock.Lock("ship.CopyShip")
 	defer s.Lock.Unlock()
 
 	sc := Ship{
@@ -460,7 +460,7 @@ func (s *Ship) CopyShip() *Ship {
 // Processes the ship for a tick
 func (s *Ship) PeriodicUpdate() {
 	// lock entity
-	s.Lock.Lock()
+	s.Lock.Lock("ship.PeriodicUpdate")
 	defer s.Lock.Unlock()
 
 	// cache system name
@@ -774,7 +774,7 @@ func (s *Ship) CmdManualNav(screenT float64, screenM float64, lock bool) {
 
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.CmdManualNav")
 		defer s.Lock.Unlock()
 	}
 
@@ -794,7 +794,7 @@ func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int, lock bool) {
 
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.CmdGoto")
 		defer s.Lock.Unlock()
 	}
 
@@ -814,7 +814,7 @@ func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int, lock bool) {
 
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.CmdOrbit")
 		defer s.Lock.Unlock()
 	}
 
@@ -834,7 +834,7 @@ func (s *Ship) CmdDock(targetID uuid.UUID, targetType int, lock bool) {
 
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.CmdDock")
 		defer s.Lock.Unlock()
 	}
 
@@ -854,7 +854,7 @@ func (s *Ship) CmdUndock(lock bool) {
 
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.CmdUndock")
 		defer s.Lock.Unlock()
 	}
 
@@ -1040,7 +1040,7 @@ func (s *Ship) GetRealCargoBayVolume() float64 {
 func (s *Ship) TotalCargoBayVolumeUsed(lock bool) float64 {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.TotalCargoBayVolumeUsed")
 		defer s.Lock.Unlock()
 	}
 
@@ -1128,7 +1128,7 @@ func (s *Ship) CheckStandings(factionID uuid.UUID) (float64, bool) {
 	}
 
 	// obtain lock (pointer to player's entry on their game client)
-	s.ReputationSheet.Lock.Lock()
+	s.ReputationSheet.Lock.Lock("ship.CheckStandings")
 	defer s.ReputationSheet.Lock.Unlock()
 
 	// try to find faction relationship
@@ -1772,15 +1772,15 @@ func (s *Ship) FindFirstAvailableItemOfTypeInCargo(typeID uuid.UUID, packaged bo
 func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.FitModule")
 		defer s.Lock.Unlock()
 	}
 
 	// lock containers
-	s.CargoBay.Lock.Lock()
+	s.CargoBay.Lock.Lock("ship.FitModule")
 	defer s.CargoBay.Lock.Unlock()
 
-	s.FittingBay.Lock.Lock()
+	s.FittingBay.Lock.Lock("ship.FitModule")
 	defer s.FittingBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -1869,15 +1869,15 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.UnfitModule")
 		defer s.Lock.Unlock()
 	}
 
 	// lock containers
-	m.shipMountedOn.CargoBay.Lock.Lock()
+	m.shipMountedOn.CargoBay.Lock.Lock("ship.UnfitModule")
 	defer m.shipMountedOn.CargoBay.Lock.Unlock()
 
-	m.shipMountedOn.FittingBay.Lock.Lock()
+	m.shipMountedOn.FittingBay.Lock.Lock("ship.UnfitModule")
 	defer m.shipMountedOn.FittingBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -1915,7 +1915,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 		o := m.shipMountedOn.FittingBay.Items[i]
 
 		// lock item
-		o.Lock.Lock()
+		o.Lock.Lock("ship.UnfitModule")
 		defer o.Lock.Unlock()
 
 		// skip if not this module
@@ -1945,12 +1945,12 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.TrashItemInCargo")
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock()
+	s.CargoBay.Lock.Lock("ship.TrashItemInCargo")
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -1986,12 +1986,12 @@ func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
 func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.PackageItemInCargo")
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock()
+	s.CargoBay.Lock.Lock("ship.PackageItemInCargo")
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -2043,12 +2043,12 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity int, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.BuyItemFromSilo")
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock()
+	s.CargoBay.Lock.Lock("ship.BuyItemFromSilo")
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -2099,7 +2099,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 
 	// lock silo if needed
 	if lock {
-		silo.Lock.Lock()
+		silo.Lock.Lock("ship.BuyItemFromSilo")
 		defer silo.Lock.Unlock()
 	}
 
@@ -2218,12 +2218,12 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 func (s *Ship) SellItemToSilo(siloID uuid.UUID, itemId uuid.UUID, quantity int, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.SellItemToSilo")
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock()
+	s.CargoBay.Lock.Lock("ship.SellItemToSilo")
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -2245,7 +2245,7 @@ func (s *Ship) SellItemToSilo(siloID uuid.UUID, itemId uuid.UUID, quantity int, 
 
 	// lock item if needed
 	if lock {
-		item.Lock.Lock()
+		item.Lock.Lock("ship.SellItemToSilo")
 		defer item.Lock.Unlock()
 	}
 
@@ -2324,12 +2324,12 @@ func (s *Ship) SellItemToSilo(siloID uuid.UUID, itemId uuid.UUID, quantity int, 
 func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.BuyItemFromOrder")
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock()
+	s.CargoBay.Lock.Lock("ship.BuyItemFromOrder")
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -2362,10 +2362,10 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 
 	// lock order and item if needed
 	if lock {
-		order.Lock.Lock()
+		order.Lock.Lock("ship.BuyItemFromOrder")
 		defer order.Lock.Unlock()
 
-		order.Item.Lock.Lock()
+		order.Item.Lock.Lock("ship.BuyItemFromOrder")
 		defer order.Item.Lock.Unlock()
 	}
 
@@ -2413,7 +2413,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	// check if we need to lock the seller
 	if seller.CurrentSystem.ID != s.CurrentSystem.ID {
 		// obtain lock
-		seller.Lock.Lock()
+		seller.Lock.Lock("ship.BuyItemFromOrder")
 		defer seller.Lock.Unlock()
 	}
 
@@ -2472,12 +2472,12 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.SellSelfAsOrder")
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock()
+	s.CargoBay.Lock.Lock("ship.SellSelfAsOrder")
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -2591,12 +2591,12 @@ func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.SellItemAsOrder")
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock()
+	s.CargoBay.Lock.Lock("ship.SellItemAsOrder")
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -2681,12 +2681,12 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.UnpackageItemInCargo")
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock()
+	s.CargoBay.Lock.Lock("ship.UnpackageItemInCargo")
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -2733,12 +2733,12 @@ func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.StackItemInCargo")
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock()
+	s.CargoBay.Lock.Lock("ship.StackItemInCargo")
 	defer s.CargoBay.Lock.Unlock()
 
 	// get the item to be stacked
@@ -2809,12 +2809,12 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.SplitItemInCargo")
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock()
+	s.CargoBay.Lock.Lock("ship.SplitItemInCargo")
 	defer s.CargoBay.Lock.Unlock()
 
 	// get the item to be split
@@ -2890,7 +2890,7 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 func (s *Ship) SelfDestruct(lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.SelfDestruct")
 		defer s.Lock.Unlock()
 	}
 
@@ -2915,12 +2915,12 @@ func (s *Ship) SelfDestruct(lock bool) error {
 func (s *Ship) ConsumeFuelFromCargo(itemID uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.ConsumeFuelFromCargo")
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock()
+	s.CargoBay.Lock.Lock("ship.ConsumeFuelFromCargo")
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -2974,12 +2974,12 @@ func (s *Ship) ConsumeFuelFromCargo(itemID uuid.UUID, lock bool) error {
 func (s *Ship) ConsumeRepairKitFromCargo(itemID uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock()
+		s.Lock.Lock("ship.ConsumeRepairKitFromCargo")
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock()
+	s.CargoBay.Lock.Lock("ship.ConsumeRepairKitFromCargo")
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -3706,6 +3706,9 @@ func (m *FittedSlot) activateAsAetherDragger() bool {
 		m.WillRepeat = false
 		return false
 	}
+
+	//debugging
+	//m.shipMountedOn.Lock.Lock()
 
 	// get target
 	tgtReg := models.NewTargetTypeRegistry()

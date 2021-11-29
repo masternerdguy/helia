@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"sync"
 	"time"
@@ -14,26 +15,28 @@ var ShutdownSignal bool
 type LabeledMutex struct {
 	Structure    string
 	UID          string
+	lastCaller   string
 	lastLocked   int64
 	lastUnlocked int64
 	isLocked     bool
 	mutex        sync.Mutex
 }
 
-func (m *LabeledMutex) Lock() {
+func (m *LabeledMutex) Lock(caller string) {
 	// obtain lock
 	m.mutex.Lock()
 
 	// store lock timestamp
 	m.lastLocked = time.Now().UnixNano()
 	m.isLocked = true
+	m.lastCaller = caller
 
 	// kill process if not labeled
 	if len(m.Structure) == 0 || len(m.UID) == 0 {
 		go func() {
 			// give time for panic to print output
 			time.Sleep(20 * time.Millisecond)
-			os.Exit(0)
+			os.Exit(2)
 		}()
 
 		panic(fmt.Sprintf("Unlabeled LabeledMutex! Make sure a label is assigned to every instance of the associated structure: %v", m))
@@ -68,10 +71,11 @@ func (m *LabeledMutex) Lock() {
 					// this is a freeze - core will save the world state and shut down the system
 					go func() {
 						time.Sleep(10 * time.Second)
-						panic(fmt.Sprintf("Mutex locked for a very suspicious amount of time, this was almost certainly a freeze: %v", m))
+						log.Println(fmt.Sprintf("Mutex locked for a very suspicious amount of time, this was almost certainly a freeze: %v", m))
 					}()
 
-					panic(fmt.Sprintf("! Emergency shutdown - deadlock detected: %v", m))
+					log.Println(fmt.Sprintf("! Emergency shutdown - deadlock detected: %v", m))
+					return
 				} else {
 					// lock released!
 					break

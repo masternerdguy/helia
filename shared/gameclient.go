@@ -63,7 +63,7 @@ func (c *GameClient) Initialize() {
 	c.Lock.UID = fmt.Sprintf("%v :: %v :: %v", c.UID, time.Now(), rand.Float64())
 
 	// obtain lock
-	c.Lock.Lock()
+	c.Lock.Lock("gameclient.Initialize")
 	defer c.Lock.Unlock()
 
 	// initialize empty event queue
@@ -74,7 +74,7 @@ func (c *GameClient) Initialize() {
 
 // Writes a message to a client
 func (c *GameClient) WriteMessage(msg *models.GameMessage) {
-	c.Lock.Lock()
+	c.Lock.Lock("gameclient.WriteMessage")
 	defer c.Lock.Unlock()
 
 	// package message as json
@@ -131,7 +131,7 @@ func (c *GameClient) WriteErrorMessage(msg string) {
 
 // Adds an event to the ship event queue
 func (c *GameClient) PushShipEvent(evt interface{}, eventType int) {
-	c.Lock.Lock()
+	c.Lock.Lock("gameclient.PushShipEvent")
 	defer c.Lock.Unlock()
 
 	c.shipEventQueue.Events = append(c.shipEventQueue.Events, Event{
@@ -142,7 +142,7 @@ func (c *GameClient) PushShipEvent(evt interface{}, eventType int) {
 
 // Gets the latest event for the player's current ship
 func (c *GameClient) PopShipEvent() *Event {
-	c.Lock.Lock()
+	c.Lock.Lock("gameclient.PopShipEvent")
 	defer c.Lock.Unlock()
 
 	if len(c.shipEventQueue.Events) > 0 {
@@ -160,14 +160,14 @@ func (c *GameClient) PopShipEvent() *Event {
 }
 
 func (c *GameClient) GetPropertyCache() PropertyCache {
-	c.Lock.Lock()
+	c.Lock.Lock("gameclient.GetPropertyCache")
 	defer c.Lock.Unlock()
 
 	return c.propertyCache
 }
 
 func (c *GameClient) SetPropertyCache(x PropertyCache) {
-	c.Lock.Lock()
+	c.Lock.Lock("gameclient.SetPropertyCache")
 	defer c.Lock.Unlock()
 
 	c.propertyCache = x

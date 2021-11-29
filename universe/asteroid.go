@@ -46,7 +46,7 @@ func (a *Asteroid) ToPhysicsDummy() physics.Dummy {
 
 // Returns a copy of the asteroid
 func (s *Asteroid) CopyAsteroid() Asteroid {
-	s.Lock.Lock()
+	s.Lock.Lock("asteroid.CopyAsteroid")
 	defer s.Lock.Unlock()
 
 	return Asteroid{

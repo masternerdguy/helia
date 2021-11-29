@@ -401,7 +401,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		}
 
 		// obtain ship lock
-		currShip.Lock.Lock()
+		currShip.Lock.Lock("socketlistener.handleClientJoin")
 		defer currShip.Lock.Unlock()
 
 		// load reputation sheet
@@ -1266,7 +1266,7 @@ func (l *SocketListener) handleClientRenameShip(client *shared.GameClient, body 
 
 // Adds a client to the server
 func (l *SocketListener) addClient(c *shared.GameClient) {
-	l.lock.Lock()
+	l.lock.Lock("socketlistener.addClient")
 	defer l.lock.Unlock()
 
 	l.clients = append(l.clients, c)
@@ -1323,7 +1323,7 @@ func (l *SocketListener) addClient(c *shared.GameClient) {
 
 // Removes a client from the server
 func (l *SocketListener) removeClient(c *shared.GameClient) {
-	l.lock.Lock()
+	l.lock.Lock("socketlistener.removeClient")
 	defer l.lock.Unlock()
 
 	// find the client to remove

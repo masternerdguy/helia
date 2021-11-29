@@ -1394,7 +1394,7 @@ func saveShip(ship *universe.Ship) error {
 	shipSvc := sql.GetShipService()
 
 	// obtain lock on copy
-	ship.Lock.Lock()
+	ship.Lock.Lock("loader.saveShip")
 	defer ship.Lock.Unlock()
 
 	dbShip := sql.Ship{

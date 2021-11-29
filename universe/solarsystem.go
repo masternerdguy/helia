@@ -54,7 +54,7 @@ type SolarSystem struct {
 // Initializes internal aspects of SolarSystem
 func (s *SolarSystem) Initialize() {
 	// obtain lock
-	s.Lock.Lock()
+	s.Lock.Lock("solarsystem.Initialize")
 	defer s.Lock.Unlock()
 
 	// initialize maps
@@ -90,7 +90,7 @@ func (s *SolarSystem) Initialize() {
 // Performs one-time shutdown actions when the server is stopping
 func (s *SolarSystem) HandleShutdownSignal() {
 	// obtain lock
-	s.Lock.Lock()
+	s.Lock.Lock("solarsystem.HandleShutdownSignal")
 	defer s.Lock.Unlock()
 
 	// propagate shutdown to connected clients
@@ -102,7 +102,7 @@ func (s *SolarSystem) HandleShutdownSignal() {
 // Processes the solar system for a tick
 func (s *SolarSystem) PeriodicUpdate() {
 	// obtain lock
-	s.Lock.Lock()
+	s.Lock.Lock("solarsystem.PeriodicUpdate")
 	defer s.Lock.Unlock()
 
 	// skip if nobody in system
@@ -1703,7 +1703,7 @@ func (s *SolarSystem) AddShip(c *Ship, lock bool) {
 
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.AddShip")
 		defer s.Lock.Unlock()
 	}
 
@@ -1726,7 +1726,7 @@ func (s *SolarSystem) RemoveShip(c *Ship, lock bool) {
 
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.RemoveShip")
 		defer s.Lock.Unlock()
 	}
 
@@ -1760,7 +1760,7 @@ func (s *SolarSystem) AddStar(c *Star) {
 	}
 
 	// obtain lock
-	s.Lock.Lock()
+	s.Lock.Lock("solarsystem.AddStar")
 	defer s.Lock.Unlock()
 
 	// add star
@@ -1775,7 +1775,7 @@ func (s *SolarSystem) AddPlanet(c *Planet) {
 	}
 
 	// obtain lock
-	s.Lock.Lock()
+	s.Lock.Lock("solarsystem.AddPlanet")
 	defer s.Lock.Unlock()
 
 	// add planet
@@ -1790,7 +1790,7 @@ func (s *SolarSystem) AddAsteroid(c *Asteroid) {
 	}
 
 	// obtain lock
-	s.Lock.Lock()
+	s.Lock.Lock("solarsystem.AddAsteroid")
 	defer s.Lock.Unlock()
 
 	// add asteroid
@@ -1805,7 +1805,7 @@ func (s *SolarSystem) AddJumphole(c *Jumphole) {
 	}
 
 	// obtain lock
-	s.Lock.Lock()
+	s.Lock.Lock("solarsystem.AddJumphole")
 	defer s.Lock.Unlock()
 
 	// add jumphole
@@ -1820,7 +1820,7 @@ func (s *SolarSystem) AddStation(c *Station) {
 	}
 
 	// obtain lock
-	s.Lock.Lock()
+	s.Lock.Lock("solarsystem.AddStation")
 	defer s.Lock.Unlock()
 
 	// add planet
@@ -1836,7 +1836,7 @@ func (s *SolarSystem) AddClient(c *shared.GameClient, lock bool) {
 
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.AddClient")
 		defer s.Lock.Unlock()
 	}
 
@@ -1853,7 +1853,7 @@ func (s *SolarSystem) RemoveClient(c *shared.GameClient, lock bool) {
 
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.RemoveClient")
 		defer s.Lock.Unlock()
 	}
 
@@ -1867,7 +1867,7 @@ func (s *SolarSystem) CopyClients(lock bool) []*shared.GameClient {
 
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.CopyClients")
 		defer s.Lock.Unlock()
 	}
 
@@ -1918,7 +1918,7 @@ func (s *SolarSystem) CopyClients(lock bool) []*shared.GameClient {
 func (s *SolarSystem) CopyShips(lock bool) map[string]*Ship {
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.CopyShips")
 		defer s.Lock.Unlock()
 	}
 
@@ -1940,7 +1940,7 @@ func (s *SolarSystem) MirrorShipMap(lock bool) map[string]*Ship {
 
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.MirrorShipMap")
 		defer s.Lock.Unlock()
 	}
 
@@ -1959,7 +1959,7 @@ func (s *SolarSystem) MirrorShipMap(lock bool) map[string]*Ship {
 func (s *SolarSystem) CopyStations(lock bool) map[string]*Station {
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.CopyStations")
 		defer s.Lock.Unlock()
 	}
 
@@ -1980,7 +1980,7 @@ func (s *SolarSystem) CopyStations(lock bool) map[string]*Station {
 func (s *SolarSystem) MirrorStationMap(lock bool) map[string]*Station {
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.MirrorStationMap")
 		defer s.Lock.Unlock()
 	}
 
@@ -1999,7 +1999,7 @@ func (s *SolarSystem) MirrorStationMap(lock bool) map[string]*Station {
 func (s *SolarSystem) CopyJumpholes(lock bool) map[string]*Jumphole {
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.CopyJumpholes")
 		defer s.Lock.Unlock()
 	}
 
@@ -2020,7 +2020,7 @@ func (s *SolarSystem) CopyJumpholes(lock bool) map[string]*Jumphole {
 func (s *SolarSystem) CopyAsteroids(lock bool) map[string]*Asteroid {
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.CopyAsteroids")
 		defer s.Lock.Unlock()
 	}
 
@@ -2041,7 +2041,7 @@ func (s *SolarSystem) CopyAsteroids(lock bool) map[string]*Asteroid {
 func (s *SolarSystem) CopyStars(lock bool) map[string]*Star {
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.CopyStars")
 		defer s.Lock.Unlock()
 	}
 
@@ -2062,7 +2062,7 @@ func (s *SolarSystem) CopyStars(lock bool) map[string]*Star {
 func (s *SolarSystem) CopyPlanets(lock bool) map[string]*Planet {
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.CopyPlanets")
 		defer s.Lock.Unlock()
 	}
 
@@ -2083,7 +2083,7 @@ func (s *SolarSystem) CopyPlanets(lock bool) map[string]*Planet {
 func (s *SolarSystem) StoreOpenSellOrder(order *SellOrder, lock bool) {
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
+		s.Lock.Lock("solarsystem.StoreOpenSellOrder")
 		defer s.Lock.Unlock()
 	}
 
@@ -2093,26 +2093,26 @@ func (s *SolarSystem) StoreOpenSellOrder(order *SellOrder, lock bool) {
 
 // Attempt to lock every entity in the system, and the system itself - never call from within the system!
 func (s *SolarSystem) TestLocks() {
-	s.Lock.Lock()
+	s.Lock.Lock("solarsystem.TestLocks")
 	defer s.Lock.Unlock()
 
 	for _, e := range s.asteroids {
-		e.Lock.Lock()
+		e.Lock.Lock("solarsystem.TestLocks::asteroids")
 		defer e.Lock.Unlock()
 	}
 
 	for _, e := range s.jumpholes {
-		e.Lock.Lock()
+		e.Lock.Lock("solarsystem.TestLocks::jumpholes")
 		defer e.Lock.Unlock()
 	}
 
 	for _, e := range s.stations {
-		e.Lock.Lock()
+		e.Lock.Lock("solarsystem.TestLocks::stations")
 		defer e.Lock.Unlock()
 	}
 
 	for _, e := range s.ships {
-		e.Lock.Lock()
+		e.Lock.Lock("solarsystem.TestLocks::ships")
 		defer e.Lock.Unlock()
 	}
 }

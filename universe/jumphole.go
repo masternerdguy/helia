@@ -42,7 +42,7 @@ func (s *Jumphole) ToPhysicsDummy() physics.Dummy {
 
 // Returns a copy of the jumphole
 func (s *Jumphole) CopyJumphole() Jumphole {
-	s.Lock.Lock()
+	s.Lock.Lock("jumphole.CopyJumphole")
 	defer s.Lock.Unlock()
 
 	return Jumphole{

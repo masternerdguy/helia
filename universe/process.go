@@ -27,7 +27,7 @@ type StationProcess struct {
 // Updates a station manufacturing process for a tick
 func (p *StationProcess) PeriodicUpdate(dT int64) {
 	// obtain lock
-	p.Lock.Lock()
+	p.Lock.Lock("process.PeriodicUpdate")
 	defer p.Lock.Unlock()
 
 	// check process status

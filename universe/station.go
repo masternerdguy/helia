@@ -34,7 +34,7 @@ type Station struct {
 // Initializes internal aspects of Station
 func (s *Station) Initialize() {
 	// obtain lock
-	s.Lock.Lock()
+	s.Lock.Lock("station.Initialize")
 	defer s.Lock.Unlock()
 
 	// initialize maps
@@ -111,7 +111,7 @@ func (s *Station) Initialize() {
 
 // Processes the station for a tick
 func (s *Station) PeriodicUpdate() {
-	s.Lock.Lock()
+	s.Lock.Lock("station.PeriodicUpdate")
 	defer s.Lock.Unlock()
 
 	// calculate delta and store time
@@ -129,7 +129,7 @@ func (s *Station) PeriodicUpdate() {
 
 // Returns a copy of the station
 func (s *Station) CopyStation() Station {
-	s.Lock.Lock()
+	s.Lock.Lock("station.CopyStation")
 	defer s.Lock.Unlock()
 
 	copiedProcesses := make(map[string]*StationProcess)

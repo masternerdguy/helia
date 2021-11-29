@@ -29,7 +29,7 @@ type dbConfig struct {
 
 func connect() (*sql.DB, error) {
 	// lock connect to handle excessive clients
-	sharedDbLock.Lock()
+	sharedDbLock.Lock("config.connect")
 	defer sharedDbLock.Unlock()
 
 	// check if we are already connected
