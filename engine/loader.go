@@ -402,8 +402,6 @@ func saveUniverse(u *universe.Universe) {
 
 			// save npc stations to database
 			for _, station := range stations {
-				log.Println(fmt.Sprintf("saving station %v", station.StationName))
-
 				dbStation := sql.Station{
 					ID:          station.ID,
 					StationName: station.StationName,
@@ -425,8 +423,6 @@ func saveUniverse(u *universe.Universe) {
 
 				// save manufacturing processes
 				for _, p := range station.Processes {
-					log.Println(fmt.Sprintf("saving process %v", p.Process.Name))
-
 					// convert internal state to db model
 					dbState := sql.StationProcessInternalState{
 						IsRunning: p.InternalState.IsRunning,
