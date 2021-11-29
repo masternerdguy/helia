@@ -304,6 +304,8 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (i
 		modFamily = "engine"
 	} else if itemFamilyID == "heat_sink" {
 		modFamily = "heat"
+	} else if itemFamilyID == "drag_amp" {
+		modFamily = "tackle"
 	}
 
 	if modFamily == "" {
