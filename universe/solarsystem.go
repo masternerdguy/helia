@@ -1138,6 +1138,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 				if dt.Seconds() < 2 {
 					c.WriteErrorMessage("you need to wait to post again")
+
+					// reset timestamp to deter spam attempts at posting
+					c.LastChatPostedAt = time.Now()
 					continue
 				}
 
