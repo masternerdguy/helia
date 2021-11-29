@@ -34,6 +34,9 @@ type GameClient struct {
 	StartID           uuid.UUID
 	EscrowContainerID uuid.UUID
 
+	// to throttle incoming chat messages
+	LastChatPostedAt time.Time
+
 	// property cache
 	propertyCache PropertyCache
 
@@ -70,6 +73,9 @@ func (c *GameClient) Initialize() {
 	c.shipEventQueue = &eventQueue{
 		Events: make([]Event, 0),
 	}
+
+	// initialize last message stamp
+	c.LastChatPostedAt = time.Now()
 }
 
 // Writes a message to a client

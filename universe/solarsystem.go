@@ -1130,6 +1130,17 @@ func (s *SolarSystem) PeriodicUpdate() {
 				// extract data
 				data := evt.Body.(models.ClientPostSystemChatMessageBody)
 
+				// throttle posting rate
+				lp := c.LastChatPostedAt
+				ct := time.Now()
+
+				dt := ct.Sub(lp)
+
+				if dt.Seconds() < 2 {
+					c.WriteErrorMessage("you need to wait to post again")
+					continue
+				}
+
 				// verify message constraints
 				if len(data.Message) > 57 {
 					c.WriteErrorMessage("chat messages must be 57 characters or less")
@@ -1147,6 +1158,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 					SenderName: sh.OwnerName,
 					Message:    data.Message,
 				})
+
+				// update timestamp
+				c.LastChatPostedAt = time.Now()
 			}
 		}
 	}
