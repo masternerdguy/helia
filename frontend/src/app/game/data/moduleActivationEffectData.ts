@@ -38,6 +38,15 @@ export class ModuleActivationEffectRepository {
       thickness: 2,
     };
   }
+
+  basicAuto5Cannon(): ModuleActivationEffectData {
+    return {
+      type: 'autocannon',
+      duration: 3500,
+      color: 'yellow',
+      thickness: 0.78,
+    };
+  }
 }
 
 export class ModuleActivationEffectData {

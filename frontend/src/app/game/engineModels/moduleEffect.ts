@@ -8,6 +8,7 @@ import { Player, TargetType } from './player';
 import { Station } from './station';
 import { Ship } from './ship';
 import { Asteroid } from './asteroid';
+import { angleBetween, magnitude } from '../engineMath';
 
 export class ModuleEffect extends WsPushModuleEffect {
   vfxData: ModuleActivationEffectData;
@@ -41,6 +42,8 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicIceMiner();
     } else if (b.gfxEffect === 'basic_shield_booster') {
       this.vfxData = repo.basicShieldBooster();
+    } else if (b.gfxEffect === 'basic_auto-5_cannon') {
+      this.vfxData = repo.basicAuto5Cannon();
     }
 
     this.maxLifeTime = this.vfxData?.duration ?? 0;
@@ -230,6 +233,74 @@ export class ModuleEffect extends WsPushModuleEffect {
           ctx.beginPath();
           ctx.moveTo(sx, sy);
           ctx.lineTo(tx, ty);
+          ctx.lineWidth = lt;
+          ctx.stroke();
+
+          // revert filter
+          ctx.filter = oldFilter;
+        }
+      } else if (this.vfxData.type === 'autocannon') {
+        /* draw a line of the given color from source to destination */
+        if (this.objStart && this.objEnd) {
+          // get end-point coordinates
+          const src = getTargetCoordinatesAndRadius(
+            this.objStart,
+            this.objStartType
+          );
+          const dest = getTargetCoordinatesAndRadius(
+            this.objEnd,
+            this.objEndType
+          );
+
+          // apply offset to destination coordinates for cooler effect
+          if (!this.endPosOffset) {
+            // get a random point within the radius of the target
+            const bR = dest[2] / 3;
+
+            const ox = randomIntFromInterval(-bR, bR);
+            const oy = randomIntFromInterval(-bR, bR);
+
+            // store offset
+            this.endPosOffset = [ox, oy];
+          }
+
+          dest[0] += this.endPosOffset[0];
+          dest[1] += this.endPosOffset[1];
+
+          // todo: implement hardpoint offset for source ship
+
+          // project to screen
+          const sx = camera.projectX(src[0]);
+          const sy = camera.projectY(src[1]);
+
+          const tx = camera.projectX(dest[0]);
+          const ty = camera.projectY(dest[1]);
+
+          // project autocannon trail thickness
+          const phase = Math.cos(this.lifeElapsed) / (2 * Math.PI);
+          const lt = camera.projectR(this.vfxData.thickness * phase);
+
+          // style line
+          ctx.strokeStyle = this.vfxData.color;
+
+          const oldFilter = ctx.filter;
+
+          if (this.vfxData.filter) {
+            ctx.filter = this.vfxData.filter;
+          }
+
+          // get line length and angle
+          const llm = magnitude(sx, sy, tx, ty) * phase;
+          const lla = angleBetween(tx, ty, sx, sy) / (Math.PI/180);
+          
+          // determine actual end
+          const txA = tx + (llm * Math.cos(lla));
+          const tyA = ty + (llm * Math.sin(lla));
+
+          // draw line
+          ctx.beginPath();
+          ctx.moveTo(sx, sy);
+          ctx.lineTo(txA, tyA);
           ctx.lineWidth = lt;
           ctx.stroke();
 
