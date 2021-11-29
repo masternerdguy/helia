@@ -137,6 +137,18 @@ func (e *HeliaEngine) Start() {
 			time.Sleep(time.Second * 60)
 		}
 	}(e)
+
+	go func() {
+		for {
+			// automatic shutdown in event of deadlock
+			if shared.MutexFreeze {
+				e.Shutdown()
+			}
+
+			// avoid pegging CPU
+			time.Sleep(1 * time.Second)
+		}
+	}()
 }
 
 // Saves the current state of the simulation and halts

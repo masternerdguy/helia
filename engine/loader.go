@@ -386,19 +386,23 @@ func saveUniverse(u *universe.Universe) {
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
 			// stash clients in system
-			lc := s.CopyClients(true)
+			lc := s.CopyClients(!shared.MutexFreeze)
 			clients = append(clients, lc...)
 
 			// get ships in system
-			ships := s.CopyShips(true)
+			ships := s.CopyShips(!shared.MutexFreeze)
 
 			// save ships to database
 			for _, ship := range ships {
+				// obtain lock on copy
+				ship.Lock.Lock()
+				defer ship.Lock.Unlock()
+
 				saveShip(ship)
 			}
 
 			// get npc stations in system
-			stations := s.CopyStations(true)
+			stations := s.CopyStations(!shared.MutexFreeze)
 
 			// save npc stations to database
 			for _, station := range stations {
@@ -427,6 +431,10 @@ func saveUniverse(u *universe.Universe) {
 
 				// save manufacturing processes
 				for _, p := range station.Processes {
+					// obtain lock on copy
+					p.Lock.Lock()
+					defer p.Lock.Unlock()
+
 					// convert internal state to db model
 					dbState := sql.StationProcessInternalState{
 						IsRunning: p.InternalState.IsRunning,
@@ -474,6 +482,10 @@ func saveUniverse(u *universe.Universe) {
 
 	// iterate over clients
 	for _, v := range clients {
+		// obtain lock on copy
+		v.Lock.Lock()
+		defer v.Lock.Unlock()
+
 		// save reputation sheet
 		sheet := SQLFromPlayerReputationSheet(&v.ReputationSheet)
 		err := userSvc.SaveReputationSheet(*v.UID, sheet)

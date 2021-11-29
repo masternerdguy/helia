@@ -6,6 +6,7 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
@@ -1881,12 +1882,21 @@ func (s *SolarSystem) CopyClients(lock bool) []*shared.GameClient {
 			Conn: nil,
 			ReputationSheet: shared.PlayerReputationSheet{
 				FactionEntries: make(map[string]*shared.PlayerReputationSheetFactionEntry),
+				Lock: shared.LabeledMutex{
+					// label mutex
+					Structure: "PlayerReputationSheet",
+					UID:       fmt.Sprintf("%v :: %v :: %v", c.UID, time.Now(), rand.Float64()),
+				},
 			},
 			CurrentShipID:     c.CurrentShipID,
 			CurrentSystemID:   c.CurrentSystemID,
 			StartID:           c.StartID,
 			EscrowContainerID: c.EscrowContainerID,
 		}
+
+		// label mutex
+		c.Lock.Structure = "GameClient"
+		c.Lock.UID = fmt.Sprintf("%v :: %v :: %v", c.UID, time.Now(), rand.Float64())
 
 		for k, f := range c.ReputationSheet.FactionEntries {
 			if f != nil {

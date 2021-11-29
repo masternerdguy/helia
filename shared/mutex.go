@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+var MutexFreeze bool
+
 // A mutex that contains information about what it locks
 type LabeledMutex struct {
 	Structure    string
@@ -47,17 +49,23 @@ func (m *LabeledMutex) Lock() {
 				break
 			}
 
+			// exit goroutine if global freeze declared
+			if MutexFreeze {
+				break
+			}
+
 			if it > 500 {
 				// are we still locked?
 				if m.lastLocked >= m.lastUnlocked {
-					// this is a freeze - dump and exit
+					MutexFreeze = true
+
+					// this is a freeze - core will save the world state and shut down the system
 					go func() {
-						// give time for panic to print output
-						time.Sleep(20 * time.Millisecond)
-						os.Exit(0)
+						time.Sleep(10 * time.Second)
+						panic(fmt.Sprintf("Mutex locked for a very suspicious amount of time, this was almost certainly a freeze: %v", m))
 					}()
 
-					panic(fmt.Sprintf("Mutex slept for a very suspicious amount of time, this is likely a freeze: %v", m))
+					panic(fmt.Sprintf("! Emergency shutdown - deadlock detected: %v", m))
 				} else {
 					// lock released!
 					break

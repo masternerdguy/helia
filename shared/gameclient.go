@@ -20,7 +20,7 @@ type GameClient struct {
 	SID  *uuid.UUID
 	UID  *uuid.UUID
 	Conn *websocket.Conn
-	lock LabeledMutex
+	Lock LabeledMutex
 
 	// standing to be kept in sync with flown ship(s)
 	ReputationSheet PlayerReputationSheet
@@ -59,12 +59,12 @@ type ShipPropertyCacheEntry struct {
 // Initializes the internals of a GameClient
 func (c *GameClient) Initialize() {
 	// label mutex
-	c.lock.Structure = "GameClient"
-	c.lock.UID = fmt.Sprintf("%v :: %v :: %v", c.UID, time.Now(), rand.Float64())
+	c.Lock.Structure = "GameClient"
+	c.Lock.UID = fmt.Sprintf("%v :: %v :: %v", c.UID, time.Now(), rand.Float64())
 
 	// obtain lock
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.Lock.Lock()
+	defer c.Lock.Unlock()
 
 	// initialize empty event queue
 	c.shipEventQueue = &eventQueue{
@@ -74,8 +74,8 @@ func (c *GameClient) Initialize() {
 
 // Writes a message to a client
 func (c *GameClient) WriteMessage(msg *models.GameMessage) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.Lock.Lock()
+	defer c.Lock.Unlock()
 
 	// package message as json
 	json, err := json.Marshal(msg)
@@ -131,8 +131,8 @@ func (c *GameClient) WriteErrorMessage(msg string) {
 
 // Adds an event to the ship event queue
 func (c *GameClient) PushShipEvent(evt interface{}, eventType int) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.Lock.Lock()
+	defer c.Lock.Unlock()
 
 	c.shipEventQueue.Events = append(c.shipEventQueue.Events, Event{
 		Type: eventType,
@@ -142,8 +142,8 @@ func (c *GameClient) PushShipEvent(evt interface{}, eventType int) {
 
 // Gets the latest event for the player's current ship
 func (c *GameClient) PopShipEvent() *Event {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.Lock.Lock()
+	defer c.Lock.Unlock()
 
 	if len(c.shipEventQueue.Events) > 0 {
 		// get top element
@@ -160,15 +160,15 @@ func (c *GameClient) PopShipEvent() *Event {
 }
 
 func (c *GameClient) GetPropertyCache() PropertyCache {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.Lock.Lock()
+	defer c.Lock.Unlock()
 
 	return c.propertyCache
 }
 
 func (c *GameClient) SetPropertyCache(x PropertyCache) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.Lock.Lock()
+	defer c.Lock.Unlock()
 
 	c.propertyCache = x
 }
