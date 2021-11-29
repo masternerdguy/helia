@@ -302,6 +302,8 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (i
 		modFamily = "fuel"
 	} else if itemFamilyID == "eng_oc" {
 		modFamily = "engine"
+	} else if itemFamilyID == "heat_sink" {
+		modFamily = "heat"
 	}
 
 	if modFamily == "" {
@@ -957,7 +959,20 @@ func (s *Ship) GetRealMaxHeat() float64 {
 
 // Returns the real heat dissipation rate of the ship after modifiers
 func (s *Ship) GetRealHeatSink() float64 {
-	return s.TemplateData.BaseHeatSink
+	// get base heat sink
+	a := s.TemplateData.BaseHeatSink
+
+	// add bonuses from passive modules in rack c
+	for _, e := range s.Fitting.CRack {
+		heatSinkAdd, s := e.ItemMeta.GetFloat64("heat_sink_add")
+
+		if s {
+			// include in real max
+			a += heatSinkAdd
+		}
+	}
+
+	return a
 }
 
 // Returns the real max fuel of the ship after modifiers
