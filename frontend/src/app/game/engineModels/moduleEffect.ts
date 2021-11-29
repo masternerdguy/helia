@@ -46,7 +46,7 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicAuto5Cannon();
     } else if (b.gfxEffect === 'basic_aether_dragger') {
       this.vfxData = repo.basicAetherDragger();
-    } 
+    }
 
     this.maxLifeTime = this.vfxData?.duration ?? 0;
 
@@ -293,11 +293,11 @@ export class ModuleEffect extends WsPushModuleEffect {
 
           // get line length and angle
           const llm = magnitude(sx, sy, tx, ty) * phase;
-          const lla = angleBetween(tx, ty, sx, sy) / (Math.PI/180);
-          
+          const lla = angleBetween(tx, ty, sx, sy) / (Math.PI / 180);
+
           // determine actual end
-          const txA = tx + (llm * Math.cos(lla));
-          const tyA = ty + (llm * Math.sin(lla));
+          const txA = tx + llm * Math.cos(lla);
+          const tyA = ty + llm * Math.sin(lla);
 
           // draw line
           ctx.beginPath();
@@ -344,10 +344,7 @@ export class ModuleEffect extends WsPushModuleEffect {
         ctx.filter = oldFilter;
       } else if (this.vfxData.type === 'aether_drag') {
         // get start coordinates
-        const src = getTargetCoordinatesAndRadius(
-          this.objEnd,
-          this.objEndType
-        );
+        const src = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
 
         // project to screen
         const sx = camera.projectX(src[0]);
@@ -366,7 +363,7 @@ export class ModuleEffect extends WsPushModuleEffect {
         }
 
         // use elapsed lifetime ratio to contract radius
-        const er = Math.max(0, sr * (1 - (this.lifeElapsed / this.maxLifeTime)));
+        const er = Math.max(0, sr * (1 - this.lifeElapsed / this.maxLifeTime));
 
         // draw aether drag field
         ctx.beginPath();
