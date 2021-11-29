@@ -394,7 +394,11 @@ func saveUniverse(u *universe.Universe) {
 
 			// save ships to database
 			for _, ship := range ships {
-				saveShip(ship)
+				err := saveShip(ship)
+
+				if err != nil {
+					log.Println(fmt.Sprintf("Error saving ship: %v | %v", ship, err))
+				}
 			}
 
 			// get npc stations in system
