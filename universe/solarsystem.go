@@ -1240,6 +1240,16 @@ func (s *SolarSystem) PeriodicUpdate() {
 		}
 	}
 
+	// update missiles
+	for _, m := range s.missiles {
+		if m.TicksRemaining <= 0 {
+			// schedule missile removal
+			dropMissiles = append(dropMissiles, m.ID.String())
+		} else {
+			m.PeriodicUpdate()
+		}
+	}
+
 	// remove dropped missiles
 	for _, k := range dropMissiles {
 		// get missile and backing module
@@ -1719,11 +1729,13 @@ func (s *SolarSystem) RemoveShip(c *Ship, lock bool) {
 	// get target type registry
 	tgtRegistry := models.NewTargetTypeRegistry()
 
-	// remove missiles tracking ship
+	// remove missiles tracking or fired by ship
 	dropMissiles := make([]string, 0)
 
 	for k, m := range s.missiles {
 		if m.TargetType == tgtRegistry.Ship && m.TargetID == c.ID {
+			dropMissiles = append(dropMissiles, k)
+		} else if m.FiredByID == c.ID {
 			dropMissiles = append(dropMissiles, k)
 		}
 	}
