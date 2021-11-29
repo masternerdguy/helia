@@ -1927,7 +1927,7 @@ func (s *SolarSystem) CopyShips(lock bool) map[string]*Ship {
 
 	// copy ships into copy map
 	for k, v := range s.ships {
-		c := v.CopyShip()
+		c := v.CopyShip(lock)
 		copy[k] = c
 	}
 

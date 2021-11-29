@@ -366,9 +366,11 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (i
 }
 
 // Returns a copy of the ship
-func (s *Ship) CopyShip() *Ship {
-	s.Lock.Lock("ship.CopyShip")
-	defer s.Lock.Unlock()
+func (s *Ship) CopyShip(lock bool) *Ship {
+	if lock {
+		s.Lock.Lock("ship.CopyShip")
+		defer s.Lock.Unlock()
+	}
 
 	sc := Ship{
 		ID:                    s.ID,

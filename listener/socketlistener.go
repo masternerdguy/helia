@@ -1286,7 +1286,7 @@ func (l *SocketListener) addClient(c *shared.GameClient) {
 
 			for _, os := range ownedShips {
 				// copy entry
-				osc := os.CopyShip()
+				osc := os.CopyShip(true)
 
 				// copy guaranteed fields
 				z := shared.ShipPropertyCacheEntry{
