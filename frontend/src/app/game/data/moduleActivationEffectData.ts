@@ -39,11 +39,22 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  basicAetherDragger(): ModuleActivationEffectData {
+    return {
+      type: 'aether_drag',
+      duration: 10000,
+      color: '#dbf4ff',
+      filter: 'blur(5px)', // "feather"
+      thickness: 3,
+    };
+  }
+
   basicAuto5Cannon(): ModuleActivationEffectData {
     return {
       type: 'autocannon',
       duration: 3500,
       color: 'yellow',
+      filter: 'blur(0.25px)', // "feather"
       thickness: 0.78,
     };
   }

@@ -527,14 +527,24 @@ func (s *Ship) PeriodicUpdate() {
 			s.Theta += 360
 		}
 
-		// apply dampening
+		// calculate felt drag
 		drag := s.GetRealSpaceDrag()
 
 		dampX := drag * s.VelX
 		dampY := drag * s.VelY
 
-		s.VelX -= dampX
-		s.VelY -= dampY
+		// apply dampening
+		if math.Abs(dampX*(1+Epsilon)) >= math.Abs(s.VelX) {
+			s.VelX = 0
+		} else {
+			s.VelX -= dampX
+		}
+
+		if math.Abs(dampY*(1+Epsilon)) >= math.Abs(s.VelY) {
+			s.VelY = 0
+		} else {
+			s.VelY -= dampY
+		}
 
 		// update modules
 		for i := range s.Fitting.ARack {
@@ -1675,9 +1685,13 @@ func (s *Ship) forwardThrust(scale float64) {
 	// calculate burn
 	burn := s.GetRealAccel() * scale
 
+	// account for additional drag effects
+	drag := s.GetRealSpaceDrag()
+	dragRatio := SpaceDrag / drag
+
 	// accelerate along theta using thrust proportional to bounded magnitude
-	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (burn)
-	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (burn)
+	s.VelX += math.Cos(s.Theta*(math.Pi/-180)) * (burn * dragRatio)
+	s.VelY += math.Sin(s.Theta*(math.Pi/-180)) * (burn * dragRatio)
 
 	// consume fuel
 	s.Fuel -= math.Abs(burn) * ShipFuelBurn

@@ -44,7 +44,9 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicShieldBooster();
     } else if (b.gfxEffect === 'basic_auto-5_cannon') {
       this.vfxData = repo.basicAuto5Cannon();
-    }
+    } else if (b.gfxEffect === 'basic_aether_dragger') {
+      this.vfxData = repo.basicAetherDragger();
+    } 
 
     this.maxLifeTime = this.vfxData?.duration ?? 0;
 
@@ -333,7 +335,40 @@ export class ModuleEffect extends WsPushModuleEffect {
         // use elapsed lifetime ratio to expand radius
         const er = Math.max(0, sr * (this.lifeElapsed / this.maxLifeTime));
 
-        // draw explosion
+        // draw boost
+        ctx.beginPath();
+        ctx.arc(sx, sy, er, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        // restore filter
+        ctx.filter = oldFilter;
+      } else if (this.vfxData.type === 'aether_drag') {
+        // get start coordinates
+        const src = getTargetCoordinatesAndRadius(
+          this.objEnd,
+          this.objEndType
+        );
+
+        // project to screen
+        const sx = camera.projectX(src[0]);
+        const sy = camera.projectY(src[1]);
+        const sr = camera.projectR(src[2]);
+        const bt = camera.projectR(this.vfxData.thickness);
+
+        // backup filter
+        const oldFilter = ctx.filter;
+
+        // style boost
+        ctx.strokeStyle = this.vfxData.color;
+        if (this.vfxData.filter) {
+          ctx.filter = this.vfxData.filter;
+          ctx.lineWidth = bt;
+        }
+
+        // use elapsed lifetime ratio to contract radius
+        const er = Math.max(0, sr * (1 - (this.lifeElapsed / this.maxLifeTime)));
+
+        // draw aether drag field
         ctx.beginPath();
         ctx.arc(sx, sy, er, 0, 2 * Math.PI);
         ctx.stroke();
