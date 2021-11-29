@@ -1,10 +1,8 @@
 package universe
 
 import (
-	"fmt"
 	"helia/listener/models"
 	"helia/physics"
-	"log"
 	"math"
 	"math/rand"
 
@@ -38,8 +36,6 @@ func (s *Missile) PeriodicUpdate() {
 	failureChancePerTick := failureChance / float64(s.TicksRemaining)
 
 	roll := rand.Float64()
-
-	log.Println(fmt.Sprintf("%v <= %v :: %v", roll, failureChancePerTick, s.TicksRemaining))
 
 	if roll <= failureChancePerTick {
 		s.TicksRemaining = 0
