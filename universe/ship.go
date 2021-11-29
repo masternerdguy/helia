@@ -528,8 +528,10 @@ func (s *Ship) PeriodicUpdate() {
 		}
 
 		// apply dampening
-		dampX := SpaceDrag * s.VelX
-		dampY := SpaceDrag * s.VelY
+		drag := s.GetRealSpaceDrag()
+
+		dampX := drag * s.VelX
+		dampY := drag * s.VelY
 
 		s.VelX -= dampX
 		s.VelY -= dampY
@@ -899,6 +901,27 @@ func (s *Ship) GetRealAccel() float64 {
 
 	// return true acceleration
 	return s.TemplateData.BaseAccel * tpm
+}
+
+// Returns the real drag felt by a ship after modifiers
+func (s *Ship) GetRealSpaceDrag() float64 {
+	// temporary modifier percentage accumulator
+	tpm := 1.0
+
+	// apply temporary modifiers
+	for _, e := range s.TemporaryModifiers {
+		if e.Attribute == "drag" {
+			tpm += e.Percentage
+		}
+	}
+
+	// floor percentage modifier at 0
+	if tpm < 0 {
+		tpm = 0
+	}
+
+	// return true drag
+	return SpaceDrag * tpm
 }
 
 // Returns the real turning capability of a ship after modifiers
@@ -1278,7 +1301,7 @@ func (s *Ship) doAutopilotManualNav() {
 	s.forwardThrust(s.AutopilotManualNav.Magnitude)
 
 	// decrease magnitude (this is to allow this to expire and require another move order from the player)
-	s.AutopilotManualNav.Magnitude -= s.AutopilotManualNav.Magnitude * SpaceDrag
+	s.AutopilotManualNav.Magnitude -= s.AutopilotManualNav.Magnitude * s.GetRealSpaceDrag()
 
 	// stop when magnitude is low
 	if s.AutopilotManualNav.Magnitude < 0.0001 {
@@ -1570,7 +1593,7 @@ func (s *Ship) flyToPoint(tX float64, tY float64, hold float64, caution float64)
 	turnMag := s.facePoint(tX, tY)
 
 	// determine whether to thrust forward and by how much
-	scale := ((s.GetRealAccel() * (caution / SpaceDrag)) / 0.175)
+	scale := ((s.GetRealAccel() * (caution / s.GetRealSpaceDrag())) / 0.175)
 	d := (physics.Distance(s.ToPhysicsDummy(), physics.Dummy{PosX: tX, PosY: tY}) - hold)
 
 	if turnMag < 1 {
@@ -3123,6 +3146,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsEngineOvercharger()
 			} else if m.ItemTypeFamily == "missile_launcher" {
 				canActivate = m.activateAsMissileLauncher()
+			} else if m.ItemTypeFamily == "drag_amp" {
+				canActivate = m.activateAsAetherDragger()
 			}
 
 			if canActivate {
@@ -3632,6 +3657,130 @@ func (m *FittedSlot) activateAsEngineOvercharger() bool {
 	}
 
 	m.shipMountedOn.TemporaryModifiers = append(m.shipMountedOn.TemporaryModifiers, modifier)
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsAetherDragger() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.NewTargetTypeRegistry()
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtI interface{}
+
+	if *m.TargetType == tgtReg.Ship {
+		// find ship
+		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtI = tgt
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+	}
+
+	// get drag multiplier
+	dragMul, _ := m.ItemMeta.GetFloat64("drag_multiplier")
+
+	// account for falloff if present
+	falloff, found := m.ItemMeta.GetString("falloff")
+	rangeRatio := 1.0 // default to 100%
+
+	if found {
+		// adjust based on falloff style
+		if falloff == "linear" {
+			// drag increase is a proportion of the distance to target over max range (closer is higher)
+			rangeRatio = 1 - (d / modRange)
+			dragMul *= rangeRatio
+		} else if falloff == "reverse_linear" {
+			// drag increase is a proportion of the distance to target over max range (further is higher)
+			rangeRatio = (d / modRange)
+
+			if d > modRange {
+				rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+			}
+
+			dragMul *= rangeRatio
+		}
+	}
+
+	// apply drag to target
+	if *m.TargetType == tgtReg.Ship {
+		c := tgtI.(*Ship)
+
+		// calculate effect duration in ticks\
+		cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
+		dT := (cooldown * 1000) / Heartbeat
+
+		// add temporary modifier to target
+		modifier := TemporaryShipModifier{
+			Attribute:      "drag",
+			Percentage:     dragMul,
+			RemainingTicks: int(dT),
+		}
+
+		c.TemporaryModifiers = append(m.shipMountedOn.TemporaryModifiers, modifier)
+	}
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+			ObjEndID:     m.TargetID,
+			ObjEndType:   m.TargetType,
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
 
 	// module activates!
 	return true
