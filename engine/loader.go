@@ -394,10 +394,6 @@ func saveUniverse(u *universe.Universe) {
 
 			// save ships to database
 			for _, ship := range ships {
-				// obtain lock on copy
-				ship.Lock.Lock()
-				defer ship.Lock.Unlock()
-
 				saveShip(ship)
 			}
 
@@ -406,9 +402,7 @@ func saveUniverse(u *universe.Universe) {
 
 			// save npc stations to database
 			for _, station := range stations {
-				// obtain lock on copy
-				station.Lock.Lock()
-				defer station.Lock.Unlock()
+				log.Println(fmt.Sprintf("saving station %v", station.StationName))
 
 				dbStation := sql.Station{
 					ID:          station.ID,
@@ -431,9 +425,7 @@ func saveUniverse(u *universe.Universe) {
 
 				// save manufacturing processes
 				for _, p := range station.Processes {
-					// obtain lock on copy
-					p.Lock.Lock()
-					defer p.Lock.Unlock()
+					log.Println(fmt.Sprintf("saving process %v", p.Process.Name))
 
 					// convert internal state to db model
 					dbState := sql.StationProcessInternalState{
@@ -482,10 +474,6 @@ func saveUniverse(u *universe.Universe) {
 
 	// iterate over clients
 	for _, v := range clients {
-		// obtain lock on copy
-		v.Lock.Lock()
-		defer v.Lock.Unlock()
-
 		// save reputation sheet
 		sheet := SQLFromPlayerReputationSheet(&v.ReputationSheet)
 		err := userSvc.SaveReputationSheet(*v.UID, sheet)
