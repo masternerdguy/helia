@@ -11,6 +11,7 @@ export class Missile extends WSMissile {
 
   constructor(ws: WSMissile) {
     super();
+    this.lastSeen = Date.now();
 
     // copy from ws model
     this.id = ws.id;
@@ -33,10 +34,10 @@ export class Missile extends WSMissile {
     const sr = camera.projectR(this.r);
 
     // draw bounding circle
-    ctx.strokeStyle = 'pink';
+    ctx.strokeStyle = 'darkred';
     ctx.beginPath();
-    ctx.arc(sx, sy, Math.max(sr, 3), 0, 2 * Math.PI, false);
-    ctx.lineWidth = 1.5;
+    ctx.arc(sx, sy, Math.max(sr, 1.5), 0, 2 * Math.PI, false);
+    ctx.lineWidth = 0.95;
     ctx.stroke();
 
     // determine direction
