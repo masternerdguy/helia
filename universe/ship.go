@@ -1800,7 +1800,7 @@ func (s *Ship) doAutopilotFight() {
 
 				// determine whether to activate
 				roll := physics.RandInRange(0, 100)
-				hit := int((1 - hr) * 100)
+				hit := int(hr * 100)
 
 				if roll >= hit {
 					// activate module
@@ -1831,7 +1831,7 @@ func (s *Ship) doAutopilotFight() {
 
 				// determine whether to activate
 				roll := physics.RandInRange(0, 100)
-				hit := int((1 - hr) * 100)
+				hit := int(hr * 100)
 
 				if roll >= hit {
 					// activate module
