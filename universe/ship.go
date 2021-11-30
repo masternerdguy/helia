@@ -1833,6 +1833,16 @@ func (s *Ship) doAutopilotFight() {
 			heatAdd := 0.0
 
 			for i, v := range s.Fitting.BRack {
+				if v.ItemTypeFamily == "shield_booster" {
+					// make sure enough shield has been lost for this to be worth it
+					shieldBoost, _ := v.ItemMeta.GetFloat64("shield_boost_amount")
+					maxShield := s.GetRealMaxShield()
+
+					if s.Shield+shieldBoost >= 0.75*maxShield {
+						continue
+					}
+				}
+
 				// get heat
 				h, _ := v.ItemMeta.GetFloat64("activation_heat")
 
