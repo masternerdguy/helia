@@ -1751,9 +1751,9 @@ func (s *Ship) doAutopilotFight() {
 	// get registry
 	targetTypeReg := models.NewTargetTypeRegistry()
 
-	if s.AutopilotDock.Type == targetTypeReg.Ship {
+	if s.AutopilotFight.Type == targetTypeReg.Ship {
 		// find ship
-		targetShip := s.CurrentSystem.ships[s.AutopilotDock.TargetID.String()]
+		targetShip := s.CurrentSystem.ships[s.AutopilotFight.TargetID.String()]
 
 		if targetShip == nil {
 			s.CmdAbort(false)
@@ -3963,6 +3963,9 @@ func (m *FittedSlot) activateAsAetherDragger() bool {
 		m.WillRepeat = false
 		return false
 	}
+
+	// debug
+	m.shipMountedOn.CmdFight(*m.TargetID, *m.TargetType, false)
 
 	// get target
 	tgtReg := models.NewTargetTypeRegistry()
