@@ -59,6 +59,7 @@ export class SystemChatWindow extends GDIWindow {
     this.chatList.setX(0);
     this.chatList.setY(0);
     this.chatList.setFont(FontSize.large);
+    this.chatList.setOnClick(() => {});
 
     // pack
     this.addComponent(this.chatList);
