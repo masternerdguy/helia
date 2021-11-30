@@ -1307,6 +1307,11 @@ func (s *Ship) behaviourPatrol() {
 			lowestDistance := math.MaxFloat64
 
 			for _, sx := range s.CurrentSystem.ships {
+				// skip if docked
+				if sx.DockedAtStation != nil {
+					continue
+				}
+
 				// get distance
 				sA := s.ToPhysicsDummy()
 				sB := s.ToPhysicsDummy()
@@ -1314,6 +1319,15 @@ func (s *Ship) behaviourPatrol() {
 
 				// check standings
 				standing, openlyHostile := sx.CheckStandings(s.FactionID)
+
+				// debug
+				standing = -10
+				openlyHostile = true
+
+				// skip if self
+				if sx.ID == s.ID {
+					continue
+				}
 
 				// only attack openly hostile targets
 				if openlyHostile {
@@ -3326,6 +3340,11 @@ func (m *FittedSlot) PeriodicUpdate() {
 			// check if a target is required
 			needsTarget, _ := m.ItemTypeMeta.GetBool("needs_target")
 
+			// debug
+			breg := NewBehaviourRegistry()
+			m.shipMountedOn.BehaviourMode = &breg.Patrol
+			m.shipMountedOn.IsNPC = true
+
 			if needsTarget {
 				// check for a target
 				if m.TargetID == nil || m.TargetType == nil {
@@ -3339,10 +3358,19 @@ func (m *FittedSlot) PeriodicUpdate() {
 
 				if *m.TargetType == tgtReg.Ship {
 					// find ship
-					_, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+					sx, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
 
 					if !f {
 						// target doesn't exist - can't activate
+						m.TargetID = nil
+						m.TargetType = nil
+
+						return
+					}
+
+					// make sure this isn't the ship it's mounted on
+					if sx.ID == m.shipMountedOn.ID {
+						// target is self - can't activate
 						m.TargetID = nil
 						m.TargetType = nil
 
@@ -3963,9 +3991,6 @@ func (m *FittedSlot) activateAsAetherDragger() bool {
 		m.WillRepeat = false
 		return false
 	}
-
-	// debug
-	m.shipMountedOn.CmdFight(*m.TargetID, *m.TargetType, false)
 
 	// get target
 	tgtReg := models.NewTargetTypeRegistry()
