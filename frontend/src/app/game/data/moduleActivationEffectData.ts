@@ -29,6 +29,26 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  basicIceHarvester(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 3250,
+      color: 'darkblue',
+      filter: 'blur(3px)', // "feather"
+      thickness: 1.22,
+    };
+  }
+
+  basicOreHarvester(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 2819,
+      color: 'darkred',
+      filter: 'blur(2px)', // "feather"
+      thickness: 0.95,
+    };
+  }
+
   basicShieldBooster(): ModuleActivationEffectData {
     return {
       type: 'bubble_shield_boost',

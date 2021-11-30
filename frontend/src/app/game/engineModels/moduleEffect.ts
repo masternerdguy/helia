@@ -46,6 +46,10 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicAuto5Cannon();
     } else if (b.gfxEffect === 'basic_aether_dragger') {
       this.vfxData = repo.basicAetherDragger();
+    } else if (b.gfxEffect === 'basic_ice_harvester') {
+      this.vfxData = repo.basicIceHarvester();
+    } else if (b.gfxEffect === 'basic_ore_harvester') {
+      this.vfxData = repo.basicOreHarvester();
     }
 
     this.maxLifeTime = this.vfxData?.duration ?? 0;

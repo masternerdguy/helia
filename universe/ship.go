@@ -306,6 +306,8 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (i
 		modFamily = "heat"
 	} else if itemFamilyID == "drag_amp" {
 		modFamily = "tackle"
+	} else if itemFamilyID == "utility_miner" {
+		modFamily = "utility"
 	}
 
 	if modFamily == "" {
@@ -3184,6 +3186,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsMissileLauncher()
 			} else if m.ItemTypeFamily == "drag_amp" {
 				canActivate = m.activateAsAetherDragger()
+			} else if m.ItemTypeFamily == "utility_miner" {
+				canActivate = m.activateAsUtilityMiner()
 			}
 
 			if canActivate {
@@ -3803,6 +3807,236 @@ func (m *FittedSlot) activateAsAetherDragger() bool {
 		}
 
 		c.TemporaryModifiers = append(c.TemporaryModifiers, modifier)
+	}
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+			ObjEndID:     m.TargetID,
+			ObjEndType:   m.TargetType,
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsUtilityMiner() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.NewTargetTypeRegistry()
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtI Any
+
+	if *m.TargetType == tgtReg.Asteroid {
+		// find asteroid
+		tgt, f := m.shipMountedOn.CurrentSystem.asteroids[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtI = tgt
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+	}
+
+	// determine angular velocity for tracking
+	dvX := m.shipMountedOn.VelX - tgtDummy.VelX
+	dvY := m.shipMountedOn.VelY - tgtDummy.VelY
+
+	dv := math.Sqrt((dvX * dvX) + (dvY * dvY))
+	w := 0.0
+
+	if d > 0 {
+		w = ((dv / d) * float64(Heartbeat)) * (180.0 / math.Pi)
+	}
+
+	// get tracking value
+	tracking, _ := m.ItemMeta.GetFloat64("tracking")
+
+	// calculate tracking ratio
+	trackingRatio := 1.0 // default to 100% tracking
+
+	if w > 0 {
+		trackingRatio = tracking / w
+	}
+
+	// clamp tracking to 100%
+	if trackingRatio > 1.0 {
+		trackingRatio = 1.0
+	}
+
+	// account for falloff if present
+	falloff, found := m.ItemMeta.GetString("falloff")
+
+	rangeRatio := 1.0 // default to 100% efficiency
+
+	if found {
+		// adjust based on falloff style
+		if falloff == "linear" {
+			// damage dealt (or ore / ice pulled if asteroid) is a proportion of the distance to target over max range (closer is higher)
+			rangeRatio = 1 - (d / modRange)
+		} else if falloff == "reverse_linear" {
+			// damage dealt (or ore / ice pulled if asteroid) is a proportion of the distance to target over max range (further is higher)
+			rangeRatio = (d / modRange)
+
+			if d > modRange {
+				rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+			}
+		}
+	}
+
+	// apply damage (or ore / ice pulled if asteroid) to target
+	if *m.TargetType == tgtReg.Asteroid {
+		// target is an asteroid - what can this module mine?
+		canMineOre, _ := m.ItemTypeMeta.GetBool("can_mine_ore")
+		canMineIce, _ := m.ItemTypeMeta.GetBool("can_mine_ice")
+
+		// get ore / ice type and volume
+		c := tgtI.(*Asteroid)
+
+		// can this module mine this type?
+		canMine := false
+
+		if c.ItemFamilyID == "ore" && canMineOre {
+			canMine = true
+		} else if c.ItemFamilyID == "ice" && canMineIce {
+			canMine = true
+		}
+
+		if canMine {
+			// get mining volume
+			oreMiningVolume, _ := m.ItemMeta.GetFloat64("ore_mining_volume")
+			iceMiningVolume, _ := m.ItemMeta.GetFloat64("ice_mining_volume")
+
+			miningVolume := 0.0
+
+			if c.ItemFamilyID == "ore" && canMineOre {
+				miningVolume = oreMiningVolume
+			} else if c.ItemFamilyID == "ice" && canMineIce {
+				miningVolume = iceMiningVolume
+			}
+
+			// get type and volume of ore / ice being collected
+			unitType := c.ItemTypeID
+			unitVol, _ := c.ItemTypeMeta.GetFloat64("volume")
+
+			// get available space in cargo hold
+			free := m.shipMountedOn.GetRealCargoBayVolume() - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
+
+			// calculate effective ore / ice volume pulled
+			pulled := miningVolume * c.Yield * rangeRatio
+
+			// make sure there is sufficient room to deposit the ore / ice
+			if free-pulled >= 0 {
+				found := false
+
+				// quantity to be placed in cargo bay
+				q := int((miningVolume * c.Yield) / unitVol)
+
+				// is there already packaged ore / ice of this type in the hold?
+				for idx := range m.shipMountedOn.CargoBay.Items {
+					itm := m.shipMountedOn.CargoBay.Items[idx]
+
+					if itm.ItemTypeID == unitType && itm.IsPackaged && !itm.CoreDirty {
+						// increase the size of this stack
+						itm.Quantity += q
+
+						// escalate for saving
+						m.shipMountedOn.CurrentSystem.ChangedQuantityItems[itm.ID.String()] = itm
+
+						// mark as found
+						found = true
+						break
+					}
+				}
+
+				if !found && q > 0 {
+					// create a new stack of ore / ice
+					nid := uuid.New()
+
+					newItem := Item{
+						ID:            nid,
+						ItemTypeID:    unitType,
+						Meta:          c.ItemTypeMeta,
+						Created:       time.Now(),
+						CreatedBy:     &m.shipMountedOn.UserID,
+						CreatedReason: fmt.Sprintf("Mined %v", c.ItemFamilyID),
+						ContainerID:   m.shipMountedOn.CargoBayContainerID,
+						Quantity:      q,
+						IsPackaged:    true,
+						Lock: shared.LabeledMutex{
+							Structure: "Item",
+							UID:       fmt.Sprintf("%v :: %v :: %v", nid, time.Now(), rand.Float64()),
+						}, ItemTypeName: c.ItemTypeName,
+						ItemFamilyID:   c.ItemFamilyID,
+						ItemFamilyName: c.ItemFamilyName,
+						ItemTypeMeta:   c.ItemTypeMeta,
+						CoreDirty:      true,
+					}
+
+					// escalate to core for saving in db
+					m.shipMountedOn.CurrentSystem.NewItems[newItem.ID.String()] = &newItem
+
+					// add new item to cargo hold
+					m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, &newItem)
+				}
+			} else {
+				return false
+			}
+		} else {
+			return false
+		}
 	}
 
 	// include visual effect if present
