@@ -1388,7 +1388,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 					}
 
 					// kill ship autopilot
-					defer gsA.CmdAbort()
+					defer gsA.CmdAbort(false)
 
 					// place ship on the opposite side of the hole
 					riX := gjB.PosX - gsA.PosX

@@ -55,6 +55,7 @@ type AutopilotRegistry struct {
 	Orbit     int
 	Dock      int
 	Undock    int
+	Fight     int
 }
 
 // Returns a populated AutopilotRegistry struct for use as an enum
@@ -66,6 +67,7 @@ func NewAutopilotRegistry() *AutopilotRegistry {
 		Orbit:     3,
 		Dock:      4,
 		Undock:    5,
+		Fight:     6,
 	}
 }
 
@@ -73,6 +75,7 @@ func NewAutopilotRegistry() *AutopilotRegistry {
 type BehaviourRegistry struct {
 	None   int
 	Wander int
+	Patrol int
 }
 
 // Returns a populated AutopilotRegistry struct for use as an enum
@@ -80,6 +83,7 @@ func NewBehaviourRegistry() *BehaviourRegistry {
 	return &BehaviourRegistry{
 		None:   0,
 		Wander: 1,
+		Patrol: 2,
 	}
 }
 
@@ -112,6 +116,12 @@ type DockData struct {
 
 // Container structure for arguments of the Undock autopilot mode
 type UndockData struct {
+}
+
+// Container structure for arguments of the Goto autopilot mode
+type FightData struct {
+	TargetID uuid.UUID
+	Type     int
 }
 
 // Structure representing a player ship in the game universe
@@ -159,6 +169,7 @@ type Ship struct {
 	AutopilotOrbit     OrbitData
 	AutopilotDock      DockData
 	AutopilotUndock    UndockData
+	AutopilotFight     FightData
 	BehaviourMode      *int
 	CurrentSystem      *SolarSystem
 	DockedAtStation    *Station
@@ -436,6 +447,7 @@ func (s *Ship) CopyShip(lock bool) *Ship {
 		AutopilotOrbit:     s.AutopilotOrbit,
 		AutopilotDock:      s.AutopilotDock,
 		AutopilotUndock:    s.AutopilotUndock,
+		AutopilotFight:     s.AutopilotFight,
 		EscrowContainerID:  s.EscrowContainerID,
 		BeingFlownByPlayer: s.BeingFlownByPlayer,
 		BehaviourMode:      s.BehaviourMode,
@@ -759,7 +771,13 @@ func (s *Ship) updateHeat() {
 }
 
 // Abruptly ends the current autopilot mode
-func (s *Ship) CmdAbort() {
+func (s *Ship) CmdAbort(lock bool) {
+	if lock {
+		// obtain lock
+		s.Lock.Lock("ship.CmdAbort")
+		defer s.Lock.Unlock()
+	}
+
 	// stop autopilot
 	s.AutopilotMode = NewAutopilotRegistry().None
 
@@ -769,6 +787,23 @@ func (s *Ship) CmdAbort() {
 	s.AutopilotOrbit = OrbitData{}
 	s.AutopilotDock = DockData{}
 	s.AutopilotUndock = UndockData{}
+	s.AutopilotFight = FightData{}
+
+	for i := range s.Fitting.ARack {
+		s.Fitting.ARack[i].WillRepeat = false
+		s.Fitting.ARack[i].TargetID = nil
+		s.Fitting.ARack[i].TargetType = nil
+	}
+
+	for i := range s.Fitting.BRack {
+		s.Fitting.BRack[i].WillRepeat = false
+		s.Fitting.BRack[i].TargetID = nil
+		s.Fitting.BRack[i].TargetType = nil
+	}
+
+	for i := range s.Fitting.CRack {
+		s.Fitting.CRack[i].WillRepeat = false
+	}
 }
 
 // Invokes manual nav autopilot on the ship
@@ -866,6 +901,26 @@ func (s *Ship) CmdUndock(lock bool) {
 	s.AutopilotUndock = UndockData{}
 
 	s.AutopilotMode = registry.Undock
+}
+
+// Invokes fight autopilot on the ship
+func (s *Ship) CmdFight(targetID uuid.UUID, targetType int, lock bool) {
+	// get registry
+	registry := NewAutopilotRegistry()
+
+	if lock {
+		// lock entity
+		s.Lock.Lock("ship.CmdFight")
+		defer s.Lock.Unlock()
+	}
+
+	// stash fight and activate autopilot
+	s.AutopilotFight = FightData{
+		TargetID: targetID,
+		Type:     targetType,
+	}
+
+	s.AutopilotMode = registry.Fight
 }
 
 // Returns a new physics dummy structure representing this ship
@@ -1161,6 +1216,8 @@ func (s *Ship) behave() {
 			return
 		case registry.Wander:
 			s.behaviourWander()
+		case registry.Patrol:
+			s.behaviourPatrol()
 		}
 	}
 }
@@ -1172,7 +1229,7 @@ func (s *Ship) behaviourWander() {
 	heatLevel := s.Heat / maxHeat
 
 	if heatLevel > 0.95 {
-		s.CmdAbort()
+		s.CmdAbort(false)
 	}
 
 	// get registry
@@ -1185,8 +1242,45 @@ func (s *Ship) behaviourWander() {
 			return
 		}
 
-		// get registry
-		tgtReg := models.NewTargetTypeRegistry()
+		// check if docked
+		if s.DockedAtStationID != nil {
+			// 1% chance of undocking per tick
+			roll := physics.RandInRange(0, 100)
+
+			if roll == 1 {
+				// undock
+				s.CmdUndock(false)
+				return
+			}
+		} else {
+			s.gotoNextWanderDestination()
+		}
+	}
+}
+
+// wanders around the universe looking for hostiles to attack
+func (s *Ship) behaviourPatrol() {
+	// get registry
+	autoReg := NewAutopilotRegistry()
+
+	// get heat level
+	maxHeat := s.GetRealMaxHeat()
+	heatLevel := s.Heat / maxHeat
+
+	// don't worry about heat if actually fighting
+	if s.AutopilotMode != autoReg.Fight {
+		// pause if heat too high
+		if heatLevel > 0.95 {
+			s.CmdAbort(false)
+		}
+	}
+
+	// check if idle
+	if s.AutopilotMode == autoReg.None {
+		// allow time to cool off :)
+		if heatLevel > 0.25 {
+			return
+		}
 
 		// check if docked
 		if s.DockedAtStationID != nil {
@@ -1199,68 +1293,114 @@ func (s *Ship) behaviourWander() {
 				return
 			}
 		} else {
-			// 50% chance of docking at a station, 50% chance of flying through a jumphole
-			roll := physics.RandInRange(0, 100)
+			s.gotoNextWanderDestination()
+		}
+	} else if s.AutopilotMode != autoReg.Fight {
+		// look for any hostile ships to attack
+		if s.CurrentSystem.tickCounter%16 == 0 {
+			// get registry
+			tgtReg := models.NewTargetTypeRegistry()
 
-			if roll < 50 {
-				// get and count stations in system
-				stations := s.CurrentSystem.stations
-				count := len(stations)
+			// scan ships in system
+			var tgtS *Ship = nil
+			lowestStanding := math.MaxFloat64
+			lowestDistance := math.MaxFloat64
 
-				// verify there are candidates
-				if count == 0 {
-					return
-				}
+			for _, sx := range s.CurrentSystem.ships {
+				// get distance
+				sA := s.ToPhysicsDummy()
+				sB := s.ToPhysicsDummy()
+				distance := physics.Distance(sA, sB)
 
-				// pick random station to dock at
-				tgt := physics.RandInRange(0, count)
+				// check standings
+				standing, openlyHostile := sx.CheckStandings(s.FactionID)
 
-				idx := 0
-				for _, e := range stations {
-					if idx == tgt {
-						// check standings
-						v, oh := s.CheckStandings(e.FactionID)
-
-						if v > shared.MIN_DOCK_STANDING && !oh {
-							// dock at it
-							s.CmdDock(e.ID, tgtReg.Station, false)
-							return
-						}
+				// only attack openly hostile targets
+				if openlyHostile {
+					// prioritize targets by standing then distance
+					if standing <= lowestStanding {
+						tgtS = sx
+						lowestStanding = standing
+					} else if distance <= lowestDistance {
+						tgtS = sx
+						lowestDistance = distance
 					}
-
-					idx++
-				}
-			} else {
-				// get and count jumholes in system
-				jumpholes := s.CurrentSystem.jumpholes
-				count := len(jumpholes)
-
-				// verify there are candidates
-				if count == 0 {
-					return
-				}
-
-				// pick random jumphole to fly through
-				tgt := physics.RandInRange(0, count)
-
-				idx := 0
-				for _, e := range jumpholes {
-					if idx == tgt {
-						// fly through it
-						s.CmdGoto(e.ID, tgtReg.Jumphole, false)
-
-						hold := 0
-						caution := 0
-
-						s.AutopilotGoto.Hold = &hold
-						s.AutopilotGoto.Caution = &caution
-
-						return
-					}
-
-					idx++
 				}
 			}
+
+			// issue attack order if found
+			if tgtS != nil {
+				s.CmdFight(tgtS.ID, tgtReg.Ship, false)
+			}
+		}
+	}
+}
+
+// helper for behaviour routines that need to wander around the universe
+func (s *Ship) gotoNextWanderDestination() {
+	// get registry
+	tgtReg := models.NewTargetTypeRegistry()
+
+	// 50% chance of docking at a station, 50% chance of flying through a jumphole
+	roll := physics.RandInRange(0, 100)
+
+	if roll < 50 {
+		// get and count stations in system
+		stations := s.CurrentSystem.stations
+		count := len(stations)
+
+		// verify there are candidates
+		if count == 0 {
+			return
+		}
+
+		// pick random station to dock at
+		tgt := physics.RandInRange(0, count)
+
+		idx := 0
+		for _, e := range stations {
+			if idx == tgt {
+				// check standings
+				v, oh := s.CheckStandings(e.FactionID)
+
+				if v > shared.MIN_DOCK_STANDING && !oh {
+					// dock at it
+					s.CmdDock(e.ID, tgtReg.Station, false)
+					return
+				}
+			}
+
+			idx++
+		}
+	} else {
+		// get and count jumholes in system
+		jumpholes := s.CurrentSystem.jumpholes
+		count := len(jumpholes)
+
+		// verify there are candidates
+		if count == 0 {
+			return
+		}
+
+		// pick random jumphole to fly through
+		tgt := physics.RandInRange(0, count)
+
+		idx := 0
+		for _, e := range jumpholes {
+			if idx == tgt {
+				// fly through it
+				s.CmdGoto(e.ID, tgtReg.Jumphole, false)
+
+				hold := 0
+				caution := 0
+
+				s.AutopilotGoto.Hold = &hold
+				s.AutopilotGoto.Caution = &caution
+
+				return
+			}
+
+			idx++
 		}
 	}
 }
@@ -1281,6 +1421,8 @@ func (s *Ship) doUndockedAutopilot() {
 		s.doAutopilotOrbit()
 	case registry.Dock:
 		s.doAutopilotDock()
+	case registry.Fight:
+		s.doAutopilotFight()
 	}
 }
 
@@ -1342,13 +1484,13 @@ func (s *Ship) doAutopilotGoto() {
 		tgt := s.CurrentSystem.ships[s.AutopilotGoto.TargetID.String()]
 
 		if tgt == nil {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
 		// abort if docked
 		if tgt.IsDocked {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
@@ -1361,7 +1503,7 @@ func (s *Ship) doAutopilotGoto() {
 		tgt := s.CurrentSystem.stations[s.AutopilotGoto.TargetID.String()]
 
 		if tgt == nil {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
@@ -1374,7 +1516,7 @@ func (s *Ship) doAutopilotGoto() {
 		tgt := s.CurrentSystem.stars[s.AutopilotGoto.TargetID.String()]
 
 		if tgt == nil {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
@@ -1387,7 +1529,7 @@ func (s *Ship) doAutopilotGoto() {
 		tgt := s.CurrentSystem.planets[s.AutopilotGoto.TargetID.String()]
 
 		if tgt == nil {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
@@ -1400,7 +1542,7 @@ func (s *Ship) doAutopilotGoto() {
 		tgt := s.CurrentSystem.jumpholes[s.AutopilotGoto.TargetID.String()]
 
 		if tgt == nil {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
@@ -1413,7 +1555,7 @@ func (s *Ship) doAutopilotGoto() {
 		tgt := s.CurrentSystem.asteroids[s.AutopilotGoto.TargetID.String()]
 
 		if tgt == nil {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
@@ -1422,7 +1564,7 @@ func (s *Ship) doAutopilotGoto() {
 		tY = tgt.PosY
 		tR = tgt.Radius
 	} else {
-		s.CmdAbort()
+		s.CmdAbort(false)
 		return
 	}
 
@@ -1458,13 +1600,13 @@ func (s *Ship) doAutopilotOrbit() {
 		tgt := s.CurrentSystem.ships[s.AutopilotOrbit.TargetID.String()]
 
 		if tgt == nil {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
 		// abort if docked
 		if tgt.IsDocked {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
@@ -1476,7 +1618,7 @@ func (s *Ship) doAutopilotOrbit() {
 		tgt := s.CurrentSystem.stations[s.AutopilotOrbit.TargetID.String()]
 
 		if tgt == nil {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
@@ -1488,7 +1630,7 @@ func (s *Ship) doAutopilotOrbit() {
 		tgt := s.CurrentSystem.stars[s.AutopilotOrbit.TargetID.String()]
 
 		if tgt == nil {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
@@ -1500,7 +1642,7 @@ func (s *Ship) doAutopilotOrbit() {
 		tgt := s.CurrentSystem.planets[s.AutopilotOrbit.TargetID.String()]
 
 		if tgt == nil {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
@@ -1512,7 +1654,7 @@ func (s *Ship) doAutopilotOrbit() {
 		tgt := s.CurrentSystem.jumpholes[s.AutopilotOrbit.TargetID.String()]
 
 		if tgt == nil {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
@@ -1524,7 +1666,7 @@ func (s *Ship) doAutopilotOrbit() {
 		tgt := s.CurrentSystem.asteroids[s.AutopilotOrbit.TargetID.String()]
 
 		if tgt == nil {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
@@ -1532,7 +1674,7 @@ func (s *Ship) doAutopilotOrbit() {
 		tX = tgt.PosX
 		tY = tgt.PosY
 	} else {
-		s.CmdAbort()
+		s.CmdAbort(false)
 		return
 	}
 
@@ -1565,7 +1707,7 @@ func (s *Ship) doAutopilotDock() {
 		station := s.CurrentSystem.stations[s.AutopilotDock.TargetID.String()]
 
 		if station == nil {
-			s.CmdAbort()
+			s.CmdAbort(false)
 			return
 		}
 
@@ -1583,7 +1725,7 @@ func (s *Ship) doAutopilotDock() {
 			s.AutopilotMode = NewAutopilotRegistry().None
 		}
 	} else {
-		s.CmdAbort()
+		s.CmdAbort(false)
 		return
 	}
 }
@@ -1601,6 +1743,115 @@ func (s *Ship) doAutopilotUndock() {
 	} else {
 		// not docked - cancel autopilot
 		s.AutopilotMode = NewAutopilotRegistry().None
+	}
+}
+
+// Causes ship to fight with a target
+func (s *Ship) doAutopilotFight() {
+	// get registry
+	targetTypeReg := models.NewTargetTypeRegistry()
+
+	if s.AutopilotDock.Type == targetTypeReg.Ship {
+		// find ship
+		targetShip := s.CurrentSystem.ships[s.AutopilotDock.TargetID.String()]
+
+		if targetShip == nil {
+			s.CmdAbort(false)
+			return
+		}
+
+		// use average weapon range to determine stand-off distance (this can be improved a lot with more specific fighting routines)
+		totalRange := 0.0
+		rangedMods := 0
+
+		for _, m := range s.Fitting.ARack {
+			r, f := m.ItemMeta.GetFloat64("range")
+
+			if f {
+				totalRange += r
+				rangedMods += 1
+			}
+		}
+
+		avgRange := totalRange / (float64(rangedMods) + Epsilon)
+		standOff := avgRange / 2.0
+
+		// fill autopilot data
+		s.AutopilotOrbit = OrbitData{
+			TargetID: s.AutopilotFight.TargetID,
+			Type:     s.AutopilotFight.Type,
+			Distance: standOff,
+		}
+
+		// reuse orbit autopilot routine to keep distance with target
+		s.doAutopilotOrbit()
+
+		if s.CurrentSystem.tickCounter%45 == 0 {
+			// try to activate rack A modules
+			maxHeat := s.GetRealMaxHeat()
+			heatAdd := 0.0
+
+			for i, v := range s.Fitting.ARack {
+				// get heat
+				h, _ := v.ItemMeta.GetFloat64("activation_heat")
+
+				// get heat ratio
+				hr := (s.Heat + heatAdd) / maxHeat
+
+				// determine whether to activate
+				roll := physics.RandInRange(0, 100)
+				hit := int((1 - hr) * 100)
+
+				if roll >= hit {
+					// activate module
+					s.Fitting.ARack[i].TargetID = &s.AutopilotFight.TargetID
+					s.Fitting.ARack[i].TargetType = &s.AutopilotFight.Type
+					s.Fitting.ARack[i].WillRepeat = true
+
+					// track heat
+					heatAdd += h
+				} else {
+					// deactivate module
+					s.Fitting.ARack[i].TargetID = nil
+					s.Fitting.ARack[i].TargetType = nil
+					s.Fitting.ARack[i].WillRepeat = false
+				}
+			}
+		} else if s.CurrentSystem.tickCounter%37 == 0 {
+			// try to activate rack B modules
+			maxHeat := s.GetRealMaxHeat()
+			heatAdd := 0.0
+
+			for i, v := range s.Fitting.BRack {
+				// get heat
+				h, _ := v.ItemMeta.GetFloat64("activation_heat")
+
+				// get heat ratio
+				hr := (s.Heat + heatAdd) / maxHeat
+
+				// determine whether to activate
+				roll := physics.RandInRange(0, 100)
+				hit := int((1 - hr) * 100)
+
+				if roll >= hit {
+					// activate module
+					s.Fitting.BRack[i].TargetID = &s.AutopilotFight.TargetID
+					s.Fitting.BRack[i].TargetType = &s.AutopilotFight.Type
+					s.Fitting.BRack[i].WillRepeat = true
+
+					// track heat
+					heatAdd += h
+				} else {
+					// deactivate module
+					s.Fitting.BRack[i].TargetID = nil
+					s.Fitting.BRack[i].TargetType = nil
+					s.Fitting.BRack[i].WillRepeat = false
+				}
+			}
+		}
+	} else {
+		s.CmdAbort(false)
+		return
 	}
 }
 
@@ -3298,11 +3549,11 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		}
 	}
 
-	// check if ammunition required to fire
+	// check if ammunition required to fire (note: NPCs do not require ammunition - i want to fix this eventually)
 	ammoTypeRaw, found := m.ItemMeta.GetString("ammunition_type")
 	var ammoItem *Item = nil
 
-	if found {
+	if found && !m.shipMountedOn.IsNPC {
 		// parse type id
 		typeID, _ := uuid.Parse(ammoTypeRaw)
 
@@ -3592,11 +3843,11 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 		}
 	}
 
-	// check if ammunition required to fire
+	// check if ammunition required to fire (note: NPCs do not require ammunition - i want to fix this eventually)
 	ammoTypeRaw, found := m.ItemMeta.GetString("ammunition_type")
 	var ammoItem *Item = nil
 
-	if found {
+	if found && !m.shipMountedOn.IsNPC {
 		// parse type id
 		typeID, _ := uuid.Parse(ammoTypeRaw)
 
