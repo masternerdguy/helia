@@ -1320,10 +1320,6 @@ func (s *Ship) behaviourPatrol() {
 				// check standings
 				standing, openlyHostile := sx.CheckStandings(s.FactionID)
 
-				// debug
-				standing = -10
-				openlyHostile = true
-
 				// skip if self
 				if sx.ID == s.ID {
 					continue
@@ -3339,11 +3335,6 @@ func (m *FittedSlot) PeriodicUpdate() {
 		if m.WillRepeat {
 			// check if a target is required
 			needsTarget, _ := m.ItemTypeMeta.GetBool("needs_target")
-
-			// debug
-			breg := NewBehaviourRegistry()
-			m.shipMountedOn.BehaviourMode = &breg.Patrol
-			m.shipMountedOn.IsNPC = true
 
 			if needsTarget {
 				// check for a target
