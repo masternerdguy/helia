@@ -243,7 +243,8 @@ CREATE TABLE public.shiptemplates (
     shiptypeid uuid NOT NULL,
     slotlayout jsonb DEFAULT '{}'::jsonb NOT NULL,
     basecargobayvolume double precision DEFAULT 0 NOT NULL,
-    itemtypeid uuid NOT NULL
+    itemtypeid uuid NOT NULL,
+    canundock boolean DEFAULT true NOT NULL
 );
 
 
