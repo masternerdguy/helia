@@ -14,6 +14,9 @@ import (
 	"github.com/google/uuid"
 )
 
+// Scalar for the base cost of warehousing a unit of volume per hour
+const WarehouseCostPerHour = 1.25
+
 // Scaler for the amount of fuel used turning
 const ShipFuelTurn = 0.001
 
@@ -433,6 +436,7 @@ func (s *Ship) CopyShip(lock bool) *Ship {
 			ShipTypeID:         s.TemplateData.ShipTypeID,
 			BaseCargoBayVolume: s.TemplateData.BaseCargoBayVolume,
 			ItemTypeID:         s.TemplateData.ItemTypeID,
+			CanUndock:          s.TemplateData.CanUndock,
 		},
 		FactionID: s.FactionID,
 		// in-memory only
@@ -625,8 +629,37 @@ func (s *Ship) PeriodicUpdate() {
 		s.PosX = s.DockedAtStation.PosX
 		s.PosY = s.DockedAtStation.PosY
 
-		// check autopilot
-		s.doDockedAutopilot()
+		// handle station workshop / warehouse
+		if !s.TemplateData.CanUndock {
+			/*
+			 * these are a special type of ship that allows a player to store and work with a large volume of items
+			 * in a station for a fee. this fee is deducted from the warehouse "ship"'s wallet and can run into the
+			 * negative. in order to re-board this ship to work with or retrieve the items, any defecit must be
+			 * settled with a cash transfer.
+			 *
+			 * the hourly fee is gradually assessed every tick.
+			 *
+			 * if there is nothing in in the warehouse's cargo bay, no fee is assesed.
+			 */
+
+			// get total volume stored
+			warehousedVolume := s.TotalCargoBayVolumeUsed(false)
+
+			// get cost per hour per unit
+			baseHourlyCost := WarehouseCostPerHour
+
+			// get fee to assess this tick
+			costPerHour := warehousedVolume * baseHourlyCost
+			secondsPerTick := float64(Heartbeat / 1000)
+
+			costPerTick := (secondsPerTick * costPerHour) / 3600
+
+			// deduct from wallet
+			s.Wallet -= costPerTick
+		} else {
+			// check autopilot
+			s.doDockedAutopilot()
+		}
 	}
 }
 
@@ -888,6 +921,11 @@ func (s *Ship) CmdDock(targetID uuid.UUID, targetType int, lock bool) {
 
 // Invokes undock autopilot on the ship
 func (s *Ship) CmdUndock(lock bool) {
+	// ignore if incapable of undocking
+	if !s.TemplateData.CanUndock {
+		return
+	}
+
 	// get registry
 	registry := NewAutopilotRegistry()
 

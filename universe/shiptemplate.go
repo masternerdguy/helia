@@ -29,6 +29,7 @@ type ShipTemplate struct {
 	SlotLayout         SlotLayout
 	BaseCargoBayVolume float64
 	ItemTypeID         uuid.UUID
+	CanUndock          bool
 }
 
 // Structure representing the slot layout available for fitting modules to this ship

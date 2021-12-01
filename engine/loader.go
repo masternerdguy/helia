@@ -1351,6 +1351,7 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 			SlotLayout:         SlotLayoutFromSQL(&temp.SlotLayout),
 			BaseCargoBayVolume: temp.BaseCargoBayVolume,
 			ItemTypeID:         temp.ItemTypeID,
+			CanUndock:          temp.CanUndock,
 		},
 		FactionID:     owner.CurrentFactionID,
 		IsNPC:         owner.IsNPC,

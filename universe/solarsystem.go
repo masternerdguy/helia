@@ -6,6 +6,7 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"math"
 	"math/rand"
 	"time"
 
@@ -845,6 +846,14 @@ func (s *SolarSystem) PeriodicUpdate() {
 				if toBoard.ID == sh.ID {
 					c.WriteErrorMessage("you are already flying this ship")
 					continue
+				}
+
+				// verify that the integer balance of the target ship is >= 0
+				if (toBoard.Wallet + 1) < 0 {
+					// get defecit
+					defecit := int64(math.Abs(toBoard.Wallet))
+
+					c.WriteErrorMessage(fmt.Sprintf("you must transfer at least %v CBN to this ship before boarding to settle a station debt", defecit))
 				}
 
 				// escalate ship switch request to core
