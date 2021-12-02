@@ -451,7 +451,7 @@ type ClientTrashItemBody struct {
 	ItemID    uuid.UUID `json:"itemID"`
 }
 
-// Body containing a request to trash an item in the current ship's cargo hold
+// Body containing a request to transfer an item in the current ship's cargo hold to another ship
 type ClientTransferItemBody struct {
 	SessionID  uuid.UUID `json:"sid"`
 	ItemID     uuid.UUID `json:"itemID"`

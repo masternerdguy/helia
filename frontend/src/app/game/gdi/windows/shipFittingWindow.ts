@@ -20,7 +20,10 @@ import { GDIBar } from '../components/gdiBar';
 import { ClientConsumeFuel } from '../../wsModels/bodies/consumeFuel';
 import { ClientSelfDestruct } from '../../wsModels/bodies/selfDestruct';
 import { ClientConsumeRepairKit } from '../../wsModels/bodies/consumeRepairKit';
-import { ServerPropertyShipCacheEntry, ServerPropertyUpdate } from '../../wsModels/bodies/propertyUpdate';
+import {
+  ServerPropertyShipCacheEntry,
+  ServerPropertyUpdate,
+} from '../../wsModels/bodies/propertyUpdate';
 import { ClientTransferItem } from '../../wsModels/bodies/transferItem';
 import { ClientViewProperty } from '../../wsModels/bodies/viewProperty';
 
@@ -166,7 +169,7 @@ export class ShipFittingWindow extends GDIWindow {
 
         // reset views
         this.resetViews();
-      }else if (a === 'Transfer') {
+      } else if (a === 'Transfer') {
         // request property refresh
         this.refreshPropertySummary();
 
@@ -197,7 +200,7 @@ export class ShipFittingWindow extends GDIWindow {
           this.resetViews();
         });
 
-        // show modal list 
+        // show modal list
         this.showModalPropertyList();
       } else if (a === 'Package') {
         // get selected item
@@ -367,7 +370,9 @@ export class ShipFittingWindow extends GDIWindow {
     this.modalPropertyView.setWidth(400);
     this.modalPropertyView.setHeight(300);
     this.modalPropertyView.initialize();
-    this.modalPropertyView.setX(this.getWidth() / 2 - this.modalPropertyView.getWidth() / 2);
+    this.modalPropertyView.setX(
+      this.getWidth() / 2 - this.modalPropertyView.getWidth() / 2
+    );
     this.modalPropertyView.setY(
       this.getHeight() / 2 - this.modalPropertyView.getHeight() / 2
     );
@@ -387,7 +392,7 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.infoView);
     this.removeComponent(this.actionView);
     this.removeComponent(this.cargoBayUsed);
-    this.removeComponent(this.modalPropertyView)
+    this.removeComponent(this.modalPropertyView);
     this.addComponent(this.modalOverlay);
     this.addComponent(this.modalInput);
   }
@@ -399,7 +404,7 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.cargoBayUsed);
     this.removeComponent(this.modalInput);
     this.addComponent(this.modalOverlay);
-    this.addComponent(this.modalPropertyView)
+    this.addComponent(this.modalPropertyView);
   }
 
   private hideModalInput() {
@@ -614,7 +619,11 @@ export class ShipFittingWindow extends GDIWindow {
           // include in property selection options
           rows.push({
             ship: e,
-            listString: () => `${fixedString(e.name, 32)} ${fixedString(shortWallet(e.wallet), 11)}`,
+            listString: () =>
+              `${fixedString(e.name, 32)} ${fixedString(
+                shortWallet(e.wallet),
+                11
+              )}`,
           });
         }
       }
