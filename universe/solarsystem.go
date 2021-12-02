@@ -1215,6 +1215,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 						// make sure this isn't the same ship
 						if sh.ID == receiver.ID {
 							c.WriteErrorMessage("item already there")
+							continue
 						}
 
 						// make sure receiver isn't in debt
@@ -1236,6 +1237,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 						if err != nil {
 							c.WriteErrorMessage("unable to complete transfer")
+							continue
 						}
 
 						// escalate to core for saving
