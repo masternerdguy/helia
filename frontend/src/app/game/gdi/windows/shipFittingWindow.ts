@@ -495,7 +495,9 @@ export class ShipFittingWindow extends GDIWindow {
     const cargo: ShipViewRow[] = [];
 
     if (this.player.currentCargoView) {
-      for (const ci of this.player.currentCargoView.items) {
+      for (const ci of this.player.currentCargoView.items.sort((a, b) =>
+        getItemSortString(a).localeCompare(getItemSortString(b))
+      )) {
         const r = buildCargoRowFromContainerItem(ci, this.isDocked);
         cargo.push(r);
       }
@@ -1014,4 +1016,8 @@ function shortWallet(d: number): string {
   }
 
   return o + ' CBN';
+}
+
+function getItemSortString(item: WSContainerItem): string {
+  return `${item.itemFamilyName}::${item.itemTypeName}::${item.quantity}::${item.id}`;
 }
