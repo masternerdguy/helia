@@ -854,6 +854,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 					defecit := int64(math.Abs(toBoard.Wallet))
 
 					c.WriteErrorMessage(fmt.Sprintf("you must transfer at least %v CBN to this ship before boarding to settle a station debt", defecit))
+					continue
 				}
 
 				// escalate ship switch request to core

@@ -996,6 +996,8 @@ function cargoQuantity(d: number): string {
 }
 
 function shortWallet(d: number): string {
+  d = Math.round(d);
+
   let o = `${d}`;
 
   // include metric prefix if needed
