@@ -1243,10 +1243,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 						item, err := sh.RemoveItemFromCargo(data.ItemID, false)
 
 						if item == nil || err != nil {
-							// put item back in source ship
-							sh.PutItemInCargo(item, false)
-
-							// write error to client
 							c.WriteErrorMessage("unable to complete transfer")
 							continue
 						}
