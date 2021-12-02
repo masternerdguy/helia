@@ -926,6 +926,14 @@ func (s *Ship) CmdUndock(lock bool) {
 		return
 	}
 
+	// make sure cargo isn't overloaded
+	usedBay := s.TotalCargoBayVolumeUsed(lock)
+	maxBay := s.GetRealCargoBayVolume()
+
+	if usedBay > maxBay {
+		return
+	}
+
 	// get registry
 	registry := NewAutopilotRegistry()
 
@@ -2345,6 +2353,32 @@ func (s *Ship) PutItemInCargo(item *Item, lock bool) error {
 	// null check
 	if item == nil {
 		return errors.New("item must not be null")
+	}
+
+	// make sure there is enough space
+	used := s.TotalCargoBayVolumeUsed(lock)
+	max := s.GetRealCargoBayVolume()
+
+	tV := 0.0
+
+	if item.IsPackaged {
+		// get item type volume metadata
+		volume, f := item.ItemTypeMeta.GetFloat64("volume")
+
+		if f {
+			tV += (volume * float64(item.Quantity))
+		}
+	} else {
+		// get item volume metadata
+		volume, f := item.Meta.GetFloat64("volume")
+
+		if f {
+			tV += (volume * float64(item.Quantity))
+		}
+	}
+
+	if tV+used > max {
+		return errors.New("insufficient cargo space")
 	}
 
 	// place item in cargo bay slice

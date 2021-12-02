@@ -215,6 +215,21 @@ func (s *SolarSystem) PeriodicUpdate() {
 				// extract data (currently nothing to process)
 				// data := evt.Body.(models.ClientUndockBody)
 
+				// make sure cargo isn't overloaded
+				usedBay := sh.TotalCargoBayVolumeUsed(false)
+				maxBay := sh.GetRealCargoBayVolume()
+
+				if usedBay > maxBay {
+					c.WriteErrorMessage("cargo bay overloaded")
+					continue
+				}
+
+				// make sure this isn't a station warehouse
+				if !sh.TemplateData.CanUndock {
+					c.WriteErrorMessage("station workshops and warehouses cannot undock")
+					continue
+				}
+
 				// apply effect to player's current ship
 				sh.CmdUndock(false)
 			}
