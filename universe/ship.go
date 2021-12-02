@@ -3,6 +3,7 @@ package universe
 import (
 	"errors"
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -650,9 +651,11 @@ func (s *Ship) PeriodicUpdate() {
 
 			// get fee to assess this tick
 			costPerHour := warehousedVolume * baseHourlyCost
-			secondsPerTick := float64(Heartbeat / 1000)
+			secondsPerTick := float64(Heartbeat) / 1000.0
 
 			costPerTick := (secondsPerTick * costPerHour) / 3600
+
+			log.Println(fmt.Sprintf("%v :: %v :: %v", costPerTick, costPerHour, secondsPerTick))
 
 			// deduct from wallet
 			s.Wallet -= costPerTick
