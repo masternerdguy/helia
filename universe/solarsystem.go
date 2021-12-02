@@ -1220,6 +1220,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 						// make sure receiver isn't in debt
 						if receiver.Wallet < 0 {
 							c.WriteErrorMessage("you cannot transfer items to a ship in debt with the station manager")
+							continue
 						}
 
 						// pull item from source ship
