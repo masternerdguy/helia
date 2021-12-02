@@ -15,7 +15,7 @@ import (
 )
 
 // Scalar for the base cost of warehousing a unit of volume per hour
-const WarehouseCostPerHour = 1.25
+const WarehouseCostPerHour = 0.25
 
 // Scaler for the amount of fuel used turning
 const ShipFuelTurn = 0.001
