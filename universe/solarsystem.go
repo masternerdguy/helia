@@ -1217,6 +1217,11 @@ func (s *SolarSystem) PeriodicUpdate() {
 							c.WriteErrorMessage("item already there")
 						}
 
+						// make sure receiver isn't in debt
+						if receiver.Wallet < 0 {
+							c.WriteErrorMessage("you cannot transfer items to a ship in debt with the station manager")
+						}
+
 						// pull item from source ship
 						item, err := sh.RemoveItemFromCargo(data.ItemID, false)
 
