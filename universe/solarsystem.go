@@ -1174,6 +1174,70 @@ func (s *SolarSystem) PeriodicUpdate() {
 				// update timestamp
 				c.LastChatPostedAt = time.Now()
 			}
+		} else if evt.Type == models.NewMessageRegistry().TransferItem {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientTransferItemBody)
+
+				// find item in source
+				item := sh.FindItemInCargo(data.ItemID)
+
+				// make sure we found something
+				if item == nil {
+					// do nothing
+					continue
+				} else {
+					// find receiver
+					receiver := s.ships[data.ReceiverID.String()]
+
+					if receiver == nil {
+						// do nothing
+						continue
+					} else {
+						// verify both ships are docked at the same station
+						if sh.DockedAtStationID == nil || receiver.DockedAtStationID == nil {
+							c.WriteErrorMessage("both ships must be docked at the same station to transfer an item")
+							continue
+						}
+
+						if *sh.DockedAtStationID != *receiver.DockedAtStationID {
+							c.WriteErrorMessage("both ships must be docked at the same station to transfer an item")
+							continue
+						}
+
+						// verify both ships are owned by the same player
+						if sh.UserID != receiver.UserID {
+							c.WriteErrorMessage("destination not available for item transfer")
+							continue
+						}
+
+						// make sure this isn't the same ship
+						if sh.ID == receiver.ID {
+							c.WriteErrorMessage("item already there")
+						}
+
+						// pull item from source ship
+						item, err := sh.RemoveItemFromCargo(data.ItemID, false)
+
+						if item == nil || err != nil {
+							c.WriteErrorMessage("unable to complete transfer")
+							continue
+						}
+
+						// push item to receiver ship
+						err = receiver.PutItemInCargo(item, false)
+
+						if err != nil {
+							c.WriteErrorMessage("unable to complete transfer")
+						}
+
+						// escalate to core for saving
+						item.ContainerID = receiver.CargoBayContainerID
+						item.CoreDirty = true
+						s.MovedItems[item.ID.String()] = item
+					}
+				}
+			}
 		}
 	}
 

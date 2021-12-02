@@ -25,7 +25,7 @@ export class PropertySheetWindow extends GDIWindow {
   private modalOverlay: GDIOverlay = new GDIOverlay();
   private modalInput: GDIInput = new GDIInput();
 
-  // last cargo bay refresh
+  // last property refresh
   private lastPropertyView: number = 0;
 
   // dock state

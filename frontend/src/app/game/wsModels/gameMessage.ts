@@ -47,4 +47,5 @@ export enum MessageTypes {
   TrashShip = 39,
   RenameShip = 40,
   PostSystemChatMessage = 41,
+  TransferItem = 42,
 }

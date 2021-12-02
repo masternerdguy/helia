@@ -313,7 +313,14 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 			json.Unmarshal([]byte(m.MessageBody), &b)
 
 			// handle message
-			l.handleClientPostSystemChatMessageBody(&client, &b)
+			l.handleClientPostSystemChatMessage(&client, &b)
+		} else if m.MessageType == msgRegistry.TransferItem {
+			// decode body as ClientTransferItemBody
+			b := models.ClientTransferItemBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientTransferItem(&client, &b)
 		}
 	}
 }
@@ -1271,7 +1278,7 @@ func (l *SocketListener) handleClientRenameShip(client *shared.GameClient, body 
 	}
 }
 
-func (l *SocketListener) handleClientPostSystemChatMessageBody(client *shared.GameClient, body *models.ClientPostSystemChatMessageBody) {
+func (l *SocketListener) handleClientPostSystemChatMessage(client *shared.GameClient, body *models.ClientPostSystemChatMessageBody) {
 	// safety returns
 	if body == nil {
 		return
@@ -1291,6 +1298,29 @@ func (l *SocketListener) handleClientPostSystemChatMessageBody(client *shared.Ga
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.PostSystemChatMessage)
+	}
+}
+
+func (l *SocketListener) handleClientTransferItem(client *shared.GameClient, body *models.ClientTransferItemBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientTransferItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.TransferItem)
 	}
 }
 

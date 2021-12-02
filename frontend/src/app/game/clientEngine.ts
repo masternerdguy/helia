@@ -880,6 +880,9 @@ function handlePropertyUpdate(d: GameMessage) {
 
   // update property sheet window
   engineSack.propertySheetWindow.sync(msg);
+
+  // update ship fitting and cargo window
+  engineSack.shipFittingWindow.syncProperty(msg);
 }
 
 // clears the screen

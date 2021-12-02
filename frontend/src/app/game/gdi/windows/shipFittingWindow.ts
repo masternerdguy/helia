@@ -20,6 +20,9 @@ import { GDIBar } from '../components/gdiBar';
 import { ClientConsumeFuel } from '../../wsModels/bodies/consumeFuel';
 import { ClientSelfDestruct } from '../../wsModels/bodies/selfDestruct';
 import { ClientConsumeRepairKit } from '../../wsModels/bodies/consumeRepairKit';
+import { ServerPropertyShipCacheEntry, ServerPropertyUpdate } from '../../wsModels/bodies/propertyUpdate';
+import { ClientTransferItem } from '../../wsModels/bodies/transferItem';
+import { ClientViewProperty } from '../../wsModels/bodies/viewProperty';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -30,6 +33,7 @@ export class ShipFittingWindow extends GDIWindow {
   // inputs
   private modalOverlay: GDIOverlay = new GDIOverlay();
   private modalInput: GDIInput = new GDIInput();
+  private modalPropertyView: GDIList = new GDIList();
 
   // bars
   private cargoBayUsed: GDIBar = new GDIBar();
@@ -162,6 +166,39 @@ export class ShipFittingWindow extends GDIWindow {
 
         // reset views
         this.resetViews();
+      }else if (a === 'Transfer') {
+        // request property refresh
+        this.refreshPropertySummary();
+
+        // set up callback
+        this.modalPropertyView.setOnClick((h) => {
+          // get selected item
+          const i: ShipViewRow = this.shipView.getSelectedItem();
+
+          // get selected ship
+          const t = h as FittingPropertyRow;
+
+          // hide property modal
+          this.hideModalPropertyList();
+
+          // send transfer request
+          const tiMsg: ClientTransferItem = {
+            sid: this.wsSvc.sid,
+            itemID: (i.object as WSContainerItem).id,
+            receiverID: t.ship.id,
+          };
+
+          this.wsSvc.sendMessage(MessageTypes.TransferItem, tiMsg);
+
+          // request cargo bay refresh
+          this.refreshCargoBay();
+
+          // reset views
+          this.resetViews();
+        });
+
+        // show modal list 
+        this.showModalPropertyList();
       } else if (a === 'Package') {
         // get selected item
         const i: ShipViewRow = this.shipView.getSelectedItem();
@@ -327,6 +364,17 @@ export class ShipFittingWindow extends GDIWindow {
     this.modalInput.setFont(FontSize.large);
     this.modalInput.initialize();
 
+    this.modalPropertyView.setWidth(400);
+    this.modalPropertyView.setHeight(300);
+    this.modalPropertyView.initialize();
+    this.modalPropertyView.setX(this.getWidth() / 2 - this.modalPropertyView.getWidth() / 2);
+    this.modalPropertyView.setY(
+      this.getHeight() / 2 - this.modalPropertyView.getHeight() / 2
+    );
+
+    this.modalPropertyView.setFont(FontSize.normal);
+    this.modalPropertyView.setOnClick(() => {});
+
     // pack
     this.addComponent(this.shipView);
     this.addComponent(this.infoView);
@@ -339,8 +387,19 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.infoView);
     this.removeComponent(this.actionView);
     this.removeComponent(this.cargoBayUsed);
+    this.removeComponent(this.modalPropertyView)
     this.addComponent(this.modalOverlay);
     this.addComponent(this.modalInput);
+  }
+
+  private showModalPropertyList() {
+    this.removeComponent(this.shipView);
+    this.removeComponent(this.infoView);
+    this.removeComponent(this.actionView);
+    this.removeComponent(this.cargoBayUsed);
+    this.removeComponent(this.modalInput);
+    this.addComponent(this.modalOverlay);
+    this.addComponent(this.modalPropertyView)
   }
 
   private hideModalInput() {
@@ -348,6 +407,17 @@ export class ShipFittingWindow extends GDIWindow {
     this.addComponent(this.infoView);
     this.addComponent(this.actionView);
     this.addComponent(this.cargoBayUsed);
+    this.removeComponent(this.modalPropertyView);
+    this.removeComponent(this.modalOverlay);
+    this.removeComponent(this.modalInput);
+  }
+
+  private hideModalPropertyList() {
+    this.addComponent(this.shipView);
+    this.addComponent(this.infoView);
+    this.addComponent(this.actionView);
+    this.addComponent(this.cargoBayUsed);
+    this.removeComponent(this.modalPropertyView);
     this.removeComponent(this.modalOverlay);
     this.removeComponent(this.modalInput);
   }
@@ -358,6 +428,15 @@ export class ShipFittingWindow extends GDIWindow {
       b.sid = this.wsSvc.sid;
 
       this.wsSvc.sendMessage(MessageTypes.ViewCargoBay, b);
+    }, 200);
+  }
+
+  private refreshPropertySummary() {
+    setTimeout(() => {
+      const b = new ClientViewProperty();
+      b.sid = this.wsSvc.sid;
+
+      this.wsSvc.sendMessage(MessageTypes.ViewProperty, b);
     }, 200);
   }
 
@@ -524,6 +603,34 @@ export class ShipFittingWindow extends GDIWindow {
     // reset info view
     this.infoView.setItems([]);
   }
+
+  syncProperty(cache: ServerPropertyUpdate) {
+    if (this.player.currentShip.dockedAtStationID) {
+      const rows: FittingPropertyRow[] = [];
+
+      // get owned ships docked at this station
+      for (let e of cache.ships.sort((a, b) => a.name.localeCompare(b.name))) {
+        if (e.dockedAtId == this.player.currentShip.dockedAtStationID) {
+          // include in property selection options
+          rows.push({
+            ship: e,
+            listString: () => `${fixedString(e.name, 32)} ${fixedString(shortWallet(e.wallet), 11)}`,
+          });
+        }
+      }
+
+      // update property modal list
+      const pIDX = this.modalPropertyView.getScroll();
+
+      this.modalPropertyView.setItems(rows);
+      this.modalPropertyView.setScroll(pIDX);
+    }
+  }
+}
+
+class FittingPropertyRow {
+  ship: ServerPropertyShipCacheEntry;
+  listString: () => string;
 }
 
 class ShipViewRow {
@@ -774,6 +881,8 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
       }
     }
 
+    actions.push('Transfer');
+
     // spacer
     actions.push('');
 
@@ -875,4 +984,23 @@ function cargoQuantity(d: number): string {
   }
 
   return o;
+}
+
+function shortWallet(d: number): string {
+  let o = `${d}`;
+
+  // include metric prefix if needed
+  if (d >= 1000000000000000) {
+    o = `${(d / 1000000000000000).toFixed(2)}P`;
+  } else if (d >= 1000000000000) {
+    o = `${(d / 1000000000000).toFixed(2)}T`;
+  } else if (d >= 1000000000) {
+    o = `${(d / 1000000000).toFixed(2)}G`;
+  } else if (d >= 1000000) {
+    o = `${(d / 1000000).toFixed(2)}M`;
+  } else if (d >= 1000) {
+    o = `${(d / 1000).toFixed(2)}k`;
+  }
+
+  return o + ' CBN';
 }

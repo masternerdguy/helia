@@ -2295,6 +2295,64 @@ func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
 	return nil
 }
 
+// Removes an item from the ship's cargo bay if it exists, without updating its container id
+func (s *Ship) RemoveItemFromCargo(id uuid.UUID, lock bool) (*Item, error) {
+	if lock {
+		// lock entity
+		s.Lock.Lock("ship.RemoveItemFromCargo")
+		defer s.Lock.Unlock()
+	}
+
+	// lock cargo bay
+	s.CargoBay.Lock.Lock("ship.RemoveItemFromCargo")
+	defer s.CargoBay.Lock.Unlock()
+
+	// remove from cargo bay
+	newCB := make([]*Item, 0)
+
+	var pulled *Item = nil
+
+	for i := range s.CargoBay.Items {
+		o := s.CargoBay.Items[i]
+
+		// skip if not this item or is dirty
+		if o.ID != id || o.CoreDirty {
+			newCB = append(newCB, o)
+		} else {
+			// store pointer
+			pulled = o
+		}
+	}
+
+	s.CargoBay.Items = newCB
+
+	// return pulled item
+	return pulled, nil
+}
+
+// Places an item in the cargo bay without updating its container id
+func (s *Ship) PutItemInCargo(item *Item, lock bool) error {
+	if lock {
+		// lock entity
+		s.Lock.Lock("ship.PutItemInCargoHold")
+		defer s.Lock.Unlock()
+	}
+
+	// lock cargo bay
+	s.CargoBay.Lock.Lock("ship.PutItemInCargoHold")
+	defer s.CargoBay.Lock.Unlock()
+
+	// null check
+	if item == nil {
+		return errors.New("item must not be null")
+	}
+
+	// place item in cargo bay slice
+	s.CargoBay.Items = append(s.CargoBay.Items, item)
+
+	return nil
+}
+
 // Packages an item in the ship's cargo bay if it exists
 func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {

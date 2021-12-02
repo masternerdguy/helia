@@ -51,6 +51,7 @@ type MessageRegistry struct {
 	TrashShip              int
 	RenameShip             int
 	PostSystemChatMessage  int
+	TransferItem           int
 }
 
 // Registry of target types
@@ -109,6 +110,7 @@ func NewMessageRegistry() *MessageRegistry {
 		TrashShip:              39,
 		RenameShip:             40,
 		PostSystemChatMessage:  41,
+		TransferItem:           42,
 	}
 }
 
@@ -447,6 +449,13 @@ type ServerPushErrorMessage struct {
 type ClientTrashItemBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemID"`
+}
+
+// Body containing a request to trash an item in the current ship's cargo hold
+type ClientTransferItemBody struct {
+	SessionID  uuid.UUID `json:"sid"`
+	ItemID     uuid.UUID `json:"itemID"`
+	ReceiverID uuid.UUID `json:"receiverID"`
 }
 
 // Body containing a request to package an item in the current ship's cargo hold
