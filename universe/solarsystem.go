@@ -1310,10 +1310,14 @@ func (s *SolarSystem) updateShips() {
 			e.Destroyed = true
 			e.DestroyedAt = &now
 
-			// adjust standings
 			for _, v := range e.Aggressors {
 				if v != nil {
-					v.AdjustStanding(e.FactionID, e.Faction.ReputationSheet, -1, true)
+					if e.Faction.IsNPC {
+						v.AdjustStandingNPC(e.FactionID, e.Faction.ReputationSheet, -1, true)
+					} else {
+						v.AdjustStandingPlayer(e.FactionID, e.ReputationSheet, -0.25, true)
+					}
+
 					v.EnforceBounds(true)
 				}
 			}

@@ -44,8 +44,10 @@ type PlayerReputationSheet struct {
 	Lock           LabeledMutex
 }
 
-func (s *PlayerReputationSheet) AdjustStanding(factionID uuid.UUID, factionRS FactionReputationSheet, amount float64, lock bool) {
+// Adjusts standing relative to an NPC faction
+func (s *PlayerReputationSheet) AdjustStandingNPC(factionID uuid.UUID, factionRS FactionReputationSheet, amount float64, lock bool) {
 	if lock {
+		// obtain lock on this reputation sheet
 		s.Lock.Lock("reputation.AdjustStanding")
 		defer s.Lock.Unlock()
 	}
@@ -63,6 +65,28 @@ func (s *PlayerReputationSheet) AdjustStanding(factionID uuid.UUID, factionRS Fa
 			continue
 		}
 
+		// get indirect adjustment amount
+		rv := (amount * (v.StandingValue / MAX_STANDING)) * INDIRECT_ADJUSTMENT_MODIFIER
+
+		// apply indirect adjustment
+		s.applyStandingChange(factionID, rv)
+	}
+}
+
+// Adjusts standing relative to a player created faction
+func (s *PlayerReputationSheet) AdjustStandingPlayer(factionID uuid.UUID, playerRS *PlayerReputationSheet, amount float64, lock bool) {
+	if lock {
+		// obtain lock on this reputation sheet
+		s.Lock.Lock("reputation.AdjustStandingPlayer")
+		defer s.Lock.Unlock()
+	}
+
+	// obtain lock on attacker sheet
+	playerRS.Lock.Lock("reputation.AdjustStandingPlayer")
+	defer playerRS.Lock.Unlock()
+
+	// iterate over attacked player's faction relationships
+	for _, v := range playerRS.FactionEntries {
 		// get indirect adjustment amount
 		rv := (amount * (v.StandingValue / MAX_STANDING)) * INDIRECT_ADJUSTMENT_MODIFIER
 
