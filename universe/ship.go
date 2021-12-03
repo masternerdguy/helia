@@ -183,7 +183,7 @@ type Ship struct {
 	ReputationSheet    *shared.PlayerReputationSheet
 	DestructArmed      bool
 	TemporaryModifiers []TemporaryShipModifier
-	Aggressors         []*shared.PlayerReputationSheet
+	Aggressors         map[string]*shared.PlayerReputationSheet
 	Lock               shared.LabeledMutex
 }
 
@@ -1204,7 +1204,7 @@ func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64, 
 		f.TemporarilyOpenlyHostileUntil = &at
 
 		// store entry
-		s.Aggressors = append(s.Aggressors, attackerRS)
+		s.Aggressors[attackerRS.UserID.String()] = attackerRS
 	}
 
 	// apply shield damage

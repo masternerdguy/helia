@@ -1228,6 +1228,7 @@ func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error
 func LoadReputationSheet(u *sql.User) *shared.PlayerReputationSheet {
 	repSheet := shared.PlayerReputationSheet{
 		FactionEntries: make(map[string]*shared.PlayerReputationSheetFactionEntry),
+		UserID:         u.ID,
 	}
 
 	repSheet.Lock.Structure = "PlayerReputationSheet"
