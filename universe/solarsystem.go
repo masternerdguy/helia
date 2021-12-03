@@ -15,25 +15,26 @@ import (
 
 // Structure representing a solar system
 type SolarSystem struct {
-	ID                uuid.UUID
-	SystemName        string
-	RegionID          uuid.UUID
-	HoldingFactionID  uuid.UUID
-	PosX              float64
-	PosY              float64
-	Universe          *Universe
-	ships             map[string]*Ship
-	stars             map[string]*Star
-	planets           map[string]*Planet
-	jumpholes         map[string]*Jumphole
-	stations          map[string]*Station
-	asteroids         map[string]*Asteroid
-	clients           map[string]*shared.GameClient       // clients in this system
-	missiles          map[string]*Missile                 // missiles in flight in this system
-	pushModuleEffects []models.GlobalPushModuleEffectBody // module visual effect aggregation for tick
-	pushPointEffects  []models.GlobalPushPointEffectBody  // non-module point visual effect aggregation for tick
-	tickCounter       int                                 // counter that is used to control frequency of certain global updates
-	Lock              shared.LabeledMutex
+	ID                    uuid.UUID
+	SystemName            string
+	RegionID              uuid.UUID
+	HoldingFactionID      uuid.UUID
+	PosX                  float64
+	PosY                  float64
+	Universe              *Universe
+	ships                 map[string]*Ship
+	stars                 map[string]*Star
+	planets               map[string]*Planet
+	jumpholes             map[string]*Jumphole
+	stations              map[string]*Station
+	asteroids             map[string]*Asteroid
+	clients               map[string]*shared.GameClient       // clients in this system
+	missiles              map[string]*Missile                 // missiles in flight in this system
+	pushModuleEffects     []models.GlobalPushModuleEffectBody // module visual effect aggregation for tick
+	pushPointEffects      []models.GlobalPushPointEffectBody  // non-module point visual effect aggregation for tick
+	tickCounter           int                                 // counter that is used to control frequency of certain global updates
+	newSystemChatMessages []models.ServerSystemChatBody
+	Lock                  shared.LabeledMutex
 	// event escalations to engine core
 	PlayerNeedRespawn    map[string]*shared.GameClient // clients in need of a respawn by core
 	NPCNeedRespawn       map[string]*Ship              // NPCs in need of a respawn by core
@@ -111,27 +112,32 @@ func (s *SolarSystem) PeriodicUpdate() {
 		return
 	}
 
-	// check tick counter to determine whether to send static world data
-	sendStatic := s.tickCounter > 50
+	// process player current ship event queues
+	s.processClientEventQueues()
 
-	// check tick counter to determine whether to send secret updates
-	sendSecret := s.tickCounter%4 == 0
+	// update ships (both player + npc)
+	s.updateShips()
 
-	// check tick counter to determine whether to send player rep sheets
-	sendPlayerRepSheets := s.tickCounter%8 == 0
+	// update npc stations
+	s.updateStations()
 
-	if sendStatic {
-		// reset tick counter
-		s.tickCounter = 0
-	}
+	// update in-flight missiles
+	s.updateMissiles()
 
+	// ship collision testing
+	s.shipCollisionTesting()
+
+	// send client updates
+	s.sendClientUpdates()
+
+	// increment tick counter
+	s.tickCounter++
+}
+
+func (s *SolarSystem) processClientEventQueues() {
 	// get message registry
 	msgRegistry := models.NewMessageRegistry()
 
-	// for aggregating new system chat messages
-	newSystemChatMessages := make([]models.ServerSystemChatBody, 0)
-
-	// process player current ship event queues
 	for _, c := range s.clients {
 		evt, lastMeaningfulActionAt := c.PopShipEvent()
 
@@ -1204,7 +1210,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 				}
 
 				// store message
-				newSystemChatMessages = append(newSystemChatMessages, models.ServerSystemChatBody{
+				s.newSystemChatMessages = append(s.newSystemChatMessages, models.ServerSystemChatBody{
 					SenderID:   sh.UserID,
 					SenderName: sh.OwnerName,
 					Message:    data.Message,
@@ -1291,7 +1297,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 			}
 		}
 	}
+}
 
+func (s *SolarSystem) updateShips() {
 	// update ships
 	for _, e := range s.ships {
 		// is hull at or below 0?
@@ -1335,12 +1343,15 @@ func (s *SolarSystem) PeriodicUpdate() {
 			e.PeriodicUpdate()
 		}
 	}
+}
 
-	// update npc stations
+func (s *SolarSystem) updateStations() {
 	for _, e := range s.stations {
 		e.PeriodicUpdate()
 	}
+}
 
+func (s *SolarSystem) updateMissiles() {
 	// get target type registry
 	tgtTypeReg := models.NewTargetTypeRegistry()
 
@@ -1439,7 +1450,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 		// remove from map
 		delete(s.missiles, k)
 	}
+}
 
+func (s *SolarSystem) shipCollisionTesting() {
 	// ship collission testing
 	for _, sA := range s.ships {
 		// skip dead ships
@@ -1533,10 +1546,29 @@ func (s *SolarSystem) PeriodicUpdate() {
 			}
 		}
 	}
+}
+
+func (s *SolarSystem) sendClientUpdates() {
+	// check tick counter to determine whether to send static world data
+	sendStatic := s.tickCounter > 50
+
+	// check tick counter to determine whether to send secret updates
+	sendSecret := s.tickCounter%4 == 0
+
+	// check tick counter to determine whether to send player rep sheets
+	sendPlayerRepSheets := s.tickCounter%8 == 0
+
+	if sendStatic {
+		// reset tick counter
+		s.tickCounter = 0
+	}
+
+	// get message registry
+	msgRegistry := models.NewMessageRegistry()
 
 	// build global update of non-secret info for clients
 	gu := models.ServerGlobalUpdateBody{
-		SystemChat: newSystemChatMessages,
+		SystemChat: s.newSystemChatMessages,
 	}
 
 	gu.CurrentSystemInfo = models.CurrentSystemInfo{
@@ -1860,8 +1892,8 @@ func (s *SolarSystem) PeriodicUpdate() {
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
 	s.pushPointEffects = make([]models.GlobalPushPointEffectBody, 0)
 
-	// increment tick counter
-	s.tickCounter++
+	// reset system chat messages for next tick
+	s.newSystemChatMessages = make([]models.ServerSystemChatBody, 0)
 }
 
 // Adds a ship to the system
