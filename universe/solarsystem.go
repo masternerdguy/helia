@@ -1381,7 +1381,7 @@ func (s *SolarSystem) updateMissiles() {
 					hullDmg, _ := m.ItemMeta.GetFloat64("hull_damage")
 
 					// apply damage to ship
-					sB.DealDamage(shieldDmg, armorDmg, hullDmg, nil)
+					sB.DealDamage(shieldDmg, armorDmg, hullDmg, m.shipMountedOn.ReputationSheet)
 
 					// schedule missile removal
 					dropMissiles = append(dropMissiles, mA.ID.String())

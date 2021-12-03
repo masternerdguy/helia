@@ -4122,7 +4122,7 @@ func (m *FittedSlot) activateAsShieldBooster() bool {
 	shieldBoost, _ := m.ItemMeta.GetFloat64("shield_boost_amount")
 
 	// apply boost to mounting ship
-	m.shipMountedOn.DealDamage(-shieldBoost, 0, 0, m.shipMountedOn.ReputationSheet)
+	m.shipMountedOn.DealDamage(-shieldBoost, 0, 0, nil)
 
 	// include visual effect if present
 	activationPGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
