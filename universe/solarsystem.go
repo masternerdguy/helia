@@ -137,8 +137,17 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 		// disconnect client if more than 5 minutes since last meaningful interaction
 		dMI := time.Since(lastMeaningfulActionAt)
+		dMIAsMinutes := dMI.Minutes()
 
-		if dMI.Minutes() > 5 {
+		if dMIAsMinutes >= 4.5 && dMIAsMinutes <= 5 {
+			// calculate time remaining
+			sr := (5 - dMIAsMinutes) * 60
+
+			if s.tickCounter%42 == 0 {
+				// inform client of imminent disconnection
+				c.WriteErrorMessage(fmt.Sprintf("you will be disconnected due to inactivity in %v seconds", int(sr)))
+			}
+		} else if dMIAsMinutes > 5 {
 			// inform client of disconnection
 			c.WriteErrorMessage("you are being disconnected due to inactivity")
 
