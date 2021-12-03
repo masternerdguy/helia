@@ -1310,6 +1310,14 @@ func (s *SolarSystem) updateShips() {
 			e.Destroyed = true
 			e.DestroyedAt = &now
 
+			// adjust standings
+			for _, v := range e.Aggressors {
+				if v != nil {
+					v.AdjustStanding(e.FactionID, e.Faction.ReputationSheet, -1, true)
+					v.EnforceBounds(true)
+				}
+			}
+
 			// was this a ship actively being flown by a player?
 			c := s.clients[e.UserID.String()]
 
@@ -1381,7 +1389,7 @@ func (s *SolarSystem) updateMissiles() {
 					hullDmg, _ := m.ItemMeta.GetFloat64("hull_damage")
 
 					// apply damage to ship
-					sB.DealDamage(shieldDmg, armorDmg, hullDmg)
+					sB.DealDamage(shieldDmg, armorDmg, hullDmg, nil)
 
 					// schedule missile removal
 					dropMissiles = append(dropMissiles, mA.ID.String())

@@ -183,6 +183,7 @@ type Ship struct {
 	ReputationSheet    *shared.PlayerReputationSheet
 	DestructArmed      bool
 	TemporaryModifiers []TemporaryShipModifier
+	Aggressors         []*shared.PlayerReputationSheet
 	Lock               shared.LabeledMutex
 }
 
@@ -1176,7 +1177,36 @@ func (s *Ship) TotalCargoBayVolumeUsed(lock bool) float64 {
 }
 
 // Deals damage to the ship
-func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) {
+func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64, attackerRS *shared.PlayerReputationSheet) {
+	// update aggression table
+	if attackerRS != nil {
+		// obtain lock
+		attackerRS.Lock.Lock("ship.DealDamage")
+		defer attackerRS.Lock.Unlock()
+
+		// get player's reputation sheet entry for this ship's faction
+		f, ok := attackerRS.FactionEntries[s.FactionID.String()]
+
+		if !ok {
+			// does not exist - create a neutral one
+			ne := shared.PlayerReputationSheetFactionEntry{
+				FactionID:        s.FactionID,
+				StandingValue:    0,
+				AreOpenlyHostile: false,
+			}
+
+			attackerRS.FactionEntries[s.FactionID.String()] = &ne
+			f = attackerRS.FactionEntries[s.FactionID.String()]
+		}
+
+		// update temporary hostility due to aggro flag
+		at := time.Now().Add(15 * time.Minute)
+		f.TemporarilyOpenlyHostileUntil = &at
+
+		// store entry
+		s.Aggressors = append(s.Aggressors, attackerRS)
+	}
+
 	// apply shield damage
 	s.Shield -= shieldDmg
 
@@ -1238,7 +1268,25 @@ func (s *Ship) CheckStandings(factionID uuid.UUID) (float64, bool) {
 
 	// try to find faction relationship
 	if val, ok := s.ReputationSheet.FactionEntries[factionID.String()]; ok {
-		return val.StandingValue, val.AreOpenlyHostile
+		// determine if currently openly hostile
+		oh := false
+
+		if val.AreOpenlyHostile {
+			// always openly hostile
+			oh = true
+		} else {
+			if val.TemporarilyOpenlyHostileUntil != nil {
+				ht := *val.TemporarilyOpenlyHostileUntil
+
+				if time.Now().Before(ht) {
+					// temporarily hostile until 15 minutes has elapsed
+					oh = true
+				}
+			}
+		}
+
+		// return standings and hostility status
+		return val.StandingValue, oh
 	} else {
 		return 0, false
 	}
@@ -3319,7 +3367,7 @@ func (s *Ship) SelfDestruct(lock bool) error {
 	}
 
 	// blow it up
-	s.DealDamage(s.GetRealMaxShield()+1, s.GetRealMaxArmor()+1, s.GetRealMaxHull()+1)
+	s.DealDamage(s.GetRealMaxShield()+1, s.GetRealMaxArmor()+1, s.GetRealMaxHull()+1, nil)
 
 	return nil
 }
@@ -3811,7 +3859,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	// apply damage (or ore / ice pulled if asteroid) to target
 	if *m.TargetType == tgtReg.Ship {
 		c := tgtI.(*Ship)
-		c.DealDamage(shieldDmg, armorDmg, hullDmg)
+		c.DealDamage(shieldDmg, armorDmg, hullDmg, m.shipMountedOn.ReputationSheet)
 	} else if *m.TargetType == tgtReg.Station {
 		c := tgtI.(*Station)
 		c.DealDamage(shieldDmg, armorDmg, hullDmg)
@@ -4074,7 +4122,7 @@ func (m *FittedSlot) activateAsShieldBooster() bool {
 	shieldBoost, _ := m.ItemMeta.GetFloat64("shield_boost_amount")
 
 	// apply boost to mounting ship
-	m.shipMountedOn.DealDamage(-shieldBoost, 0, 0)
+	m.shipMountedOn.DealDamage(-shieldBoost, 0, 0, m.shipMountedOn.ReputationSheet)
 
 	// include visual effect if present
 	activationPGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
