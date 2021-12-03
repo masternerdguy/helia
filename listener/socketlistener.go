@@ -584,7 +584,7 @@ func (l *SocketListener) handleClientNavClick(client *shared.GameClient, body *m
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.NavClick)
+		client.PushShipEvent(data, msgRegistry.NavClick, true)
 	}
 }
 
@@ -607,7 +607,7 @@ func (l *SocketListener) handleClientGoto(client *shared.GameClient, body *model
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.Goto)
+		client.PushShipEvent(data, msgRegistry.Goto, true)
 	}
 }
 
@@ -630,7 +630,7 @@ func (l *SocketListener) handleClientOrbit(client *shared.GameClient, body *mode
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.Orbit)
+		client.PushShipEvent(data, msgRegistry.Orbit, true)
 	}
 }
 
@@ -653,7 +653,7 @@ func (l *SocketListener) handleClientDock(client *shared.GameClient, body *model
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.Dock)
+		client.PushShipEvent(data, msgRegistry.Dock, true)
 	}
 }
 
@@ -676,7 +676,7 @@ func (l *SocketListener) handleClientUndock(client *shared.GameClient, body *mod
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.Undock)
+		client.PushShipEvent(data, msgRegistry.Undock, true)
 	}
 }
 
@@ -699,7 +699,7 @@ func (l *SocketListener) handleClientActivateModule(client *shared.GameClient, b
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.ActivateModule)
+		client.PushShipEvent(data, msgRegistry.ActivateModule, true)
 	}
 }
 
@@ -722,7 +722,7 @@ func (l *SocketListener) handleClientDeactivateModule(client *shared.GameClient,
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.DeactivateModule)
+		client.PushShipEvent(data, msgRegistry.DeactivateModule, true)
 	}
 }
 
@@ -745,7 +745,7 @@ func (l *SocketListener) handleClientViewCargoBay(client *shared.GameClient, bod
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.ViewCargoBay)
+		client.PushShipEvent(data, msgRegistry.ViewCargoBay, false)
 	}
 }
 
@@ -768,7 +768,7 @@ func (l *SocketListener) handleClientUnfitModule(client *shared.GameClient, body
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.UnfitModule)
+		client.PushShipEvent(data, msgRegistry.UnfitModule, true)
 	}
 }
 
@@ -791,7 +791,7 @@ func (l *SocketListener) handleClientTrashItem(client *shared.GameClient, body *
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.TrashItem)
+		client.PushShipEvent(data, msgRegistry.TrashItem, true)
 	}
 }
 
@@ -814,7 +814,7 @@ func (l *SocketListener) handleClientPackageItem(client *shared.GameClient, body
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.PackageItem)
+		client.PushShipEvent(data, msgRegistry.PackageItem, true)
 	}
 }
 
@@ -837,7 +837,7 @@ func (l *SocketListener) handleClientUnpackageItem(client *shared.GameClient, bo
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.UnpackageItem)
+		client.PushShipEvent(data, msgRegistry.UnpackageItem, true)
 	}
 }
 
@@ -860,7 +860,7 @@ func (l *SocketListener) handleClientStackItem(client *shared.GameClient, body *
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.StackItem)
+		client.PushShipEvent(data, msgRegistry.StackItem, true)
 	}
 }
 
@@ -883,7 +883,7 @@ func (l *SocketListener) handleClientSplitItem(client *shared.GameClient, body *
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.SplitItem)
+		client.PushShipEvent(data, msgRegistry.SplitItem, true)
 	}
 }
 
@@ -906,7 +906,7 @@ func (l *SocketListener) handleClientFitModule(client *shared.GameClient, body *
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.FitModule)
+		client.PushShipEvent(data, msgRegistry.FitModule, true)
 	}
 }
 
@@ -929,7 +929,7 @@ func (l *SocketListener) handleClientSellAsOrder(client *shared.GameClient, body
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.SellAsOrder)
+		client.PushShipEvent(data, msgRegistry.SellAsOrder, true)
 	}
 }
 
@@ -952,7 +952,7 @@ func (l *SocketListener) handleClientViewOpenSellOrders(client *shared.GameClien
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.ViewOpenSellOrders)
+		client.PushShipEvent(data, msgRegistry.ViewOpenSellOrders, false)
 	}
 }
 
@@ -975,7 +975,7 @@ func (l *SocketListener) handleClientBuySellOrder(client *shared.GameClient, bod
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.BuySellOrder)
+		client.PushShipEvent(data, msgRegistry.BuySellOrder, true)
 	}
 }
 
@@ -998,7 +998,7 @@ func (l *SocketListener) handleClientViewIndustrialOrders(client *shared.GameCli
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.ViewIndustrialOrders)
+		client.PushShipEvent(data, msgRegistry.ViewIndustrialOrders, false)
 	}
 }
 
@@ -1021,7 +1021,7 @@ func (l *SocketListener) handleClientBuyFromSilo(client *shared.GameClient, body
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.BuyFromSilo)
+		client.PushShipEvent(data, msgRegistry.BuyFromSilo, true)
 	}
 }
 
@@ -1044,7 +1044,7 @@ func (l *SocketListener) handleClientSellToSilo(client *shared.GameClient, body 
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.SellToSilo)
+		client.PushShipEvent(data, msgRegistry.SellToSilo, true)
 	}
 }
 
@@ -1067,7 +1067,7 @@ func (l *SocketListener) handleClientViewStarMap(client *shared.GameClient, body
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.ViewStarMap)
+		client.PushShipEvent(data, msgRegistry.ViewStarMap, false)
 	}
 }
 
@@ -1090,7 +1090,7 @@ func (l *SocketListener) handleClientConsumeFuel(client *shared.GameClient, body
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.ConsumeFuel)
+		client.PushShipEvent(data, msgRegistry.ConsumeFuel, true)
 	}
 }
 
@@ -1113,7 +1113,7 @@ func (l *SocketListener) handleClientSelfDestruct(client *shared.GameClient, bod
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.SelfDestruct)
+		client.PushShipEvent(data, msgRegistry.SelfDestruct, true)
 	}
 }
 
@@ -1136,7 +1136,7 @@ func (l *SocketListener) handleClientConsumeRepairKit(client *shared.GameClient,
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.ConsumeRepairKit)
+		client.PushShipEvent(data, msgRegistry.ConsumeRepairKit, true)
 	}
 }
 
@@ -1159,7 +1159,7 @@ func (l *SocketListener) handleClientViewProperty(client *shared.GameClient, bod
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.ViewProperty)
+		client.PushShipEvent(data, msgRegistry.ViewProperty, false)
 	}
 }
 
@@ -1182,7 +1182,7 @@ func (l *SocketListener) handleClientBoard(client *shared.GameClient, body *mode
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.Board)
+		client.PushShipEvent(data, msgRegistry.Board, true)
 	}
 }
 
@@ -1205,7 +1205,7 @@ func (l *SocketListener) handleClientTransferCredits(client *shared.GameClient, 
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.TransferCredits)
+		client.PushShipEvent(data, msgRegistry.TransferCredits, true)
 	}
 }
 
@@ -1228,7 +1228,7 @@ func (l *SocketListener) handleClientSellShipAsOrder(client *shared.GameClient, 
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.SellShipAsOrder)
+		client.PushShipEvent(data, msgRegistry.SellShipAsOrder, true)
 	}
 }
 
@@ -1251,7 +1251,7 @@ func (l *SocketListener) handleClientTrashShip(client *shared.GameClient, body *
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.TrashShip)
+		client.PushShipEvent(data, msgRegistry.TrashShip, true)
 	}
 }
 
@@ -1274,7 +1274,7 @@ func (l *SocketListener) handleClientRenameShip(client *shared.GameClient, body 
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.RenameShip)
+		client.PushShipEvent(data, msgRegistry.RenameShip, true)
 	}
 }
 
@@ -1297,7 +1297,7 @@ func (l *SocketListener) handleClientPostSystemChatMessage(client *shared.GameCl
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.PostSystemChatMessage)
+		client.PushShipEvent(data, msgRegistry.PostSystemChatMessage, true)
 	}
 }
 
@@ -1320,7 +1320,7 @@ func (l *SocketListener) handleClientTransferItem(client *shared.GameClient, bod
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.TransferItem)
+		client.PushShipEvent(data, msgRegistry.TransferItem, true)
 	}
 }
 

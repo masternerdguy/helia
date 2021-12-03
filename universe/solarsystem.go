@@ -131,9 +131,23 @@ func (s *SolarSystem) PeriodicUpdate() {
 	// for aggregating new system chat messages
 	newSystemChatMessages := make([]models.ServerSystemChatBody, 0)
 
-	// process player current ship event queue
+	// process player current ship event queues
 	for _, c := range s.clients {
-		evt := c.PopShipEvent()
+		evt, lastMeaningfulActionAt := c.PopShipEvent()
+
+		// disconnect client if more than 5 minutes since last meaningful interaction
+		dMI := time.Since(lastMeaningfulActionAt)
+
+		if dMI.Minutes() > 5 {
+			// inform client of disconnection
+			c.WriteErrorMessage("you are being disconnected due to inactivity")
+
+			// disconnect client
+			s.RemoveClient(c, false)
+
+			// move to next one
+			continue
+		}
 
 		// skip if nothing to do
 		if evt == nil {

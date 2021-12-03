@@ -37,6 +37,9 @@ type GameClient struct {
 	// to throttle incoming chat messages
 	LastChatPostedAt time.Time
 
+	// to disconnect if no meaningful user input is being received
+	LastMeaningfulActionAt time.Time
+
 	// property cache
 	propertyCache PropertyCache
 
@@ -76,6 +79,9 @@ func (c *GameClient) Initialize() {
 
 	// initialize last message stamp
 	c.LastChatPostedAt = time.Now()
+
+	// initialize last interaction stamp
+	c.LastMeaningfulActionAt = time.Now()
 }
 
 // Writes a message to a client
@@ -136,9 +142,13 @@ func (c *GameClient) WriteErrorMessage(msg string) {
 }
 
 // Adds an event to the ship event queue
-func (c *GameClient) PushShipEvent(evt interface{}, eventType int) {
+func (c *GameClient) PushShipEvent(evt interface{}, eventType int, meaningful bool) {
 	c.Lock.Lock("gameclient.PushShipEvent")
 	defer c.Lock.Unlock()
+
+	if meaningful {
+		c.LastMeaningfulActionAt = time.Now()
+	}
 
 	c.shipEventQueue.Events = append(c.shipEventQueue.Events, Event{
 		Type: eventType,
@@ -147,7 +157,7 @@ func (c *GameClient) PushShipEvent(evt interface{}, eventType int) {
 }
 
 // Gets the latest event for the player's current ship
-func (c *GameClient) PopShipEvent() *Event {
+func (c *GameClient) PopShipEvent() (*Event, time.Time) {
 	c.Lock.Lock("gameclient.PopShipEvent")
 	defer c.Lock.Unlock()
 
@@ -159,10 +169,10 @@ func (c *GameClient) PopShipEvent() *Event {
 		c.shipEventQueue.Events = c.shipEventQueue.Events[1:]
 
 		// return event
-		return &x
+		return &x, c.LastMeaningfulActionAt
 	}
 
-	return nil
+	return nil, c.LastMeaningfulActionAt
 }
 
 func (c *GameClient) GetPropertyCache() PropertyCache {
