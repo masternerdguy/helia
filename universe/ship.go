@@ -1252,18 +1252,26 @@ func (s *Ship) behave() {
 	}
 
 	if s.BehaviourMode != nil {
-		// get registry
-		registry := NewBehaviourRegistry()
+		// get aggressive if under threat
+		ms := s.GetRealMaxShield()
+		sr := s.Shield / ms
 
-		switch *s.BehaviourMode {
-		case registry.None:
-			// unset mode
-			s.BehaviourMode = nil
-			return
-		case registry.Wander:
-			s.behaviourWander()
-		case registry.Patrol:
+		if sr < 0.75 {
 			s.behaviourPatrol()
+		} else {
+			// get registry
+			registry := NewBehaviourRegistry()
+
+			switch *s.BehaviourMode {
+			case registry.None:
+				// unset mode
+				s.BehaviourMode = nil
+				return
+			case registry.Wander:
+				s.behaviourWander()
+			case registry.Patrol:
+				s.behaviourPatrol()
+			}
 		}
 	}
 }
