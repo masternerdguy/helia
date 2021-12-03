@@ -1184,7 +1184,7 @@ func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64, 
 		attackerRS.Lock.Lock("ship.DealDamage")
 		defer attackerRS.Lock.Unlock()
 
-		// get attcking player's reputation sheet entry for this ship's faction
+		// get attacking player's reputation sheet entry for this ship's faction
 		f, ok := attackerRS.FactionEntries[s.FactionID.String()]
 
 		if !ok {
