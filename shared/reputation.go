@@ -112,7 +112,7 @@ func (s *PlayerReputationSheet) applyStandingChange(factionID uuid.UUID, amount 
 	}
 
 	// adjust standing
-	f.StandingValue -= amount
+	f.StandingValue += amount
 
 	// check new amount
 	if f.StandingValue >= CLEAR_OPENLY_HOSTILE {

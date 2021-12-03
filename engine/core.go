@@ -448,6 +448,19 @@ func handleEscalations(sol *universe.SolarSystem) {
 				ds.DestroyedAt = &now
 			}
 
+			// apply standings change for kill
+			for _, v := range ds.Aggressors {
+				if v != nil {
+					if ds.Faction.IsNPC {
+						v.AdjustStandingNPC(ds.FactionID, ds.Faction.ReputationSheet, -1, true)
+					} else {
+						v.AdjustStandingPlayer(ds.FactionID, ds.ReputationSheet, -0.25, true)
+					}
+
+					v.EnforceBounds(true)
+				}
+			}
+
 			// update dead ship in db
 			err := saveShip(ds)
 
