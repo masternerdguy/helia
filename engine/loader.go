@@ -1357,6 +1357,7 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 		FactionID:     owner.CurrentFactionID,
 		IsNPC:         owner.IsNPC,
 		BehaviourMode: owner.BehaviourMode,
+		Aggressors:    make(map[string]*shared.PlayerReputationSheet),
 		Lock: shared.LabeledMutex{
 			Structure: "Ship",
 			UID:       fmt.Sprintf("%v :: %v :: %v", sh.ID, time.Now(), rand.Float64()),
