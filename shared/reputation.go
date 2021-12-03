@@ -75,6 +75,11 @@ func (s *PlayerReputationSheet) AdjustStandingNPC(factionID uuid.UUID, factionRS
 
 // Adjusts standing relative to a player created faction
 func (s *PlayerReputationSheet) AdjustStandingPlayer(factionID uuid.UUID, playerRS *PlayerReputationSheet, amount float64, lock bool) {
+	// null check
+	if playerRS == nil {
+		return
+	}
+
 	if lock {
 		// obtain lock on this reputation sheet
 		s.Lock.Lock("reputation.AdjustStandingPlayer")
