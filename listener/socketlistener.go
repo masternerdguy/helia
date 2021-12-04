@@ -79,6 +79,9 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		userSvc := sql.GetUserService()
 
 		// save reputation sheet
+		client.ReputationSheet.Lock.Lock("socketlistener.HandleConnect::DisconnectSave")
+		defer client.ReputationSheet.Lock.Unlock()
+
 		srs := engine.SQLFromPlayerReputationSheet(&client.ReputationSheet)
 		err := userSvc.SaveReputationSheet(*client.UID, srs)
 
