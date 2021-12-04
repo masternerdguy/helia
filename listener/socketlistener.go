@@ -85,7 +85,9 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		srs := engine.SQLFromPlayerReputationSheet(&client.ReputationSheet)
 		err := userSvc.SaveReputationSheet(*client.UID, srs)
 
-		log.Println(fmt.Sprintf("! unable to save reputation sheet for %v on disconnect! %v", client.UID, err))
+		if err != nil {
+			log.Println(fmt.Sprintf("! unable to save reputation sheet for %v on disconnect! %v", client.UID, err))
+		}
 	}(&client)
 
 	// get message type registry
