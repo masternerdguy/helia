@@ -23,6 +23,8 @@ export class SignupComponent implements OnInit {
   }
 
   async register() {
+    let ok = true;
+
     // try to create account
     await this.accountService.register({
       emailaddress: this.emailaddress.nativeElement.value,
@@ -32,11 +34,13 @@ export class SignupComponent implements OnInit {
       confirmpassword: this.confirmpassword.nativeElement.value,
     })
     .catch((r) => {
+      ok = false;
+
         // show error message
         alert(r.error);
     })
-    .then((r) => {
-      if (r.status == 200) {
+    .then(() => {
+      if (ok) {
       // redirect to login page
       window.location.href = '/auth/signin';
       }

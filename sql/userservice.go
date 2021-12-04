@@ -109,7 +109,7 @@ func (s UserService) NewUser(
 	}
 
 	// hash password
-	hp, err := s.Hashpass(u, p)
+	hp, err := s.Hashpass(emailAddress, p)
 
 	if err != nil {
 		return nil, err

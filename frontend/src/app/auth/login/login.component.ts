@@ -9,7 +9,7 @@ import { clientStart } from 'src/app/game/clientEngine';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit {
-  @ViewChild('charactername') charactername: ElementRef;
+  @ViewChild('emailaddress') emailaddress: ElementRef;
   @ViewChild('password') password: ElementRef;
 
   loginSuccess = false;
@@ -24,7 +24,7 @@ export class LoginComponent implements OnInit {
   async login() {
     // try to sign in
     const s = await this.accountService.login({
-      charactername: this.charactername.nativeElement.value,
+      emailaddress: this.emailaddress.nativeElement.value,
       password: this.password.nativeElement.value,
     });
 
