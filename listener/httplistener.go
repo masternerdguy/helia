@@ -167,11 +167,11 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		if user.IsNPC {
 			err = errors.New("logins not allowed for NPC accounts")
 		}
-	}
 
-	// verify not banned
-	if user.Banned {
-		err = errors.New("you have been banned")
+		// verify not banned
+		if user.Banned {
+			err = errors.New("you have been banned")
+		}
 	}
 
 	if err != nil {
