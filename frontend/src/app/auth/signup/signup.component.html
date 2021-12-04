@@ -13,16 +13,24 @@
         <div>
             <label>Choose your starting faction...</label>
             <div>
-                <input type="radio" name="startgroup" value="8d9e032c-d9b1-4a36-8bbf-1448fa60a09a"/>&nbsp;Kingdom of Antaria
+                <input 
+                    type="radio" id="ksr" name="startgroup" value="282b12c9-59e6-412a-8122-6fe07640a0c0" (change)="setStart($event)"/>
+                &nbsp;Kingdom of Antaria
             </div>
             <div>
-                <input type="radio" name="startgroup" value="e17f91f3-a16f-4854-80f5-e8ec5e1ee113"/>&nbsp;Ozouka Accord
+                <input 
+                    type="radio" id="asr" name="startgroup" value="0317d9ea-6b4c-4345-a52e-785793150f5b" (change)="setStart($event)"/>
+                &nbsp;Ozouka Accord
             </div>
             <div>
-                <input type="radio" name="startgroup" value="77abd4c9-66a4-49ab-817b-25f9c8bc36b7"/>&nbsp;Vierra Federation
+                <input 
+                    type="radio" id="fsr" name="startgroup" value="d58ca466-8280-48bb-8c1a-fcdbf6525603" (change)="setStart($event)"/>
+                &nbsp;Vierra Federation
             </div>
             <div>
-                <input type="radio" name="startgroup" value="d3f90928-5747-4176-81c3-d1463557bb26"/>&nbsp;Tenevan Coalition
+                <input 
+                    type="radio" id="csr" name="startgroup" value="46a065c5-59b4-4deb-b31b-ceff79b5cffc" (change)="setStart($event)"/>
+                &nbsp;Tenevan Coalition
             </div>
         </div>
         <br/>
@@ -32,7 +40,7 @@
         </div>
         <div>
             <label for="confirmpassword">Confirm Password</label>
-            <input type="confirmpassword" class="form-control" placeholder="Confirm your good password..." id="confirmpassword" #confirmpassword />
+            <input type="password" class="form-control" placeholder="Confirm your good password..." id="confirmpassword" #confirmpassword />
         </div>
         <br/>
         <button type="button" class="btn btn-primary" (click)="register()">

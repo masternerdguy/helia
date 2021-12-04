@@ -3,4 +3,5 @@ export class RegisterModel {
   public charactername: string;
   public startid: string;
   public password: string;
+  public confirmpassword: string;
 }
