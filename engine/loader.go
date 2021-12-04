@@ -377,18 +377,10 @@ func saveUniverse(u *universe.Universe) {
 	// get services
 	stationSvc := sql.GetStationService()
 	stationProcessSvc := sql.GetStationProcessService()
-	userSvc := sql.GetUserService()
-
-	// for aggregating connected clients
-	clients := make([]*shared.GameClient, 0)
 
 	// iterate over systems
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			// stash clients in system
-			lc := s.CopyClients(!shared.MutexFreeze)
-			clients = append(clients, lc...)
-
 			// get ships in system
 			ships := s.CopyShips(!shared.MutexFreeze)
 
@@ -469,17 +461,6 @@ func saveUniverse(u *universe.Universe) {
 					}
 				}
 			}
-		}
-	}
-
-	// iterate over clients
-	for _, v := range clients {
-		// save reputation sheet
-		sheet := SQLFromPlayerReputationSheet(&v.ReputationSheet)
-		err := userSvc.SaveReputationSheet(*v.UID, sheet)
-
-		if err != nil {
-			log.Println(fmt.Sprintf("Error saving reputation sheet: %v | %v", v, err))
 		}
 	}
 }
