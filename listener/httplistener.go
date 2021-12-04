@@ -169,6 +169,11 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// verify not banned
+	if user.Banned {
+		err = errors.New("you have been banned")
+	}
+
 	if err != nil {
 		res.Success = false
 		res.Message = err.Error()
