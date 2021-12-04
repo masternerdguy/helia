@@ -8,6 +8,7 @@ import (
 	"helia/sql"
 	"io/ioutil"
 	"net/http"
+	"net/mail"
 )
 
 // Listener for handling and dispatching incoming http requests
@@ -59,6 +60,20 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if m.Password != m.ConfirmPassword {
+		http.Error(w, "Passwords must match.", 500)
+		return
+	}
+
+	email, v := isValidEmailAddress(m.EmailAddress)
+
+	if !v {
+		http.Error(w, "Email address is invalid.", 500)
+		return
+	}
+
+	m.EmailAddress = email
+
 	// validate start
 	startID := m.StartID
 
@@ -109,6 +124,8 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// build initial reputation sheet
+	u.ReputationSheet.FactionEntries = make(map[string]sql.PlayerReputationSheetFactionEntry)
+
 	for _, r := range f.ReputationSheet.Entries {
 		u.ReputationSheet.FactionEntries[r.TargetFactionID.String()] = sql.PlayerReputationSheetFactionEntry{
 			FactionID:        r.TargetFactionID,
@@ -229,4 +246,14 @@ func (l *HTTPListener) HandleShutdown(w http.ResponseWriter, r *http.Request) {
 		// initiate shutdown
 		l.Engine.Shutdown()
 	}
+}
+
+func isValidEmailAddress(e string) (string, bool) {
+	addr, err := mail.ParseAddress(e)
+
+	if err != nil {
+		return "", false
+	}
+
+	return addr.Address, true
 }

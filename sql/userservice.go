@@ -24,7 +24,7 @@ func GetUserService() UserService {
 type User struct {
 	ID                uuid.UUID
 	CharacterName     string
-	EmailAddress      string
+	EmailAddress      *string
 	Hashpass          string
 	Registered        time.Time
 	Banned            bool
