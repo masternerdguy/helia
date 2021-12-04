@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -192,8 +191,6 @@ func (s UserService) SaveReputationSheet(uid uuid.UUID, repsheet PlayerReputatio
 	if err != nil {
 		return err
 	}
-
-	log.Println("rep sheet saved!")
 
 	defer q.Close()
 
