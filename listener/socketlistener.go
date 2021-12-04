@@ -79,18 +79,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		userSvc := sql.GetUserService()
 
 		// save reputation sheet
-		srs := sql.PlayerReputationSheet{
-			FactionEntries: make(map[string]sql.PlayerReputationSheetFactionEntry),
-		}
-
-		for _, fr := range client.ReputationSheet.FactionEntries {
-			srs.FactionEntries[fr.FactionID.String()] = sql.PlayerReputationSheetFactionEntry{
-				FactionID:        fr.FactionID,
-				StandingValue:    fr.StandingValue,
-				AreOpenlyHostile: fr.AreOpenlyHostile,
-			}
-		}
-
+		srs := engine.SQLFromPlayerReputationSheet(&client.ReputationSheet)
 		err := userSvc.SaveReputationSheet(*client.UID, srs)
 
 		log.Println(fmt.Sprintf("! unable to save reputation sheet for %v on disconnect! %v", client.UID, err))
