@@ -454,7 +454,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 					if ds.Faction.IsNPC {
 						v.AdjustStandingNPC(ds.FactionID, ds.Faction.ReputationSheet, -1, true)
 					} else {
-						v.AdjustStandingPlayer(ds.FactionID, ds.ReputationSheet, -0.25, true)
+						v.AdjustStandingPlayer(ds.ReputationSheet, -0.25, true)
 					}
 
 					v.EnforceBounds(true)

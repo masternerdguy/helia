@@ -1,6 +1,8 @@
 package shared
 
 import (
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -70,13 +72,17 @@ func (s *PlayerReputationSheet) AdjustStandingNPC(factionID uuid.UUID, factionRS
 		// get indirect adjustment amount
 		rv := (amount * (v.StandingValue / MAX_STANDING)) * INDIRECT_ADJUSTMENT_MODIFIER
 
+		if rv != 0 {
+			log.Println(fmt.Sprintf("%v :: %v", v.TargetFactionID, rv))
+		}
+
 		// apply indirect adjustment
-		s.applyStandingChange(factionID, rv)
+		s.applyStandingChange(v.TargetFactionID, rv)
 	}
 }
 
 // Adjusts standing relative to a player created faction
-func (s *PlayerReputationSheet) AdjustStandingPlayer(factionID uuid.UUID, playerRS *PlayerReputationSheet, amount float64, lock bool) {
+func (s *PlayerReputationSheet) AdjustStandingPlayer(playerRS *PlayerReputationSheet, amount float64, lock bool) {
 	// null check
 	if playerRS == nil {
 		return
@@ -98,7 +104,7 @@ func (s *PlayerReputationSheet) AdjustStandingPlayer(factionID uuid.UUID, player
 		rv := (amount * (v.StandingValue / MAX_STANDING)) * INDIRECT_ADJUSTMENT_MODIFIER
 
 		// apply indirect adjustment
-		s.applyStandingChange(factionID, rv)
+		s.applyStandingChange(v.FactionID, rv)
 	}
 }
 
