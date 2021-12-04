@@ -460,28 +460,6 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 					// bound check
 					v.EnforceBounds(true)
-
-					// save attacker reputation sheet
-					v.Lock.Lock("core.handleEscalations::DeadShips")
-					defer v.Lock.Unlock()
-
-					srs := sql.PlayerReputationSheet{
-						FactionEntries: make(map[string]sql.PlayerReputationSheetFactionEntry),
-					}
-
-					for _, fr := range v.FactionEntries {
-						srs.FactionEntries[fr.FactionID.String()] = sql.PlayerReputationSheetFactionEntry{
-							FactionID:        fr.FactionID,
-							StandingValue:    fr.StandingValue,
-							AreOpenlyHostile: fr.AreOpenlyHostile,
-						}
-					}
-
-					err := userSvc.SaveReputationSheet(v.UserID, srs)
-
-					if err != nil {
-						log.Println(fmt.Sprintf("! Unable to update rep sheet for %v in db (%v)!", v.UserID, err))
-					}
 				}
 			}
 
