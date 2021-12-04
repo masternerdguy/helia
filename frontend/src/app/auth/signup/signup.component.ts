@@ -7,7 +7,7 @@ import { AccountService } from '../account.service';
   styleUrls: ['./signup.component.css'],
 })
 export class SignupComponent implements OnInit {
-  @ViewChild('username') username: ElementRef;
+  @ViewChild('charactername') charactername: ElementRef;
   @ViewChild('password') password: ElementRef;
 
   constructor(private accountService: AccountService) {}
@@ -17,7 +17,7 @@ export class SignupComponent implements OnInit {
   async register() {
     // try to create account
     await this.accountService.register({
-      username: this.username.nativeElement.value,
+      charactername: this.charactername.nativeElement.value,
       password: this.password.nativeElement.value,
     });
 

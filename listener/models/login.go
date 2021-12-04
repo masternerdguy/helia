@@ -2,8 +2,8 @@ package models
 
 // Incoming payload for existing user login
 type APILoginModel struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	CharacterName string `json:"charactername"`
+	Password      string `json:"password"`
 }
 
 // Outgoing result of user login attempt

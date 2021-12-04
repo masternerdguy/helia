@@ -51,8 +51,8 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validation
-	if len(m.Username) == 0 {
-		http.Error(w, "Username must not be empty.", 500)
+	if len(m.CharacterName) == 0 {
+		http.Error(w, "CharacterName must not be empty.", 500)
 		return
 	}
 
@@ -87,7 +87,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create user
-	u, err := userSvc.NewUser(m.Username, m.Password, startID, ec.ID, start.FactionID)
+	u, err := userSvc.NewUser(m.CharacterName, m.Password, startID, ec.ID, start.FactionID)
 
 	if err != nil {
 		http.Error(w, "createuser: "+err.Error(), 500)
@@ -160,7 +160,7 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	// attempt login
 	res := models.APILoginResponseModel{}
-	user, err := userSvc.GetUserByLogin(m.Username, m.Password)
+	user, err := userSvc.GetUserByLogin(m.CharacterName, m.Password)
 
 	// verify not an NPC account
 	if err == nil {

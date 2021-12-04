@@ -2,13 +2,39 @@
     <h2>Register</h2>
     <form class="form">
         <div>
-            <label for="username">Username</label>
-            <input type="username" class="form-control" placeholder="Enter username" id="username" #username />
+            <label for="emailaddress">Email Address</label>
+            <input type="emailaddress" class="form-control" placeholder="Enter your email address..." id="emailaddress" #emailaddress />
         </div>
         <div>
-            <label for="password">Password</label>
-            <input type="password" class="form-control" placeholder="Enter password" id="password" #password />
+            <label for="charactername">Character Name</label>
+            <input type="charactername" class="form-control" placeholder="Enter your character's name..." id="charactername" #charactername />
         </div>
+        <br/>
+        <div>
+            <label>Choose your starting faction...</label>
+            <div>
+                <input type="radio" name="startgroup" value="8d9e032c-d9b1-4a36-8bbf-1448fa60a09a"/>&nbsp;Kingdom of Antaria
+            </div>
+            <div>
+                <input type="radio" name="startgroup" value="e17f91f3-a16f-4854-80f5-e8ec5e1ee113"/>&nbsp;Ozouka Accord
+            </div>
+            <div>
+                <input type="radio" name="startgroup" value="77abd4c9-66a4-49ab-817b-25f9c8bc36b7"/>&nbsp;Vierra Federation
+            </div>
+            <div>
+                <input type="radio" name="startgroup" value="d3f90928-5747-4176-81c3-d1463557bb26"/>&nbsp;Tenevan Coalition
+            </div>
+        </div>
+        <br/>
+        <div>
+            <label for="password">Password</label>
+            <input type="password" class="form-control" placeholder="Enter a good password..." id="password" #password />
+        </div>
+        <div>
+            <label for="confirmpassword">Confirm Password</label>
+            <input type="confirmpassword" class="form-control" placeholder="Confirm your good password..." id="confirmpassword" #confirmpassword />
+        </div>
+        <br/>
         <button type="button" class="btn btn-primary" (click)="register()">
             Submit
         </button>

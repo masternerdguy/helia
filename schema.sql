@@ -440,7 +440,7 @@ ALTER TABLE public.universe_systems OWNER TO developer;
 
 CREATE TABLE public.users (
     id uuid NOT NULL,
-    username character varying(16) NOT NULL,
+    charactername character varying(16) NOT NULL,
     hashpass character(64) NOT NULL,
     registered timestamp with time zone NOT NULL,
     banned bit(1) NOT NULL,
@@ -697,11 +697,11 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_username_uq; Type: CONSTRAINT; Schema: public; Owner: developer
+-- Name: users users_charactername_uq; Type: CONSTRAINT; Schema: public; Owner: developer
 --
 
 ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_username_uq UNIQUE (username);
+    ADD CONSTRAINT users_charactername_uq UNIQUE (charactername);
 
 
 --

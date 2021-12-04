@@ -1,4 +1,4 @@
 export class RegisterModel {
-  public username: string;
+  public charactername: string;
   public password: string;
 }

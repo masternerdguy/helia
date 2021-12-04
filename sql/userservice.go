@@ -23,7 +23,7 @@ func GetUserService() UserService {
 // Structure representing a row in the users table
 type User struct {
 	ID                uuid.UUID
-	Username          string
+	CharacterName     string
 	Hashpass          string
 	Registered        time.Time
 	Banned            bool
@@ -77,10 +77,10 @@ func (a *PlayerReputationSheet) Scan(value interface{}) error {
 	return json.Unmarshal(b, &a)
 }
 
-// Hashes a user's password using their username and an internal constant as the salt
-func (s UserService) Hashpass(username string, pwd string) (hash *string, err error) {
+// Hashes a user's password using their charactername and an internal constant as the salt
+func (s UserService) Hashpass(charactername string, pwd string) (hash *string, err error) {
 	const salt = "_4ppl3j4ck!_"
-	token := []byte(fmt.Sprintf("%s-xiwmg-%s-dnjij-%s", username, pwd, salt))
+	token := []byte(fmt.Sprintf("%s-xiwmg-%s-dnjij-%s", charactername, pwd, salt))
 
 	if err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ func (s UserService) NewUser(u string, p string, startID uuid.UUID, escrowContai
 
 	// insert user
 	sql := `
-				INSERT INTO public.users(id, username, hashpass, registered, banned, startid, escrow_containerid, current_factionid)
+				INSERT INTO public.users(id, charactername, hashpass, registered, banned, startid, escrow_containerid, current_factionid)
 				VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 			`
 
@@ -127,7 +127,7 @@ func (s UserService) NewUser(u string, p string, startID uuid.UUID, escrowContai
 	// return user with inserted data
 	user := User{
 		ID:               uid,
-		Username:         u,
+		CharacterName:    u,
 		Hashpass:         *hp,
 		Registered:       createdAt,
 		Banned:           false,
@@ -190,7 +190,7 @@ func (s UserService) SaveReputationSheet(uid uuid.UUID, repsheet PlayerReputatio
 }
 
 // Finds the user with the supplied credentials
-func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) {
+func (s UserService) GetUserByLogin(charactername string, pwd string) (*User, error) {
 	// get db handle
 	db, err := connect()
 
@@ -199,7 +199,7 @@ func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) 
 	}
 
 	// hash password
-	hp, err := s.Hashpass(username, pwd)
+	hp, err := s.Hashpass(charactername, pwd)
 
 	if err != nil {
 		return nil, err
@@ -208,14 +208,14 @@ func (s UserService) GetUserByLogin(username string, pwd string) (*User, error) 
 	// check for user with these credentials
 	user := User{}
 
-	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid, reputationsheet,
+	sqlStatement := `SELECT id, charactername, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid, reputationsheet,
 							isnpc, behaviourmode
 					 FROM users
-					 WHERE username=$1 AND hashpass=$2`
+					 WHERE charactername=$1 AND hashpass=$2`
 
-	row := db.QueryRow(sqlStatement, username, *hp)
+	row := db.QueryRow(sqlStatement, charactername, *hp)
 
-	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
+	switch err := row.Scan(&user.ID, &user.CharacterName, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
 		&user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet, &user.IsNPC, &user.BehaviourMode); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
@@ -238,14 +238,14 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 	// check for user with these credentials
 	user := User{}
 
-	sqlStatement := `SELECT id, username, hashpass, registered, banned, current_shipid, startid, escrow_containerid, current_factionid, reputationsheet,
+	sqlStatement := `SELECT id, charactername, hashpass, registered, banned, current_shipid, startid, escrow_containerid, current_factionid, reputationsheet,
 							isnpc, behaviourmode
 					 FROM users
 					 WHERE id=$1`
 
 	row := db.QueryRow(sqlStatement, uid)
 
-	switch err := row.Scan(&user.ID, &user.Username, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
+	switch err := row.Scan(&user.ID, &user.CharacterName, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
 		&user.StartID, &user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet, &user.IsNPC, &user.BehaviourMode); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
