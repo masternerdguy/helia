@@ -451,13 +451,30 @@ func handleEscalations(sol *universe.SolarSystem) {
 			// apply standings change for kill
 			for _, v := range ds.Aggressors {
 				if v != nil {
+					// combat adjustment
 					if ds.Faction.IsNPC {
 						v.AdjustStandingNPC(ds.FactionID, ds.Faction.ReputationSheet, -1, true)
 					} else {
 						v.AdjustStandingPlayer(ds.ReputationSheet, -0.25, true)
 					}
 
+					// bound check
 					v.EnforceBounds(true)
+
+					// save attacker reputation sheet
+					srs := sql.PlayerReputationSheet{
+						FactionEntries: make(map[string]sql.PlayerReputationSheetFactionEntry),
+					}
+
+					for _, fr := range v.FactionEntries {
+						srs.FactionEntries[fr.FactionID.String()] = sql.PlayerReputationSheetFactionEntry{
+							FactionID:        fr.FactionID,
+							StandingValue:    fr.StandingValue,
+							AreOpenlyHostile: fr.AreOpenlyHostile,
+						}
+					}
+
+					userSvc.SaveReputationSheet(v.UserID, srs)
 				}
 			}
 
