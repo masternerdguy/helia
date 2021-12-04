@@ -65,6 +65,37 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 	// defer cleanup of client when they disconnect
 	defer l.removeClient(&client)
 
+	// defer saves on disconnect
+	defer func(client *shared.GameClient) {
+		if client == nil {
+			return
+		}
+
+		if !client.Joined {
+			return
+		}
+
+		// get services
+		userSvc := sql.GetUserService()
+
+		// save reputation sheet
+		srs := sql.PlayerReputationSheet{
+			FactionEntries: make(map[string]sql.PlayerReputationSheetFactionEntry),
+		}
+
+		for _, fr := range client.ReputationSheet.FactionEntries {
+			srs.FactionEntries[fr.FactionID.String()] = sql.PlayerReputationSheetFactionEntry{
+				FactionID:        fr.FactionID,
+				StandingValue:    fr.StandingValue,
+				AreOpenlyHostile: fr.AreOpenlyHostile,
+			}
+		}
+
+		err := userSvc.SaveReputationSheet(*client.UID, srs)
+
+		log.Println(fmt.Sprintf("! unable to save reputation sheet for %v on disconnect! %v", client.UID, err))
+	}(&client)
+
 	// get message type registry
 	msgRegistry := models.NewMessageRegistry()
 
@@ -559,6 +590,9 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 		// debug out
 		log.Println(fmt.Sprintf("player joined: %v", &body.SessionID))
+
+		// mark as successfully joined
+		client.Joined = true
 	} else {
 		// dump error to console
 		log.Println(fmt.Sprintf("player join error: %v", err))
