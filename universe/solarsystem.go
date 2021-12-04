@@ -97,6 +97,10 @@ func (s *SolarSystem) HandleShutdownSignal() {
 
 	// propagate shutdown to connected clients
 	for _, c := range s.clients {
+		// close underlying connection
+		c.Conn.Close()
+
+		// mark as dead
 		c.Dead = true
 	}
 }
