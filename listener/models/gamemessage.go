@@ -159,24 +159,24 @@ type CurrentShipInfo struct {
 
 // Structure for passing non-secret information about a ship
 type GlobalShipInfo struct {
-	ID        uuid.UUID `json:"id"`
-	UserID    uuid.UUID `json:"uid"`
-	Created   time.Time `json:"createdAt"`
-	ShipName  string    `json:"shipName"`
-	OwnerName string    `json:"ownerName"`
-	PosX      float64   `json:"x"`
-	PosY      float64   `json:"y"`
-	SystemID  uuid.UUID `json:"systemId"`
-	Texture   string    `json:"texture"`
-	Theta     float64   `json:"theta"`
-	VelX      float64   `json:"velX"`
-	VelY      float64   `json:"velY"`
-	Mass      float64   `json:"mass"`
-	Radius    float64   `json:"radius"`
-	ShieldP   float64   `json:"shieldP"`
-	ArmorP    float64   `json:"armorP"`
-	HullP     float64   `json:"hullP"`
-	FactionID uuid.UUID `json:"factionId"`
+	ID            uuid.UUID `json:"id"`
+	UserID        uuid.UUID `json:"uid"`
+	Created       time.Time `json:"createdAt"`
+	ShipName      string    `json:"shipName"`
+	CharacterName string    `json:"ownerName"`
+	PosX          float64   `json:"x"`
+	PosY          float64   `json:"y"`
+	SystemID      uuid.UUID `json:"systemId"`
+	Texture       string    `json:"texture"`
+	Theta         float64   `json:"theta"`
+	VelX          float64   `json:"velX"`
+	VelY          float64   `json:"velY"`
+	Mass          float64   `json:"mass"`
+	Radius        float64   `json:"radius"`
+	ShieldP       float64   `json:"shieldP"`
+	ArmorP        float64   `json:"armorP"`
+	HullP         float64   `json:"hullP"`
+	FactionID     uuid.UUID `json:"factionId"`
 }
 
 // Structure for passing non-secret information about a star

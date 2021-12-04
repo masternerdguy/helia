@@ -1304,7 +1304,7 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 		UserID:                sh.UserID,
 		Created:               sh.Created,
 		ShipName:              sh.ShipName,
-		OwnerName:             owner.CharacterName,
+		CharacterName:         owner.CharacterName,
 		PosX:                  sh.PosX,
 		PosY:                  sh.PosY,
 		SystemID:              sh.SystemID,

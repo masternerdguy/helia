@@ -8,8 +8,6 @@ import (
 	"helia/sql"
 	"io/ioutil"
 	"net/http"
-
-	"github.com/google/uuid"
 )
 
 // Listener for handling and dispatching incoming http requests
@@ -52,7 +50,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 
 	// validation
 	if len(m.CharacterName) == 0 {
-		http.Error(w, "CharacterName must not be empty.", 500)
+		http.Error(w, "Character Name must not be empty.", 500)
 		return
 	}
 
@@ -61,18 +59,18 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get start - todo: make this player selectable from a list of available starts
-	startID, err := uuid.Parse("49f06e8929fb4a02a0344b5d0702adac")
-
-	if err != nil {
-		http.Error(w, "caststartid: "+err.Error(), 500)
-		return
-	}
+	// validate start
+	startID := m.StartID
 
 	start, err := startSvc.GetStartByID(startID)
 
 	if err != nil {
 		http.Error(w, "getstart: "+err.Error(), 500)
+		return
+	}
+
+	if !start.Available {
+		http.Error(w, "You must select an available start.", 500)
 		return
 	}
 
@@ -87,7 +85,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create user
-	u, err := userSvc.NewUser(m.CharacterName, m.Password, startID, ec.ID, start.FactionID)
+	u, err := userSvc.NewUser(m.CharacterName, m.Password, startID, ec.ID, start.FactionID, m.EmailAddress)
 
 	if err != nil {
 		http.Error(w, "createuser: "+err.Error(), 500)
@@ -160,7 +158,7 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	// attempt login
 	res := models.APILoginResponseModel{}
-	user, err := userSvc.GetUserByLogin(m.CharacterName, m.Password)
+	user, err := userSvc.GetUserByLogin(m.EmailAddress, m.Password)
 
 	// verify not an NPC account
 	if err == nil {

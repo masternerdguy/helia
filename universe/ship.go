@@ -133,7 +133,7 @@ type Ship struct {
 	UserID                uuid.UUID
 	Created               time.Time
 	ShipName              string
-	OwnerName             string
+	CharacterName         string
 	PosX                  float64
 	PosY                  float64
 	SystemID              uuid.UUID
@@ -394,7 +394,7 @@ func (s *Ship) CopyShip(lock bool) *Ship {
 		UserID:                s.UserID,
 		Created:               s.Created,
 		ShipName:              s.ShipName,
-		OwnerName:             s.OwnerName,
+		CharacterName:         s.CharacterName,
 		PosX:                  s.PosX,
 		PosY:                  s.PosY,
 		SystemID:              s.SystemID,
@@ -2968,7 +2968,7 @@ func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 	meta["armor"] = s.Armor
 	meta["hull"] = s.Hull
 	meta["fuel"] = s.Fuel
-	meta["seller"] = s.OwnerName
+	meta["seller"] = s.CharacterName
 
 	for i, e := range s.Fitting.ARack {
 		k := fmt.Sprintf("rackA[%v]", i)

@@ -24,6 +24,7 @@ func GetUserService() UserService {
 type User struct {
 	ID                uuid.UUID
 	CharacterName     string
+	EmailAddress      string
 	Hashpass          string
 	Registered        time.Time
 	Banned            bool
@@ -92,7 +93,14 @@ func (s UserService) Hashpass(charactername string, pwd string) (hash *string, e
 }
 
 // Creates a new user
-func (s UserService) NewUser(u string, p string, startID uuid.UUID, escrowContainerID uuid.UUID, factionID uuid.UUID) (*User, error) {
+func (s UserService) NewUser(
+	u string,
+	p string,
+	startID uuid.UUID,
+	escrowContainerID uuid.UUID,
+	factionID uuid.UUID,
+	emailAddress string,
+) (*User, error) {
 	// get db handle
 	db, err := connect()
 
@@ -109,14 +117,14 @@ func (s UserService) NewUser(u string, p string, startID uuid.UUID, escrowContai
 
 	// insert user
 	sql := `
-				INSERT INTO public.users(id, charactername, hashpass, registered, banned, startid, escrow_containerid, current_factionid)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+				INSERT INTO public.users(id, charactername, hashpass, registered, banned, startid, escrow_containerid, current_factionid, emailaddress)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
 			`
 
 	uid := uuid.New()
 	createdAt := time.Now()
 
-	q, err := db.Query(sql, uid, u, *hp, createdAt, 0, startID, escrowContainerID, factionID)
+	q, err := db.Query(sql, uid, u, *hp, createdAt, 0, startID, escrowContainerID, factionID, emailAddress)
 
 	if err != nil {
 		return nil, err
@@ -190,7 +198,7 @@ func (s UserService) SaveReputationSheet(uid uuid.UUID, repsheet PlayerReputatio
 }
 
 // Finds the user with the supplied credentials
-func (s UserService) GetUserByLogin(charactername string, pwd string) (*User, error) {
+func (s UserService) GetUserByLogin(emailaddress string, pwd string) (*User, error) {
 	// get db handle
 	db, err := connect()
 
@@ -199,7 +207,7 @@ func (s UserService) GetUserByLogin(charactername string, pwd string) (*User, er
 	}
 
 	// hash password
-	hp, err := s.Hashpass(charactername, pwd)
+	hp, err := s.Hashpass(emailaddress, pwd)
 
 	if err != nil {
 		return nil, err
@@ -209,14 +217,14 @@ func (s UserService) GetUserByLogin(charactername string, pwd string) (*User, er
 	user := User{}
 
 	sqlStatement := `SELECT id, charactername, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid, reputationsheet,
-							isnpc, behaviourmode
+							isnpc, behaviourmode, emailaddress
 					 FROM users
-					 WHERE charactername=$1 AND hashpass=$2`
+					 WHERE emailaddress=$1 AND hashpass=$2`
 
-	row := db.QueryRow(sqlStatement, charactername, *hp)
+	row := db.QueryRow(sqlStatement, emailaddress, *hp)
 
 	switch err := row.Scan(&user.ID, &user.CharacterName, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
-		&user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet, &user.IsNPC, &user.BehaviourMode); err {
+		&user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet, &user.IsNPC, &user.BehaviourMode, &user.EmailAddress); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:
@@ -239,14 +247,15 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 	user := User{}
 
 	sqlStatement := `SELECT id, charactername, hashpass, registered, banned, current_shipid, startid, escrow_containerid, current_factionid, reputationsheet,
-							isnpc, behaviourmode
+							isnpc, behaviourmode, emailaddress
 					 FROM users
 					 WHERE id=$1`
 
 	row := db.QueryRow(sqlStatement, uid)
 
 	switch err := row.Scan(&user.ID, &user.CharacterName, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
-		&user.StartID, &user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet, &user.IsNPC, &user.BehaviourMode); err {
+		&user.StartID, &user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet, &user.IsNPC, &user.BehaviourMode,
+		&user.EmailAddress); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:

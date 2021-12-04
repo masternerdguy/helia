@@ -1212,7 +1212,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// store message
 				s.newSystemChatMessages = append(s.newSystemChatMessages, models.ServerSystemChatBody{
 					SenderID:   sh.UserID,
-					SenderName: sh.OwnerName,
+					SenderName: sh.CharacterName,
 					Message:    data.Message,
 				})
 
@@ -1590,24 +1590,24 @@ func (s *SolarSystem) sendClientUpdates() {
 
 		// build ship info and append
 		gu.Ships = append(gu.Ships, models.GlobalShipInfo{
-			ID:        d.ID,
-			UserID:    d.UserID,
-			Created:   d.Created,
-			ShipName:  d.ShipName,
-			OwnerName: d.OwnerName,
-			PosX:      d.PosX,
-			PosY:      d.PosY,
-			SystemID:  d.SystemID,
-			Texture:   d.Texture,
-			Theta:     d.Theta,
-			VelX:      d.VelX,
-			VelY:      d.VelY,
-			Mass:      d.GetRealMass(),
-			Radius:    d.TemplateData.Radius,
-			ShieldP:   ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
-			ArmorP:    ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
-			HullP:     ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
-			FactionID: d.FactionID,
+			ID:            d.ID,
+			UserID:        d.UserID,
+			Created:       d.Created,
+			ShipName:      d.ShipName,
+			CharacterName: d.CharacterName,
+			PosX:          d.PosX,
+			PosY:          d.PosY,
+			SystemID:      d.SystemID,
+			Texture:       d.Texture,
+			Theta:         d.Theta,
+			VelX:          d.VelX,
+			VelY:          d.VelY,
+			Mass:          d.GetRealMass(),
+			Radius:        d.TemplateData.Radius,
+			ShieldP:       ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
+			ArmorP:        ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
+			HullP:         ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
+			FactionID:     d.FactionID,
 		})
 	}
 
