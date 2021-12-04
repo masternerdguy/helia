@@ -30,6 +30,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	userSvc := sql.GetUserService()
 	startSvc := sql.GetStartService()
 	containerSvc := sql.GetContainerService()
+	factionSvc := sql.GetFactionService()
 
 	// read body
 	b, err := ioutil.ReadAll(r.Body)
@@ -98,6 +99,31 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "createnoobshipforplayer: "+err.Error(), 500)
+		return
+	}
+
+	// load faction
+	f, err := factionSvc.GetFactionByID(start.FactionID)
+
+	if err != nil {
+		http.Error(w, "loadfaction: "+err.Error(), 500)
+		return
+	}
+
+	// build initial reputation sheet
+	for _, r := range f.ReputationSheet.Entries {
+		u.ReputationSheet.FactionEntries[r.TargetFactionID.String()] = sql.PlayerReputationSheetFactionEntry{
+			FactionID:        r.TargetFactionID,
+			StandingValue:    r.StandingValue,
+			AreOpenlyHostile: r.AreOpenlyHostile,
+		}
+	}
+
+	// save initial reputation sheet
+	err = userSvc.SaveReputationSheet(u.ID, u.ReputationSheet)
+
+	if err != nil {
+		http.Error(w, "saveinitialrepsheet: "+err.Error(), 500)
 		return
 	}
 
