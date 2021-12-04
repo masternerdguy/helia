@@ -78,10 +78,10 @@ func (a *PlayerReputationSheet) Scan(value interface{}) error {
 	return json.Unmarshal(b, &a)
 }
 
-// Hashes a user's password using their charactername and an internal constant as the salt
-func (s UserService) Hashpass(charactername string, pwd string) (hash *string, err error) {
+// Hashes a user's password using their email address and an internal constant as the salt
+func (s UserService) Hashpass(emailaddress string, pwd string) (hash *string, err error) {
 	const salt = "_4ppl3j4ck!_"
-	token := []byte(fmt.Sprintf("%s-xiwmg-%s-dnjij-%s", charactername, pwd, salt))
+	token := []byte(fmt.Sprintf("%s-xiwmg-%s-dnjij-%s", emailaddress, pwd, salt))
 
 	if err != nil {
 		return nil, err
