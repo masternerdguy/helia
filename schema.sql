@@ -450,7 +450,8 @@ CREATE TABLE public.users (
     current_factionid uuid NOT NULL,
     reputationsheet jsonb DEFAULT '{}'::jsonb NOT NULL,
     isnpc boolean DEFAULT false NOT NULL,
-    behaviourmode integer
+    behaviourmode integer,
+    emailaddress character varying(128)
 );
 
 
@@ -681,6 +682,14 @@ ALTER TABLE ONLY public.sellorders
 
 
 --
+-- Name: users uq_user_emailaddress; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT uq_user_emailaddress UNIQUE (emailaddress);
+
+
+--
 -- Name: sessions userid_uq; Type: CONSTRAINT; Schema: public; Owner: developer
 --
 
@@ -689,19 +698,19 @@ ALTER TABLE ONLY public.sessions
 
 
 --
--- Name: users users_pk_uq; Type: CONSTRAINT; Schema: public; Owner: developer
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_pk_uq PRIMARY KEY (id);
-
-
---
 -- Name: users users_charactername_uq; Type: CONSTRAINT; Schema: public; Owner: developer
 --
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_charactername_uq UNIQUE (charactername);
+
+
+--
+-- Name: users users_pk_uq; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pk_uq PRIMARY KEY (id);
 
 
 --
