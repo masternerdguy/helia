@@ -122,22 +122,15 @@ export class Ship extends WSShip {
           continue;
         }
   
-        // get raw hardpoint radius and angle
-        const hr = hp.hpPos[0]
-        const ht = hp.hpPos[1] % 360;
-  
-        // convert radius for screen projection
-        const shr = camera.projectR(hr);
+        // get hardpoint position and angle
+        const hx = this.getHardpointPosition(hp.hpPos);
 
-        // add hardpoint angle to ship
-        const sht = st + (ht * (Math.PI / -180) + Math.PI / 2)
-  
-        // get cartesian coordinates of hardpoint
-        const hx = sx + (Math.cos(sht) * shr);
-        const hy = sy + (Math.sin(sht) * shr);
+        // project to screen
+        const shx = camera.projectX(hx[0]);
+        const shy = camera.projectY(hx[1]);
   
         ctx.beginPath();
-        ctx.arc(hx, hy, 1.5, 0, 2 * Math.PI, false);
+        ctx.arc(shx, shy, 1.5, 0, 2 * Math.PI, false);
         ctx.lineWidth = 2;
         ctx.stroke();
       }
@@ -230,5 +223,26 @@ export class Ship extends WSShip {
 
   getFaction(): Faction {
     return GetFactionCacheEntry(this.factionId);
+  }
+
+  getHardpointPosition(hpPos: number[]): [number, number] {
+    if (hpPos?.length != 2) {
+      return [this.x, this.y];
+    }
+
+    // get hardpoint radius and angle
+    const hr = hpPos[0]
+    const ht = hpPos[1] % 360;
+
+    // add hardpoint angle to ship
+    const st = (this.theta * (Math.PI / -180) + Math.PI / 2);
+    const sht = st + (ht * (Math.PI / -180) + Math.PI / 2)
+
+    // get cartesian coordinates of hardpoint
+    const hx = this.x + (Math.cos(sht) * hr);
+    const hy = this.y + (Math.sin(sht) * hr);
+
+    // return hp position on screen
+    return [hx, hy];
   }
 }

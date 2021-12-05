@@ -132,7 +132,8 @@ export class ModuleEffect extends WsPushModuleEffect {
           // get end-point coordinates
           const src = getTargetCoordinatesAndRadius(
             this.objStart,
-            this.objStartType
+            this.objStartType,
+            this.objStartHPOffset,
           );
           const dest = getTargetCoordinatesAndRadius(
             this.objEnd,
@@ -153,8 +154,6 @@ export class ModuleEffect extends WsPushModuleEffect {
 
           dest[0] += this.endPosOffset[0];
           dest[1] += this.endPosOffset[1];
-
-          // todo: implement hardpoint offset for source ship
 
           // project to screen
           const sx = camera.projectX(src[0]);
@@ -191,7 +190,8 @@ export class ModuleEffect extends WsPushModuleEffect {
           // get end-point coordinates
           const src = getTargetCoordinatesAndRadius(
             this.objStart,
-            this.objStartType
+            this.objStartType,
+            this.objStartHPOffset,
           );
           const dest = getTargetCoordinatesAndRadius(
             this.objEnd,
@@ -212,8 +212,6 @@ export class ModuleEffect extends WsPushModuleEffect {
 
           dest[0] += this.endPosOffset[0];
           dest[1] += this.endPosOffset[1];
-
-          // todo: implement hardpoint offset for source ship
 
           // project to screen
           const sx = camera.projectX(src[0]);
@@ -251,7 +249,8 @@ export class ModuleEffect extends WsPushModuleEffect {
           // get end-point coordinates
           const src = getTargetCoordinatesAndRadius(
             this.objStart,
-            this.objStartType
+            this.objStartType,
+            this.objStartHPOffset,
           );
           const dest = getTargetCoordinatesAndRadius(
             this.objEnd,
@@ -272,8 +271,6 @@ export class ModuleEffect extends WsPushModuleEffect {
 
           dest[0] += this.endPosOffset[0];
           dest[1] += this.endPosOffset[1];
-
-          // todo: implement hardpoint offset for source ship
 
           // project to screen
           const sx = camera.projectX(src[0]);
@@ -317,7 +314,8 @@ export class ModuleEffect extends WsPushModuleEffect {
         // get start coordinates
         const src = getTargetCoordinatesAndRadius(
           this.objStart,
-          this.objStartType
+          this.objStartType,
+          this.objStartHPOffset,
         );
 
         // project to screen
@@ -383,7 +381,8 @@ export class ModuleEffect extends WsPushModuleEffect {
 
 function getTargetCoordinatesAndRadius(
   tgt: any,
-  tgtType: TargetType
+  tgtType: TargetType,
+  hpPos?: number[],
 ): [number, number, number] {
   if (tgtType === TargetType.Station) {
     const st = tgt as Station;
@@ -392,7 +391,13 @@ function getTargetCoordinatesAndRadius(
 
   if (tgtType === TargetType.Ship) {
     const s = tgt as Ship;
-    return [s.x, s.y, s.radius];
+    
+    if (hpPos?.length != 2) {
+      return [s.x, s.y, s.radius];
+    } else {
+      const ox = s.getHardpointPosition(hpPos)
+      return [ox[0], ox[1], s.radius];
+    }
   }
 
   if (tgtType === TargetType.Asteroid) {
