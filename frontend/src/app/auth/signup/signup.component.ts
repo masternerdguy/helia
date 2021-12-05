@@ -26,24 +26,25 @@ export class SignupComponent implements OnInit {
     let ok = true;
 
     // try to create account
-    await this.accountService.register({
-      emailaddress: this.emailaddress.nativeElement.value,
-      charactername: this.charactername.nativeElement.value,
-      startid: this.startid,
-      password: this.password.nativeElement.value,
-      confirmpassword: this.confirmpassword.nativeElement.value,
-    })
-    .catch((r) => {
-      ok = false;
+    await this.accountService
+      .register({
+        emailaddress: this.emailaddress.nativeElement.value,
+        charactername: this.charactername.nativeElement.value,
+        startid: this.startid,
+        password: this.password.nativeElement.value,
+        confirmpassword: this.confirmpassword.nativeElement.value,
+      })
+      .catch((r) => {
+        ok = false;
 
         // show error message
         alert(r.error);
-    })
-    .then(() => {
-      if (ok) {
-      // redirect to login page
-      window.location.href = '/auth/signin';
-      }
-    });
+      })
+      .then(() => {
+        if (ok) {
+          // redirect to login page
+          window.location.href = '/auth/signin';
+        }
+      });
   }
 }
