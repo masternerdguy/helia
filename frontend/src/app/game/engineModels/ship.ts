@@ -232,7 +232,7 @@ export class Ship extends WSShip {
 
     // get hardpoint radius and angle
     const hr = hpPos[0]
-    const ht = hpPos[1] % 360;
+    const ht = (hpPos[1] + 360) % 360;
 
     // add hardpoint angle to ship
     const st = (this.theta * (Math.PI / -180) + Math.PI / 2);

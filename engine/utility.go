@@ -215,11 +215,14 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 			return u, err
 		}
 
+		// copy loop index value
+		cpyIdx := idx
+
 		// link item to slot
 		fitting.ARack = append(fitting.ARack, sql.FittedSlot{
 			ItemID:     i.ID,
 			ItemTypeID: l.ItemTypeID,
-			SlotIndex:  &idx,
+			SlotIndex:  &cpyIdx,
 		})
 	}
 
@@ -254,11 +257,14 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 			return u, err
 		}
 
+		// copy loop index value
+		cpyIdx := idx
+
 		// link item to slot
 		fitting.BRack = append(fitting.BRack, sql.FittedSlot{
 			ItemID:     i.ID,
 			ItemTypeID: l.ItemTypeID,
-			SlotIndex:  &idx,
+			SlotIndex:  &cpyIdx,
 		})
 	}
 
@@ -293,11 +299,14 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 			return u, err
 		}
 
+		// copy loop index value
+		cpyIdx := idx
+
 		// link item to slot
 		fitting.CRack = append(fitting.CRack, sql.FittedSlot{
 			ItemID:     i.ID,
 			ItemTypeID: l.ItemTypeID,
-			SlotIndex:  &idx,
+			SlotIndex:  &cpyIdx,
 		})
 	}
 

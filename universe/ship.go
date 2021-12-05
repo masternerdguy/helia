@@ -2219,6 +2219,9 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 
 	s.CargoBay.Items = newCB
 
+	// copy loop index value
+	cpyIdx := idx
+
 	// create new fitted slot for item
 	fs := FittedSlot{
 		ItemID:             item.ID,
@@ -2228,7 +2231,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 		ItemTypeFamily:     item.ItemFamilyID,
 		ItemTypeFamilyName: item.ItemFamilyName,
 		ItemTypeName:       item.ItemTypeName,
-		SlotIndex:          &idx,
+		SlotIndex:          &cpyIdx,
 	}
 
 	fs.shipMountedOn = s
