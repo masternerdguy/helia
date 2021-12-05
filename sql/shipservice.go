@@ -61,6 +61,7 @@ type Fitting struct {
 type FittedSlot struct {
 	ItemTypeID uuid.UUID `json:"item_type_id"`
 	ItemID     uuid.UUID `json:"item_id"`
+	SlotIndex  *int      `json:"slot_idx"`
 }
 
 // Converts from a Fitting to JSON

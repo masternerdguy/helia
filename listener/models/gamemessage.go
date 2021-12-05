@@ -355,8 +355,9 @@ type ServerModuleStatusBody struct {
 	CyclePercent int       `json:"cyclePercent"`
 	Meta         Meta      `json:"meta"`
 	// hardpoint details
-	HardpointFamily string `json:"hpFamily"`
-	HardpointVolume int    `json:"hpVolume"`
+	HardpointFamily   string     `json:"hpFamily"`
+	HardpointVolume   int        `json:"hpVolume"`
+	HardpointPosition [2]float64 `json:"hpPos"`
 }
 
 // Body containing information about a ship's rack
@@ -382,11 +383,12 @@ type ClientDeactivateModuleBody struct {
 
 // Body containing a module visual effect to be rendered by the client
 type GlobalPushModuleEffectBody struct {
-	GfxEffect    string     `json:"gfxEffect"`
-	ObjStartID   uuid.UUID  `json:"objStartID"`
-	ObjStartType int        `json:"objStartType"`
-	ObjEndID     *uuid.UUID `json:"objEndID"`
-	ObjEndType   *int       `json:"objEndType"`
+	GfxEffect               string     `json:"gfxEffect"`
+	ObjStartID              uuid.UUID  `json:"objStartID"`
+	ObjStartType            int        `json:"objStartType"`
+	ObjStartHardpointOffset [2]float64 `json:"objStartHPOffset"` // [radius, theta]
+	ObjEndID                *uuid.UUID `json:"objEndID"`
+	ObjEndType              *int       `json:"objEndType"`
 }
 
 // Body containing a non-module visual effect to be rendered at a point in space by the client

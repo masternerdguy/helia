@@ -1761,6 +1761,7 @@ func (s *SolarSystem) sendClientUpdates() {
 				slot := d.TemplateData.SlotLayout.ASlots[idx]
 				module.HardpointFamily = slot.Family
 				module.HardpointVolume = slot.Volume
+				module.HardpointPosition = slot.TexturePosition
 
 				// store on message
 				rackA.Modules = append(rackA.Modules, module)

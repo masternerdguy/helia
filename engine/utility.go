@@ -185,7 +185,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 	}
 
 	// create rack a modules
-	for _, l := range start.ShipFitting.ARack {
+	for idx, l := range start.ShipFitting.ARack {
 		// skip if empty slot
 		if l.ItemTypeID.String() == defaultUUID {
 			// link empty slot and move on
@@ -219,11 +219,12 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 		fitting.ARack = append(fitting.ARack, sql.FittedSlot{
 			ItemID:     i.ID,
 			ItemTypeID: l.ItemTypeID,
+			SlotIndex:  &idx,
 		})
 	}
 
 	// create rack b modules
-	for _, l := range start.ShipFitting.BRack {
+	for idx, l := range start.ShipFitting.BRack {
 		// skip if empty slot
 		if l.ItemTypeID.String() == defaultUUID {
 			// link empty slot and move on
@@ -257,11 +258,12 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 		fitting.BRack = append(fitting.BRack, sql.FittedSlot{
 			ItemID:     i.ID,
 			ItemTypeID: l.ItemTypeID,
+			SlotIndex:  &idx,
 		})
 	}
 
 	// create rack c modules
-	for _, l := range start.ShipFitting.CRack {
+	for idx, l := range start.ShipFitting.CRack {
 		// skip if empty slot
 		if l.ItemTypeID.String() == defaultUUID {
 			// link empty slot and move on
@@ -295,6 +297,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 		fitting.CRack = append(fitting.CRack, sql.FittedSlot{
 			ItemID:     i.ID,
 			ItemTypeID: l.ItemTypeID,
+			SlotIndex:  &idx,
 		})
 	}
 

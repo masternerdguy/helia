@@ -53,9 +53,9 @@ type SlotLayout struct {
 
 // JSON structure representing a slot in a SlotLayout
 type Slot struct {
-	Family          string `json:"mod_family"`
-	Volume          int    `json:"volume"`
-	TexturePosition []int  `json:"hp_pos"`
+	Family          string     `json:"mod_family"`
+	Volume          int        `json:"volume"`
+	TexturePosition [2]float64 `json:"hp_pos"`
 }
 
 // Converts from a SlotLayout to JSON

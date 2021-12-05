@@ -50,4 +50,5 @@ export class WSModule {
   meta: any;
   hpFamily: string;
   hpVolume: number;
+  hpPos: number[];
 }

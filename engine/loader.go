@@ -611,6 +611,7 @@ func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
 	// copy slot data
 	slot.ItemID = value.ItemID
 	slot.ItemTypeID = value.ItemTypeID
+	slot.SlotIndex = value.SlotIndex
 
 	// check if this slot is empty
 	if slot.ItemID.String() == defaultUUID ||
@@ -696,6 +697,7 @@ func SQLFromFittedSlot(value *universe.FittedSlot) sql.FittedSlot {
 	// copy slot data
 	slot.ItemID = value.ItemID
 	slot.ItemTypeID = value.ItemTypeID
+	slot.SlotIndex = value.SlotIndex
 
 	// return filled slot
 	return slot
@@ -1371,6 +1373,8 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 		m := &sp.Fitting.CRack[i]
 		m.LinkShip(sp)
 	}
+
+	// copy slot info to fitted moduiles
 
 	// return pointer to ship
 	return sp, nil

@@ -249,6 +249,7 @@ type FittedSlot struct {
 	TargetID           *uuid.UUID
 	TargetType         *int
 	Rack               string
+	SlotIndex          *int
 	// in-memory only, secret
 	shipMountedOn    *Ship
 	cooldownProgress int
@@ -2224,6 +2225,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 		ItemTypeFamily:     item.ItemFamilyID,
 		ItemTypeFamilyName: item.ItemFamilyName,
 		ItemTypeName:       item.ItemTypeName,
+		SlotIndex:          &idx,
 	}
 
 	fs.shipMountedOn = s
@@ -3978,6 +3980,24 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 			ObjEndType:   m.TargetType,
 		}
 
+		gfxEffect.ObjStartHardpointOffset = [...]float64{
+			0,
+			0,
+		}
+
+		if m.SlotIndex != nil {
+			rack := m.Rack
+			idx := *m.SlotIndex
+
+			if rack == "a" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
+			} else if rack == "b" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.BSlots[idx].TexturePosition
+			} else if rack == "c" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.CSlots[idx].TexturePosition
+			}
+		}
+
 		// push to solar system list for next update
 		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
 	}
@@ -4137,6 +4157,24 @@ func (m *FittedSlot) activateAsShieldBooster() bool {
 			ObjStartType: tgtReg.Ship,
 		}
 
+		gfxEffect.ObjStartHardpointOffset = [...]float64{
+			0,
+			0,
+		}
+
+		if m.SlotIndex != nil {
+			rack := m.Rack
+			idx := *m.SlotIndex
+
+			if rack == "a" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
+			} else if rack == "b" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.BSlots[idx].TexturePosition
+			} else if rack == "c" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.CSlots[idx].TexturePosition
+			}
+		}
+
 		// push to solar system list for next update
 		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
 	}
@@ -4286,6 +4324,24 @@ func (m *FittedSlot) activateAsAetherDragger() bool {
 			ObjStartType: tgtReg.Ship,
 			ObjEndID:     m.TargetID,
 			ObjEndType:   m.TargetType,
+		}
+
+		gfxEffect.ObjStartHardpointOffset = [...]float64{
+			0,
+			0,
+		}
+
+		if m.SlotIndex != nil {
+			rack := m.Rack
+			idx := *m.SlotIndex
+
+			if rack == "a" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
+			} else if rack == "b" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.BSlots[idx].TexturePosition
+			} else if rack == "c" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.CSlots[idx].TexturePosition
+			}
 		}
 
 		// push to solar system list for next update

@@ -43,5 +43,5 @@ type SlotLayout struct {
 type Slot struct {
 	Family          string
 	Volume          int
-	TexturePosition []int
+	TexturePosition [2]float64
 }
