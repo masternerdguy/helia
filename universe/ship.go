@@ -3997,8 +3997,6 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 
 			if rack == "A" {
 				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
-			} else if rack == "B" {
-				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.BSlots[idx].TexturePosition
 			}
 		}
 
@@ -4120,10 +4118,33 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 	stubID := uuid.New()
 	flightTicks := int((flightTime * 1000) / Heartbeat)
 
+	// determine launcher hardpoint location
+	hpX := [...]float64{
+		0,
+		0,
+	}
+
+	if m.SlotIndex != nil {
+		rack := m.Rack
+		idx := *m.SlotIndex
+
+		if rack == "A" {
+			hpX = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
+		}
+	}
+
+	sRad := physics.ToRadians(m.shipMountedOn.Theta)
+	hRad := physics.ToRadians(hpX[1])
+
+	cRad := sRad + hRad
+	lx := math.Cos(cRad) * hpX[0]
+	ly := math.Sin(cRad) * hpX[0]
+
+	// store stub
 	stub := Missile{
 		ID:             stubID,
-		PosX:           m.shipMountedOn.PosX,
-		PosY:           m.shipMountedOn.PosY,
+		PosX:           m.shipMountedOn.PosX + lx,
+		PosY:           m.shipMountedOn.PosY + ly,
 		Texture:        missileGfxEffect,
 		Module:         m,
 		TargetID:       *m.TargetID,
@@ -4159,22 +4180,6 @@ func (m *FittedSlot) activateAsShieldBooster() bool {
 			GfxEffect:    activationPGfxEffect,
 			ObjStartID:   m.shipMountedOn.ID,
 			ObjStartType: tgtReg.Ship,
-		}
-
-		gfxEffect.ObjStartHardpointOffset = [...]float64{
-			0,
-			0,
-		}
-
-		if m.SlotIndex != nil {
-			rack := m.Rack
-			idx := *m.SlotIndex
-
-			if rack == "A" {
-				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
-			} else if rack == "B" {
-				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.BSlots[idx].TexturePosition
-			}
 		}
 
 		// push to solar system list for next update
@@ -4326,22 +4331,6 @@ func (m *FittedSlot) activateAsAetherDragger() bool {
 			ObjStartType: tgtReg.Ship,
 			ObjEndID:     m.TargetID,
 			ObjEndType:   m.TargetType,
-		}
-
-		gfxEffect.ObjStartHardpointOffset = [...]float64{
-			0,
-			0,
-		}
-
-		if m.SlotIndex != nil {
-			rack := m.Rack
-			idx := *m.SlotIndex
-
-			if rack == "A" {
-				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
-			} else if rack == "B" {
-				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.BSlots[idx].TexturePosition
-			}
 		}
 
 		// push to solar system list for next update
@@ -4572,6 +4561,20 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 			ObjStartType: tgtReg.Ship,
 			ObjEndID:     m.TargetID,
 			ObjEndType:   m.TargetType,
+		}
+
+		gfxEffect.ObjStartHardpointOffset = [...]float64{
+			0,
+			0,
+		}
+
+		if m.SlotIndex != nil {
+			rack := m.Rack
+			idx := *m.SlotIndex
+
+			if rack == "A" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
+			}
 		}
 
 		// push to solar system list for next update
