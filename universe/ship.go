@@ -3999,8 +3999,6 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
 			} else if rack == "B" {
 				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.BSlots[idx].TexturePosition
-			} else if rack == "C" {
-				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.CSlots[idx].TexturePosition
 			}
 		}
 
@@ -4176,8 +4174,6 @@ func (m *FittedSlot) activateAsShieldBooster() bool {
 				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
 			} else if rack == "B" {
 				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.BSlots[idx].TexturePosition
-			} else if rack == "C" {
-				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.CSlots[idx].TexturePosition
 			}
 		}
 
@@ -4345,8 +4341,6 @@ func (m *FittedSlot) activateAsAetherDragger() bool {
 				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
 			} else if rack == "B" {
 				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.BSlots[idx].TexturePosition
-			} else if rack == "C" {
-				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.CSlots[idx].TexturePosition
 			}
 		}
 
