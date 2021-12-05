@@ -109,6 +109,33 @@ export class Ship extends WSShip {
     ctx.rotate(this.theta * (Math.PI / -180) + Math.PI / 2);
     ctx.drawImage(this.texture2d, -sr, -sr, sr * 2, sr * 2);
     ctx.restore();
+
+    console.log(this.fitStatus)
+
+    // debug: draw rack A hardpoints
+    if (this.fitStatus?.aRack?.modules){
+      for (const hp of this.fitStatus.aRack.modules) {
+        ctx.strokeStyle = "pink";
+  
+        if (hp.hpPos.length != 2) {
+          continue;
+        }
+  
+        const hr = hp.hpPos[0];
+        const ht = hp.hpPos[1];
+  
+        const shr = camera.projectR(hr);
+        const sht = ((this.theta * (Math.PI / -180) + Math.PI / 2) + ht) % 360;
+  
+        const hx = sx + (Math.cos(sht * (-180/Math.PI)) * shr);
+        const hy = sy + (Math.sin(sht * (-180/Math.PI)) * shr);
+  
+        ctx.beginPath();
+        ctx.arc(hx, hy, 1.5, 0, 2 * Math.PI, false);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
   }
 
   sync(sh: WSShip) {

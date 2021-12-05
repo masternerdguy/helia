@@ -820,6 +820,14 @@ function handleCurrentShipUpdate(d: GameMessage) {
 
   engineSack.player.currentShip.sync(msg.currentShipInfo);
 
+  // make sure it's synced on the ship list as well
+  for (const sh of engineSack.player.currentSystem.ships) {
+    if (sh.id == engineSack.player.currentShip.id) {
+      sh.sync(msg.currentShipInfo);
+      break;
+    }
+  }
+
   // update camera position to track player ship
   engineSack.camera.x = msg.currentShipInfo.x;
   engineSack.camera.y = msg.currentShipInfo.y;
