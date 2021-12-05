@@ -140,8 +140,6 @@ export class ModuleEffect extends WsPushModuleEffect {
             this.objEndType
           );
 
-          console.log(this.objStartHPOffset)
-
           // apply offset to destination coordinates for cooler effect
           if (!this.endPosOffset) {
             // get a random point within the radius of the target
