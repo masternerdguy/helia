@@ -103,14 +103,15 @@ export class Ship extends WSShip {
 
     ctx.stroke();
 
+    // convert theta for rendering
+    const st = (this.theta * (Math.PI / -180) + Math.PI / 2);
+
     // draw ship
     ctx.save();
     ctx.translate(sx, sy);
-    ctx.rotate(this.theta * (Math.PI / -180) + Math.PI / 2);
+    ctx.rotate(st);
     ctx.drawImage(this.texture2d, -sr, -sr, sr * 2, sr * 2);
     ctx.restore();
-
-    console.log(this.fitStatus)
 
     // debug: draw rack A hardpoints
     if (this.fitStatus?.aRack?.modules){
@@ -121,15 +122,19 @@ export class Ship extends WSShip {
           continue;
         }
   
-        //const hr = hp.hpPos[0];
-        const hr = 3
+        // get raw hardpoint radius and angle
+        const hr = hp.hpPos[0]
         const ht = hp.hpPos[1] % 360;
   
+        // convert radius for screen projection
         const shr = camera.projectR(hr);
-        const sht = ((this.theta * (Math.PI / -180) + Math.PI / 2) + ht) % (2*Math.PI);
+
+        // add hardpoint angle to ship
+        const sht = st + (ht * (Math.PI / -180) + Math.PI / 2)
   
-        const hx = sx + (Math.cos(sht * (-180/Math.PI)) * shr);
-        const hy = sy + (Math.sin(sht * (-180/Math.PI)) * shr);
+        // get cartesian coordinates of hardpoint
+        const hx = sx + (Math.cos(sht) * shr);
+        const hy = sy + (Math.sin(sht) * shr);
   
         ctx.beginPath();
         ctx.arc(hx, hy, 1.5, 0, 2 * Math.PI, false);
