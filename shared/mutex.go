@@ -103,7 +103,10 @@ func (m *LabeledMutex) Lock(caller string) {
 					// this is a freeze - core will save the world state and shut down the system
 					go func() {
 						time.Sleep(10 * time.Second)
+
+						// print diagnostic output
 						log.Println(fmt.Sprintf("Mutex locked for a very suspicious amount of time, this was almost certainly a freeze: %v", m))
+						m.Print()
 					}()
 
 					log.Println(fmt.Sprintf("! Emergency shutdown - deadlock detected: %v", m))
@@ -138,4 +141,24 @@ func (m *LabeledMutex) Unlock() {
 
 	// release lock
 	m.mutex.Unlock()
+}
+
+// Writes formatted diagnostic output to console
+func (m *LabeledMutex) Print() {
+	log.Println(fmt.Sprintf("UID : %v", m.UID))
+	log.Println(fmt.Sprintf("lastCaller : %v", m.lastCaller))
+
+	if m.aggressiveMode {
+		log.Println(fmt.Sprintf("lastCallerStack : %v", m.lastCallerStack))
+	}
+
+	log.Println(fmt.Sprintf("lastLocker : %v", m.lastLocker))
+
+	if m.aggressiveMode {
+		log.Println(fmt.Sprintf("lastLockerStack : %v", m.lastLockerStack))
+	}
+
+	log.Println(fmt.Sprintf("lastLocked : %v", m.lastLocked))
+	log.Println(fmt.Sprintf("lastUnlocked : %v", m.lastUnlocked))
+	log.Println(fmt.Sprintf("isLocked : %v", m.isLocked))
 }
