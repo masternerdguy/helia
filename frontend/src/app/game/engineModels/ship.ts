@@ -104,7 +104,7 @@ export class Ship extends WSShip {
     ctx.stroke();
 
     // convert theta for rendering
-    const st = (this.theta * (Math.PI / -180) + Math.PI / 2);
+    const st = this.theta * (Math.PI / -180) + Math.PI / 2;
 
     // draw ship
     ctx.save();
@@ -113,24 +113,44 @@ export class Ship extends WSShip {
     ctx.drawImage(this.texture2d, -sr, -sr, sr * 2, sr * 2);
     ctx.restore();
 
-    // debug: draw rack A hardpoints
-    if (this.fitStatus?.aRack?.modules){
+    // draw rack A hardpoint indicators
+    const hpi = camera.projectR(1);
+
+    if (this.fitStatus?.aRack?.modules) {
       for (const hp of this.fitStatus.aRack.modules) {
-        ctx.strokeStyle = "pink";
-  
+        // skip if invalid position
         if (hp.hpPos.length != 2) {
           continue;
         }
-  
+
         // get hardpoint position and angle
         const hx = this.getHardpointPosition(hp.hpPos);
 
         // project to screen
         const shx = camera.projectX(hx[0]);
         const shy = camera.projectY(hx[1]);
-  
+        const shr = camera.projectR(0.33);
+
+        // draw indicator circle
         ctx.beginPath();
-        ctx.arc(shx, shy, 1.5, 0, 2 * Math.PI, false);
+
+        if (hp.isCycling) {
+          ctx.strokeStyle = '#fc9003';
+          ctx.arc(
+            shx,
+            shy,
+            shr,
+            0,
+            2 * Math.PI * (hp.cyclePercent / 100),
+            false
+          );
+        } else {
+          if (hpi >= 5) {
+            ctx.strokeStyle = '#b0b0b0';
+            ctx.arc(shx, shy, shr, 0, 2 * Math.PI, false);
+          }
+        }
+
         ctx.lineWidth = 2;
         ctx.stroke();
       }
@@ -231,16 +251,16 @@ export class Ship extends WSShip {
     }
 
     // get hardpoint radius and angle
-    const hr = hpPos[0]
+    const hr = hpPos[0];
     const ht = (hpPos[1] + 360) % 360;
 
     // add hardpoint angle to ship
-    const st = (this.theta * (Math.PI / -180) + Math.PI / 2);
-    const sht = st + (ht * (Math.PI / -180) + Math.PI / 2)
+    const st = this.theta * (Math.PI / -180) + Math.PI / 2;
+    const sht = st + (ht * (Math.PI / -180) + Math.PI / 2);
 
     // get cartesian coordinates of hardpoint
-    const hx = this.x + (Math.cos(sht) * hr);
-    const hy = this.y + (Math.sin(sht) * hr);
+    const hx = this.x + Math.cos(sht) * hr;
+    const hy = this.y + Math.sin(sht) * hr;
 
     // return hp position on screen
     return [hx, hy];

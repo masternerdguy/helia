@@ -133,7 +133,7 @@ export class ModuleEffect extends WsPushModuleEffect {
           const src = getTargetCoordinatesAndRadius(
             this.objStart,
             this.objStartType,
-            this.objStartHPOffset,
+            this.objStartHPOffset
           );
           const dest = getTargetCoordinatesAndRadius(
             this.objEnd,
@@ -191,7 +191,7 @@ export class ModuleEffect extends WsPushModuleEffect {
           const src = getTargetCoordinatesAndRadius(
             this.objStart,
             this.objStartType,
-            this.objStartHPOffset,
+            this.objStartHPOffset
           );
           const dest = getTargetCoordinatesAndRadius(
             this.objEnd,
@@ -250,7 +250,7 @@ export class ModuleEffect extends WsPushModuleEffect {
           const src = getTargetCoordinatesAndRadius(
             this.objStart,
             this.objStartType,
-            this.objStartHPOffset,
+            this.objStartHPOffset
           );
           const dest = getTargetCoordinatesAndRadius(
             this.objEnd,
@@ -315,7 +315,7 @@ export class ModuleEffect extends WsPushModuleEffect {
         const src = getTargetCoordinatesAndRadius(
           this.objStart,
           this.objStartType,
-          this.objStartHPOffset,
+          this.objStartHPOffset
         );
 
         // project to screen
@@ -382,7 +382,7 @@ export class ModuleEffect extends WsPushModuleEffect {
 function getTargetCoordinatesAndRadius(
   tgt: any,
   tgtType: TargetType,
-  hpPos?: number[],
+  hpPos?: number[]
 ): [number, number, number] {
   if (tgtType === TargetType.Station) {
     const st = tgt as Station;
@@ -391,11 +391,11 @@ function getTargetCoordinatesAndRadius(
 
   if (tgtType === TargetType.Ship) {
     const s = tgt as Ship;
-    
+
     if (hpPos?.length != 2) {
       return [s.x, s.y, s.radius];
     } else {
-      const ox = s.getHardpointPosition(hpPos)
+      const ox = s.getHardpointPosition(hpPos);
       return [ox[0], ox[1], s.radius];
     }
   }
