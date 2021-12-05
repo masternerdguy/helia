@@ -121,11 +121,12 @@ export class Ship extends WSShip {
           continue;
         }
   
-        const hr = hp.hpPos[0];
-        const ht = hp.hpPos[1];
+        //const hr = hp.hpPos[0];
+        const hr = 3
+        const ht = hp.hpPos[1] % 360;
   
         const shr = camera.projectR(hr);
-        const sht = ((this.theta * (Math.PI / -180) + Math.PI / 2) + ht) % 360;
+        const sht = ((this.theta * (Math.PI / -180) + Math.PI / 2) + ht) % (2*Math.PI);
   
         const hx = sx + (Math.cos(sht * (-180/Math.PI)) * shr);
         const hy = sy + (Math.sin(sht * (-180/Math.PI)) * shr);

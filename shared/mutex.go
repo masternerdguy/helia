@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime/debug"
 	"sync"
 	"time"
 )
@@ -16,18 +17,36 @@ type LabeledMutex struct {
 	Structure       string
 	UID             string
 	lastCaller      string
+	lastCallerStack string // only captured if in "aggressive" mode due to performance penalty
 	lastLocker      string
+	lastLockerStack string // only captured if in "aggressive" mode due to performance penalty
 	lastLocked      int64
 	lastUnlocked    int64
 	isLocked        bool
 	mutex           sync.Mutex
 	lastCallerMutex sync.Mutex
+	aggressiveMode  bool // if true, performance-intensive logging will be performed
+}
+
+// When set to true, performance intensive logging (eg: call stack) will be performed
+func (m *LabeledMutex) SetAggressiveFlag(f bool) {
+	// obtain lock
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	// set flag
+	m.aggressiveMode = f
 }
 
 func (m *LabeledMutex) Lock(caller string) {
 	// store most recent caller (this will likely be the one causing the freeze)
 	m.lastCallerMutex.Lock()
 	m.lastCaller = caller
+
+	if m.aggressiveMode {
+		m.lastCallerStack = string(debug.Stack())
+	}
+
 	m.lastCallerMutex.Unlock()
 
 	// obtain lock
@@ -39,6 +58,10 @@ func (m *LabeledMutex) Lock(caller string) {
 
 	// store last locker
 	m.lastLocker = caller
+
+	if m.aggressiveMode {
+		m.lastLockerStack = string(debug.Stack())
+	}
 
 	// kill process if not labeled
 	if len(m.Structure) == 0 || len(m.UID) == 0 {
