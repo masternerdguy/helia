@@ -48,6 +48,8 @@ import { PropertySheetWindow } from './gdi/windows/propertySheetWindow';
 import { ServerPropertyUpdate } from './wsModels/bodies/propertyUpdate';
 import { Missile } from './engineModels/missile';
 import { SystemChatWindow } from './gdi/windows/systemChatWindow';
+import { ServerInfoMessage } from './wsModels/bodies/infoMessage';
+import { PushInfoWindow } from './gdi/windows/pushInfoWindow';
 
 class EngineSack {
   constructor() {}
@@ -68,6 +70,7 @@ class EngineSack {
 
   // ui elements
   pushErrorWindow: PushErrorWindow;
+  pushInfoWindow: PushInfoWindow;
   shipStatusWindow: ShipStatusWindow;
   targetInteractionWindow: TargetInteractionWindow;
   overviewWindow: OverviewWindow;
@@ -148,6 +151,16 @@ export function clientStart(
   );
   engineSack.pushErrorWindow.setY(
     gameCanvas.height / 2 - engineSack.pushErrorWindow.getHeight() / 2
+  );
+
+  engineSack.pushInfoWindow = new PushInfoWindow();
+  engineSack.pushInfoWindow.initialize();
+  engineSack.pushInfoWindow.pack();
+  engineSack.pushInfoWindow.setX(
+    gameCanvas.width / 2 - engineSack.pushInfoWindow.getWidth() / 2
+  );
+  engineSack.pushInfoWindow.setY(
+    gameCanvas.height / 2 - engineSack.pushInfoWindow.getHeight() / 2
   );
 
   engineSack.shipStatusWindow = new ShipStatusWindow();
@@ -254,6 +267,7 @@ export function clientStart(
   // cache windows for simpler updating and rendering
   engineSack.windows = [
     engineSack.pushErrorWindow,
+    engineSack.pushInfoWindow,
     engineSack.shipStatusWindow,
     engineSack.targetInteractionWindow,
     engineSack.overviewWindow,
@@ -286,6 +300,8 @@ export function clientStart(
       handleCargoBayUpdate(d);
     } else if (d.type === MessageTypes.PushError) {
       handleErrorMessageFromServer(d);
+    } else if (d.type === MessageTypes.PushInfo) {
+      handleInfoMessageFromServer(d);
     } else if (d.type === MessageTypes.OpenSellOrdersUpdate) {
       handleOpenSellOrdersUpdateMessageFromServer(d);
     } else if (d.type === MessageTypes.IndustrialOrdersUpdate) {
@@ -348,6 +364,7 @@ function handleJoin(d: GameMessage) {
   engineSack.ordersMarketWindow.setHidden(true);
   engineSack.industrialMarketWindow.setHidden(true);
   engineSack.pushErrorWindow.setHidden(true);
+  engineSack.pushInfoWindow.setHidden(true);
   engineSack.starMapWindow.setHidden(true);
   engineSack.reputationSheetWindow.setHidden(true);
   engineSack.propertySheetWindow.setHidden(true);
@@ -749,6 +766,21 @@ function handleErrorMessageFromServer(d: GameMessage) {
   // show the push error window
   engineSack.pushErrorWindow.setHidden(false);
   engineSack.pushErrorWindow.setText(msg.message);
+}
+
+function handleInfoMessageFromServer(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerInfoMessage;
+
+  // move push error window to top
+  engineSack.windows = [
+    engineSack.pushInfoWindow,
+    ...engineSack.windows.filter((item) => item !== engineSack.pushInfoWindow),
+  ];
+
+  // show the push info window
+  engineSack.pushInfoWindow.setHidden(false);
+  engineSack.pushInfoWindow.setText(msg.message);
 }
 
 function handleCargoBayUpdate(d: GameMessage) {

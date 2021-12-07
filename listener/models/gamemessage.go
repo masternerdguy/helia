@@ -8,6 +8,7 @@ import (
 
 // Registry of game message types
 type MessageRegistry struct {
+	PushInfo               int
 	PushError              int
 	Join                   int
 	GlobalUpdate           int
@@ -67,6 +68,7 @@ type TargetTypeRegistry struct {
 // Returns a MessageRegistry with correct enum values
 func NewMessageRegistry() *MessageRegistry {
 	return &MessageRegistry{
+		PushInfo:               -2,
 		PushError:              -1,
 		Join:                   0,
 		GlobalUpdate:           1,
@@ -442,8 +444,13 @@ type ClientUnfitModuleBody struct {
 	ItemID    uuid.UUID `json:"itemID"`
 }
 
-// Body containing a message string to be displayed to the player from the server
+// Body containing an error message string to be displayed to the player from the server
 type ServerPushErrorMessage struct {
+	Message string `json:"message"`
+}
+
+// Body containing an informational message string to be displayed to the player from the server
+type ServerPushInfoMessage struct {
 	Message string `json:"message"`
 }
 

@@ -4,6 +4,7 @@ export class GameMessage {
 }
 
 export enum MessageTypes {
+  PushInfo = -2,
   PushError = -1,
   Join = 0,
   Update = 1,

@@ -123,6 +123,9 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 
 // Send an error string to the client to be displayed
 func (c *GameClient) WriteErrorMessage(msg string) {
+	c.Lock.Lock("gameclient.WriteErrorMessage")
+	defer c.Lock.Unlock()
+
 	// get message registry
 	msgRegistry := models.NewMessageRegistry()
 
@@ -139,6 +142,30 @@ func (c *GameClient) WriteErrorMessage(msg string) {
 	}
 
 	// write error to client
+	c.WriteMessage(&cu)
+}
+
+// Send an informational string to the client to be displayed
+func (c *GameClient) WriteInfoMessage(msg string) {
+	c.Lock.Lock("gameclient.WriteInfoMessage")
+	defer c.Lock.Unlock()
+
+	// get message registry
+	msgRegistry := models.NewMessageRegistry()
+
+	// package message
+	d := models.ServerPushInfoMessage{
+		Message: msg,
+	}
+
+	b, _ := json.Marshal(&d)
+
+	cu := models.GameMessage{
+		MessageType: msgRegistry.PushInfo,
+		MessageBody: string(b),
+	}
+
+	// write message to client
 	c.WriteMessage(&cu)
 }
 

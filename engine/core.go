@@ -7,6 +7,7 @@ import (
 	"helia/universe"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -673,6 +674,14 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// put ship in system
 			sol.AddShip(es, true)
+
+			// is this a station workshop/warehouse?
+			if !es.TemplateData.CanUndock {
+				if rs.Client != nil {
+					// inform player they will be charged for storing items in the cargo bay
+					notifyClientOfWorkshopFee(rs.Client)
+				}
+			}
 		}(rs, sol)
 	}
 
@@ -771,6 +780,14 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// inject into system
 			sol.AddShip(sh, true)
+
+			// is this a station workshop/warehouse?
+			if !sh.TemplateData.CanUndock {
+				if rs.Client != nil {
+					// inform player they will be charged for storing items in the cargo bay
+					notifyClientOfWorkshopFee(rs.Client)
+				}
+			}
 		}(rs, sol)
 	}
 
@@ -791,4 +808,21 @@ func handleEscalations(sol *universe.SolarSystem) {
 			}
 		}(rs, sol)
 	}
+}
+
+func notifyClientOfWorkshopFee(c *shared.GameClient) {
+	if c == nil {
+		return
+	}
+
+	lns := []string{
+		"you have purchased a station workship! you will be charged a small fee ",
+		"for every unit of volume you consume in its cargo bay. the more you store ",
+		"in its cargo bay, the higher the fee will become. the fee is deducted from ",
+		"the workshop's wallet - if you go into debt you will need to transfer CBN ",
+		"to settle it before you can retrieve any stored items.",
+	}
+
+	infoMsg := strings.Join(lns, "")
+	c.WriteInfoMessage(infoMsg)
 }

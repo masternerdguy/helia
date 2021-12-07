@@ -199,12 +199,14 @@ type NewShipPurchase struct {
 	ShipTemplateID uuid.UUID
 	UserID         uuid.UUID
 	StationID      uuid.UUID
+	Client         *shared.GameClient
 }
 
 // Structure representing a purchased used ship, not yet materialized
 type UsedShipPurchase struct {
 	ShipID uuid.UUID
 	UserID uuid.UUID
+	Client *shared.GameClient
 }
 
 // Structure representing a renamed ship, not yet materialized
@@ -2673,6 +2675,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 			UserID:         s.UserID,
 			ShipTemplateID: stID,
 			StationID:      *s.DockedAtStationID,
+			Client:         s.CurrentSystem.clients[s.UserID.String()],
 		}
 
 		// escalate order save request to core
@@ -2921,6 +2924,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 		r := UsedShipPurchase{
 			UserID: s.UserID,
 			ShipID: purShipID,
+			Client: s.CurrentSystem.clients[s.UserID.String()],
 		}
 
 		s.CurrentSystem.UsedShipPurchases[order.ID.String()] = &r

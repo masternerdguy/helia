@@ -88,6 +88,7 @@ export class GDIStyle {
 
   // standardized override colors for ui elements
   static errorFillColor = '#b30000';
+  static infoFillColor = '#0000b3';
 
   // helpers
   static getUnderlyingFont(font: FontSize): string {
