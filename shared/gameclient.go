@@ -123,9 +123,6 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 
 // Send an error string to the client to be displayed
 func (c *GameClient) WriteErrorMessage(msg string) {
-	c.Lock.Lock("gameclient.WriteErrorMessage")
-	defer c.Lock.Unlock()
-
 	// get message registry
 	msgRegistry := models.NewMessageRegistry()
 
@@ -147,9 +144,6 @@ func (c *GameClient) WriteErrorMessage(msg string) {
 
 // Send an informational string to the client to be displayed
 func (c *GameClient) WriteInfoMessage(msg string) {
-	c.Lock.Lock("gameclient.WriteInfoMessage")
-	defer c.Lock.Unlock()
-
 	// get message registry
 	msgRegistry := models.NewMessageRegistry()
 

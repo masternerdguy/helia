@@ -2574,6 +2574,11 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 		defer silo.Lock.Unlock()
 	}
 
+	// make sure quantity is positive
+	if quantity <= 0 {
+		return errors.New("quantity of stack to buy must be positive")
+	}
+
 	// verify sufficient funds
 	cost := float64(state.Price * quantity)
 
@@ -2671,15 +2676,20 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 		}
 
 		// request a new ship to be generated from this purchase
-		newShip := NewShipPurchase{
+		r := NewShipPurchase{
 			UserID:         s.UserID,
 			ShipTemplateID: stID,
 			StationID:      *s.DockedAtStationID,
-			Client:         s.CurrentSystem.clients[s.UserID.String()],
+		}
+
+		c, ok := s.CurrentSystem.clients[s.UserID.String()]
+
+		if ok {
+			r.Client = c
 		}
 
 		// escalate order save request to core
-		s.CurrentSystem.NewShipPurchases[nid.String()] = &newShip
+		s.CurrentSystem.NewShipPurchases[nid.String()] = &r
 	}
 
 	// success
@@ -2924,7 +2934,12 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 		r := UsedShipPurchase{
 			UserID: s.UserID,
 			ShipID: purShipID,
-			Client: s.CurrentSystem.clients[s.UserID.String()],
+		}
+
+		c, ok := s.CurrentSystem.clients[s.UserID.String()]
+
+		if ok {
+			r.Client = c
 		}
 
 		s.CurrentSystem.UsedShipPurchases[order.ID.String()] = &r
