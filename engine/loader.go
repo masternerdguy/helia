@@ -1347,8 +1347,9 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 		},
 	}
 
-	// debug: perform aggressive logging on ships
+	// debug: perform aggressive logging on ships and enforce sleep
 	es.Lock.SetAggressiveFlag(true)
+	es.Lock.SetEnforceWaitFlag(true)
 
 	// load and inject reputation sheet
 	repSheet := LoadReputationSheet(owner)

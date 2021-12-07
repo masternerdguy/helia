@@ -463,9 +463,11 @@ func (s *Ship) CopyShip(lock bool) *Ship {
 		TemporaryModifiers: s.TemporaryModifiers,
 	}
 
-	// debug: perform aggressive logging on ships
+	// debug: perform aggressive logging on ships and enforce sleep
 	sc.Lock.SetAggressiveFlag(true)
+	sc.Lock.SetEnforceWaitFlag(true)
 
+	// copy station if docked
 	if s.DockedAtStationID != nil {
 		g := &s.DockedAtStationID
 		sc.DockedAtStationID = *g
@@ -476,6 +478,7 @@ func (s *Ship) CopyShip(lock bool) *Ship {
 		}
 	}
 
+	// copy destroyed at if set
 	if s.DestroyedAt != nil {
 		g := &s.DestroyedAt
 		sc.DestroyedAt = *g

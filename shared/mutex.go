@@ -26,6 +26,7 @@ type LabeledMutex struct {
 	mutex           sync.Mutex
 	lastCallerMutex sync.Mutex
 	aggressiveMode  bool // if true, performance-intensive logging will be performed
+	enforceWait     bool // if true, the goroutine will be required to briefly sleep before acquiring a lock
 }
 
 // When set to true, performance intensive logging (eg: call stack) will be performed
@@ -38,7 +39,22 @@ func (m *LabeledMutex) SetAggressiveFlag(f bool) {
 	m.aggressiveMode = f
 }
 
+// When set to true, the calling goroutine will be forced to sleep for a brief time before obtaining the lock
+func (m *LabeledMutex) SetEnforceWaitFlag(f bool) {
+	// obtain lock
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	// set flag
+	m.enforceWait = f
+}
+
 func (m *LabeledMutex) Lock(caller string) {
+	// enforce wait if flag set
+	if m.enforceWait {
+		time.Sleep(500 * time.Nanosecond)
+	}
+
 	// store most recent caller (this will likely be the one causing the freeze)
 	m.lastCallerMutex.Lock()
 	m.lastCaller = caller
