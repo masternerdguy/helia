@@ -868,6 +868,7 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
         m.itemFamilyID === 'eng_oc' ||
         m.itemFamilyID === 'drag_amp' ||
         m.itemFamilyID === 'utility_miner' ||
+        m.itemFamilyID === 'utility_siphon' ||
         m.itemFamilyID === 'heat_sink';
 
       if (isModule) {

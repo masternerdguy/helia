@@ -326,6 +326,8 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (i
 		modFamily = "tackle"
 	} else if itemFamilyID == "utility_miner" {
 		modFamily = "utility"
+	} else if itemFamilyID == "utility_siphon" {
+		modFamily = "utility"
 	}
 
 	if modFamily == "" {
@@ -1249,6 +1251,58 @@ func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64, 
 	if s.Hull < 0 {
 		s.Hull = 0
 	}
+}
+
+// Siphons energy from the ship, returns the actual amount siphoned
+func (s *Ship) SiphonEnergy(maxSiphonAmount float64, attackerRS *shared.PlayerReputationSheet) float64 {
+	// update aggression table
+	if attackerRS != nil {
+		// obtain lock
+		attackerRS.Lock.Lock("ship.SiphonEnergy")
+		defer attackerRS.Lock.Unlock()
+
+		// get attacking player's reputation sheet entry for this ship's faction
+		f, ok := attackerRS.FactionEntries[s.FactionID.String()]
+
+		if !ok {
+			// does not exist - create a neutral one
+			ne := shared.PlayerReputationSheetFactionEntry{
+				FactionID:        s.FactionID,
+				StandingValue:    0,
+				AreOpenlyHostile: false,
+			}
+
+			attackerRS.FactionEntries[s.FactionID.String()] = &ne
+			f = attackerRS.FactionEntries[s.FactionID.String()]
+		}
+
+		// update temporary hostility due to aggro flag
+		at := time.Now().Add(15 * time.Minute)
+		f.TemporarilyOpenlyHostileUntil = &at
+
+		// store entry
+		s.Aggressors[attackerRS.UserID.String()] = attackerRS
+	}
+
+	// limit amount to siphon so that the remaining amount is positive
+	actualSiphon := 0.0
+
+	if s.Energy-maxSiphonAmount >= 0 {
+		actualSiphon = maxSiphonAmount
+	} else {
+		actualSiphon = maxSiphonAmount - s.Energy
+	}
+
+	// apply siphon
+	s.Energy -= actualSiphon
+
+	// clamp energy
+	if s.Energy < 0 {
+		s.Energy = 0
+	}
+
+	// return amount siphoned
+	return actualSiphon
 }
 
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities
@@ -3684,6 +3738,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsAetherDragger()
 			} else if m.ItemTypeFamily == "utility_miner" {
 				canActivate = m.activateAsUtilityMiner()
+			} else if m.ItemTypeFamily == "utility_siphon" {
+				canActivate = m.activateAsUtilitySiphon()
 			}
 
 			if canActivate {
@@ -4570,6 +4626,180 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 		} else {
 			return false
 		}
+	}
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+			ObjEndID:     m.TargetID,
+			ObjEndType:   m.TargetType,
+		}
+
+		gfxEffect.ObjStartHardpointOffset = [...]float64{
+			0,
+			0,
+		}
+
+		if m.SlotIndex != nil {
+			rack := m.Rack
+			idx := *m.SlotIndex
+
+			if rack == "A" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
+			}
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsUtilitySiphon() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.NewTargetTypeRegistry()
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtI Any
+
+	if *m.TargetType == tgtReg.Ship {
+		// find ship
+		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtI = tgt
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+	}
+
+	// get max siphon amount
+	maxSiphonAmt, _ := m.ItemMeta.GetFloat64("energy_siphon_amount")
+
+	// determine angular velocity for tracking
+	dvX := m.shipMountedOn.VelX - tgtDummy.VelX
+	dvY := m.shipMountedOn.VelY - tgtDummy.VelY
+
+	dv := math.Sqrt((dvX * dvX) + (dvY * dvY))
+	w := 0.0
+
+	if d > 0 {
+		w = ((dv / d) * float64(Heartbeat)) * (180.0 / math.Pi)
+	}
+
+	// get tracking value
+	tracking, _ := m.ItemMeta.GetFloat64("tracking")
+
+	// calculate tracking ratio
+	trackingRatio := 1.0 // default to 100% tracking
+
+	if w > 0 {
+		trackingRatio = tracking / w
+	}
+
+	// clamp tracking to 100%
+	if trackingRatio > 1.0 {
+		trackingRatio = 1.0
+	}
+
+	// adjust siphon amount based on tracking
+	maxSiphonAmt *= trackingRatio
+
+	// account for falloff if present
+	falloff, found := m.ItemMeta.GetString("falloff")
+
+	rangeRatio := 1.0 // default to 100% damage (or ore pull if asteroid)
+
+	if found {
+		// adjust based on falloff style
+		if falloff == "linear" {
+			// max amount siphoned is a proportion of the distance to target over max range (closer is higher)
+			rangeRatio = 1 - (d / modRange)
+
+			maxSiphonAmt *= rangeRatio
+		} else if falloff == "reverse_linear" {
+			//  max amount siphoned is a proportion of the distance to target over max range (further is higher)
+			rangeRatio = (d / modRange)
+
+			if d > modRange {
+				rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+			}
+
+			maxSiphonAmt *= rangeRatio
+		}
+	}
+
+	// siphon energy from target ship
+	if *m.TargetType == tgtReg.Ship {
+		c := tgtI.(*Ship)
+		actualSiphon := c.SiphonEnergy(maxSiphonAmt, m.shipMountedOn.ReputationSheet)
+
+		// add to energy
+		m.shipMountedOn.Energy += actualSiphon
+
+		// any excess becomes heat
+		maxEnergy := m.shipMountedOn.GetRealMaxEnergy()
+		excess := m.shipMountedOn.Energy - maxEnergy
+
+		if excess > 0 {
+			// apply heat
+			m.shipMountedOn.Heat += excess
+
+			// clamp energy
+			m.shipMountedOn.Energy = maxEnergy
+		}
+	} else {
+		return false
 	}
 
 	// include visual effect if present
