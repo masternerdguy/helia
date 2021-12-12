@@ -840,8 +840,10 @@ func (s *Ship) updateHeat() {
 		s.Hull -= (((s.Heat - maxHeat) / 1000) * Heartbeat) * ShipHeatDamage
 	}
 
-	// dissipate heat taking efficiency modifier into account
-	s.Heat -= ((s.GetRealHeatSink() / 1000) * Heartbeat) * u
+	if !s.IsCloaked {
+		// dissipate heat taking efficiency modifier into account
+		s.Heat -= ((s.GetRealHeatSink() / 1000) * Heartbeat) * u
+	}
 
 	// clamp heat
 	if s.Heat < 0 {
