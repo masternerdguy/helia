@@ -436,7 +436,7 @@ export class ModuleEffect extends WsPushModuleEffect {
         ctx.beginPath();
         ctx.moveTo(sx, sy);
         ctx.lineTo(tx, ty);
-        ctx.quadraticCurveTo(sx + ox, sx + oy, tx, tx);
+        ctx.quadraticCurveTo(sx + ox, sx + oy, tx, ty);
         ctx.lineWidth = lt;
         ctx.stroke();
 
