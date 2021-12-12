@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --host 192.168.12.210 --disable-host-check",
+    "start": "ng serve --host 0.0.0.0 --disable-host-check",
     "build": "ng build",
     "backup-db": "pg_dump -d helia -f ../schema.sql -s && pg_dump -d helia -f ../testdb.sql",
     "restore-db": "echo 'drop owned by developer;' | psql -d helia && psql -d helia < ../testdb.sql",
