@@ -129,319 +129,327 @@ export class ModuleEffect extends WsPushModuleEffect {
   render(ctx: any, camera: Camera) {
     if (this.vfxData) {
       if (this.vfxData.type === 'laser') {
-        /* draw a line of the given color from source to destination */
-        if (this.objStart && this.objEnd) {
-          // get end-point coordinates
-          const src = getTargetCoordinatesAndRadius(
-            this.objStart,
-            this.objStartType,
-            this.objStartHPOffset
-          );
-          const dest = getTargetCoordinatesAndRadius(
-            this.objEnd,
-            this.objEndType
-          );
-
-          // apply offset to destination coordinates for cooler effect
-          if (!this.endPosOffset) {
-            // get a random point within the radius of the target
-            const bR = dest[2] / 3;
-
-            const ox = randomIntFromInterval(-bR, bR);
-            const oy = randomIntFromInterval(-bR, bR);
-
-            // store offset
-            this.endPosOffset = [ox, oy];
-          }
-
-          dest[0] += this.endPosOffset[0];
-          dest[1] += this.endPosOffset[1];
-
-          // project to screen
-          const sx = camera.projectX(src[0]);
-          const sy = camera.projectY(src[1]);
-
-          const tx = camera.projectX(dest[0]);
-          const ty = camera.projectY(dest[1]);
-
-          // project laser beam thickness
-          const lt = camera.projectR(this.vfxData.thickness);
-
-          // style line
-          ctx.strokeStyle = this.vfxData.color;
-
-          const oldFilter = ctx.filter;
-
-          if (this.vfxData.filter) {
-            ctx.filter = this.vfxData.filter;
-          }
-
-          // draw line
-          ctx.beginPath();
-          ctx.moveTo(sx, sy);
-          ctx.lineTo(tx, ty);
-          ctx.lineWidth = lt;
-          ctx.stroke();
-
-          // revert filter
-          ctx.filter = oldFilter;
-        }
+        this.renderAsLaserEffect(camera, ctx);
       } else if (this.vfxData.type === 'gauss') {
-        /* draw a line of the given color from source to destination */
-        if (this.objStart && this.objEnd) {
-          // get end-point coordinates
-          const src = getTargetCoordinatesAndRadius(
-            this.objStart,
-            this.objStartType,
-            this.objStartHPOffset
-          );
-          const dest = getTargetCoordinatesAndRadius(
-            this.objEnd,
-            this.objEndType
-          );
-
-          // apply offset to destination coordinates for cooler effect
-          if (!this.endPosOffset) {
-            // get a random point within the radius of the target
-            const bR = dest[2] / 3;
-
-            const ox = randomIntFromInterval(-bR, bR);
-            const oy = randomIntFromInterval(-bR, bR);
-
-            // store offset
-            this.endPosOffset = [ox, oy];
-          }
-
-          dest[0] += this.endPosOffset[0];
-          dest[1] += this.endPosOffset[1];
-
-          // project to screen
-          const sx = camera.projectX(src[0]);
-          const sy = camera.projectY(src[1]);
-
-          const tx = camera.projectX(dest[0]);
-          const ty = camera.projectY(dest[1]);
-
-          // project gauss trail thickness
-          const decay = 1 - this.lifeElapsed / this.maxLifeTime;
-          const lt = camera.projectR(this.vfxData.thickness * decay);
-
-          // style line
-          ctx.strokeStyle = this.vfxData.color;
-
-          const oldFilter = ctx.filter;
-
-          if (this.vfxData.filter) {
-            ctx.filter = this.vfxData.filter;
-          }
-
-          // draw line
-          ctx.beginPath();
-          ctx.moveTo(sx, sy);
-          ctx.lineTo(tx, ty);
-          ctx.lineWidth = lt;
-          ctx.stroke();
-
-          // revert filter
-          ctx.filter = oldFilter;
-        }
+        this.renderAsGaussEffect(camera, ctx);
       } else if (this.vfxData.type === 'autocannon') {
-        /* draw a line of the given color from source to destination */
-        if (this.objStart && this.objEnd) {
-          // get end-point coordinates
-          const src = getTargetCoordinatesAndRadius(
-            this.objStart,
-            this.objStartType,
-            this.objStartHPOffset
-          );
-          const dest = getTargetCoordinatesAndRadius(
-            this.objEnd,
-            this.objEndType
-          );
-
-          // apply offset to destination coordinates for cooler effect
-          if (!this.endPosOffset) {
-            // get a random point within the radius of the target
-            const bR = dest[2] / 3;
-
-            const ox = randomIntFromInterval(-bR, bR);
-            const oy = randomIntFromInterval(-bR, bR);
-
-            // store offset
-            this.endPosOffset = [ox, oy];
-          }
-
-          dest[0] += this.endPosOffset[0];
-          dest[1] += this.endPosOffset[1];
-
-          // project to screen
-          const sx = camera.projectX(src[0]);
-          const sy = camera.projectY(src[1]);
-
-          const tx = camera.projectX(dest[0]);
-          const ty = camera.projectY(dest[1]);
-
-          // project autocannon trail thickness
-          const phase = Math.cos(this.lifeElapsed) / (2 * Math.PI);
-          const lt = camera.projectR(this.vfxData.thickness * phase);
-
-          // style line
-          ctx.strokeStyle = this.vfxData.color;
-
-          const oldFilter = ctx.filter;
-
-          if (this.vfxData.filter) {
-            ctx.filter = this.vfxData.filter;
-          }
-
-          // get line length and angle
-          const llm = magnitude(sx, sy, tx, ty) * phase;
-          const lla = angleBetween(tx, ty, sx, sy) / (Math.PI / 180);
-
-          // determine actual end
-          const txA = tx + llm * Math.cos(lla);
-          const tyA = ty + llm * Math.sin(lla);
-
-          // draw line
-          ctx.beginPath();
-          ctx.moveTo(sx, sy);
-          ctx.lineTo(txA, tyA);
-          ctx.lineWidth = lt;
-          ctx.stroke();
-
-          // revert filter
-          ctx.filter = oldFilter;
-        }
+        this.renderAsAutocannonEffect(camera, ctx);
       } else if (this.vfxData.type === 'bubble_shield_boost') {
-        // get start coordinates
-        const src = getTargetCoordinatesAndRadius(
-          this.objStart,
-          this.objStartType,
-          this.objStartHPOffset
-        );
-
-        // project to screen
-        const sx = camera.projectX(src[0]);
-        const sy = camera.projectY(src[1]);
-        const sr = camera.projectR(src[2]);
-        const bt = camera.projectR(this.vfxData.thickness);
-
-        // backup filter
-        const oldFilter = ctx.filter;
-
-        // style boost
-        ctx.strokeStyle = this.vfxData.color;
-        if (this.vfxData.filter) {
-          ctx.filter = this.vfxData.filter;
-          ctx.lineWidth = bt;
-        }
-
-        // use elapsed lifetime ratio to expand radius
-        const er = Math.max(0, sr * (this.lifeElapsed / this.maxLifeTime));
-
-        // draw boost
-        ctx.beginPath();
-        ctx.arc(sx, sy, er, 0, 2 * Math.PI);
-        ctx.stroke();
-
-        // restore filter
-        ctx.filter = oldFilter;
+        this.renderAsBubbleShieldBoostEffect(camera, ctx);
       } else if (this.vfxData.type === 'aether_drag') {
-        // get start coordinates
-        const src = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
-
-        // project to screen
-        const sx = camera.projectX(src[0]);
-        const sy = camera.projectY(src[1]);
-        const sr = camera.projectR(src[2]);
-        const bt = camera.projectR(this.vfxData.thickness);
-
-        // backup filter
-        const oldFilter = ctx.filter;
-
-        // style boost
-        ctx.strokeStyle = this.vfxData.color;
-        if (this.vfxData.filter) {
-          ctx.filter = this.vfxData.filter;
-          ctx.lineWidth = bt;
-        }
-
-        // use elapsed lifetime ratio to contract radius
-        const er = Math.max(0, sr * (1 - this.lifeElapsed / this.maxLifeTime));
-
-        // draw aether drag field
-        ctx.beginPath();
-        ctx.arc(sx, sy, er, 0, 2 * Math.PI);
-        ctx.stroke();
-
-        // restore filter
-        ctx.filter = oldFilter;
+        this.renderAsAetherDragEffect(camera, ctx);
       } else if (this.vfxData.type === 'siphon') {
-        /* draw a curve of the given color from source to destination */
-        if (this.objStart && this.objEnd) {
-          // get end-point coordinates
-          const src = getTargetCoordinatesAndRadius(
-            this.objStart,
-            this.objStartType,
-            this.objStartHPOffset
-          );
-          const dest = getTargetCoordinatesAndRadius(
-            this.objEnd,
-            this.objEndType
-          );
-
-          // apply offset to destination coordinates for cooler effect
-          if (!this.endPosOffset) {
-            // get a random point within the radius of the target
-            const bR = dest[2] / 3;
-
-            const ox = randomIntFromInterval(-bR, bR);
-            const oy = randomIntFromInterval(-bR, bR);
-
-            // store offset
-            this.endPosOffset = [ox, oy];
-          }
-
-          dest[0] += this.endPosOffset[0];
-          dest[1] += this.endPosOffset[1];
-
-          // project to screen
-          const sx = camera.projectX(src[0]);
-          const sy = camera.projectY(src[1]);
-
-          const tx = camera.projectX(dest[0]);
-          const ty = camera.projectY(dest[1]);
-
-          // project siphon curve thickness
-          const lt = camera.projectR(this.vfxData.thickness);
-
-          // style curve
-          ctx.strokeStyle = this.vfxData.color;
-
-          const oldFilter = ctx.filter;
-
-          if (this.vfxData.filter) {
-            ctx.filter = this.vfxData.filter;
-          }
-
-          // animate curve effect
-          const d = magnitude(sx, sy, tx, ty);
-          const p = 1 - this.lifeElapsed / this.maxLifeTime;
-
-          const ox = p * d;
-          const oy = p * d;
-
-          // draw curve
-          ctx.beginPath();
-          ctx.moveTo(sx, sy);
-          ctx.quadraticCurveTo(sx + ox, sy + oy, tx, ty);
-          ctx.lineWidth = lt;
-          ctx.stroke();
-
-          // revert filter
-          ctx.filter = oldFilter;
-        }
+        this.renderAsSiphonEffect(camera, ctx);
       }
+    }
+  }
+
+  private renderAsSiphonEffect(camera: Camera, ctx: any) {
+    if (this.objStart && this.objEnd) {
+      // get end-point coordinates
+      const src = getTargetCoordinatesAndRadius(
+        this.objStart,
+        this.objStartType,
+        this.objStartHPOffset
+      );
+      const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
+
+      // apply offset to destination coordinates for cooler effect
+      if (!this.endPosOffset) {
+        // get a random point within the radius of the target
+        const bR = dest[2] / 3;
+
+        const ox = randomIntFromInterval(-bR, bR);
+        const oy = randomIntFromInterval(-bR, bR);
+
+        // store offset
+        this.endPosOffset = [ox, oy];
+      }
+
+      dest[0] += this.endPosOffset[0];
+      dest[1] += this.endPosOffset[1];
+
+      // project to screen
+      const sx = camera.projectX(src[0]);
+      const sy = camera.projectY(src[1]);
+
+      const tx = camera.projectX(dest[0]);
+      const ty = camera.projectY(dest[1]);
+
+      // project siphon curve thickness
+      const lt = camera.projectR(this.vfxData.thickness);
+
+      // style curve
+      ctx.strokeStyle = this.vfxData.color;
+
+      const oldFilter = ctx.filter;
+
+      if (this.vfxData.filter) {
+        ctx.filter = this.vfxData.filter;
+      }
+
+      // animate curve effect
+      const d = magnitude(sx, sy, tx, ty);
+      const p = 1 - this.lifeElapsed / this.maxLifeTime;
+
+      const ox = p * d;
+      const oy = p * d;
+
+      // draw curve
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.quadraticCurveTo(sx + ox, sy + oy, tx, ty);
+      ctx.lineWidth = lt;
+      ctx.stroke();
+
+      // revert filter
+      ctx.filter = oldFilter;
+    }
+  }
+
+  private renderAsAetherDragEffect(camera: Camera, ctx: any) {
+    // get target coordinates
+    const src = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
+
+    // project to screen
+    const sx = camera.projectX(src[0]);
+    const sy = camera.projectY(src[1]);
+    const sr = camera.projectR(src[2]);
+    const bt = camera.projectR(this.vfxData.thickness);
+
+    // backup filter
+    const oldFilter = ctx.filter;
+
+    // style boost
+    ctx.strokeStyle = this.vfxData.color;
+    if (this.vfxData.filter) {
+      ctx.filter = this.vfxData.filter;
+      ctx.lineWidth = bt;
+    }
+
+    // use elapsed lifetime ratio to contract radius
+    const er = Math.max(0, sr * (1 - this.lifeElapsed / this.maxLifeTime));
+
+    // draw aether drag field
+    ctx.beginPath();
+    ctx.arc(sx, sy, er, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    // restore filter
+    ctx.filter = oldFilter;
+  }
+
+  private renderAsBubbleShieldBoostEffect(camera: Camera, ctx: any) {
+    // get start coordinates
+    const src = getTargetCoordinatesAndRadius(
+      this.objStart,
+      this.objStartType,
+      this.objStartHPOffset
+    );
+
+    // project to screen
+    const sx = camera.projectX(src[0]);
+    const sy = camera.projectY(src[1]);
+    const sr = camera.projectR(src[2]);
+    const bt = camera.projectR(this.vfxData.thickness);
+
+    // backup filter
+    const oldFilter = ctx.filter;
+
+    // style boost
+    ctx.strokeStyle = this.vfxData.color;
+    if (this.vfxData.filter) {
+      ctx.filter = this.vfxData.filter;
+      ctx.lineWidth = bt;
+    }
+
+    // use elapsed lifetime ratio to expand radius
+    const er = Math.max(0, sr * (this.lifeElapsed / this.maxLifeTime));
+
+    // draw boost
+    ctx.beginPath();
+    ctx.arc(sx, sy, er, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    // restore filter
+    ctx.filter = oldFilter;
+  }
+
+  private renderAsAutocannonEffect(camera: Camera, ctx: any) {
+    if (this.objStart && this.objEnd) {
+      // get end-point coordinates
+      const src = getTargetCoordinatesAndRadius(
+        this.objStart,
+        this.objStartType,
+        this.objStartHPOffset
+      );
+      const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
+
+      // apply offset to destination coordinates for cooler effect
+      if (!this.endPosOffset) {
+        // get a random point within the radius of the target
+        const bR = dest[2] / 3;
+
+        const ox = randomIntFromInterval(-bR, bR);
+        const oy = randomIntFromInterval(-bR, bR);
+
+        // store offset
+        this.endPosOffset = [ox, oy];
+      }
+
+      dest[0] += this.endPosOffset[0];
+      dest[1] += this.endPosOffset[1];
+
+      // project to screen
+      const sx = camera.projectX(src[0]);
+      const sy = camera.projectY(src[1]);
+
+      const tx = camera.projectX(dest[0]);
+      const ty = camera.projectY(dest[1]);
+
+      // project autocannon trail thickness
+      const phase = Math.cos(this.lifeElapsed) / (2 * Math.PI);
+      const lt = camera.projectR(this.vfxData.thickness * phase);
+
+      // style line
+      ctx.strokeStyle = this.vfxData.color;
+
+      const oldFilter = ctx.filter;
+
+      if (this.vfxData.filter) {
+        ctx.filter = this.vfxData.filter;
+      }
+
+      // get line length and angle
+      const llm = magnitude(sx, sy, tx, ty) * phase;
+      const lla = angleBetween(tx, ty, sx, sy) / (Math.PI / 180);
+
+      // determine actual end
+      const txA = tx + llm * Math.cos(lla);
+      const tyA = ty + llm * Math.sin(lla);
+
+      // draw line
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(txA, tyA);
+      ctx.lineWidth = lt;
+      ctx.stroke();
+
+      // revert filter
+      ctx.filter = oldFilter;
+    }
+  }
+
+  private renderAsGaussEffect(camera: Camera, ctx: any) {
+    if (this.objStart && this.objEnd) {
+      // get end-point coordinates
+      const src = getTargetCoordinatesAndRadius(
+        this.objStart,
+        this.objStartType,
+        this.objStartHPOffset
+      );
+      const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
+
+      // apply offset to destination coordinates for cooler effect
+      if (!this.endPosOffset) {
+        // get a random point within the radius of the target
+        const bR = dest[2] / 3;
+
+        const ox = randomIntFromInterval(-bR, bR);
+        const oy = randomIntFromInterval(-bR, bR);
+
+        // store offset
+        this.endPosOffset = [ox, oy];
+      }
+
+      dest[0] += this.endPosOffset[0];
+      dest[1] += this.endPosOffset[1];
+
+      // project to screen
+      const sx = camera.projectX(src[0]);
+      const sy = camera.projectY(src[1]);
+
+      const tx = camera.projectX(dest[0]);
+      const ty = camera.projectY(dest[1]);
+
+      // project gauss trail thickness
+      const decay = 1 - this.lifeElapsed / this.maxLifeTime;
+      const lt = camera.projectR(this.vfxData.thickness * decay);
+
+      // style line
+      ctx.strokeStyle = this.vfxData.color;
+
+      const oldFilter = ctx.filter;
+
+      if (this.vfxData.filter) {
+        ctx.filter = this.vfxData.filter;
+      }
+
+      // draw line
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(tx, ty);
+      ctx.lineWidth = lt;
+      ctx.stroke();
+
+      // revert filter
+      ctx.filter = oldFilter;
+    }
+  }
+
+  private renderAsLaserEffect(camera: Camera, ctx: any) {
+    if (this.objStart && this.objEnd) {
+      // get end-point coordinates
+      const src = getTargetCoordinatesAndRadius(
+        this.objStart,
+        this.objStartType,
+        this.objStartHPOffset
+      );
+      const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
+
+      // apply offset to destination coordinates for cooler effect
+      if (!this.endPosOffset) {
+        // get a random point within the radius of the target
+        const bR = dest[2] / 3;
+
+        const ox = randomIntFromInterval(-bR, bR);
+        const oy = randomIntFromInterval(-bR, bR);
+
+        // store offset
+        this.endPosOffset = [ox, oy];
+      }
+
+      dest[0] += this.endPosOffset[0];
+      dest[1] += this.endPosOffset[1];
+
+      // project to screen
+      const sx = camera.projectX(src[0]);
+      const sy = camera.projectY(src[1]);
+
+      const tx = camera.projectX(dest[0]);
+      const ty = camera.projectY(dest[1]);
+
+      // project laser beam thickness
+      const lt = camera.projectR(this.vfxData.thickness);
+
+      // style line
+      ctx.strokeStyle = this.vfxData.color;
+
+      const oldFilter = ctx.filter;
+
+      if (this.vfxData.filter) {
+        ctx.filter = this.vfxData.filter;
+      }
+
+      // draw line
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(tx, ty);
+      ctx.lineWidth = lt;
+      ctx.stroke();
+
+      // revert filter
+      ctx.filter = oldFilter;
     }
   }
 }
