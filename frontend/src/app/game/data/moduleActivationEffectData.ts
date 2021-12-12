@@ -78,6 +78,16 @@ export class ModuleActivationEffectRepository {
       thickness: 0.78,
     };
   }
+
+  basicUtilitySiphon(): ModuleActivationEffectData {
+    return {
+      type: 'siphon',
+      duration: 820,
+      color: 'orange',
+      filter: 'blur(5px)', // "feather"
+      thickness: 1.2,
+    };
+  }
 }
 
 export class ModuleActivationEffectData {
