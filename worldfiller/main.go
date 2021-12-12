@@ -182,8 +182,8 @@ func calculateSystemSeed(s *universe.SolarSystem) int {
 }
 
 func injectProcess(u *universe.Universe) {
-	pID, err := uuid.Parse("508f9bdf-4b75-4f48-b251-e8c5b1111f38")
-	prob := 3
+	pID, err := uuid.Parse("bceba439-33ee-49ca-bf16-910c811df6c1")
+	prob := 1
 
 	stationProcessSvc := sql.GetStationProcessService()
 
@@ -191,33 +191,33 @@ func injectProcess(u *universe.Universe) {
 		panic(err)
 	}
 
-	var textures = [...]string{
+	/*var textures = [...]string{
 		"sanctuary-1",
-	}
+	}*/
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 12742651)
+			rand.Seed(int64(calculateSystemSeed(s)) - 234699)
 
 			stations := s.CopyStations(true)
 
 			for _, st := range stations {
-				for _, t := range textures {
-					if st.Texture != t {
-						roll := physics.RandInRange(0, 100)
+				//for _, t := range textures {
+				//	if st.Texture != t {
+				roll := physics.RandInRange(0, 100)
 
-						if roll <= prob {
-							sp := sql.StationProcess{
-								StationID: st.ID,
-								ProcessID: pID,
-								ID:        uuid.New(),
-							}
-
-							toSave = append(toSave, sp)
-						}
+				if roll <= prob {
+					sp := sql.StationProcess{
+						StationID: st.ID,
+						ProcessID: pID,
+						ID:        uuid.New(),
 					}
+
+					toSave = append(toSave, sp)
+					//		}
+					//	}
 				}
 			}
 		}
