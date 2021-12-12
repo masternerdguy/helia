@@ -128,7 +128,6 @@ export class ModuleEffect extends WsPushModuleEffect {
 
   render(ctx: any, camera: Camera) {
     if (this.vfxData) {
-      console.log(this.vfxData);
       if (this.vfxData.type === 'laser') {
         /* draw a line of the given color from source to destination */
         if (this.objStart && this.objEnd) {
