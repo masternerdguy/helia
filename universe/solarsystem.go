@@ -1592,6 +1592,11 @@ func (s *SolarSystem) sendClientUpdates() {
 			continue
 		}
 
+		// skip cloaked ships
+		if d.IsCloaked {
+			continue
+		}
+
 		// build ship info and append
 		gu.Ships = append(gu.Ships, models.GlobalShipInfo{
 			ID:            d.ID,

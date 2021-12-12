@@ -183,6 +183,7 @@ type Ship struct {
 	ReputationSheet    *shared.PlayerReputationSheet
 	DestructArmed      bool
 	TemporaryModifiers []TemporaryShipModifier
+	IsCloaked          bool
 	Aggressors         map[string]*shared.PlayerReputationSheet
 	Lock               shared.LabeledMutex
 }
@@ -328,6 +329,8 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (i
 		modFamily = "utility"
 	} else if itemFamilyID == "utility_siphon" {
 		modFamily = "utility"
+	} else if itemFamilyID == "utility_cloak" {
+		modFamily = "utility"
 	}
 
 	if modFamily == "" {
@@ -463,6 +466,7 @@ func (s *Ship) CopyShip(lock bool) *Ship {
 		BehaviourMode:      s.BehaviourMode,
 		IsNPC:              s.IsNPC,
 		TemporaryModifiers: s.TemporaryModifiers,
+		IsCloaked:          s.IsCloaked,
 	}
 
 	// debug: perform aggressive logging on ships and enforce sleep
@@ -530,6 +534,9 @@ func (s *Ship) PeriodicUpdate() {
 	}
 
 	s.TemporaryModifiers = keptTemporaryModifiers
+
+	// update cloaking
+	s.updateCloaking()
 
 	// update energy
 	s.updateEnergy()
@@ -673,6 +680,33 @@ func (s *Ship) PeriodicUpdate() {
 			s.doDockedAutopilot()
 		}
 	}
+}
+
+func (s *Ship) updateCloaking() {
+	// aggregate cloaking percentage
+	cloaked := false
+	cloakPercentage := 0.0
+
+	for _, e := range s.TemporaryModifiers {
+		if e.Attribute == "cloak" {
+			cloakPercentage += e.Percentage
+		}
+	}
+
+	// determine whether cloaked for tick
+	if cloakPercentage >= 1 {
+		// ship is cloaked
+		cloaked = true
+	} else {
+		// ship is intermittently cloaked
+		r := rand.Float64()
+
+		if r <= cloakPercentage {
+			cloaked = true
+		}
+	}
+
+	s.IsCloaked = cloaked
 }
 
 // Updates the ship's energy level for a tick
@@ -1669,6 +1703,12 @@ func (s *Ship) doAutopilotGoto() {
 			return
 		}
 
+		// abort if cloaked
+		if tgt.IsCloaked {
+			s.CmdAbort(false)
+			return
+		}
+
 		// store target details
 		tX = tgt.PosX
 		tY = tgt.PosY
@@ -1785,6 +1825,12 @@ func (s *Ship) doAutopilotOrbit() {
 			return
 		}
 
+		// abort if cloaked
+		if tgt.IsCloaked {
+			s.CmdAbort(false)
+			return
+		}
+
 		// store target details
 		tX = tgt.PosX
 		tY = tgt.PosY
@@ -1894,6 +1940,11 @@ func (s *Ship) doAutopilotDock() {
 			// get closer
 			s.flyToPoint(station.PosX, station.PosY, hold, 20)
 		} else {
+			// wait if cloaked
+			if s.IsCloaked {
+				return
+			}
+
 			// dock with station
 			s.DockedAtStation = station
 			s.DockedAtStationID = &station.ID
@@ -1931,6 +1982,18 @@ func (s *Ship) doAutopilotFight() {
 		targetShip := s.CurrentSystem.ships[s.AutopilotFight.TargetID.String()]
 
 		if targetShip == nil {
+			s.CmdAbort(false)
+			return
+		}
+
+		// abort if docked
+		if targetShip.IsDocked {
+			s.CmdAbort(false)
+			return
+		}
+
+		// abort if cloaked
+		if targetShip.IsCloaked {
 			s.CmdAbort(false)
 			return
 		}
@@ -3613,6 +3676,13 @@ func (m *FittedSlot) PeriodicUpdate() {
 	} else {
 		// check for activation intent
 		if m.WillRepeat {
+			// check if cloaked (exempting cloaking devices)
+			if m.shipMountedOn.IsCloaked && m.ItemTypeFamily != "utility_cloak" {
+				// cloaked - can't active
+				m.WillRepeat = false
+				return
+			}
+
 			// check if a target is required
 			needsTarget, _ := m.ItemTypeMeta.GetBool("needs_target")
 
@@ -3740,6 +3810,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsUtilityMiner()
 			} else if m.ItemTypeFamily == "utility_siphon" {
 				canActivate = m.activateAsUtilitySiphon()
+			} else if m.ItemTypeFamily == "utility_cloak" {
+				canActivate = m.activateAsUtilityCloak()
 			}
 
 			if canActivate {
@@ -4832,6 +4904,46 @@ func (m *FittedSlot) activateAsUtilitySiphon() bool {
 		// push to solar system list for next update
 		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
 	}
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsUtilityCloak() bool {
+	// make sure that no other modules are active
+	for _, x := range m.shipMountedOn.Fitting.ARack {
+		if x.IsCycling {
+			return false
+		}
+	}
+
+	for _, x := range m.shipMountedOn.Fitting.BRack {
+		if x.IsCycling {
+			return false
+		}
+	}
+
+	// get activation energy and duration (approximately same as cooldown for cloaking devices)
+	activationEnergy, _ := m.ItemMeta.GetFloat64("activation_energy")
+	cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
+
+	// get ship mass
+	mx := m.shipMountedOn.GetRealMass()
+
+	// calculate "cloak amount" (if percentage < 100% then cloaking will "flicker")
+	dC := (activationEnergy / mx) * 7
+
+	// calculate effect duration in ticks
+	dT := (cooldown * 1000) / Heartbeat
+
+	// add temporary modifier
+	modifier := TemporaryShipModifier{
+		Attribute:      "cloak",
+		Percentage:     dC,
+		RemainingTicks: int(dT) + int(dC*10), // duration bonus for lighter ships
+	}
+
+	m.shipMountedOn.TemporaryModifiers = append(m.shipMountedOn.TemporaryModifiers, modifier)
 
 	// module activates!
 	return true
