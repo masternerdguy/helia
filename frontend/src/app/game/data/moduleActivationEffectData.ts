@@ -82,9 +82,9 @@ export class ModuleActivationEffectRepository {
   basicUtilitySiphon(): ModuleActivationEffectData {
     return {
       type: 'siphon',
-      duration: 1820,
+      duration: 1865,
       color: 'orange',
-      filter: 'blur(3.15px)', // "feather"
+      filter: 'blur(9.28px)', // "feather"
       thickness: 1.2,
     };
   }
