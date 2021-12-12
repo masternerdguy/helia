@@ -128,6 +128,7 @@ export class ModuleEffect extends WsPushModuleEffect {
 
   render(ctx: any, camera: Camera) {
     if (this.vfxData) {
+      console.log(this.vfxData);
       if (this.vfxData.type === 'laser') {
         /* draw a line of the given color from source to destination */
         if (this.objStart && this.objEnd) {
@@ -376,72 +377,71 @@ export class ModuleEffect extends WsPushModuleEffect {
 
         // restore filter
         ctx.filter = oldFilter;
-      }
-    } else if (this.vfxData.type === 'siphon') {
-      /* draw a curve of the given color from source to destination */
-      if (this.objStart && this.objEnd) {
-        // get end-point coordinates
-        const src = getTargetCoordinatesAndRadius(
-          this.objStart,
-          this.objStartType,
-          this.objStartHPOffset
-        );
-        const dest = getTargetCoordinatesAndRadius(
-          this.objEnd,
-          this.objEndType
-        );
+      } else if (this.vfxData.type === 'siphon') {
+        /* draw a curve of the given color from source to destination */
+        if (this.objStart && this.objEnd) {
+          // get end-point coordinates
+          const src = getTargetCoordinatesAndRadius(
+            this.objStart,
+            this.objStartType,
+            this.objStartHPOffset
+          );
+          const dest = getTargetCoordinatesAndRadius(
+            this.objEnd,
+            this.objEndType
+          );
 
-        // apply offset to destination coordinates for cooler effect
-        if (!this.endPosOffset) {
-          // get a random point within the radius of the target
-          const bR = dest[2] / 3;
+          // apply offset to destination coordinates for cooler effect
+          if (!this.endPosOffset) {
+            // get a random point within the radius of the target
+            const bR = dest[2] / 3;
 
-          const ox = randomIntFromInterval(-bR, bR);
-          const oy = randomIntFromInterval(-bR, bR);
+            const ox = randomIntFromInterval(-bR, bR);
+            const oy = randomIntFromInterval(-bR, bR);
 
-          // store offset
-          this.endPosOffset = [ox, oy];
+            // store offset
+            this.endPosOffset = [ox, oy];
+          }
+
+          dest[0] += this.endPosOffset[0];
+          dest[1] += this.endPosOffset[1];
+
+          // project to screen
+          const sx = camera.projectX(src[0]);
+          const sy = camera.projectY(src[1]);
+
+          const tx = camera.projectX(dest[0]);
+          const ty = camera.projectY(dest[1]);
+
+          // project siphon curve thickness
+          const lt = camera.projectR(this.vfxData.thickness);
+
+          // style curve
+          ctx.strokeStyle = this.vfxData.color;
+
+          const oldFilter = ctx.filter;
+
+          if (this.vfxData.filter) {
+            ctx.filter = this.vfxData.filter;
+          }
+
+          // animate curve effect
+          const d = magnitude(sx, sy, tx, ty);
+          const p = 1 - this.lifeElapsed / this.maxLifeTime;
+
+          const ox = p * d;
+          const oy = p * d;
+
+          // draw curve
+          ctx.beginPath();
+          ctx.moveTo(sx, sy);
+          ctx.quadraticCurveTo(sx + ox, sy + oy, tx, ty);
+          ctx.lineWidth = lt;
+          ctx.stroke();
+
+          // revert filter
+          ctx.filter = oldFilter;
         }
-
-        dest[0] += this.endPosOffset[0];
-        dest[1] += this.endPosOffset[1];
-
-        // project to screen
-        const sx = camera.projectX(src[0]);
-        const sy = camera.projectY(src[1]);
-
-        const tx = camera.projectX(dest[0]);
-        const ty = camera.projectY(dest[1]);
-
-        // project siphon curve thickness
-        const lt = camera.projectR(this.vfxData.thickness);
-
-        // style curve
-        ctx.strokeStyle = this.vfxData.color;
-
-        const oldFilter = ctx.filter;
-
-        if (this.vfxData.filter) {
-          ctx.filter = this.vfxData.filter;
-        }
-
-        // animate curve effect
-        const d = magnitude(sx, sy, tx, ty);
-        const p = 1 - (this.lifeElapsed / this.maxLifeTime);
-
-        const ox = p * d;
-        const oy = p * d;
-
-        // draw curve
-        ctx.beginPath();
-        ctx.moveTo(sx, sy);
-        ctx.lineTo(tx, ty);
-        ctx.quadraticCurveTo(sx + ox, sx + oy, tx, ty);
-        ctx.lineWidth = lt;
-        ctx.stroke();
-
-        // revert filter
-        ctx.filter = oldFilter;
       }
     }
   }
