@@ -1133,7 +1133,20 @@ func (s *Ship) GetRealMaxHull() float64 {
 
 // Returns the real max energy of the ship after modifiers
 func (s *Ship) GetRealMaxEnergy() float64 {
-	return s.TemplateData.BaseEnergy
+	// get base max energy
+	a := s.TemplateData.BaseEnergy
+
+	// add bonuses from passive modules in rack c
+	for _, e := range s.Fitting.CRack {
+		energyMaxAdd, s := e.ItemMeta.GetFloat64("energy_max_add")
+
+		if s {
+			// include in real max
+			a += energyMaxAdd
+		}
+	}
+
+	return a
 }
 
 // Returns the real energy regeneration rate of the ship after modifiers
