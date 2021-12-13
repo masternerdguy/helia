@@ -3707,6 +3707,14 @@ func (m *FittedSlot) PeriodicUpdate() {
 						return
 					}
 
+					if sx.IsCloaked {
+						// target is cloaked - can't activate
+						m.TargetID = nil
+						m.TargetType = nil
+
+						return
+					}
+
 					// make sure this isn't the ship it's mounted on
 					if sx.ID == m.shipMountedOn.ID {
 						// target is self - can't activate
