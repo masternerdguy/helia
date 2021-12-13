@@ -3729,7 +3729,7 @@ func (m *FittedSlot) PeriodicUpdate() {
 		// check for activation intent
 		if m.WillRepeat {
 			// check if cloaked (exempting cloaking devices)
-			if m.shipMountedOn.IsCloaked && m.ItemTypeFamily != "utility_cloak" {
+			if m.shipMountedOn.IsCloaked {
 				// cloaked - can't active
 				m.WillRepeat = false
 				return
