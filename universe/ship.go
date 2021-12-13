@@ -335,6 +335,8 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (i
 		modFamily = "power"
 	} else if itemFamilyID == "aux_generator" {
 		modFamily = "power"
+	} else if itemFamilyID == "cargo_expander" {
+		modFamily = "cargo"
 	}
 
 	if modFamily == "" {
@@ -1212,7 +1214,29 @@ func (s *Ship) GetRealMaxFuel() float64 {
 
 // Returns the real max cargo bay volume of the ship after modifiers
 func (s *Ship) GetRealCargoBayVolume() float64 {
-	return s.TemplateData.BaseCargoBayVolume
+	// get base cargo volume
+	cv := s.TemplateData.BaseCargoBayVolume
+
+	// add bonuses from passive modules in rack c
+	for _, e := range s.Fitting.CRack {
+		if e.SlotIndex == nil {
+			continue
+		}
+
+		// check if cargo expander
+		k, s := e.ItemMeta.GetBool("cargokit")
+
+		if k && s {
+			// get slot volume
+			l := e.shipMountedOn.TemplateData.SlotLayout.CSlots[*e.SlotIndex]
+			sv := float64(l.Volume)
+
+			// include in real max
+			cv += sv
+		}
+	}
+
+	return cv
 }
 
 // Returns the total amount of cargo bay space currently in use
