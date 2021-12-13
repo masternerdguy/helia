@@ -95,10 +95,6 @@ func LoadUniverse() (*universe.Universe, error) {
 				},
 			}
 
-			// debug: perform aggressive logging on systems and enforce sleep
-			s.Lock.SetAggressiveFlag(true)
-			s.Lock.SetEnforceWaitFlag(true)
-
 			// initialize and store system
 			s.Initialize()
 			systems[s.ID.String()] = &s
