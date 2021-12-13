@@ -333,6 +333,8 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (i
 		modFamily = "utility"
 	} else if itemFamilyID == "battery_pack" {
 		modFamily = "power"
+	} else if itemFamilyID == "aux_generator" {
+		modFamily = "power"
 	}
 
 	if modFamily == "" {
@@ -1151,7 +1153,20 @@ func (s *Ship) GetRealMaxEnergy() float64 {
 
 // Returns the real energy regeneration rate of the ship after modifiers
 func (s *Ship) GetRealEnergyRegen() float64 {
-	return s.TemplateData.BaseEnergyRegen
+	// get base energy regen
+	a := s.TemplateData.BaseEnergyRegen
+
+	// add bonuses from passive modules in rack c
+	for _, e := range s.Fitting.CRack {
+		energyRegenAdd, s := e.ItemMeta.GetFloat64("energy_regen_max_add")
+
+		if s {
+			// include in real max
+			a += energyRegenAdd
+		}
+	}
+
+	return a
 }
 
 // Returns the real max heat of the ship after modifiers
