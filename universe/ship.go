@@ -331,6 +331,8 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (i
 		modFamily = "utility"
 	} else if itemFamilyID == "utility_cloak" {
 		modFamily = "utility"
+	} else if itemFamilyID == "battery_pack" {
+		modFamily = "power"
 	}
 
 	if modFamily == "" {
