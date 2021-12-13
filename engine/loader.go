@@ -95,6 +95,10 @@ func LoadUniverse() (*universe.Universe, error) {
 				},
 			}
 
+			// debug: perform aggressive logging on systems and enforce sleep
+			s.Lock.SetAggressiveFlag(true)
+			s.Lock.SetEnforceWaitFlag(true)
+
 			// initialize and store system
 			s.Initialize()
 			systems[s.ID.String()] = &s
@@ -1346,10 +1350,6 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 			UID:       fmt.Sprintf("%v :: %v :: %v", sh.ID, time.Now(), rand.Float64()),
 		},
 	}
-
-	// debug: perform aggressive logging on ships and enforce sleep
-	es.Lock.SetAggressiveFlag(true)
-	es.Lock.SetEnforceWaitFlag(true)
 
 	// load and inject reputation sheet
 	repSheet := LoadReputationSheet(owner)

@@ -469,10 +469,6 @@ func (s *Ship) CopyShip(lock bool) *Ship {
 		IsCloaked:          s.IsCloaked,
 	}
 
-	// debug: perform aggressive logging on ships and enforce sleep
-	sc.Lock.SetAggressiveFlag(true)
-	sc.Lock.SetEnforceWaitFlag(true)
-
 	// copy station if docked
 	if s.DockedAtStationID != nil {
 		g := &s.DockedAtStationID
