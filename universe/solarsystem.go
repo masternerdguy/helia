@@ -118,21 +118,27 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	// process player current ship event queues
 	s.processClientEventQueues()
+	s.Lock.LogInternalProgress("solarsystem.processClientEventQueues done!")
 
 	// update ships (both player + npc)
 	s.updateShips()
+	s.Lock.LogInternalProgress("solarsystem.updateShips done!")
 
 	// update npc stations
 	s.updateStations()
+	s.Lock.LogInternalProgress("solarsystem.updateStations done!")
 
 	// update in-flight missiles
 	s.updateMissiles()
+	s.Lock.LogInternalProgress("solarsystem.updateMissiles done!")
 
 	// ship collision testing
 	s.shipCollisionTesting()
+	s.Lock.LogInternalProgress("solarsystem.shipCollisionTesting done!")
 
 	// send client updates
 	s.sendClientUpdates()
+	s.Lock.LogInternalProgress("solarsystem.sendClientUpdates done!")
 
 	// increment tick counter
 	s.tickCounter++

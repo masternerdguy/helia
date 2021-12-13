@@ -14,19 +14,21 @@ var ShutdownSignal bool
 
 // A mutex that contains information about what it locks
 type LabeledMutex struct {
-	Structure       string
-	UID             string
-	lastCaller      string
-	lastCallerStack string // only captured if in "aggressive" mode due to performance penalty
-	lastLocker      string
-	lastLockerStack string // only captured if in "aggressive" mode due to performance penalty
-	lastLocked      int64
-	lastUnlocked    int64
-	isLocked        bool
-	mutex           sync.Mutex
-	lastCallerMutex sync.Mutex
-	aggressiveMode  bool // if true, performance-intensive logging will be performed
-	enforceWait     bool // if true, the goroutine will be required to briefly sleep before acquiring a lock
+	Structure             string
+	UID                   string
+	lastCaller            string
+	lastCallerStack       string // only captured if in "aggressive" mode due to performance penalty
+	lastLocker            string
+	lastLockerStack       string // only captured if in "aggressive" mode due to performance penalty
+	lastLocked            int64
+	lastUnlocked          int64
+	isLocked              bool
+	mutex                 sync.Mutex
+	lastCallerMutex       sync.Mutex
+	aggressiveMode        bool // if true, performance-intensive logging will be performed
+	enforceWait           bool // if true, the goroutine will be required to briefly sleep before acquiring a lock
+	internalProgressMutex sync.Mutex
+	internalProgressLog   []string
 }
 
 // When set to true, performance intensive logging (eg: call stack) will be performed
@@ -49,6 +51,16 @@ func (m *LabeledMutex) SetEnforceWaitFlag(f bool) {
 	m.enforceWait = f
 }
 
+// Stores an arbitrary log entry on the mutex. It is assumed that the caller has a lock, and the log is cleared when the mutex is released.
+func (m *LabeledMutex) LogInternalProgress(log string) {
+	// obtain lock
+	m.internalProgressMutex.Lock()
+	defer m.internalProgressMutex.Unlock()
+
+	// store progress
+	m.internalProgressLog = append(m.internalProgressLog, log)
+}
+
 func (m *LabeledMutex) Lock(caller string) {
 	// enforce wait if flag set
 	if m.enforceWait {
@@ -57,13 +69,13 @@ func (m *LabeledMutex) Lock(caller string) {
 
 	// store most recent caller (this will likely be the one causing the freeze)
 	m.lastCallerMutex.Lock()
+	defer m.lastCallerMutex.Unlock()
+
 	m.lastCaller = caller
 
 	if m.aggressiveMode {
 		m.lastCallerStack = string(debug.Stack())
 	}
-
-	m.lastCallerMutex.Unlock()
 
 	// obtain lock
 	m.mutex.Lock()
@@ -75,6 +87,7 @@ func (m *LabeledMutex) Lock(caller string) {
 	// store last locker
 	m.lastLocker = caller
 
+	// store stack trace if in aggressive mode
 	if m.aggressiveMode {
 		m.lastLockerStack = string(debug.Stack())
 	}
@@ -155,6 +168,12 @@ func (m *LabeledMutex) Unlock() {
 	m.lastUnlocked = time.Now().UnixNano()
 	m.isLocked = false
 
+	// reset internal progress
+	m.internalProgressMutex.Lock()
+	defer m.internalProgressMutex.Unlock()
+
+	m.internalProgressLog = make([]string, 8)
+
 	// release lock
 	m.mutex.Unlock()
 }
@@ -177,4 +196,5 @@ func (m *LabeledMutex) Print() {
 	log.Println(fmt.Sprintf("lastLocked : %v", m.lastLocked))
 	log.Println(fmt.Sprintf("lastUnlocked : %v", m.lastUnlocked))
 	log.Println(fmt.Sprintf("isLocked : %v", m.isLocked))
+	log.Println(fmt.Sprintf("internalProgressLog: %v", m.internalProgressLog))
 }
