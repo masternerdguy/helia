@@ -1529,8 +1529,13 @@ func (s *SolarSystem) shipCollisionTesting() {
 							// move player to destination system
 							gc.CurrentSystemID = gjB.OutSystemID
 
-							defer gjB.OutSystem.AddClient(gc, true)
-							defer s.RemoveClient(gc, false)
+							// defer to avoid deadlocking either system
+							defer func(s *SolarSystem) {
+								go func(s *SolarSystem) {
+									defer gjB.OutSystem.AddClient(gc, true)
+									defer s.RemoveClient(gc, true)
+								}(s)
+							}(s)
 						}
 					}
 
@@ -1548,7 +1553,12 @@ func (s *SolarSystem) shipCollisionTesting() {
 					gsA.SystemID = gjB.OutSystemID
 
 					// perform move operation
-					defer gjB.OutSystem.AddShip(gsA, true)
+					defer func(s *SolarSystem) {
+						go func(s *SolarSystem) {
+							defer gjB.OutSystem.AddShip(gsA, true)
+						}(s)
+					}(s)
+
 					defer s.RemoveShip(gsA, false)
 				}(sA, jB, c)
 
