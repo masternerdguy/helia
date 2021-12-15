@@ -321,6 +321,8 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (i
 		modFamily = "fuel"
 	} else if itemFamilyID == "eng_oc" {
 		modFamily = "engine"
+	} else if itemFamilyID == "active_sink" {
+		modFamily = "heat"
 	} else if itemFamilyID == "heat_sink" {
 		modFamily = "heat"
 	} else if itemFamilyID == "drag_amp" {
@@ -1191,7 +1193,22 @@ func (s *Ship) GetRealHeatSink() float64 {
 		}
 	}
 
-	return a
+	// temporary modifier percentage accumulator
+	tpm := 1.0
+
+	// apply temporary modifiers
+	for _, e := range s.TemporaryModifiers {
+		if e.Attribute == "heat_sink" {
+			tpm += e.Percentage
+		}
+	}
+
+	// floor percentage modifier at 0
+	if tpm < 0 {
+		tpm = 0
+	}
+
+	return a * tpm
 }
 
 // Returns the real max fuel of the ship after modifiers
@@ -3862,6 +3879,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsShieldBooster()
 			} else if m.ItemTypeFamily == "eng_oc" {
 				canActivate = m.activateAsEngineOvercharger()
+			} else if m.ItemTypeFamily == "active_sink" {
+				canActivate = m.activateAsActiveRadiator()
 			} else if m.ItemTypeFamily == "missile_launcher" {
 				canActivate = m.activateAsMissileLauncher()
 			} else if m.ItemTypeFamily == "drag_amp" {
@@ -4417,6 +4436,33 @@ func (m *FittedSlot) activateAsEngineOvercharger() bool {
 	// add temporary modifier
 	modifier := TemporaryShipModifier{
 		Attribute:      "accel",
+		Percentage:     dA,
+		RemainingTicks: int(dT),
+	}
+
+	m.shipMountedOn.TemporaryModifiers = append(m.shipMountedOn.TemporaryModifiers, modifier)
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsActiveRadiator() bool {
+	// get activation energy and duration (same as cooldown for active radiators)
+	activationEnergy, _ := m.ItemMeta.GetFloat64("activation_energy")
+	cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
+
+	// get ship heat capacity
+	mx := m.shipMountedOn.GetRealMaxHeat()
+
+	// calculate heat sink amount
+	dA := (activationEnergy / mx) * 35
+
+	// calculate effect duration in ticks
+	dT := (cooldown * 1000) / Heartbeat
+
+	// add temporary modifier
+	modifier := TemporaryShipModifier{
+		Attribute:      "heat_sink",
 		Percentage:     dA,
 		RemainingTicks: int(dT),
 	}

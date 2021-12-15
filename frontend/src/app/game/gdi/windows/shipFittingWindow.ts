@@ -866,6 +866,7 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
         m.itemFamilyID === 'fuel_tank' ||
         m.itemFamilyID === 'armor_plate' ||
         m.itemFamilyID === 'eng_oc' ||
+        m.itemFamilyID === 'active_sink' ||
         m.itemFamilyID === 'drag_amp' ||
         m.itemFamilyID === 'utility_miner' ||
         m.itemFamilyID === 'utility_siphon' ||
