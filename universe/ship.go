@@ -4025,31 +4025,8 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	armorDmg, _ := m.ItemMeta.GetFloat64("armor_damage")
 	hullDmg, _ := m.ItemMeta.GetFloat64("hull_damage")
 
-	// determine angular velocity for tracking
-	dvX := m.shipMountedOn.VelX - tgtDummy.VelX
-	dvY := m.shipMountedOn.VelY - tgtDummy.VelY
-
-	dv := math.Sqrt((dvX * dvX) + (dvY * dvY))
-	w := 0.0
-
-	if d > 0 {
-		w = ((dv / d) * float64(Heartbeat)) * (180.0 / math.Pi)
-	}
-
-	// get tracking value
-	tracking, _ := m.ItemMeta.GetFloat64("tracking")
-
 	// calculate tracking ratio
-	trackingRatio := 1.0 // default to 100% tracking
-
-	if w > 0 {
-		trackingRatio = tracking / w
-	}
-
-	// clamp tracking to 100%
-	if trackingRatio > 1.0 {
-		trackingRatio = 1.0
-	}
+	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
 
 	// adjust damage based on tracking
 	shieldDmg *= trackingRatio
@@ -4657,31 +4634,8 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 		}
 	}
 
-	// determine angular velocity for tracking
-	dvX := m.shipMountedOn.VelX - tgtDummy.VelX
-	dvY := m.shipMountedOn.VelY - tgtDummy.VelY
-
-	dv := math.Sqrt((dvX * dvX) + (dvY * dvY))
-	w := 0.0
-
-	if d > 0 {
-		w = ((dv / d) * float64(Heartbeat)) * (180.0 / math.Pi)
-	}
-
-	// get tracking value
-	tracking, _ := m.ItemMeta.GetFloat64("tracking")
-
 	// calculate tracking ratio
-	trackingRatio := 1.0 // default to 100% tracking
-
-	if w > 0 {
-		trackingRatio = tracking / w
-	}
-
-	// clamp tracking to 100%
-	if trackingRatio > 1.0 {
-		trackingRatio = 1.0
-	}
+	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
 
 	// account for falloff if present
 	falloff, found := m.ItemMeta.GetString("falloff")
@@ -4742,7 +4696,7 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 			free := m.shipMountedOn.GetRealCargoBayVolume() - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
 
 			// calculate effective ore / ice volume pulled
-			pulled := miningVolume * c.Yield * rangeRatio
+			pulled := miningVolume * c.Yield * rangeRatio * trackingRatio
 
 			// make sure there is sufficient room to deposit the ore / ice
 			if free-pulled >= 0 {
@@ -4904,31 +4858,8 @@ func (m *FittedSlot) activateAsUtilitySiphon() bool {
 	// get max siphon amount
 	maxSiphonAmt, _ := m.ItemMeta.GetFloat64("energy_siphon_amount")
 
-	// determine angular velocity for tracking
-	dvX := m.shipMountedOn.VelX - tgtDummy.VelX
-	dvY := m.shipMountedOn.VelY - tgtDummy.VelY
-
-	dv := math.Sqrt((dvX * dvX) + (dvY * dvY))
-	w := 0.0
-
-	if d > 0 {
-		w = ((dv / d) * float64(Heartbeat)) * (180.0 / math.Pi)
-	}
-
-	// get tracking value
-	tracking, _ := m.ItemMeta.GetFloat64("tracking")
-
 	// calculate tracking ratio
-	trackingRatio := 1.0 // default to 100% tracking
-
-	if w > 0 {
-		trackingRatio = tracking / w
-	}
-
-	// clamp tracking to 100%
-	if trackingRatio > 1.0 {
-		trackingRatio = 1.0
-	}
+	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
 
 	// adjust siphon amount based on tracking
 	maxSiphonAmt *= trackingRatio
@@ -5053,4 +4984,38 @@ func (m *FittedSlot) activateAsUtilityCloak() bool {
 
 	// module activates!
 	return true
+}
+
+// Reusable helper function to determine tracking ratio between a module and a target
+func (m *FittedSlot) calculateTrackingRatioWithTarget(tgtDummy physics.Dummy) float64 {
+	// calculate distance
+	d := physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+	// determine angular velocity for tracking
+	dvX := m.shipMountedOn.VelX - tgtDummy.VelX
+	dvY := m.shipMountedOn.VelY - tgtDummy.VelY
+
+	dv := math.Sqrt((dvX * dvX) + (dvY * dvY))
+	w := 0.0
+
+	if d > 0 {
+		w = ((dv / d) * float64(Heartbeat)) * (180.0 / math.Pi)
+	}
+
+	// get tracking value
+	tracking, _ := m.ItemMeta.GetFloat64("tracking")
+
+	// calculate tracking ratio
+	trackingRatio := 1.0 // default to 100% tracking
+
+	if w > 0 {
+		trackingRatio = tracking / w
+	}
+
+	// clamp tracking to 100%
+	if trackingRatio > 1.0 {
+		trackingRatio = 1.0
+	}
+
+	return trackingRatio
 }
