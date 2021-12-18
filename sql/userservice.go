@@ -33,9 +33,50 @@ type User struct {
 	EscrowContainerID uuid.UUID
 	CurrentFactionID  uuid.UUID
 	ReputationSheet   PlayerReputationSheet
+	ExperienceSheet   PlayerExperienceSheet
 	// for special NPC "users"
 	IsNPC         bool
 	BehaviourMode *int
+}
+
+type PlayerExperienceSheet struct {
+	ShipExperience map[string]PlayerShipExperienceEntry `json:"shipEntries"`
+}
+
+type PlayerShipExperienceEntry struct {
+	SecondsOfExperience float64   `json:"secondsOfExperience"`
+	ShipTemplateID      uuid.UUID `json:"shipTemplateID"`
+	ShipTemplateName    string    `json:"shipTemplateName"`
+}
+
+// Converts from a PlayerShipExperienceEntry to JSON
+func (a PlayerShipExperienceEntry) Value() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a PlayerShipExperienceEntry
+func (a *PlayerShipExperienceEntry) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
+}
+
+// Converts from a PlayerExperienceSheet to JSON
+func (a PlayerExperienceSheet) Value() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a PlayerExperienceSheet
+func (a *PlayerExperienceSheet) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
 }
 
 type PlayerReputationSheetFactionEntry struct {
@@ -197,6 +238,31 @@ func (s UserService) SaveReputationSheet(uid uuid.UUID, repsheet PlayerReputatio
 	return nil
 }
 
+// Sets experiencesheet on a user in the database
+func (s UserService) SaveExperienceSheet(uid uuid.UUID, expsheet PlayerExperienceSheet) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update user
+	sql := `
+				UPDATE public.users SET experiencesheet = $1 WHERE id = $2;
+			`
+
+	q, err := db.Query(sql, expsheet, uid)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}
+
 // Finds the user with the supplied credentials
 func (s UserService) GetUserByLogin(emailaddress string, pwd string) (*User, error) {
 	// get db handle
@@ -217,14 +283,15 @@ func (s UserService) GetUserByLogin(emailaddress string, pwd string) (*User, err
 	user := User{}
 
 	sqlStatement := `SELECT id, charactername, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid, reputationsheet,
-							isnpc, behaviourmode, emailaddress
+							isnpc, behaviourmode, emailaddress, experiencesheet
 					 FROM users
 					 WHERE emailaddress=$1 AND hashpass=$2`
 
 	row := db.QueryRow(sqlStatement, emailaddress, *hp)
 
 	switch err := row.Scan(&user.ID, &user.CharacterName, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
-		&user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet, &user.IsNPC, &user.BehaviourMode, &user.EmailAddress); err {
+		&user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet, &user.IsNPC, &user.BehaviourMode, &user.EmailAddress,
+		&user.ExperienceSheet); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:
@@ -247,7 +314,7 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 	user := User{}
 
 	sqlStatement := `SELECT id, charactername, hashpass, registered, banned, current_shipid, startid, escrow_containerid, current_factionid, reputationsheet,
-							isnpc, behaviourmode, emailaddress
+							isnpc, behaviourmode, emailaddress, experiencesheet
 					 FROM users
 					 WHERE id=$1`
 
@@ -255,7 +322,7 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 
 	switch err := row.Scan(&user.ID, &user.CharacterName, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
 		&user.StartID, &user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet, &user.IsNPC, &user.BehaviourMode,
-		&user.EmailAddress); err {
+		&user.EmailAddress, &user.ExperienceSheet); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:

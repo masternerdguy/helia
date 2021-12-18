@@ -634,6 +634,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 			// link player's reputation sheet into ship
 			es.ReputationSheet = &rs.ReputationSheet
 
+			// link player's experience sheet into ship
+			es.ExperienceSheet = &rs.ExperienceSheet
+
 			// set client current ship to new noob ship
 			rs.CurrentShipID = es.ID
 			es.BeingFlownByPlayer = true
@@ -709,6 +712,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// link player's reputation sheet into target ship
 			tgt.ReputationSheet = &rs.Client.ReputationSheet
+
+			// link player's experience sheet into target ship
+			tgt.ExperienceSheet = &rs.Client.ExperienceSheet
 
 			// set client current ship to target ship
 			rs.Client.CurrentShipID = tgt.ID

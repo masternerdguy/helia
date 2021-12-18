@@ -181,6 +181,7 @@ type Ship struct {
 	EscrowContainerID  *uuid.UUID
 	BeingFlownByPlayer bool
 	ReputationSheet    *shared.PlayerReputationSheet
+	ExperienceSheet    *shared.PlayerExperienceSheet
 	DestructArmed      bool
 	TemporaryModifiers []TemporaryShipModifier
 	IsCloaked          bool

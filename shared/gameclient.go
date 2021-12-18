@@ -26,6 +26,9 @@ type GameClient struct {
 	// standing to be kept in sync with flown ship(s)
 	ReputationSheet PlayerReputationSheet
 
+	// experience to be kept in sync with flown ship(s)
+	ExperienceSheet PlayerExperienceSheet
+
 	// local event queue for player's current ship
 	shipEventQueue *eventQueue
 

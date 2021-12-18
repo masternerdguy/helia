@@ -451,7 +451,8 @@ CREATE TABLE public.users (
     reputationsheet jsonb DEFAULT '{}'::jsonb NOT NULL,
     isnpc boolean DEFAULT false NOT NULL,
     behaviourmode integer,
-    emailaddress character varying(128)
+    emailaddress character varying(128),
+    experiencesheet jsonb DEFAULT '{}'::jsonb NOT NULL
 );
 
 

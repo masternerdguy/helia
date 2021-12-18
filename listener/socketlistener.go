@@ -88,6 +88,17 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(fmt.Sprintf("! unable to save reputation sheet for %v on disconnect! %v", client.UID, err))
 		}
+
+		// save experience sheet
+		client.ExperienceSheet.Lock.Lock("socketlistener.HandleConnect::DisconnectSave")
+		defer client.ExperienceSheet.Lock.Unlock()
+
+		ers := engine.SQLFromPlayerExperienceSheet(&client.ExperienceSheet)
+		err = userSvc.SaveExperienceSheet(*client.UID, ers)
+
+		if err != nil {
+			log.Println(fmt.Sprintf("! unable to save experience sheet for %v on disconnect! %v", client.UID, err))
+		}
 	}(&client)
 
 	// get message type registry
@@ -462,6 +473,26 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 		// inject reputation sheet
 		currShip.ReputationSheet = &client.ReputationSheet
+
+		// load experience sheet
+		client.ExperienceSheet = shared.PlayerExperienceSheet{
+			ShipExperience: make(map[string]*shared.ShipExperienceEntry),
+		}
+
+		// label mutex
+		client.ExperienceSheet.Lock.Structure = "PlayerExperienceSheet"
+		client.ExperienceSheet.Lock.UID = fmt.Sprintf("%v :: %v :: %v", u.ID, time.Now(), rand.Float64())
+
+		for k, v := range u.ExperienceSheet.ShipExperience {
+			client.ExperienceSheet.ShipExperience[k] = &shared.ShipExperienceEntry{
+				SecondsOfExperience: v.SecondsOfExperience,
+				ShipTemplateID:      v.ShipTemplateID,
+				ShipTemplateName:    v.ShipTemplateName,
+			}
+		}
+
+		// inject experience sheet
+		currShip.ExperienceSheet = &client.ExperienceSheet
 
 		// build current ship info data for welcome message
 		shipInfo := models.CurrentShipInfo{

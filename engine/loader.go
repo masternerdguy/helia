@@ -465,6 +465,7 @@ func saveUniverse(u *universe.Universe) {
 	}
 }
 
+// Converts a reputation sheet to its SQL representation for saving to the db
 func SQLFromPlayerReputationSheet(value *shared.PlayerReputationSheet) sql.PlayerReputationSheet {
 	sheet := sql.PlayerReputationSheet{
 		FactionEntries: make(map[string]sql.PlayerReputationSheetFactionEntry),
@@ -482,6 +483,30 @@ func SQLFromPlayerReputationSheet(value *shared.PlayerReputationSheet) sql.Playe
 			FactionID:        v.FactionID,
 			StandingValue:    v.StandingValue,
 			AreOpenlyHostile: v.AreOpenlyHostile,
+		}
+	}
+
+	return sheet
+}
+
+// Converts an experience sheet to its SQL representation for saving to the db
+func SQLFromPlayerExperienceSheet(value *shared.PlayerExperienceSheet) sql.PlayerExperienceSheet {
+	sheet := sql.PlayerExperienceSheet{
+		ShipExperience: make(map[string]sql.PlayerShipExperienceEntry),
+	}
+
+	// null check
+	if value == nil {
+		// return empty sheet
+		return sheet
+	}
+
+	// copy into sheet
+	for k, v := range value.ShipExperience {
+		sheet.ShipExperience[k] = sql.PlayerShipExperienceEntry{
+			SecondsOfExperience: v.SecondsOfExperience,
+			ShipTemplateID:      v.ShipTemplateID,
+			ShipTemplateName:    v.ShipTemplateName,
 		}
 	}
 
@@ -1208,6 +1233,7 @@ func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error
 	return &o, nil
 }
 
+// Takes a SQL User and extracts its reputation sheet for use in the game engine
 func LoadReputationSheet(u *sql.User) *shared.PlayerReputationSheet {
 	repSheet := shared.PlayerReputationSheet{
 		FactionEntries: make(map[string]*shared.PlayerReputationSheetFactionEntry),
@@ -1226,6 +1252,26 @@ func LoadReputationSheet(u *sql.User) *shared.PlayerReputationSheet {
 	}
 
 	return &repSheet
+}
+
+// Takes a SQL User and extracts its experience sheet for use in the game engine
+func LoadExperienceSheet(u *sql.User) *shared.PlayerExperienceSheet {
+	expSheet := shared.PlayerExperienceSheet{
+		ShipExperience: make(map[string]*shared.ShipExperienceEntry),
+	}
+
+	expSheet.Lock.Structure = "PlayerExperienceSheet"
+	expSheet.Lock.UID = fmt.Sprintf("%v :: %v :: %v", u.ID, time.Now(), rand.Float64())
+
+	for k, v := range u.ExperienceSheet.ShipExperience {
+		expSheet.ShipExperience[k] = &shared.ShipExperienceEntry{
+			SecondsOfExperience: v.SecondsOfExperience,
+			ShipTemplateID:      v.ShipTemplateID,
+			ShipTemplateName:    v.ShipTemplateName,
+		}
+	}
+
+	return &expSheet
 }
 
 // Takes a SQL Ship and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
