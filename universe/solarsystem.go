@@ -1315,13 +1315,29 @@ func (s *SolarSystem) updateShips() {
 		if e.DockedAtStationID == nil {
 			// update player flight experience
 			if e.BeingFlownByPlayer && e.ExperienceSheet != nil {
-				// get experience entry for this ship template
-				x := e.ExperienceSheet.GetShipExperienceEntry(e.TemplateData.ID)
+				// make sure they still have a connected client
+				c := s.clients[e.UserID.String()]
 
-				// update entry
-				x.SecondsOfExperience += (Heartbeat / 1000.0)
-				x.ShipTemplateName = e.TemplateData.ShipTemplateName
-				e.ExperienceSheet.SetShipExperienceEntry(x)
+				if c != nil {
+					// get experience entry for this ship template
+					x := e.ExperienceSheet.GetShipExperienceEntry(e.TemplateData.ID)
+
+					// stash level
+					xl := math.Trunc(x.GetExperience())
+
+					// update entry
+					x.SecondsOfExperience += (Heartbeat / 1000.0)
+					x.ShipTemplateName = e.TemplateData.ShipTemplateName
+					e.ExperienceSheet.SetShipExperienceEntry(x)
+
+					// compare new and old levels
+					nl := math.Trunc(x.GetExperience())
+
+					if nl > xl {
+						// notify player of the level up!
+						c.WriteInfoMessage(fmt.Sprintf("you have advanced to %v level %v!", x.ShipTemplateName, nl))
+					}
+				}
 			}
 		}
 
