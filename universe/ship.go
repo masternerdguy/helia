@@ -163,30 +163,31 @@ type Ship struct {
 	// docking
 	DockedAtStationID *uuid.UUID
 	// in-memory only
-	IsNPC              bool
-	IsDocked           bool
-	Faction            *Faction
-	AutopilotMode      int
-	AutopilotManualNav ManualNavData
-	AutopilotGoto      GotoData
-	AutopilotOrbit     OrbitData
-	AutopilotDock      DockData
-	AutopilotUndock    UndockData
-	AutopilotFight     FightData
-	BehaviourMode      *int
-	CurrentSystem      *SolarSystem
-	DockedAtStation    *Station
-	CargoBay           *Container
-	FittingBay         *Container
-	EscrowContainerID  *uuid.UUID
-	BeingFlownByPlayer bool
-	ReputationSheet    *shared.PlayerReputationSheet
-	ExperienceSheet    *shared.PlayerExperienceSheet
-	DestructArmed      bool
-	TemporaryModifiers []TemporaryShipModifier
-	IsCloaked          bool
-	Aggressors         map[string]*shared.PlayerReputationSheet
-	Lock               shared.LabeledMutex
+	IsNPC                    bool
+	IsDocked                 bool
+	Faction                  *Faction
+	AutopilotMode            int
+	AutopilotManualNav       ManualNavData
+	AutopilotGoto            GotoData
+	AutopilotOrbit           OrbitData
+	AutopilotDock            DockData
+	AutopilotUndock          UndockData
+	AutopilotFight           FightData
+	BehaviourMode            *int
+	CurrentSystem            *SolarSystem
+	DockedAtStation          *Station
+	CargoBay                 *Container
+	FittingBay               *Container
+	EscrowContainerID        *uuid.UUID
+	BeingFlownByPlayer       bool
+	ReputationSheet          *shared.PlayerReputationSheet
+	ExperienceSheet          *shared.PlayerExperienceSheet
+	DestructArmed            bool
+	TemporaryModifiers       []TemporaryShipModifier
+	IsCloaked                bool
+	Aggressors               map[string]*shared.PlayerReputationSheet
+	Lock                     shared.LabeledMutex
+	flightExperienceModifier float64
 }
 
 type TemporaryShipModifier struct {
@@ -503,6 +504,9 @@ func (s *Ship) PeriodicUpdate() {
 	// lock entity
 	s.Lock.Lock("ship.PeriodicUpdate")
 	defer s.Lock.Unlock()
+
+	// cache experience modifier
+	s.flightExperienceModifier = s.GetExperienceModifier()
 
 	// cache system name
 	if s.CurrentSystem != nil {
@@ -1095,9 +1099,34 @@ func (s *Ship) GetRealSpaceDrag() float64 {
 	return SpaceDrag * tpm
 }
 
+// Calculates the experience percentage bonus to apply to some basic stats
+func (s *Ship) GetExperienceModifier() float64 {
+	m := 1.0
+
+	if s.ExperienceSheet != nil {
+		// get experience entry for this ship template
+		v := s.ExperienceSheet.GetShipExperienceEntry(s.TemplateData.ID)
+
+		// get truncated level
+		l := math.Trunc(v.GetExperience())
+
+		if l > 0 {
+			// apply a dampening factor to get percentage
+			b := math.Log(((math.Pow(l, 0.9)) / 9) + 1)
+
+			if b > 0 {
+				// add bonus
+				m += b
+			}
+		}
+	}
+
+	return m
+}
+
 // Returns the real turning capability of a ship after modifiers
 func (s *Ship) GetRealTurn() float64 {
-	return s.TemplateData.BaseTurn
+	return s.TemplateData.BaseTurn * s.flightExperienceModifier
 }
 
 // Returns the real mass of a ship after modifiers
@@ -1107,18 +1136,18 @@ func (s *Ship) GetRealMass() float64 {
 
 // Returns the real max shield of the ship after modifiers
 func (s *Ship) GetRealMaxShield() float64 {
-	return s.TemplateData.BaseShield
+	return s.TemplateData.BaseShield * s.flightExperienceModifier
 }
 
 // Returns the real shield regen rate after modifiers
 func (s *Ship) GetRealShieldRegen() float64 {
-	return s.TemplateData.BaseShieldRegen
+	return s.TemplateData.BaseShieldRegen * s.flightExperienceModifier
 }
 
 // Returns the real max armor of the ship after modifiers
 func (s *Ship) GetRealMaxArmor() float64 {
 	// get base max armor
-	a := s.TemplateData.BaseArmor
+	a := s.TemplateData.BaseArmor * s.flightExperienceModifier
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {
@@ -1135,13 +1164,13 @@ func (s *Ship) GetRealMaxArmor() float64 {
 
 // Returns the real max hull of the ship after modifiers
 func (s *Ship) GetRealMaxHull() float64 {
-	return s.TemplateData.BaseHull
+	return s.TemplateData.BaseHull * s.flightExperienceModifier
 }
 
 // Returns the real max energy of the ship after modifiers
 func (s *Ship) GetRealMaxEnergy() float64 {
 	// get base max energy
-	a := s.TemplateData.BaseEnergy
+	a := s.TemplateData.BaseEnergy * s.flightExperienceModifier
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {
@@ -1159,7 +1188,7 @@ func (s *Ship) GetRealMaxEnergy() float64 {
 // Returns the real energy regeneration rate of the ship after modifiers
 func (s *Ship) GetRealEnergyRegen() float64 {
 	// get base energy regen
-	a := s.TemplateData.BaseEnergyRegen
+	a := s.TemplateData.BaseEnergyRegen * s.flightExperienceModifier
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {
@@ -1176,13 +1205,13 @@ func (s *Ship) GetRealEnergyRegen() float64 {
 
 // Returns the real max heat of the ship after modifiers
 func (s *Ship) GetRealMaxHeat() float64 {
-	return s.TemplateData.BaseHeatCap
+	return s.TemplateData.BaseHeatCap * s.flightExperienceModifier
 }
 
 // Returns the real heat dissipation rate of the ship after modifiers
 func (s *Ship) GetRealHeatSink() float64 {
 	// get base heat sink
-	a := s.TemplateData.BaseHeatSink
+	a := s.TemplateData.BaseHeatSink * s.flightExperienceModifier
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {
@@ -1215,7 +1244,7 @@ func (s *Ship) GetRealHeatSink() float64 {
 // Returns the real max fuel of the ship after modifiers
 func (s *Ship) GetRealMaxFuel() float64 {
 	// get base max fuel
-	f := s.TemplateData.BaseFuel
+	f := s.TemplateData.BaseFuel * s.flightExperienceModifier
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {
@@ -1233,7 +1262,7 @@ func (s *Ship) GetRealMaxFuel() float64 {
 // Returns the real max cargo bay volume of the ship after modifiers
 func (s *Ship) GetRealCargoBayVolume() float64 {
 	// get base cargo volume
-	cv := s.TemplateData.BaseCargoBayVolume
+	cv := s.TemplateData.BaseCargoBayVolume * s.flightExperienceModifier
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {
