@@ -20,11 +20,45 @@ type ShipExperienceEntry struct {
 	ShipTemplateName    string
 }
 
+// Returns a ship experience entry from the map or returns a blank one if not found
+func (e *PlayerExperienceSheet) GetShipExperienceEntry(shipTemplateID uuid.UUID) ShipExperienceEntry {
+	// obtain lock
+	e.Lock.Lock("playerexperiencesheet.GetShipExperienceEntry")
+	defer e.Lock.Unlock()
+
+	// build empty entry
+	x := ShipExperienceEntry{
+		ShipTemplateID: shipTemplateID,
+	}
+
+	// copy if found
+	v, f := e.ShipExperience[shipTemplateID.String()]
+
+	if f {
+		x.SecondsOfExperience = v.SecondsOfExperience
+		x.ShipTemplateName = v.ShipTemplateName
+	}
+
+	// return result
+	return x
+}
+
+// Overwrites a ship experience entry in the map
+func (e *PlayerExperienceSheet) SetShipExperienceEntry(value ShipExperienceEntry) {
+	// obtain lock
+	e.Lock.Lock("playerexperiencesheet.SetShipExperienceEntry")
+	defer e.Lock.Unlock()
+
+	// update map
+	e.ShipExperience[value.ShipTemplateID.String()] = &value
+}
+
 // Returns the unrounded experience level represented by a ShipExperienceEntry
 func (e *ShipExperienceEntry) GetExperience() float64 {
 	return secondsToExperienceLevel(e.SecondsOfExperience)
 }
 
+// Converts seconds to an experience level using a logarithmic function
 func secondsToExperienceLevel(s float64) float64 {
 	// convert seconds to minutes
 	m := s / 60.0

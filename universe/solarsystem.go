@@ -1312,6 +1312,17 @@ func (s *SolarSystem) processClientEventQueues() {
 func (s *SolarSystem) updateShips() {
 	// update ships
 	for _, e := range s.ships {
+		// update player flight experience
+		if e.BeingFlownByPlayer && e.ExperienceSheet != nil {
+			// get experience entry for this ship template
+			x := e.ExperienceSheet.GetShipExperienceEntry(e.TemplateData.ID)
+
+			// update entry
+			x.SecondsOfExperience += (Heartbeat / 1000.0)
+			x.ShipTemplateName = e.TemplateData.ShipTemplateName
+			e.ExperienceSheet.SetShipExperienceEntry(x)
+		}
+
 		// is hull at or below 0?
 		if e.Hull <= 0 {
 			now := time.Now()
