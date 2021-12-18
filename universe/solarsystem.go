@@ -6,6 +6,7 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -1322,6 +1323,9 @@ func (s *SolarSystem) updateShips() {
 				x.SecondsOfExperience += (Heartbeat / 1000.0)
 				x.ShipTemplateName = e.TemplateData.ShipTemplateName
 				e.ExperienceSheet.SetShipExperienceEntry(x)
+
+				// debug log level
+				log.Println(fmt.Sprintf("%v, %v -> %v", e.ShipName, x.SecondsOfExperience, x.GetExperience()))
 			}
 		}
 
