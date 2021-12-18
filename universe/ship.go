@@ -1076,7 +1076,7 @@ func (s *Ship) GetRealAccel() float64 {
 	}
 
 	// return true acceleration
-	return s.TemplateData.BaseAccel * tpm
+	return s.TemplateData.BaseAccel * s.flightExperienceModifier * tpm
 }
 
 // Returns the real drag felt by a ship after modifiers
