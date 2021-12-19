@@ -492,7 +492,8 @@ func SQLFromPlayerReputationSheet(value *shared.PlayerReputationSheet) sql.Playe
 // Converts an experience sheet to its SQL representation for saving to the db
 func SQLFromPlayerExperienceSheet(value *shared.PlayerExperienceSheet) sql.PlayerExperienceSheet {
 	sheet := sql.PlayerExperienceSheet{
-		ShipExperience: make(map[string]sql.PlayerShipExperienceEntry),
+		ShipExperience:   make(map[string]sql.PlayerShipExperienceEntry),
+		ModuleExperience: make(map[string]sql.PlayerModuleExperienceEntry),
 	}
 
 	// null check
