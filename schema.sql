@@ -212,7 +212,8 @@ CREATE TABLE public.ships (
     remaxdirty boolean DEFAULT true NOT NULL,
     trash_containerid uuid NOT NULL,
     wallet double precision DEFAULT 0 NOT NULL,
-    noload boolean DEFAULT false NOT NULL
+    noload boolean DEFAULT false NOT NULL,
+    flightexperiencemodifier double precision DEFAULT 1.0 NOT NULL
 );
 
 
