@@ -510,6 +510,14 @@ func SQLFromPlayerExperienceSheet(value *shared.PlayerExperienceSheet) sql.Playe
 		}
 	}
 
+	for k, v := range value.ModuleExperience {
+		sheet.ModuleExperience[k] = sql.PlayerModuleExperienceEntry{
+			SecondsOfExperience: v.SecondsOfExperience,
+			ItemTypeID:          v.ItemTypeID,
+			ItemTypeName:        v.ItemTypeName,
+		}
+	}
+
 	return sheet
 }
 
@@ -1268,6 +1276,14 @@ func LoadExperienceSheet(u *sql.User) *shared.PlayerExperienceSheet {
 			SecondsOfExperience: v.SecondsOfExperience,
 			ShipTemplateID:      v.ShipTemplateID,
 			ShipTemplateName:    v.ShipTemplateName,
+		}
+	}
+
+	for k, v := range u.ExperienceSheet.ModuleExperience {
+		expSheet.ModuleExperience[k] = &shared.ModuleExperienceEntry{
+			SecondsOfExperience: v.SecondsOfExperience,
+			ItemTypeID:          v.ItemTypeID,
+			ItemTypeName:        v.ItemTypeName,
 		}
 	}
 

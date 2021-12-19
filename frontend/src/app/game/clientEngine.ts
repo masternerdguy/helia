@@ -50,7 +50,7 @@ import { Missile } from './engineModels/missile';
 import { SystemChatWindow } from './gdi/windows/systemChatWindow';
 import { ServerInfoMessage } from './wsModels/bodies/infoMessage';
 import { PushInfoWindow } from './gdi/windows/pushInfoWindow';
-import { ExperienceSheetWindow } from './gdi/windows/experienceWindow';
+import { ExperienceSheetWindow } from './gdi/windows/experienceSheetWindow';
 import { ServerExperienceUpdate } from './wsModels/bodies/experienceUpdate';
 
 class EngineSack {
@@ -946,6 +946,15 @@ function handlePropertyUpdate(d: GameMessage) {
 function handleExperienceUpdate(d: GameMessage) {
   // parse body
   const msg = JSON.parse(d.body) as ServerExperienceUpdate;
+
+  // fix missing lists
+  if (!msg.modules) {
+    msg.modules = [];
+  }
+
+  if (!msg.ships) {
+    msg.ships = [];
+  }
 
   // update experience sheet window
   engineSack.experienceSheetWindow.sync(msg);

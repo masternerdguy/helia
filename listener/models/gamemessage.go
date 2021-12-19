@@ -706,7 +706,8 @@ type ClientViewExperienceBody struct {
 
 // Body containing a response to the client containing the player's experience levels
 type ServerExperienceUpdateBody struct {
-	ShipEntries []ServerExperienceUpdateShipEntryBody `json:"ships"`
+	ShipEntries   []ServerExperienceUpdateShipEntryBody   `json:"ships"`
+	ModuleEntries []ServerExperienceUpdateModuleEntryBody `json:"modules"`
 }
 
 // Body containing the player's experience level with a given ship template
@@ -714,4 +715,11 @@ type ServerExperienceUpdateShipEntryBody struct {
 	ExperienceLevel  float64   `json:"experienceLevel"`
 	ShipTemplateID   uuid.UUID `json:"shipTemplateID"`
 	ShipTemplateName string    `json:"shipTemplateName"`
+}
+
+// Body containing the player's experience level with a given module
+type ServerExperienceUpdateModuleEntryBody struct {
+	ExperienceLevel float64   `json:"experienceLevel"`
+	ItemTypeID      uuid.UUID `json:"itemTypeID"`
+	ItemTypeName    string    `json:"itemTypeName"`
 }

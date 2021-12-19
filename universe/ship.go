@@ -3771,6 +3771,38 @@ func (m *FittedSlot) PeriodicUpdate() {
 			m.IsCycling = false
 			m.cooldownProgress = 0
 			m.CyclePercent = 0
+
+			// update experience
+			if m.shipMountedOn.ExperienceSheet != nil && m.shipMountedOn.BeingFlownByPlayer {
+				// verify there is a client connected to this module's ship
+				c := m.shipMountedOn.CurrentSystem.clients[m.shipMountedOn.UserID.String()]
+
+				if c != nil {
+					// get experience
+					xp := m.shipMountedOn.ExperienceSheet.GetModuleExperienceEntry(m.ItemTypeID)
+
+					// cache current level
+					xl := math.Trunc(xp.GetExperience())
+
+					// update experience
+					xp.SecondsOfExperience += cooldown
+					m.shipMountedOn.ExperienceSheet.SetModuleExperienceEntry(xp)
+
+					// cache new level
+					nl := math.Trunc(xp.GetExperience())
+
+					if nl > xl {
+						// notify player of the level up!
+						c.WriteInfoMessage(
+							fmt.Sprintf(
+								"you have advanced to %v level %v!",
+								m.ItemTypeName,
+								nl,
+							),
+						)
+					}
+				}
+			}
 		} else {
 			// update percentage
 			m.CyclePercent = ((m.cooldownProgress * 100) / cooldownMs)

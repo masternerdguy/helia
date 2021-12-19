@@ -4,6 +4,7 @@ import { GDIList } from '../components/gdiList';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { WsService } from '../../ws.service';
 import {
+  ServerExperienceModuleEntry,
   ServerExperienceShipEntry,
   ServerExperienceUpdate,
 } from '../../wsModels/bodies/experienceUpdate';
@@ -91,6 +92,30 @@ export class ExperienceSheetWindow extends GDIWindow {
       }
     }
 
+    // handle module entries
+    {
+      // add header
+      rows.push(...makeSectionHeader('Module Types'));
+
+      // sort entries by level, then name, then id
+      const sorted = cache.modules
+        .sort((a, b) =>
+          this.getModuleSortKey(a).localeCompare(this.getModuleSortKey(b))
+        )
+        .reverse();
+
+      // build module entries
+      for (const s of sorted) {
+        const r = new ExperienceSheetViewRow();
+        const ls = experienceSheetViewRowStringFromModule(s);
+
+        r.listString = () => ls;
+        r.module = s;
+
+        rows.push(r);
+      }
+    }
+
     // update list
     this.experienceList.setItems(rows);
 
@@ -110,18 +135,23 @@ export class ExperienceSheetWindow extends GDIWindow {
   private getShipSortKey(s: ServerExperienceShipEntry): string {
     return `${s.experienceLevel}::${s.shipTemplateName}::${s.shipTemplateID}`;
   }
+
+  private getModuleSortKey(s: ServerExperienceModuleEntry): string {
+    return `${s.experienceLevel}::${s.itemTypeName}::${s.itemTypeID}`;
+  }
 }
 
 class ExperienceSheetViewRow {
   listString: () => string;
   ship?: ServerExperienceShipEntry;
+  module?: ServerExperienceModuleEntry;
 }
 
 function makeSectionHeader(title: string): ExperienceSheetViewRow[] {
   const rows: ExperienceSheetViewRow[] = [];
 
   rows.push({
-    listString: () => 'Ship Models',
+    listString: () => title,
   });
 
   let underline = '';
@@ -152,6 +182,21 @@ function experienceSheetViewRowStringFromShip(
   return (
     `${fixedString('', 2)} ` +
     `${fixedString(s.shipTemplateName, 40)} ` +
+    `${fixedString(`[${s.experienceLevel.toFixed(2)}]`, 8)} `
+  );
+}
+
+function experienceSheetViewRowStringFromModule(
+  s: ServerExperienceModuleEntry
+): string {
+  if (s == null) {
+    return;
+  }
+
+  // build string
+  return (
+    `${fixedString('', 2)} ` +
+    `${fixedString(s.itemTypeName, 40)} ` +
     `${fixedString(`[${s.experienceLevel.toFixed(2)}]`, 8)} `
   );
 }

@@ -40,13 +40,20 @@ type User struct {
 }
 
 type PlayerExperienceSheet struct {
-	ShipExperience map[string]PlayerShipExperienceEntry `json:"shipEntries"`
+	ShipExperience   map[string]PlayerShipExperienceEntry   `json:"shipEntries"`
+	ModuleExperience map[string]PlayerModuleExperienceEntry `json:"moduleEntries"`
 }
 
 type PlayerShipExperienceEntry struct {
 	SecondsOfExperience float64   `json:"secondsOfExperience"`
 	ShipTemplateID      uuid.UUID `json:"shipTemplateID"`
 	ShipTemplateName    string    `json:"shipTemplateName"`
+}
+
+type PlayerModuleExperienceEntry struct {
+	SecondsOfExperience float64   `json:"secondsOfExperience"`
+	ItemTypeID          uuid.UUID `json:"itemTypeID"`
+	ItemTypeName        string    `json:"itemTypeName"`
 }
 
 // Converts from a PlayerShipExperienceEntry to JSON
@@ -56,6 +63,21 @@ func (a PlayerShipExperienceEntry) Value() (driver.Value, error) {
 
 // Converts from JSON to a PlayerShipExperienceEntry
 func (a *PlayerShipExperienceEntry) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
+}
+
+// Converts from a PlayerModuleExperienceEntry to JSON
+func (a PlayerModuleExperienceEntry) Value() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a PlayerModuleExperienceEntry
+func (a *PlayerModuleExperienceEntry) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")
