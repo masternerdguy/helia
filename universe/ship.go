@@ -3786,6 +3786,7 @@ func (m *FittedSlot) PeriodicUpdate() {
 
 					// update experience
 					xp.SecondsOfExperience += cooldown
+					xp.ItemTypeName = m.ItemTypeName
 					m.shipMountedOn.ExperienceSheet.SetModuleExperienceEntry(xp)
 
 					// cache new level
