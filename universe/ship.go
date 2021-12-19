@@ -129,33 +129,34 @@ type FightData struct {
 
 // Structure representing a player ship in the game universe
 type Ship struct {
-	ID                    uuid.UUID
-	UserID                uuid.UUID
-	Created               time.Time
-	ShipName              string
-	CharacterName         string
-	PosX                  float64
-	PosY                  float64
-	SystemID              uuid.UUID
-	SystemName            string
-	Texture               string
-	Theta                 float64
-	VelX                  float64
-	VelY                  float64
-	Shield                float64
-	Armor                 float64
-	Hull                  float64
-	Fuel                  float64
-	Heat                  float64
-	Energy                float64
-	Fitting               Fitting
-	Destroyed             bool
-	DestroyedAt           *time.Time
-	CargoBayContainerID   uuid.UUID
-	FittingBayContainerID uuid.UUID
-	TrashContainerID      uuid.UUID
-	ReMaxDirty            bool
-	Wallet                float64
+	ID                       uuid.UUID
+	UserID                   uuid.UUID
+	Created                  time.Time
+	ShipName                 string
+	CharacterName            string
+	PosX                     float64
+	PosY                     float64
+	SystemID                 uuid.UUID
+	SystemName               string
+	Texture                  string
+	Theta                    float64
+	VelX                     float64
+	VelY                     float64
+	Shield                   float64
+	Armor                    float64
+	Hull                     float64
+	Fuel                     float64
+	Heat                     float64
+	Energy                   float64
+	Fitting                  Fitting
+	Destroyed                bool
+	DestroyedAt              *time.Time
+	CargoBayContainerID      uuid.UUID
+	FittingBayContainerID    uuid.UUID
+	TrashContainerID         uuid.UUID
+	ReMaxDirty               bool
+	Wallet                   float64
+	FlightExperienceModifier float64
 	// cache of base template
 	TemplateData ShipTemplate
 	// cache from controlling user
@@ -163,31 +164,30 @@ type Ship struct {
 	// docking
 	DockedAtStationID *uuid.UUID
 	// in-memory only
-	IsNPC                    bool
-	IsDocked                 bool
-	Faction                  *Faction
-	AutopilotMode            int
-	AutopilotManualNav       ManualNavData
-	AutopilotGoto            GotoData
-	AutopilotOrbit           OrbitData
-	AutopilotDock            DockData
-	AutopilotUndock          UndockData
-	AutopilotFight           FightData
-	BehaviourMode            *int
-	CurrentSystem            *SolarSystem
-	DockedAtStation          *Station
-	CargoBay                 *Container
-	FittingBay               *Container
-	EscrowContainerID        *uuid.UUID
-	BeingFlownByPlayer       bool
-	ReputationSheet          *shared.PlayerReputationSheet
-	ExperienceSheet          *shared.PlayerExperienceSheet
-	DestructArmed            bool
-	TemporaryModifiers       []TemporaryShipModifier
-	IsCloaked                bool
-	Aggressors               map[string]*shared.PlayerReputationSheet
-	Lock                     shared.LabeledMutex
-	flightExperienceModifier float64
+	IsNPC              bool
+	IsDocked           bool
+	Faction            *Faction
+	AutopilotMode      int
+	AutopilotManualNav ManualNavData
+	AutopilotGoto      GotoData
+	AutopilotOrbit     OrbitData
+	AutopilotDock      DockData
+	AutopilotUndock    UndockData
+	AutopilotFight     FightData
+	BehaviourMode      *int
+	CurrentSystem      *SolarSystem
+	DockedAtStation    *Station
+	CargoBay           *Container
+	FittingBay         *Container
+	EscrowContainerID  *uuid.UUID
+	BeingFlownByPlayer bool
+	ReputationSheet    *shared.PlayerReputationSheet
+	ExperienceSheet    *shared.PlayerExperienceSheet
+	DestructArmed      bool
+	TemporaryModifiers []TemporaryShipModifier
+	IsCloaked          bool
+	Aggressors         map[string]*shared.PlayerReputationSheet
+	Lock               shared.LabeledMutex
 }
 
 type TemporaryShipModifier struct {
@@ -408,32 +408,33 @@ func (s *Ship) CopyShip(lock bool) *Ship {
 	}
 
 	sc := Ship{
-		ID:                    s.ID,
-		UserID:                s.UserID,
-		Created:               s.Created,
-		ShipName:              s.ShipName,
-		CharacterName:         s.CharacterName,
-		PosX:                  s.PosX,
-		PosY:                  s.PosY,
-		SystemID:              s.SystemID,
-		SystemName:            s.SystemName,
-		Texture:               s.Texture,
-		Theta:                 s.Theta,
-		VelX:                  s.VelX,
-		VelY:                  s.VelY,
-		Shield:                s.Shield,
-		Armor:                 s.Armor,
-		Hull:                  s.Hull,
-		Fuel:                  s.Fuel,
-		Heat:                  s.Heat,
-		Energy:                s.Energy,
-		Fitting:               s.Fitting,
-		Destroyed:             s.Destroyed,
-		CargoBayContainerID:   s.CargoBayContainerID,
-		FittingBayContainerID: s.FittingBayContainerID,
-		TrashContainerID:      s.TrashContainerID,
-		ReMaxDirty:            s.ReMaxDirty,
-		Wallet:                s.Wallet,
+		ID:                       s.ID,
+		UserID:                   s.UserID,
+		Created:                  s.Created,
+		ShipName:                 s.ShipName,
+		CharacterName:            s.CharacterName,
+		PosX:                     s.PosX,
+		PosY:                     s.PosY,
+		SystemID:                 s.SystemID,
+		SystemName:               s.SystemName,
+		Texture:                  s.Texture,
+		Theta:                    s.Theta,
+		VelX:                     s.VelX,
+		VelY:                     s.VelY,
+		Shield:                   s.Shield,
+		Armor:                    s.Armor,
+		Hull:                     s.Hull,
+		Fuel:                     s.Fuel,
+		Heat:                     s.Heat,
+		Energy:                   s.Energy,
+		Fitting:                  s.Fitting,
+		Destroyed:                s.Destroyed,
+		CargoBayContainerID:      s.CargoBayContainerID,
+		FittingBayContainerID:    s.FittingBayContainerID,
+		TrashContainerID:         s.TrashContainerID,
+		ReMaxDirty:               s.ReMaxDirty,
+		Wallet:                   s.Wallet,
+		FlightExperienceModifier: s.FlightExperienceModifier,
 		TemplateData: ShipTemplate{
 			ID:                 s.TemplateData.ID,
 			Created:            s.TemplateData.Created,
@@ -463,21 +464,20 @@ func (s *Ship) CopyShip(lock bool) *Ship {
 			Structure: "Ship",
 			UID:       fmt.Sprintf("%v :: %v :: %v", s.ID, time.Now(), rand.Float64()),
 		},
-		IsDocked:                 s.IsDocked,
-		AutopilotMode:            s.AutopilotMode,
-		AutopilotManualNav:       s.AutopilotManualNav,
-		AutopilotGoto:            s.AutopilotGoto,
-		AutopilotOrbit:           s.AutopilotOrbit,
-		AutopilotDock:            s.AutopilotDock,
-		AutopilotUndock:          s.AutopilotUndock,
-		AutopilotFight:           s.AutopilotFight,
-		EscrowContainerID:        s.EscrowContainerID,
-		BeingFlownByPlayer:       s.BeingFlownByPlayer,
-		BehaviourMode:            s.BehaviourMode,
-		IsNPC:                    s.IsNPC,
-		TemporaryModifiers:       s.TemporaryModifiers,
-		IsCloaked:                s.IsCloaked,
-		flightExperienceModifier: s.flightExperienceModifier,
+		IsDocked:           s.IsDocked,
+		AutopilotMode:      s.AutopilotMode,
+		AutopilotManualNav: s.AutopilotManualNav,
+		AutopilotGoto:      s.AutopilotGoto,
+		AutopilotOrbit:     s.AutopilotOrbit,
+		AutopilotDock:      s.AutopilotDock,
+		AutopilotUndock:    s.AutopilotUndock,
+		AutopilotFight:     s.AutopilotFight,
+		EscrowContainerID:  s.EscrowContainerID,
+		BeingFlownByPlayer: s.BeingFlownByPlayer,
+		BehaviourMode:      s.BehaviourMode,
+		IsNPC:              s.IsNPC,
+		TemporaryModifiers: s.TemporaryModifiers,
+		IsCloaked:          s.IsCloaked,
 	}
 
 	// copy station if docked
@@ -506,8 +506,10 @@ func (s *Ship) PeriodicUpdate() {
 	s.Lock.Lock("ship.PeriodicUpdate")
 	defer s.Lock.Unlock()
 
-	// cache experience modifier
-	s.flightExperienceModifier = s.GetExperienceModifier()
+	// update experience modifier
+	if s.ExperienceSheet != nil {
+		s.FlightExperienceModifier = s.GetExperienceModifier()
+	}
 
 	// cache system name
 	if s.CurrentSystem != nil {
@@ -1076,7 +1078,7 @@ func (s *Ship) GetRealAccel() float64 {
 	}
 
 	// return true acceleration
-	return s.TemplateData.BaseAccel * s.flightExperienceModifier * tpm
+	return s.TemplateData.BaseAccel * s.FlightExperienceModifier * tpm
 }
 
 // Returns the real drag felt by a ship after modifiers
@@ -1127,7 +1129,7 @@ func (s *Ship) GetExperienceModifier() float64 {
 
 // Returns the real turning capability of a ship after modifiers
 func (s *Ship) GetRealTurn() float64 {
-	return s.TemplateData.BaseTurn * s.flightExperienceModifier
+	return s.TemplateData.BaseTurn * s.FlightExperienceModifier
 }
 
 // Returns the real mass of a ship after modifiers
@@ -1137,18 +1139,18 @@ func (s *Ship) GetRealMass() float64 {
 
 // Returns the real max shield of the ship after modifiers
 func (s *Ship) GetRealMaxShield() float64 {
-	return s.TemplateData.BaseShield * s.flightExperienceModifier
+	return s.TemplateData.BaseShield * s.FlightExperienceModifier
 }
 
 // Returns the real shield regen rate after modifiers
 func (s *Ship) GetRealShieldRegen() float64 {
-	return s.TemplateData.BaseShieldRegen * s.flightExperienceModifier
+	return s.TemplateData.BaseShieldRegen * s.FlightExperienceModifier
 }
 
 // Returns the real max armor of the ship after modifiers
 func (s *Ship) GetRealMaxArmor() float64 {
 	// get base max armor
-	a := s.TemplateData.BaseArmor * s.flightExperienceModifier
+	a := s.TemplateData.BaseArmor * s.FlightExperienceModifier
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {
@@ -1165,13 +1167,13 @@ func (s *Ship) GetRealMaxArmor() float64 {
 
 // Returns the real max hull of the ship after modifiers
 func (s *Ship) GetRealMaxHull() float64 {
-	return s.TemplateData.BaseHull * s.flightExperienceModifier
+	return s.TemplateData.BaseHull * s.FlightExperienceModifier
 }
 
 // Returns the real max energy of the ship after modifiers
 func (s *Ship) GetRealMaxEnergy() float64 {
 	// get base max energy
-	a := s.TemplateData.BaseEnergy * s.flightExperienceModifier
+	a := s.TemplateData.BaseEnergy * s.FlightExperienceModifier
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {
@@ -1189,7 +1191,7 @@ func (s *Ship) GetRealMaxEnergy() float64 {
 // Returns the real energy regeneration rate of the ship after modifiers
 func (s *Ship) GetRealEnergyRegen() float64 {
 	// get base energy regen
-	a := s.TemplateData.BaseEnergyRegen * s.flightExperienceModifier
+	a := s.TemplateData.BaseEnergyRegen * s.FlightExperienceModifier
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {
@@ -1206,13 +1208,13 @@ func (s *Ship) GetRealEnergyRegen() float64 {
 
 // Returns the real max heat of the ship after modifiers
 func (s *Ship) GetRealMaxHeat() float64 {
-	return s.TemplateData.BaseHeatCap * s.flightExperienceModifier
+	return s.TemplateData.BaseHeatCap * s.FlightExperienceModifier
 }
 
 // Returns the real heat dissipation rate of the ship after modifiers
 func (s *Ship) GetRealHeatSink() float64 {
 	// get base heat sink
-	a := s.TemplateData.BaseHeatSink * s.flightExperienceModifier
+	a := s.TemplateData.BaseHeatSink * s.FlightExperienceModifier
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {
@@ -1245,7 +1247,7 @@ func (s *Ship) GetRealHeatSink() float64 {
 // Returns the real max fuel of the ship after modifiers
 func (s *Ship) GetRealMaxFuel() float64 {
 	// get base max fuel
-	f := s.TemplateData.BaseFuel * s.flightExperienceModifier
+	f := s.TemplateData.BaseFuel * s.FlightExperienceModifier
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {
@@ -1263,7 +1265,7 @@ func (s *Ship) GetRealMaxFuel() float64 {
 // Returns the real max cargo bay volume of the ship after modifiers
 func (s *Ship) GetRealCargoBayVolume() float64 {
 	// get base cargo volume
-	cv := s.TemplateData.BaseCargoBayVolume * s.flightExperienceModifier
+	cv := s.TemplateData.BaseCargoBayVolume * s.FlightExperienceModifier
 
 	// add bonuses from passive modules in rack c
 	for _, e := range s.Fitting.CRack {

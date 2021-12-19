@@ -20,34 +20,35 @@ func GetShipService() ShipService {
 
 // Structure representing a row in the ships table
 type Ship struct {
-	ID                    uuid.UUID
-	UserID                uuid.UUID
-	Created               time.Time
-	ShipName              string
-	PosX                  float64
-	PosY                  float64
-	SystemID              uuid.UUID
-	Texture               string
-	Theta                 float64
-	VelX                  float64
-	VelY                  float64
-	Shield                float64
-	Armor                 float64
-	Hull                  float64
-	Fuel                  float64
-	Heat                  float64
-	Energy                float64
-	ShipTemplateID        uuid.UUID
-	DockedAtStationID     *uuid.UUID
-	Fitting               Fitting
-	Destroyed             bool
-	DestroyedAt           *time.Time
-	CargoBayContainerID   uuid.UUID
-	FittingBayContainerID uuid.UUID
-	TrashContainerID      uuid.UUID
-	ReMaxDirty            bool
-	Wallet                float64
-	NoLoad                bool
+	ID                       uuid.UUID
+	UserID                   uuid.UUID
+	Created                  time.Time
+	ShipName                 string
+	PosX                     float64
+	PosY                     float64
+	SystemID                 uuid.UUID
+	Texture                  string
+	Theta                    float64
+	VelX                     float64
+	VelY                     float64
+	Shield                   float64
+	Armor                    float64
+	Hull                     float64
+	Fuel                     float64
+	Heat                     float64
+	Energy                   float64
+	ShipTemplateID           uuid.UUID
+	DockedAtStationID        *uuid.UUID
+	Fitting                  Fitting
+	Destroyed                bool
+	DestroyedAt              *time.Time
+	CargoBayContainerID      uuid.UUID
+	FittingBayContainerID    uuid.UUID
+	TrashContainerID         uuid.UUID
+	ReMaxDirty               bool
+	Wallet                   float64
+	NoLoad                   bool
+	FlightExperienceModifier float64
 }
 
 // JSON structure representing the module racks of a ship and what is fitted to them
@@ -138,7 +139,8 @@ func (s ShipService) GetShipByID(shipID uuid.UUID, isDestroyed bool) (*Ship, err
 			SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
 				   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
 				   dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid,
-				   fittingbay_containerid, remaxdirty, trash_containerid, wallet, noload
+				   fittingbay_containerid, remaxdirty, trash_containerid, wallet, noload,
+				   flightexperiencemodifier
 			FROM public.ships
 			WHERE id = $1 and destroyed = $2 and noload = 'f'
 		`
@@ -148,7 +150,8 @@ func (s ShipService) GetShipByID(shipID uuid.UUID, isDestroyed bool) (*Ship, err
 	switch err := row.Scan(&ship.ID, &ship.SystemID, &ship.UserID, &ship.PosX, &ship.PosY, &ship.Created, &ship.ShipName, &ship.Texture,
 		&ship.Theta, &ship.VelX, &ship.VelY, &ship.Shield, &ship.Armor, &ship.Hull, &ship.Fuel, &ship.Heat, &ship.Energy, &ship.ShipTemplateID,
 		&ship.DockedAtStationID, &ship.Fitting, &ship.Destroyed, &ship.DestroyedAt, &ship.CargoBayContainerID,
-		&ship.FittingBayContainerID, &ship.ReMaxDirty, &ship.TrashContainerID, &ship.Wallet, &ship.NoLoad); err {
+		&ship.FittingBayContainerID, &ship.ReMaxDirty, &ship.TrashContainerID, &ship.Wallet, &ship.NoLoad,
+		&ship.FlightExperienceModifier); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("ship not found")
 	case nil:
@@ -174,7 +177,8 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID, isDestroyed bool)
 				SELECT id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, 
 					   theta, vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
 					   dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid,
-					   fittingbay_containerid, remaxdirty, trash_containerid, wallet, noload
+					   fittingbay_containerid, remaxdirty, trash_containerid, wallet, noload,
+					   flightexperiencemodifier
 				FROM public.ships
 				WHERE universe_systemid = $1 and destroyed = $2 and noload = 'f'
 			`
@@ -194,7 +198,8 @@ func (s ShipService) GetShipsBySolarSystem(systemID uuid.UUID, isDestroyed bool)
 		rows.Scan(&s.ID, &s.SystemID, &s.UserID, &s.PosX, &s.PosY, &s.Created, &s.ShipName, &s.Texture,
 			&s.Theta, &s.VelX, &s.VelY, &s.Shield, &s.Armor, &s.Hull, &s.Fuel, &s.Heat, &s.Energy, &s.ShipTemplateID,
 			&s.DockedAtStationID, &s.Fitting, &s.Destroyed, &s.DestroyedAt, &s.CargoBayContainerID,
-			&s.FittingBayContainerID, &s.ReMaxDirty, &s.TrashContainerID, &s.Wallet, &s.NoLoad)
+			&s.FittingBayContainerID, &s.ReMaxDirty, &s.TrashContainerID, &s.Wallet, &s.NoLoad,
+			&s.FlightExperienceModifier)
 
 		// append to ship slice
 		systems = append(systems, s)
@@ -219,13 +224,14 @@ func (s ShipService) UpdateShip(ship Ship) error {
 			SET universe_systemid=$2, userid=$3, pos_x=$4, pos_y=$5, created=$6, shipname=$7, texture=$8, theta=$9, vel_x=$10,
 				vel_y=$11, shield=$12, armor=$13, hull=$14, fuel=$15, heat=$16, energy=$17, shiptemplateid=$18, dockedat_stationid=$19,
 				fitting=$20, destroyed=$21, destroyedat=$22, cargobay_containerid=$23, fittingbay_containerid=$24, remaxdirty=$25,
-				trash_containerid=$26, wallet=$27, noload=$28
+				trash_containerid=$26, wallet=$27, noload=$28, flightexperiencemodifier=$29
 			WHERE id = $1
 		`
 
 	_, err = db.Exec(sqlStatement, ship.ID, ship.SystemID, ship.UserID, ship.PosX, ship.PosY, ship.Created, ship.ShipName, ship.Texture, ship.Theta, ship.VelX,
 		ship.VelY, ship.Shield, ship.Armor, ship.Hull, ship.Fuel, ship.Heat, ship.Energy, ship.ShipTemplateID, ship.DockedAtStationID, ship.Fitting, ship.Destroyed,
-		ship.DestroyedAt, ship.CargoBayContainerID, ship.FittingBayContainerID, ship.ReMaxDirty, ship.TrashContainerID, ship.Wallet, ship.NoLoad)
+		ship.DestroyedAt, ship.CargoBayContainerID, ship.FittingBayContainerID, ship.ReMaxDirty, ship.TrashContainerID, ship.Wallet, ship.NoLoad,
+		ship.FlightExperienceModifier)
 
 	return err
 }
