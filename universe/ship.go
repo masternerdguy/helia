@@ -3,7 +3,6 @@ package universe
 import (
 	"errors"
 	"fmt"
-	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -4456,8 +4455,6 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 }
 
 func (m *FittedSlot) activateAsShieldBooster() bool {
-	log.Println(fmt.Sprintf("%v :: %v", m.shipMountedOn.CharacterName, m.usageExperienceModifier))
-
 	// get shield boost amount
 	shieldBoost, _ := m.ItemMeta.GetFloat64("shield_boost_amount")
 
