@@ -3,7 +3,10 @@ import { FontSize, GDIStyle } from '../base/gdiStyle';
 import { GDIList } from '../components/gdiList';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { WsService } from '../../ws.service';
-import { ServerExperienceShipEntry, ServerExperienceUpdate } from '../../wsModels/bodies/experienceUpdate';
+import {
+  ServerExperienceShipEntry,
+  ServerExperienceUpdate,
+} from '../../wsModels/bodies/experienceUpdate';
 import { ClientViewExperience } from '../../wsModels/bodies/viewExperience';
 
 export class ExperienceSheetWindow extends GDIWindow {
@@ -17,7 +20,7 @@ export class ExperienceSheetWindow extends GDIWindow {
 
   initialize() {
     // set dimensions
-    this.setWidth(815);
+    this.setWidth(400);
     this.setHeight(400);
 
     // initialize
@@ -28,7 +31,7 @@ export class ExperienceSheetWindow extends GDIWindow {
     this.setTitle('Experience Sheet');
 
     // experience list
-    this.experienceList.setWidth(715);
+    this.experienceList.setWidth(400);
     this.experienceList.setHeight(400);
     this.experienceList.initialize();
 
@@ -66,10 +69,15 @@ export class ExperienceSheetWindow extends GDIWindow {
 
     // handle ship template entries
     {
+      // add header
+      rows.push(...makeSectionHeader('Ship Models'));
+
       // sort entries by level, then name, then id
-      const sorted = cache.ships.sort((a, b) =>
-        this.getShipSortKey(a).localeCompare(this.getShipSortKey(b))
-      ).reverse();
+      const sorted = cache.ships
+        .sort((a, b) =>
+          this.getShipSortKey(a).localeCompare(this.getShipSortKey(b))
+        )
+        .reverse();
 
       // build ship entries
       for (const s of sorted) {
@@ -100,7 +108,7 @@ export class ExperienceSheetWindow extends GDIWindow {
   }
 
   private getShipSortKey(s: ServerExperienceShipEntry): string {
-    return `${s.experienceLevel}::${s.shipTemplateName}::${s.shipTemplateID}`
+    return `${s.experienceLevel}::${s.shipTemplateName}::${s.shipTemplateID}`;
   }
 }
 
@@ -109,8 +117,32 @@ class ExperienceSheetViewRow {
   ship?: ServerExperienceShipEntry;
 }
 
+function makeSectionHeader(title: string): ExperienceSheetViewRow[] {
+  const rows: ExperienceSheetViewRow[] = [];
+
+  rows.push({
+    listString: () => 'Ship Models',
+  });
+
+  let underline = '';
+
+  for (let i = 0; i < title.length; i++) {
+    underline += '-';
+  }
+
+  rows.push({
+    listString: () => underline,
+  });
+
+  rows.push({
+    listString: () => ' ',
+  });
+
+  return rows;
+}
+
 function experienceSheetViewRowStringFromShip(
-  s: ServerExperienceShipEntry,
+  s: ServerExperienceShipEntry
 ): string {
   if (s == null) {
     return;
@@ -118,9 +150,9 @@ function experienceSheetViewRowStringFromShip(
 
   // build string
   return (
-    `${fixedString("", 2)} ` +
-    `${fixedString(s.shipTemplateName, 32)} ` +
-    `${fixedString(`[${s.experienceLevel.toFixed(2)}]`, 12)} `
+    `${fixedString('', 2)} ` +
+    `${fixedString(s.shipTemplateName, 40)} ` +
+    `${fixedString(`[${s.experienceLevel.toFixed(2)}]`, 8)} `
   );
 }
 

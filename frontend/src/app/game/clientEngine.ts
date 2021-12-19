@@ -256,7 +256,7 @@ export function clientStart(
   engineSack.experienceSheetWindow.setX(395);
   engineSack.experienceSheetWindow.setY(395);
   engineSack.experienceSheetWindow.initialize();
-  engineSack.experienceSheetWindow.setWsService(engineSack.wsSvc)
+  engineSack.experienceSheetWindow.setWsService(engineSack.wsSvc);
   engineSack.experienceSheetWindow.pack();
 
   // link windows to window manager
@@ -911,6 +911,9 @@ function handleCurrentShipUpdate(d: GameMessage) {
 
   // update system chat window
   engineSack.systemChatWindow.setWsService(engineSack.wsSvc);
+
+  // update experience window
+  engineSack.experienceSheetWindow.setWsService(engineSack.wsSvc);
 }
 
 function handleFactionUpdate(d: GameMessage) {
