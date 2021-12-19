@@ -1439,8 +1439,6 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 		m.LinkShip(sp)
 	}
 
-	// copy slot info to fitted moduiles
-
 	// return pointer to ship
 	return sp, nil
 }
