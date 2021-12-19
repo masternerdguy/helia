@@ -135,7 +135,7 @@ func (e *PlayerExperienceSheet) SetModuleExperienceEntry(value ModuleExperienceE
 
 // Returns the unrounded experience level represented by a ModuleExperienceEntry
 func (e *ModuleExperienceEntry) GetExperience() float64 {
-	return secondsToExperienceLevel(e.SecondsOfExperience, 0.02)
+	return secondsToExperienceLevel(e.SecondsOfExperience, -0.05)
 }
 
 // Converts seconds to an experience level using a logarithmic function
