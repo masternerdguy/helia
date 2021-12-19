@@ -1265,7 +1265,8 @@ func LoadReputationSheet(u *sql.User) *shared.PlayerReputationSheet {
 // Takes a SQL User and extracts its experience sheet for use in the game engine
 func LoadExperienceSheet(u *sql.User) *shared.PlayerExperienceSheet {
 	expSheet := shared.PlayerExperienceSheet{
-		ShipExperience: make(map[string]*shared.ShipExperienceEntry),
+		ShipExperience:   make(map[string]*shared.ShipExperienceEntry),
+		ModuleExperience: make(map[string]*shared.ModuleExperienceEntry),
 	}
 
 	expSheet.Lock.Structure = "PlayerExperienceSheet"
