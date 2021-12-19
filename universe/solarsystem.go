@@ -1354,7 +1354,13 @@ func (s *SolarSystem) updateShips() {
 
 					if nl > xl {
 						// notify player of the level up!
-						c.WriteInfoMessage(fmt.Sprintf("you have advanced to %v level %v!", x.ShipTemplateName, nl))
+						c.WriteInfoMessage(
+							fmt.Sprintf(
+								"you have advanced to %v level %v! be sure to refuel and repair them to take advantage of their increased abilities!",
+								x.ShipTemplateName,
+								nl,
+							),
+						)
 					}
 				}
 			}
