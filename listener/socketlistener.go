@@ -483,7 +483,8 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 		// load experience sheet
 		client.ExperienceSheet = shared.PlayerExperienceSheet{
-			ShipExperience: make(map[string]*shared.ShipExperienceEntry),
+			ShipExperience:   make(map[string]*shared.ShipExperienceEntry),
+			ModuleExperience: make(map[string]*shared.ModuleExperienceEntry),
 		}
 
 		// label mutex
@@ -495,6 +496,14 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				SecondsOfExperience: v.SecondsOfExperience,
 				ShipTemplateID:      v.ShipTemplateID,
 				ShipTemplateName:    v.ShipTemplateName,
+			}
+		}
+
+		for k, v := range u.ExperienceSheet.ModuleExperience {
+			client.ExperienceSheet.ModuleExperience[k] = &shared.ModuleExperienceEntry{
+				SecondsOfExperience: v.SecondsOfExperience,
+				ItemTypeID:          v.ItemTypeID,
+				ItemTypeName:        v.ItemTypeName,
 			}
 		}
 
