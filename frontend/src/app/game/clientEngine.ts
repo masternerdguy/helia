@@ -50,6 +50,8 @@ import { Missile } from './engineModels/missile';
 import { SystemChatWindow } from './gdi/windows/systemChatWindow';
 import { ServerInfoMessage } from './wsModels/bodies/infoMessage';
 import { PushInfoWindow } from './gdi/windows/pushInfoWindow';
+import { ExperienceSheetWindow } from './gdi/windows/experienceWindow';
+import { ServerExperienceUpdate } from './wsModels/bodies/experienceUpdate';
 
 class EngineSack {
   constructor() {}
@@ -80,6 +82,7 @@ class EngineSack {
   starMapWindow: StarMapWindow;
   reputationSheetWindow: ReputationSheetWindow;
   propertySheetWindow: PropertySheetWindow;
+  experienceSheetWindow: ExperienceSheetWindow;
   systemChatWindow: SystemChatWindow;
   lastShiftDown: number;
 
@@ -249,6 +252,12 @@ export function clientStart(
   );
   engineSack.systemChatWindow.pack();
 
+  engineSack.experienceSheetWindow = new ExperienceSheetWindow();
+  engineSack.experienceSheetWindow.setX(395);
+  engineSack.experienceSheetWindow.setY(395);
+  engineSack.experienceSheetWindow.initialize();
+  engineSack.experienceSheetWindow.pack();
+
   // link windows to window manager
   engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☀');
   engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☍');
@@ -263,6 +272,7 @@ export function clientStart(
   engineSack.windowManager.manageWindow(engineSack.reputationSheetWindow, '❉');
   engineSack.windowManager.manageWindow(engineSack.propertySheetWindow, '⬢');
   engineSack.windowManager.manageWindow(engineSack.systemChatWindow, '⋉');
+  engineSack.windowManager.manageWindow(engineSack.experienceSheetWindow, '✇');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
@@ -278,6 +288,7 @@ export function clientStart(
     engineSack.reputationSheetWindow,
     engineSack.propertySheetWindow,
     engineSack.systemChatWindow,
+    engineSack.experienceSheetWindow,
     engineSack.windowManager,
   ];
 
@@ -314,6 +325,8 @@ export function clientStart(
       handlePlayerFactionUpdate(d);
     } else if (d.type == MessageTypes.PropertyUpdate) {
       handlePropertyUpdate(d);
+    } else if (d.type == MessageTypes.ExperienceUpdate) {
+      handleExperienceUpdate(d);
     }
   });
 }
@@ -923,6 +936,14 @@ function handlePropertyUpdate(d: GameMessage) {
 
   // update ship fitting and cargo window
   engineSack.shipFittingWindow.syncProperty(msg);
+}
+
+function handleExperienceUpdate(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerExperienceUpdate;
+
+  // update experience sheet window
+  engineSack.experienceSheetWindow.sync(msg);
 }
 
 // clears the screen
