@@ -1305,6 +1305,25 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
+		} else if evt.Type == models.NewMessageRegistry().ViewExperience {
+			if sh != nil {
+				// extract data
+				// data := evt.Body.(models.ClientViewExperienceBody)
+
+				// build experience update
+				u := c.ExperienceSheet.CopyAsUpdate()
+
+				// package message
+				b, _ := json.Marshal(&u)
+
+				z := models.GameMessage{
+					MessageType: msgRegistry.ExperienceUpdate,
+					MessageBody: string(b),
+				}
+
+				// write response to client
+				c.WriteMessage(&z)
+			}
 		}
 	}
 }

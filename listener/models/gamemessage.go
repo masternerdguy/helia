@@ -53,6 +53,8 @@ type MessageRegistry struct {
 	RenameShip             int
 	PostSystemChatMessage  int
 	TransferItem           int
+	ViewExperience         int
+	ExperienceUpdate       int
 }
 
 // Registry of target types
@@ -113,6 +115,8 @@ func NewMessageRegistry() *MessageRegistry {
 		RenameShip:             40,
 		PostSystemChatMessage:  41,
 		TransferItem:           42,
+		ViewExperience:         43,
+		ExperienceUpdate:       44,
 	}
 }
 
@@ -693,4 +697,21 @@ type ClientRenameShipBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ShipID    uuid.UUID `json:"shipId"`
 	Name      string    `json:"name"`
+}
+
+// Body containing a request from the client for a summary of the player's experience levels
+type ClientViewExperienceBody struct {
+	SessionID uuid.UUID `json:"sid"`
+}
+
+// Body containing a response to the client containing the player's experience levels
+type ServerExperienceUpdateBody struct {
+	ShipEntries []ServerExperienceUpdateShipEntryBody `json:"ships"`
+}
+
+// Body containing the player's experience level with a given ship template
+type ServerExperienceUpdateShipEntryBody struct {
+	ExperienceLevel  float64   `json:"experienceLevel"`
+	ShipTemplateID   uuid.UUID `json:"shipTemplateID"`
+	ShipTemplateName string    `json:"shipTemplateName"`
 }

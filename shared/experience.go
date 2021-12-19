@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"helia/listener/models"
 	"math"
 
 	"github.com/google/uuid"
@@ -18,6 +19,27 @@ type ShipExperienceEntry struct {
 	SecondsOfExperience float64
 	ShipTemplateID      uuid.UUID
 	ShipTemplateName    string
+}
+
+func (e *PlayerExperienceSheet) CopyAsUpdate() models.ServerExperienceUpdateBody {
+	e.Lock.Lock("playerexperiencesheet.CopyAsUpdate")
+	defer e.Lock.Unlock()
+
+	u := models.ServerExperienceUpdateBody{}
+
+	for _, e := range e.ShipExperience {
+		if e == nil {
+			continue
+		}
+
+		u.ShipEntries = append(u.ShipEntries, models.ServerExperienceUpdateShipEntryBody{
+			ExperienceLevel:  e.GetExperience(),
+			ShipTemplateID:   e.ShipTemplateID,
+			ShipTemplateName: e.ShipTemplateName,
+		})
+	}
+
+	return u
 }
 
 // Returns a ship experience entry from the map or returns a blank one if not found
