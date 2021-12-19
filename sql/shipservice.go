@@ -95,9 +95,10 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 					id, universe_systemid, userid, pos_x, pos_y, created, shipname, texture, theta,
 					vel_x, vel_y, shield, armor, hull, fuel, heat, energy, shiptemplateid,
 					dockedat_stationid, fitting, destroyed, destroyedat, cargobay_containerid,
-					fittingbay_containerid, remaxdirty, trash_containerid, wallet, noload)
+					fittingbay_containerid, remaxdirty, trash_containerid, wallet, noload,
+					flightexperiencemodifier)
 				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22,
-						$23, $24, $25, $26, $27, $28);
+						$23, $24, $25, $26, $27, $28, $29);
 			`
 
 	uid := uuid.New()
@@ -106,7 +107,7 @@ func (s ShipService) NewShip(e Ship) (*Ship, error) {
 	q, err := db.Query(sql, uid, e.SystemID, e.UserID, e.PosX, e.PosY, createdAt, e.ShipName, e.Texture, e.Theta,
 		e.VelX, e.VelY, e.Shield, e.Armor, e.Hull, e.Fuel, e.Heat, e.Energy, e.ShipTemplateID, e.DockedAtStationID,
 		e.Fitting, e.Destroyed, e.DestroyedAt, e.CargoBayContainerID, e.FittingBayContainerID, e.ReMaxDirty,
-		e.TrashContainerID, e.Wallet, e.NoLoad)
+		e.TrashContainerID, e.Wallet, e.NoLoad, e.FlightExperienceModifier)
 
 	if err != nil {
 		return nil, err
