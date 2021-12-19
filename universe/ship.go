@@ -256,8 +256,9 @@ type FittedSlot struct {
 	Rack               string
 	SlotIndex          *int
 	// in-memory only, secret
-	shipMountedOn    *Ship
-	cooldownProgress int
+	shipMountedOn           *Ship
+	cooldownProgress        int
+	usageExperienceModifier float64
 }
 
 // Links the ship the slot is on into the slot
@@ -3811,6 +3812,13 @@ func (m *FittedSlot) PeriodicUpdate() {
 	} else {
 		// check for activation intent
 		if m.WillRepeat {
+			// cache usage experience modifier
+			if m.shipMountedOn.ExperienceSheet != nil && m.shipMountedOn.BeingFlownByPlayer {
+				m.usageExperienceModifier = m.GetExperienceModifier()
+			} else {
+				m.usageExperienceModifier = 1.0
+			}
+
 			// check if cloaked (exempting cloaking devices)
 			if m.shipMountedOn.IsCloaked {
 				// cloaked - can't active
@@ -4091,6 +4099,11 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	armorDmg, _ := m.ItemMeta.GetFloat64("armor_damage")
 	hullDmg, _ := m.ItemMeta.GetFloat64("hull_damage")
 
+	// apply usage experience modifier
+	shieldDmg *= m.usageExperienceModifier
+	armorDmg *= m.usageExperienceModifier
+	hullDmg *= m.usageExperienceModifier
+
 	// calculate tracking ratio
 	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
 
@@ -4182,6 +4195,9 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 
 			// calculate effective ore / ice volume pulled
 			pulled := miningVolume * c.Yield * rangeRatio
+
+			// apply usage experience modifier
+			pulled *= m.usageExperienceModifier
 
 			// make sure there is sufficient room to deposit the ore / ice
 			if free-pulled >= 0 {
@@ -4387,6 +4403,10 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 	flightTime, _ := m.ItemMeta.GetFloat64("flight_time")
 	maxVelocity := (modRange / flightTime)
 
+	// apply usage experience modifiers
+	flightTime *= m.usageExperienceModifier
+	maxVelocity *= m.usageExperienceModifier
+
 	stubID := uuid.New()
 	flightTicks := int((flightTime * 1000) / Heartbeat)
 
@@ -4438,6 +4458,9 @@ func (m *FittedSlot) activateAsShieldBooster() bool {
 	// get shield boost amount
 	shieldBoost, _ := m.ItemMeta.GetFloat64("shield_boost_amount")
 
+	// apply usage experience modifier
+	shieldBoost *= m.usageExperienceModifier
+
 	// apply boost to mounting ship
 	m.shipMountedOn.DealDamage(-shieldBoost, 0, 0, nil)
 
@@ -4476,6 +4499,9 @@ func (m *FittedSlot) activateAsEngineOvercharger() bool {
 	// calculate effect duration in ticks
 	dT := (cooldown * 1000) / Heartbeat
 
+	// apply usage experience modifier
+	dT *= m.usageExperienceModifier
+
 	// add temporary modifier
 	modifier := TemporaryShipModifier{
 		Attribute:      "accel",
@@ -4502,6 +4528,9 @@ func (m *FittedSlot) activateAsActiveRadiator() bool {
 
 	// calculate effect duration in ticks
 	dT := (cooldown * 1000) / Heartbeat
+
+	// apply usage experience modifier
+	dT *= m.usageExperienceModifier
 
 	// add temporary modifier
 	modifier := TemporaryShipModifier{
@@ -4578,6 +4607,9 @@ func (m *FittedSlot) activateAsAetherDragger() bool {
 
 	// get drag multiplier
 	dragMul, _ := m.ItemMeta.GetFloat64("drag_multiplier")
+
+	// apply usage experience modifier
+	dragMul *= m.usageExperienceModifier
 
 	// account for falloff if present
 	falloff, found := m.ItemMeta.GetString("falloff")
@@ -4764,6 +4796,9 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 			// calculate effective ore / ice volume pulled
 			pulled := miningVolume * c.Yield * rangeRatio * trackingRatio
 
+			// apply usage experience modifier
+			pulled *= m.usageExperienceModifier
+
 			// make sure there is sufficient room to deposit the ore / ice
 			if free-pulled >= 0 {
 				found := false
@@ -4924,6 +4959,9 @@ func (m *FittedSlot) activateAsUtilitySiphon() bool {
 	// get max siphon amount
 	maxSiphonAmt, _ := m.ItemMeta.GetFloat64("energy_siphon_amount")
 
+	// apply usage experience modifier
+	maxSiphonAmt *= m.usageExperienceModifier
+
 	// calculate tracking ratio
 	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
 
@@ -5036,6 +5074,9 @@ func (m *FittedSlot) activateAsUtilityCloak() bool {
 	// calculate "cloak amount" (if percentage < 100% then cloaking will "flicker")
 	dC := (activationEnergy / mx) * 7
 
+	// apply usage experience modifier
+	dC *= m.usageExperienceModifier
+
 	// calculate effect duration in ticks
 	dT := (cooldown * 1000) / Heartbeat
 
@@ -5084,4 +5125,29 @@ func (m *FittedSlot) calculateTrackingRatioWithTarget(tgtDummy physics.Dummy) fl
 	}
 
 	return trackingRatio
+}
+
+// Calculates the experience percentage bonus to apply to some active module stats
+func (m *FittedSlot) GetExperienceModifier() float64 {
+	mx := 1.0
+
+	if m.shipMountedOn.ExperienceSheet != nil {
+		// get experience entry for this item type as a module
+		v := m.shipMountedOn.ExperienceSheet.GetShipExperienceEntry(m.ItemTypeID)
+
+		// get truncated level
+		l := math.Trunc(v.GetExperience())
+
+		if l > 0 {
+			// apply a dampening factor to get percentage
+			b := math.Log(((math.Pow(l, 0.75)) / 8.8) + 1)
+
+			if b > 0 {
+				// add bonus
+				mx += b
+			}
+		}
+	}
+
+	return mx
 }
