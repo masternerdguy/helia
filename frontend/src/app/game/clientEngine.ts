@@ -256,6 +256,7 @@ export function clientStart(
   engineSack.experienceSheetWindow.setX(395);
   engineSack.experienceSheetWindow.setY(395);
   engineSack.experienceSheetWindow.initialize();
+  engineSack.experienceSheetWindow.setWsService(engineSack.wsSvc)
   engineSack.experienceSheetWindow.pack();
 
   // link windows to window manager
