@@ -381,6 +381,7 @@ function handleJoin(d: GameMessage) {
   engineSack.starMapWindow.setHidden(true);
   engineSack.reputationSheetWindow.setHidden(true);
   engineSack.propertySheetWindow.setHidden(true);
+  engineSack.experienceSheetWindow.setHidden(true);
 
   // start game loop
   engineSack.lastFrameTime = Date.now();

@@ -1,10 +1,10 @@
 import { GDIWindow } from '../base/gdiWindow';
 import { FontSize, GDIStyle } from '../base/gdiStyle';
 import { GDIList } from '../components/gdiList';
-import { ClientViewProperty } from '../../wsModels/bodies/viewProperty';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { WsService } from '../../ws.service';
 import { ServerExperienceShipEntry, ServerExperienceUpdate } from '../../wsModels/bodies/experienceUpdate';
+import { ClientViewExperience } from '../../wsModels/bodies/viewExperience';
 
 export class ExperienceSheetWindow extends GDIWindow {
   private experienceList = new GDIList();
@@ -92,7 +92,7 @@ export class ExperienceSheetWindow extends GDIWindow {
 
   private refreshExperienceSummary() {
     setTimeout(() => {
-      const b = new ClientViewProperty();
+      const b = new ClientViewExperience();
       b.sid = this.wsSvc.sid;
 
       this.wsSvc.sendMessage(MessageTypes.ViewExperience, b);
