@@ -94,6 +94,11 @@ export class ExperienceSheetWindow extends GDIWindow {
 
     // handle module entries
     {
+      // spacer
+      rows.push({
+        listString: () => '',
+      });
+
       // add header
       rows.push(...makeSectionHeader('Module Types'));
 
