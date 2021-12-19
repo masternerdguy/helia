@@ -5133,7 +5133,7 @@ func (m *FittedSlot) GetExperienceModifier() float64 {
 
 	if m.shipMountedOn.ExperienceSheet != nil {
 		// get experience entry for this item type as a module
-		v := m.shipMountedOn.ExperienceSheet.GetShipExperienceEntry(m.ItemTypeID)
+		v := m.shipMountedOn.ExperienceSheet.GetModuleExperienceEntry(m.ItemTypeID)
 
 		// get truncated level
 		l := math.Trunc(v.GetExperience())
