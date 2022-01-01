@@ -63,7 +63,10 @@ func LoadUniverse() (*universe.Universe, error) {
 	}
 
 	regions := make(map[string]*universe.Region)
-	for _, e := range rs {
+	for rIDX, e := range rs {
+		// progress output
+		log.Println(fmt.Sprintf("loading region %v of %v", rIDX + 1, len(rs)))
+
 		// load basic region information
 		r := universe.Region{
 			ID:         e.ID,
