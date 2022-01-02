@@ -49,6 +49,9 @@ type GameClient struct {
 
 	// kill switch
 	Dead bool
+
+	// last global update message lastGlobalAckToken
+	lastGlobalAckToken int
 }
 
 type PropertyCache struct {
@@ -90,6 +93,12 @@ func (c *GameClient) Initialize() {
 
 // Writes a message to a client
 func (c *GameClient) WriteMessage(msg *models.GameMessage) {
+	// return if connection closed
+	if c.Dead {
+		return
+	}
+
+	// obtain lock
 	c.Lock.Lock("gameclient.WriteMessage")
 	defer c.Lock.Unlock()
 
@@ -212,4 +221,28 @@ func (c *GameClient) SetPropertyCache(x PropertyCache) {
 	defer c.Lock.Unlock()
 
 	c.propertyCache = x
+}
+
+// Sets the value of a client's global update counter
+func (c *GameClient) SetLastGlobalAckToken(x int) {
+	c.Lock.Lock("gameclient.SetLastGlobalAckToken")
+	defer c.Lock.Unlock()
+
+	c.lastGlobalAckToken = x
+}
+
+// Returns a client's global update counter
+func (c *GameClient) GetLastGlobalAckToken() int {
+	c.Lock.Lock("gameclient.GetLastGlobalAckToken")
+	defer c.Lock.Unlock()
+
+	return c.lastGlobalAckToken
+}
+
+// Resets a client's global update counter to -1
+func (c *GameClient) ClearLastGlobalAckToken() {
+	c.Lock.Lock("gameclient.ClearLastGlobalAckToken")
+	defer c.Lock.Unlock()
+
+	c.lastGlobalAckToken = -1
 }

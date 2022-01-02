@@ -6,6 +6,7 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -34,6 +35,7 @@ type SolarSystem struct {
 	pushPointEffects      []models.GlobalPushPointEffectBody  // non-module point visual effect aggregation for tick
 	tickCounter           int                                 // counter that is used to control frequency of certain global updates
 	newSystemChatMessages []models.ServerSystemChatBody
+	globalAckToken        int // counter for number of ticks this system has gone through since server start (daily restart is assumed)
 	Lock                  shared.LabeledMutex
 	// event escalations to engine core
 	PlayerNeedRespawn    map[string]*shared.GameClient // clients in need of a respawn by core
@@ -149,6 +151,12 @@ func (s *SolarSystem) processClientEventQueues() {
 	msgRegistry := models.NewMessageRegistry()
 
 	for _, c := range s.clients {
+		// skip if connection dead
+		if c.Dead {
+			continue
+		}
+
+		// pop latest event from client
 		evt, lastMeaningfulActionAt := c.PopShipEvent()
 
 		// disconnect client if more than 5 minutes since last meaningful interaction
@@ -191,7 +199,37 @@ func (s *SolarSystem) processClientEventQueues() {
 		sh.EscrowContainerID = &c.EscrowContainerID
 
 		// process event
-		if evt.Type == models.NewMessageRegistry().NavClick {
+		if evt.Type == models.NewMessageRegistry().GlobalAck {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientGlobalAckBody)
+
+				// verify that this ack is for this system
+				if data.SolarSystemID != s.ID {
+					continue
+				}
+
+				// verify the client has a token
+				ct := c.GetLastGlobalAckToken()
+
+				if ct == -1 {
+					continue
+				}
+
+				// verify token isn't from the future
+				if data.Token > s.globalAckToken {
+					continue
+				}
+
+				// verify token isn't too old
+				if data.Token <= ct {
+					continue
+				}
+
+				// update token
+				c.SetLastGlobalAckToken(s.globalAckToken)
+			}
+		} else if evt.Type == models.NewMessageRegistry().NavClick {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientNavClickBody)
@@ -1623,14 +1661,28 @@ func (s *SolarSystem) shipCollisionTesting() {
 }
 
 func (s *SolarSystem) sendClientUpdates() {
+	// initialize or decay tokens
+	for _, c := range s.clients {
+		lt := c.GetLastGlobalAckToken()
+
+		if lt == -1 {
+			c.SetLastGlobalAckToken(s.globalAckToken)
+		} else {
+			c.SetLastGlobalAckToken(lt - 1)
+		}
+	}
+
+	// increment global update counter
+	s.globalAckToken++
+
 	// check tick counter to determine whether to send static world data
-	sendStatic := s.tickCounter > 50
+	sendStatic := s.tickCounter > 100
 
 	// check tick counter to determine whether to send secret updates
-	sendSecret := s.tickCounter%4 == 0
+	sendSecret := s.tickCounter%8 == 0
 
 	// check tick counter to determine whether to send player rep sheets
-	sendPlayerRepSheets := s.tickCounter%8 == 0
+	sendPlayerRepSheets := s.tickCounter%16 == 0
 
 	if sendStatic {
 		// reset tick counter
@@ -1643,6 +1695,7 @@ func (s *SolarSystem) sendClientUpdates() {
 	// build global update of non-secret info for clients
 	gu := models.ServerGlobalUpdateBody{
 		SystemChat: s.newSystemChatMessages,
+		Token:      s.globalAckToken,
 	}
 
 	gu.CurrentSystemInfo = models.CurrentSystemInfo{
@@ -1709,7 +1762,7 @@ func (s *SolarSystem) sendClientUpdates() {
 		 * Performance note: This data is very static and can be sent rarely. Once every second is fine,
 		 * and saves a significant amount of bandwidth. Note it needs to be sent often enough for someone
 		 * jumping into the system to receive data about the celestial objects it contains within a
-		 * reasonable amount of time (which I feel is ~1 second).
+		 * reasonable amount of time (which I feel is ~2 seconds).
 		 */
 
 		for _, d := range s.stars {
@@ -1795,15 +1848,47 @@ func (s *SolarSystem) sendClientUpdates() {
 		MessageBody: string(b),
 	}
 
+	// map to store clients that received global update
+	receivedGlobal := make(map[string]*shared.GameClient)
+
 	// write global update to clients
 	for _, c := range s.clients {
 		/*
 		 * Performance note: This message must be sent to every client in the
 		 * system in every tick. Otherwise, movement will be choppy and the
 		 * game will feel laggy and unresponsive.
+		 *
+		 *
 		 */
 
-		c.WriteMessage(&msg)
+		// skip if connection dead
+		if c.Dead {
+			s.RemoveClient(c, false)
+			continue
+		}
+
+		// get token
+		ct := c.GetLastGlobalAckToken()
+
+		// get difference between tokens
+		dt := s.globalAckToken - ct
+
+		// verify client is reasonably up to date
+		up := (float64(dt) / 50.0) * 100
+		ur := physics.RandInRange(0, 100)
+
+		if ur >= int(up) {
+			// send global update
+			c.WriteMessage(&msg)
+
+			// allow additional updates
+			receivedGlobal[c.UID.String()] = c
+		} else if up > 100 {
+			// bring token partially up to date
+			c.SetLastGlobalAckToken(s.globalAckToken - dt/2)
+		}
+
+		log.Println(fmt.Sprintf("%v, %v", up, ur))
 	}
 
 	// write secret current ship updates to individual clients
@@ -1814,7 +1899,7 @@ func (s *SolarSystem) sendClientUpdates() {
 		 * sending it just a little less often significantly reduced bandwidth usage.
 		 */
 
-		for _, c := range s.clients {
+		for _, c := range receivedGlobal {
 			// find current ship
 			d := s.ships[c.CurrentShipID.String()]
 
@@ -1932,7 +2017,12 @@ func (s *SolarSystem) sendClientUpdates() {
 		 * sending it just a little less often significantly reduced bandwidth usage.
 		 */
 
-		for _, c := range s.clients {
+		for _, c := range receivedGlobal {
+			// skip if connection dead
+			if c.Dead {
+				continue
+			}
+
 			// find current ship
 			d := s.ships[c.CurrentShipID.String()]
 
@@ -2121,6 +2211,9 @@ func (s *SolarSystem) AddClient(c *shared.GameClient, lock bool) {
 		s.Lock.Lock("solarsystem.AddClient")
 		defer s.Lock.Unlock()
 	}
+
+	// clear token
+	c.ClearLastGlobalAckToken()
 
 	// add client
 	s.clients[(*c.UID).String()] = c

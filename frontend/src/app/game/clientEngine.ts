@@ -52,6 +52,7 @@ import { ServerInfoMessage } from './wsModels/bodies/infoMessage';
 import { PushInfoWindow } from './gdi/windows/pushInfoWindow';
 import { ExperienceSheetWindow } from './gdi/windows/experienceSheetWindow';
 import { ServerExperienceUpdate } from './wsModels/bodies/experienceUpdate';
+import { ClientGlobalAck } from './wsModels/bodies/globalAck';
 
 class EngineSack {
   constructor() {}
@@ -398,6 +399,19 @@ function handleGlobalUpdate(d: GameMessage) {
 
   // parse body
   const msg = JSON.parse(d.body) as ServerGlobalUpdateBody;
+
+  // store ack token
+  engineSack.wsSvc.ackToken = msg.token;
+
+  setTimeout(() => {
+    // send global update ack response
+    const ack = new ClientGlobalAck();
+    ack.sid = engineSack.wsSvc.sid;
+    ack.sysId = engineSack.player.currentSystem.id;
+    ack.token = engineSack.wsSvc.ackToken;
+
+    engineSack.wsSvc.sendMessage(MessageTypes.GlobalAck, ack);
+  }, 0);
 
   // system switch or update check
   if (msg.currentSystemInfo.id !== engineSack.player.currentSystem.id) {

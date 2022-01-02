@@ -119,7 +119,14 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// handle message based on type
-		if m.MessageType == msgRegistry.Join {
+		if m.MessageType == msgRegistry.GlobalAck {
+			// decode body as ClientGlobalAckBody
+			b := models.ClientGlobalAckBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientGlobalAck(&client, &b)
+		} else if m.MessageType == msgRegistry.Join {
 			// decode body as ClientJoinBody
 			b := models.ClientJoinBody{}
 			json.Unmarshal([]byte(m.MessageBody), &b)
@@ -637,6 +644,29 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 	} else {
 		// dump error to console
 		log.Println(fmt.Sprintf("player join error: %v", err))
+	}
+}
+
+func (l *SocketListener) handleClientGlobalAck(client *shared.GameClient, body *models.ClientGlobalAckBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		log.Println(fmt.Sprintf("handleClientGlobalAck: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.GlobalAck, false)
 	}
 }
 

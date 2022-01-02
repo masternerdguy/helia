@@ -51,4 +51,5 @@ export enum MessageTypes {
   TransferItem = 42,
   ViewExperience = 43,
   ExperienceUpdate = 44,
+  GlobalAck = 45,
 }

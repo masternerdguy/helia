@@ -12,6 +12,7 @@ export class WsService {
   ws: WebSocketSubject<GameMessage>;
   lastMessageReceivedAt: number;
   sid: string;
+  ackToken: number;
 
   constructor() {}
 

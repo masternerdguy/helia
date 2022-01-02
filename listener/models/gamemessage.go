@@ -55,6 +55,7 @@ type MessageRegistry struct {
 	TransferItem           int
 	ViewExperience         int
 	ExperienceUpdate       int
+	GlobalAck              int
 }
 
 // Registry of target types
@@ -117,6 +118,7 @@ func NewMessageRegistry() *MessageRegistry {
 		TransferItem:           42,
 		ViewExperience:         43,
 		ExperienceUpdate:       44,
+		GlobalAck:              45,
 	}
 }
 
@@ -289,6 +291,7 @@ type ServerGlobalUpdateBody struct {
 	NewPointEffects   []GlobalPushPointEffectBody  `json:"newPointEffects"`
 	Missiles          []GlobalMissileBody          `json:"missiles"`
 	SystemChat        []ServerSystemChatBody       `json:"systemChat"`
+	Token             int                          `json:"token"`
 }
 
 // Body containing a new chat message to push to clients in a system
@@ -722,4 +725,11 @@ type ServerExperienceUpdateModuleEntryBody struct {
 	ExperienceLevel float64   `json:"experienceLevel"`
 	ItemTypeID      uuid.UUID `json:"itemTypeID"`
 	ItemTypeName    string    `json:"itemTypeName"`
+}
+
+// Body indicating to the server that the last global update was received
+type ClientGlobalAckBody struct {
+	SessionID     uuid.UUID `json:"sid"`
+	SolarSystemID uuid.UUID `json:"sysId"`
+	Token         int       `json:"token"`
 }

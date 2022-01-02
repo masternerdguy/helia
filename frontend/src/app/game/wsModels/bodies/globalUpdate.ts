@@ -22,4 +22,5 @@ export class ServerGlobalUpdateBody {
   newPointEffects: WsPushPointEffect[];
   missiles: WSMissile[];
   systemChat: WSSystemChatMessage[];
+  token: number;
 }
