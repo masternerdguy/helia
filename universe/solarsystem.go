@@ -1854,11 +1854,14 @@ func (s *SolarSystem) sendClientUpdates() {
 	// write global update to clients
 	for _, c := range s.clients {
 		/*
-		 * Performance note: This message must be sent to every client in the
-		 * system in every tick. Otherwise, movement will be choppy and the
-		 * game will feel laggy and unresponsive.
+		 * Performance note: An attempt to send this message to the client
+		 * must be made every tick, or gameplay will be choppy from their
+		 * perspective.
 		 *
-		 *
+		 * Note that if a client is not acknowledging receipt of global
+		 * updates promptly that the rate at which those updates will be
+		 * sent will be throttled. This is to save bandwidth and avoid
+		 * saturating clients with more updates than they can handle.
 		 */
 
 		// skip if connection dead

@@ -50,7 +50,7 @@ type GameClient struct {
 	// kill switch
 	Dead bool
 
-	// last global update message lastGlobalAckToken
+	// last global update message token
 	lastGlobalAckToken int
 }
 
