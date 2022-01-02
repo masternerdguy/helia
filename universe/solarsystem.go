@@ -6,7 +6,6 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -1890,8 +1889,6 @@ func (s *SolarSystem) sendClientUpdates() {
 			// bring token partially up to date
 			c.SetLastGlobalAckToken(s.globalAckToken - dt/2)
 		}
-
-		log.Println(fmt.Sprintf("%v, %v", up, ur))
 	}
 
 	// write secret current ship updates to individual clients
