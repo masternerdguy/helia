@@ -1682,6 +1682,29 @@ func (s *Ship) behaviourTrade() {
 				s.CmdUndock(false)
 				return
 			}
+
+			// attempt to sell items in cargo bay on the industrial market
+			for _, i := range s.CargoBay.Items {
+				st := s.DockedAtStation
+
+				// skip if unpackaged or 0 quantity
+				if !i.IsPackaged || i.Quantity == 0 {
+					continue
+				}
+
+				// skip if dirty
+				if i.CoreDirty {
+					continue
+				}
+
+				// iterate over processes
+				for _, p := range st.Processes {
+					for _, pi := range p.Process.Inputs {
+						// try to sell item to silo
+						s.SellItemToSilo(pi.ID, i.ID, i.Quantity, false)
+					}
+				}
+			}
 		} else {
 			s.gotoNextWanderDestination()
 		}
