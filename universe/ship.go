@@ -79,6 +79,7 @@ type BehaviourRegistry struct {
 	None   int
 	Wander int
 	Patrol int
+	Trade  int
 }
 
 // Returns a populated AutopilotRegistry struct for use as an enum
@@ -87,6 +88,7 @@ func NewBehaviourRegistry() *BehaviourRegistry {
 		None:   0,
 		Wander: 1,
 		Patrol: 2,
+		Trade:  3,
 	}
 }
 
@@ -1519,6 +1521,8 @@ func (s *Ship) behave() {
 				s.behaviourWander()
 			case registry.Patrol:
 				s.behaviourPatrol()
+			case registry.Trade:
+				s.behaviourTrade()
 			}
 		}
 	}
@@ -1644,6 +1648,42 @@ func (s *Ship) behaviourPatrol() {
 			if tgtS != nil {
 				s.CmdFight(tgtS.ID, tgtReg.Ship, false)
 			}
+		}
+	}
+}
+
+// todo: implement patch trading
+func (s *Ship) behaviourTrade() {
+	// pause if heat too high
+	maxHeat := s.GetRealMaxHeat()
+	heatLevel := s.Heat / maxHeat
+
+	if heatLevel > 0.95 {
+		s.CmdAbort(false)
+	}
+
+	// get registry
+	autoReg := NewAutopilotRegistry()
+
+	// check if idle
+	if s.AutopilotMode == autoReg.None {
+		// allow time to cool off :)
+		if heatLevel > 0.25 {
+			return
+		}
+
+		// check if docked
+		if s.DockedAtStationID != nil {
+			// 1% chance of undocking per tick
+			roll := physics.RandInRange(0, 100)
+
+			if roll == 1 {
+				// undock
+				s.CmdUndock(false)
+				return
+			}
+		} else {
+			s.gotoNextWanderDestination()
 		}
 	}
 }
