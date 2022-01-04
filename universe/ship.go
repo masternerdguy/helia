@@ -1700,8 +1700,16 @@ func (s *Ship) behaviourTrade() {
 				// iterate over processes
 				for _, p := range st.Processes {
 					for _, pi := range p.Process.Inputs {
+						// skip if not buying this item type
+						if pi.ItemTypeID != i.ItemTypeID {
+    							continue
+						}
+
+						// get random quantity
+						q := physics.RandInRange(1, i.Quantity)
+    					
 						// try to sell item to silo
-						s.SellItemToSilo(pi.ID, i.ID, i.Quantity, false)
+						s.SellItemToSilo(pi.ID, i.ID, q, false)
 					}
 				}
 			}
