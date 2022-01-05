@@ -1559,7 +1559,7 @@ func (s *Ship) behaviourWander() {
 				return
 			}
 		} else {
-			s.gotoNextWanderDestination()
+			s.gotoNextWanderDestination(50)
 		}
 	}
 }
@@ -1599,7 +1599,7 @@ func (s *Ship) behaviourPatrol() {
 				return
 			}
 		} else {
-			s.gotoNextWanderDestination()
+			s.gotoNextWanderDestination(50)
 		}
 	} else if s.AutopilotMode != autoReg.Fight {
 		// look for any hostile ships to attack
@@ -1778,20 +1778,20 @@ func (s *Ship) behaviourPatchTrade() {
 				}
 			}
 		} else {
-			s.gotoNextWanderDestination()
+			s.gotoNextWanderDestination(85)
 		}
 	}
 }
 
 // helper for behaviour routines that need to wander around the universe
-func (s *Ship) gotoNextWanderDestination() {
+func (s *Ship) gotoNextWanderDestination(stationJumpholeRatio int) {
 	// get registry
 	tgtReg := models.NewTargetTypeRegistry()
 
-	// 50% chance of docking at a station, 50% chance of flying through a jumphole
+	// chance of docking at a station vs flying through a jumphole is based on the stationJumpholeRatio parameter
 	roll := physics.RandInRange(0, 100)
 
-	if roll < 50 {
+	if roll < stationJumpholeRatio {
 		// get and count stations in system
 		stations := s.CurrentSystem.stations
 		count := len(stations)
