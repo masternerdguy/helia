@@ -1677,7 +1677,7 @@ func (s *Ship) behaviourPatchTrade() {
 			// 1% chance of undocking per tick
 			roll := physics.RandInRange(0, 100)
 
-			if roll == 1 {
+			if roll == -1 {
 				// undock
 				s.CmdUndock(false)
 				return
@@ -1721,7 +1721,7 @@ func (s *Ship) behaviourPatchTrade() {
 								q := physics.RandInRange(1, i.Quantity)
 
 								// try to sell item to silo
-								s.SellItemToSilo(pi.ID, i.ID, q, false)
+								s.SellItemToSilo(p.ID, i.ID, q, false)
 							}
 						}
 					}
@@ -1739,16 +1739,11 @@ func (s *Ship) behaviourPatchTrade() {
 						buyRoll := physics.RandInRange(0, 100)
 
 						if buyRoll%3 == 0 {
-							// get random quantity within cargo capacity
-							uv, _ := po.ItemTypeMeta.GetFloat64("volume")
-							cv := s.GetRealCargoBayVolume()
-							cu := s.TotalCargoBayVolumeUsed(false)
-
-							mq := math.Min((cv-cu)/(uv+Epsilon), 1000)
-							q := physics.RandInRange(1, int(mq))
+							// get random quantity
+							q := physics.RandInRange(1, 1000)
 
 							// try to buy item from silo
-							s.BuyItemFromSilo(po.ID, po.ItemTypeID, q, false)
+							s.BuyItemFromSilo(p.ID, po.ItemTypeID, q, false)
 						}
 					}
 				}
