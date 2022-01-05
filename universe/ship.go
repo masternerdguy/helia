@@ -1677,7 +1677,7 @@ func (s *Ship) behaviourPatchTrade() {
 			// 1% chance of undocking per tick
 			roll := physics.RandInRange(0, 100)
 
-			if roll == -1 {
+			if roll == 1 {
 				// undock
 				s.CmdUndock(false)
 				return
@@ -1750,31 +1750,37 @@ func (s *Ship) behaviourPatchTrade() {
 			} else if roll%84 == 0 {
 				toTrash := make([]*Item, 0)
 
-				// trash random items in cargo bay
-				for _, i := range s.CargoBay.Items {
-					// skip if dirty
-					if i.CoreDirty {
-						continue
+				// verify sufficient volume is being used to warrant trashing
+				cv := s.GetRealCargoBayVolume()
+				cu := s.TotalCargoBayVolumeUsed(false)
+
+				if cu/cv > 0.75 {
+					// trash random items in cargo bay
+					for _, i := range s.CargoBay.Items {
+						// skip if dirty
+						if i.CoreDirty {
+							continue
+						}
+
+						// roll for trash chance
+						trashRoll := physics.RandInRange(0, 100)
+
+						if trashRoll%3 == 0 {
+							// mark for trash
+							toTrash = append(toTrash, i)
+						}
 					}
 
-					// roll for trash chance
-					trashRoll := physics.RandInRange(0, 100)
+					// commit trash
+					for _, i := range toTrash {
+						// skip if dirty
+						if i.CoreDirty {
+							continue
+						}
 
-					if trashRoll%3 == 0 {
-						// mark for trash
-						toTrash = append(toTrash, i)
+						// trash item
+						s.TrashItemInCargo(i.ID, false)
 					}
-				}
-
-				// commit trash
-				for _, i := range toTrash {
-					// skip if dirty
-					if i.CoreDirty {
-						continue
-					}
-
-					// trash item
-					s.TrashItemInCargo(i.ID, false)
 				}
 			}
 		} else {
