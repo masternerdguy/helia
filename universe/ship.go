@@ -1686,7 +1686,7 @@ func (s *Ship) behaviourPatchTrade() {
 			// check if wallet should be randomized
 			if roll%22 == 0 {
 				// randomize wallet
-				s.Wallet = float64(physics.RandInRange(0, math.MaxInt32/4))
+				s.Wallet = float64(physics.RandInRange(0, math.MaxInt32/64))
 			}
 
 			// check if buy/sell/trash attempts should be made
