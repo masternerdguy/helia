@@ -1784,14 +1784,14 @@ func (s *Ship) behaviourPatchTrade() {
 }
 
 // helper for behaviour routines that need to wander around the universe
-func (s *Ship) gotoNextWanderDestination(stationJumpholeRatio int) {
+func (s *Ship) gotoNextWanderDestination(stationDockChance int) {
 	// get registry
 	tgtReg := models.NewTargetTypeRegistry()
 
-	// chance of docking at a station vs flying through a jumphole is based on the stationJumpholeRatio parameter
+	// chance of docking at a station vs flying through a jumphole is based on the stationDockChance parameter
 	roll := physics.RandInRange(0, 100)
 
-	if roll < stationJumpholeRatio {
+	if roll < stationDockChance {
 		// get and count stations in system
 		stations := s.CurrentSystem.stations
 		count := len(stations)
