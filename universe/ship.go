@@ -307,7 +307,7 @@ func (f *Fitting) stripModuleFromFitting(itemID uuid.UUID) {
 }
 
 // Determines whether a rack has a free slot suitable for fitting a given module and returns the index if found
-func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (int, bool) {
+func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume float64, rack string) (int, bool) {
 	// get default uuid
 	emptyUUID := uuid.UUID{}
 	defaultUUID := emptyUUID.String()
@@ -393,7 +393,7 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume int, rack string) (i
 		}
 
 		// check if this slot is compatible
-		if s.Volume >= volume &&
+		if float64(s.Volume) >= volume &&
 			(s.Family == modFamily || s.Family == "any") {
 			// this slot is compatible
 			return i, true
@@ -1739,8 +1739,13 @@ func (s *Ship) behaviourPatchTrade() {
 						buyRoll := physics.RandInRange(0, 100)
 
 						if buyRoll%3 == 0 {
-							// get random quantity
-							q := physics.RandInRange(1, 100)
+							// get random quantity within cargo capacity
+							uv, _ := po.ItemTypeMeta.GetFloat64("volume")
+							cv := s.GetRealCargoBayVolume()
+							cu := s.TotalCargoBayVolumeUsed(false)
+
+							mq := math.Min((cv-cu)/(uv+Epsilon), 1000)
+							q := physics.RandInRange(1, int(mq))
 
 							// try to buy item from silo
 							s.BuyItemFromSilo(po.ID, po.ItemTypeID, q, false)
@@ -2553,7 +2558,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	}
 
 	// get module volume
-	v, _ := item.ItemTypeMeta.GetInt("volume")
+	v, _ := item.ItemTypeMeta.GetFloat64("volume")
 
 	// find a free slot
 	idx, fnd := s.getFreeSlotIndex(item.ItemFamilyID, v, r)
