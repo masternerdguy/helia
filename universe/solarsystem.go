@@ -1265,10 +1265,6 @@ func (s *SolarSystem) processClientEventQueues() {
 
 				// update timestamp
 				c.LastChatPostedAt = time.Now()
-
-				//debug to test patch trader
-				sh.IsNPC = true
-				sh.BehaviourMode = &NewBehaviourRegistry().PatchTrade
 			}
 		} else if evt.Type == models.NewMessageRegistry().TransferItem {
 			if sh != nil {
