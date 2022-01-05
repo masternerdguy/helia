@@ -76,19 +76,19 @@ func NewAutopilotRegistry() *AutopilotRegistry {
 
 // Autopilot states for ships
 type BehaviourRegistry struct {
-	None   int
-	Wander int
-	Patrol int
-	Trade  int
+	None       int
+	Wander     int
+	Patrol     int
+	PatchTrade int
 }
 
 // Returns a populated AutopilotRegistry struct for use as an enum
 func NewBehaviourRegistry() *BehaviourRegistry {
 	return &BehaviourRegistry{
-		None:   0,
-		Wander: 1,
-		Patrol: 2,
-		Trade:  3,
+		None:       0,
+		Wander:     1,
+		Patrol:     2,
+		PatchTrade: 3,
 	}
 }
 
@@ -1521,8 +1521,8 @@ func (s *Ship) behave() {
 				s.behaviourWander()
 			case registry.Patrol:
 				s.behaviourPatrol()
-			case registry.Trade:
-				s.behaviourTrade()
+			case registry.PatchTrade:
+				s.behaviourPatchTrade()
 			}
 		}
 	}
@@ -1652,8 +1652,8 @@ func (s *Ship) behaviourPatrol() {
 	}
 }
 
-// todo: implement patch trading
-func (s *Ship) behaviourTrade() {
+// wanders around the universe randomly buying and selling things to patch the economy
+func (s *Ship) behaviourPatchTrade() {
 	// pause if heat too high
 	maxHeat := s.GetRealMaxHeat()
 	heatLevel := s.Heat / maxHeat
@@ -1683,34 +1683,97 @@ func (s *Ship) behaviourTrade() {
 				return
 			}
 
-			// attempt to sell items in cargo bay on the industrial market
-			for _, i := range s.CargoBay.Items {
-				st := s.DockedAtStation
+			// check if wallet should be randomized
+			if roll%22 == 0 {
+				// randomize wallet
+				s.Wallet = float64(physics.RandInRange(0, math.MaxInt32))
+			}
 
-				// skip if unpackaged or 0 quantity
-				if !i.IsPackaged || i.Quantity == 0 {
-					continue
+			// check if buy/sell/trash attempts should be made
+			if roll%33 == 0 {
+				// attempt to sell items in cargo bay on the industrial market
+				for _, i := range s.CargoBay.Items {
+					st := s.DockedAtStation
+
+					// skip if unpackaged or 0 quantity
+					if !i.IsPackaged || i.Quantity == 0 {
+						continue
+					}
+
+					// skip if dirty
+					if i.CoreDirty {
+						continue
+					}
+
+					// iterate over processes
+					for _, p := range st.Processes {
+						for _, pi := range p.Process.Inputs {
+							// skip if not buying this item type
+							if pi.ItemTypeID != i.ItemTypeID {
+								continue
+							}
+
+							// roll for sell chance
+							sellRoll := physics.RandInRange(0, 100)
+
+							if sellRoll%3 == 0 {
+								// get random quantity
+								q := physics.RandInRange(1, i.Quantity)
+
+								// try to sell item to silo
+								s.SellItemToSilo(pi.ID, i.ID, q, false)
+							}
+						}
+					}
 				}
-
-				// skip if dirty
-				if i.CoreDirty {
-					continue
-				}
-
-				// iterate over processes
-				for _, p := range st.Processes {
-					for _, pi := range p.Process.Inputs {
-						// skip if not buying this item type
-						if pi.ItemTypeID != i.ItemTypeID {
+			} else if roll%32 == 0 {
+				// attempt to buy items from the industrial market
+				for _, p := range s.DockedAtStation.Processes {
+					for _, po := range p.Process.Outputs {
+						// skip if ship
+						if po.ItemFamilyID == "ship" {
 							continue
 						}
 
-						// get random quantity
-						q := physics.RandInRange(1, i.Quantity)
+						// roll for buy chance
+						buyRoll := physics.RandInRange(0, 100)
 
-						// try to sell item to silo
-						s.SellItemToSilo(pi.ID, i.ID, q, false)
+						if buyRoll%3 == 0 {
+							// get random quantity
+							q := physics.RandInRange(1, 100)
+
+							// try to buy item from silo
+							s.BuyItemFromSilo(po.ID, po.ItemTypeID, q, false)
+						}
 					}
+				}
+			} else if roll%84 == 0 {
+				toTrash := make([]*Item, 0)
+
+				// trash random items in cargo bay
+				for _, i := range s.CargoBay.Items {
+					// skip if dirty
+					if i.CoreDirty {
+						continue
+					}
+
+					// roll for trash chance
+					trashRoll := physics.RandInRange(0, 100)
+
+					if trashRoll%3 == 0 {
+						// mark for trash
+						toTrash = append(toTrash, i)
+					}
+				}
+
+				// commit trash
+				for _, i := range toTrash {
+					// skip if dirty
+					if i.CoreDirty {
+						continue
+					}
+
+					s.TrashItemInCargo(i.ID, false)
 				}
 			}
 		} else {
