@@ -1442,13 +1442,19 @@ func (s *SolarSystem) updateShips() {
 			s.pushPointEffects = append(s.pushPointEffects, exp)
 
 			// log destruction to console
+			bm := 0
+
+			if e.BehaviourMode != nil {
+				bm = *e.BehaviourMode
+			}
+
 			log.Println(
 				fmt.Sprintf(
 					"[%v] %v was destroyed (%v::%v>>%v)",
 					s.SystemName,
 					e.CharacterName,
 					e.Texture,
-					e.BehaviourMode,
+					bm,
 					e.Aggressors,
 				),
 			)
