@@ -60,17 +60,19 @@ func (p *StationProcess) PeriodicUpdate(dT int64) {
 				p.InternalState.Outputs[k] = o
 
 				// log delivery
-				log.Println(
-					fmt.Sprintf(
-						"[%v] Silo job %v at %v delivered %v %v to output silo (new quantity %v)",
-						p.SolarSystemName,
-						p.Process.Name,
-						p.StationName,
-						s.Quantity,
-						s.ItemTypeName,
-						o.Quantity,
-					),
-				)
+				if p.StationName == "Jaylah Station" && p.StationID.String() == "7bb73633-bfd6-4795-bb47-eff3b458de30" {
+					log.Println(
+						fmt.Sprintf(
+							"[%v] Silo job %v at %v delivered %v %v to output silo (new quantity %v)",
+							p.SolarSystemName,
+							p.Process.Name,
+							p.StationName,
+							s.Quantity,
+							s.ItemTypeName,
+							o.Quantity,
+						),
+					)
+				}
 			}
 
 			// reset process
@@ -87,6 +89,20 @@ func (p *StationProcess) PeriodicUpdate(dT int64) {
 
 				// roll back ms counter
 				p.MSCounter -= 1000
+
+				// log delivery
+				if p.StationName == "Jaylah Station" && p.StationID.String() == "7bb73633-bfd6-4795-bb47-eff3b458de30" {
+					log.Println(
+						fmt.Sprintf(
+							"[%v] Silo job %v at %v (%v/%v)",
+							p.SolarSystemName,
+							p.Process.Name,
+							p.StationName,
+							p.Progress,
+							p.Process.Time,
+						),
+					)
+				}
 			}
 		}
 	} else {
@@ -111,17 +127,19 @@ func (p *StationProcess) PeriodicUpdate(dT int64) {
 			p.InternalState.Inputs[k] = i
 
 			// log consumption
-			log.Println(
-				fmt.Sprintf(
-					"[%v] Silo job %v at %v consumed %v %v from input silo (new quantity %v)",
-					p.SolarSystemName,
-					p.Process.Name,
-					p.StationName,
-					s.Quantity,
-					s.ItemTypeName,
-					i.Quantity,
-				),
-			)
+			if p.StationName == "Jaylah Station" && p.StationID.String() == "7bb73633-bfd6-4795-bb47-eff3b458de30" {
+				log.Println(
+					fmt.Sprintf(
+						"[%v] Silo job %v at %v consumed %v %v from input silo (new quantity %v)",
+						p.SolarSystemName,
+						p.Process.Name,
+						p.StationName,
+						s.Quantity,
+						s.ItemTypeName,
+						i.Quantity,
+					),
+				)
+			}
 		}
 
 		// start process
