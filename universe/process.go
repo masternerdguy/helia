@@ -3,6 +3,7 @@ package universe
 import (
 	"fmt"
 	"helia/shared"
+	"log"
 	"math/rand"
 	"time"
 
@@ -19,9 +20,11 @@ type StationProcess struct {
 	InternalState StationProcessInternalState
 	Meta          Meta
 	// in-memory only
-	Lock      shared.LabeledMutex
-	Process   Process
-	MSCounter int64
+	Lock            shared.LabeledMutex
+	Process         Process
+	StationName     string
+	SolarSystemName string
+	MSCounter       int64
 }
 
 // Updates a station manufacturing process for a tick
@@ -55,6 +58,19 @@ func (p *StationProcess) PeriodicUpdate(dT int64) {
 				// store updated factor
 				o.Quantity += s.Quantity
 				p.InternalState.Outputs[k] = o
+
+				// log delivery
+				log.Println(
+					fmt.Sprintf(
+						"[%v] Silo job %v at %v delivered %v %v to output silo (new quantity %v)",
+						p.SolarSystemName,
+						p.Process.Name,
+						p.StationName,
+						s.Quantity,
+						s.ItemTypeName,
+						o.Quantity,
+					),
+				)
 			}
 
 			// reset process
@@ -93,6 +109,19 @@ func (p *StationProcess) PeriodicUpdate(dT int64) {
 			// store updated factor
 			i.Quantity -= s.Quantity
 			p.InternalState.Inputs[k] = i
+
+			// log consumption
+			log.Println(
+				fmt.Sprintf(
+					"[%v] Silo job %v at %v consumed %v %v from input silo (new quantity %v)",
+					p.SolarSystemName,
+					p.Process.Name,
+					p.StationName,
+					s.Quantity,
+					s.ItemTypeName,
+					i.Quantity,
+				),
+			)
 		}
 
 		// start process
@@ -217,8 +246,10 @@ func (p *StationProcess) CopyStationProcess() *StationProcess {
 			Structure: "StationProcess",
 			UID:       fmt.Sprintf("%v :: %v :: %v", p.ID, time.Now(), rand.Float64()),
 		},
-		Process:   p.Process,
-		MSCounter: p.MSCounter,
+		Process:         p.Process,
+		MSCounter:       p.MSCounter,
+		StationName:     p.StationName,
+		SolarSystemName: p.SolarSystemName,
 	}
 
 	return &copy

@@ -274,6 +274,8 @@ func LoadUniverse() (*universe.Universe, error) {
 						return nil, err
 					}
 
+					spx.StationName = currStation.StationName
+					spx.SolarSystemName = s.SystemName
 					processes[spx.ID.String()] = spx
 				}
 
