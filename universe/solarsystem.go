@@ -6,6 +6,7 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -1439,6 +1440,18 @@ func (s *SolarSystem) updateShips() {
 			}
 
 			s.pushPointEffects = append(s.pushPointEffects, exp)
+
+			// log destruction to console
+			log.Println(
+				fmt.Sprintf(
+					"[%v] %v was destroyed (%v::%v>>%v)",
+					s.SystemName,
+					e.CharacterName,
+					e.Texture,
+					e.BehaviourMode,
+					e.Aggressors,
+				),
+			)
 		} else {
 			// update ship
 			e.PeriodicUpdate()

@@ -557,6 +557,16 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// put ship in home system
 			home.CurrentSystem.AddShip(es, true)
+
+			// log respawn to console
+			log.Println(
+				fmt.Sprintf(
+					"[%v] %v was respawned at %v (NPC).",
+					home.CurrentSystem.SystemName,
+					es.CharacterName,
+					home.StationName,
+				),
+			)
 		}(rs, sol)
 	}
 
@@ -643,6 +653,16 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// put the client in that system
 			home.CurrentSystem.AddClient(rs, true)
+
+			// log respawn to console
+			log.Println(
+				fmt.Sprintf(
+					"[%v] %v was respawned at %v.",
+					home.CurrentSystem.SystemName,
+					es.CharacterName,
+					home.StationName,
+				),
+			)
 		}(rs, sol)
 	}
 
