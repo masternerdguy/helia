@@ -1719,7 +1719,7 @@ func (s *Ship) behaviourPatchTrade() {
 
 							if sellRoll%3 == 0 {
 								// get random quantity
-								q := physics.RandInRange(1, i.Quantity)
+								q := physics.RandInRange(1, i.Quantity+1)
 
 								// try to sell item to silo
 								s.SellItemToSilo(p.ID, i.ID, q, false)
@@ -1744,7 +1744,11 @@ func (s *Ship) behaviourPatchTrade() {
 							q := physics.RandInRange(1, 1000)
 
 							// try to buy item from silo
-							s.BuyItemFromSilo(p.ID, po.ItemTypeID, q, false)
+							err := s.BuyItemFromSilo(p.ID, po.ItemTypeID, q, false)
+
+							if err != nil {
+								log.Println(err)
+							}
 						}
 					}
 				}
@@ -3058,13 +3062,19 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 	}
 
 	// log buy to console
+	bm := 0
+
+	if s.BehaviourMode != nil {
+		bm = *s.BehaviourMode
+	}
+
 	log.Println(
 		fmt.Sprintf(
 			"[%v] %v (%v::%v) bought %v %v from %v (silo)",
 			s.CurrentSystem.SystemName,
 			s.CharacterName,
 			s.Texture,
-			s.BehaviourMode,
+			bm,
 			quantity,
 			output.ItemTypeName,
 			s.DockedAtStation.StationName,
@@ -3179,13 +3189,19 @@ func (s *Ship) SellItemToSilo(siloID uuid.UUID, itemId uuid.UUID, quantity int, 
 	s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
 
 	// log sell to console
+	bm := 0
+
+	if s.BehaviourMode != nil {
+		bm = *s.BehaviourMode
+	}
+
 	log.Println(
 		fmt.Sprintf(
 			"[%v] %v (%v::%v) sold %v %v to %v (silo)",
 			s.CurrentSystem.SystemName,
 			s.CharacterName,
 			s.Texture,
-			s.BehaviourMode,
+			bm,
 			quantity,
 			item.ItemTypeName,
 			s.DockedAtStation.StationName,
@@ -3347,13 +3363,19 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	}
 
 	// log buy to console
+	bm := 0
+
+	if s.BehaviourMode != nil {
+		bm = *s.BehaviourMode
+	}
+
 	log.Println(
 		fmt.Sprintf(
 			"[%v] %v (%v::%v) bought %v %v at %v (order)",
 			s.CurrentSystem.SystemName,
 			s.CharacterName,
 			s.Texture,
-			s.BehaviourMode,
+			bm,
 			order.Item.Quantity,
 			order.Item.ItemTypeName,
 			s.DockedAtStation.StationName,
@@ -3481,13 +3503,19 @@ func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 	s.CurrentSystem.NewSellOrders[newOrder.ID.String()] = &newOrder
 
 	// log listing to console
+	bm := 0
+
+	if s.BehaviourMode != nil {
+		bm = *s.BehaviourMode
+	}
+
 	log.Println(
 		fmt.Sprintf(
 			"[%v] %v (%v::%v) listed itself for sale at %v (order)",
 			s.CurrentSystem.SystemName,
 			s.CharacterName,
 			s.Texture,
-			s.BehaviourMode,
+			bm,
 			s.DockedAtStation.StationName,
 		),
 	)
@@ -3584,13 +3612,19 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 	s.CurrentSystem.NewSellOrders[newOrder.ID.String()] = &newOrder
 
 	// log listing to console
+	bm := 0
+
+	if s.BehaviourMode != nil {
+		bm = *s.BehaviourMode
+	}
+
 	log.Println(
 		fmt.Sprintf(
 			"[%v] %v (%v::%v) listed %v %v at %v (order)",
 			s.CurrentSystem.SystemName,
 			s.CharacterName,
 			s.Texture,
-			s.BehaviourMode,
+			bm,
 			newOrder.Item.Quantity,
 			newOrder.Item.ItemTypeName,
 			s.DockedAtStation.StationName,

@@ -65,7 +65,7 @@ func LoadUniverse() (*universe.Universe, error) {
 	regions := make(map[string]*universe.Region)
 	for rIDX, e := range rs {
 		// progress output
-		log.Println(fmt.Sprintf("loading region %v of %v", rIDX + 1, len(rs)))
+		log.Println(fmt.Sprintf("loading region %v of %v", rIDX+1, len(rs)))
 
 		// load basic region information
 		r := universe.Region{
@@ -1441,6 +1441,9 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 		m := &sp.Fitting.CRack[i]
 		m.LinkShip(sp)
 	}
+
+	// associate escrow container with ship
+	sp.EscrowContainerID = &owner.EscrowContainerID
 
 	// return pointer to ship
 	return sp, nil
