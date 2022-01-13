@@ -3,6 +3,7 @@ package universe
 import (
 	"errors"
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -3056,6 +3057,20 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 		s.CurrentSystem.NewShipPurchases[nid.String()] = &r
 	}
 
+	// log buy to console
+	log.Println(
+		fmt.Sprintf(
+			"[%v] %v (%v::%v) bought %v %v from %v (silo)",
+			s.CurrentSystem.SystemName,
+			s.CharacterName,
+			s.Texture,
+			s.BehaviourMode,
+			quantity,
+			output.ItemTypeName,
+			s.DockedAtStation.StationName,
+		),
+	)
+
 	// success
 	return nil
 }
@@ -3163,6 +3178,21 @@ func (s *Ship) SellItemToSilo(siloID uuid.UUID, itemId uuid.UUID, quantity int, 
 	// save item
 	s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
 
+	// log sell to console
+	log.Println(
+		fmt.Sprintf(
+			"[%v] %v (%v::%v) sold %v %v to %v (silo)",
+			s.CurrentSystem.SystemName,
+			s.CharacterName,
+			s.Texture,
+			s.BehaviourMode,
+			quantity,
+			item.ItemTypeName,
+			s.DockedAtStation.StationName,
+		),
+	)
+
+	// success
 	return nil
 }
 
@@ -3316,6 +3346,20 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 		s.CurrentSystem.MovedItems[order.Item.ID.String()] = order.Item
 	}
 
+	// log buy to console
+	log.Println(
+		fmt.Sprintf(
+			"[%v] %v (%v::%v) bought %v %v at %v (order)",
+			s.CurrentSystem.SystemName,
+			s.CharacterName,
+			s.Texture,
+			s.BehaviourMode,
+			order.Item.Quantity,
+			order.Item.ItemTypeName,
+			s.DockedAtStation.StationName,
+		),
+	)
+
 	// success
 	return nil
 }
@@ -3436,6 +3480,19 @@ func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 	// escalate to core for saving in db
 	s.CurrentSystem.NewSellOrders[newOrder.ID.String()] = &newOrder
 
+	// log listing to console
+	log.Println(
+		fmt.Sprintf(
+			"[%v] %v (%v::%v) listed itself for sale at %v (order)",
+			s.CurrentSystem.SystemName,
+			s.CharacterName,
+			s.Texture,
+			s.BehaviourMode,
+			s.DockedAtStation.StationName,
+		),
+	)
+
+	// success
 	return nil
 }
 
@@ -3526,6 +3583,21 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 	// escalate to core for saving in db
 	s.CurrentSystem.NewSellOrders[newOrder.ID.String()] = &newOrder
 
+	// log listing to console
+	log.Println(
+		fmt.Sprintf(
+			"[%v] %v (%v::%v) listed %v %v at %v (order)",
+			s.CurrentSystem.SystemName,
+			s.CharacterName,
+			s.Texture,
+			s.BehaviourMode,
+			newOrder.Item.Quantity,
+			newOrder.Item.ItemTypeName,
+			s.DockedAtStation.StationName,
+		),
+	)
+
+	// success
 	return nil
 }
 
