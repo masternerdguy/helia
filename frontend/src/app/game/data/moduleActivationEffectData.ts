@@ -1,4 +1,14 @@
 export class ModuleActivationEffectRepository {
+  leBanhammer(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 3500,
+      color: 'gold',
+      filter: 'blur(10px)', // "feather"
+      thickness: 7.5,
+    };
+  }
+
   basicLaserTool(): ModuleActivationEffectData {
     return {
       type: 'laser',

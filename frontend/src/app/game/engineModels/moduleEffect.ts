@@ -34,7 +34,9 @@ export class ModuleEffect extends WsPushModuleEffect {
     // get effect data
     const repo = new ModuleActivationEffectRepository();
 
-    if (b.gfxEffect === 'basic_laser_tool') {
+    if (b.gfxEffect === 'le_banhammer') {
+      this.vfxData = repo.leBanhammer();
+    } else if (b.gfxEffect === 'basic_laser_tool') {
       this.vfxData = repo.basicLaserTool();
     } else if (b.gfxEffect === 'basic_gauss_rifle') {
       this.vfxData = repo.basicGaussRifle();
