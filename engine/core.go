@@ -134,8 +134,8 @@ func (e *HeliaEngine) Start() {
 
 			log.Println("* All systems passed deadlock check!")
 
-			// wait 60 seconds
-			time.Sleep(time.Second * 60)
+			// wait 2 minutes
+			time.Sleep(time.Second * 120)
 		}
 	}(e)
 
