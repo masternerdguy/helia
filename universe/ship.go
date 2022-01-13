@@ -1549,7 +1549,7 @@ func (s *Ship) behaviourWander() {
 		}
 
 		// check if docked
-		if s.DockedAtStationID != nil {
+		if s.DockedAtStationID != nil && s.DockedAtStation != nil {
 			// 1% chance of undocking per tick
 			roll := physics.RandInRange(0, 100)
 
@@ -1589,7 +1589,7 @@ func (s *Ship) behaviourPatrol() {
 		}
 
 		// check if docked
-		if s.DockedAtStationID != nil {
+		if s.DockedAtStationID != nil && s.DockedAtStation != nil {
 			// 1% chance of undocking per tick
 			roll := physics.RandInRange(0, 100)
 
@@ -1673,7 +1673,7 @@ func (s *Ship) behaviourPatchTrade() {
 		}
 
 		// check if docked
-		if s.DockedAtStationID != nil {
+		if s.DockedAtStationID != nil && s.DockedAtStation != nil {
 			// 1% chance of undocking per tick
 			roll := physics.RandInRange(0, 100)
 
