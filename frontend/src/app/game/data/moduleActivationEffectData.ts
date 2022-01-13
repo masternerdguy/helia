@@ -1,7 +1,7 @@
 export class ModuleActivationEffectRepository {
   leBanhammer(): ModuleActivationEffectData {
     return {
-      type: 'laser',
+      type: 'gauss',
       duration: 3500,
       color: 'gold',
       filter: 'blur(10px)', // "feather"
