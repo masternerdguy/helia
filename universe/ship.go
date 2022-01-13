@@ -1744,11 +1744,7 @@ func (s *Ship) behaviourPatchTrade() {
 							q := physics.RandInRange(1, 1000)
 
 							// try to buy item from silo
-							err := s.BuyItemFromSilo(p.ID, po.ItemTypeID, q, false)
-
-							if err != nil {
-								log.Println(err)
-							}
+							s.BuyItemFromSilo(p.ID, po.ItemTypeID, q, false)
 						}
 					}
 				}
