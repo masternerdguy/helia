@@ -1252,6 +1252,7 @@ func LoadReputationSheet(u *sql.User) *shared.PlayerReputationSheet {
 	repSheet := shared.PlayerReputationSheet{
 		FactionEntries: make(map[string]*shared.PlayerReputationSheetFactionEntry),
 		UserID:         u.ID,
+		CharacterName:  u.CharacterName,
 	}
 
 	repSheet.Lock.Structure = "PlayerReputationSheet"

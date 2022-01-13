@@ -471,6 +471,8 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		// load reputation sheet
 		client.ReputationSheet = shared.PlayerReputationSheet{
 			FactionEntries: make(map[string]*shared.PlayerReputationSheetFactionEntry),
+			UserID:         u.ID,
+			CharacterName:  u.CharacterName,
 		}
 
 		// label mutex

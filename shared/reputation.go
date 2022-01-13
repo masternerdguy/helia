@@ -42,8 +42,9 @@ type PlayerReputationSheetFactionEntry struct {
 type PlayerReputationSheet struct {
 	FactionEntries map[string]*PlayerReputationSheetFactionEntry // map key is faction id string
 	// in-memory only
-	Lock   LabeledMutex
-	UserID uuid.UUID
+	Lock          LabeledMutex
+	UserID        uuid.UUID
+	CharacterName string
 }
 
 // Adjusts standing relative to an NPC faction
