@@ -2095,6 +2095,20 @@ func (s *SolarSystem) AddShip(c *Ship, lock bool) {
 	// store pointer to system
 	c.CurrentSystem = s
 
+	// store docked station pointer if docked
+	if c.DockedAtStationID != nil {
+		c.DockedAtStation = s.stations[c.DockedAtStationID.String()]
+
+		if c.DockedAtStation != nil {
+			c.IsDocked = true
+		} else {
+			c.DockedAtStationID = nil
+			c.IsDocked = false
+		}
+	} else {
+		c.IsDocked = false
+	}
+
 	// disarm self destruct
 	c.DestructArmed = false
 

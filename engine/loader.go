@@ -108,23 +108,6 @@ func LoadUniverse() (*universe.Universe, error) {
 			// for jumphole linking later
 			sMap[s.ID.String()] = &s
 
-			// load ships
-			ships, err := shipSvc.GetShipsBySolarSystem(s.ID, false)
-
-			if err != nil {
-				return nil, err
-			}
-
-			for _, sh := range ships {
-				es, err := LoadShip(&sh, &u)
-
-				if err != nil {
-					return nil, err
-				}
-
-				s.AddShip(es, true)
-			}
-
 			// load stars
 			stars, err := starSvc.GetStarsBySolarSystem(s.ID)
 
@@ -341,6 +324,23 @@ func LoadUniverse() (*universe.Universe, error) {
 
 				// add to solar system
 				s.AddStation(&station)
+			}
+
+			// load ships
+			ships, err := shipSvc.GetShipsBySolarSystem(s.ID, false)
+
+			if err != nil {
+				return nil, err
+			}
+
+			for _, sh := range ships {
+				es, err := LoadShip(&sh, &u)
+
+				if err != nil {
+					return nil, err
+				}
+
+				s.AddShip(es, true)
 			}
 		}
 
