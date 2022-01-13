@@ -1719,7 +1719,7 @@ func (s *Ship) behaviourPatchTrade() {
 
 							if sellRoll%3 == 0 {
 								// get random quantity
-								q := physics.RandInRange(1, i.Quantity+1)
+								q := physics.RandInRange(1, i.Quantity+2)
 
 								// try to sell item to silo
 								s.SellItemToSilo(p.ID, i.ID, q, false)
