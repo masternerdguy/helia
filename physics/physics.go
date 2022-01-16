@@ -29,20 +29,20 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy) {
 	bVy := dummyB.VelY
 	bM := dummyB.Mass
 
-	// guarantee some push effect in event of zero velocity
+	// guarantee some push effect in event of very low velocity
 	if aVx < 1 {
 		aVx = rand.Float64()
 	}
 
-	if aVx < 1 {
+	if aVy < 1 {
 		aVy = rand.Float64()
 	}
 
-	if aVx < 1 {
+	if bVx < 1 {
 		bVx = rand.Float64()
 	}
 
-	if aVx < 1 {
+	if bVy < 1 {
 		bVy = rand.Float64()
 	}
 
