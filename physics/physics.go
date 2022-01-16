@@ -29,23 +29,6 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) {
 	bVy := dummyB.VelY
 	bM := dummyB.Mass
 
-	// guarantee some push effect in event of very low velocity
-	if aVx < 1 {
-		aVx = rand.Float64()
-	}
-
-	if aVy < 1 {
-		aVy = rand.Float64()
-	}
-
-	if bVx < 1 {
-		bVx = rand.Float64()
-	}
-
-	if bVy < 1 {
-		bVy = rand.Float64()
-	}
-
 	// push them apart to avoid double counting and overlap
 	dummyA.PosX = (dummyA.PosX - aVx*(2.0+systemRadius))
 	dummyA.PosY = (dummyA.PosY - aVy*(2.0+systemRadius))
