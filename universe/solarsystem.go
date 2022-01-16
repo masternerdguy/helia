@@ -1612,6 +1612,10 @@ func (s *SolarSystem) shipCollisionTesting() {
 					// update ships with results
 					sA.ApplyPhysicsDummy(dummyA)
 					sB.ApplyPhysicsDummy(dummyB)
+
+					// adjust rotations slightly
+					sA.Theta *= (1.0 + rand.Float64()/10)
+					sB.Theta *= (1.0 + rand.Float64()/10)
 				}
 			}
 		}

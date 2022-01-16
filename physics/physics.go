@@ -29,11 +29,28 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy) {
 	bVy := dummyB.VelY
 	bM := dummyB.Mass
 
+	// guarantee some push effect in event of zero velocity
+	if aVx == 0 {
+		aVx = rand.Float64()
+	}
+
+	if aVy == 0 {
+		aVy = rand.Float64()
+	}
+
+	if bVx == 0 {
+		bVx = rand.Float64()
+	}
+
+	if bVy == 0 {
+		bVy = rand.Float64()
+	}
+
 	// push them apart to avoid double counting and overlap
-	dummyA.PosX = (dummyA.PosX - aVx*(8.0*rand.Float64()+2.0))
-	dummyA.PosY = (dummyA.PosY - aVy*(8.0*rand.Float64()+2.0))
-	dummyB.PosX = (dummyB.PosX - bVx*(8.0*rand.Float64()+2.0))
-	dummyB.PosY = (dummyB.PosY - bVy*(8.0*rand.Float64()+2.0))
+	dummyA.PosX = (dummyA.PosX - aVx*(2.0+rand.Float64()))
+	dummyA.PosY = (dummyA.PosY - aVy*(2.0+rand.Float64()))
+	dummyB.PosX = (dummyB.PosX - bVx*(2.0+rand.Float64()))
+	dummyB.PosY = (dummyB.PosY - bVy*(2.0+rand.Float64()))
 
 	// determine center of mass's velocity
 	cVx := (aVx*aM + bVx*bM) / (aM + bM)
