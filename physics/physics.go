@@ -2,6 +2,7 @@ package physics
 
 import (
 	"math"
+	"math/rand"
 )
 
 // Dummy structure used to pass key values in physics calculations
@@ -29,10 +30,10 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy) {
 	bM := dummyB.Mass
 
 	// push them apart to avoid double counting and overlap
-	dummyA.PosX = (dummyA.PosX - aVx*2.0)
-	dummyA.PosY = (dummyA.PosY - aVy*2.0)
-	dummyB.PosX = (dummyB.PosX - bVx*2.0)
-	dummyB.PosY = (dummyB.PosY - bVy*2.0)
+	dummyA.PosX = (dummyA.PosX - aVx*(2.0+rand.Float64()))
+	dummyA.PosY = (dummyA.PosY - aVy*(2.0+rand.Float64()))
+	dummyB.PosX = (dummyB.PosX - bVx*(2.0+rand.Float64()))
+	dummyB.PosY = (dummyB.PosY - bVy*(2.0+rand.Float64()))
 
 	// determine center of mass's velocity
 	cVx := (aVx*aM + bVx*bM) / (aM + bM)

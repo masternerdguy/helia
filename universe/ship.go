@@ -5415,6 +5415,26 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 					// add new item to cargo hold
 					m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, &newItem)
 				}
+
+				// log mine to console
+				bm := 0
+
+				if m.shipMountedOn.BehaviourMode != nil {
+					bm = *m.shipMountedOn.BehaviourMode
+				}
+
+				shared.TeeLog(
+					fmt.Sprintf(
+						"[%v] %v (%v::%v) mined %v %v from %v",
+						m.shipMountedOn.CurrentSystem.SystemName,
+						m.shipMountedOn.CharacterName,
+						m.shipMountedOn.Texture,
+						bm,
+						q,
+						c.ItemTypeName,
+						c.Name,
+					),
+				)
 			} else {
 				return false
 			}
