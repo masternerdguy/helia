@@ -33,15 +33,18 @@ func InitializeTeeLog(fns ...logTeeHandler) {
 			// wait for log
 			log := <-teeLogChannel
 
-			// pass to logger functions on separate goroutines
-			for _, h := range teeLogHandlers {
-				go func(h logTeeHandler) {
-					h(log.Message, log.EventTime)
-				}(h)
+			// detach log handling
+			go func() {
+				// pass to logger functions on separate goroutines
+				for _, h := range teeLogHandlers {
+					go func(h logTeeHandler) {
+						h(log.Message, log.EventTime)
+					}(h)
+				}
+			}()
 
-				// avoid overwhelming any handlers
-				time.Sleep(50 * time.Millisecond)
-			}
+			// avoid overwhelming any handlers by guaranteeing a minimal spacing between events
+			time.Sleep(10 * time.Millisecond)
 		}
 	}()
 
