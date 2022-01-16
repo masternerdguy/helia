@@ -1,17 +1,14 @@
 package shared
 
 import (
-	"fmt"
-	"math/rand"
+	"sync"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 var teeLogChannel chan teeLog
 var teeLogInitialized = false
 var teeLogHandlers []logTeeHandler
-var teeLogWrite LabeledMutex
+var teeLogWrite sync.Mutex // intentionally not using LabeledMutex to avoid dying if logging is slow
 
 type logTeeHandler func(string, time.Time)
 
@@ -33,10 +30,7 @@ func InitializeTeeLog(fns ...logTeeHandler) {
 	teeLogChannel = make(chan teeLog)
 
 	// initialize mutex
-	teeLogWrite = LabeledMutex{
-		Structure: "PlayerReputationSheet",
-		UID:       fmt.Sprintf("%v :: %v :: %v", uuid.New(), time.Now(), rand.Float64()),
-	}
+	teeLogWrite = sync.Mutex{}
 
 	// start watcher
 	go func() {
@@ -50,7 +44,7 @@ func InitializeTeeLog(fns ...logTeeHandler) {
 				for _, h := range teeLogHandlers {
 					go func(h logTeeHandler) {
 						// obtain write lock
-						teeLogWrite.Lock("InitializeTeeLog::watcher")
+						teeLogWrite.Lock()
 						defer teeLogWrite.Unlock()
 
 						// write message
