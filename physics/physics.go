@@ -15,10 +15,10 @@ type Dummy struct {
 }
 
 // Calculates the result of a 2D elastic collission between two dummies and stores the result in those dummies
-func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) {
+func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) float64 {
 	// safety check
 	if dummyA == nil || dummyB == nil {
-		return
+		return 0
 	}
 
 	// get velocity and mass
@@ -30,10 +30,18 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) {
 	bM := dummyB.Mass
 
 	// push them apart to avoid double counting and overlap
-	dummyA.PosX = (dummyA.PosX - aVx*(2.0+systemRadius/2))
-	dummyA.PosY = (dummyA.PosY - aVy*(2.0+systemRadius/2))
-	dummyB.PosX = (dummyB.PosX - bVx*(2.0+systemRadius/2))
-	dummyB.PosY = (dummyB.PosY - bVy*(2.0+systemRadius/2))
+	for {
+		dummyA.PosX = (dummyA.PosX - Sign(aVx)*2.0)
+		dummyA.PosY = (dummyA.PosY - Sign(aVy)*2.0)
+		dummyB.PosX = (dummyB.PosX - Sign(bVx)*2.0)
+		dummyB.PosY = (dummyB.PosY - Sign(bVy)*2.0)
+
+		nD := Distance(*dummyA, *dummyB)
+
+		if nD > systemRadius {
+			break
+		}
+	}
 
 	// determine center of mass's velocity
 	cVx := (aVx*aM + bVx*bM) / (aM + bM)
@@ -54,6 +62,9 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) {
 	dummyA.VelY = aVy2
 	dummyB.VelX = bVx2
 	dummyB.VelY = bVy2
+
+	// return mixing angle
+	return mix
 }
 
 // Calculates the distance between the centers of 2 physics dummies and returns the result
@@ -65,4 +76,15 @@ func Distance(dummyA Dummy, dummyB Dummy) float64 {
 	dy2 := dy * dy
 
 	return math.Sqrt(dx2 + dy2)
+}
+
+func Sign(a float64) float64 {
+	switch {
+	case a < 0:
+		return -1
+	case a > 0:
+		return +1
+	}
+
+	return 1
 }
