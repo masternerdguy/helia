@@ -46,7 +46,7 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) float64 
 		}
 
 		// prevents infinite loop
-		if iter > 100 {
+		if iter > 5 {
 			break
 		}
 
