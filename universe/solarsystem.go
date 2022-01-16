@@ -1616,8 +1616,8 @@ func (s *SolarSystem) shipCollisionTesting() {
 					sB.ApplyPhysicsDummy(dummyB)
 
 					// apply mixing angle
-					sA.Theta += mix / 50
-					sB.Theta -= mix / 50
+					sA.Theta += mix / 20
+					sB.Theta -= mix / 20
 				}
 			}
 		}
