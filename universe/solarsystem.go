@@ -1265,10 +1265,6 @@ func (s *SolarSystem) processClientEventQueues() {
 
 				// update timestamp
 				c.LastChatPostedAt = time.Now()
-
-				// debug do not commit
-				sh.IsNPC = true
-				sh.BehaviourMode = &NewBehaviourRegistry().PatchMine
 			}
 		} else if evt.Type == models.NewMessageRegistry().TransferItem {
 			if sh != nil {
