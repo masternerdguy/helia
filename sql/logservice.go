@@ -45,3 +45,29 @@ func (s LogService) WriteLog(
 	// return success
 	return nil
 }
+
+// Purges all logs from the database
+func (s LogService) NukeLogs() error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// delete logs
+	sql := `
+				delete from public.logs
+			`
+
+	q, err := db.Query(sql)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	// return success
+	return nil
+}
