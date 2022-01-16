@@ -73,6 +73,7 @@ func NewAutopilotRegistry() *AutopilotRegistry {
 		Dock:      4,
 		Undock:    5,
 		Fight:     6,
+		Mine:      7,
 	}
 }
 
