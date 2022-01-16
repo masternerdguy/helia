@@ -201,6 +201,7 @@ type Ship struct {
 	IsCloaked              bool
 	Aggressors             map[string]*shared.PlayerReputationSheet
 	aiIncompatibleOreFault bool // true when mining autopilot failed due to incompatible ore (for patch miners)
+	aiNoOrePulledFault     bool // true when mining autopilot failed due to pulling no ore (for patch miners)
 	Lock                   shared.LabeledMutex
 }
 
@@ -1063,6 +1064,8 @@ func (s *Ship) CmdMine(targetID uuid.UUID, targetType int, lock bool) {
 	}
 
 	s.aiIncompatibleOreFault = false
+	s.aiNoOrePulledFault = false
+
 	s.AutopilotMode = registry.Mine
 }
 
@@ -1838,13 +1841,28 @@ func (s *Ship) behaviourPatchMine() {
 	// get registry
 	autoReg := NewAutopilotRegistry()
 
-	// check for fault
+	// check for faults
 	if s.aiIncompatibleOreFault {
+		// stop autopilot
+		s.CmdAbort(false)
+
 		// clear flag
 		s.aiIncompatibleOreFault = false
 
 		// wander
 		s.gotoNextWanderDestination(15)
+		return
+	}
+
+	if s.aiNoOrePulledFault {
+		// stop autopilot
+		s.CmdAbort(false)
+
+		// clear flag
+		s.aiNoOrePulledFault = false
+
+		// wander
+		s.gotoNextWanderDestination(95)
 		return
 	}
 
@@ -4748,6 +4766,11 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 				// quantity to be placed in cargo bay
 				q := int((miningVolume * c.Yield) / unitVol)
 
+				if q <= 0 && m.shipMountedOn.IsNPC {
+					// raise fault
+					m.shipMountedOn.aiNoOrePulledFault = true
+				}
+
 				// is there already packaged ore / ice of this type in the hold?
 				for idx := range m.shipMountedOn.CargoBay.Items {
 					itm := m.shipMountedOn.CargoBay.Items[idx]
@@ -5367,6 +5390,11 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 
 				// quantity to be placed in cargo bay
 				q := int((miningVolume * c.Yield) / unitVol)
+
+				if q <= 0 && m.shipMountedOn.IsNPC {
+					// raise fault
+					m.shipMountedOn.aiNoOrePulledFault = true
+				}
 
 				// is there already packaged ore / ice of this type in the hold?
 				for idx := range m.shipMountedOn.CargoBay.Items {
