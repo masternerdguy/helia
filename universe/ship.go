@@ -60,6 +60,7 @@ type AutopilotRegistry struct {
 	Dock      int
 	Undock    int
 	Fight     int
+	Mine      int
 }
 
 // Returns a populated AutopilotRegistry struct for use as an enum
@@ -81,6 +82,7 @@ type BehaviourRegistry struct {
 	Wander     int
 	Patrol     int
 	PatchTrade int
+	PatchMine  int
 }
 
 // Returns a populated AutopilotRegistry struct for use as an enum
@@ -90,6 +92,7 @@ func NewBehaviourRegistry() *BehaviourRegistry {
 		Wander:     1,
 		Patrol:     2,
 		PatchTrade: 3,
+		PatchMine:  4,
 	}
 }
 
@@ -124,8 +127,14 @@ type DockData struct {
 type UndockData struct {
 }
 
-// Container structure for arguments of the Goto autopilot mode
+// Container structure for arguments of the Fight autopilot mode
 type FightData struct {
+	TargetID uuid.UUID
+	Type     int
+}
+
+// Container structure for arguments of the Mine autopilot mode
+type MineData struct {
 	TargetID uuid.UUID
 	Type     int
 }
@@ -177,6 +186,7 @@ type Ship struct {
 	AutopilotDock      DockData
 	AutopilotUndock    UndockData
 	AutopilotFight     FightData
+	AutopilotMine      MineData
 	BehaviourMode      *int
 	CurrentSystem      *SolarSystem
 	DockedAtStation    *Station
@@ -885,6 +895,7 @@ func (s *Ship) CmdAbort(lock bool) {
 	s.AutopilotDock = DockData{}
 	s.AutopilotUndock = UndockData{}
 	s.AutopilotFight = FightData{}
+	s.AutopilotMine = MineData{}
 
 	for i := range s.Fitting.ARack {
 		s.Fitting.ARack[i].WillRepeat = false
@@ -1877,6 +1888,8 @@ func (s *Ship) doUndockedAutopilot() {
 		s.doAutopilotDock()
 	case registry.Fight:
 		s.doAutopilotFight()
+	case registry.Mine:
+		s.doAutopilotMine()
 	}
 }
 
@@ -2340,6 +2353,137 @@ func (s *Ship) doAutopilotFight() {
 					s.Fitting.BRack[i].TargetType = nil
 					s.Fitting.BRack[i].WillRepeat = false
 				}
+			}
+		}
+	} else {
+		s.CmdAbort(false)
+		return
+	}
+}
+
+// Causes ship to mine a target
+func (s *Ship) doAutopilotMine() {
+	// get registry
+	targetTypeReg := models.NewTargetTypeRegistry()
+
+	if s.AutopilotMine.Type == targetTypeReg.Asteroid {
+		// find asteroid
+		targetAsteroid := s.CurrentSystem.asteroids[s.AutopilotMine.TargetID.String()]
+
+		if targetAsteroid == nil {
+			s.CmdAbort(false)
+			return
+		}
+
+		// determine type of asteroid
+		isOre := targetAsteroid.ItemFamilyID == "ore"
+		isIce := targetAsteroid.ItemFamilyID == "ice"
+
+		// use average mining range to determine stand-off distance (this can be improved a lot with more specific mining routines)
+		totalRange := 0.0
+		rangedMods := 0
+
+		for _, m := range s.Fitting.ARack {
+			// only take appropriate equipment into account
+			if isOre {
+				f, c := m.ItemMeta.GetBool("can_mine_ore")
+
+				if !f || !c {
+					continue
+				}
+			}
+
+			if isIce {
+				f, c := m.ItemMeta.GetBool("can_mine_ice")
+
+				if !f || !c {
+					continue
+				}
+			}
+
+			// accumulate range
+			r, f := m.ItemMeta.GetFloat64("range")
+
+			if f {
+				totalRange += r
+				rangedMods += 1
+			}
+		}
+
+		if rangedMods == 0 {
+			// can't mine this type
+			s.CmdAbort(false)
+			return
+		}
+
+		avgRange := totalRange / (float64(rangedMods) + Epsilon)
+		standOff := int(avgRange / 2.0)
+
+		// fill autopilot data
+		s.AutopilotGoto = GotoData{
+			TargetID: s.AutopilotMine.TargetID,
+			Type:     s.AutopilotMine.Type,
+			Hold:     &standOff,
+		}
+
+		// reuse orbit autopilot routine to keep distance with target
+		s.doAutopilotGoto()
+
+		if s.CurrentSystem.tickCounter%45 == 0 {
+			// try to activate rack A mining modules
+			maxHeat := s.GetRealMaxHeat()
+			heatAdd := 0.0
+
+			for i, v := range s.Fitting.ARack {
+				if isOre {
+					f, c := v.ItemMeta.GetBool("can_mine_ore")
+
+					if !f || !c {
+						continue
+					}
+				}
+
+				if isIce {
+					f, c := v.ItemMeta.GetBool("can_mine_ice")
+
+					if !f || !c {
+						continue
+					}
+				}
+
+				// get heat
+				h, _ := v.ItemMeta.GetFloat64("activation_heat")
+
+				// get heat ratio
+				hr := (s.Heat + heatAdd) / maxHeat
+
+				// determine whether to activate
+				roll := physics.RandInRange(0, 100)
+				hit := int(hr * 100)
+
+				if roll >= hit {
+					// activate module
+					s.Fitting.ARack[i].TargetID = &s.AutopilotMine.TargetID
+					s.Fitting.ARack[i].TargetType = &s.AutopilotMine.Type
+					s.Fitting.ARack[i].WillRepeat = true
+
+					// track heat
+					heatAdd += h
+				} else {
+					// deactivate module
+					s.Fitting.ARack[i].TargetID = nil
+					s.Fitting.ARack[i].TargetType = nil
+					s.Fitting.ARack[i].WillRepeat = false
+				}
+			}
+		} else if s.CurrentSystem.tickCounter%37 == 0 {
+			// check if cargo bay is almost full (>80%)
+			max := s.GetRealCargoBayVolume()
+			used := s.TotalCargoBayVolumeUsed(false)
+
+			if used/max > 0.8 {
+				// stop mining
+				s.CmdAbort(false)
 			}
 		}
 	} else {
