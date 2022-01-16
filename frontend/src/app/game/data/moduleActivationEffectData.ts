@@ -59,6 +59,26 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  mielIceHarvester(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 52789,
+      color: 'darkviolet',
+      filter: 'blur(4px)', // "feather"
+      thickness: 1.35,
+    };
+  }
+
+  lecheOreHarvester(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 53621,
+      color: 'darkorange',
+      filter: 'blur(3px)', // "feather"
+      thickness: 1.01,
+    };
+  }
+
   basicShieldBooster(): ModuleActivationEffectData {
     return {
       type: 'bubble_shield_boost',

@@ -54,6 +54,10 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicOreHarvester();
     } else if (b.gfxEffect === 'basic_energy_siphon') {
       this.vfxData = repo.basicUtilitySiphon();
+    } else if (b.gfxEffect === 'miel_ice_harvester') {
+      this.vfxData = repo.mielIceHarvester();
+    } else if (b.gfxEffect === 'leche_ore_harvester') {
+      this.vfxData = repo.lecheOreHarvester();
     }
 
     this.maxLifeTime = this.vfxData?.duration ?? 0;
