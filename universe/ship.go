@@ -1044,6 +1044,26 @@ func (s *Ship) CmdFight(targetID uuid.UUID, targetType int, lock bool) {
 	s.AutopilotMode = registry.Fight
 }
 
+// Invokes mine autopilot on the ship
+func (s *Ship) CmdMine(targetID uuid.UUID, targetType int, lock bool) {
+	// get registry
+	registry := NewAutopilotRegistry()
+
+	if lock {
+		// lock entity
+		s.Lock.Lock("ship.CmdMine")
+		defer s.Lock.Unlock()
+	}
+
+	// stash mine and activate autopilot
+	s.AutopilotMine = MineData{
+		TargetID: targetID,
+		Type:     targetType,
+	}
+
+	s.AutopilotMode = registry.Mine
+}
+
 // Returns a new physics dummy structure representing this ship
 func (s *Ship) ToPhysicsDummy() physics.Dummy {
 	return physics.Dummy{
@@ -1912,12 +1932,7 @@ func (s *Ship) behaviourPatchMine() {
 
 				if tgtAst != nil {
 					// go mine it
-					s.AutopilotMine = MineData{
-						TargetID: tgtAst.ID,
-						Type:     models.NewTargetTypeRegistry().Asteroid,
-					}
-
-					s.AutopilotMode = NewAutopilotRegistry().Mine
+					s.CmdMine(tgtAst.ID, models.NewTargetTypeRegistry().Asteroid, false)
 				} else {
 					// no asteroids here? wander
 					s.gotoNextWanderDestination(15)
