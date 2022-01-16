@@ -60,12 +60,9 @@ func printLogger(s string, t time.Time) {
 }
 
 func dbLogger(s string, t time.Time) {
-	// save on separate goroutine to avoid bottlenecking engine
-	go func() {
-		// get log service
-		logSvc := sql.GetLogService()
+	// get log service
+	logSvc := sql.GetLogService()
 
-		// write log
-		logSvc.WriteLog(s, t)
-	}()
+	// write log
+	logSvc.WriteLog(s, t)
 }
