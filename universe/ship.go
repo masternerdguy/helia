@@ -1873,7 +1873,7 @@ func (s *Ship) behaviourPatchMine() {
 				s.Wallet = float64(physics.RandInRange(0, math.MaxInt32/64))
 			}
 
-			// check if buy/sell/trash attempts should be made
+			// check if sell attempts should be made
 			if roll%33 == 0 {
 				// attempt to sell items in cargo bay on the industrial market
 				for _, i := range s.CargoBay.Items {
