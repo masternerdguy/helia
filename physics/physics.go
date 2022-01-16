@@ -15,10 +15,10 @@ type Dummy struct {
 }
 
 // Calculates the result of a 2D elastic collission between two dummies and stores the result in those dummies
-func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) float64 {
+func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) {
 	// safety check
 	if dummyA == nil || dummyB == nil {
-		return 0
+		return
 	}
 
 	// get velocity and mass
@@ -29,19 +29,36 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) float64 
 	bVy := dummyB.VelY
 	bM := dummyB.Mass
 
+	// guarantee some kind of minimum velocity in check
+	if math.Abs(aVx) < 0.5 {
+		aVx = rand.Float64() - 0.5
+	}
+
+	if math.Abs(aVy) < 0.5 {
+		aVy = rand.Float64() - 0.5
+	}
+
+	if math.Abs(bVx) < 0.5 {
+		bVx = rand.Float64() - 0.5
+	}
+
+	if math.Abs(bVy) < 0.5 {
+		bVy = rand.Float64() - 0.5
+	}
+
 	// push them apart to avoid double counting and overlap
 	iter := 0
 
 	for {
-		dummyA.PosX = (dummyA.PosX - Sign(aVx)*rand.Float64()*5.0)
-		dummyA.PosY = (dummyA.PosY - Sign(aVy)*rand.Float64()*5.0)
-		dummyB.PosX = (dummyB.PosX - Sign(bVx)*rand.Float64()*5.0)
-		dummyB.PosY = (dummyB.PosY - Sign(bVy)*rand.Float64()*5.0)
+		dummyA.PosX = (dummyA.PosX - Sign(aVx)*rand.Float64()*2.0)
+		dummyA.PosY = (dummyA.PosY - Sign(aVy)*rand.Float64()*2.0)
+		dummyB.PosX = (dummyB.PosX - Sign(bVx)*rand.Float64()*2.0)
+		dummyB.PosY = (dummyB.PosY - Sign(bVy)*rand.Float64()*2.0)
 
 		// exit if no longer touching
 		nD := Distance(*dummyA, *dummyB)
 
-		if nD > systemRadius*1.01 {
+		if nD > systemRadius {
 			break
 		}
 
@@ -57,24 +74,17 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) float64 
 	cVx := (aVx*aM + bVx*bM) / (aM + bM)
 	cVy := (aVy*aM + bVy*bM) / (aM + bM)
 
-	// randomize mix angle
-	mix := rand.Float64()
-	antiMix := 1.0 - mix
-
 	// reverse directions and de-reference frame
-	aVx2 := -aVx + (cVx * mix)
-	aVy2 := -aVy + (cVy * mix)
-	bVx2 := -bVx + (cVx * antiMix)
-	bVy2 := -bVy + (cVy * antiMix)
+	aVx2 := -aVx + cVx
+	aVy2 := -aVy + cVy
+	bVx2 := -bVx + cVx
+	bVy2 := -bVy + cVy
 
 	// store
 	dummyA.VelX = aVx2
 	dummyA.VelY = aVy2
 	dummyB.VelX = bVx2
 	dummyB.VelY = bVy2
-
-	// return mixing angle
-	return mix
 }
 
 // Calculates the distance between the centers of 2 physics dummies and returns the result
