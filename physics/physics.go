@@ -15,7 +15,7 @@ type Dummy struct {
 }
 
 // Calculates the result of a 2D elastic collission between two dummies and stores the result in those dummies
-func ElasticCollide(dummyA *Dummy, dummyB *Dummy) {
+func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) {
 	// safety check
 	if dummyA == nil || dummyB == nil {
 		return
@@ -47,10 +47,10 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy) {
 	}
 
 	// push them apart to avoid double counting and overlap
-	dummyA.PosX = (dummyA.PosX - aVx*(2.0+rand.Float64()))
-	dummyA.PosY = (dummyA.PosY - aVy*(2.0+rand.Float64()))
-	dummyB.PosX = (dummyB.PosX - bVx*(2.0+rand.Float64()))
-	dummyB.PosY = (dummyB.PosY - bVy*(2.0+rand.Float64()))
+	dummyA.PosX = (dummyA.PosX - aVx*(2.0+systemRadius))
+	dummyA.PosY = (dummyA.PosY - aVy*(2.0+systemRadius))
+	dummyB.PosX = (dummyB.PosX - bVx*(2.0+systemRadius))
+	dummyB.PosY = (dummyB.PosY - bVy*(2.0+systemRadius))
 
 	// determine center of mass's velocity
 	cVx := (aVx*aM + bVx*bM) / (aM + bM)

@@ -1605,9 +1605,11 @@ func (s *SolarSystem) shipCollisionTesting() {
 				d := physics.Distance(dummyA, dummyB)
 
 				// check for radius intersection
-				if d <= (sA.TemplateData.Radius + sB.TemplateData.Radius) {
+				sysRad := (sA.TemplateData.Radius + sB.TemplateData.Radius)
+
+				if d <= sysRad {
 					// calculate collission results
-					physics.ElasticCollide(&dummyA, &dummyB)
+					physics.ElasticCollide(&dummyA, &dummyB, sysRad)
 
 					// update ships with results
 					sA.ApplyPhysicsDummy(dummyA)
