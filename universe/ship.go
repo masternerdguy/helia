@@ -1916,6 +1916,8 @@ func (s *Ship) behaviourPatchMine() {
 						TargetID: tgtAst.ID,
 						Type:     models.NewTargetTypeRegistry().Asteroid,
 					}
+
+					s.AutopilotMode = NewAutopilotRegistry().Mine
 				} else {
 					// no asteroids here? wander
 					s.gotoNextWanderDestination(15)
