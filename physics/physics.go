@@ -33,15 +33,15 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) float64 
 	iter := 0
 
 	for {
-		dummyA.PosX = (dummyA.PosX - Sign(aVx)*systemRadius/10)
-		dummyA.PosY = (dummyA.PosY - Sign(aVy)*systemRadius/10)
-		dummyB.PosX = (dummyB.PosX - Sign(bVx)*systemRadius/10)
-		dummyB.PosY = (dummyB.PosY - Sign(bVy)*systemRadius/10)
+		dummyA.PosX = (dummyA.PosX - Sign(aVx)*rand.Float64()*5.0)
+		dummyA.PosY = (dummyA.PosY - Sign(aVy)*rand.Float64()*5.0)
+		dummyB.PosX = (dummyB.PosX - Sign(bVx)*rand.Float64()*5.0)
+		dummyB.PosY = (dummyB.PosY - Sign(bVy)*rand.Float64()*5.0)
 
 		// exit if no longer touching
 		nD := Distance(*dummyA, *dummyB)
 
-		if nD > systemRadius*1.05 {
+		if nD > systemRadius*1.01 {
 			break
 		}
 
