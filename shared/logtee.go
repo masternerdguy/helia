@@ -1,12 +1,17 @@
 package shared
 
 import (
+	"fmt"
+	"math/rand"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 var teeLogChannel chan teeLog
 var teeLogInitialized = false
 var teeLogHandlers []logTeeHandler
+var teeLogWrite LabeledMutex
 
 type logTeeHandler func(string, time.Time)
 
@@ -27,6 +32,12 @@ func InitializeTeeLog(fns ...logTeeHandler) {
 	// initialize channel
 	teeLogChannel = make(chan teeLog)
 
+	// initialize mutex
+	teeLogWrite = LabeledMutex{
+		Structure: "PlayerReputationSheet",
+		UID:       fmt.Sprintf("%v :: %v :: %v", uuid.New(), time.Now(), rand.Float64()),
+	}
+
 	// start watcher
 	go func() {
 		for {
@@ -38,13 +49,15 @@ func InitializeTeeLog(fns ...logTeeHandler) {
 				// pass to logger functions on separate goroutines
 				for _, h := range teeLogHandlers {
 					go func(h logTeeHandler) {
+						// obtain write lock
+						teeLogWrite.Lock("InitializeTeeLog::watcher")
+						defer teeLogWrite.Unlock()
+
+						// write message
 						h(log.Message, log.EventTime)
 					}(h)
 				}
 			}()
-
-			// avoid overwhelming any handlers by guaranteeing a minimal spacing between events
-			time.Sleep(10 * time.Millisecond)
 		}
 	}()
 
