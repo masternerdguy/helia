@@ -30,17 +30,27 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) float64 
 	bM := dummyB.Mass
 
 	// push them apart to avoid double counting and overlap
-	for {
-		dummyA.PosX = (dummyA.PosX - Sign(aVx)*2.0)
-		dummyA.PosY = (dummyA.PosY - Sign(aVy)*2.0)
-		dummyB.PosX = (dummyB.PosX - Sign(bVx)*2.0)
-		dummyB.PosY = (dummyB.PosY - Sign(bVy)*2.0)
+	iter := 0
 
+	for {
+		dummyA.PosX = (dummyA.PosX - Sign(aVx)*systemRadius/10)
+		dummyA.PosY = (dummyA.PosY - Sign(aVy)*systemRadius/10)
+		dummyB.PosX = (dummyB.PosX - Sign(bVx)*systemRadius/10)
+		dummyB.PosY = (dummyB.PosY - Sign(bVy)*systemRadius/10)
+
+		// exit if no longer touching
 		nD := Distance(*dummyA, *dummyB)
 
-		if nD > systemRadius {
+		if nD > systemRadius*1.05 {
 			break
 		}
+
+		// prevents infinite loop
+		if iter > 100 {
+			break
+		}
+
+		iter++
 	}
 
 	// determine center of mass's velocity
