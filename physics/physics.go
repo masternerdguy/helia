@@ -56,11 +56,15 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy) {
 	cVx := (aVx*aM + bVx*bM) / (aM + bM)
 	cVy := (aVy*aM + bVy*bM) / (aM + bM)
 
+	// randomize mix angle
+	mix := rand.Float64()
+	antiMix := 1.0 - mix
+
 	// reverse directions and de-reference frame
-	aVx2 := -aVx + cVx
-	aVy2 := -aVy + cVy
-	bVx2 := -bVx + cVx
-	bVy2 := -bVy + cVy
+	aVx2 := -aVx + (cVx * mix)
+	aVy2 := -aVy + (cVy * mix)
+	bVx2 := -bVx + (cVx * antiMix)
+	bVy2 := -bVy + (cVy * antiMix)
 
 	// store
 	dummyA.VelX = aVx2
