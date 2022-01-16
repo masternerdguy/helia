@@ -38,6 +38,9 @@ func InitializeTeeLog(fns ...logTeeHandler) {
 				go func(h logTeeHandler) {
 					h(log.Message, log.EventTime)
 				}(h)
+
+				// avoid overwhelming any handlers
+				time.Sleep(50 * time.Millisecond)
 			}
 		}
 	}()
