@@ -177,31 +177,32 @@ type Ship struct {
 	// docking
 	DockedAtStationID *uuid.UUID
 	// in-memory only
-	IsNPC              bool
-	IsDocked           bool
-	Faction            *Faction
-	AutopilotMode      int
-	AutopilotManualNav ManualNavData
-	AutopilotGoto      GotoData
-	AutopilotOrbit     OrbitData
-	AutopilotDock      DockData
-	AutopilotUndock    UndockData
-	AutopilotFight     FightData
-	AutopilotMine      MineData
-	BehaviourMode      *int
-	CurrentSystem      *SolarSystem
-	DockedAtStation    *Station
-	CargoBay           *Container
-	FittingBay         *Container
-	EscrowContainerID  *uuid.UUID
-	BeingFlownByPlayer bool
-	ReputationSheet    *shared.PlayerReputationSheet
-	ExperienceSheet    *shared.PlayerExperienceSheet
-	DestructArmed      bool
-	TemporaryModifiers []TemporaryShipModifier
-	IsCloaked          bool
-	Aggressors         map[string]*shared.PlayerReputationSheet
-	Lock               shared.LabeledMutex
+	IsNPC                  bool
+	IsDocked               bool
+	Faction                *Faction
+	AutopilotMode          int
+	AutopilotManualNav     ManualNavData
+	AutopilotGoto          GotoData
+	AutopilotOrbit         OrbitData
+	AutopilotDock          DockData
+	AutopilotUndock        UndockData
+	AutopilotFight         FightData
+	AutopilotMine          MineData
+	BehaviourMode          *int
+	CurrentSystem          *SolarSystem
+	DockedAtStation        *Station
+	CargoBay               *Container
+	FittingBay             *Container
+	EscrowContainerID      *uuid.UUID
+	BeingFlownByPlayer     bool
+	ReputationSheet        *shared.PlayerReputationSheet
+	ExperienceSheet        *shared.PlayerExperienceSheet
+	DestructArmed          bool
+	TemporaryModifiers     []TemporaryShipModifier
+	IsCloaked              bool
+	Aggressors             map[string]*shared.PlayerReputationSheet
+	aiIncompatibleOreFault bool // true when mining autopilot failed due to incompatible ore (for patch miners)
+	Lock                   shared.LabeledMutex
 }
 
 type TemporaryShipModifier struct {
@@ -1062,6 +1063,7 @@ func (s *Ship) CmdMine(targetID uuid.UUID, targetType int, lock bool) {
 		Type:     targetType,
 	}
 
+	s.aiIncompatibleOreFault = false
 	s.AutopilotMode = registry.Mine
 }
 
@@ -1837,6 +1839,16 @@ func (s *Ship) behaviourPatchMine() {
 	// get registry
 	autoReg := NewAutopilotRegistry()
 
+	// check for fault
+	if s.aiIncompatibleOreFault {
+		// clear flag
+		s.aiIncompatibleOreFault = false
+
+		// wander
+		s.gotoNextWanderDestination(15)
+		return
+	}
+
 	// check if idle
 	if s.AutopilotMode == autoReg.None {
 		// allow time to cool off :)
@@ -2555,6 +2567,8 @@ func (s *Ship) doAutopilotMine() {
 		if rangedMods == 0 {
 			// can't mine this type
 			s.CmdAbort(false)
+			s.aiIncompatibleOreFault = true
+
 			return
 		}
 
