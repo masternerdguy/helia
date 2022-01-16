@@ -100,6 +100,19 @@ CREATE TABLE public.itemtypes (
 ALTER TABLE public.itemtypes OWNER TO developer;
 
 --
+-- Name: logs; Type: TABLE; Schema: public; Owner: developer
+--
+
+CREATE TABLE public.logs (
+    id uuid NOT NULL,
+    "timestamp" timestamp with time zone NOT NULL,
+    message text NOT NULL
+);
+
+
+ALTER TABLE public.logs OWNER TO developer;
+
+--
 -- Name: processes; Type: TABLE; Schema: public; Owner: developer
 --
 
@@ -465,6 +478,14 @@ ALTER TABLE public.users OWNER TO developer;
 
 ALTER TABLE ONLY public.factions
     ADD CONSTRAINT factions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: logs logs_pkey; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.logs
+    ADD CONSTRAINT logs_pkey PRIMARY KEY (id);
 
 
 --

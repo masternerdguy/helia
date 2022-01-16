@@ -4,6 +4,7 @@ import (
 	"helia/engine"
 	"helia/listener"
 	"helia/shared"
+	"helia/sql"
 	"log"
 	"math/rand"
 	"net/http"
@@ -14,6 +15,7 @@ func main() {
 	// configure global tee logging
 	shared.InitializeTeeLog(
 		printLogger,
+		dbLogger,
 	)
 
 	// initialize RNG
@@ -54,5 +56,13 @@ func main() {
 }
 
 func printLogger(s string, t time.Time) {
-	log.Println(s) // t is intentionaly discarded because Println already provides a timestamp
+	log.Println(s) // t is intentionally discarded because Println already provides a timestamp
+}
+
+func dbLogger(s string, t time.Time) {
+	// get log service
+	logSvc := sql.GetLogService()
+
+	// write log
+	logSvc.WriteLog(s, t)
 }
