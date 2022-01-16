@@ -1535,6 +1535,8 @@ func (s *Ship) behave() {
 				s.behaviourPatrol()
 			case registry.PatchTrade:
 				s.behaviourPatchTrade()
+			case registry.PatchMine:
+				s.behaviourPatchMine()
 			}
 		}
 	}
@@ -1797,6 +1799,128 @@ func (s *Ship) behaviourPatchTrade() {
 			}
 		} else {
 			s.gotoNextWanderDestination(85)
+		}
+	}
+}
+
+// wanders around the universe randomly mining and selling what it mined to patch the economy
+func (s *Ship) behaviourPatchMine() {
+	// pause if heat too high
+	maxHeat := s.GetRealMaxHeat()
+	heatLevel := s.Heat / maxHeat
+
+	if heatLevel > 0.95 {
+		s.CmdAbort(false)
+	}
+
+	// get registry
+	autoReg := NewAutopilotRegistry()
+
+	// check if idle
+	if s.AutopilotMode == autoReg.None {
+		// allow time to cool off :)
+		if heatLevel > 0.25 {
+			return
+		}
+
+		// check if docked
+		if s.DockedAtStationID != nil && s.DockedAtStation != nil {
+			// 1% chance of undocking per tick
+			roll := physics.RandInRange(0, 100)
+
+			if roll == 1 {
+				// undock
+				s.CmdUndock(false)
+				return
+			}
+
+			// check if wallet should be randomized
+			if roll%22 == 0 {
+				// randomize wallet
+				s.Wallet = float64(physics.RandInRange(0, math.MaxInt32/64))
+			}
+
+			// check if buy/sell/trash attempts should be made
+			if roll%33 == 0 {
+				// attempt to sell items in cargo bay on the industrial market
+				for _, i := range s.CargoBay.Items {
+					st := s.DockedAtStation
+
+					// skip if unpackaged or 0 quantity
+					if !i.IsPackaged || i.Quantity == 0 {
+						continue
+					}
+
+					// skip if dirty
+					if i.CoreDirty {
+						continue
+					}
+
+					// iterate over processes
+					for _, p := range st.Processes {
+						for _, pi := range p.Process.Inputs {
+							// skip if not buying this item type
+							if pi.ItemTypeID != i.ItemTypeID {
+								continue
+							}
+
+							// roll for sell chance
+							sellRoll := physics.RandInRange(0, 100)
+
+							if sellRoll%3 == 0 {
+								// get random quantity
+								q := physics.RandInRange(1, i.Quantity+2)
+
+								// try to sell item to silo
+								s.SellItemToSilo(p.ID, i.ID, q, false)
+							}
+						}
+					}
+				}
+			}
+		} else {
+			// check if cargo bay is almost full (>80%)
+			max := s.GetRealCargoBayVolume()
+			used := s.TotalCargoBayVolumeUsed(false)
+
+			if used/max > 0.8 {
+				// go somewhere to try and sell it
+				s.gotoNextWanderDestination(85)
+			} else {
+				// get and count asteroids in system
+				asteroids := s.CurrentSystem.asteroids
+				count := len(asteroids)
+
+				// verify there are candidates
+				if count == 0 {
+					return
+				}
+
+				// pick random asteroid to mine
+				tgt := physics.RandInRange(0, count)
+				var tgtAst *Asteroid = nil
+
+				idx := 0
+				for _, v := range asteroids {
+					if idx == tgt {
+						tgtAst = v
+						break
+					}
+
+					idx++
+				}
+
+				if tgtAst != nil {
+					// go mine it
+					s.AutopilotMine = MineData{
+						TargetID: tgtAst.ID,
+						Type:     models.NewTargetTypeRegistry().Asteroid,
+					}
+				} else {
+					// no asteroids here? wander
+					s.gotoNextWanderDestination(15)
+				}
+			}
 		}
 	}
 }
