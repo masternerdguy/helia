@@ -7,7 +7,6 @@ import (
 	"helia/listener/models"
 	"helia/shared"
 	"helia/sql"
-	"log"
 	"math/rand"
 	"net/http"
 	"time"
@@ -45,7 +44,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 	// return if protocol change failed
 	if err != nil {
-		log.Print("ws protocol update error:", err)
+		shared.TeeLog(fmt.Sprintf("ws protocol update error: %v", err))
 		return
 	}
 
@@ -86,7 +85,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		err := userSvc.SaveReputationSheet(*client.UID, srs)
 
 		if err != nil {
-			log.Println(fmt.Sprintf("! unable to save reputation sheet for %v on disconnect! %v", client.UID, err))
+			shared.TeeLog(fmt.Sprintf("! unable to save reputation sheet for %v on disconnect! %v", client.UID, err))
 		}
 
 		// save experience sheet
@@ -97,7 +96,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		err = userSvc.SaveExperienceSheet(*client.UID, ers)
 
 		if err != nil {
-			log.Println(fmt.Sprintf("! unable to save experience sheet for %v on disconnect! %v", client.UID, err))
+			shared.TeeLog(fmt.Sprintf("! unable to save experience sheet for %v on disconnect! %v", client.UID, err))
 		}
 	}(&client)
 
@@ -114,7 +113,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 		// exit if read failed
 		if err != nil {
-			log.Println("ws read error:", err)
+			shared.TeeLog(fmt.Sprintf("ws read error: %v", err.Error()))
 			break
 		}
 
@@ -386,7 +385,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 	}
 
 	// debug out
-	log.Println(fmt.Sprintf("player join attempt: %v", &body.SessionID))
+	shared.TeeLog(fmt.Sprintf("player join attempt: %v", &body.SessionID))
 
 	// initialize services
 	sessionSvc := sql.GetSessionService()
@@ -427,14 +426,14 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 			if dbShip == nil {
 				// report error
-				log.Println(fmt.Sprintf("player join error: unable to find ship %v for %v", u.CurrentShipID, u.ID))
+				shared.TeeLog(fmt.Sprintf("player join error: unable to find ship %v for %v", u.CurrentShipID, u.ID))
 
 				// try to recover by creating a noob ship for player
 				nStart, err := startSvc.GetStartByID(u.StartID)
 
 				if err != nil {
 					// dump error to console
-					log.Println(fmt.Sprintf("player join recovery - unable to get start for player: %v", err))
+					shared.TeeLog(fmt.Sprintf("player join recovery - unable to get start for player: %v", err))
 					return
 				}
 
@@ -442,7 +441,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 				if err != nil {
 					// dump error to console
-					log.Println(fmt.Sprintf("player join recovery - unable to create noob ship for player: %v", err))
+					shared.TeeLog(fmt.Sprintf("player join recovery - unable to create noob ship for player: %v", err))
 					return
 				}
 
@@ -450,7 +449,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				dbShip, err = shipSvc.GetShipByID(*u.CurrentShipID, false)
 
 				if dbShip == nil || err != nil {
-					log.Println(fmt.Sprintf("player join recovery: unable to find recovery noob ship %v for %v", u.CurrentShipID, u.ID))
+					shared.TeeLog(fmt.Sprintf("player join recovery: unable to find recovery noob ship %v for %v", u.CurrentShipID, u.ID))
 					return
 				}
 			}
@@ -459,7 +458,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			currShip, err = engine.LoadShip(dbShip, l.Engine.Universe)
 
 			if dbShip == nil {
-				log.Println(fmt.Sprintf("player join error: %v", err))
+				shared.TeeLog(fmt.Sprintf("player join error: %v", err))
 				return
 			}
 		}
@@ -639,13 +638,13 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		client.WriteMessage(&msg)
 
 		// debug out
-		log.Println(fmt.Sprintf("player joined: %v", &body.SessionID))
+		shared.TeeLog(fmt.Sprintf("player joined: %v", &body.SessionID))
 
 		// mark as successfully joined
 		client.Joined = true
 	} else {
 		// dump error to console
-		log.Println(fmt.Sprintf("player join error: %v", err))
+		shared.TeeLog(fmt.Sprintf("player join error: %v", err))
 	}
 }
 
@@ -661,7 +660,7 @@ func (l *SocketListener) handleClientGlobalAck(client *shared.GameClient, body *
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientGlobalAck: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientGlobalAck: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -684,7 +683,7 @@ func (l *SocketListener) handleClientNavClick(client *shared.GameClient, body *m
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientNavClick: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientNavClick: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -707,7 +706,7 @@ func (l *SocketListener) handleClientGoto(client *shared.GameClient, body *model
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientGoto: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientGoto: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -730,7 +729,7 @@ func (l *SocketListener) handleClientOrbit(client *shared.GameClient, body *mode
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientOrbit: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientOrbit: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -753,7 +752,7 @@ func (l *SocketListener) handleClientDock(client *shared.GameClient, body *model
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientDock: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientDock: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -776,7 +775,7 @@ func (l *SocketListener) handleClientUndock(client *shared.GameClient, body *mod
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientUndock: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientUndock: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -799,7 +798,7 @@ func (l *SocketListener) handleClientActivateModule(client *shared.GameClient, b
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientActivateModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientActivateModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -822,7 +821,7 @@ func (l *SocketListener) handleClientDeactivateModule(client *shared.GameClient,
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientDeactivateModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientDeactivateModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -845,7 +844,7 @@ func (l *SocketListener) handleClientViewCargoBay(client *shared.GameClient, bod
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientViewCargoBay: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientViewCargoBay: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -868,7 +867,7 @@ func (l *SocketListener) handleClientUnfitModule(client *shared.GameClient, body
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientUnfitModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientUnfitModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -891,7 +890,7 @@ func (l *SocketListener) handleClientTrashItem(client *shared.GameClient, body *
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientTrashItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientTrashItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -914,7 +913,7 @@ func (l *SocketListener) handleClientPackageItem(client *shared.GameClient, body
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientPackageItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientPackageItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -937,7 +936,7 @@ func (l *SocketListener) handleClientUnpackageItem(client *shared.GameClient, bo
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientUnpackageItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientUnpackageItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -960,7 +959,7 @@ func (l *SocketListener) handleClientStackItem(client *shared.GameClient, body *
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientStackItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientStackItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -983,7 +982,7 @@ func (l *SocketListener) handleClientSplitItem(client *shared.GameClient, body *
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientSplitItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientSplitItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1006,7 +1005,7 @@ func (l *SocketListener) handleClientFitModule(client *shared.GameClient, body *
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientFitModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientFitModule: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1029,7 +1028,7 @@ func (l *SocketListener) handleClientSellAsOrder(client *shared.GameClient, body
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientSellAsOrder: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientSellAsOrder: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1052,7 +1051,7 @@ func (l *SocketListener) handleClientViewOpenSellOrders(client *shared.GameClien
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientViewOpenSellOrders: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientViewOpenSellOrders: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1075,7 +1074,7 @@ func (l *SocketListener) handleClientBuySellOrder(client *shared.GameClient, bod
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientBuySellOrder: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientBuySellOrder: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1098,7 +1097,7 @@ func (l *SocketListener) handleClientViewIndustrialOrders(client *shared.GameCli
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientViewIndustrialOrders: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientViewIndustrialOrders: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1121,7 +1120,7 @@ func (l *SocketListener) handleClientBuyFromSilo(client *shared.GameClient, body
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientBuyFromSilo: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientBuyFromSilo: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1144,7 +1143,7 @@ func (l *SocketListener) handleClientSellToSilo(client *shared.GameClient, body 
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientSellToSilo: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientSellToSilo: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1167,7 +1166,7 @@ func (l *SocketListener) handleClientViewStarMap(client *shared.GameClient, body
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientViewStarMap: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientViewStarMap: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1190,7 +1189,7 @@ func (l *SocketListener) handleClientConsumeFuel(client *shared.GameClient, body
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientConsumeFuel: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientConsumeFuel: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1213,7 +1212,7 @@ func (l *SocketListener) handleClientSelfDestruct(client *shared.GameClient, bod
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientSelfDestruct: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientSelfDestruct: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1236,7 +1235,7 @@ func (l *SocketListener) handleClientConsumeRepairKit(client *shared.GameClient,
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientConsumeRepairKit: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientConsumeRepairKit: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1259,7 +1258,7 @@ func (l *SocketListener) handleClientViewProperty(client *shared.GameClient, bod
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientViewProperty: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientViewProperty: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1282,7 +1281,7 @@ func (l *SocketListener) handleClientBoard(client *shared.GameClient, body *mode
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientBoard: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientBoard: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1305,7 +1304,7 @@ func (l *SocketListener) handleClientTransferCredits(client *shared.GameClient, 
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientTransferCredits: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientTransferCredits: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1328,7 +1327,7 @@ func (l *SocketListener) handleClientSellShipAsOrder(client *shared.GameClient, 
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientSellShipAsOrder: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientSellShipAsOrder: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1351,7 +1350,7 @@ func (l *SocketListener) handleClientTrashShip(client *shared.GameClient, body *
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientTrashShip: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientTrashShip: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1374,7 +1373,7 @@ func (l *SocketListener) handleClientRenameShip(client *shared.GameClient, body 
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientRenameShip: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientRenameShip: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1397,7 +1396,7 @@ func (l *SocketListener) handleClientPostSystemChatMessage(client *shared.GameCl
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientPostSystemChatMessageBody: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientPostSystemChatMessageBody: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1420,7 +1419,7 @@ func (l *SocketListener) handleClientTransferItem(client *shared.GameClient, bod
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientTransferItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientTransferItem: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1443,7 +1442,7 @@ func (l *SocketListener) handleClientViewExperience(client *shared.GameClient, b
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		log.Println(fmt.Sprintf("handleClientViewExperience: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientViewExperience: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()

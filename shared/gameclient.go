@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"helia/listener/models"
-	"log"
 	"math/rand"
 	"time"
 
@@ -112,13 +111,13 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 
 		if _, err := gz.Write([]byte(json)); err != nil {
 			// dump error message to console
-			log.Println(err)
+			TeeLog(err.Error())
 			return
 		}
 
 		if err := gz.Close(); err != nil {
 			// dump error message to console
-			log.Println(err)
+			TeeLog(err.Error())
 			return
 		}
 
@@ -129,7 +128,7 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 		c.Conn.WriteMessage(1, []byte(o))
 	} else {
 		// dump error message to console
-		log.Println(err)
+		TeeLog(err.Error())
 	}
 }
 

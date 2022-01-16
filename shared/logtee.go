@@ -16,15 +16,16 @@ type teeLog struct {
 }
 
 // Prepares shared tee logger
-func InitializeTeeLog(fns []logTeeHandler) {
+func InitializeTeeLog(fns ...logTeeHandler) {
 	if teeLogInitialized {
 		panic("logtee is already initialized!")
 	}
 
+	// store logger functions
+	teeLogHandlers = fns
+
 	// initialize channel
 	teeLogChannel = make(chan teeLog)
-	teeLogHandlers = fns
-	teeLogInitialized = true
 
 	// start watcher
 	go func() {
@@ -38,6 +39,9 @@ func InitializeTeeLog(fns []logTeeHandler) {
 			}
 		}
 	}()
+
+	// mark as initialized
+	teeLogInitialized = true
 }
 
 // Queues a log string to be handled by the initialized logger functions

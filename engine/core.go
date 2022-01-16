@@ -5,7 +5,6 @@ import (
 	"helia/shared"
 	"helia/sql"
 	"helia/universe"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -21,7 +20,7 @@ type HeliaEngine struct {
 
 // Initializes a new instance of the game engine
 func (e *HeliaEngine) Initialize() *HeliaEngine {
-	log.Println("Loading game universe from database...")
+	shared.TeeLog("Loading game universe from database...")
 
 	// load universe
 	u, err := LoadUniverse()
@@ -31,11 +30,11 @@ func (e *HeliaEngine) Initialize() *HeliaEngine {
 	}
 
 	// generate transient celestials
-	log.Println("Generating transient celestials...")
+	shared.TeeLog("Generating transient celestials...")
 	u.BuildTransientCelestials()
 
 	// cache starmap
-	log.Println("Building starmap...")
+	shared.TeeLog("Building starmap...")
 	err = u.BuildMapWithCache()
 
 	if err != nil {
@@ -45,7 +44,7 @@ func (e *HeliaEngine) Initialize() *HeliaEngine {
 	e.Universe = u
 
 	// instantiate engine
-	log.Println("Universe ready!")
+	shared.TeeLog("Universe ready!")
 	engine := HeliaEngine{}
 
 	return &engine
@@ -53,7 +52,7 @@ func (e *HeliaEngine) Initialize() *HeliaEngine {
 
 // Start the goroutines for each system
 func (e *HeliaEngine) Start() {
-	log.Println("Starting system goroutines...")
+	shared.TeeLog("Starting system goroutines...")
 
 	for _, r := range e.Universe.Regions {
 		for _, s := range r.Systems {
@@ -101,38 +100,38 @@ func (e *HeliaEngine) Start() {
 					lastFrame = makeTimestamp()
 				}
 
-				log.Println(fmt.Sprintf("System %s has halted.", sol.SystemName))
+				shared.TeeLog(fmt.Sprintf("System %s has halted.", sol.SystemName))
 			}(s)
 		}
 	}
 
-	log.Println("System goroutines started!")
+	shared.TeeLog("System goroutines started!")
 
 	// start watchdog goroutine (to alert of any deadlocks for debugging purposes)
 	go func(e *HeliaEngine) {
 		for {
 			if shutdownSignal {
-				log.Println("! Deadlock Check [goroutine] Halted!")
+				shared.TeeLog("! Deadlock Check [goroutine] Halted!")
 				break
 			}
 
-			log.Println("* Deadlock Check Starting")
+			shared.TeeLog("* Deadlock Check Starting")
 
 			// iterate over systems
 			for _, r := range e.Universe.Regions {
 				for _, s := range r.Systems {
-					log.Println(fmt.Sprintf("* Testing [%v]", s.SystemName))
+					shared.TeeLog(fmt.Sprintf("* Testing [%v]", s.SystemName))
 
 					// test locks
 					s.TestLocks()
-					log.Println(fmt.Sprintf("* [%v] Passed", s.SystemName))
+					shared.TeeLog(fmt.Sprintf("* [%v] Passed", s.SystemName))
 				}
 
 				// small sleep between systems
 				time.Sleep(20 * time.Millisecond)
 			}
 
-			log.Println("* All systems passed deadlock check!")
+			shared.TeeLog("* All systems passed deadlock check!")
 
 			// wait 2 minutes
 			time.Sleep(time.Second * 120)
@@ -159,10 +158,10 @@ func (e *HeliaEngine) Shutdown() {
 		return
 	}
 
-	log.Println("! Server shutdown initiated")
+	shared.TeeLog("! Server shutdown initiated")
 
 	// shut down simulation
-	log.Println("Stopping simulation...")
+	shared.TeeLog("Stopping simulation...")
 	shutdownSignal = true
 	shared.ShutdownSignal = true
 
@@ -177,15 +176,15 @@ func (e *HeliaEngine) Shutdown() {
 		time.Sleep(1000)
 	}
 
-	log.Println("Halt success assumed")
+	shared.TeeLog("Halt success assumed")
 
 	// save progress
-	log.Println("Saving world state...")
+	shared.TeeLog("Saving world state...")
 	saveUniverse(e.Universe)
-	log.Println("World state saved!")
+	shared.TeeLog("World state saved!")
 
 	// end program
-	log.Println("Shutdown complete! Goodbye :)")
+	shared.TeeLog("Shutdown complete! Goodbye :)")
 	os.Exit(0)
 }
 
@@ -220,7 +219,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// error check
 			if err != nil {
-				log.Println(fmt.Sprintf("Unable to relocate item %v: %v", mi.ID, err))
+				shared.TeeLog(fmt.Sprintf("Unable to relocate item %v: %v", mi.ID, err))
 			} else {
 				// mark as clean
 				mi.CoreDirty = false
@@ -248,7 +247,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// error check
 			if err != nil {
-				log.Println(fmt.Sprintf("Unable to package item %v: %v", mi.ID, err))
+				shared.TeeLog(fmt.Sprintf("Unable to package item %v: %v", mi.ID, err))
 			} else {
 				// mark as clean
 				mi.CoreDirty = false
@@ -276,7 +275,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// error check
 			if err != nil {
-				log.Println(fmt.Sprintf("Unable to unpackage item %v: %v", mi.ID, err))
+				shared.TeeLog(fmt.Sprintf("Unable to unpackage item %v: %v", mi.ID, err))
 			} else {
 				// mark as clean
 				mi.CoreDirty = false
@@ -304,7 +303,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// error check
 			if err != nil {
-				log.Println(fmt.Sprintf("Unable to change quantity of item %v: %v", mi.ID, err))
+				shared.TeeLog(fmt.Sprintf("Unable to change quantity of item %v: %v", mi.ID, err))
 			} else {
 				// mark as clean
 				mi.CoreDirty = false
@@ -329,7 +328,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// error check
 			if err != nil || id == nil {
-				log.Println(fmt.Sprintf("Unable to save new item %v: %v", mi.ID, err))
+				shared.TeeLog(fmt.Sprintf("Unable to save new item %v: %v", mi.ID, err))
 			} else {
 				// store corrected id from db insert
 				mi.ID = *id
@@ -338,12 +337,12 @@ func handleEscalations(sol *universe.SolarSystem) {
 				ni, err := itemSvc.GetItemByID(*id)
 
 				if err != nil || id == nil {
-					log.Println(fmt.Sprintf("Unable to load new item %v: %v", mi.ID, err))
+					shared.TeeLog(fmt.Sprintf("Unable to load new item %v: %v", mi.ID, err))
 				} else {
 					fi, err := LoadItem(ni)
 
 					if err != nil || id == nil {
-						log.Println(fmt.Sprintf("Unable to integrate new item %v: %v", mi.ID, err))
+						shared.TeeLog(fmt.Sprintf("Unable to integrate new item %v: %v", mi.ID, err))
 					} else {
 						// copy loaded values
 						mi.Meta = fi.Meta
@@ -391,7 +390,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// error check
 			if err != nil || id == nil {
-				log.Println(fmt.Sprintf("Unable to save new sell order %v: %v", mi.ID, err))
+				shared.TeeLog(fmt.Sprintf("Unable to save new sell order %v: %v", mi.ID, err))
 			} else {
 				// store corrected id from db insert
 				mi.ID = *id
@@ -422,7 +421,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// error check
 			if err != nil {
-				log.Println(fmt.Sprintf("Unable to update bought sell order %v: %v", mi.ID, err))
+				shared.TeeLog(fmt.Sprintf("Unable to update bought sell order %v: %v", mi.ID, err))
 			} else {
 				// mark as clean
 				mi.CoreDirty = false
@@ -468,7 +467,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			err := saveShip(ds)
 
 			if err != nil {
-				log.Println(fmt.Sprintf("! Unable to mark ship %v as dead in db (%v)!", ds.ID, err))
+				shared.TeeLog(fmt.Sprintf("! Unable to mark ship %v as dead in db (%v)!", ds.ID, err))
 				return
 			}
 		}(ds, sol)
@@ -486,14 +485,14 @@ func handleEscalations(sol *universe.SolarSystem) {
 			user, err := userSvc.GetUserByID(rs.UserID)
 
 			if err != nil {
-				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - no associated user!", rs.UserID))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn NPC %v - no associated user!", rs.UserID))
 				return
 			}
 
 			start, err := startSvc.GetStartByID(user.StartID)
 
 			if err != nil {
-				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - no associated start!", rs.UserID))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn NPC %v - no associated start!", rs.UserID))
 				return
 			}
 
@@ -501,7 +500,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			home := sol.Universe.FindStation(start.HomeStationID, &sol.ID)
 
 			if home == nil {
-				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - no home station!", rs.UserID))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn NPC %v - no home station!", rs.UserID))
 				return
 			}
 
@@ -509,14 +508,14 @@ func handleEscalations(sol *universe.SolarSystem) {
 			u, err := CreateNoobShipForPlayer(start, rs.UserID)
 
 			if err != nil || u.CurrentShipID == nil {
-				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - failed to create noob ship (%v | %v)!", rs.UserID, err, u.CurrentShipID))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn NPC %v - failed to create noob ship (%v | %v)!", rs.UserID, err, u.CurrentShipID))
 				return
 			}
 
 			ns, err := shipSvc.GetShipByID(*u.CurrentShipID, false)
 
 			if err != nil || ns == nil {
-				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - no noob ship!", rs.UserID))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn NPC %v - no noob ship!", rs.UserID))
 				return
 			}
 
@@ -524,7 +523,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			err = shipSvc.UpdateShip(*ns)
 
 			if home == nil {
-				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - couldn't save noob ship changes (%v)!", rs.UserID, err))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn NPC %v - couldn't save noob ship changes (%v)!", rs.UserID, err))
 				return
 			}
 
@@ -532,14 +531,14 @@ func handleEscalations(sol *universe.SolarSystem) {
 			ns, err = shipSvc.GetShipByID(*u.CurrentShipID, false)
 
 			if err != nil || ns == nil {
-				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - no noob ship again!", rs.UserID))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn NPC %v - no noob ship again!", rs.UserID))
 				return
 			}
 
 			es, err := LoadShip(ns, sol.Universe)
 
 			if err != nil || es == nil {
-				log.Println(fmt.Sprintf("! Unable to respawn NPC %v - couldn't load new noobship into universe (%v)!", rs.UserID, err))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn NPC %v - couldn't load new noobship into universe (%v)!", rs.UserID, err))
 				return
 			}
 
@@ -559,7 +558,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			home.CurrentSystem.AddShip(es, true)
 
 			// log respawn to console
-			log.Println(
+			shared.TeeLog(
 				fmt.Sprintf(
 					"[%v] %v was respawned at %v (NPC).",
 					home.CurrentSystem.SystemName,
@@ -585,7 +584,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			start, err := startSvc.GetStartByID(rs.StartID)
 
 			if err != nil {
-				log.Println(fmt.Sprintf("! Unable to respawn player %v - no starting conditions!", rs.UID))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - no starting conditions!", rs.UID))
 				return
 			}
 
@@ -593,7 +592,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			home := sol.Universe.FindStation(start.HomeStationID, &sol.ID)
 
 			if home == nil {
-				log.Println(fmt.Sprintf("! Unable to respawn player %v - no home station!", rs.UID))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - no home station!", rs.UID))
 				return
 			}
 
@@ -601,14 +600,14 @@ func handleEscalations(sol *universe.SolarSystem) {
 			u, err := CreateNoobShipForPlayer(start, *rs.UID)
 
 			if err != nil || u.CurrentShipID == nil {
-				log.Println(fmt.Sprintf("! Unable to respawn player %v - failed to create noob ship (%v | %v)!", rs.UID, err, u.CurrentShipID))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - failed to create noob ship (%v | %v)!", rs.UID, err, u.CurrentShipID))
 				return
 			}
 
 			ns, err := shipSvc.GetShipByID(*u.CurrentShipID, false)
 
 			if err != nil || ns == nil {
-				log.Println(fmt.Sprintf("! Unable to respawn player %v - no noob ship!", rs.UID))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - no noob ship!", rs.UID))
 				return
 			}
 
@@ -616,7 +615,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			err = shipSvc.UpdateShip(*ns)
 
 			if home == nil {
-				log.Println(fmt.Sprintf("! Unable to respawn player %v - couldn't save noob ship changes (%v)!", rs.UID, err))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - couldn't save noob ship changes (%v)!", rs.UID, err))
 				return
 			}
 
@@ -624,14 +623,14 @@ func handleEscalations(sol *universe.SolarSystem) {
 			ns, err = shipSvc.GetShipByID(*u.CurrentShipID, false)
 
 			if err != nil || ns == nil {
-				log.Println(fmt.Sprintf("! Unable to respawn player %v - no noob ship again!", rs.UID))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - no noob ship again!", rs.UID))
 				return
 			}
 
 			es, err := LoadShip(ns, sol.Universe)
 
 			if err != nil || es == nil {
-				log.Println(fmt.Sprintf("! Unable to respawn player %v - couldn't load new noobship into universe (%v)!", rs.UID, err))
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - couldn't load new noobship into universe (%v)!", rs.UID, err))
 				return
 			}
 
@@ -655,7 +654,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			home.CurrentSystem.AddClient(rs, true)
 
 			// log respawn to console
-			log.Println(
+			shared.TeeLog(
 				fmt.Sprintf(
 					"[%v] %v was respawned at %v.",
 					home.CurrentSystem.SystemName,
@@ -683,7 +682,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			)
 
 			if err != nil || ps == nil {
-				log.Println(fmt.Sprintf("! Unable to complete ship purchase for %v - failure saving (%v)!", rs.UserID, err))
+				shared.TeeLog(fmt.Sprintf("! Unable to complete ship purchase for %v - failure saving (%v)!", rs.UserID, err))
 				return
 			}
 
@@ -691,7 +690,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			es, err := LoadShip(ps, sol.Universe)
 
 			if err != nil || es == nil {
-				log.Println(fmt.Sprintf("! Unable to complete ship purchase for %v - failure loading (%v)!", rs.UserID, err))
+				shared.TeeLog(fmt.Sprintf("! Unable to complete ship purchase for %v - failure loading (%v)!", rs.UserID, err))
 				return
 			}
 
@@ -720,7 +719,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			err := userSvc.SetCurrentShipID(*rs.Client.UID, &rs.Target.ID)
 
 			if err != nil {
-				log.Println(fmt.Sprintf("! Unable to complete ship switch for %v - failure saving (%v)!", rs.Client.UID, err))
+				shared.TeeLog(fmt.Sprintf("! Unable to complete ship switch for %v - failure saving (%v)!", rs.Client.UID, err))
 				return
 			}
 
@@ -757,7 +756,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			err := shipSvc.SetNoLoad(rs.ID, rs.Flag)
 
 			if err != nil {
-				log.Println(fmt.Sprintf("! Unable to set no load switch for %v - failure saving (%v)!", rs.ID, err))
+				shared.TeeLog(fmt.Sprintf("! Unable to set no load switch for %v - failure saving (%v)!", rs.ID, err))
 				return
 			}
 		}(rs, sol)
@@ -775,7 +774,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			err := shipSvc.SetOwner(rs.ShipID, rs.UserID)
 
 			if err != nil {
-				log.Println(fmt.Sprintf("! Unable to set new owner for %v - failure saving (%v)!", rs.ShipID, err))
+				shared.TeeLog(fmt.Sprintf("! Unable to set new owner for %v - failure saving (%v)!", rs.ShipID, err))
 				return
 
 			}
@@ -784,7 +783,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			err = shipSvc.SetNoLoad(rs.ShipID, false)
 
 			if err != nil {
-				log.Println(fmt.Sprintf("! Unable to set no load switch for %v - failure saving (%v)!", rs.ShipID, err))
+				shared.TeeLog(fmt.Sprintf("! Unable to set no load switch for %v - failure saving (%v)!", rs.ShipID, err))
 				return
 
 			}
@@ -793,14 +792,14 @@ func handleEscalations(sol *universe.SolarSystem) {
 			shd, err := shipSvc.GetShipByID(rs.ShipID, false)
 
 			if err != nil {
-				log.Println(fmt.Sprintf("! Unable to load used ship for %v - failure saving (%v)! [part 1]", rs.ShipID, err))
+				shared.TeeLog(fmt.Sprintf("! Unable to load used ship for %v - failure saving (%v)! [part 1]", rs.ShipID, err))
 				return
 			}
 
 			sh, err := LoadShip(shd, sol.Universe)
 
 			if err != nil {
-				log.Println(fmt.Sprintf("! Unable to load used ship for %v - failure saving (%v)! [part 2]", rs.ShipID, err))
+				shared.TeeLog(fmt.Sprintf("! Unable to load used ship for %v - failure saving (%v)! [part 2]", rs.ShipID, err))
 				return
 			}
 
@@ -829,7 +828,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			err := shipSvc.Rename(rs.ShipID, rs.Name)
 
 			if err != nil {
-				log.Println(fmt.Sprintf("! Unable to rename ship %v - failure saving (%v)!", rs.ShipID.ID(), err))
+				shared.TeeLog(fmt.Sprintf("! Unable to rename ship %v - failure saving (%v)!", rs.ShipID.ID(), err))
 				return
 			}
 		}(rs, sol)

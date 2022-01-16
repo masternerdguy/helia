@@ -3,6 +3,7 @@ package main
 import (
 	"helia/engine"
 	"helia/listener"
+	"helia/shared"
 	"log"
 	"math/rand"
 	"net/http"
@@ -10,39 +11,48 @@ import (
 )
 
 func main() {
+	// configure global tee logging
+	shared.InitializeTeeLog(
+		printLogger,
+	)
+
 	// initialize RNG
-	log.Println("Initializing RNG...")
+	shared.TeeLog("Initializing RNG...")
 	rand.Seed(time.Now().UnixNano())
 
 	// initialize game engine
-	log.Println("Initializing engine...")
+	shared.TeeLog("Initializing engine...")
 	engine := engine.HeliaEngine{}
 	engine.Initialize()
 
 	// instantiate socket listener
-	log.Println("Initializing socket listener...")
+	shared.TeeLog("Initializing socket listener...")
 	socketListener := &listener.SocketListener{}
 	socketListener.Initialize()
 	socketListener.Engine = &engine
 
-	log.Println("Wiring up socket handlers...")
+	shared.TeeLog("Wiring up socket handlers...")
 	http.HandleFunc("/ws/connect", socketListener.HandleConnect)
 
 	// start engine
-	log.Println("Starting engine...")
+	shared.TeeLog("Starting engine...")
 	engine.Start()
 
 	// instantiate http listener
-	log.Println("Initializing HTTP listener...")
+	shared.TeeLog("Initializing HTTP listener...")
 	httpListener := &listener.HTTPListener{}
 	httpListener.Engine = &engine
 
 	// listen an serve api requests
-	log.Println("Wiring up HTTP handlers...")
+	shared.TeeLog("Wiring up HTTP handlers...")
 	http.HandleFunc("/api/register", httpListener.HandleRegister)
 	http.HandleFunc("/api/login", httpListener.HandleLogin)
 	http.HandleFunc("/api/shutdown", httpListener.HandleShutdown)
 
-	log.Println("Helia is running!")
+	shared.TeeLog("Helia is running!")
 	http.ListenAndServe(":8080", nil)
+}
+
+func printLogger(s string, t time.Time) {
+	log.Println(s) // t is intentionaly discarded because Println already provides a timestamp
 }

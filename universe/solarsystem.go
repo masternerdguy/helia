@@ -6,7 +6,6 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -1452,7 +1451,7 @@ func (s *SolarSystem) updateShips() {
 				bm = *e.BehaviourMode
 			}
 
-			log.Println(
+			shared.TeeLog(
 				fmt.Sprintf(
 					"[%v] %v was destroyed (%v::%v>>%v)",
 					s.SystemName,

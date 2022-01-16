@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"helia/engine"
 	"helia/physics"
+	"helia/shared"
 	"helia/sql"
 	"helia/universe"
-	"log"
 	"math"
 	"math/rand"
 
@@ -20,14 +20,14 @@ import (
 
 func main() {
 	// load universe from database
-	log.Println("Loading universe from database...")
+	shared.TeeLog("Loading universe from database...")
 	universe, err := engine.LoadUniverse()
 
 	if err != nil {
 		panic(err)
 	}
 
-	log.Println("Loaded universe!")
+	shared.TeeLog("Loaded universe!")
 
 	/*
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED

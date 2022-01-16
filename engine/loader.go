@@ -6,7 +6,6 @@ import (
 	"helia/shared"
 	"helia/sql"
 	"helia/universe"
-	"log"
 	"math/rand"
 	"time"
 
@@ -65,7 +64,7 @@ func LoadUniverse() (*universe.Universe, error) {
 	regions := make(map[string]*universe.Region)
 	for rIDX, e := range rs {
 		// progress output
-		log.Println(fmt.Sprintf("loading region %v of %v", rIDX+1, len(rs)))
+		shared.TeeLog(fmt.Sprintf("loading region %v of %v", rIDX+1, len(rs)))
 
 		// load basic region information
 		r := universe.Region{
@@ -394,7 +393,7 @@ func saveUniverse(u *universe.Universe) {
 				err := saveShip(ship)
 
 				if err != nil {
-					log.Println(fmt.Sprintf("Error saving ship: %v | %v", ship, err))
+					shared.TeeLog(fmt.Sprintf("Error saving ship: %v | %v", ship, err))
 				}
 			}
 
@@ -419,7 +418,7 @@ func saveUniverse(u *universe.Universe) {
 				err := stationSvc.UpdateStation(dbStation)
 
 				if err != nil {
-					log.Println(fmt.Sprintf("Error saving station: %v | %v", dbStation, err))
+					shared.TeeLog(fmt.Sprintf("Error saving station: %v | %v", dbStation, err))
 				}
 
 				// save manufacturing processes
@@ -462,7 +461,7 @@ func saveUniverse(u *universe.Universe) {
 					err := stationProcessSvc.UpdateStationProcess(dbProcess)
 
 					if err != nil {
-						log.Println(fmt.Sprintf("Error saving station process: %v | %v", dbProcess, err))
+						shared.TeeLog(fmt.Sprintf("Error saving station process: %v | %v", dbProcess, err))
 					}
 				}
 			}
@@ -1495,7 +1494,7 @@ func saveShip(ship *universe.Ship) error {
 	err := shipSvc.UpdateShip(dbShip)
 
 	if err != nil {
-		log.Println(fmt.Sprintf("Error saving ship: %v | %v", dbShip, err))
+		shared.TeeLog(fmt.Sprintf("Error saving ship: %v | %v", dbShip, err))
 	}
 
 	return err

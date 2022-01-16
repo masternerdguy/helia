@@ -2,7 +2,6 @@ package shared
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"runtime/debug"
 	"sync"
@@ -134,11 +133,11 @@ func (m *LabeledMutex) Lock(caller string) {
 						time.Sleep(10 * time.Second)
 
 						// print diagnostic output
-						log.Println(fmt.Sprintf("Mutex locked for a very suspicious amount of time, this was almost certainly a freeze: %v", m))
+						TeeLog(fmt.Sprintf("Mutex locked for a very suspicious amount of time, this was almost certainly a freeze: %v", m))
 						m.Print()
 					}()
 
-					log.Println(fmt.Sprintf("! Emergency shutdown - deadlock detected: %v", m))
+					TeeLog(fmt.Sprintf("! Emergency shutdown - deadlock detected: %v", m))
 					return
 				} else {
 					// lock released!
@@ -180,21 +179,21 @@ func (m *LabeledMutex) Unlock() {
 
 // Writes formatted diagnostic output to console
 func (m *LabeledMutex) Print() {
-	log.Println(fmt.Sprintf("UID : %v", m.UID))
-	log.Println(fmt.Sprintf("lastCaller : %v", m.lastCaller))
+	TeeLog(fmt.Sprintf("UID : %v", m.UID))
+	TeeLog(fmt.Sprintf("lastCaller : %v", m.lastCaller))
 
 	if m.aggressiveMode {
-		log.Println(fmt.Sprintf("lastCallerStack : %v", m.lastCallerStack))
+		TeeLog(fmt.Sprintf("lastCallerStack : %v", m.lastCallerStack))
 	}
 
-	log.Println(fmt.Sprintf("lastLocker : %v", m.lastLocker))
+	TeeLog(fmt.Sprintf("lastLocker : %v", m.lastLocker))
 
 	if m.aggressiveMode {
-		log.Println(fmt.Sprintf("lastLockerStack : %v", m.lastLockerStack))
+		TeeLog(fmt.Sprintf("lastLockerStack : %v", m.lastLockerStack))
 	}
 
-	log.Println(fmt.Sprintf("lastLocked : %v", m.lastLocked))
-	log.Println(fmt.Sprintf("lastUnlocked : %v", m.lastUnlocked))
-	log.Println(fmt.Sprintf("isLocked : %v", m.isLocked))
-	log.Println(fmt.Sprintf("internalProgressLog: %v", m.internalProgressLog))
+	TeeLog(fmt.Sprintf("lastLocked : %v", m.lastLocked))
+	TeeLog(fmt.Sprintf("lastUnlocked : %v", m.lastUnlocked))
+	TeeLog(fmt.Sprintf("isLocked : %v", m.isLocked))
+	TeeLog(fmt.Sprintf("internalProgressLog: %v", m.internalProgressLog))
 }
