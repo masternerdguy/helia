@@ -25,8 +25,6 @@ func main() {
 	if err != nil {
 		shared.TeeLog(err.Error())
 		panic(err)
-	} else {
-		shared.TeeLog("Logs nuked!")
 	}
 
 	// initialize RNG
