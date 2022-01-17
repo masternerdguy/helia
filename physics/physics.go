@@ -67,6 +67,10 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) (float64
 	mTa := aPm * mT
 	mTb := bPm * mT
 
+	// convert to degrees
+	mTa = ToDegrees(mTa)
+	mTb = ToDegrees(mTb)
+
 	// determine center of mass's velocity
 	cVx := (aVx*aM + bVx*bM) / (aM + bM)
 	cVy := (aVy*aM + bVy*bM) / (aM + bM)
