@@ -133,8 +133,8 @@ func (e *HeliaEngine) Start() {
 
 			shared.TeeLog("* All systems passed deadlock check!")
 
-			// wait 2 minutes
-			time.Sleep(time.Second * 120)
+			// wait 5 minutes
+			time.Sleep(time.Second * 300)
 		}
 	}(e)
 
