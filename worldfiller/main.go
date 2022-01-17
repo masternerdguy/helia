@@ -7,8 +7,10 @@ import (
 	"helia/shared"
 	"helia/sql"
 	"helia/universe"
+	"log"
 	"math"
 	"math/rand"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -19,6 +21,11 @@ import (
  */
 
 func main() {
+	// configure global tee logging
+	shared.InitializeTeeLog(
+		printLogger,
+	)
+
 	// load universe from database
 	shared.TeeLog("Loading universe from database...")
 	universe, err := engine.LoadUniverse()
@@ -182,8 +189,8 @@ func calculateSystemSeed(s *universe.SolarSystem) int {
 }
 
 func injectProcess(u *universe.Universe) {
-	pID, err := uuid.Parse("75488383-bb0f-49f6-97d2-3d14a4bde026")
-	prob := 15
+	pID, err := uuid.Parse("b7e42371-b055-4402-add9-77c811cfb156")
+	prob := 2
 
 	stationProcessSvc := sql.GetStationProcessService()
 
@@ -192,22 +199,22 @@ func injectProcess(u *universe.Universe) {
 	}
 
 	var textures = [...]string{
-		"coalition-1",
-		"coalition-4",
-		"coalition-6",
+		"sanctuary-1",
+		"bad-1",
+		"fly-1",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 22903430321)
+			rand.Seed(int64(calculateSystemSeed(s)) - 9235236433)
 
 			stations := s.CopyStations(true)
 
 			for _, st := range stations {
 				for _, t := range textures {
-					if st.Texture == t {
+					if st.Texture != t {
 						roll := physics.RandInRange(0, 100)
 
 						if roll <= prob {
@@ -598,4 +605,8 @@ type Astling struct {
 	PosY          float64
 	Yield         float64
 	Mass          float64
+}
+
+func printLogger(s string, t time.Time) {
+	log.Println(s) // t is intentionally discarded because Println already provides a timestamp
 }
