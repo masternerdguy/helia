@@ -125,9 +125,12 @@ func (e *HeliaEngine) Start() {
 					// test locks
 					s.TestLocks()
 					shared.TeeLog(fmt.Sprintf("* [%v] Passed", s.SystemName))
+
+					// small sleep between systems
+					time.Sleep(5 * time.Millisecond)
 				}
 
-				// small sleep between systems
+				// larger sleep between regions
 				time.Sleep(20 * time.Millisecond)
 			}
 
