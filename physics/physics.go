@@ -15,10 +15,10 @@ type Dummy struct {
 }
 
 // Calculates the result of a 2D elastic collission between two dummies and stores the result in those dummies
-func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) {
+func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) (float64, float64) {
 	// safety check
 	if dummyA == nil || dummyB == nil {
-		return
+		return 0, 0
 	}
 
 	// get velocity and mass
@@ -53,6 +53,20 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) {
 		iter++
 	}
 
+	// determine angle between velocity vectors
+	mT := math.Atan2(bVy, bVx) - math.Atan2(aVy, aVx)
+
+	// determine total mass of system
+	sM := aM + bM
+
+	// determine proportions of mass in system
+	aPm := aM / sM
+	bPm := bM / sM
+
+	// distribute angle proportionately to mass
+	mTa := aPm * mT
+	mTb := bPm * mT
+
 	// determine center of mass's velocity
 	cVx := (aVx*aM + bVx*bM) / (aM + bM)
 	cVy := (aVy*aM + bVy*bM) / (aM + bM)
@@ -68,6 +82,9 @@ func ElasticCollide(dummyA *Dummy, dummyB *Dummy, systemRadius float64) {
 	dummyA.VelY = aVy2
 	dummyB.VelX = bVx2
 	dummyB.VelY = bVy2
+
+	// return tuple with mixing angles
+	return mTa, mTb
 }
 
 // Calculates the distance between the centers of 2 physics dummies and returns the result

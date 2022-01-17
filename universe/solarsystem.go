@@ -1609,11 +1609,22 @@ func (s *SolarSystem) shipCollisionTesting() {
 
 				if d <= sysRad {
 					// calculate collission results
-					physics.ElasticCollide(&dummyA, &dummyB, sysRad)
+					mTa, mTb := physics.ElasticCollide(&dummyA, &dummyB, sysRad)
 
 					// update ships with results
 					sA.ApplyPhysicsDummy(dummyA)
 					sB.ApplyPhysicsDummy(dummyB)
+
+					// determine angle sign
+					mS := 1.0
+
+					if rand.Float64() <= 0.5 {
+						mS = -1.0
+					}
+
+					// apply mixing angles
+					sA.Theta += mTa * mS
+					sB.Theta -= mTb * mS
 				}
 			}
 		}
