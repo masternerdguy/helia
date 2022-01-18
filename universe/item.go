@@ -24,5 +24,6 @@ type Item struct {
 	ItemFamilyID   string
 	ItemFamilyName string
 	ItemTypeMeta   Meta
+	Process        *Process
 	CoreDirty      bool
 }

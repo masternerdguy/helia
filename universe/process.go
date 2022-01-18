@@ -156,9 +156,10 @@ type ProcessOutput struct {
 
 // Structure representing the standardized metadata for item types on the industrial market
 type IndustrialMetadata struct {
-	MinPrice int
-	MaxPrice int
-	SiloSize int
+	MinPrice   int
+	MaxPrice   int
+	SiloSize   int
+	ProcessID *uuid.UUID
 }
 
 // Fetches industrial market limits from item type metadata
@@ -174,10 +175,16 @@ func (p *ProcessInput) GetIndustrialMetadata() IndustrialMetadata {
 		minprice, _ := l.GetInt("minprice")
 		maxprice, _ := l.GetInt("maxprice")
 		silosize, _ := l.GetInt("silosize")
+		processidStr, _ := l.GetString("process_id")
 
 		d.MinPrice = minprice
 		d.MaxPrice = maxprice
 		d.SiloSize = silosize
+
+		if len(processidStr) > 0 {
+			x := uuid.MustParse(processidStr)
+			d.ProcessID = &x
+		}
 	}
 
 	return d

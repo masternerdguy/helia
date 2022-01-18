@@ -1054,6 +1054,34 @@ func LoadItem(i *sql.Item) (*universe.Item, error) {
 	// include item family data
 	ei.ItemFamilyName = fm.FriendlyName
 
+	if ei.ItemFamilyID == "schematic" {
+		processSvc := sql.GetProcessService()
+
+		// load associated process from metadata
+    	l, f := ei.ItemTypeMeta.GetMap("industrialmarket")
+
+	    if f {
+			processidStr, idf := l.GetString("process_id")
+
+			if idf {
+				pid := uuid.MustParse(processidStr)
+				pc, err := processSvc.GetProcessByID(pid)
+
+				if err != nil {
+					return nil, err
+				}
+
+				p, err := LoadProcess(pc)
+
+				if err != nil {
+					return nil, err
+				}
+
+				ei.Process = p				
+			}
+		}
+	}
+
 	// return filled item
 	return ei, nil
 }

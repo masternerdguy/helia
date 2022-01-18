@@ -353,6 +353,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 						mi.ItemTypeName = fi.ItemTypeName
 						mi.ItemFamilyID = fi.ItemFamilyID
 						mi.ItemFamilyName = fi.ItemFamilyName
+						mi.Process = fi.Process
 
 						// mark as clean
 						mi.CoreDirty = false
