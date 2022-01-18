@@ -386,7 +386,7 @@ func (s *SolarSystem) processClientEventQueues() {
 						continue
 					}
 
-					// add to message
+					// convert for transmission
 					r := models.ServerItemViewBody{
 						ID:             i.ID,
 						ItemTypeID:     i.ItemTypeID,
@@ -399,6 +399,35 @@ func (s *SolarSystem) processClientEventQueues() {
 						ItemTypeMeta:   models.Meta(i.ItemTypeMeta),
 					}
 
+					if i.ItemFamilyID == "schematic" && i.Process != nil {
+						pc := *i.Process
+
+						// include process data
+						sv := models.ServerSchematicViewBody{
+							ID: pc.ID,
+							Time: pc.Time,
+						}
+
+						for _, pi := range pc.Inputs {
+							sv.Inputs = append(sv.Inputs, models.ServerSchematicFactorViewBody {
+								ItemTypeID: pi.ItemTypeID,
+								ItemTypeName: pi.ItemTypeName,
+								Quantity: pi.Quantity,
+							})
+						}
+
+						for _, po := range pc.Outputs {
+							sv.Outputs = append(sv.Outputs, models.ServerSchematicFactorViewBody {
+								ItemTypeID: po.ItemTypeID,
+								ItemTypeName: po.ItemTypeName,
+								Quantity: po.Quantity,
+							})
+						}
+
+						r.Schematic = &sv
+					}
+
+					// add to message
 					vw.Items = append(vw.Items, r)
 				}
 

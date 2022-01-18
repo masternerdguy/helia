@@ -500,6 +500,9 @@ export class ShipFittingWindow extends GDIWindow {
       )) {
         const r = buildCargoRowFromContainerItem(ci, this.isDocked);
         cargo.push(r);
+
+        // debug out
+        console.log(ci);
       }
     }
 

@@ -424,15 +424,31 @@ type ClientViewCargoBayBody struct {
 
 // Structure representing a view of an item in a container from the server
 type ServerItemViewBody struct {
-	ID             uuid.UUID `json:"id"`
-	ItemTypeID     uuid.UUID `json:"itemTypeID"`
-	ItemTypeName   string    `json:"itemTypeName"`
-	ItemFamilyID   string    `json:"itemFamilyID"`
-	ItemFamilyName string    `json:"itemFamilyName"`
-	Quantity       int       `json:"quantity"`
-	IsPackaged     bool      `json:"isPackaged"`
-	Meta           Meta      `json:"meta"`
-	ItemTypeMeta   Meta      `json:"itemTypeMeta"`
+	ID             uuid.UUID                `json:"id"`
+	ItemTypeID     uuid.UUID                `json:"itemTypeID"`
+	ItemTypeName   string                   `json:"itemTypeName"`
+	ItemFamilyID   string                   `json:"itemFamilyID"`
+	ItemFamilyName string                   `json:"itemFamilyName"`
+	Quantity       int                      `json:"quantity"`
+	IsPackaged     bool                     `json:"isPackaged"`
+	Meta           Meta                     `json:"meta"`
+	ItemTypeMeta   Meta                     `json:"itemTypeMeta"`
+	Schematic      *ServerSchematicViewBody `json:"schematic"`
+}
+
+// Structure representing a view of the factors of a schematic
+type ServerSchematicViewBody struct {
+  ID      uuid.UUID                       `json:"id"`
+  Time    int                             `json:"time"`
+  Inputs  []ServerSchematicFactorViewBody `json:"inputs"`
+  Outputs []ServerSchematicFactorViewBody `json:"outputs"`
+}
+
+// Structure representing a view of a factor in a schematic
+type ServerSchematicFactorViewBody struct {
+  ItemTypeID   uuid.UUID `json:"itemTypeId"`
+  ItemTypeName string    `json:"itemTypeName"`
+  Quantity     int       `json:"quantity"`
 }
 
 // Type representing metadata to be sent between the client and server

@@ -13,4 +13,18 @@ export class WSContainerItem {
   isPackaged: boolean;
   meta: any;
   itemTypeMeta: any;
+  schematic: WSSchematicProcess;
+}
+
+export class WSSchematicProcess {
+  id: string;
+  time: number;
+  inputs: WSSchematicProcessFactor[];
+  outputs: WSSchematicProcessFactor[];
+}
+
+export class WSSchematicProcessFactor {
+  itemTypeId: string;
+  itemTypeName: string;
+  quantity: number;
 }
