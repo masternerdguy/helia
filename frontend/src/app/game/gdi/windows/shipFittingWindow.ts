@@ -771,6 +771,41 @@ function buildInfoRowsFromContainerItem(m: WSContainerItem): ShipViewRow[] {
     rows.push(buildShipViewRowSpacer());
   }
 
+  // schematics
+  if (m.schematic) {
+    rows.push(buildShipViewRowText('Schematic Properties'));
+
+    const v = buildShipViewRowText(
+      infoKeyValueString('Job Time', `${m.schematic.time} seconds`)
+    );
+
+    rows.push(v);
+
+    rows.push(buildShipViewRowSpacer());
+    rows.push(buildShipViewRowText('Schematic Inputs'));
+
+    for (const f of m.schematic.inputs) {
+      const v = buildShipViewRowText(
+        infoKeyValueString(f.itemTypeName, `${f.quantity}`)
+      );
+
+      rows.push(v);
+    }
+
+    rows.push(buildShipViewRowSpacer());
+    rows.push(buildShipViewRowText('Schematic Outputs'));
+
+    for (const f of m.schematic.outputs) {
+      const v = buildShipViewRowText(
+        infoKeyValueString(f.itemTypeName, `${f.quantity}`)
+      );
+
+      rows.push(v);
+    }
+
+    rows.push(buildShipViewRowSpacer());
+  }
+
   // return info rows
   return rows;
 }
