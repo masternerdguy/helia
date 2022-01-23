@@ -164,6 +164,35 @@ CREATE TABLE public.processoutputs (
 ALTER TABLE public.processoutputs OWNER TO developer;
 
 --
+-- Name: schematicruns; Type: TABLE; Schema: public; Owner: developer
+--
+
+CREATE TABLE public.schematicruns (
+    id uuid NOT NULL,
+    created timestamp with time zone NOT NULL,
+    processid uuid NOT NULL,
+    statusid character varying(16) DEFAULT 'new'::character varying NOT NULL,
+    progress integer DEFAULT 0 NOT NULL,
+    schematic_itemid uuid NOT NULL,
+    userid uuid NOT NULL
+);
+
+
+ALTER TABLE public.schematicruns OWNER TO developer;
+
+--
+-- Name: schematicrunstatuses; Type: TABLE; Schema: public; Owner: developer
+--
+
+CREATE TABLE public.schematicrunstatuses (
+    id character varying(16) NOT NULL,
+    meta jsonb DEFAULT '{}'::jsonb NOT NULL
+);
+
+
+ALTER TABLE public.schematicrunstatuses OWNER TO developer;
+
+--
 -- Name: sellorders; Type: TABLE; Schema: public; Owner: developer
 --
 
@@ -518,6 +547,30 @@ ALTER TABLE ONLY public.processoutputs
 
 ALTER TABLE ONLY public.stationprocesses
     ADD CONSTRAINT pk_stationprocess_uq PRIMARY KEY (id);
+
+
+--
+-- Name: schematicruns schematicruns_id_uq; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.schematicruns
+    ADD CONSTRAINT schematicruns_id_uq UNIQUE (id);
+
+
+--
+-- Name: schematicruns schematicruns_pkey; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.schematicruns
+    ADD CONSTRAINT schematicruns_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: schematicrunstatuses schematicrunstatuses_id_uq; Type: CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.schematicrunstatuses
+    ADD CONSTRAINT schematicrunstatuses_id_uq PRIMARY KEY (id);
 
 
 --
@@ -1100,6 +1153,30 @@ ALTER TABLE ONLY public.universe_jumpholes
 
 ALTER TABLE ONLY public.universe_planets
     ADD CONSTRAINT planet_system_fk FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
+
+
+--
+-- Name: schematicruns schematicruns_items; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.schematicruns
+    ADD CONSTRAINT schematicruns_items FOREIGN KEY (schematic_itemid) REFERENCES public.items(id) NOT VALID;
+
+
+--
+-- Name: schematicruns schematicruns_schematicrunstatuses; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.schematicruns
+    ADD CONSTRAINT schematicruns_schematicrunstatuses FOREIGN KEY (statusid) REFERENCES public.schematicrunstatuses(id) NOT VALID;
+
+
+--
+-- Name: schematicruns schematicruns_users; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.schematicruns
+    ADD CONSTRAINT schematicruns_users FOREIGN KEY (userid) REFERENCES public.users(id) NOT VALID;
 
 
 --
