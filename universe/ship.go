@@ -3371,7 +3371,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 		}
 
 		// escalate order save request to core
-		s.CurrentSystem.NewShipPurchases[nid.String()] = &r
+		s.CurrentSystem.NewShipTickets[nid.String()] = &r
 	}
 
 	// log buy to console

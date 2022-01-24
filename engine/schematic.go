@@ -178,7 +178,7 @@ func startSchematics() {
 													}
 
 													// escalate order save request to core
-													s.NewShipPurchases[nid.String()] = &r
+													s.NewShipTickets[nid.String()] = &r
 												}
 											}
 

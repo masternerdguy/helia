@@ -672,11 +672,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(rs, sol)
 	}
 
-	// iterate over new ship purchases
-	for id := range sol.NewShipPurchases {
+	// iterate over new ship tickets
+	for id := range sol.NewShipTickets {
 		// capture reference and remove from map
-		rs := sol.NewShipPurchases[id]
-		delete(sol.NewShipPurchases, id)
+		rs := sol.NewShipTickets[id]
+		delete(sol.NewShipTickets, id)
 
 		// handle escalation on another goroutine
 		go func(rs *universe.NewShipPurchase, sol *universe.SolarSystem) {
