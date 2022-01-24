@@ -156,6 +156,10 @@ func startSchematics() {
 													// escalate order save request to core
 													s.NewItems[nid.String()] = &newItem
 
+													// obtain lock on cargo bay
+													sh.CargoBay.Lock.Lock("core::startSchematics::watcher::delivery[4]")
+													defer sh.CargoBay.Lock.Unlock()
+
 													// place item in cargo bay
 													sh.CargoBay.Items = append(sh.CargoBay.Items, &newItem)
 												} else {
