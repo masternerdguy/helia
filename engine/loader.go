@@ -53,6 +53,15 @@ func LoadUniverse() (*universe.Universe, error) {
 			UserID:          sr.UserID,
 		}
 
+		// don't load stuck ones
+		if usr.StatusID == "error" {
+			shared.TeeLog(fmt.Sprintf("Not loading schematic run %v (error)", usr.ID))
+			continue
+		} else if usr.StatusID == "deliverypending" {
+			shared.TeeLog(fmt.Sprintf("Not loading schematic run %v (deliverypending)", usr.ID))
+			continue
+		}
+
 		addSchematicRunForUser(sr.UserID, &usr)
 	}
 
@@ -487,6 +496,29 @@ func saveUniverse(u *universe.Universe) {
 						shared.TeeLog(fmt.Sprintf("Error saving station process: %v | %v", dbProcess, err))
 					}
 				}
+			}
+		}
+	}
+
+	// save schematic runs
+	schematicRunSvc := sql.GetSchematicRunService()
+
+	for _, sre := range schematicRunMap {
+		for _, sr := range sre {
+			usr := sql.SchematicRun{
+				ID:              sr.ID,
+				Created:         sr.Created,
+				ProcessID:       sr.ProcessID,
+				StatusID:        sr.StatusID,
+				Progress:        sr.Progress,
+				SchematicItemID: sr.SchematicItemID,
+				UserID:          sr.UserID,
+			}
+
+			err := schematicRunSvc.UpdateSchematicRun(usr)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("Error saving schematic run: %v | %v", usr, err))
 			}
 		}
 	}

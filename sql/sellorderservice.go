@@ -146,7 +146,7 @@ func (s SellOrderService) MarkSellOrderAsBought(e SellOrder) error {
 		return err
 	}
 
-	// insert sell order
+	// update sell order
 	sql := `
 			UPDATE public.sellorders
 			SET bought = $2, buyer_userid = $3

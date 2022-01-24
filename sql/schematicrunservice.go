@@ -63,3 +63,66 @@ func (s SchematicRunService) GetUndeliveredSchematicRuns() ([]SchematicRun, erro
 
 	return schematicruns, err
 }
+
+// Creates a new schematic run
+func (s SchematicRunService) NewSchematicRun(e SchematicRun) (*SchematicRun, error) {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// insert sell order
+	sql := `
+			INSERT INTO public.schematicruns(
+				id, created, processid, statusid, progress, schematic_itemid, userid)
+				VALUES ($1, $2, $3, $4, $5, $6, $7);
+		   `
+
+	uid := uuid.New()
+	createdAt := time.Now()
+
+	q, err := db.Query(sql, uid, e.Created, e.ProcessID, e.StatusID, e.Progress, e.SchematicItemID, e.UserID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer q.Close()
+
+	// update id in model
+	e.ID = uid
+	e.Created = createdAt
+
+	// return pointer to inserted schematic run model
+	return &e, nil
+}
+
+// Saves the progress and status of a schematic run
+func (s SchematicRunService) UpdateSchematicRun(e SchematicRun) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update schematic run
+	sql := `
+			UPDATE public.schematicruns
+			SET StatusID=$2, Progress=$3
+			WHERE id = $1
+		   `
+
+	q, err := db.Query(sql, e.ID, e.StatusID, e.Progress)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	// success
+	return nil
+}
