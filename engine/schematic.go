@@ -35,10 +35,13 @@ func startSchematics() {
 
 	// start watcher
 	go func() {
+		// exit notification
+		defer shared.TeeLog("! Schematic watcher has halted")
+
+		// watcher loop
 		for {
 			// check for shutdown signal
 			if shutdownSignal {
-				shared.TeeLog("! Schematic watcher has halted")
 				break
 			}
 
