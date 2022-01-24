@@ -221,7 +221,7 @@ func startSchematics() {
 // Returns pointers to hooked schematic runs for a given user
 func getSchematicRunsByUser(userID uuid.UUID) []*universe.SchematicRun {
 	// obtain lock
-	schematicRunMapLock.Lock("schematic::getSchematicsByUser")
+	schematicRunMapLock.Lock("schematic::getSchematicRunsByUser")
 	defer schematicRunMapLock.Unlock()
 
 	// check if user known
