@@ -13,8 +13,8 @@ func makeTimestamp() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
-// Creates a noob (starter) ship for a player and put them in it
-func CreatePurchasedShipForPlayer(ownerID uuid.UUID, templateID uuid.UUID, stationID uuid.UUID, systemID uuid.UUID) (*sql.Ship, error) {
+// Creates a ship for a player (from industrial market purchase or schematic run output)
+func CreateShipForPlayer(ownerID uuid.UUID, templateID uuid.UUID, stationID uuid.UUID, systemID uuid.UUID) (*sql.Ship, error) {
 	// get services
 	userSvc := sql.GetUserService()
 	shipSvc := sql.GetShipService()

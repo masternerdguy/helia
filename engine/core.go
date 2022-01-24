@@ -178,15 +178,7 @@ func (e *HeliaEngine) Shutdown() {
 	shared.ShutdownSignal = true
 
 	// wait for 30 seconds to give everything a chance to exit
-	sleepStart := time.Now()
-
-	for {
-		if time.Since(sleepStart).Seconds() > 30 {
-			break
-		}
-
-		time.Sleep(1 * time.Second)
-	}
+	time.Sleep(30 * time.Second)
 
 	shared.TeeLog("Halt success assumed")
 
@@ -689,7 +681,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(rs *universe.NewShipPurchase, sol *universe.SolarSystem) {
 			// create new ship for player
-			ps, err := CreatePurchasedShipForPlayer(
+			ps, err := CreateShipForPlayer(
 				rs.UserID,
 				rs.ShipTemplateID,
 				rs.StationID,
