@@ -197,6 +197,8 @@ func (e *HeliaEngine) Shutdown() {
 
 	// end program
 	shared.TeeLog("Shutdown complete! Goodbye :)")
+
+	time.Sleep(1 * time.Second)
 	os.Exit(0)
 }
 
