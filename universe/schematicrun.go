@@ -17,6 +17,7 @@ type SchematicRun struct {
 	SchematicItemID uuid.UUID
 	UserID          uuid.UUID
 	// in-memory only
+	Initialized   bool
 	Lock          shared.LabeledMutex
 	SchematicItem *Item
 	Process       *Process

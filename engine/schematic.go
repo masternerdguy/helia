@@ -65,6 +65,11 @@ func startSchematics() {
 						j.Lock.Lock("core::startSchematics::watcher::iter")
 						defer j.Lock.Unlock()
 
+						// skip if uninitialized
+						if !j.Initialized {
+							continue
+						}
+
 						// increment timer
 						if j.StatusID == "running" {
 							j.Progress += 1
@@ -178,15 +183,18 @@ func startSchematics() {
 											j.StatusID = "delivered"
 										} else {
 											shared.TeeLog(fmt.Sprintf("Schematic ship is not in a system! %v", sh))
+											j.StatusID = "error"
 										}
 
 									} else {
 										shared.TeeLog(fmt.Sprintf("Schematic run does not have ship attached! %v", j))
+										j.StatusID = "error"
 									}
 								}(j)
 							}
 						} else {
 							shared.TeeLog(fmt.Sprintf("Schematic run does not have process attached! %v", j))
+							j.StatusID = "error"
 						}
 					}
 				}
@@ -213,14 +221,16 @@ func getSchematicRunsByUser(userID uuid.UUID) []*universe.SchematicRun {
 	schematicRunMapLock.Lock("schematic::getSchematicsByUser")
 	defer schematicRunMapLock.Unlock()
 
-	// null check
-	if val, ok := schematicRunMap[userID.String()]; ok {
-		// return sclie
-		return val
+	// check if user known
+	_, ok := schematicRunMap[userID.String()]
+
+	if !ok {
+		// add empty slice
+		schematicRunMap[userID.String()] = make([]*universe.SchematicRun, 0)
 	}
 
-	// return empty slice
-	return make([]*universe.SchematicRun, 0)
+	// return pointers
+	return schematicRunMap[userID.String()]
 }
 
 // Hooks a schematic run into the watcher

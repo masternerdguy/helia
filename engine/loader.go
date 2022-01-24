@@ -29,9 +29,32 @@ func LoadUniverse() (*universe.Universe, error) {
 	sellOrderSvc := sql.GetSellOrderService()
 	itemSvc := sql.GetItemService()
 	factionSvc := sql.GetFactionService()
+	schematicRunSvc := sql.GetSchematicRunService()
 
 	// empty universe to fill
 	u := universe.Universe{}
+
+	// load schematic runs (without pointers)
+	srs, err := schematicRunSvc.GetUndeliveredSchematicRuns()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// hook into runner
+	for _, sr := range srs {
+		usr := universe.SchematicRun{
+			ID:              sr.ID,
+			Created:         sr.Created,
+			ProcessID:       sr.ProcessID,
+			StatusID:        sr.StatusID,
+			Progress:        sr.Progress,
+			SchematicItemID: sr.SchematicItemID,
+			UserID:          sr.UserID,
+		}
+
+		addSchematicRunForUser(sr.UserID, &usr)
+	}
 
 	// load factions
 	dfs, err := factionSvc.GetAllFactions()
@@ -1058,9 +1081,9 @@ func LoadItem(i *sql.Item) (*universe.Item, error) {
 		processSvc := sql.GetProcessService()
 
 		// load associated process from metadata
-    	l, f := ei.ItemTypeMeta.GetMap("industrialmarket")
+		l, f := ei.ItemTypeMeta.GetMap("industrialmarket")
 
-	    if f {
+		if f {
 			processidStr, idf := l.GetString("process_id")
 
 			if idf {
@@ -1077,7 +1100,7 @@ func LoadItem(i *sql.Item) (*universe.Item, error) {
 					return nil, err
 				}
 
-				ei.Process = p				
+				ei.Process = p
 			}
 		}
 	}
@@ -1474,6 +1497,32 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 
 	// associate escrow container with ship
 	sp.EscrowContainerID = &owner.EscrowContainerID
+
+	// hook cargo bay schematics into running jobs
+	runs := getSchematicRunsByUser(sh.UserID)
+
+	for _, r := range runs {
+		// obtain lock
+		r.Lock.Lock("loader::LoadShip()")
+		defer r.Lock.Unlock()
+
+		// hook references
+		for _, ci := range cargoBay.Items {
+			if ci.ID == r.SchematicItemID {
+				r.SchematicItem = ci
+				r.Process = ci.Process
+				r.Ship = sp
+
+				break
+			}
+		}
+
+		// check if all hooked
+		if r.SchematicItem != nil && r.Process != nil && r.Ship != nil {
+			// mark as initialized
+			r.Initialized = true
+		}
+	}
 
 	// return pointer to ship
 	return sp, nil
