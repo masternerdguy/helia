@@ -20,9 +20,18 @@ type HeliaEngine struct {
 
 // Initializes a new instance of the game engine
 func (e *HeliaEngine) Initialize() *HeliaEngine {
-	shared.TeeLog("Loading game universe from database...")
+	// setup schematic runs watcher
+	shared.TeeLog("Starting schematic runs watcher...")
+
+	startSchematics()
+
+	if !schematicRunnerStarted {
+		panic("Schematics watcher not running!")
+	}
 
 	// load universe
+	shared.TeeLog("Loading game universe from database...")
+
 	u, err := LoadUniverse()
 
 	if err != nil {
