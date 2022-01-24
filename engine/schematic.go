@@ -78,6 +78,9 @@ func startSchematics() {
 						} else if j.StatusID == "error" {
 							// do not redeliver
 							continue
+						} else if j.StatusID == "delivered" {
+							// do not redeliver
+							continue
 						}
 
 						// check if complete
