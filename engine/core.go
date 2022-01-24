@@ -185,7 +185,7 @@ func (e *HeliaEngine) Shutdown() {
 			break
 		}
 
-		time.Sleep(1000)
+		time.Sleep(1 * time.Second)
 	}
 
 	shared.TeeLog("Halt success assumed")
