@@ -505,6 +505,12 @@ func saveUniverse(u *universe.Universe) {
 
 	for _, sre := range schematicRunMap {
 		for _, sr := range sre {
+			// skip if never initialized
+			if !sr.Initialized {
+				continue
+			}
+
+			// convert to sql type
 			usr := sql.SchematicRun{
 				ID:              sr.ID,
 				Created:         sr.Created,
@@ -515,6 +521,7 @@ func saveUniverse(u *universe.Universe) {
 				UserID:          sr.UserID,
 			}
 
+			// save changes
 			err := schematicRunSvc.UpdateSchematicRun(usr)
 
 			if err != nil {
