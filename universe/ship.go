@@ -212,7 +212,7 @@ type TemporaryShipModifier struct {
 }
 
 // Structure representing a newly purchased ship, not yet materialized
-type NewShipPurchase struct {
+type NewShipTicket struct {
 	ID             uuid.UUID
 	ShipTemplateID uuid.UUID
 	UserID         uuid.UUID
@@ -3358,7 +3358,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 		}
 
 		// request a new ship to be generated from this purchase
-		r := NewShipPurchase{
+		r := NewShipTicket{
 			UserID:         s.UserID,
 			ShipTemplateID: stID,
 			StationID:      *s.DockedAtStationID,

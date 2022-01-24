@@ -679,7 +679,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		delete(sol.NewShipTickets, id)
 
 		// handle escalation on another goroutine
-		go func(rs *universe.NewShipPurchase, sol *universe.SolarSystem) {
+		go func(rs *universe.NewShipTicket, sol *universe.SolarSystem) {
 			// create new ship for player
 			ps, err := CreateShipForPlayer(
 				rs.UserID,

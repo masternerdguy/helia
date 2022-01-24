@@ -171,7 +171,7 @@ func startSchematics() {
 													}
 
 													// request a new ship to be generated from this purchase
-													r := universe.NewShipPurchase{
+													r := universe.NewShipTicket{
 														UserID:         sh.UserID,
 														ShipTemplateID: stID,
 														StationID:      *sh.DockedAtStationID,

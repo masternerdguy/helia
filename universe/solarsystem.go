@@ -47,7 +47,7 @@ type SolarSystem struct {
 	NewItems             map[string]*Item              // stacks of items that are newly created and need to be saved by core
 	NewSellOrders        map[string]*SellOrder         // new sell orders in need of saving by core
 	BoughtSellOrders     map[string]*SellOrder         // sell orders that have been fulfilled in need of saving by core
-	NewShipTickets       map[string]*NewShipPurchase   // newly purchased/delivered ships that need to be generated and saved by core
+	NewShipTickets       map[string]*NewShipTicket     // newly purchased/delivered ships that need to be generated and saved by core
 	ShipSwitches         map[string]*ShipSwitch        // approved requests to switch a client to another ship in need of saving by core
 	SetNoLoad            map[string]*ShipNoLoadSet     // updates to the no load flag in need of saving by core
 	UsedShipPurchases    map[string]*UsedShipPurchase  // purchased used ships that need to be hooked in and saved by core
@@ -79,7 +79,7 @@ func (s *SolarSystem) Initialize() {
 	s.NewItems = make(map[string]*Item)
 	s.NewSellOrders = make(map[string]*SellOrder)
 	s.BoughtSellOrders = make(map[string]*SellOrder)
-	s.NewShipTickets = make(map[string]*NewShipPurchase)
+	s.NewShipTickets = make(map[string]*NewShipTicket)
 	s.ShipSwitches = make(map[string]*ShipSwitch)
 	s.SetNoLoad = make(map[string]*ShipNoLoadSet)
 	s.UsedShipPurchases = make(map[string]*UsedShipPurchase)
