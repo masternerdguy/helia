@@ -206,3 +206,37 @@ func startSchematics() {
 	// mark as started
 	schematicRunnerStarted = true
 }
+
+// Returns pointers to hooked schematic runs for a given user
+func getSchematicRunsByUser(userID uuid.UUID) []*universe.SchematicRun {
+	// obtain lock
+	schematicRunMapLock.Lock("schematic::getSchematicsByUser")
+	defer schematicRunMapLock.Unlock()
+
+	// null check
+	if val, ok := schematicRunMap[userID.String()]; ok {
+		// return sclie
+		return val
+	}
+
+	// return empty slice
+	return make([]*universe.SchematicRun, 0)
+}
+
+// Hooks a schematic run into the watcher
+func addSchematicRunForUser(userID uuid.UUID, run *universe.SchematicRun) {
+	// obtain lock
+	schematicRunMapLock.Lock("schematic::addSchematicRunForUser")
+	defer schematicRunMapLock.Unlock()
+
+	// check if user known
+	_, ok := schematicRunMap[userID.String()]
+
+	if !ok {
+		// add empty slice
+		schematicRunMap[userID.String()] = make([]*universe.SchematicRun, 0)
+	}
+
+	// store run
+	schematicRunMap[userID.String()] = append(schematicRunMap[userID.String()], run)
+}
