@@ -156,7 +156,7 @@ func (m *LabeledMutex) Unlock() {
 	if !m.isLocked {
 		go func() {
 			// give time for panic to print output
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(20 * time.Millisecond)
 			os.Exit(0)
 		}()
 

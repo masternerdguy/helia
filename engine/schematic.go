@@ -47,7 +47,6 @@ func startSchematics() {
 
 			// obtain lock
 			schematicRunMapLock.Lock("core::startSchematics::watcher")
-			defer schematicRunMapLock.Unlock()
 
 			// get tpf
 			now := makeTimestamp()
