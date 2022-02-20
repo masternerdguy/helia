@@ -377,6 +377,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientViewSchematicRuns(&client, &b)
+		} else if m.MessageType == msgRegistry.RunSchematic {
+			// decode body as ClientRunSchematicBody
+			b := models.ClientRunSchematicBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientRunSchematic(&client, &b)
 		}
 	}
 }
@@ -1480,6 +1487,29 @@ func (l *SocketListener) handleClientViewSchematicRuns(client *shared.GameClient
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.ViewSchematicRuns, false)
+	}
+}
+
+func (l *SocketListener) handleClientRunSchematic(client *shared.GameClient, body *models.ClientRunSchematicBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		shared.TeeLog(fmt.Sprintf("handleClientRunSchematic: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.RunSchematic, false)
 	}
 }
 

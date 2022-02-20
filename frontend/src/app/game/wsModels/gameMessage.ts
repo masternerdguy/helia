@@ -54,4 +54,5 @@ export enum MessageTypes {
   GlobalAck = 45,
   ViewSchematicRuns = 46,
   SchematicRunsUpdate = 47,
+  RunSchematic = 48,
 }

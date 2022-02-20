@@ -58,6 +58,7 @@ type MessageRegistry struct {
 	GlobalAck              int
 	ViewSchematicRuns      int
 	SchematicRunsUpdate    int
+	RunSchematic           int
 }
 
 // Registry of target types
@@ -123,6 +124,7 @@ func NewMessageRegistry() *MessageRegistry {
 		GlobalAck:              45,
 		ViewSchematicRuns:      46,
 		SchematicRunsUpdate:    47,
+		RunSchematic:           48,
 	}
 }
 
@@ -761,4 +763,10 @@ type ClientViewSchematicRunsBody struct {
 
 // Body containing currently running schematics
 type ServerSchematicRunsUpdateBody struct {
+}
+
+// Body containing a request to run a schematic in the player's station warehouse/workshop
+type ClientRunSchematicBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	ItemID    uuid.UUID `json:"itemId"`
 }
