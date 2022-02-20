@@ -52,4 +52,6 @@ export enum MessageTypes {
   ViewExperience = 43,
   ExperienceUpdate = 44,
   GlobalAck = 45,
+  ViewSchematicRuns = 46,
+  SchematicRunsUpdate = 47,
 }

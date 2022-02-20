@@ -1390,6 +1390,13 @@ func (s *SolarSystem) processClientEventQueues() {
 				// write response to client
 				c.WriteMessage(&z)
 			}
+		} else if evt.Type == models.NewMessageRegistry().ViewSchematicRuns {
+			if sh != nil {
+				// extract data
+				// data := evt.Body.(models.ClientViewSchematicRunsBody)
+
+				shared.TeeLog("Not yet implemented: ViewSchematicRuns")
+			}
 		}
 	}
 }

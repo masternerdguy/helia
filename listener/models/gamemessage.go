@@ -56,6 +56,8 @@ type MessageRegistry struct {
 	ViewExperience         int
 	ExperienceUpdate       int
 	GlobalAck              int
+	ViewSchematicRuns      int
+	SchematicRunsUpdate    int
 }
 
 // Registry of target types
@@ -119,6 +121,8 @@ func NewMessageRegistry() *MessageRegistry {
 		ViewExperience:         43,
 		ExperienceUpdate:       44,
 		GlobalAck:              45,
+		ViewSchematicRuns:      46,
+		SchematicRunsUpdate:    47,
 	}
 }
 
@@ -438,17 +442,17 @@ type ServerItemViewBody struct {
 
 // Structure representing a view of the factors of a schematic
 type ServerSchematicViewBody struct {
-  ID      uuid.UUID                       `json:"id"`
-  Time    int                             `json:"time"`
-  Inputs  []ServerSchematicFactorViewBody `json:"inputs"`
-  Outputs []ServerSchematicFactorViewBody `json:"outputs"`
+	ID      uuid.UUID                       `json:"id"`
+	Time    int                             `json:"time"`
+	Inputs  []ServerSchematicFactorViewBody `json:"inputs"`
+	Outputs []ServerSchematicFactorViewBody `json:"outputs"`
 }
 
 // Structure representing a view of a factor in a schematic
 type ServerSchematicFactorViewBody struct {
-  ItemTypeID   uuid.UUID `json:"itemTypeId"`
-  ItemTypeName string    `json:"itemTypeName"`
-  Quantity     int       `json:"quantity"`
+	ItemTypeID   uuid.UUID `json:"itemTypeId"`
+	ItemTypeName string    `json:"itemTypeName"`
+	Quantity     int       `json:"quantity"`
 }
 
 // Type representing metadata to be sent between the client and server
@@ -748,4 +752,13 @@ type ClientGlobalAckBody struct {
 	SessionID     uuid.UUID `json:"sid"`
 	SolarSystemID uuid.UUID `json:"sysId"`
 	Token         int       `json:"token"`
+}
+
+// Body containing a request for schematic runs
+type ClientViewSchematicRunsBody struct {
+	SessionID uuid.UUID `json:"sid"`
+}
+
+// Body containing currently running schematics
+type ServerSchematicRunsUpdateBody struct {
 }
