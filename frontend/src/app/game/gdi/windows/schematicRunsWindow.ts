@@ -28,8 +28,8 @@ export class SchematicRunsWindow extends GDIWindow {
     this.setTitle('Schematic Runs');
 
     // schematic runs list
-    this.schematicRunList.setWidth(400);
-    this.schematicRunList.setHeight(400);
+    this.schematicRunList.setWidth(500);
+    this.schematicRunList.setHeight(300);
     this.schematicRunList.initialize();
 
     this.schematicRunList.setX(0);
