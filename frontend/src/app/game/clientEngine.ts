@@ -53,6 +53,8 @@ import { PushInfoWindow } from './gdi/windows/pushInfoWindow';
 import { ExperienceSheetWindow } from './gdi/windows/experienceSheetWindow';
 import { ServerExperienceUpdate } from './wsModels/bodies/experienceUpdate';
 import { ClientGlobalAck } from './wsModels/bodies/globalAck';
+import { SchematicRunsWindow } from './gdi/windows/schematicRunsWindow';
+import { ServerSchematicRunsUpdate } from './wsModels/bodies/schematicRunsUpdate';
 
 class EngineSack {
   constructor() {}
@@ -84,6 +86,7 @@ class EngineSack {
   reputationSheetWindow: ReputationSheetWindow;
   propertySheetWindow: PropertySheetWindow;
   experienceSheetWindow: ExperienceSheetWindow;
+  schematicRunsWindow: SchematicRunsWindow;
   systemChatWindow: SystemChatWindow;
   lastShiftDown: number;
 
@@ -260,6 +263,13 @@ export function clientStart(
   engineSack.experienceSheetWindow.setWsService(engineSack.wsSvc);
   engineSack.experienceSheetWindow.pack();
 
+  engineSack.schematicRunsWindow = new SchematicRunsWindow();
+  engineSack.schematicRunsWindow.setX(410);
+  engineSack.schematicRunsWindow.setY(410);
+  engineSack.schematicRunsWindow.initialize();
+  engineSack.schematicRunsWindow.setWsService(engineSack.wsSvc);
+  engineSack.schematicRunsWindow.pack();
+
   // link windows to window manager
   engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☀');
   engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☍');
@@ -275,6 +285,7 @@ export function clientStart(
   engineSack.windowManager.manageWindow(engineSack.propertySheetWindow, '⬢');
   engineSack.windowManager.manageWindow(engineSack.systemChatWindow, '⋉');
   engineSack.windowManager.manageWindow(engineSack.experienceSheetWindow, '✇');
+  engineSack.windowManager.manageWindow(engineSack.schematicRunsWindow, '⨻');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
@@ -291,6 +302,7 @@ export function clientStart(
     engineSack.propertySheetWindow,
     engineSack.systemChatWindow,
     engineSack.experienceSheetWindow,
+    engineSack.schematicRunsWindow,
     engineSack.windowManager,
   ];
 
@@ -329,6 +341,8 @@ export function clientStart(
       handlePropertyUpdate(d);
     } else if (d.type == MessageTypes.ExperienceUpdate) {
       handleExperienceUpdate(d);
+    } else if (d.type == MessageTypes.SchematicRunsUpdate) {
+      handleSchematicRunsUpdate(d);
     }
   });
 }
@@ -384,6 +398,7 @@ function handleJoin(d: GameMessage) {
   engineSack.reputationSheetWindow.setHidden(true);
   engineSack.propertySheetWindow.setHidden(true);
   engineSack.experienceSheetWindow.setHidden(true);
+  engineSack.schematicRunsWindow.setHidden(true);
 
   // start game loop
   engineSack.lastFrameTime = Date.now();
@@ -928,6 +943,9 @@ function handleCurrentShipUpdate(d: GameMessage) {
 
   // update experience window
   engineSack.experienceSheetWindow.setWsService(engineSack.wsSvc);
+
+  // update schematic runs window
+  engineSack.schematicRunsWindow.setWsService(engineSack.wsSvc);
 }
 
 function handleFactionUpdate(d: GameMessage) {
@@ -972,6 +990,17 @@ function handleExperienceUpdate(d: GameMessage) {
 
   // update experience sheet window
   engineSack.experienceSheetWindow.sync(msg);
+}
+
+function handleSchematicRunsUpdate(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerSchematicRunsUpdate;
+
+  // fix missing lists
+  console.log("not yet implemented");
+
+  // update schematic runs window
+  engineSack.schematicRunsWindow.sync(msg);
 }
 
 // clears the screen
