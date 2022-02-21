@@ -864,6 +864,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 				e.Lock.Lock("core.handleEscalations::SchematicRunViews::runs")
 				defer e.Lock.Unlock()
 
+				// skip if uninitialized
+				if !e.Initialized {
+					continue
+				}
+
 				// null checks
 				if e.Process == nil {
 					continue
@@ -878,6 +883,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 				}
 
 				if e.Ship.CurrentSystem == nil {
+					continue
+				}
+
+				// skip if dirty
+				if e.SchematicItem.CoreDirty {
 					continue
 				}
 

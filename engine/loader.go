@@ -1538,15 +1538,29 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 	sp.EscrowContainerID = &owner.EscrowContainerID
 
 	// hook cargo bay schematics into running jobs
-	runs := getSchematicRunsByUser(sh.UserID)
+	HookSchematics(sp)
+
+	// return pointer to ship
+	return sp, nil
+}
+
+// Hooks pointers needed if a schematic is currently running
+func HookSchematics(sp *universe.Ship) {
+	// get schematic runs for ship owner
+	runs := getSchematicRunsByUser(sp.UserID)
 
 	for _, r := range runs {
 		// obtain lock
-		r.Lock.Lock("loader::LoadShip()")
+		r.Lock.Lock("loader::HookSchematics()")
 		defer r.Lock.Unlock()
 
+		// skip if initialized
+		if r.Initialized {
+			continue
+		}
+
 		// hook references
-		for _, ci := range cargoBay.Items {
+		for _, ci := range sp.CargoBay.Items {
 			if ci.ID == r.SchematicItemID {
 				r.SchematicItem = ci
 				r.Process = ci.Process
@@ -1560,11 +1574,13 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 		if r.SchematicItem != nil && r.Process != nil && r.Ship != nil {
 			// mark as initialized
 			r.Initialized = true
+
+			if r.StatusID != "delivered" {
+				// mark schematic item as in use
+				r.SchematicItem.InUse = true
+			}
 		}
 	}
-
-	// return pointer to ship
-	return sp, nil
 }
 
 // Updates a ship in the database

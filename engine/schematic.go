@@ -187,6 +187,9 @@ func startSchematics() {
 
 											// mark as delivered
 											j.StatusID = "delivered"
+
+											// free schematic
+											j.SchematicItem.InUse = false
 										} else {
 											shared.TeeLog(fmt.Sprintf("Schematic ship is not in a system! %v", sh))
 											j.StatusID = "error"
