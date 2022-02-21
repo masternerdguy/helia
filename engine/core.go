@@ -1,7 +1,9 @@
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
+	"helia/listener/models"
 	"helia/shared"
 	"helia/sql"
 	"helia/universe"
@@ -839,6 +841,70 @@ func handleEscalations(sol *universe.SolarSystem) {
 				return
 			}
 		}(rs, sol)
+	}
+
+	// iterate over clients in need of a schematic runs update
+	for id := range sol.SchematicRunViews {
+		// capture reference and remove from map
+		rs := sol.SchematicRunViews[id]
+		delete(sol.SchematicRunViews, id)
+
+		// handle escalation on another goroutine
+		go func(rs *shared.GameClient) {
+			// get runs
+			runs := getSchematicRunsByUser(*rs.UID)
+
+			// copy to update message
+			msg := models.ServerSchematicRunsUpdateBody{
+				Runs: make([]models.ServerSchematicRunEntryBody, len(runs)),
+			}
+
+			for _, e := range runs {
+				// obtain lock
+				e.Lock.Lock("core.handleEscalations::SchematicRunViews::runs")
+				defer e.Lock.Unlock()
+
+				// null checks
+				if e.Process == nil {
+					continue
+				}
+
+				if e.Ship == nil {
+					continue
+				}
+
+				if e.Ship.DockedAtStation == nil {
+					continue
+				}
+
+				// copy fields
+				o := models.ServerSchematicRunEntryBody{
+					SchematicRunID:     e.ID,
+					SchematicName:      e.Process.Name,
+					HostShipName:       e.Ship.ShipName,
+					HostStationName:    e.Ship.DockedAtStation.StationName,
+					StatusID:           e.StatusID,
+					PercentageComplete: (float64(e.Progress) / float64(e.Process.Time)) + universe.Epsilon,
+				}
+
+				// store in message
+				msg.Runs = append(msg.Runs, o)
+			}
+
+			// get message registry
+			msgRegistry := models.NewMessageRegistry()
+
+			// serialize message
+			b, _ := json.Marshal(&msg)
+
+			sct := models.GameMessage{
+				MessageType: msgRegistry.SchematicRunsUpdate,
+				MessageBody: string(b),
+			}
+
+			// write message to client
+			rs.WriteMessage(&sct)
+		}(rs)
 	}
 }
 

@@ -763,10 +763,21 @@ type ClientViewSchematicRunsBody struct {
 
 // Body containing currently running schematics
 type ServerSchematicRunsUpdateBody struct {
+	Runs []ServerSchematicRunEntryBody `json:"runs"`
 }
 
 // Body containing a request to run a schematic in the player's station warehouse/workshop
 type ClientRunSchematicBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemId"`
+}
+
+// Body containing a currently running schematic
+type ServerSchematicRunEntryBody struct {
+	SchematicRunID     uuid.UUID `json:"id"`
+	SchematicName      string    `json:"schematicName"`
+	HostShipName       string    `json:"hostShipName"`
+	HostStationName    string    `json:"hostStationName"`
+	StatusID           string    `json:"statusId"`
+	PercentageComplete float64   `json:"percentageComplete"`
 }

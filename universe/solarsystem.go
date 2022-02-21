@@ -52,6 +52,7 @@ type SolarSystem struct {
 	SetNoLoad            map[string]*ShipNoLoadSet     // updates to the no load flag in need of saving by core
 	UsedShipPurchases    map[string]*UsedShipPurchase  // purchased used ships that need to be hooked in and saved by core
 	ShipRenames          map[string]*ShipRename        // renamed ships that need to be saved by core
+	SchematicRunViews    map[string]*shared.GameClient // requests for a schematic run summary
 }
 
 // Initializes internal aspects of SolarSystem
@@ -84,6 +85,7 @@ func (s *SolarSystem) Initialize() {
 	s.SetNoLoad = make(map[string]*ShipNoLoadSet)
 	s.UsedShipPurchases = make(map[string]*UsedShipPurchase)
 	s.ShipRenames = make(map[string]*ShipRename)
+	s.SchematicRunViews = make(map[string]*shared.GameClient)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -1395,7 +1397,8 @@ func (s *SolarSystem) processClientEventQueues() {
 				// extract data
 				// data := evt.Body.(models.ClientViewSchematicRunsBody)
 
-				shared.TeeLog("Not yet implemented: ViewSchematicRuns")
+				// escalate to core
+				s.SchematicRunViews[c.UID.String()] = c
 			}
 		} else if evt.Type == models.NewMessageRegistry().RunSchematic {
 			if sh != nil {
