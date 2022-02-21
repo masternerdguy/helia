@@ -778,6 +778,7 @@ type ServerSchematicRunEntryBody struct {
 	SchematicName      string    `json:"schematicName"`
 	HostShipName       string    `json:"hostShipName"`
 	HostStationName    string    `json:"hostStationName"`
+	SolarSystemName    string    `json:"solarSystemName"`
 	StatusID           string    `json:"statusId"`
 	PercentageComplete float64   `json:"percentageComplete"`
 }

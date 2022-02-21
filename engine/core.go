@@ -877,12 +877,17 @@ func handleEscalations(sol *universe.SolarSystem) {
 					continue
 				}
 
+				if e.Ship.CurrentSystem == nil {
+					continue
+				}
+
 				// copy fields
 				o := models.ServerSchematicRunEntryBody{
 					SchematicRunID:     e.ID,
 					SchematicName:      e.Process.Name,
 					HostShipName:       e.Ship.ShipName,
 					HostStationName:    e.Ship.DockedAtStation.StationName,
+					SolarSystemName:    e.Ship.CurrentSystem.SystemName,
 					StatusID:           e.StatusID,
 					PercentageComplete: (float64(e.Progress) / float64(e.Process.Time)) + universe.Epsilon,
 				}

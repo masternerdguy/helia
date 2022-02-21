@@ -58,8 +58,37 @@ export class SchematicRunsWindow extends GDIWindow {
     this.wsSvc = wsSvc;
   }
 
-  sync(cache: ServerSchematicRunsUpdate) {
-    console.log("not yet implemented");
+  sync(update: ServerSchematicRunsUpdate) {
+    // sort runs by progress descending
+    const sortedRuns = update.runs.sort((a, b) => {return b.percentageComplete-a.percentageComplete});
+
+    // stash scroll position
+    const scrollIdx = this.schematicRunList.getScroll();
+
+    // clear list
+    this.schematicRunList.setItems([]);
+
+    // update list
+    const rows: string[] = [];
+
+    for (const e of sortedRuns) {
+      const percentageComplete = `${(e.percentageComplete * 100).toFixed(2)}`;
+
+      rows.push(
+        fixedString('', 2) + ' ' +
+        fixedString(e.schematicName, 16) + ' ' +
+        fixedString(e.statusId, 8) + ' ' + 
+        fixedString(e.hostShipName, 16) + ' ' +
+        fixedString(e.hostStationName, 16) + ' ' +
+        fixedString(e.solarSystemName, 16) + ' ' +
+        fixedString(`(${percentageComplete})`, 8) + '~'
+      )
+    }
+
+    this.schematicRunList.setItems(rows);
+
+    // restore scroll position
+    this.schematicRunList.setScroll(scrollIdx);
   }
 
   private refreshSchematicRuns() {
@@ -69,5 +98,13 @@ export class SchematicRunsWindow extends GDIWindow {
 
       this.wsSvc.sendMessage(MessageTypes.ViewSchematicRuns, b);
     }, 200);
+  }  
+}
+
+function fixedString(str: string, width: number): string {
+  if (str === undefined || str == null) {
+    return ''.padEnd(width);
   }
+
+  return str.substr(0, width).padEnd(width);
 }
