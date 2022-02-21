@@ -26,6 +26,7 @@ import {
 } from '../../wsModels/bodies/propertyUpdate';
 import { ClientTransferItem } from '../../wsModels/bodies/transferItem';
 import { ClientViewProperty } from '../../wsModels/bodies/viewProperty';
+import { ClientRunSchematic } from '../../wsModels/bodies/runSchematic';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -297,6 +298,23 @@ export class ShipFittingWindow extends GDIWindow {
         };
 
         this.wsSvc.sendMessage(MessageTypes.FitModule, tiMsg);
+
+        // request cargo bay refresh
+        this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
+      } else if (a === 'Run') {
+        // get selected item
+        const i: ShipViewRow = this.shipView.getSelectedItem();
+
+        // send run request
+        const tiMsg: ClientRunSchematic = {
+          sid: this.wsSvc.sid,
+          itemId: (i.object as WSContainerItem).id,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.RunSchematic, tiMsg);
 
         // request cargo bay refresh
         this.refreshCargoBay();
@@ -914,6 +932,15 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
       if (isModule) {
         // offer fit action
         actions.push('Fit');
+      }
+
+      // determine whether or not this is a schematic
+      const isSchematic =
+        m.itemFamilyID == "schematic";
+
+      if (isSchematic) {
+        // offer run action
+        actions.push('Run');
       }
 
       // determine whether or not this is fuel
