@@ -997,7 +997,7 @@ function handleSchematicRunsUpdate(d: GameMessage) {
   const msg = JSON.parse(d.body) as ServerSchematicRunsUpdate;
 
   // fix missing lists
-  if(!msg.runs) {
+  if (!msg.runs) {
     msg.runs = [];
   }
 

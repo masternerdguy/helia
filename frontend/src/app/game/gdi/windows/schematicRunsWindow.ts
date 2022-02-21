@@ -60,7 +60,9 @@ export class SchematicRunsWindow extends GDIWindow {
 
   sync(update: ServerSchematicRunsUpdate) {
     // sort runs by progress descending
-    const sortedRuns = update.runs.sort((a, b) => {return b.percentageComplete-a.percentageComplete});
+    const sortedRuns = update.runs.sort((a, b) => {
+      return b.percentageComplete - a.percentageComplete;
+    });
 
     // stash scroll position
     const scrollIdx = this.schematicRunList.getScroll();
@@ -75,14 +77,21 @@ export class SchematicRunsWindow extends GDIWindow {
       const percentageComplete = `${(e.percentageComplete * 100).toFixed(2)}`;
 
       rows.push(
-        fixedString('', 2) + ' ' +
-        fixedString(e.schematicName, 16) + ' ' +
-        fixedString(e.statusId, 8) + ' ' + 
-        fixedString(e.hostShipName, 16) + ' ' +
-        fixedString(e.hostStationName, 16) + ' ' +
-        fixedString(e.solarSystemName, 16) + ' ' +
-        fixedString(`(${percentageComplete})`, 8) + '~'
-      )
+        fixedString('', 2) +
+          ' ' +
+          fixedString(e.schematicName, 16) +
+          ' ' +
+          fixedString(e.statusId, 8) +
+          ' ' +
+          fixedString(e.hostShipName, 16) +
+          ' ' +
+          fixedString(e.hostStationName, 16) +
+          ' ' +
+          fixedString(e.solarSystemName, 16) +
+          ' ' +
+          fixedString(`(${percentageComplete})`, 8) +
+          '~'
+      );
     }
 
     this.schematicRunList.setItems(rows);
@@ -98,7 +107,7 @@ export class SchematicRunsWindow extends GDIWindow {
 
       this.wsSvc.sendMessage(MessageTypes.ViewSchematicRuns, b);
     }, 200);
-  }  
+  }
 }
 
 function fixedString(str: string, width: number): string {

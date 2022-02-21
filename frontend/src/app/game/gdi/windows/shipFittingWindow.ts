@@ -935,8 +935,7 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
       }
 
       // determine whether or not this is a schematic
-      const isSchematic =
-        m.itemFamilyID == "schematic";
+      const isSchematic = m.itemFamilyID == 'schematic';
 
       if (isSchematic) {
         // offer run action
