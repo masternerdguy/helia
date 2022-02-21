@@ -1403,9 +1403,54 @@ func (s *SolarSystem) processClientEventQueues() {
 		} else if evt.Type == models.NewMessageRegistry().RunSchematic {
 			if sh != nil {
 				// extract data
-				// data := evt.Body.(models.ClientRunSchematicBody)
+				data := evt.Body.(models.ClientRunSchematicBody)
 
-				shared.TeeLog("Not yet implemented: RunSchematic")
+				// find item in cargo
+				item := sh.FindItemInCargo(data.ItemID)
+
+				// make sure we found something
+				if item == nil {
+					// do nothing
+					continue
+				} else {
+					// verify ship is docked
+					if sh.DockedAtStation == nil {
+						c.WriteErrorMessage("you must be docked to run a schematic")
+						continue
+					}
+
+					// verify ship is a station warehouse or workshop
+					if sh.TemplateData.CanUndock {
+						c.WriteErrorMessage("schematics can only be run from a station workshop or warehouse")
+						continue
+					}
+
+					// verify item is a schematic
+					if item.ItemFamilyID != "schematic" {
+						c.WriteErrorMessage("this item is not a schematic")
+						continue
+					}
+
+					// verify schematic is available
+					if item.SchematicInUse {
+						c.WriteErrorMessage("this schematic is already running")
+						continue
+					}
+
+					// verify schematic is clean
+					if item.CoreDirty {
+						c.WriteErrorMessage("schematic is dirty")
+						continue
+					}
+
+					// verify process is linked
+					if item.Process == nil {
+						c.WriteErrorMessage("schematic is improperly initialized")
+						continue
+					}
+
+					c.WriteErrorMessage("not yet implemented :( ")
+				}
 			}
 		}
 	}

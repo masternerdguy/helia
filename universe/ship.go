@@ -2793,11 +2793,24 @@ func (s *Ship) FindModule(id uuid.UUID, rack string) *FittedSlot {
 	return nil
 }
 
-// Returns an item in the ship's cargo bay if it is present
+// Returns an item in the ship's cargo bay if it is present and clean
 func (s *Ship) FindItemInCargo(id uuid.UUID) *Item {
 	// look for item
 	for i := range s.CargoBay.Items {
 		item := s.CargoBay.Items[i]
+
+		// skip if unclean
+		if item.CoreDirty {
+			continue
+		}
+
+		if item.SchematicInUse {
+			continue
+		}
+
+		if item.Quantity <= 0 {
+			continue
+		}
 
 		if item.ID == id {
 			// return item
@@ -2809,13 +2822,17 @@ func (s *Ship) FindItemInCargo(id uuid.UUID) *Item {
 	return nil
 }
 
-// Returns the first available (clean and nonzero quantity) item of a given type and packaging state in the cargo bay
+// Returns the first available, clean, item of a given type and packaging state in the cargo bay
 func (s *Ship) FindFirstAvailableItemOfTypeInCargo(typeID uuid.UUID, packaged bool) *Item {
 	// look for item
 	for i := range s.CargoBay.Items {
 		item := s.CargoBay.Items[i]
 
 		if item.CoreDirty {
+			continue
+		}
+
+		if item.SchematicInUse {
 			continue
 		}
 

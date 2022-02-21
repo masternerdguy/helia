@@ -1577,7 +1577,7 @@ func HookSchematics(sp *universe.Ship) {
 
 			if r.StatusID != "delivered" {
 				// mark schematic item as in use
-				r.SchematicItem.InUse = true
+				r.SchematicItem.SchematicInUse = true
 			}
 		}
 	}

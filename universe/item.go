@@ -26,5 +26,5 @@ type Item struct {
 	ItemTypeMeta   Meta
 	Process        *Process
 	CoreDirty      bool
-	InUse          bool
+	SchematicInUse bool
 }
