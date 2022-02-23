@@ -17,7 +17,7 @@ export class SchematicRunsWindow extends GDIWindow {
 
   initialize() {
     // set dimensions
-    this.setWidth(500);
+    this.setWidth(650);
     this.setHeight(300);
 
     // initialize
@@ -28,7 +28,7 @@ export class SchematicRunsWindow extends GDIWindow {
     this.setTitle('Schematic Runs');
 
     // schematic runs list
-    this.schematicRunList.setWidth(500);
+    this.schematicRunList.setWidth(650);
     this.schematicRunList.setHeight(300);
     this.schematicRunList.initialize();
 
