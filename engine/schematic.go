@@ -107,10 +107,6 @@ func startSchematics() {
 								/* Deliver items on a separate goroutine */
 
 								go func(j *universe.SchematicRun) {
-									// obtain lock
-									j.Lock.Lock("core::startSchematics::watcher::delivery")
-									defer j.Lock.Unlock()
-
 									// obtain lock on delivery system and ship
 									if j.Ship != nil {
 										sh := j.Ship
