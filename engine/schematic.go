@@ -258,4 +258,5 @@ func addSchematicRunForUser(userID uuid.UUID, run *universe.SchematicRun) {
 
 	// store run
 	schematicRunMap[userID.String()] = append(schematicRunMap[userID.String()], run)
+	run.SchematicItem.SchematicInUse = true
 }

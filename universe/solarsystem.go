@@ -1097,6 +1097,22 @@ func (s *SolarSystem) processClientEventQueues() {
 					continue
 				}
 
+				// verify no running schematics in ship
+				noSchematicRuns := true
+
+				for _, i := range toSell.CargoBay.Items {
+					if i.ItemFamilyID == "schematic" {
+						if i.SchematicInUse {
+							noSchematicRuns = false
+						}
+					}
+				}
+
+				if !noSchematicRuns {
+					c.WriteErrorMessage("a schematic is currently running on this ship")
+					continue
+				}
+
 				// associate escrow container id with ship being sold
 				toSell.EscrowContainerID = &c.EscrowContainerID
 
@@ -1162,6 +1178,22 @@ func (s *SolarSystem) processClientEventQueues() {
 				// verify it isn't the same ship
 				if toTrash.ID == sh.ID {
 					c.WriteErrorMessage("you are currently flying this ship")
+					continue
+				}
+
+				// verify no running schematics in ship
+				noSchematicRuns := true
+
+				for _, i := range toTrash.CargoBay.Items {
+					if i.ItemFamilyID == "schematic" {
+						if i.SchematicInUse {
+							noSchematicRuns = false
+						}
+					}
+				}
+
+				if !noSchematicRuns {
+					c.WriteErrorMessage("a schematic is currently running on this ship")
 					continue
 				}
 

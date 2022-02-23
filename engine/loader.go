@@ -60,6 +60,9 @@ func LoadUniverse() (*universe.Universe, error) {
 		} else if usr.StatusID == "deliverypending" {
 			shared.TeeLog(fmt.Sprintf("Not loading schematic run %v (deliverypending)", usr.ID))
 			continue
+		} else if usr.StatusID == "delivered" {
+			shared.TeeLog(fmt.Sprintf("Not loading schematic run %v (delivered)", usr.ID))
+			continue
 		}
 
 		addSchematicRunForUser(sr.UserID, &usr)
