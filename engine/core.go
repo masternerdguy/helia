@@ -202,6 +202,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	shipSvc := sql.GetShipService()
 	userSvc := sql.GetUserService()
 	itemSvc := sql.GetItemService()
+	schematicRunSvc := sql.GetSchematicRunService()
 
 	// obtain lock
 	sol.Lock.Lock("core.handleEscalations")
@@ -920,6 +921,60 @@ func handleEscalations(sol *universe.SolarSystem) {
 			// write message to client
 			rs.WriteMessage(&sct)
 		}(rs)
+	}
+
+	// iterate over newly invoked schematics
+	for id := range sol.NewSchematicRuns {
+		// capture reference and remove from map
+		rs := sol.NewSchematicRuns[id]
+		delete(sol.NewSchematicRuns, id)
+
+		// handle escalation on another goroutine
+		go func(rs *universe.NewSchematicRunTicket, sol *universe.SolarSystem) {
+			// obtain locks
+			rs.Client.Lock.Lock("core.handleEscalations::NewSchematicRuns")
+			defer rs.Client.Lock.Unlock()
+
+			rs.Ship.Lock.Lock("core.handleEscalations::NewSchematicRuns")
+			defer rs.Ship.Lock.Unlock()
+
+			rs.SchematicItem.Lock.Lock("core.handleEscalations::NewSchematicRuns")
+			defer rs.SchematicItem.Lock.Unlock()
+
+			// create new run in database
+			r, err := schematicRunSvc.NewSchematicRun(sql.SchematicRun{
+				ProcessID:       rs.SchematicItem.Process.ID,
+				StatusID:        "new",
+				SchematicItemID: rs.SchematicItem.ID,
+				UserID:          *rs.Client.UID,
+			})
+
+			if err != nil || r == nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to run schematic %v - failure saving (%v)!", rs.SchematicItem.ID, err))
+				return
+			}
+
+			// convert to universe model
+			usr := universe.SchematicRun{
+				ID:              r.ID,
+				Created:         r.Created,
+				ProcessID:       r.ProcessID,
+				StatusID:        r.StatusID,
+				Progress:        r.Progress,
+				SchematicItemID: r.SchematicItemID,
+				UserID:          r.UserID,
+			}
+
+			// hook schematic
+			addSchematicRunForUser(*rs.Client.UID, &usr)
+			hookSchematics(rs.Ship)
+
+			// mark as running
+			rs.SchematicItem.SchematicInUse = true
+
+			// unmark dirty
+			rs.SchematicItem.CoreDirty = false
+		}(rs, sol)
 	}
 }
 

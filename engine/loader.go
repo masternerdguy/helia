@@ -1538,14 +1538,14 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 	sp.EscrowContainerID = &owner.EscrowContainerID
 
 	// hook cargo bay schematics into running jobs
-	HookSchematics(sp)
+	hookSchematics(sp)
 
 	// return pointer to ship
 	return sp, nil
 }
 
 // Hooks pointers needed if a schematic is currently running
-func HookSchematics(sp *universe.Ship) {
+func hookSchematics(sp *universe.Ship) {
 	// get schematic runs for ship owner
 	runs := getSchematicRunsByUser(sp.UserID)
 
