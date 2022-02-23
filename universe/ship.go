@@ -2850,6 +2850,38 @@ func (s *Ship) FindFirstAvailableItemOfTypeInCargo(typeID uuid.UUID, packaged bo
 	return nil
 }
 
+// Returns the first available, clean, packaged item of a given type and stack size in the cargo bay
+func (s *Ship) FindFirstAvailablePackagedStackOfSizeInCargo(typeID uuid.UUID, size int) *Item {
+	// look for item
+	for i := range s.CargoBay.Items {
+		item := s.CargoBay.Items[i]
+
+		if item.CoreDirty {
+			continue
+		}
+
+		if item.SchematicInUse {
+			continue
+		}
+
+		if item.Quantity <= 0 {
+			continue
+		}
+
+		if item.Quantity < size {
+			continue
+		}
+
+		if item.ItemTypeID == typeID && item.IsPackaged {
+			// return item
+			return item
+		}
+	}
+
+	// nothing found
+	return nil
+}
+
 // Removes an item from the cargo hold and fits it to the ship
 func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	if lock {

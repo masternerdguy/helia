@@ -1449,6 +1449,47 @@ func (s *SolarSystem) processClientEventQueues() {
 						continue
 					}
 
+					// verify that all input requirements are met
+					inputsMet := true
+					inputsUsed := make([]*Item, 0)
+
+					for _, i := range item.Process.Inputs {
+						// look for sufficient stack
+						so := sh.FindFirstAvailablePackagedStackOfSizeInCargo(i.ItemTypeID, i.Quantity)
+
+						if so == nil {
+							inputsMet = false
+						} else {
+							// store pointer
+							inputsUsed = append(inputsUsed, so)
+						}
+					}
+
+					if !inputsMet {
+						c.WriteErrorMessage("not all required resources were provided")
+						continue
+					}
+
+					// verify there is sufficient space to store outputs
+					outputSize := 0.0
+
+					for _, o := range item.Process.Outputs {
+						// get stack volume
+						v, _ := o.ItemTypeMeta.GetFloat64("volume")
+						sv := float64(o.Quantity) * v
+
+						// accumulate
+						outputSize += sv
+					}
+
+					bayUsed := sh.TotalCargoBayVolumeUsed(false)
+					bayMax := sh.GetRealCargoBayVolume()
+
+					if bayUsed+outputSize > bayMax {
+						c.WriteErrorMessage("insufficient space to store outputs")
+						continue
+					}
+
 					c.WriteErrorMessage("not yet implemented :( ")
 				}
 			}
