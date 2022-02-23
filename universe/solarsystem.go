@@ -385,6 +385,11 @@ func (s *SolarSystem) processClientEventQueues() {
 						continue
 					}
 
+					// skip if running schematic
+					if i.SchematicInUse {
+						continue
+					}
+
 					// skip if no quantity
 					if i.Quantity <= 0 {
 						continue
