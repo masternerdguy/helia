@@ -207,10 +207,10 @@ func startSchematics() {
 						}
 					}
 				}
-			}
 
-			// decrement accumulator
-			msAccumulator -= 1000
+				// decrement accumulator
+				msAccumulator -= 1000
+			}
 
 			// release lock, must be right before sleep
 			schematicRunMapLock.Unlock()
