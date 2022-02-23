@@ -7,6 +7,7 @@ import (
 	"helia/shared"
 	"helia/sql"
 	"helia/universe"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -963,6 +964,10 @@ func handleEscalations(sol *universe.SolarSystem) {
 				Progress:        r.Progress,
 				SchematicItemID: r.SchematicItemID,
 				UserID:          r.UserID,
+				Lock: shared.LabeledMutex{
+					Structure: "SchematicRun",
+					UID:       fmt.Sprintf("%v :: %v :: %v", r.ID, time.Now(), rand.Float64()),
+				},
 			}
 
 			// hook schematic

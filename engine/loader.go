@@ -51,6 +51,10 @@ func LoadUniverse() (*universe.Universe, error) {
 			Progress:        sr.Progress,
 			SchematicItemID: sr.SchematicItemID,
 			UserID:          sr.UserID,
+			Lock: shared.LabeledMutex{
+				Structure: "SchematicRun",
+				UID:       fmt.Sprintf("%v :: %v :: %v", sr.ID, time.Now(), rand.Float64()),
+			},
 		}
 
 		// don't load stuck ones
