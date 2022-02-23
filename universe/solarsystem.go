@@ -87,6 +87,7 @@ func (s *SolarSystem) Initialize() {
 	s.UsedShipPurchases = make(map[string]*UsedShipPurchase)
 	s.ShipRenames = make(map[string]*ShipRename)
 	s.SchematicRunViews = make(map[string]*shared.GameClient)
+	s.NewSchematicRuns = make(map[string]*NewSchematicRunTicket)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
