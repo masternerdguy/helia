@@ -81,20 +81,24 @@ export class SchematicRunsWindow extends GDIWindow {
           ' ' +
           fixedString(e.schematicName, 16) +
           ' ' +
-          fixedString(e.statusId, 8) +
+          fixedString(e.statusId, 10) +
           ' ' +
-          fixedString(e.hostShipName, 16) +
-          ' ' +
-          fixedString(e.hostStationName, 16) +
+          fixedString(e.hostShipName, 32) +
           ' ' +
           fixedString(e.solarSystemName, 16) +
           ' ' +
-          fixedString(`(${percentageComplete})`, 8) +
+          fixedString(`(${percentageComplete}%)`, 10) +
           '~'
       );
     }
 
-    this.schematicRunList.setItems(rows);
+    this.schematicRunList.setItems(
+      rows.map((r) => {
+        return {
+          listString: () => `${r}`,
+        };
+      })
+    );
 
     // restore scroll position
     this.schematicRunList.setScroll(scrollIdx);

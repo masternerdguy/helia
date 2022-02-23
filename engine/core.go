@@ -858,7 +858,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// copy to update message
 			msg := models.ServerSchematicRunsUpdateBody{
-				Runs: make([]models.ServerSchematicRunEntryBody, len(runs)),
+				Runs: make([]models.ServerSchematicRunEntryBody, 0),
 			}
 
 			for _, e := range runs {
