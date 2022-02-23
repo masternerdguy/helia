@@ -220,6 +220,13 @@ type NewShipTicket struct {
 	Client         *shared.GameClient
 }
 
+// Structure represending an invoked schematic
+type NewSchematicRunTicket struct {
+	SchematicItem *Item
+	Client        *shared.GameClient
+	Ship          *Ship
+}
+
 // Structure representing a purchased used ship, not yet materialized
 type UsedShipPurchase struct {
 	ShipID uuid.UUID

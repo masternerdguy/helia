@@ -37,22 +37,23 @@ type SolarSystem struct {
 	globalAckToken        int // counter for number of ticks this system has gone through since server start (daily restart is assumed)
 	Lock                  shared.LabeledMutex
 	// event escalations to engine core
-	PlayerNeedRespawn    map[string]*shared.GameClient // clients in need of a respawn by core
-	NPCNeedRespawn       map[string]*Ship              // NPCs in need of a respawn by core
-	DeadShips            map[string]*Ship              // dead ships in need of cleanup by core
-	MovedItems           map[string]*Item              // items moved to a new container in need of saving by core
-	PackagedItems        map[string]*Item              // items packaged in need of saving by core
-	UnpackagedItems      map[string]*Item              // items unpackaged in need of saving by core
-	ChangedQuantityItems map[string]*Item              // stacks of items that have changed quantity and need saving by core
-	NewItems             map[string]*Item              // stacks of items that are newly created and need to be saved by core
-	NewSellOrders        map[string]*SellOrder         // new sell orders in need of saving by core
-	BoughtSellOrders     map[string]*SellOrder         // sell orders that have been fulfilled in need of saving by core
-	NewShipTickets       map[string]*NewShipTicket     // newly purchased/delivered ships that need to be generated and saved by core
-	ShipSwitches         map[string]*ShipSwitch        // approved requests to switch a client to another ship in need of saving by core
-	SetNoLoad            map[string]*ShipNoLoadSet     // updates to the no load flag in need of saving by core
-	UsedShipPurchases    map[string]*UsedShipPurchase  // purchased used ships that need to be hooked in and saved by core
-	ShipRenames          map[string]*ShipRename        // renamed ships that need to be saved by core
-	SchematicRunViews    map[string]*shared.GameClient // requests for a schematic run summary
+	PlayerNeedRespawn    map[string]*shared.GameClient     // clients in need of a respawn by core
+	NPCNeedRespawn       map[string]*Ship                  // NPCs in need of a respawn by core
+	DeadShips            map[string]*Ship                  // dead ships in need of cleanup by core
+	MovedItems           map[string]*Item                  // items moved to a new container in need of saving by core
+	PackagedItems        map[string]*Item                  // items packaged in need of saving by core
+	UnpackagedItems      map[string]*Item                  // items unpackaged in need of saving by core
+	ChangedQuantityItems map[string]*Item                  // stacks of items that have changed quantity and need saving by core
+	NewItems             map[string]*Item                  // stacks of items that are newly created and need to be saved by core
+	NewSellOrders        map[string]*SellOrder             // new sell orders in need of saving by core
+	BoughtSellOrders     map[string]*SellOrder             // sell orders that have been fulfilled in need of saving by core
+	NewShipTickets       map[string]*NewShipTicket         // newly purchased/delivered ships that need to be generated and saved by core
+	ShipSwitches         map[string]*ShipSwitch            // approved requests to switch a client to another ship in need of saving by core
+	SetNoLoad            map[string]*ShipNoLoadSet         // updates to the no load flag in need of saving by core
+	UsedShipPurchases    map[string]*UsedShipPurchase      // purchased used ships that need to be hooked in and saved by core
+	ShipRenames          map[string]*ShipRename            // renamed ships that need to be saved by core
+	SchematicRunViews    map[string]*shared.GameClient     // requests for a schematic run summary
+	NewSchematicRuns     map[string]*NewSchematicRunTicket // newly invoked schematics that need to be started
 }
 
 // Initializes internal aspects of SolarSystem
@@ -1452,6 +1453,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					// verify that all input requirements are met
 					inputsMet := true
 					inputsUsed := make([]*Item, 0)
+					inputsSize := make([]int, 0)
 
 					for _, i := range item.Process.Inputs {
 						// look for sufficient stack
@@ -1460,8 +1462,9 @@ func (s *SolarSystem) processClientEventQueues() {
 						if so == nil {
 							inputsMet = false
 						} else {
-							// store pointer
+							// store pointer and size
 							inputsUsed = append(inputsUsed, so)
+							inputsSize = append(inputsSize, i.Quantity)
 						}
 					}
 
@@ -1490,7 +1493,25 @@ func (s *SolarSystem) processClientEventQueues() {
 						continue
 					}
 
-					c.WriteErrorMessage("not yet implemented :( ")
+					// consume input resources
+					for x, i := range inputsUsed {
+						// decrement quantity
+						i.Quantity -= inputsSize[x]
+
+						// escalate to core for saving
+						s.ChangedQuantityItems[i.ID.String()] = i
+						i.CoreDirty = true
+					}
+
+					// start job
+					t := NewSchematicRunTicket{
+						Client:        c,
+						Ship:          sh,
+						SchematicItem: item,
+					}
+
+					s.NewSchematicRuns[item.ID.String()] = &t
+					item.SchematicInUse = true
 				}
 			}
 		}
