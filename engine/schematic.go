@@ -17,8 +17,8 @@ var schematicRunMap map[string][]*universe.SchematicRun // map of users to schem
 var schematicRunMapLock shared.LabeledMutex             // lock to share user<->schematic runs map
 
 // Initializes the schematics run watcher
-func startSchematics() {
-	// check if already initialized
+func initializeSchematicsWatcher() {
+	// check if already started
 	if schematicRunnerStarted {
 		panic("Schematic runner already running!")
 	}
@@ -28,6 +28,14 @@ func startSchematics() {
 	schematicRunMapLock = shared.LabeledMutex{
 		Structure: "core::startSchematics",
 		UID:       fmt.Sprintf("%v-%v-%v", uuid.New(), time.Now(), physics.RandInRange(0, 1000)),
+	}
+}
+
+// Starts the schematics run watcher
+func startSchematics() {
+	// check if already started
+	if schematicRunnerStarted {
+		panic("Schematic runner already running!")
 	}
 
 	lastFrame := makeTimestamp()

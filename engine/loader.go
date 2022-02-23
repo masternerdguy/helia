@@ -42,6 +42,8 @@ func LoadUniverse() (*universe.Universe, error) {
 	}
 
 	// hook into runner
+	initializeSchematicsWatcher()
+
 	for _, sr := range srs {
 		usr := universe.SchematicRun{
 			ID:              sr.ID,
