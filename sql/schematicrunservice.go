@@ -83,7 +83,7 @@ func (s SchematicRunService) NewSchematicRun(e SchematicRun) (*SchematicRun, err
 	uid := uuid.New()
 	createdAt := time.Now()
 
-	q, err := db.Query(sql, uid, e.Created, e.ProcessID, e.StatusID, e.Progress, e.SchematicItemID, e.UserID)
+	q, err := db.Query(sql, uid, createdAt, e.ProcessID, e.StatusID, e.Progress, e.SchematicItemID, e.UserID)
 
 	if err != nil {
 		return nil, err

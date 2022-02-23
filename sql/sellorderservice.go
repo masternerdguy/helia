@@ -121,7 +121,7 @@ func (s SellOrderService) NewSellOrder(e SellOrder) (*SellOrder, error) {
 	uid := uuid.New()
 	createdAt := time.Now()
 
-	q, err := db.Query(sql, uid, e.StationID, e.ItemID, e.SellerUserID, e.AskPrice, e.Created, e.Bought, e.BuyerUserID)
+	q, err := db.Query(sql, uid, e.StationID, e.ItemID, e.SellerUserID, e.AskPrice, createdAt, e.Bought, e.BuyerUserID)
 
 	if err != nil {
 		return nil, err
