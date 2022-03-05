@@ -1652,11 +1652,25 @@ func (s *SolarSystem) updateShips() {
 					continue
 				}
 
+				// drop chance roll
+				roll := rand.Float64()
+
+				if roll < 0.5 {
+					continue
+				}
+
 				wr.DeadShipItems = append(wr.DeadShipItems, it)
 			}
 
 			for _, it := range e.FittingBay.Items {
 				if it.Quantity <= 0 {
+					continue
+				}
+
+				// drop chance roll
+				roll := rand.Float64()
+
+				if roll < 0.75 {
 					continue
 				}
 
