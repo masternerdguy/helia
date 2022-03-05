@@ -375,7 +375,9 @@ CREATE TABLE public.shiptemplates (
     slotlayout jsonb DEFAULT '{}'::jsonb NOT NULL,
     basecargobayvolume double precision DEFAULT 0 NOT NULL,
     itemtypeid uuid NOT NULL,
-    canundock boolean DEFAULT true NOT NULL
+    canundock boolean DEFAULT true NOT NULL,
+    wrecktexture character varying(16) DEFAULT 'basic-wreck'::character varying NOT NULL,
+    explosiontexture character varying(16) DEFAULT 'basic_explosion'::character varying NOT NULL
 );
 
 
