@@ -4567,6 +4567,17 @@ func (m *FittedSlot) PeriodicUpdate() {
 
 						return
 					}
+				} else if *m.TargetType == tgtReg.Wreck {
+					// find wreck
+					_, f := m.shipMountedOn.CurrentSystem.wrecks[m.TargetID.String()]
+
+					if !f {
+						// target doesn't exist - can't activate
+						m.TargetID = nil
+						m.TargetType = nil
+
+						return
+					}
 				} else {
 					// unsupported target type - can't activate
 					m.TargetID = nil
