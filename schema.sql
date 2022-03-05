@@ -16,6 +16,49 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: sp_cleanup(); Type: PROCEDURE; Schema: public; Owner: developer
+--
+
+CREATE PROCEDURE public.sp_cleanup()
+    LANGUAGE sql
+    AS $$-- delete dead ships
+delete from ships where destroyedat is not null;
+
+-- delete untracked items
+delete from items where containerid not in
+(
+	select escrow_containerid from users
+	union
+	select trash_containerid from ships
+	union
+	select fittingbay_containerid from ships
+	union
+	select cargobay_containerid from ships
+);
+
+-- delete untracked containers
+delete from containers where id not in
+(
+	select escrow_containerid from users
+	union
+	select trash_containerid from ships
+	union
+	select fittingbay_containerid from ships
+	union
+	select cargobay_containerid from ships
+);
+
+-- delete logs
+delete from logs;
+
+-- delete sessions
+delete from sessions;
+$$;
+
+
+ALTER PROCEDURE public.sp_cleanup() OWNER TO developer;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
