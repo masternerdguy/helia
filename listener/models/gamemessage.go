@@ -218,6 +218,18 @@ type GlobalPlanetInfo struct {
 	Theta      float64   `json:"theta"`
 }
 
+// Structure for passing non-secret information about a wreck
+type GlobalWreckInfo struct {
+	ID        uuid.UUID `json:"id"`
+	SystemID  uuid.UUID `json:"systemId"`
+	WreckName string    `json:"wreckName"`
+	PosX      float64   `json:"x"`
+	PosY      float64   `json:"y"`
+	Texture   string    `json:"texture"`
+	Radius    float64   `json:"radius"`
+	Theta     float64   `json:"theta"`
+}
+
 // Structure for passing non-secret information about an asteroid
 type GlobalAsteroidInfo struct {
 	ID       uuid.UUID `json:"id"`
@@ -297,6 +309,7 @@ type ServerGlobalUpdateBody struct {
 	NewPointEffects   []GlobalPushPointEffectBody  `json:"newPointEffects"`
 	Missiles          []GlobalMissileBody          `json:"missiles"`
 	SystemChat        []ServerSystemChatBody       `json:"systemChat"`
+	Wrecks            []GlobalWreckInfo            `json:"wreck"`
 	Token             int                          `json:"token"`
 }
 

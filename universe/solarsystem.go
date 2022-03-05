@@ -30,6 +30,7 @@ type SolarSystem struct {
 	asteroids             map[string]*Asteroid
 	clients               map[string]*shared.GameClient       // clients in this system
 	missiles              map[string]*Missile                 // missiles in flight in this system
+	wrecks                map[string]*Wreck                   // wrecks of destroyed ships in this system
 	pushModuleEffects     []models.GlobalPushModuleEffectBody // module visual effect aggregation for tick
 	pushPointEffects      []models.GlobalPushPointEffectBody  // non-module point visual effect aggregation for tick
 	tickCounter           int                                 // counter that is used to control frequency of certain global updates
@@ -65,6 +66,7 @@ func (s *SolarSystem) Initialize() {
 	// initialize maps
 	s.clients = make(map[string]*shared.GameClient)
 	s.missiles = make(map[string]*Missile)
+	s.wrecks = make(map[string]*Wreck)
 	s.ships = make(map[string]*Ship)
 	s.stars = make(map[string]*Star)
 	s.planets = make(map[string]*Planet)
@@ -1986,6 +1988,33 @@ func (s *SolarSystem) sendClientUpdates() {
 		 * reasonable amount of time (which I feel is ~2 seconds).
 		 */
 
+		emptyWreckIDs := make([]string, 0)
+
+		for k, r := range s.wrecks {
+			// skip empty wrecks and mark for deletion
+			if len(r.Items) == 0 {
+				emptyWreckIDs = append(emptyWreckIDs, k)
+				continue
+			}
+
+			gu.Wrecks = append(gu.Wrecks, models.GlobalWreckInfo{
+				ID:        r.ID,
+				SystemID:  r.SystemID,
+				WreckName: r.WreckName,
+				PosX:      r.PosX,
+				PosY:      r.PosY,
+				Texture:   r.Texture,
+				Radius:    r.Radius,
+				Theta:     r.Theta,
+			})
+		}
+
+		// delete empty wrecks
+		for _, i := range emptyWreckIDs {
+			delete(s.wrecks, i)
+		}
+
+		// stars
 		for _, d := range s.stars {
 			gu.Stars = append(gu.Stars, models.GlobalStarInfo{
 				ID:       d.ID,
@@ -1999,6 +2028,7 @@ func (s *SolarSystem) sendClientUpdates() {
 			})
 		}
 
+		// planets
 		for _, d := range s.planets {
 			gu.Planets = append(gu.Planets, models.GlobalPlanetInfo{
 				ID:         d.ID,
@@ -2013,6 +2043,7 @@ func (s *SolarSystem) sendClientUpdates() {
 			})
 		}
 
+		// asteroids
 		for _, d := range s.asteroids {
 			gu.Asteroids = append(gu.Asteroids, models.GlobalAsteroidInfo{
 				ID:       d.ID,
@@ -2027,6 +2058,7 @@ func (s *SolarSystem) sendClientUpdates() {
 			})
 		}
 
+		// jumpholes
 		for _, d := range s.jumpholes {
 			gu.Jumpholes = append(gu.Jumpholes, models.GlobalJumpholeInfo{
 				ID:           d.ID,
@@ -2042,6 +2074,7 @@ func (s *SolarSystem) sendClientUpdates() {
 			})
 		}
 
+		// stations
 		for _, d := range s.stations {
 			gu.Stations = append(gu.Stations, models.GlobalStationInfo{
 				ID:          d.ID,
