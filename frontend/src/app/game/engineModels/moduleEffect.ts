@@ -58,6 +58,8 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.mielIceHarvester();
     } else if (b.gfxEffect === 'leche_ore_harvester') {
       this.vfxData = repo.lecheOreHarvester();
+    } else if (b.gfxEffect === 'basic_salvager') {
+      this.vfxData = repo.basicSalvager();
     }
 
     this.maxLifeTime = this.vfxData?.duration ?? 0;
@@ -84,6 +86,13 @@ export class ModuleEffect extends WsPushModuleEffect {
           break;
         }
       }
+    } else if (this.objStartType === TargetType.Wreck) {
+      for (const s of this.player.currentSystem.wrecks) {
+        if (s.id === this.objStartID) {
+          this.objStart = s;
+          break;
+        }
+      }
     }
 
     // locate end object if present
@@ -104,6 +113,13 @@ export class ModuleEffect extends WsPushModuleEffect {
         }
       } else if (this.objEndType === TargetType.Asteroid) {
         for (const s of this.player.currentSystem.asteroids) {
+          if (s.id === this.objEndID) {
+            this.objEnd = s;
+            break;
+          }
+        }
+      } else if (this.objEndType === TargetType.Wreck) {
+        for (const s of this.player.currentSystem.wrecks) {
           if (s.id === this.objEndID) {
             this.objEnd = s;
             break;
@@ -146,7 +162,65 @@ export class ModuleEffect extends WsPushModuleEffect {
         this.renderAsAetherDragEffect(camera, ctx);
       } else if (this.vfxData.type === 'siphon') {
         this.renderAsSiphonEffect(camera, ctx);
+      } else if (this.vfxData.type === 'salvager') {
+        this.renderAsSalvagerEffect(camera, ctx);
       }
+    }
+  }
+
+  private renderAsSalvagerEffect(camera: Camera, ctx: any) {
+    if (this.objStart && this.objEnd) {
+      // get end-point coordinates
+      const src = getTargetCoordinatesAndRadius(
+        this.objStart,
+        this.objStartType,
+        this.objStartHPOffset
+      );
+      const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
+
+      // apply offset to destination coordinates for cooler effect
+      if (!this.endPosOffset) {
+        // get a random point within the radius of the target
+        const bR = dest[2] / 1.5;
+
+        const ox = randomIntFromInterval(-bR, bR);
+        const oy = randomIntFromInterval(-bR, bR);
+
+        // store offset
+        this.endPosOffset = [ox, oy];
+      }
+
+      dest[0] += this.endPosOffset[0];
+      dest[1] += this.endPosOffset[1];
+
+      // project to screen
+      const sx = camera.projectX(src[0]);
+      const sy = camera.projectY(src[1]);
+
+      const tx = camera.projectX(dest[0]);
+      const ty = camera.projectY(dest[1]);
+
+      // project salvage beam thickness
+      const lt = camera.projectR(this.vfxData.thickness);
+
+      // style line
+      ctx.strokeStyle = this.vfxData.color;
+
+      const oldFilter = ctx.filter;
+
+      if (this.vfxData.filter) {
+        ctx.filter = this.vfxData.filter;
+      }
+
+      // draw line
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(tx, ty);
+      ctx.lineWidth = lt;
+      ctx.stroke();
+
+      // revert filter
+      ctx.filter = oldFilter;
     }
   }
 

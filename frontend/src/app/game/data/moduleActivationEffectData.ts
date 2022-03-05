@@ -99,6 +99,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  basicSalvager(): ModuleActivationEffectData {
+    return {
+      type: 'salvager',
+      duration: 10000,
+      color: '#ff6347',
+      filter: 'blur(1.5px)', // "feather"
+      thickness: 1.8,
+    };
+  }
+
   basicAuto5Cannon(): ModuleActivationEffectData {
     return {
       type: 'autocannon',
