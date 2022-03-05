@@ -28,6 +28,7 @@
               "src/assets/stations",
               "src/assets/asteroids",
               "src/assets/missiles",
+              "src/assets/wrecks",
               "src/assets/fonts"
             ],
             "styles": [

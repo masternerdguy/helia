@@ -55,6 +55,7 @@ import { ServerExperienceUpdate } from './wsModels/bodies/experienceUpdate';
 import { ClientGlobalAck } from './wsModels/bodies/globalAck';
 import { SchematicRunsWindow } from './gdi/windows/schematicRunsWindow';
 import { ServerSchematicRunsUpdate } from './wsModels/bodies/schematicRunsUpdate';
+import { Wreck } from './engineModels/wreck';
 
 class EngineSack {
   constructor() {}
@@ -477,6 +478,10 @@ function handleGlobalUpdate(d: GameMessage) {
       msg.missiles = [];
     }
 
+    if (!msg.wrecks || msg.wrecks == null) {
+      msg.wrecks = [];
+    }
+
     if (!msg.systemChat || msg.systemChat == null) {
       msg.systemChat = [];
     }
@@ -556,10 +561,33 @@ function handleGlobalUpdate(d: GameMessage) {
       }
 
       if (!match) {
-        // add ship to memory
+        // add missile to memory
         engineSack.player.currentSystem.missiles.push(new Missile(sh));
       }
     }
+
+        // update wrecks
+        for (const sh of msg.wrecks) {
+          let match = false;
+    
+          // find wreck in memory
+          for (const sm of engineSack.player.currentSystem.wrecks) {
+            if (sh.id === sm.id) {
+              match = true;
+    
+              // sync wreck in memory
+              sm.sync(sh);
+    
+              // exit loop
+              break;
+            }
+          }
+    
+          if (!match) {
+            // add wreck to memory
+            engineSack.player.currentSystem.wrecks.push(new Wreck(sh));
+          }
+        }
 
     // update stars
     for (const st of msg.stars) {
@@ -1136,6 +1164,16 @@ function clientRender() {
     p.render(engineSack.ctx, engineSack.camera);
   }
 
+  // draw wrecks
+  const keepWrecks: Wreck[] = [];
+  for (const sh of engineSack.player.currentSystem.wrecks) {
+    // only draw wrecks we've "recently" seen
+    if (Date.now() - sh.lastSeen <= 2500) {
+      sh.render(engineSack.ctx, engineSack.camera);
+      keepWrecks.push(sh);
+    }
+  }
+
   // draw ships
   const keepShips: Ship[] = [];
   for (const sh of engineSack.player.currentSystem.ships) {
@@ -1166,9 +1204,10 @@ function clientRender() {
     ef.render(engineSack.ctx, engineSack.camera);
   }
 
-  // keep only ships / missiles that were drawable in-memory
+  // keep only ships / missiles / wrecks that were drawable in-memory
   engineSack.player.currentSystem.ships = keepShips;
   engineSack.player.currentSystem.missiles = keepMissiles;
+  engineSack.player.currentSystem.wrecks = keepWrecks;
 
   // draw overlay if docked
   if (!!engineSack.player.currentShip.dockedAtStationID) {

@@ -9,6 +9,7 @@ import { WsPushPointEffect } from '../entities/wsPushPointEffect';
 import { WSAsteroid } from '../entities/wsAsteroid';
 import { WSMissile } from '../entities/wsMissile';
 import { WSSystemChatMessage } from '../entities/wsSystemChatMessage';
+import { WSWreck } from '../entities/wsWreck';
 
 export class ServerGlobalUpdateBody {
   currentSystemInfo: WSSystem;
@@ -21,6 +22,7 @@ export class ServerGlobalUpdateBody {
   newModuleEffects: WsPushModuleEffect[];
   newPointEffects: WsPushPointEffect[];
   missiles: WSMissile[];
+  wrecks: WSWreck[];
   systemChat: WSSystemChatMessage[];
   token: number;
 }

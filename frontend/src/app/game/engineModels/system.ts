@@ -10,6 +10,7 @@ import { Asteroid } from './asteroid';
 import { GetFactionCacheEntry } from '../wsModels/shared';
 import { Faction } from './faction';
 import { Missile } from './missile';
+import { Wreck } from './wreck';
 
 export class System extends WSSystem {
   constructor(ws: WSSystem) {
@@ -30,6 +31,7 @@ export class System extends WSSystem {
     this.moduleEffects = [];
     this.pointEffects = [];
     this.missiles = [];
+    this.wrecks = [];
   }
 
   ships: Ship[];
@@ -41,6 +43,7 @@ export class System extends WSSystem {
   moduleEffects: ModuleEffect[];
   pointEffects: PointEffect[];
   missiles: Missile[];
+  wrecks: Wreck[];
 
   backplateImg: HTMLImageElement;
   backplateValid = false;
