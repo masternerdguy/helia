@@ -5891,7 +5891,7 @@ func (m *FittedSlot) activateAsSalvager() bool {
 	}
 
 	// attempt to pull from target wreck
-	if *m.TargetType == tgtReg.Ship {
+	if *m.TargetType == tgtReg.Wreck {
 		c := tgtI.(*Wreck)
 
 		i, sv := c.TrySalvage(salvageChance, maxSalvageVol)

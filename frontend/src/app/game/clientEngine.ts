@@ -1168,7 +1168,7 @@ function clientRender() {
   const keepWrecks: Wreck[] = [];
   for (const sh of engineSack.player.currentSystem.wrecks) {
     // only draw wrecks we've "recently" seen
-    if (Date.now() - sh.lastSeen <= 2500) {
+    if (Date.now() - sh.lastSeen <= 5000) {
       sh.render(engineSack.ctx, engineSack.camera);
       keepWrecks.push(sh);
     }
