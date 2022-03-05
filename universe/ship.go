@@ -5915,6 +5915,7 @@ func (m *FittedSlot) activateAsSalvager() bool {
 			if cu+sv <= cv {
 				// store in cargo bay
 				m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, i)
+				i.ContainerID = m.shipMountedOn.CargoBayContainerID
 
 				// escalate to core for saving
 				i.CoreDirty = true
