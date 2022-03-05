@@ -311,7 +311,7 @@ type ServerGlobalUpdateBody struct {
 	NewPointEffects   []GlobalPushPointEffectBody  `json:"newPointEffects"`
 	Missiles          []GlobalMissileBody          `json:"missiles"`
 	SystemChat        []ServerSystemChatBody       `json:"systemChat"`
-	Wrecks            []GlobalWreckInfo            `json:"wreck"`
+	Wrecks            []GlobalWreckInfo            `json:"wrecks"`
 	Token             int                          `json:"token"`
 }
 
