@@ -366,7 +366,7 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume float64, rack string
 	} else if itemFamilyID == "cargo_expander" {
 		modFamily = "cargo"
 	} else if itemFamilyID == "salvager" {
-		modFamily = "cargo"
+		modFamily = "utility"
 	}
 
 	if modFamily == "" {
