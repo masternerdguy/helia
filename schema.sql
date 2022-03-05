@@ -59,6 +59,51 @@ $$;
 
 ALTER PROCEDURE public.sp_cleanup() OWNER TO developer;
 
+--
+-- Name: sp_purgehumans(); Type: PROCEDURE; Schema: public; Owner: developer
+--
+
+CREATE PROCEDURE public.sp_purgehumans()
+    LANGUAGE sql
+    AS $$-- delete non-npc user data
+update users set current_shipid = null  where isnpc = 'f';
+select id from users where isnpc = 'f';
+delete from ships where userid in (select id from users where isnpc = 'f');
+delete from sellorders where seller_userid in (select id from users where isnpc = 'f');
+delete from sellorders where buyer_userid in (select id from users where isnpc = 'f');
+delete from sessions;
+delete from schematicruns;
+
+-- delete untracked items
+delete from items where containerid not in
+(
+	select escrow_containerid from users where isnpc = 't'
+	union
+	select trash_containerid from ships
+	union
+	select fittingbay_containerid from ships
+	union
+	select cargobay_containerid from ships
+);
+
+-- delete non-npc users
+delete from users where isnpc = 'f';
+
+-- delete untracked containers
+delete from containers where id not in
+(
+	select escrow_containerid from users where isnpc = 't'
+	union
+	select trash_containerid from ships
+	union
+	select fittingbay_containerid from ships
+	union
+	select cargobay_containerid from ships
+);$$;
+
+
+ALTER PROCEDURE public.sp_purgehumans() OWNER TO developer;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
