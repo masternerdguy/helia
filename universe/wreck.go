@@ -4,14 +4,14 @@ import "github.com/google/uuid"
 
 // Structure representing a wreck
 type Wreck struct {
-	ID        uuid.UUID
-	SystemID  uuid.UUID
-	WreckName string
-	PosX      float64
-	PosY      float64
-	Texture   string
-	Radius    float64
-	Theta     float64
-	Items     []*Item
-	Ship      *Ship
+	ID            uuid.UUID
+	SystemID      uuid.UUID
+	WreckName     string
+	PosX          float64
+	PosY          float64
+	Texture       string
+	Radius        float64
+	Theta         float64
+	DeadShipItems []*Item
+	DeadShip      *Ship
 }

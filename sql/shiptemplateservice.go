@@ -24,6 +24,8 @@ type ShipTemplate struct {
 	Created            time.Time
 	ShipTemplateName   string
 	Texture            string
+	WreckTexture       string
+	ExplosionTexture   string
 	Radius             float64
 	BaseAccel          float64
 	BaseMass           float64
@@ -90,7 +92,7 @@ func (s ShipTemplateService) GetShipTemplateByID(shipTemplateID uuid.UUID) (*Shi
 			SELECT id, created, shiptemplatename, texture, radius, baseaccel, basemass, baseturn, 
 				   baseshield, baseshieldregen, basearmor, basehull, basefuel, baseheatcap, baseheatsink, 
 				   baseenergy, baseenergyregen, shiptypeid, slotlayout, basecargobayvolume, itemtypeid,
-				   canundock
+				   canundock, wrecktexture, explosiontexture
 			FROM public.shiptemplates
 			WHERE id = $1
 		`
@@ -100,7 +102,7 @@ func (s ShipTemplateService) GetShipTemplateByID(shipTemplateID uuid.UUID) (*Shi
 	switch err := row.Scan(&t.ID, &t.Created, &t.ShipTemplateName, &t.Texture, &t.Radius, &t.BaseAccel, &t.BaseMass, &t.BaseTurn,
 		&t.BaseShield, &t.BaseShieldRegen, &t.BaseArmor, &t.BaseHull, &t.BaseFuel, &t.BaseHeatCap, &t.BaseHeatSink,
 		&t.BaseEnergy, &t.BaseEnergyRegen, &t.ShipTypeID, &t.SlotLayout, &t.BaseCargoBayVolume, &t.ItemTypeID,
-		&t.CanUndock); err {
+		&t.CanUndock, &t.WreckTexture, &t.ExplosionTexture); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("ship template not found")
 	case nil:

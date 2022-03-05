@@ -1486,6 +1486,8 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 			ID:                 temp.ID,
 			Created:            temp.Created,
 			ShipTemplateName:   temp.ShipTemplateName,
+			WreckTexture:       temp.WreckTexture,
+			ExplosionTexture:   temp.ExplosionTexture,
 			Texture:            temp.Texture,
 			Radius:             temp.Radius,
 			BaseAccel:          temp.BaseAccel,

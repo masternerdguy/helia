@@ -12,6 +12,8 @@ type ShipTemplate struct {
 	Created            time.Time
 	ShipTemplateName   string
 	Texture            string
+	WreckTexture       string
+	ExplosionTexture   string
 	Radius             float64
 	BaseAccel          float64
 	BaseMass           float64

@@ -1625,13 +1625,45 @@ func (s *SolarSystem) updateShips() {
 
 			// drop explosion for ship
 			exp := models.GlobalPushPointEffectBody{
-				GfxEffect: "basic_explosion",
+				GfxEffect: e.TemplateData.ExplosionTexture,
 				PosX:      e.PosX,
 				PosY:      e.PosY,
 				Radius:    e.TemplateData.Radius * 1.5,
 			}
 
 			s.pushPointEffects = append(s.pushPointEffects, exp)
+
+			// create wreck for ship
+			wr := Wreck{
+				ID:            uuid.New(),
+				SystemID:      s.ID,
+				PosX:          e.PosX,
+				PosY:          e.PosY,
+				Theta:         e.Theta,
+				Radius:        e.TemplateData.Radius,
+				Texture:       e.TemplateData.WreckTexture,
+				WreckName:     fmt.Sprintf("Wreck of %v", e.ShipName),
+				DeadShipItems: make([]*Item, 0),
+				DeadShip:      e,
+			}
+
+			for _, it := range e.CargoBay.Items {
+				if it.Quantity <= 0 {
+					continue
+				}
+
+				wr.DeadShipItems = append(wr.DeadShipItems, it)
+			}
+
+			for _, it := range e.FittingBay.Items {
+				if it.Quantity <= 0 {
+					continue
+				}
+
+				wr.DeadShipItems = append(wr.DeadShipItems, it)
+			}
+
+			s.wrecks[wr.ID.String()] = &wr
 
 			// log destruction to console
 			bm := 0
@@ -1992,7 +2024,7 @@ func (s *SolarSystem) sendClientUpdates() {
 
 		for k, r := range s.wrecks {
 			// skip empty wrecks and mark for deletion
-			if len(r.Items) == 0 {
+			if len(r.DeadShipItems) == 0 {
 				emptyWreckIDs = append(emptyWreckIDs, k)
 				continue
 			}
