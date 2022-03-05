@@ -481,6 +481,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 				shared.TeeLog(fmt.Sprintf("! Unable to mark ship %v as dead in db (%v)!", ds.ID, err))
 				return
 			}
+
+			// make wreck available
+			ds.WreckReady = true
 		}(ds, sol)
 	}
 

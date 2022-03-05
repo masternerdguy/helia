@@ -202,6 +202,7 @@ type Ship struct {
 	Aggressors             map[string]*shared.PlayerReputationSheet
 	aiIncompatibleOreFault bool // true when mining autopilot failed due to incompatible ore (for patch miners)
 	aiNoOrePulledFault     bool // true when mining autopilot failed due to pulling no ore (for patch miners)
+	WreckReady             bool // true when a dead ship has been saved to the db and the wreck can be looted
 	Lock                   shared.LabeledMutex
 }
 
@@ -363,6 +364,8 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume float64, rack string
 	} else if itemFamilyID == "aux_generator" {
 		modFamily = "power"
 	} else if itemFamilyID == "cargo_expander" {
+		modFamily = "cargo"
+	} else if itemFamilyID == "salvager" {
 		modFamily = "cargo"
 	}
 
@@ -4606,6 +4609,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsUtilitySiphon()
 			} else if m.ItemTypeFamily == "utility_cloak" {
 				canActivate = m.activateAsUtilityCloak()
+			} else if m.ItemTypeFamily == "salvager" {
+				canActivate = m.activateAsSalvager()
 			}
 
 			if canActivate {
@@ -5779,6 +5784,166 @@ func (m *FittedSlot) activateAsUtilityCloak() bool {
 	}
 
 	m.shipMountedOn.TemporaryModifiers = append(m.shipMountedOn.TemporaryModifiers, modifier)
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsSalvager() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.NewTargetTypeRegistry()
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtI Any
+
+	if *m.TargetType == tgtReg.Wreck {
+		// find wreck
+		tgt, f := m.shipMountedOn.CurrentSystem.wrecks[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtI = tgt
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+	}
+
+	// get max salvage amount
+	maxSalvageVol, _ := m.ItemMeta.GetFloat64("salvage_volume")
+
+	// get salvage chance
+	salvageChance, _ := m.ItemMeta.GetFloat64("salvage_chance")
+
+	// apply usage experience modifier
+	maxSalvageVol *= m.usageExperienceModifier
+	salvageChance *= m.usageExperienceModifier
+
+	// calculate tracking ratio
+	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
+
+	// adjust based on tracking
+	maxSalvageVol *= trackingRatio
+	salvageChance *= trackingRatio
+
+	// account for falloff if present
+	falloff, found := m.ItemMeta.GetString("falloff")
+
+	rangeRatio := 1.0 // default to 100% damage (or ore pull if asteroid)
+
+	if found {
+		// adjust based on falloff style
+		if falloff == "linear" {
+			// max amount salvaged is a proportion of the distance to target over max range (closer is higher)
+			rangeRatio = 1 - (d / modRange)
+
+			maxSalvageVol *= rangeRatio
+		} else if falloff == "reverse_linear" {
+			//  max amount salvaged is a proportion of the distance to target over max range (further is higher)
+			rangeRatio = (d / modRange)
+
+			if d > modRange {
+				rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+			}
+
+			maxSalvageVol *= rangeRatio
+		}
+	}
+
+	// attempt to pull from target wreck
+	if *m.TargetType == tgtReg.Ship {
+		c := tgtI.(*Wreck)
+
+		i, sv := c.TrySalvage(salvageChance, maxSalvageVol)
+
+		if i != nil {
+			// success! try to add to cargo bay
+			cv := m.shipMountedOn.GetRealCargoBayVolume()
+			cu := m.shipMountedOn.TotalCargoBayVolumeUsed(false)
+
+			if cu+sv <= cv {
+				// store in cargo bay
+				m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, i)
+
+				// escalate to core for saving
+				i.CoreDirty = true
+				m.shipMountedOn.CurrentSystem.MovedItems[i.ID.String()] = i
+			}
+		}
+	} else {
+		return false
+	}
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+			ObjEndID:     m.TargetID,
+			ObjEndType:   m.TargetType,
+		}
+
+		gfxEffect.ObjStartHardpointOffset = [...]float64{
+			0,
+			0,
+		}
+
+		if m.SlotIndex != nil {
+			rack := m.Rack
+			idx := *m.SlotIndex
+
+			if rack == "A" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
+			}
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
 
 	// module activates!
 	return true
