@@ -578,6 +578,17 @@ function handleGlobalUpdate(d: GameMessage) {
           // sync wreck in memory
           sm.sync(sh);
 
+          // current ship target check if undocked
+          if (!engineSack.player.currentShip.dockedAtStationID) {
+            if (
+              sm.id === engineSack.player.currentTargetID &&
+              engineSack.player.currentTargetType === TargetType.Wreck
+            ) {
+              sm.isTargeted = true;
+              engineSack.targetInteractionWindow.setTarget(sm, TargetType.Wreck);
+            }
+          }
+
           // exit loop
           break;
         }
