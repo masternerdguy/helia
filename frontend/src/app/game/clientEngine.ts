@@ -566,28 +566,28 @@ function handleGlobalUpdate(d: GameMessage) {
       }
     }
 
-        // update wrecks
-        for (const sh of msg.wrecks) {
-          let match = false;
-    
-          // find wreck in memory
-          for (const sm of engineSack.player.currentSystem.wrecks) {
-            if (sh.id === sm.id) {
-              match = true;
-    
-              // sync wreck in memory
-              sm.sync(sh);
-    
-              // exit loop
-              break;
-            }
-          }
-    
-          if (!match) {
-            // add wreck to memory
-            engineSack.player.currentSystem.wrecks.push(new Wreck(sh));
-          }
+    // update wrecks
+    for (const sh of msg.wrecks) {
+      let match = false;
+
+      // find wreck in memory
+      for (const sm of engineSack.player.currentSystem.wrecks) {
+        if (sh.id === sm.id) {
+          match = true;
+
+          // sync wreck in memory
+          sm.sync(sh);
+
+          // exit loop
+          break;
         }
+      }
+
+      if (!match) {
+        // add wreck to memory
+        engineSack.player.currentSystem.wrecks.push(new Wreck(sh));
+      }
+    }
 
     // update stars
     for (const st of msg.stars) {

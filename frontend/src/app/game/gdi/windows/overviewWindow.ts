@@ -132,6 +132,10 @@ export class OverviewWindow extends GDIWindow {
       (a.ownerName ?? '').localeCompare(b.ownerName ?? '')
     );
 
+    const sortedWrecks = player.currentSystem.wrecks.sort((a, b) =>
+      (a.wreckName ?? '').localeCompare(b.wreckName ?? '')
+    );
+
     // include stars
     for (const i of player.currentSystem.stars) {
       const od = overviewDistance(
@@ -273,6 +277,29 @@ export class OverviewWindow extends GDIWindow {
         listString: () => {
           return `${fixedString('ASTEROID', 9)}${fixedString(
             i.name,
+            32
+          )} ${fixedString(od, 8)}`;
+        },
+      };
+
+      objects.push(d);
+    }
+
+    // include wrecks
+    for (const i of sortedWrecks) {
+      const od = overviewDistance(
+        player.currentShip.x,
+        player.currentShip.y,
+        i.x,
+        i.y
+      );
+
+      const d = {
+        object: i,
+        type: TargetType.Wreck,
+        listString: () => {
+          return `${fixedString('WRECK', 9)}${fixedString(
+            i.wreckName,
             32
           )} ${fixedString(od, 8)}`;
         },
