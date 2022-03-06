@@ -11,6 +11,7 @@ import { GDITabPane } from '../components/gdiTabPane';
 import { GDILabel } from '../components/gdiLabel';
 import { Player } from '../../engineModels/player';
 import { WsService } from '../../ws.service';
+import { GDIButton } from '../components/gdiButton';
 
 export class ReputationSheetWindow extends GDIWindow {
   private player: Player;
@@ -27,6 +28,7 @@ export class ReputationSheetWindow extends GDIWindow {
 
   // "my faction" tab
   private npcFactionLabel = new GDILabel();
+  private createFactionButton = new GDIButton();
 
   initialize() {
     // set dimensions
@@ -57,8 +59,9 @@ export class ReputationSheetWindow extends GDIWindow {
   }
 
   private packMyFactionTab() {
+    // npc faction indicator label
     this.npcFactionLabel.setWidth(this.getWidth());
-    this.npcFactionLabel.setHeight(GDIStyle.getUnderlyingFontSize(FontSize.normal) + 5);
+    this.npcFactionLabel.setHeight(Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2));
     this.npcFactionLabel.initialize();
 
     this.npcFactionLabel.setText('You are currently a member of an NPC faction.')
@@ -66,6 +69,21 @@ export class ReputationSheetWindow extends GDIWindow {
 
     this.npcFactionLabel.setX(0);
     this.npcFactionLabel.setY(GDIStyle.tabHandleHeight);
+
+    // create faction button
+    this.createFactionButton.setWidth(this.getWidth() * 0.5);
+    this.createFactionButton.setHeight(Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2));
+    this.createFactionButton.initialize();
+
+    this.createFactionButton.setText('Create Faction');
+    this.createFactionButton.setFont(FontSize.normal);
+
+    this.createFactionButton.setX(this.getWidth() * 0.25);
+    this.createFactionButton.setY(100 + GDIStyle.tabHandleHeight);
+
+    this.createFactionButton.setOnClick(() => {
+      console.log("todo - new faction button");
+    });
   }
 
   private packReputationTab() {
@@ -318,10 +336,12 @@ export class ReputationSheetWindow extends GDIWindow {
 
   private showNPCComponentsOnMyFactionTab() {
     this.tabs.addComponent(this.npcFactionLabel, 'My Faction');
+    this.tabs.addComponent(this.createFactionButton, 'My Faction');
   }
 
   private hideNPCComponentsOnMyFactionTab() {
     this.tabs.removeComponent(this.npcFactionLabel, 'My Faction');
+    this.tabs.removeComponent(this.createFactionButton, 'My Faction');
   }
 }
 
