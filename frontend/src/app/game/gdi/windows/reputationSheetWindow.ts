@@ -38,6 +38,10 @@ export class ReputationSheetWindow extends GDIWindow {
 
     this.addComponent(this.tabs);
 
+    this.packReputationTab();
+  }
+
+  private packReputationTab() {
     // faction list
     this.factionList.setWidth(300);
     this.factionList.setHeight(200 + GDIStyle.tabHandleHeight);
@@ -85,7 +89,7 @@ export class ReputationSheetWindow extends GDIWindow {
     this.infoList.setY(200);
 
     this.infoList.setFont(FontSize.normal);
-    this.infoList.setOnClick(() => {});
+    this.infoList.setOnClick(() => { });
 
     this.tabs.addComponent(this.infoList, 'Reputation');
   }
