@@ -272,7 +272,7 @@ export class ReputationSheetWindow extends GDIWindow {
 
     // check for faction change (or initial presentation)
     if (this.lastFactionId != faction.id) {
-      this.lastFactionId == faction.id;
+      this.lastFactionId = faction.id;
 
       if (faction.isNPC) {
         this.showNPCComponentsOnMyFactionTab();
