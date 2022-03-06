@@ -8,12 +8,25 @@ import {
 import { Faction } from '../../engineModels/faction';
 import { WSPlayerFactionRelationship } from '../../wsModels/entities/wsPlayerFaction';
 import { GDITabPane } from '../components/gdiTabPane';
+import { GDILabel } from '../components/gdiLabel';
+import { Player } from '../../engineModels/player';
+import { WsService } from '../../ws.service';
 
 export class ReputationSheetWindow extends GDIWindow {
+  private player: Player;
+  private lastFactionId: string;
+  private wsSvc: WsService;
+
+  // tab pane
   private tabs = new GDITabPane();
+
+  // "reputation" tab
   private factionList = new GDIList();
   private actionList = new GDIList();
   private infoList = new GDIList();
+
+  // "my faction" tab
+  private npcFactionLabel = new GDILabel();
 
   initialize() {
     // set dimensions
@@ -38,7 +51,21 @@ export class ReputationSheetWindow extends GDIWindow {
 
     this.addComponent(this.tabs);
 
+    // pack tabs
     this.packReputationTab();
+    this.packMyFactionTab();
+  }
+
+  private packMyFactionTab() {
+    this.npcFactionLabel.setWidth(this.getWidth());
+    this.npcFactionLabel.setHeight(GDIStyle.getUnderlyingFontSize(FontSize.normal) + 5);
+    this.npcFactionLabel.initialize();
+
+    this.npcFactionLabel.setText('You are currently a member of an NPC faction.')
+    this.npcFactionLabel.setFont(FontSize.normal);
+
+    this.npcFactionLabel.setX(0);
+    this.npcFactionLabel.setY(GDIStyle.tabHandleHeight);
   }
 
   private packReputationTab() {
@@ -206,6 +233,26 @@ export class ReputationSheetWindow extends GDIWindow {
     };
   }
 
+  setWsService(wsSvc: WsService) {
+    this.wsSvc = wsSvc;
+  }
+
+  setPlayer(player: Player) {
+    this.player = player;
+    const faction = player.getFaction();
+
+    // check for faction change (or initial presentation)
+    if (this.lastFactionId != faction.id) {
+      this.lastFactionId == faction.id;
+
+      if (faction.isNPC) {
+        this.showNPCComponentsOnMyFactionTab();
+      } else {
+        this.hideNPCComponentsOnMyFactionTab();
+      }
+    }
+  }
+
   periodicUpdate() {
     if (!this.isHidden()) {
       // get player-faction relationships
@@ -267,6 +314,14 @@ export class ReputationSheetWindow extends GDIWindow {
       this.factionList.setScroll(sp);
       this.factionList.setSelectedIndex(si);
     }
+  }
+
+  private showNPCComponentsOnMyFactionTab() {
+    this.tabs.addComponent(this.npcFactionLabel, 'My Faction');
+  }
+
+  private hideNPCComponentsOnMyFactionTab() {
+    this.tabs.removeComponent(this.npcFactionLabel, 'My Faction');
   }
 }
 

@@ -180,6 +180,26 @@ export class GDITabPane extends GDIBase {
     // add component to tab
     t.components.push(component);
   }
+
+  removeComponent(component: GDIComponent, tab: string) {
+    // get tab from map
+    let t = this.tabs.get(tab);
+
+    if (!t) {
+      // initialize missing tab
+      t = new Tab();
+      t.setWidth(this.getWidth());
+      t.setHeight(this.getHeight() - GDIStyle.tabHandleHeight);
+      t.setX(0);
+      t.setY(GDIStyle.tabHandleHeight);
+      t.initialize();
+
+      this.tabs.set(tab, t);
+    }
+
+    // remove from tab
+    t.components = t.components.filter(x => x != component);
+  }
 }
 
 class Tab extends GDIBase {

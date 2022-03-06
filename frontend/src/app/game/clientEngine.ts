@@ -835,7 +835,7 @@ function handleGlobalUpdate(d: GameMessage) {
   // update overview window
   engineSack.overviewWindow.sync(engineSack.player);
 
-  // update overview window
+  // update system chat window
   engineSack.systemChatWindow.sync(msg.systemChat);
 }
 
@@ -988,6 +988,10 @@ function handleCurrentShipUpdate(d: GameMessage) {
 
   // update schematic runs window
   engineSack.schematicRunsWindow.setWsService(engineSack.wsSvc);
+
+  // update reputation sheet window
+  engineSack.reputationSheetWindow.setWsService(engineSack.wsSvc);
+  engineSack.reputationSheetWindow.setPlayer(engineSack.player);
 }
 
 function handleFactionUpdate(d: GameMessage) {

@@ -9,7 +9,7 @@ export class GDIButton extends GDIBase {
   private font: FontSize = FontSize.normal;
 
   private onClick: (x: number, y: number) => void;
-  private enabled;
+  private enabled: boolean;
 
   initialize() {
     // initialize offscreen canvas
