@@ -198,7 +198,7 @@ export class GDITabPane extends GDIBase {
     }
 
     // remove from tab
-    t.components = t.components.filter(x => x != component);
+    t.components = t.components.filter((x) => x != component);
   }
 }
 

@@ -61,10 +61,14 @@ export class ReputationSheetWindow extends GDIWindow {
   private packMyFactionTab() {
     // npc faction indicator label
     this.npcFactionLabel.setWidth(this.getWidth());
-    this.npcFactionLabel.setHeight(Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2));
+    this.npcFactionLabel.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
     this.npcFactionLabel.initialize();
 
-    this.npcFactionLabel.setText('You are currently a member of an NPC faction.')
+    this.npcFactionLabel.setText(
+      'You are currently a member of an NPC faction.'
+    );
     this.npcFactionLabel.setFont(FontSize.normal);
 
     this.npcFactionLabel.setX(0);
@@ -72,7 +76,9 @@ export class ReputationSheetWindow extends GDIWindow {
 
     // create faction button
     this.createFactionButton.setWidth(this.getWidth() * 0.5);
-    this.createFactionButton.setHeight(Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2));
+    this.createFactionButton.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
     this.createFactionButton.initialize();
 
     this.createFactionButton.setText('Create Faction');
@@ -82,7 +88,7 @@ export class ReputationSheetWindow extends GDIWindow {
     this.createFactionButton.setY(100 + GDIStyle.tabHandleHeight);
 
     this.createFactionButton.setOnClick(() => {
-      console.log("todo - new faction button");
+      console.log('todo - new faction button');
     });
   }
 
@@ -100,12 +106,17 @@ export class ReputationSheetWindow extends GDIWindow {
       // get faction row
       const o = item as FactionRepViewRow;
 
-      // update actions
-      this.actionList.setItems(o.actions);
+      if (o.faction != null) {
+        // update actions
+        this.actionList.setItems(o.actions);
 
-      // update detailed info
-      const details = this.buildDetails(o);
-      this.infoList.setItems(details);
+        // update detailed info
+        const details = this.buildDetails(o);
+        this.infoList.setItems(details);
+      } else {
+        this.actionList.setItems([]);
+        this.infoList.setItems([]);
+      }
     });
 
     this.tabs.addComponent(this.factionList, 'Reputation');
@@ -134,7 +145,7 @@ export class ReputationSheetWindow extends GDIWindow {
     this.infoList.setY(200);
 
     this.infoList.setFont(FontSize.normal);
-    this.infoList.setOnClick(() => { });
+    this.infoList.setOnClick(() => {});
 
     this.tabs.addComponent(this.infoList, 'Reputation');
   }
@@ -303,10 +314,54 @@ export class ReputationSheetWindow extends GDIWindow {
         return bVal - aVal;
       });
 
-      // build rows
+      // build rows (NPC factions)
       const factionRows: FactionRepViewRow[] = [];
 
-      for (const f of factions) {
+      for (const f of factions.filter((f) => f.isNPC && f.id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a')) {
+        let playerRel: WSPlayerFactionRelationship = null;
+
+        // find relationship to player
+        for (const rel of playerFactionRelationships) {
+          if (rel.factionId == f.id) {
+            playerRel = rel;
+            break;
+          }
+        }
+
+        factionRows.push({
+          faction: f,
+          actions: [],
+          listString: () => factionListRowString(playerRel, f),
+        });
+      }
+
+      // spacer
+      factionRows.push({
+        faction: null,
+        actions: [],
+        listString: () => '',
+      });
+
+      factionRows.push({
+        faction: null,
+        actions: [],
+        listString: () => 'Player Factions',
+      });
+
+      factionRows.push({
+        faction: null,
+        actions: [],
+        listString: () => '===============',
+      });
+
+      factionRows.push({
+        faction: null,
+        actions: [],
+        listString: () => '',
+      });
+
+      // build rows (player factions)
+      for (const f of factions.filter((f) => !f.isNPC && f.id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a')) {
         let playerRel: WSPlayerFactionRelationship = null;
 
         // find relationship to player
