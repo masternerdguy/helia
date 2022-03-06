@@ -585,7 +585,10 @@ function handleGlobalUpdate(d: GameMessage) {
               engineSack.player.currentTargetType === TargetType.Wreck
             ) {
               sm.isTargeted = true;
-              engineSack.targetInteractionWindow.setTarget(sm, TargetType.Wreck);
+              engineSack.targetInteractionWindow.setTarget(
+                sm,
+                TargetType.Wreck
+              );
             }
           }
 

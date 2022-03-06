@@ -1,5 +1,5 @@
 import { GDIWindow } from '../base/gdiWindow';
-import { FontSize } from '../base/gdiStyle';
+import { FontSize, GDIStyle } from '../base/gdiStyle';
 import { GDIList } from '../components/gdiList';
 import {
   GetFactionCache,
@@ -7,8 +7,10 @@ import {
 } from '../../wsModels/shared';
 import { Faction } from '../../engineModels/faction';
 import { WSPlayerFactionRelationship } from '../../wsModels/entities/wsPlayerFaction';
+import { GDITabPane } from '../components/gdiTabPane';
 
 export class ReputationSheetWindow extends GDIWindow {
+  private tabs = new GDITabPane();
   private factionList = new GDIList();
   private actionList = new GDIList();
   private infoList = new GDIList();
@@ -16,7 +18,7 @@ export class ReputationSheetWindow extends GDIWindow {
   initialize() {
     // set dimensions
     this.setWidth(400);
-    this.setHeight(400);
+    this.setHeight(420);
 
     // initialize
     super.initialize();
@@ -25,9 +27,20 @@ export class ReputationSheetWindow extends GDIWindow {
   pack() {
     this.setTitle('Reputation Sheet');
 
+    // tab list
+    this.tabs.setWidth(this.getWidth());
+    this.tabs.setHeight(this.getHeight());
+    this.tabs.initialize();
+
+    this.tabs.setX(0);
+    this.tabs.setY(0);
+    this.tabs.setSelectedTab('Reputation');
+
+    this.addComponent(this.tabs);
+
     // faction list
     this.factionList.setWidth(300);
-    this.factionList.setHeight(200);
+    this.factionList.setHeight(200 + GDIStyle.tabHandleHeight);
     this.factionList.initialize();
 
     this.factionList.setX(0);
@@ -46,11 +59,11 @@ export class ReputationSheetWindow extends GDIWindow {
       this.infoList.setItems(details);
     });
 
-    this.addComponent(this.factionList);
+    this.tabs.addComponent(this.factionList, 'Reputation');
 
     // action list
     this.actionList.setWidth(100);
-    this.actionList.setHeight(200);
+    this.actionList.setHeight(200 + GDIStyle.tabHandleHeight);
     this.actionList.initialize();
 
     this.actionList.setX(300);
@@ -61,11 +74,11 @@ export class ReputationSheetWindow extends GDIWindow {
       console.log(item); // todo
     });
 
-    this.addComponent(this.actionList);
+    this.tabs.addComponent(this.actionList, 'Reputation');
 
     // info list
     this.infoList.setWidth(400);
-    this.infoList.setHeight(200);
+    this.infoList.setHeight(220 - GDIStyle.tabHandleHeight);
     this.infoList.initialize();
 
     this.infoList.setX(0);
@@ -74,7 +87,7 @@ export class ReputationSheetWindow extends GDIWindow {
     this.infoList.setFont(FontSize.normal);
     this.infoList.setOnClick(() => {});
 
-    this.addComponent(this.infoList);
+    this.tabs.addComponent(this.infoList, 'Reputation');
   }
 
   private buildDetails(r: FactionRepViewRow): FactionInfoViewRow[] {
