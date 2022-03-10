@@ -186,6 +186,42 @@ export class ReputationSheetWindow extends GDIWindow {
         this.newFactionTickerLabel.getHeight() +
         10
     );
+
+    // submit button
+    this.newFactionSubmitButton.setWidth(this.getWidth() * 0.5);
+    this.newFactionSubmitButton.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
+    this.newFactionSubmitButton.initialize();
+
+    this.newFactionSubmitButton.setText('Submit');
+    this.newFactionSubmitButton.setFont(FontSize.normal);
+
+    this.newFactionSubmitButton.setX(this.getWidth() * 0.25);
+    this.newFactionSubmitButton.setY(this.getHeight() - 130);
+
+    this.newFactionSubmitButton.setOnClick(() => {
+      // todo
+      console.log('submit - not yet implemented');
+    });
+
+    // cancel button
+    this.newFactionCancelButton.setWidth(this.getWidth() * 0.5);
+    this.newFactionCancelButton.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
+    this.newFactionCancelButton.initialize();
+
+    this.newFactionCancelButton.setText('Cancel');
+    this.newFactionCancelButton.setFont(FontSize.normal);
+
+    this.newFactionCancelButton.setX(this.getWidth() * 0.25);
+    this.newFactionCancelButton.setY(this.getHeight() - 100);
+
+    this.newFactionCancelButton.setOnClick(() => {
+      // close new faction form
+      this.hideNewFactionFormModal();
+    });
   }
 
   private packMyFactionTab() {
@@ -546,6 +582,8 @@ export class ReputationSheetWindow extends GDIWindow {
     this.addComponent(this.newFactionDescriptionInput);
     this.addComponent(this.newFactionTickerLabel);
     this.addComponent(this.newFactionTickerInput);
+    this.addComponent(this.newFactionSubmitButton);
+    this.addComponent(this.newFactionCancelButton);
   }
 
   private hideNewFactionFormModal() {
@@ -557,6 +595,8 @@ export class ReputationSheetWindow extends GDIWindow {
     this.removeComponent(this.newFactionDescriptionInput);
     this.removeComponent(this.newFactionTickerLabel);
     this.removeComponent(this.newFactionTickerInput);
+    this.removeComponent(this.newFactionSubmitButton);
+    this.removeComponent(this.newFactionCancelButton);
   }
 
   private showModalBase() {
