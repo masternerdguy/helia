@@ -122,6 +122,31 @@ export class ReputationSheetWindow extends GDIWindow {
 
     this.newFactionNameInput.setX(this.getWidth() * 0.025);
     this.newFactionNameInput.setY(this.newFactionNameLabel.getY() + this.newFactionNameLabel.getHeight() + 10);
+
+        // new faction description label
+        this.newFactionDescriptionLabel.setWidth(this.getWidth());
+        this.newFactionDescriptionLabel.setHeight(
+          Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+        );
+        this.newFactionDescriptionLabel.initialize();
+    
+        this.newFactionDescriptionLabel.setText(
+          'Brief Description'
+        );
+        this.newFactionDescriptionLabel.setFont(FontSize.normal);
+    
+        this.newFactionDescriptionLabel.setX(0);
+        this.newFactionDescriptionLabel.setY(this.newFactionNameInput.getY() + this.newFactionNameInput.getHeight() + 10);
+    
+        // new faction description input
+        this.newFactionDescriptionInput.setWidth(this.getWidth() * 0.95);
+        this.newFactionDescriptionInput.setHeight(inputFontSize);
+    
+        this.newFactionDescriptionInput.initialize();
+        this.newFactionDescriptionInput.setFont(FontSize.large);
+    
+        this.newFactionDescriptionInput.setX(this.getWidth() * 0.025);
+        this.newFactionDescriptionInput.setY(this.newFactionDescriptionLabel.getY() + this.newFactionDescriptionLabel.getHeight() + 10);
   }
 
   private packMyFactionTab() {
@@ -474,6 +499,8 @@ export class ReputationSheetWindow extends GDIWindow {
 
     this.addComponent(this.newFactionNameLabel);
     this.addComponent(this.newFactionNameInput);
+    this.addComponent(this.newFactionDescriptionLabel);
+    this.addComponent(this.newFactionDescriptionInput);
   }
 
   private hideNewFactionFormModal() {
@@ -481,6 +508,8 @@ export class ReputationSheetWindow extends GDIWindow {
 
     this.removeComponent(this.newFactionNameLabel);
     this.removeComponent(this.newFactionNameInput);
+    this.removeComponent(this.newFactionDescriptionLabel);
+    this.removeComponent(this.newFactionDescriptionInput);
   }
 
   private showModalBase() {
