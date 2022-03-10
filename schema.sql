@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.2
+-- Dumped from database version 14.2 (Ubuntu 14.2-1.pgdg20.04+1)
 -- Dumped by pg_dump version 14.2 (Ubuntu 14.2-1.pgdg20.04+1)
 
 SET statement_timeout = 0;
@@ -135,7 +135,9 @@ CREATE TABLE public.factions (
     isjoinable boolean DEFAULT false NOT NULL,
     canholdsov boolean DEFAULT false NOT NULL,
     isclosed boolean DEFAULT false NOT NULL,
-    reputationsheet jsonb DEFAULT '{}'::jsonb NOT NULL
+    reputationsheet jsonb DEFAULT '{}'::jsonb NOT NULL,
+    ownerid uuid,
+    homestationid uuid
 );
 
 
@@ -880,6 +882,20 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: fki_fk_factions_stations; Type: INDEX; Schema: public; Owner: developer
+--
+
+CREATE INDEX fki_fk_factions_stations ON public.factions USING btree (homestationid);
+
+
+--
+-- Name: fki_fk_factions_users; Type: INDEX; Schema: public; Owner: developer
+--
+
+CREATE INDEX fki_fk_factions_users ON public.factions USING btree (ownerid);
+
+
+--
 -- Name: fki_fk_items_containers; Type: INDEX; Schema: public; Owner: developer
 --
 
@@ -963,6 +979,22 @@ ALTER TABLE ONLY public.universe_asteroids
 
 ALTER TABLE ONLY public.universe_asteroids
     ADD CONSTRAINT fk_asteroids_systems FOREIGN KEY (universe_systemid) REFERENCES public.universe_systems(id);
+
+
+--
+-- Name: factions fk_factions_stations; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT fk_factions_stations FOREIGN KEY (homestationid) REFERENCES public.universe_stations(id);
+
+
+--
+-- Name: factions fk_factions_users; Type: FK CONSTRAINT; Schema: public; Owner: developer
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT fk_factions_users FOREIGN KEY (ownerid) REFERENCES public.users(id);
 
 
 --
