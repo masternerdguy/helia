@@ -29,19 +29,19 @@ export class GDIBase implements GDIComponent {
   }
 
   setX(x: number) {
-    this.x = x;
+    this.x = Math.round(x);
   }
 
   setY(y: number) {
-    this.y = y;
+    this.y = Math.round(y);
   }
 
   setWidth(w: number) {
-    this.w = w;
+    this.w = Math.round(w);
   }
 
   setHeight(h: number) {
-    this.h = h;
+    this.h = Math.round(h);
   }
 
   periodicUpdate() {

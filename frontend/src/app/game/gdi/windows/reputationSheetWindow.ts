@@ -35,12 +35,12 @@ export class ReputationSheetWindow extends GDIWindow {
   // "my faction" tab
   private npcFactionLabel = new GDILabel();
   private createFactionButton = new GDIButton();
-  
+
   // new faction modal form
   private newFactionNameLabel = new GDILabel();
   private newFactionNameInput = new GDIInput();
   private newFactionTickerLabel = new GDILabel();
-  private newFactionTickerInput = new GDILabel();
+  private newFactionTickerInput = new GDIInput();
   private newFactionDescriptionLabel = new GDILabel();
   private newFactionDescriptionInput = new GDIInput();
   private newFactionSubmitButton = new GDIButton();
@@ -90,7 +90,7 @@ export class ReputationSheetWindow extends GDIWindow {
     // pack tabs
     this.packReputationTab();
     this.packMyFactionTab();
-    
+
     // pack modal forms
     this.packNewFactionModalForm();
   }
@@ -105,9 +105,7 @@ export class ReputationSheetWindow extends GDIWindow {
     );
     this.newFactionNameLabel.initialize();
 
-    this.newFactionNameLabel.setText(
-      'Faction Name'
-    );
+    this.newFactionNameLabel.setText('Faction Name');
     this.newFactionNameLabel.setFont(FontSize.normal);
 
     this.newFactionNameLabel.setX(0);
@@ -121,32 +119,73 @@ export class ReputationSheetWindow extends GDIWindow {
     this.newFactionNameInput.setFont(FontSize.large);
 
     this.newFactionNameInput.setX(this.getWidth() * 0.025);
-    this.newFactionNameInput.setY(this.newFactionNameLabel.getY() + this.newFactionNameLabel.getHeight() + 10);
+    this.newFactionNameInput.setY(
+      this.newFactionNameLabel.getY() +
+        this.newFactionNameLabel.getHeight() +
+        10
+    );
 
-        // new faction description label
-        this.newFactionDescriptionLabel.setWidth(this.getWidth());
-        this.newFactionDescriptionLabel.setHeight(
-          Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
-        );
-        this.newFactionDescriptionLabel.initialize();
-    
-        this.newFactionDescriptionLabel.setText(
-          'Brief Description'
-        );
-        this.newFactionDescriptionLabel.setFont(FontSize.normal);
-    
-        this.newFactionDescriptionLabel.setX(0);
-        this.newFactionDescriptionLabel.setY(this.newFactionNameInput.getY() + this.newFactionNameInput.getHeight() + 10);
-    
-        // new faction description input
-        this.newFactionDescriptionInput.setWidth(this.getWidth() * 0.95);
-        this.newFactionDescriptionInput.setHeight(inputFontSize);
-    
-        this.newFactionDescriptionInput.initialize();
-        this.newFactionDescriptionInput.setFont(FontSize.large);
-    
-        this.newFactionDescriptionInput.setX(this.getWidth() * 0.025);
-        this.newFactionDescriptionInput.setY(this.newFactionDescriptionLabel.getY() + this.newFactionDescriptionLabel.getHeight() + 10);
+    // new faction description label
+    this.newFactionDescriptionLabel.setWidth(this.getWidth());
+    this.newFactionDescriptionLabel.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
+    this.newFactionDescriptionLabel.initialize();
+
+    this.newFactionDescriptionLabel.setText('Brief Description');
+    this.newFactionDescriptionLabel.setFont(FontSize.normal);
+
+    this.newFactionDescriptionLabel.setX(0);
+    this.newFactionDescriptionLabel.setY(
+      this.newFactionNameInput.getY() +
+        this.newFactionNameInput.getHeight() +
+        10
+    );
+
+    // new faction description input
+    this.newFactionDescriptionInput.setWidth(this.getWidth() * 0.95);
+    this.newFactionDescriptionInput.setHeight(inputFontSize);
+
+    this.newFactionDescriptionInput.initialize();
+    this.newFactionDescriptionInput.setFont(FontSize.large);
+
+    this.newFactionDescriptionInput.setX(this.getWidth() * 0.025);
+    this.newFactionDescriptionInput.setY(
+      this.newFactionDescriptionLabel.getY() +
+        this.newFactionDescriptionLabel.getHeight() +
+        10
+    );
+
+    // new faction ticker label
+    this.newFactionTickerLabel.setWidth(this.getWidth());
+    this.newFactionTickerLabel.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
+    this.newFactionTickerLabel.initialize();
+
+    this.newFactionTickerLabel.setText('Ticker');
+    this.newFactionTickerLabel.setFont(FontSize.normal);
+
+    this.newFactionTickerLabel.setX(0);
+    this.newFactionTickerLabel.setY(
+      this.newFactionDescriptionInput.getY() +
+        this.newFactionDescriptionInput.getHeight() +
+        10
+    );
+
+    // new faction ticker input
+    this.newFactionTickerInput.setWidth(this.getWidth() * 0.95);
+    this.newFactionTickerInput.setHeight(inputFontSize);
+
+    this.newFactionTickerInput.initialize();
+    this.newFactionTickerInput.setFont(FontSize.large);
+
+    this.newFactionTickerInput.setX(this.getWidth() * 0.025);
+    this.newFactionTickerInput.setY(
+      this.newFactionTickerLabel.getY() +
+        this.newFactionTickerLabel.getHeight() +
+        10
+    );
   }
 
   private packMyFactionTab() {
@@ -412,7 +451,9 @@ export class ReputationSheetWindow extends GDIWindow {
       // build rows (NPC factions)
       const factionRows: FactionRepViewRow[] = [];
 
-      for (const f of factions.filter((f) => f.isNPC && f.id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a')) {
+      for (const f of factions.filter(
+        (f) => f.isNPC && f.id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a'
+      )) {
         let playerRel: WSPlayerFactionRelationship = null;
 
         // find relationship to player
@@ -456,7 +497,9 @@ export class ReputationSheetWindow extends GDIWindow {
       });
 
       // build rows (player factions)
-      for (const f of factions.filter((f) => !f.isNPC && f.id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a')) {
+      for (const f of factions.filter(
+        (f) => !f.isNPC && f.id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a'
+      )) {
         let playerRel: WSPlayerFactionRelationship = null;
 
         // find relationship to player
@@ -501,6 +544,8 @@ export class ReputationSheetWindow extends GDIWindow {
     this.addComponent(this.newFactionNameInput);
     this.addComponent(this.newFactionDescriptionLabel);
     this.addComponent(this.newFactionDescriptionInput);
+    this.addComponent(this.newFactionTickerLabel);
+    this.addComponent(this.newFactionTickerInput);
   }
 
   private hideNewFactionFormModal() {
@@ -510,6 +555,8 @@ export class ReputationSheetWindow extends GDIWindow {
     this.removeComponent(this.newFactionNameInput);
     this.removeComponent(this.newFactionDescriptionLabel);
     this.removeComponent(this.newFactionDescriptionInput);
+    this.removeComponent(this.newFactionTickerLabel);
+    this.removeComponent(this.newFactionTickerInput);
   }
 
   private showModalBase() {
