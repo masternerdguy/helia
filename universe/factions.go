@@ -18,6 +18,8 @@ type Faction struct {
 	Meta            Meta
 	ReputationSheet shared.FactionReputationSheet
 	Ticker          string
+	OwnerID         *uuid.UUID
+	HomeStationID   *uuid.UUID
 }
 
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities

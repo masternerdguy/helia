@@ -951,6 +951,8 @@ func FactionFromSQL(value *sql.Faction) *universe.Faction {
 	faction.CanHoldSov = value.CanHoldSov
 	faction.Meta = universe.Meta(value.Meta)
 	faction.Ticker = value.Ticker
+	faction.OwnerID = value.OwnerID
+	faction.HomeStationID = value.HomeStationID
 
 	// copy reputation sheet entries
 	faction.ReputationSheet = shared.FactionReputationSheet{

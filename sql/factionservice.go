@@ -29,6 +29,8 @@ type Faction struct {
 	Meta            Meta `json:"meta"`
 	ReputationSheet FactionReputationSheet
 	Ticker          string
+	OwnerID         *uuid.UUID
+	HomeStationID   *uuid.UUID
 }
 
 type ReputationSheetEntry struct {
@@ -88,7 +90,8 @@ func (s FactionService) GetFactionByID(FactionID uuid.UUID) (*Faction, error) {
 
 	sqlStatement :=
 		`
-			SELECT id, name, description, isnpc, isjoinable, isclosed, canholdsov, meta, ticker, reputationsheet
+			SELECT id, name, description, isnpc, isjoinable, isclosed, canholdsov, meta, ticker, reputationsheet,
+			       ownerid, homestationid
 			FROM public.Factions
 			WHERE id = $1
 		`
@@ -96,7 +99,7 @@ func (s FactionService) GetFactionByID(FactionID uuid.UUID) (*Faction, error) {
 	row := db.QueryRow(sqlStatement, FactionID)
 
 	switch err := row.Scan(&t.ID, &t.Name, &t.Description, &t.IsNPC, &t.IsJoinable, &t.IsClosed, &t.CanHoldSov,
-		&t.Meta, &t.Ticker, &t.ReputationSheet); err {
+		&t.Meta, &t.Ticker, &t.ReputationSheet, &t.OwnerID, &t.HomeStationID); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("faction not found")
 	case nil:
@@ -119,7 +122,8 @@ func (s FactionService) GetAllFactions() ([]Faction, error) {
 
 	// load factions
 	sql := `
-				SELECT id, name, description, isnpc, isjoinable, isclosed, canholdsov, meta, ticker, reputationsheet
+				SELECT id, name, description, isnpc, isjoinable, isclosed, canholdsov, meta, ticker, reputationsheet,
+				       ownerid, homestationid
 				FROM public.Factions
 			`
 
@@ -136,7 +140,7 @@ func (s FactionService) GetAllFactions() ([]Faction, error) {
 
 		// scan into faction structure
 		rows.Scan(&s.ID, &s.Name, &s.Description, &s.IsNPC, &s.IsJoinable, &s.IsClosed, &s.CanHoldSov,
-			&s.Meta, &s.Ticker, &s.ReputationSheet)
+			&s.Meta, &s.Ticker, &s.ReputationSheet, &s.OwnerID, &s.HomeStationID)
 
 		// append to ship slice
 		factions = append(factions, s)
@@ -157,13 +161,16 @@ func (s FactionService) NewFaction(e Faction) (*Faction, error) {
 	// insert faction
 	sql := `
 				INSERT INTO public.factions(
-					id, name, description, isnpc, isjoinable, canholdsov, isclosed, meta, ticker, reputationsheet)
-					VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
+					id, name, description, isnpc, isjoinable, canholdsov, isclosed, meta, ticker, reputationsheet,
+				    ownerid, homestationid
+				)
+					VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
 			`
 
 	uid := uuid.New()
 
-	q, err := db.Query(sql, uid, e.Name, e.Description, e.IsNPC, e.IsJoinable, e.CanHoldSov, e.IsClosed, e.Meta, e.Ticker, e.ReputationSheet)
+	q, err := db.Query(sql, uid, e.Name, e.Description, e.IsNPC, e.IsJoinable, e.CanHoldSov, e.IsClosed, e.Meta, e.Ticker, e.ReputationSheet,
+		e.OwnerID, e.HomeStationID)
 
 	if err != nil {
 		return nil, err
@@ -191,10 +198,12 @@ func (s FactionService) SaveFaction(e Faction) error {
 	sql := `
 				UPDATE public.factions
 				SET name=$2, description=$3, meta=$4, ticker=$5, isnpc=$6, isjoinable=$7, canholdsov=$8, isclosed=$9, reputationsheet=$10
+				    ownerid=$11, homestationid=$12
 				WHERE id=$1;
 			`
 
-	q, err := db.Query(sql, e.ID, e.Name, e.Description, e.Meta, e.Ticker, e.IsNPC, e.IsJoinable, e.CanHoldSov, e.IsClosed, e.ReputationSheet)
+	q, err := db.Query(sql, e.ID, e.Name, e.Description, e.Meta, e.Ticker, e.IsNPC, e.IsJoinable, e.CanHoldSov, e.IsClosed, e.ReputationSheet,
+		e.OwnerID, e.HomeStationID)
 
 	if err != nil {
 		return err
