@@ -59,6 +59,7 @@ type MessageRegistry struct {
 	ViewSchematicRuns      int
 	SchematicRunsUpdate    int
 	RunSchematic           int
+	CreateNewFaction       int
 }
 
 // Registry of target types
@@ -126,6 +127,7 @@ func NewMessageRegistry() *MessageRegistry {
 		ViewSchematicRuns:      46,
 		SchematicRunsUpdate:    47,
 		RunSchematic:           48,
+		CreateNewFaction:       49,
 	}
 }
 
@@ -796,4 +798,12 @@ type ServerSchematicRunEntryBody struct {
 	SolarSystemName    string    `json:"solarSystemName"`
 	StatusID           string    `json:"statusId"`
 	PercentageComplete float64   `json:"percentageComplete"`
+}
+
+// Body containing a request to create a new player faction
+type ClientCreateNewFactionBody struct {
+	SessionID   uuid.UUID `json:"sid"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Ticker      string    `json:"ticker"`
 }

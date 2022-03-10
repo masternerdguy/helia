@@ -1554,6 +1554,14 @@ func (s *SolarSystem) processClientEventQueues() {
 					item.SchematicInUse = true
 				}
 			}
+		} else if evt.Type == models.NewMessageRegistry().CreateNewFaction {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientCreateNewFactionBody)
+
+				// todo
+				shared.TeeLog(fmt.Sprintf("new faction requested: %v", data))
+			}
 		}
 	}
 }

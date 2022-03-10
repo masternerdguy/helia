@@ -14,6 +14,8 @@ import { WsService } from '../../ws.service';
 import { GDIButton } from '../components/gdiButton';
 import { GDIOverlay } from '../components/gdiOverlay';
 import { GDIInput } from '../components/gdiInput';
+import { ClientNewFaction as ClientCreateNewFaction } from '../../wsModels/bodies/createNewFaction';
+import { MessageTypes } from '../../wsModels/gameMessage';
 
 export class ReputationSheetWindow extends GDIWindow {
   private player: Player;
@@ -201,8 +203,15 @@ export class ReputationSheetWindow extends GDIWindow {
     this.newFactionSubmitButton.setY(this.getHeight() - 130);
 
     this.newFactionSubmitButton.setOnClick(() => {
-      // todo
-      console.log('submit - not yet implemented');
+      // send request to create new faction
+      const b = new ClientCreateNewFaction();
+      
+      b.sid = this.wsSvc.sid;
+      b.name = this.newFactionNameInput.getText();
+      b.description = this.newFactionDescriptionInput.getText();
+      b.ticker = this.newFactionTickerInput.getText();
+
+      this.wsSvc.sendMessage(MessageTypes.CreateNewFaction, b);
     });
 
     // cancel button
