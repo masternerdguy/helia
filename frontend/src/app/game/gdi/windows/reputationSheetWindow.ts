@@ -12,11 +12,17 @@ import { GDILabel } from '../components/gdiLabel';
 import { Player } from '../../engineModels/player';
 import { WsService } from '../../ws.service';
 import { GDIButton } from '../components/gdiButton';
+import { GDIOverlay } from '../components/gdiOverlay';
+import { GDIInput } from '../components/gdiInput';
 
 export class ReputationSheetWindow extends GDIWindow {
   private player: Player;
   private lastFactionId: string;
   private wsSvc: WsService;
+
+  // modal base
+  private modalOverlay: GDIOverlay = new GDIOverlay();
+  private modalInput: GDIInput = new GDIInput();
 
   // tab pane
   private tabs = new GDITabPane();
@@ -29,6 +35,16 @@ export class ReputationSheetWindow extends GDIWindow {
   // "my faction" tab
   private npcFactionLabel = new GDILabel();
   private createFactionButton = new GDIButton();
+  
+  // new faction modal form
+  private newFactionNameLabel = new GDILabel();
+  private newFactionNameInput = new GDIInput();
+  private newFactionTickerLabel = new GDILabel();
+  private newFactionTickerInput = new GDILabel();
+  private newFactionDescriptionLabel = new GDILabel();
+  private newFactionDescriptionInput = new GDIInput();
+  private newFactionSubmitButton = new GDIButton();
+  private newFactionCancelButton = new GDIButton();
 
   initialize() {
     // set dimensions
@@ -53,9 +69,59 @@ export class ReputationSheetWindow extends GDIWindow {
 
     this.addComponent(this.tabs);
 
+    // modal base and generic input
+    this.modalOverlay.setWidth(this.getWidth());
+    this.modalOverlay.setHeight(this.getHeight());
+    this.modalOverlay.setX(0);
+    this.modalOverlay.setY(0);
+    this.modalOverlay.initialize();
+
+    const fontSize = GDIStyle.getUnderlyingFontSize(FontSize.large);
+    this.modalInput.setWidth(100);
+    this.modalInput.setHeight(Math.round(fontSize + 0.5));
+    this.modalInput.setX(this.getWidth() / 2 - this.modalInput.getWidth() / 2);
+    this.modalInput.setY(
+      this.getHeight() / 2 - this.modalInput.getHeight() / 2
+    );
+
+    this.modalInput.setFont(FontSize.large);
+    this.modalInput.initialize();
+
     // pack tabs
     this.packReputationTab();
     this.packMyFactionTab();
+    
+    // pack modal forms
+    this.packNewFactionModalForm();
+  }
+
+  private packNewFactionModalForm() {
+    const inputFontSize = GDIStyle.getUnderlyingFontSize(FontSize.large);
+
+    // new faction name label
+    this.newFactionNameLabel.setWidth(this.getWidth());
+    this.newFactionNameLabel.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
+    this.newFactionNameLabel.initialize();
+
+    this.newFactionNameLabel.setText(
+      'Faction Name'
+    );
+    this.newFactionNameLabel.setFont(FontSize.normal);
+
+    this.newFactionNameLabel.setX(0);
+    this.newFactionNameLabel.setY(GDIStyle.tabHandleHeight);
+
+    // new faction name input
+    this.newFactionNameInput.setWidth(this.getWidth() * 0.95);
+    this.newFactionNameInput.setHeight(inputFontSize);
+
+    this.newFactionNameInput.initialize();
+    this.newFactionNameInput.setFont(FontSize.large);
+
+    this.newFactionNameInput.setX(this.getWidth() * 0.025);
+    this.newFactionNameInput.setY(this.newFactionNameLabel.getY() + this.newFactionNameLabel.getHeight() + 10);
   }
 
   private packMyFactionTab() {
@@ -88,7 +154,11 @@ export class ReputationSheetWindow extends GDIWindow {
     this.createFactionButton.setY(100 + GDIStyle.tabHandleHeight);
 
     this.createFactionButton.setOnClick(() => {
-      console.log('todo - new faction button');
+      // show new faction form
+      this.showNewFactionFormModal();
+
+      // reset form inputs
+      this.resetNewFactionFormInputs();
     });
   }
 
@@ -397,6 +467,36 @@ export class ReputationSheetWindow extends GDIWindow {
   private hideNPCComponentsOnMyFactionTab() {
     this.tabs.removeComponent(this.npcFactionLabel, 'My Faction');
     this.tabs.removeComponent(this.createFactionButton, 'My Faction');
+  }
+
+  private showNewFactionFormModal() {
+    this.showModalBase();
+
+    this.addComponent(this.newFactionNameLabel);
+    this.addComponent(this.newFactionNameInput);
+  }
+
+  private hideNewFactionFormModal() {
+    this.hideModalBase();
+
+    this.removeComponent(this.newFactionNameLabel);
+    this.removeComponent(this.newFactionNameInput);
+  }
+
+  private showModalBase() {
+    this.removeComponent(this.tabs);
+    this.addComponent(this.modalOverlay);
+  }
+
+  private hideModalBase() {
+    this.addComponent(this.tabs);
+    this.removeComponent(this.modalOverlay);
+  }
+
+  private resetNewFactionFormInputs() {
+    this.newFactionNameInput.setText('');
+    this.newFactionDescriptionInput.setText('');
+    this.newFactionTickerInput.setText('');
   }
 }
 
