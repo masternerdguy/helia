@@ -1018,18 +1018,6 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// try to create faction (most likely to fail if name or ticker are taken)
 			f, err := factionSvc.NewFaction(sql.Faction{
-				/*	ID              uuid.UUID
-					Name            string
-					Description     string
-					IsNPC           bool
-					IsJoinable      bool
-					IsClosed        bool
-					CanHoldSov      bool
-					Meta            Meta `json:"meta"`
-					ReputationSheet FactionReputationSheet
-					Ticker          string
-					OwnerID         *uuid.UUID
-					HomeStationID   *uuid.UUID*/
 				Name:            mi.Name,
 				Description:     mi.Description,
 				IsNPC:           false,
@@ -1077,6 +1065,45 @@ func handleEscalations(sol *universe.SolarSystem) {
 				// exit
 				return
 			}
+
+			// notify clients of new faction
+			af := models.ServerFactionUpdateBody{
+				Factions: make([]models.ServerFactionBody, 0),
+			}
+
+			// include relationship data
+			rels := make([]models.ServerFactionRelationship, 0)
+
+			for _, rel := range f.ReputationSheet.Entries {
+				rels = append(rels, models.ServerFactionRelationship{
+					FactionID:        rel.TargetFactionID,
+					AreOpenlyHostile: rel.AreOpenlyHostile,
+					StandingValue:    rel.StandingValue,
+				})
+			}
+
+			af.Factions = append(af.Factions, models.ServerFactionBody{
+				ID:            f.ID,
+				Name:          f.Name,
+				Description:   f.Description,
+				IsNPC:         f.IsNPC,
+				IsJoinable:    f.IsJoinable,
+				IsClosed:      f.IsClosed,
+				CanHoldSov:    f.CanHoldSov,
+				Ticker:        f.Ticker,
+				Relationships: rels,
+			})
+
+			// package faction data
+			b, _ := json.Marshal(&af)
+
+			msg := models.GameMessage{
+				MessageType: models.NewMessageRegistry().FactionUpdate,
+				MessageBody: string(b),
+			}
+
+			// write message to connected clients
+			sol.Universe.SendGlobalMessage(&msg)
 
 			// update ship with new faction
 			sh.Faction = uf
