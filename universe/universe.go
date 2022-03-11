@@ -3,6 +3,7 @@ package universe
 import (
 	"encoding/json"
 	"fmt"
+	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
 	"math/rand"
@@ -212,7 +213,7 @@ func (u *Universe) FindShip(shipID uuid.UUID, noLockSystemID *uuid.UUID) *Ship {
 	// iterate over all systems in all regions
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			// do not if system is exempted
+			// do not lock if system is exempted
 			var lock = true
 
 			if noLockSystemID != nil {
@@ -319,4 +320,23 @@ func (u *Universe) FindStation(stationID uuid.UUID, noLockSystemID *uuid.UUID) *
 	}
 
 	return nil
+}
+
+// writes a global update to all clients on separate goroutines (per system)
+func (u *Universe) SendGlobalMessage(msg *models.GameMessage) {
+	// iterate over all systems in all regions
+	for _, r := range u.Regions {
+		for _, s := range r.Systems {
+			go func(s *SolarSystem) {
+				// obtain lock
+				s.Lock.Lock("universe.SendGlobalMessage")
+				defer s.Lock.Unlock()
+
+				// send messages to clients
+				for _, c := range s.clients {
+					c.WriteMessage(msg)
+				}
+			}(s)
+		}
+	}
 }

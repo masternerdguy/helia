@@ -235,6 +235,31 @@ func (s UserService) SetCurrentShipID(uid uuid.UUID, shipID *uuid.UUID) error {
 	return nil
 }
 
+// Sets current_factionid on a user in the database
+func (s UserService) SetCurrentFactionID(uid uuid.UUID, factionID *uuid.UUID) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update user
+	sql := `
+				UPDATE public.users SET current_factionid = $1 WHERE id = $2;
+			`
+
+	q, err := db.Query(sql, *factionID, uid)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}
+
 // Sets reputationsheet on a user in the database
 func (s UserService) SaveReputationSheet(uid uuid.UUID, repsheet PlayerReputationSheet) error {
 	// get db handle

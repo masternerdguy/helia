@@ -55,6 +55,7 @@ type SolarSystem struct {
 	ShipRenames          map[string]*ShipRename            // renamed ships that need to be saved by core
 	SchematicRunViews    map[string]*shared.GameClient     // requests for a schematic run summary
 	NewSchematicRuns     map[string]*NewSchematicRunTicket // newly invoked schematics that need to be started
+	NewFactions          map[string]*NewFactionTicket      // partially approved requests to create a new faction and automatically join it
 }
 
 // Initializes internal aspects of SolarSystem
@@ -90,6 +91,7 @@ func (s *SolarSystem) Initialize() {
 	s.ShipRenames = make(map[string]*ShipRename)
 	s.SchematicRunViews = make(map[string]*shared.GameClient)
 	s.NewSchematicRuns = make(map[string]*NewSchematicRunTicket)
+	s.NewFactions = make(map[string]*NewFactionTicket)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -1559,8 +1561,62 @@ func (s *SolarSystem) processClientEventQueues() {
 				// extract data
 				data := evt.Body.(models.ClientCreateNewFactionBody)
 
-				// todo
-				shared.TeeLog(fmt.Sprintf("new faction requested: %v", data))
+				// verify ship is docked
+				if sh.DockedAtStation == nil || sh.DockedAtStationID == nil {
+					c.WriteErrorMessage("you must be docked to create a faction")
+					continue
+				}
+
+				if sh.Faction != nil {
+					// verify player is in an NPC faction
+					if !sh.Faction.IsNPC {
+						c.WriteErrorMessage("you must be in an NPC faction to create a faction")
+						continue
+					}
+
+					// required fields
+					if len(data.Name) == 0 {
+						c.WriteErrorMessage("you must enter a faction name")
+						continue
+					}
+
+					if len(data.Description) == 0 {
+						c.WriteErrorMessage("you must enter a faction description")
+						continue
+					}
+
+					if len(data.Ticker) == 0 {
+						c.WriteErrorMessage("you must enter a faction ticker")
+						continue
+					}
+
+					// enforce string length limits
+					if len(data.Name) > 32 {
+						c.WriteErrorMessage("faction name must be 32 characters or less")
+						continue
+					}
+
+					if len(data.Description) > 8192 {
+						c.WriteErrorMessage("please enter a shorter description")
+						continue
+					}
+
+					if len(data.Description) > 3 {
+						c.WriteErrorMessage("ticker must be 3 characters or less")
+						continue
+					}
+
+					// escalate to core for creation
+					t := NewFactionTicket{
+						Name:          data.Name,
+						Description:   data.Description,
+						Ticker:        data.Ticker,
+						Client:        c,
+						HomeStationID: *sh.DockedAtStationID,
+					}
+
+					s.NewFactions[c.UID.String()] = &t
+				}
 			}
 		}
 	}

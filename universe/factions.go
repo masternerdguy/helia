@@ -22,6 +22,15 @@ type Faction struct {
 	HomeStationID   *uuid.UUID
 }
 
+// Structure representing a partially validated request to create a new faction and join the creator into it
+type NewFactionTicket struct {
+	Name          string
+	Description   string
+	Ticker        string
+	Client        *shared.GameClient
+	HomeStationID uuid.UUID
+}
+
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities
 func (s *Faction) CheckStandings(factionID uuid.UUID) (float64, bool) {
 	// try to find faction relationship

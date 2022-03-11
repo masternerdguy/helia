@@ -204,6 +204,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	userSvc := sql.GetUserService()
 	itemSvc := sql.GetItemService()
 	schematicRunSvc := sql.GetSchematicRunService()
+	factionSvc := sql.GetFactionService()
 
 	// obtain lock
 	sol.Lock.Lock("core.handleEscalations")
@@ -983,6 +984,109 @@ func handleEscalations(sol *universe.SolarSystem) {
 			// unmark dirty
 			rs.SchematicItem.CoreDirty = false
 		}(rs, sol)
+	}
+
+	// iterate over new faction requests
+	for id := range sol.NewFactions {
+		// capture reference and remove from map
+		mi := sol.NewFactions[id]
+		delete(sol.NewFactions, id)
+
+		// handle escalation on another goroutine
+		go func(mi *universe.NewFactionTicket, sol *universe.SolarSystem) {
+			// obtain lock on game client
+			mi.Client.Lock.Lock("core.handleEscalations::NewFactions")
+			defer mi.Client.Lock.Unlock()
+
+			// obtain lock on ship attached to client
+			sh := sol.Universe.FindShip(mi.Client.CurrentShipID, nil)
+
+			// null check
+			if sh == nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to create faction %v - no ship!", mi))
+				return
+			}
+
+			sh.Lock.Lock("core.handleEscalations::NewFactions")
+			defer sh.Lock.Unlock()
+
+			// one last docked check
+			if sh.DockedAtStation == nil || sh.DockedAtStationID == nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to create faction %v - creator not docked!", mi))
+				return
+			}
+
+			// try to create faction (most likely to fail if name or ticker are taken)
+			f, err := factionSvc.NewFaction(sql.Faction{
+				/*	ID              uuid.UUID
+					Name            string
+					Description     string
+					IsNPC           bool
+					IsJoinable      bool
+					IsClosed        bool
+					CanHoldSov      bool
+					Meta            Meta `json:"meta"`
+					ReputationSheet FactionReputationSheet
+					Ticker          string
+					OwnerID         *uuid.UUID
+					HomeStationID   *uuid.UUID*/
+				Name:            mi.Name,
+				Description:     mi.Description,
+				IsNPC:           false,
+				IsJoinable:      true,
+				IsClosed:        false,
+				CanHoldSov:      false,
+				Meta:            make(sql.Meta),
+				ReputationSheet: sql.FactionReputationSheet{},
+				Ticker:          mi.Ticker,
+				OwnerID:         mi.Client.UID,
+				HomeStationID:   &mi.HomeStationID,
+			})
+
+			// error check
+			if err != nil {
+				// log
+				shared.TeeLog(fmt.Sprintf("Unable to create faction %v: %v", mi, err))
+
+				// notify client of failure
+				go func(c *shared.GameClient) {
+					c.WriteErrorMessage("unable to create your faction - are your name and ticker unique?")
+				}(mi.Client)
+
+				// exit
+				return
+			}
+
+			// load faction into universe
+			uf := FactionFromSQL(f)
+			sol.Universe.Factions[uf.ID.String()] = uf
+
+			// put founder in their new faction
+			err = userSvc.SetCurrentFactionID(*mi.Client.UID, &f.ID)
+
+			// error check
+			if err != nil {
+				// log
+				shared.TeeLog(fmt.Sprintf("Unable to assign creator to new faction %v: %v", mi, err))
+
+				// notify client of failure
+				go func(c *shared.GameClient) {
+					c.WriteErrorMessage("unable to join you to your new faction!")
+				}(mi.Client)
+
+				// exit
+				return
+			}
+
+			// update ship with new faction
+			sh.Faction = uf
+			sh.FactionID = uf.ID
+
+			// send welcome message to player
+			go func(c *shared.GameClient) {
+				c.WriteInfoMessage(fmt.Sprintf("welcome to %v !", uf.Name))
+			}(mi.Client)
+		}(mi, sol)
 	}
 }
 
