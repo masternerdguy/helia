@@ -609,6 +609,16 @@ export class ReputationSheetWindow extends GDIWindow {
           }
         }
 
+        if (!playerRel) {
+          // stub a zero standing entry for unknown faction
+          playerRel = {
+            factionId: f.id,
+            openlyHostile: false,
+            standingValue: 0,
+            isMember: f.id == this.player.getFaction().id 
+          }
+        }
+
         factionRows.push({
           faction: f,
           actions: [],

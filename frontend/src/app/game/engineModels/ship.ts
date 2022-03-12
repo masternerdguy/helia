@@ -239,6 +239,10 @@ export class Ship extends WSShip {
     if (sh.wallet) {
       this.wallet = Math.round(sh.wallet);
     }
+
+    if (sh.factionId) {
+      this.factionId = sh.factionId;
+    }
   }
 
   getFaction(): Faction {
