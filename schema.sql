@@ -86,6 +86,12 @@ delete from items where containerid not in
 	select cargobay_containerid from ships
 );
 
+-- move non-npc users into neutral faction so they can be deleted
+update users set current_factionid = '42b937ad-0000-46e9-9af9-fc7dbf878e6a' where isnpc = 'f';
+
+-- null owners on non-npc factions so their owners can be deleted
+update factions set ownerid = null where isnpc = false and id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a';
+
 -- delete non-npc users
 delete from users where isnpc = 'f';
 
@@ -99,7 +105,11 @@ delete from containers where id not in
 	select fittingbay_containerid from ships
 	union
 	select cargobay_containerid from ships
-);$$;
+);
+
+-- delete player factions
+delete from factions where isnpc = false and id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a';
+$$;
 
 
 ALTER PROCEDURE public.sp_purgehumans() OWNER TO developer;
