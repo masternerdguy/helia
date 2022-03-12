@@ -3,6 +3,7 @@ import { FontSize, GDIStyle } from '../base/gdiStyle';
 import { GDIList } from '../components/gdiList';
 import {
   GetFactionCache,
+  GetFactionCacheEntry,
   GetPlayerFactionRelationshipCache,
 } from '../../wsModels/shared';
 import { Faction } from '../../engineModels/faction';
@@ -369,48 +370,89 @@ export class ReputationSheetWindow extends GDIWindow {
     rows.push(infoKeyValueString('Ticker', `[${r.faction.ticker}]`));
     rows.push('');
 
-    // relationships
-    rows.push('Liked By');
-    for (const f of factions) {
-      if (f.id != r.faction.id && !f.isClosed) {
-        // find relationship
-        for (const rel of f.relationships) {
-          if (rel.factionId != r.faction.id) {
+    // relationships (NPC)
+    if (r.faction.isNPC) {
+      rows.push('Liked By');
+      for (const f of factions) {
+        // only NPC factions
+        if (!f.isNPC) {
+          continue;
+        }
+
+        if (f.id != r.faction.id && !f.isClosed) {
+          // find relationship
+          for (const rel of f.relationships) {
+            if (rel.factionId != r.faction.id) {
+              continue;
+            }
+
+            if (rel.standingValue > 0) {
+              rows.push(
+                infoKeyValueString(f.name, `[${rel.standingValue.toFixed(2)}] `)
+              );
+            }
+          }
+        }
+      }
+
+      rows.push('');
+
+      rows.push('Disliked By');
+      for (const f of factions) {
+        if (f.id != r.faction.id && !f.isClosed) {
+          // only NPC factions
+          if (!f.isNPC) {
             continue;
           }
 
-          if (rel.standingValue > 0) {
+          // find relationship
+          for (const rel of f.relationships) {
+            if (rel.factionId != r.faction.id) {
+              continue;
+            }
+
+            if (rel.standingValue < 0) {
+              let openHostileFlag = '';
+
+              if (rel.openlyHostile) {
+                openHostileFlag = '⚔';
+              }
+
+              rows.push(
+                infoKeyValueString(
+                  f.name,
+                  `[${rel.standingValue.toFixed(2)}] ` + openHostileFlag
+                )
+              );
+            }
+          }
+        }
+      }
+    } else {
+      // relationships (player)
+      rows.push('Liked By');
+      for (const f of r.faction.relationships) {
+        if (f.factionId != r.faction.id) {
+          if (f.standingValue > 0) {
+            const fc = GetFactionCacheEntry(f.factionId);
+
             rows.push(
-              infoKeyValueString(f.name, `[${rel.standingValue.toFixed(2)}] `)
+              infoKeyValueString(fc.name, `[${f.standingValue.toFixed(2)}] `)
             );
           }
         }
       }
-    }
 
-    rows.push('');
+      rows.push('');
 
-    rows.push('Disliked By');
-    for (const f of factions) {
-      if (f.id != r.faction.id && !f.isClosed) {
-        // find relationship
-        for (const rel of f.relationships) {
-          if (rel.factionId != r.faction.id) {
-            continue;
-          }
-
-          if (rel.standingValue < 0) {
-            let openHostileFlag = '';
-
-            if (rel.openlyHostile) {
-              openHostileFlag = '⚔';
-            }
+      rows.push('Disliked By');
+      for (const f of r.faction.relationships) {
+        if (f.factionId != r.faction.id) {
+          if (f.standingValue < 0) {
+            const fc = GetFactionCacheEntry(f.factionId);
 
             rows.push(
-              infoKeyValueString(
-                f.name,
-                `[${rel.standingValue.toFixed(2)}] ` + openHostileFlag
-              )
+              infoKeyValueString(fc.name, `[${f.standingValue.toFixed(2)}] `)
             );
           }
         }
@@ -419,7 +461,13 @@ export class ReputationSheetWindow extends GDIWindow {
 
     // description
     rows.push('');
-    rows.push('Encyclopedia Summary');
+
+    if (r.faction.isNPC) {
+      rows.push('Encyclopedia Summary');
+    } else {
+      rows.push('Player-provided Description');
+    }
+
     rows.push('');
 
     const displayDescription = this.infoList.breakText(
