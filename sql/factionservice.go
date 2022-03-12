@@ -197,7 +197,7 @@ func (s FactionService) SaveFaction(e Faction) error {
 	// update faction
 	sql := `
 				UPDATE public.factions
-				SET name=$2, description=$3, meta=$4, ticker=$5, isnpc=$6, isjoinable=$7, canholdsov=$8, isclosed=$9, reputationsheet=$10
+				SET name=$2, description=$3, meta=$4, ticker=$5, isnpc=$6, isjoinable=$7, canholdsov=$8, isclosed=$9, reputationsheet=$10,
 				    ownerid=$11, homestationid=$12
 				WHERE id=$1;
 			`
