@@ -615,8 +615,8 @@ export class ReputationSheetWindow extends GDIWindow {
             factionId: f.id,
             openlyHostile: false,
             standingValue: 0,
-            isMember: f.id == this.player.getFaction().id 
-          }
+            isMember: f.id == this.player.getFaction().id,
+          };
         }
 
         factionRows.push({
