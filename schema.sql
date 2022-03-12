@@ -25,6 +25,11 @@ CREATE PROCEDURE public.sp_cleanup()
     AS $$-- delete dead ships
 delete from ships where destroyedat is not null;
 
+-- delete any extra NPC ships that somehow didn't die
+delete from ships where id in (
+	select sh.id from ships sh join users u on sh.userid = u.id where isnpc = 't' and u.current_shipid != sh.id
+);
+
 -- delete untracked items
 delete from items where containerid not in
 (
