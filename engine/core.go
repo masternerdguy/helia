@@ -11,6 +11,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // Will cause all system goroutines to stop when true
@@ -1039,6 +1041,41 @@ func handleEscalations(sol *universe.SolarSystem) {
 				// notify client of failure
 				go func(c *shared.GameClient) {
 					c.WriteErrorMessage("unable to create your faction - are your name and ticker unique?")
+				}(mi.Client)
+
+				// exit
+				return
+			}
+
+			// copy founder's reputation sheet to new faction
+			playerRep := SQLFromPlayerReputationSheet(&mi.Client.ReputationSheet)
+
+			f.ReputationSheet = sql.FactionReputationSheet{
+				Entries:        make(map[string]sql.ReputationSheetEntry),
+				HostFactionIDs: make([]uuid.UUID, 0),
+				WorldPercent:   0,
+			}
+
+			for _, l := range playerRep.FactionEntries {
+				f.ReputationSheet.Entries[l.FactionID.String()] = sql.ReputationSheetEntry{
+					SourceFactionID:  f.ID,
+					TargetFactionID:  l.FactionID,
+					StandingValue:    l.StandingValue,
+					AreOpenlyHostile: l.AreOpenlyHostile,
+				}
+			}
+
+			// save reputation sheet
+			err = factionSvc.SaveFaction(*f)
+
+			// error check
+			if err != nil {
+				// log
+				shared.TeeLog(fmt.Sprintf("Unable to copy reputation sheet to new faction %v: %v", mi, err))
+
+				// notify client of failure
+				go func(c *shared.GameClient) {
+					c.WriteErrorMessage("unable to copy reputation sheet!")
 				}(mi.Client)
 
 				// exit

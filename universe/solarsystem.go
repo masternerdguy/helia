@@ -1601,7 +1601,7 @@ func (s *SolarSystem) processClientEventQueues() {
 						continue
 					}
 
-					if len(data.Description) > 3 {
+					if len(data.Ticker) > 3 {
 						c.WriteErrorMessage("ticker must be 3 characters or less")
 						continue
 					}
