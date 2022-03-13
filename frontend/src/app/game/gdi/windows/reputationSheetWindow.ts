@@ -35,9 +35,13 @@ export class ReputationSheetWindow extends GDIWindow {
   private actionList = new GDIList();
   private infoList = new GDIList();
 
-  // "my faction" tab
+  // "my faction" tab (in NPC faction)
   private npcFactionLabel = new GDILabel();
   private createFactionButton = new GDIButton();
+
+  // "my faction" tab (in player faction)
+  private playerFactionLabel = new GDILabel();
+  private leaveFactionButton = new GDIButton();
 
   // new faction modal form
   private newFactionNameLabel = new GDILabel();
@@ -237,6 +241,39 @@ export class ReputationSheetWindow extends GDIWindow {
     this.newFactionCancelButton.setOnClick(() => {
       // close new faction form
       this.hideNewFactionFormModal();
+    });
+
+    // player faction indicator label
+    this.playerFactionLabel.setWidth(this.getWidth());
+    this.playerFactionLabel.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
+    this.playerFactionLabel.initialize();
+
+    this.playerFactionLabel.setText(
+      'You are currently a member of a player faction.'
+    );
+    this.playerFactionLabel.setFont(FontSize.normal);
+
+    this.playerFactionLabel.setX(0);
+    this.playerFactionLabel.setY(GDIStyle.tabHandleHeight);
+
+    // leave faction button
+    this.leaveFactionButton.setWidth(this.getWidth() * 0.5);
+    this.leaveFactionButton.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
+    this.leaveFactionButton.initialize();
+
+    this.leaveFactionButton.setText('Leave Faction');
+    this.leaveFactionButton.setFont(FontSize.normal);
+
+    this.leaveFactionButton.setX(this.getWidth() * 0.25);
+    this.leaveFactionButton.setY(100 + GDIStyle.tabHandleHeight);
+
+    this.leaveFactionButton.setOnClick(() => {
+      // todo
+      console.log('leave faction not yet implemented');
     });
   }
 
@@ -509,8 +546,10 @@ export class ReputationSheetWindow extends GDIWindow {
 
       if (faction.isNPC) {
         this.showNPCComponentsOnMyFactionTab();
+        this.hidePlayerComponentsOnMyFactionTab();
       } else {
         this.hideNPCComponentsOnMyFactionTab();
+        this.showPlayerComponentsOnMyFactionTab();
       }
     }
   }
@@ -644,6 +683,16 @@ export class ReputationSheetWindow extends GDIWindow {
   private hideNPCComponentsOnMyFactionTab() {
     this.tabs.removeComponent(this.npcFactionLabel, 'My Faction');
     this.tabs.removeComponent(this.createFactionButton, 'My Faction');
+  }
+
+  private showPlayerComponentsOnMyFactionTab() {
+    this.tabs.addComponent(this.playerFactionLabel, 'My Faction');
+    this.tabs.addComponent(this.leaveFactionButton, 'My Faction');
+  }
+
+  private hidePlayerComponentsOnMyFactionTab() {
+    this.tabs.removeComponent(this.playerFactionLabel, 'My Faction');
+    this.tabs.removeComponent(this.leaveFactionButton, 'My Faction');
   }
 
   private showNewFactionFormModal() {

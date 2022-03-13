@@ -1516,7 +1516,7 @@ func (l *SocketListener) handleClientRunSchematic(client *shared.GameClient, bod
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.RunSchematic, false)
+		client.PushShipEvent(data, msgRegistry.RunSchematic, true)
 	}
 }
 
@@ -1539,7 +1539,7 @@ func (l *SocketListener) handleClientCreateNewFaction(client *shared.GameClient,
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.CreateNewFaction, false)
+		client.PushShipEvent(data, msgRegistry.CreateNewFaction, true)
 	}
 }
 

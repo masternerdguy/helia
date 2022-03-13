@@ -1591,8 +1591,8 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 
 					// enforce string length limits
-					if len(data.Name) > 32 {
-						c.WriteErrorMessage("faction name must be 32 characters or less")
+					if len(data.Name) > 24 {
+						c.WriteErrorMessage("faction name must be 24 characters or less")
 						continue
 					}
 
