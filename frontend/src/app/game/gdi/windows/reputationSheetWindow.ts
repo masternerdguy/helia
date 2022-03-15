@@ -679,7 +679,7 @@ export class ReputationSheetWindow extends GDIWindow {
         if (f.isJoinable && !f.isNPC) {
           actionList.push({
             listString: () => 'Apply',
-            faction: f
+            faction: f,
           });
         }
 
