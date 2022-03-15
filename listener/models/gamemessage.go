@@ -61,6 +61,7 @@ type MessageRegistry struct {
 	RunSchematic           int
 	CreateNewFaction       int
 	LeaveFaction           int
+	ApplyToFaction         int
 }
 
 // Registry of target types
@@ -130,6 +131,7 @@ func NewMessageRegistry() *MessageRegistry {
 		RunSchematic:           48,
 		CreateNewFaction:       49,
 		LeaveFaction:           50,
+		ApplyToFaction:         51,
 	}
 }
 
@@ -812,4 +814,10 @@ type ClientCreateNewFactionBody struct {
 // Body containing a request to leave a player faction
 type ClientLeaveFactionBody struct {
 	SessionID uuid.UUID `json:"sid"`
+}
+
+// Body containing a request to apply to join a player faction
+type ClientApplyToFactionBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	FactionID uuid.UUID `json:"factionId"`
 }

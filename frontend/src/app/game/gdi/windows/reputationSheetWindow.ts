@@ -18,6 +18,7 @@ import { GDIInput } from '../components/gdiInput';
 import { ClientNewFaction } from '../../wsModels/bodies/newFaction';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { ClientLeaveFaction } from '../../wsModels/bodies/leaveFaction';
+import { ClientApplyToFaction } from '../../wsModels/bodies/applyToFaction';
 
 export class ReputationSheetWindow extends GDIWindow {
   private player: Player;
@@ -359,7 +360,14 @@ export class ReputationSheetWindow extends GDIWindow {
 
     this.actionList.setFont(FontSize.normal);
     this.actionList.setOnClick((item) => {
-      console.log(item); // todo
+      if (item == 'Apply') {
+        // send request to apply to join faction
+        const b = new ClientApplyToFaction();
+
+        b.sid = this.wsSvc.sid;
+
+        this.wsSvc.sendMessage(MessageTypes.ApplyToFaction, b);
+      }
     });
 
     this.tabs.addComponent(this.actionList, 'Reputation');
@@ -607,9 +615,15 @@ export class ReputationSheetWindow extends GDIWindow {
           }
         }
 
+        const actionList: string[] = [];
+
+        if (f.isJoinable && !f.isNPC) {
+          actionList.push('Apply');
+        }
+
         factionRows.push({
           faction: f,
-          actions: [],
+          actions: actionList,
           listString: () => factionListRowString(playerRel, f),
         });
       }

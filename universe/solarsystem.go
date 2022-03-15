@@ -1640,6 +1640,51 @@ func (s *SolarSystem) processClientEventQueues() {
 					s.LeaveFactions[c.UID.String()] = &t
 				}
 			}
+		} else if evt.Type == models.NewMessageRegistry().ApplyToFaction {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientApplyToFactionBody)
+
+				// null check
+				if sh.Faction == nil {
+					continue
+				}
+
+				// verify ship is docked
+				if sh.DockedAtStation == nil || sh.DockedAtStationID == nil {
+					c.WriteErrorMessage("you must be docked to apply to join a faction")
+					continue
+				}
+
+				// verify player is in an NPC faction
+				if !sh.Faction.IsNPC {
+					c.WriteErrorMessage("you must be in an NPC faction to apply to join a faction")
+					continue
+				}
+
+				// get faction being applied to
+				f := s.Universe.Factions[data.FactionID.String()]
+
+				if f == nil {
+					c.WriteErrorMessage("faction does not exist")
+					continue
+				}
+
+				// verify this is a player faction
+				if f.IsNPC {
+					c.WriteErrorMessage("this is an NPC faction")
+					continue
+				}
+
+				// verify it is accepting applications
+				if !f.IsJoinable {
+					c.WriteErrorMessage("faction is closed to applications")
+					continue
+				}
+
+				// todo
+				shared.TeeLog(fmt.Sprintf("todo: apply to join faction %v", data))
+			}
 		}
 	}
 }
