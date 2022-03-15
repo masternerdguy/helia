@@ -615,15 +615,9 @@ export class ReputationSheetWindow extends GDIWindow {
           }
         }
 
-        const actionList: string[] = [];
-
-        if (f.isJoinable && !f.isNPC) {
-          actionList.push('Apply');
-        }
-
         factionRows.push({
           faction: f,
-          actions: actionList,
+          actions: [],
           listString: () => factionListRowString(playerRel, f),
         });
       }
@@ -677,9 +671,15 @@ export class ReputationSheetWindow extends GDIWindow {
           };
         }
 
+        const actionList: string[] = [];
+
+        if (f.isJoinable && !f.isNPC) {
+          actionList.push('Apply');
+        }
+
         factionRows.push({
           faction: f,
-          actions: [],
+          actions: actionList,
           listString: () => factionListRowString(playerRel, f),
         });
       }
