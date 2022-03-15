@@ -1,3 +1,3 @@
-export class LeaveFaction {
+export class ClientLeaveFaction {
   sid: string;
 }

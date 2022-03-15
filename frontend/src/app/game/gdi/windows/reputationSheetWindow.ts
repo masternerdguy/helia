@@ -15,8 +15,9 @@ import { WsService } from '../../ws.service';
 import { GDIButton } from '../components/gdiButton';
 import { GDIOverlay } from '../components/gdiOverlay';
 import { GDIInput } from '../components/gdiInput';
-import { ClientNewFaction as ClientCreateNewFaction } from '../../wsModels/bodies/createNewFaction';
+import { ClientNewFaction } from '../../wsModels/bodies/newFaction';
 import { MessageTypes } from '../../wsModels/gameMessage';
+import { ClientLeaveFaction } from '../../wsModels/bodies/leaveFaction';
 
 export class ReputationSheetWindow extends GDIWindow {
   private player: Player;
@@ -209,7 +210,7 @@ export class ReputationSheetWindow extends GDIWindow {
 
     this.newFactionSubmitButton.setOnClick(() => {
       // send request to create new faction
-      const b = new ClientCreateNewFaction();
+      const b = new ClientNewFaction();
 
       b.sid = this.wsSvc.sid;
       b.name = this.newFactionNameInput.getText();
@@ -272,8 +273,12 @@ export class ReputationSheetWindow extends GDIWindow {
     this.leaveFactionButton.setY(100 + GDIStyle.tabHandleHeight);
 
     this.leaveFactionButton.setOnClick(() => {
-      // todo
-      console.log('leave faction not yet implemented');
+      // send request to leave faction
+      const b = new ClientLeaveFaction();
+
+      b.sid = this.wsSvc.sid;
+
+      this.wsSvc.sendMessage(MessageTypes.LeaveFaction, b);
     });
   }
 
