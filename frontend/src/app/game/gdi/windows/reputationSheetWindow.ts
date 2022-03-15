@@ -360,11 +360,14 @@ export class ReputationSheetWindow extends GDIWindow {
 
     this.actionList.setFont(FontSize.normal);
     this.actionList.setOnClick((item) => {
-      if (item == 'Apply') {
+      const action = item.listString();
+
+      if (action == 'Apply') {
         // send request to apply to join faction
         const b = new ClientApplyToFaction();
 
         b.sid = this.wsSvc.sid;
+        b.factionId = item.faction.id;
 
         this.wsSvc.sendMessage(MessageTypes.ApplyToFaction, b);
       }
@@ -671,10 +674,13 @@ export class ReputationSheetWindow extends GDIWindow {
           };
         }
 
-        const actionList: string[] = [];
+        const actionList = [];
 
         if (f.isJoinable && !f.isNPC) {
-          actionList.push('Apply');
+          actionList.push({
+            listString: () => 'Apply',
+            faction: f
+          });
         }
 
         factionRows.push({
