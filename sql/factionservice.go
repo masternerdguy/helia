@@ -163,7 +163,7 @@ func (s FactionService) NewFaction(e Faction) (*Faction, error) {
 					id, name, description, isnpc, isjoinable, canholdsov, meta, ticker, reputationsheet,
 				    ownerid, homestationid
 				)
-					VALUES ($1, $2, $3, $4, $5, $6, $8, $9, $10, $11, $12);
+					VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);
 			`
 
 	uid := uuid.New()
