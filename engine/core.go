@@ -1024,7 +1024,6 @@ func handleEscalations(sol *universe.SolarSystem) {
 				Description:     mi.Description,
 				IsNPC:           false,
 				IsJoinable:      true,
-				IsClosed:        false,
 				CanHoldSov:      false,
 				Meta:            make(sql.Meta),
 				ReputationSheet: sql.FactionReputationSheet{},
@@ -1125,7 +1124,6 @@ func handleEscalations(sol *universe.SolarSystem) {
 				Description:   f.Description,
 				IsNPC:         f.IsNPC,
 				IsJoinable:    f.IsJoinable,
-				IsClosed:      f.IsClosed,
 				CanHoldSov:    f.CanHoldSov,
 				Ticker:        f.Ticker,
 				Relationships: rels,
@@ -1141,6 +1139,83 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// write message to connected clients
 			sol.Universe.SendGlobalMessage(&msg)
+
+			// update ship with new faction
+			sh.Faction = uf
+			sh.FactionID = uf.ID
+
+			// send welcome message to player
+			go func(c *shared.GameClient) {
+				c.WriteInfoMessage(fmt.Sprintf("welcome to %v !", uf.Name))
+			}(mi.Client)
+		}(mi, sol)
+	}
+
+	// iterate over leave faction requests
+	for id := range sol.LeaveFactions {
+		// capture reference and remove from map
+		mi := sol.LeaveFactions[id]
+		delete(sol.LeaveFactions, id)
+
+		// handle escalation on another goroutine
+		go func(mi *universe.LeaveFactionTicket, sol *universe.SolarSystem) {
+			// obtain lock on game client
+			mi.Client.Lock.Lock("core.handleEscalations::LeaveFactions")
+			defer mi.Client.Lock.Unlock()
+
+			// obtain lock on ship attached to client
+			sh := sol.Universe.FindShip(mi.Client.CurrentShipID, nil)
+
+			// null check
+			if sh == nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to leave faction %v - no ship!", mi))
+				return
+			}
+
+			sh.Lock.Lock("core.handleEscalations::LeaveFactions")
+			defer sh.Lock.Unlock()
+
+			// one last docked check
+			if sh.DockedAtStation == nil || sh.DockedAtStationID == nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to leave faction %v - not docked!", mi))
+				return
+			}
+
+			// find their starting conditions
+			user, err := userSvc.GetUserByID(*mi.Client.UID)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to leave faction %v - no associated user!", mi.Client.UID))
+				return
+			}
+
+			start, err := startSvc.GetStartByID(user.StartID)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to leave faction %v - no associated start!", mi.Client.UID))
+				return
+			}
+
+			// put player in their starter faction
+			fID := start.FactionID
+			err = userSvc.SetCurrentFactionID(*mi.Client.UID, &fID)
+
+			// error check
+			if err != nil {
+				// log
+				shared.TeeLog(fmt.Sprintf("Unable to leaver creator to new faction %v: %v", mi, err))
+
+				// notify client of failure
+				go func(c *shared.GameClient) {
+					c.WriteErrorMessage("unable to join you to your starter faction!")
+				}(mi.Client)
+
+				// exit
+				return
+			}
+
+			// get faction from cache
+			uf := sol.Universe.Factions[fID.String()]
 
 			// update ship with new faction
 			sh.Faction = uf

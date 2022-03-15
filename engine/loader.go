@@ -947,7 +947,6 @@ func FactionFromSQL(value *sql.Faction) *universe.Faction {
 	faction.Description = value.Description
 	faction.IsNPC = value.IsNPC
 	faction.IsJoinable = value.IsJoinable
-	faction.IsClosed = value.IsClosed
 	faction.CanHoldSov = value.CanHoldSov
 	faction.Meta = universe.Meta(value.Meta)
 	faction.Ticker = value.Ticker

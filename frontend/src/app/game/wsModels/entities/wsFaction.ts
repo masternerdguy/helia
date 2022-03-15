@@ -4,7 +4,6 @@ export class WSFaction {
   description: string;
   isNPC: boolean;
   isJoinable: boolean;
-  isClosed: boolean;
   canHoldSov: boolean;
   ticker: string;
   relationships: WSFactionRelationship[];

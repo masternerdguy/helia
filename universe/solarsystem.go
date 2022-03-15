@@ -56,6 +56,7 @@ type SolarSystem struct {
 	SchematicRunViews    map[string]*shared.GameClient     // requests for a schematic run summary
 	NewSchematicRuns     map[string]*NewSchematicRunTicket // newly invoked schematics that need to be started
 	NewFactions          map[string]*NewFactionTicket      // partially approved requests to create a new faction and automatically join it
+	LeaveFactions        map[string]*LeaveFactionTicket    // approved requests to leave a faction and rejoin the starter faction
 }
 
 // Initializes internal aspects of SolarSystem
@@ -92,6 +93,7 @@ func (s *SolarSystem) Initialize() {
 	s.SchematicRunViews = make(map[string]*shared.GameClient)
 	s.NewSchematicRuns = make(map[string]*NewSchematicRunTicket)
 	s.NewFactions = make(map[string]*NewFactionTicket)
+	s.LeaveFactions = make(map[string]*LeaveFactionTicket)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -1616,6 +1618,26 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 
 					s.NewFactions[c.UID.String()] = &t
+				}
+			}
+		} else if evt.Type == models.NewMessageRegistry().LeaveFaction {
+			if sh != nil {
+				// extract data
+				//data := evt.Body.(models.ClientLeaveFactionBody)
+
+				// verify ship is docked
+				if sh.DockedAtStation == nil || sh.DockedAtStationID == nil {
+					c.WriteErrorMessage("you must be docked to leave a faction")
+					continue
+				}
+
+				if sh.Faction != nil {
+					// escalate to core for leave
+					t := LeaveFactionTicket{
+						Client: c,
+					}
+
+					s.LeaveFactions[c.UID.String()] = &t
 				}
 			}
 		}

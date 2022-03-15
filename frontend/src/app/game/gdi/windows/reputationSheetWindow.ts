@@ -416,7 +416,7 @@ export class ReputationSheetWindow extends GDIWindow {
           continue;
         }
 
-        if (f.id != r.faction.id && !f.isClosed) {
+        if (f.id != r.faction.id) {
           // find relationship
           for (const rel of f.relationships) {
             if (rel.factionId != r.faction.id) {
@@ -436,7 +436,7 @@ export class ReputationSheetWindow extends GDIWindow {
 
       rows.push('Disliked By');
       for (const f of factions) {
-        if (f.id != r.faction.id && !f.isClosed) {
+        if (f.id != r.faction.id) {
           // only NPC factions
           if (!f.isNPC) {
             continue;

@@ -391,6 +391,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientCreateNewFaction(&client, &b)
+		} else if m.MessageType == msgRegistry.LeaveFaction {
+			// decode body as ClientLeaveFactionBody
+			b := models.ClientLeaveFactionBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientLeaveFaction(&client, &b)
 		}
 	}
 }
@@ -629,7 +636,6 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				Description:   f.Description,
 				IsNPC:         f.IsNPC,
 				IsJoinable:    f.IsJoinable,
-				IsClosed:      f.IsClosed,
 				CanHoldSov:    f.CanHoldSov,
 				Ticker:        f.Ticker,
 				Relationships: rels,
@@ -1540,6 +1546,29 @@ func (l *SocketListener) handleClientCreateNewFaction(client *shared.GameClient,
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.CreateNewFaction, true)
+	}
+}
+
+func (l *SocketListener) handleClientLeaveFaction(client *shared.GameClient, body *models.ClientLeaveFactionBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		shared.TeeLog(fmt.Sprintf("handleClientLeaveFaction: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.LeaveFaction, true)
 	}
 }
 

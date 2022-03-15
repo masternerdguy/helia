@@ -31,6 +31,8 @@ func main() {
 	shared.TeeLog("Initializing RNG...")
 	rand.Seed(time.Now().UnixNano())
 
+	//
+
 	// initialize game engine
 	shared.TeeLog("Initializing engine...")
 	engine := engine.HeliaEngine{}

@@ -16,6 +16,67 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: factions; Type: TABLE; Schema: public; Owner: developer
+--
+
+CREATE TABLE public.factions (
+    id uuid NOT NULL,
+    name character varying(32) NOT NULL,
+    description character varying(8192) NOT NULL,
+    meta jsonb NOT NULL,
+    ticker character varying(3) DEFAULT '???'::character varying NOT NULL,
+    isnpc boolean DEFAULT false NOT NULL,
+    isjoinable boolean DEFAULT false NOT NULL,
+    canholdsov boolean DEFAULT false NOT NULL,
+    reputationsheet jsonb DEFAULT '{}'::jsonb NOT NULL,
+    ownerid uuid,
+    homestationid uuid
+);
+
+
+ALTER TABLE public.factions OWNER TO developer;
+
+--
+-- Name: fn_getemptyplayerfactions(); Type: FUNCTION; Schema: public; Owner: developer
+--
+
+CREATE FUNCTION public.fn_getemptyplayerfactions() RETURNS SETOF public.factions
+    LANGUAGE plpgsql
+    AS $$
+declare 
+	 rec_faction record;
+	 player_factions cursor
+		 for select * from factions where id not in
+			(
+				select current_factionid from users
+			)
+			and isnpc = 'f'
+			and id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a';
+begin
+   -- open the cursor
+   open player_factions;
+	
+   loop
+      -- fetch next faction from cursor
+      fetch player_factions into rec_faction;	  
+      -- exit when no more row to fetch
+      exit when not found;
+	  -- store faction
+	  return next rec_faction;
+   end loop;
+  
+   -- close the cursor
+   close player_factions;
+end; $$;
+
+
+ALTER FUNCTION public.fn_getemptyplayerfactions() OWNER TO developer;
+
 --
 -- Name: sp_cleanup(); Type: PROCEDURE; Schema: public; Owner: developer
 --
@@ -59,6 +120,12 @@ delete from logs;
 
 -- delete sessions
 delete from sessions;
+
+-- delete empty factions
+delete from factions where id in
+(
+	select id from fn_getemptyplayerfactions()
+);
 $$;
 
 
@@ -119,10 +186,6 @@ $$;
 
 ALTER PROCEDURE public.sp_purgehumans() OWNER TO developer;
 
-SET default_tablespace = '';
-
-SET default_table_access_method = heap;
-
 --
 -- Name: containers; Type: TABLE; Schema: public; Owner: developer
 --
@@ -135,28 +198,6 @@ CREATE TABLE public.containers (
 
 
 ALTER TABLE public.containers OWNER TO developer;
-
---
--- Name: factions; Type: TABLE; Schema: public; Owner: developer
---
-
-CREATE TABLE public.factions (
-    id uuid NOT NULL,
-    name character varying(32) NOT NULL,
-    description character varying(8192) NOT NULL,
-    meta jsonb NOT NULL,
-    ticker character varying(3) DEFAULT '???'::character varying NOT NULL,
-    isnpc boolean DEFAULT false NOT NULL,
-    isjoinable boolean DEFAULT false NOT NULL,
-    canholdsov boolean DEFAULT false NOT NULL,
-    isclosed boolean DEFAULT false NOT NULL,
-    reputationsheet jsonb DEFAULT '{}'::jsonb NOT NULL,
-    ownerid uuid,
-    homestationid uuid
-);
-
-
-ALTER TABLE public.factions OWNER TO developer;
 
 --
 -- Name: itemfamilies; Type: TABLE; Schema: public; Owner: developer

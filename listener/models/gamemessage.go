@@ -60,6 +60,7 @@ type MessageRegistry struct {
 	SchematicRunsUpdate    int
 	RunSchematic           int
 	CreateNewFaction       int
+	LeaveFaction           int
 }
 
 // Registry of target types
@@ -128,6 +129,7 @@ func NewMessageRegistry() *MessageRegistry {
 		SchematicRunsUpdate:    47,
 		RunSchematic:           48,
 		CreateNewFaction:       49,
+		LeaveFaction:           50,
 	}
 }
 
@@ -629,7 +631,6 @@ type ServerFactionBody struct {
 	Description   string                      `json:"description"`
 	IsNPC         bool                        `json:"isNPC"`
 	IsJoinable    bool                        `json:"isJoinable"`
-	IsClosed      bool                        `json:"isClosed"`
 	CanHoldSov    bool                        `json:"canHoldSov"`
 	Relationships []ServerFactionRelationship `json:"relationships"`
 	Ticker        string                      `json:"ticker"`
@@ -806,4 +807,9 @@ type ClientCreateNewFactionBody struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Ticker      string    `json:"ticker"`
+}
+
+// Body containing a request to leave a player faction
+type ClientLeaveFactionBody struct {
+	SessionID uuid.UUID `json:"sid"`
 }

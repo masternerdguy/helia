@@ -56,4 +56,5 @@ export enum MessageTypes {
   SchematicRunsUpdate = 47,
   RunSchematic = 48,
   CreateNewFaction = 49,
+  LeaveFaction = 50,
 }

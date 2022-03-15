@@ -13,7 +13,6 @@ type Faction struct {
 	Description     string
 	IsNPC           bool
 	IsJoinable      bool
-	IsClosed        bool
 	CanHoldSov      bool
 	Meta            Meta
 	ReputationSheet shared.FactionReputationSheet
@@ -29,6 +28,11 @@ type NewFactionTicket struct {
 	Ticker        string
 	Client        *shared.GameClient
 	HomeStationID uuid.UUID
+}
+
+// Structure representing a validated request to leave a player faction and rejoin the starter faction
+type LeaveFactionTicket struct {
+	Client *shared.GameClient
 }
 
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities
