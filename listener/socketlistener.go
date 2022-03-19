@@ -426,6 +426,20 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientRejectApplication(&client, &b)
+		} else if m.MessageType == msgRegistry.ViewMembers {
+			// decode body as ClientViewMembersBody
+			b := models.ClientViewMembersBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientViewMembers(&client, &b)
+		} else if m.MessageType == msgRegistry.KickMember {
+			// decode body as ClientKickMemberBody
+			b := models.ClientKickMemberBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientKickMember(&client, &b)
 		}
 	}
 }
@@ -1664,7 +1678,7 @@ func (l *SocketListener) handleClientApproveApplication(client *shared.GameClien
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		shared.TeeLog(fmt.Sprintf("ClientApproveApplicationBody: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientApproveApplication: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1687,7 +1701,7 @@ func (l *SocketListener) handleClientRejectApplication(client *shared.GameClient
 
 	// verify session id
 	if body.SessionID != *client.SID {
-		shared.TeeLog(fmt.Sprintf("ClientRejectApplicationBody: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+		shared.TeeLog(fmt.Sprintf("handleClientRejectApplication: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
 		msgRegistry := models.NewMessageRegistry()
@@ -1695,6 +1709,52 @@ func (l *SocketListener) handleClientRejectApplication(client *shared.GameClient
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.RejectApplication, true)
+	}
+}
+
+func (l *SocketListener) handleClientViewMembers(client *shared.GameClient, body *models.ClientViewMembersBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		shared.TeeLog(fmt.Sprintf("handleClientViewMembers: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.ViewMembers, true)
+	}
+}
+
+func (l *SocketListener) handleClientKickMember(client *shared.GameClient, body *models.ClientKickMemberBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		shared.TeeLog(fmt.Sprintf("handleClientKickMember: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.KickMember, true)
 	}
 }
 

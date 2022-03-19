@@ -66,6 +66,9 @@ type MessageRegistry struct {
 	ApplicationsUpdate     int
 	ApproveApplication     int
 	RejectApplication      int
+	ViewMembers            int
+	MembersUpdate          int
+	KickMember             int
 }
 
 // Registry of target types
@@ -140,6 +143,9 @@ func NewMessageRegistry() *MessageRegistry {
 		ApplicationsUpdate:     53,
 		ApproveApplication:     54,
 		RejectApplication:      55,
+		ViewMembers:            56,
+		MembersUpdate:          57,
+		KickMember:             58,
 	}
 }
 
@@ -857,6 +863,28 @@ type ClientApproveApplicationBody struct {
 
 // Body containing a request to reject an application to a player's faction
 type ClientRejectApplicationBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	UserID    uuid.UUID `json:"userId"`
+}
+
+// Body containing current members of the player's faction
+type ServerMembersUpdateBody struct {
+	Members []ServerMemberEntry `json:"members"`
+}
+
+// Structure representing a member of a player's faction
+type ServerMemberEntry struct {
+	UserID        uuid.UUID `json:"id"`
+	CharacterName string    `json:"name"`
+}
+
+// Body containing a request to view members of the player's faction
+type ClientViewMembersBody struct {
+	SessionID uuid.UUID `json:"sid"`
+}
+
+// Body containing a request to kick a member from a player's faction
+type ClientKickMemberBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	UserID    uuid.UUID `json:"userId"`
 }

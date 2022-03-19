@@ -24,6 +24,10 @@ import { ViewApplications as ClientViewApplications } from '../../wsModels/bodie
 import { WSApplication } from '../../wsModels/entities/wsApplication';
 import { ClientApproveApplication } from '../../wsModels/bodies/approveApplication';
 import { ClientRejectApplication } from '../../wsModels/bodies/rejectApplication';
+import { ClientKickMember } from '../../wsModels/bodies/kickMember';
+import { ServerMembersUpdate } from '../../wsModels/bodies/membersUpdate';
+import { WSMember } from '../../wsModels/entities/wsMember';
+import { ClientViewMembers } from '../../wsModels/bodies/viewMembers';
 
 export class ReputationSheetWindow extends GDIWindow {
   private player: Player;
@@ -52,6 +56,7 @@ export class ReputationSheetWindow extends GDIWindow {
   private playerFactionLabel = new GDILabel();
   private leaveFactionButton = new GDIButton();
   private viewApplicantsButton = new GDIButton();
+  private viewMembersButton = new GDIButton();
 
   // "new faction" modal form
   private newFactionNameLabel = new GDILabel();
@@ -68,6 +73,12 @@ export class ReputationSheetWindow extends GDIWindow {
   private applicantActionList = new GDIList();
   private applicantInfoList = new GDIList();
   private viewApplicantCloseButton = new GDIButton();
+
+    // "view members" modal form
+    private memberList = new GDIList();
+    private memberActionList = new GDIList();
+    private memberInfoList = new GDIList();
+    private viewMembersCloseButton = new GDIButton();
 
   initialize() {
     // set dimensions
@@ -121,9 +132,109 @@ export class ReputationSheetWindow extends GDIWindow {
 
     // pack modal views
     this.packViewApplicantsModal();
+    this.packViewMembersModal();
 
     // pack modal forms
     this.packNewFactionModalForm();
+  }
+
+  private packViewMembersModal() {
+    // member list
+    this.memberList.setWidth(300);
+    this.memberList.setHeight(200 + GDIStyle.tabHandleHeight);
+    this.memberList.initialize();
+
+    this.memberList.setX(0);
+    this.memberList.setY(0);
+
+    this.memberList.setFont(FontSize.normal);
+    this.memberList.setOnClick((item) => {
+      // get row
+      const o = item as MemberInfoRow;
+
+      if (o.member != null) {
+        // update actions
+        const actions: any[] = [];
+
+        for (const a of o.actions) {
+          actions.push({
+            listString: () => `${a}`,
+          });
+        }
+
+        this.memberActionList.setItems(actions);
+
+        // update detailed info
+        const details = this.buildMemberDetails(o);
+        this.memberInfoList.setItems(details);
+      } else {
+        this.memberActionList.setItems([]);
+        this.memberInfoList.setItems([]);
+      }
+    });
+
+    // action list
+    this.memberActionList.setWidth(100);
+    this.memberActionList.setHeight(180 + GDIStyle.tabHandleHeight);
+    this.memberActionList.initialize();
+
+    this.memberActionList.setX(300);
+    this.memberActionList.setY(0);
+
+    this.memberActionList.setFont(FontSize.normal);
+    this.memberActionList.setOnClick((item) => {
+      const action = item.listString();
+      const member =
+        this.memberList.getSelectedItem() as MemberInfoRow;
+
+      if (action == 'Kick') {
+        // send request to kick member
+        const b = new ClientKickMember();
+
+        b.sid = this.wsSvc.sid;
+        b.userId = member.member.id;
+
+        this.wsSvc.sendMessage(MessageTypes.KickMember, b);
+
+        // request refresh
+        const now = Date.now();
+        setTimeout(() => this.refreshMembers(now), 0);
+
+        // reset lists
+        this.memberActionList.setItems([]);
+        this.memberList.setItems([]);
+        this.memberInfoList.setItems([]);
+      }
+    });
+
+    // info list
+    this.memberInfoList.setWidth(400);
+    this.memberInfoList.setHeight(190 - GDIStyle.tabHandleHeight);
+    this.memberInfoList.initialize();
+
+    this.memberInfoList.setX(0);
+    this.memberInfoList.setY(200);
+
+    this.memberInfoList.setFont(FontSize.normal);
+    this.memberInfoList.setOnClick(() => {});
+
+    // close button
+    this.viewMembersCloseButton.setWidth(this.getWidth() * 0.5);
+    this.viewMembersCloseButton.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
+    this.viewMembersCloseButton.initialize();
+
+    this.viewMembersCloseButton.setText('Close');
+    this.viewMembersCloseButton.setFont(FontSize.normal);
+
+    this.viewMembersCloseButton.setX(this.getWidth() * 0.25);
+    this.viewMembersCloseButton.setY(this.getHeight() - 40);
+
+    this.viewMembersCloseButton.setOnClick(() => {
+      // close view members modal
+      this.hideViewMembersModal();
+    });
   }
 
   private packViewApplicantsModal() {
@@ -479,6 +590,27 @@ export class ReputationSheetWindow extends GDIWindow {
       // show view applicants modal
       this.showViewApplicantsModal();
     });
+
+        // view members button
+        this.viewMembersButton.setWidth(this.getWidth() * 0.5);
+        this.viewMembersButton.setHeight(
+          Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+        );
+    
+        this.viewMembersButton.initialize();
+    
+        this.viewMembersButton.setText('View Members');
+        this.viewMembersButton.setFont(FontSize.normal);
+    
+        this.viewMembersButton.setX(this.getWidth() * 0.25);
+        this.viewMembersButton.setY(
+          this.viewApplicantsButton.getY() + this.viewApplicantsButton.getHeight() + 10
+        );
+    
+        this.viewMembersButton.setOnClick(() => {
+          // show view applicants modal
+          this.showViewMembersModal();
+        });
   }
 
   private packReputationTab() {
@@ -714,6 +846,13 @@ export class ReputationSheetWindow extends GDIWindow {
     };
   }
 
+  private memberInfoViewRowFromString(s: string): MemberInfoViewRow {
+    return {
+      listString: () => s,
+    };
+  }
+
+
   private buildApplicantDetails(r: ApplicantInfoRow): ApplicantInfoViewRow[] {
     const rows: string[] = [];
 
@@ -729,6 +868,25 @@ export class ReputationSheetWindow extends GDIWindow {
 
     for (const r of rows) {
       dRows.push(this.applicantInfoViewRowFromString(r));
+    }
+
+    // return converted rows
+    return dRows;
+  }
+
+  private buildMemberDetails(r: MemberInfoRow): MemberInfoViewRow[] {
+    const rows: string[] = [];
+
+    // basic info
+    rows.push('Basic');
+    rows.push(infoKeyValueString('Name', r.member.name));
+    rows.push('');
+
+    // convert to display rows
+    const dRows: MemberInfoViewRow[] = [];
+
+    for (const r of rows) {
+      dRows.push(this.memberInfoViewRowFromString(r));
     }
 
     // return converted rows
@@ -911,6 +1069,14 @@ export class ReputationSheetWindow extends GDIWindow {
     this.lastApplicationView = now;
   }
 
+  private refreshMembers(now: number) {
+    const b = new ClientViewMembers();
+    b.sid = this.wsSvc.sid;
+
+    this.wsSvc.sendMessage(MessageTypes.ViewMembers, b);
+    this.lastApplicationView = now;
+  }
+
   private showNPCComponentsOnMyFactionTab() {
     this.tabs.addComponent(this.npcFactionLabel, 'My Faction');
     this.tabs.addComponent(this.createFactionButton, 'My Faction');
@@ -927,6 +1093,7 @@ export class ReputationSheetWindow extends GDIWindow {
 
     if (this.isFactionOwner) {
       this.tabs.addComponent(this.viewApplicantsButton, 'My Faction');
+      this.tabs.addComponent(this.viewMembersButton, 'My Faction');
     }
   }
 
@@ -934,6 +1101,7 @@ export class ReputationSheetWindow extends GDIWindow {
     this.tabs.removeComponent(this.playerFactionLabel, 'My Faction');
     this.tabs.removeComponent(this.leaveFactionButton, 'My Faction');
     this.tabs.removeComponent(this.viewApplicantsButton, 'My Faction');
+    this.tabs.removeComponent(this.viewMembersButton, 'My Faction');
   }
 
   private showNewFactionFormModal() {
@@ -980,6 +1148,24 @@ export class ReputationSheetWindow extends GDIWindow {
     this.removeComponent(this.viewApplicantCloseButton);
   }
 
+  private showViewMembersModal() {
+    this.showModalBase();
+
+    this.addComponent(this.memberList);
+    this.addComponent(this.memberInfoList);
+    this.addComponent(this.memberActionList);
+    this.addComponent(this.viewMembersCloseButton);
+  }
+
+  private hideViewMembersModal() {
+    this.hideModalBase();
+
+    this.removeComponent(this.memberList);
+    this.removeComponent(this.memberInfoList);
+    this.removeComponent(this.memberActionList);
+    this.removeComponent(this.viewMembersCloseButton);
+  }
+
   private showModalBase() {
     this.removeComponent(this.tabs);
     this.addComponent(this.modalOverlay);
@@ -1022,6 +1208,33 @@ export class ReputationSheetWindow extends GDIWindow {
     this.applicantList.setSelectedIndex(selection);
     this.applicantList.setScroll(scroll);
   }
+
+  syncMembers(msg: ServerMembersUpdate) {
+    // stash applicant list state
+    const scroll = this.memberList.getScroll();
+    const selection = this.memberList.getSelectedIndex();
+
+    // clear applicant list
+    this.memberList.setItems([]);
+
+    // build new rows
+    const rows: MemberInfoRow[] = [];
+
+    for (const r of msg.members) {
+      rows.push({
+        actions: ['Kick', ''],
+        member: r,
+        listString: () => `${r.name}`,
+      });
+    }
+
+    // store new rows
+    this.memberList.setItems(rows);
+
+    // restore state
+    this.memberList.setSelectedIndex(selection);
+    this.memberList.setScroll(scroll);
+  }
 }
 
 class FactionRepViewRow {
@@ -1043,6 +1256,17 @@ class ApplicantInfoRow {
 }
 
 class ApplicantInfoViewRow {
+  listString: () => string;
+}
+
+class MemberInfoRow {
+  member: WSMember;
+  actions: string[];
+
+  listString: () => string;
+}
+
+class MemberInfoViewRow {
   listString: () => string;
 }
 
