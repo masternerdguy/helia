@@ -605,6 +605,26 @@ func handleEscalations(sol *universe.SolarSystem) {
 				return
 			}
 
+			// check if their home station is overriden by faction membership
+			ur, err := userSvc.GetUserByID(*rs.UID)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - no user!", rs.UID))
+				return
+			}
+
+			uf := sol.Universe.Factions[ur.CurrentFactionID.String()]
+
+			if uf == nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - no faction!", rs.UID))
+				return
+			}
+
+			if !uf.IsNPC && uf.HomeStationID != nil {
+				// override home station on start in-memory only
+				start.HomeStationID = *uf.HomeStationID
+			}
+
 			// find their home station
 			home := sol.Universe.FindStation(start.HomeStationID, &sol.ID)
 
