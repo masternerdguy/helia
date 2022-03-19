@@ -242,7 +242,7 @@ func (u *Universe) FindShipsByUserID(userID uuid.UUID, noLockSystemID *uuid.UUID
 	// iterate over all systems in all regions
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			// do not if system is exempted
+			// do lock not if system is exempted
 			var lock = true
 
 			if noLockSystemID != nil {
@@ -270,7 +270,7 @@ func (u *Universe) FindCurrentPlayerShip(userID uuid.UUID, noLockSystemID *uuid.
 	// iterate over all systems in all regions
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			// do not if system is exempted
+			// do not lock if system is exempted
 			var lock = true
 
 			if noLockSystemID != nil {
@@ -286,6 +286,39 @@ func (u *Universe) FindCurrentPlayerShip(userID uuid.UUID, noLockSystemID *uuid.
 					// id and flown check
 					if shx.BeingFlownByPlayer && shx.UserID == userID {
 						return shx
+					}
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+// Finds the client of a currently connected player
+func (u *Universe) FindCurrentPlayerClient(userID uuid.UUID, noLockSystemID *uuid.UUID) *shared.GameClient {
+	// iterate over all systems in all regions
+	for _, r := range u.Regions {
+		for _, s := range r.Systems {
+			// do not lock if system is exempted
+			var lock = true
+
+			if noLockSystemID != nil {
+				lock = s.ID != *noLockSystemID
+			}
+
+			// get raw pointers to clients in system
+			clients := s.MirrorClientMap(lock)
+
+			// look for client in system
+			for _, cx := range clients {
+				if cx != nil {
+					// id check
+					cID := *cx.UID
+
+					if cID == userID {
+						// match
+						return cx
 					}
 				}
 			}

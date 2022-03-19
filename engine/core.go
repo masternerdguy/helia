@@ -1209,7 +1209,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			// error check
 			if err != nil {
 				// log
-				shared.TeeLog(fmt.Sprintf("Unable to leaver creator to new faction %v: %v", mi, err))
+				shared.TeeLog(fmt.Sprintf("Unable to join creator to new faction %v: %v", mi, err))
 
 				// notify client of failure
 				go func(c *shared.GameClient) {
@@ -1231,6 +1231,93 @@ func handleEscalations(sol *universe.SolarSystem) {
 			go func(c *shared.GameClient) {
 				c.WriteInfoMessage(fmt.Sprintf("welcome to %v !", uf.Name))
 			}(mi.Client)
+		}(mi, sol)
+	}
+
+	// iterate over join faction requests
+	for id := range sol.JoinFactions {
+		// capture reference and remove from map
+		mi := sol.JoinFactions[id]
+		delete(sol.JoinFactions, id)
+
+		// handle escalation on another goroutine
+		go func(mi *universe.JoinFactionTicket, sol *universe.SolarSystem) {
+			// null check
+			if mi.OwnerClient == nil {
+				shared.TeeLog(fmt.Sprintf("No owner client attached to join request: %v", mi))
+				return
+			}
+
+			// try to find the target faction
+			faction := sol.Universe.Factions[mi.FactionID.String()]
+
+			if faction == nil {
+				shared.TeeLog(fmt.Sprintf("Unable to find target faction to join: %v", mi))
+				return
+			}
+
+			// try to find applicant's game client
+			appClient := sol.Universe.FindCurrentPlayerClient(mi.UserID, nil)
+
+			if appClient != nil {
+				// obtain lock on applicant's game client
+				appClient.Lock.Lock("core.handleEscalations::JoinFactions")
+				defer appClient.Lock.Unlock()
+			}
+
+			// try to find applicant's ship
+			appShip := sol.Universe.FindCurrentPlayerShip(mi.UserID, nil)
+
+			// null check
+			if appShip == nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to join faction %v - no ship!", mi))
+				return
+			}
+
+			// obtain lock on applicant's ship
+			appShip.Lock.Lock("core.handleEscalations::JoinFactions")
+			defer appShip.Lock.Unlock()
+
+			// put player in the target faction
+			fID := faction.ID
+			err := userSvc.SetCurrentFactionID(mi.UserID, &fID)
+
+			// error check
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("Unable to join player to target faction %v: %v", mi, err))
+				return
+			}
+
+			// verify applicant is still in an NPC faction
+			if appShip.Faction == nil || appShip.Faction.IsNPC {
+				// send failure message to owner
+				go func(c *shared.GameClient) {
+					if c != nil {
+						c.WriteErrorMessage("unable to approve - applicant is no longer in an NPC faction")
+					}
+				}(mi.OwnerClient)
+
+				// exit
+				return
+			}
+
+			// update ship with new faction
+			appShip.Faction = faction
+			appShip.FactionID = faction.ID
+
+			// send welcome message to applicant
+			go func(c *shared.GameClient) {
+				if c != nil {
+					c.WriteInfoMessage(fmt.Sprintf("welcome to %v !", faction.Name))
+				}
+			}(appClient)
+
+			// send confirmation message to owner
+			go func(c *shared.GameClient) {
+				if c != nil {
+					c.WriteInfoMessage("approval success!")
+				}
+			}(mi.OwnerClient)
 		}(mi, sol)
 	}
 }

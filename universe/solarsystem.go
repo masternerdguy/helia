@@ -57,6 +57,7 @@ type SolarSystem struct {
 	NewSchematicRuns     map[string]*NewSchematicRunTicket // newly invoked schematics that need to be started
 	NewFactions          map[string]*NewFactionTicket      // partially approved requests to create a new faction and automatically join it
 	LeaveFactions        map[string]*LeaveFactionTicket    // approved requests to leave a faction and rejoin the starter faction
+	JoinFactions         map[string]*JoinFactionTicket     // partially approved requests to join a player into a player faction
 }
 
 // Initializes internal aspects of SolarSystem
@@ -94,6 +95,7 @@ func (s *SolarSystem) Initialize() {
 	s.NewSchematicRuns = make(map[string]*NewSchematicRunTicket)
 	s.NewFactions = make(map[string]*NewFactionTicket)
 	s.LeaveFactions = make(map[string]*LeaveFactionTicket)
+	s.JoinFactions = make(map[string]*JoinFactionTicket)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -1792,8 +1794,22 @@ func (s *SolarSystem) processClientEventQueues() {
 				continue
 			}
 
-			// todo
-			shared.TeeLog(fmt.Sprintf("not yet implemented %v", data))
+			// escalate to core for final approval and handling
+			s.JoinFactions[cID.String()] = &JoinFactionTicket{
+				UserID:      data.UserID,
+				FactionID:   sh.FactionID,
+				OwnerClient: c,
+			}
+
+			// remove application on separate goroutine
+			go func(f *Faction, userID uuid.UUID) {
+				// obtain lock
+				f.Lock.Lock("solarsystem.processClientEventQueues::ApproveApplication")
+				defer f.Lock.Unlock()
+
+				// remove entry
+				delete(f.Applications, userID.String())
+			}(sh.Faction, data.UserID)
 		} else if evt.Type == msgRegistry.RejectApplication {
 			// extract data
 			data := evt.Body.(models.ClientRejectApplicationBody)
@@ -2915,6 +2931,26 @@ func (s *SolarSystem) MirrorShipMap(lock bool) map[string]*Ship {
 	m := make(map[string]*Ship)
 
 	for k, v := range s.ships {
+		m[k] = v
+	}
+
+	// return new map
+	return m
+}
+
+// Returns a new map containing pointers to the clients in the system - use with care!
+func (s *SolarSystem) MirrorClientMap(lock bool) map[string]*shared.GameClient {
+
+	if lock {
+		// obtain lock
+		s.Lock.Lock("solarsystem.MirrorClientMap")
+		defer s.Lock.Unlock()
+	}
+
+	// copy pointers into new map
+	m := make(map[string]*shared.GameClient)
+
+	for k, v := range s.clients {
 		m[k] = v
 	}
 

@@ -45,6 +45,12 @@ type FactionApplicationTicket struct {
 	CharacterName  string
 }
 
+type JoinFactionTicket struct {
+	UserID      uuid.UUID
+	FactionID   uuid.UUID
+	OwnerClient *shared.GameClient
+}
+
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities
 func (s *Faction) CheckStandings(factionID uuid.UUID) (float64, bool) {
 	// try to find faction relationship
