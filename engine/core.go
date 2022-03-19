@@ -673,6 +673,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			// put ship in home system
 			home.CurrentSystem.AddShip(es, true)
+			es.SystemID = home.SystemID
 
 			// link player's faction into ship
 			es.FactionID = u.CurrentFactionID
