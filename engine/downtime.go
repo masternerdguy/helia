@@ -149,6 +149,15 @@ func (d *DownTimeRunner) averagePlayerFactionStandings() error {
 			cv := *repAcc[k]
 			be.StandingValue = cv
 
+			// update hostility flags
+			if cv >= shared.CLEAR_OPENLY_HOSTILE {
+				// unset openly hostile flag
+				be.AreOpenlyHostile = false
+			} else if cv <= shared.BECOME_OPENLY_HOSTILE {
+				// set openly hostile flag
+				be.AreOpenlyHostile = true
+			}
+
 			// store in map
 			frs.Entries[k] = be
 		}
