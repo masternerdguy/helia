@@ -1289,7 +1289,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			}
 
 			// verify applicant is still in an NPC faction
-			if appShip.Faction == nil || appShip.Faction.IsNPC {
+			if appShip.Faction == nil || !appShip.Faction.IsNPC {
 				// send failure message to owner
 				go func(c *shared.GameClient) {
 					if c != nil {
