@@ -34,6 +34,7 @@ export class ReputationSheetWindow extends GDIWindow {
   private lastFactionId: string;
   private isFactionOwner: boolean;
   private lastApplicationView: number = 0;
+  private lastMemberView: number = 0;
   private wsSvc: WsService;
 
   // modal base
@@ -1055,6 +1056,12 @@ export class ReputationSheetWindow extends GDIWindow {
           // request current applicants
           this.refreshApplicants(now);
         }
+
+        // check if members view is stale
+        if (now - this.lastMemberView > 5000) {
+          // request current members
+          this.refreshMembers(now);
+        }
       } else {
         this.isFactionOwner = false;
       }
@@ -1074,7 +1081,7 @@ export class ReputationSheetWindow extends GDIWindow {
     b.sid = this.wsSvc.sid;
 
     this.wsSvc.sendMessage(MessageTypes.ViewMembers, b);
-    this.lastApplicationView = now;
+    this.lastMemberView = now;
   }
 
   private showNPCComponentsOnMyFactionTab() {
