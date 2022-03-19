@@ -183,6 +183,15 @@ export class ReputationSheetWindow extends GDIWindow {
         b.userId = application.applicant.id;
 
         this.wsSvc.sendMessage(MessageTypes.ApproveApplication, b);
+
+        // request refresh
+        const now = Date.now();
+        setTimeout(() => this.refreshApplicants(now), 0);
+
+        // reset lists
+        this.applicantActionList.setItems([]);
+        this.applicantList.setItems([]);
+        this.applicantInfoList.setItems([]);
       } else if (action == 'Reject') {
         // send request to reject application
         const b = new ClientRejectApplication();
@@ -191,6 +200,15 @@ export class ReputationSheetWindow extends GDIWindow {
         b.userId = application.applicant.id;
 
         this.wsSvc.sendMessage(MessageTypes.RejectApplication, b);
+
+        // request refresh
+        const now = Date.now();
+        setTimeout(() => this.refreshApplicants(now), 0);
+
+        // reset lists
+        this.applicantActionList.setItems([]);
+        this.applicantList.setItems([]);
+        this.applicantInfoList.setItems([]);
       }
     });
 
@@ -877,16 +895,20 @@ export class ReputationSheetWindow extends GDIWindow {
 
         if (now - this.lastApplicationView > 5000) {
           // request current applicants
-          const b = new ClientViewApplications();
-          b.sid = this.wsSvc.sid;
-
-          this.wsSvc.sendMessage(MessageTypes.ViewApplications, b);
-          this.lastApplicationView = now;
+          this.refreshApplicants(now);
         }
       } else {
         this.isFactionOwner = false;
       }
     }
+  }
+
+  private refreshApplicants(now: number) {
+    const b = new ClientViewApplications();
+    b.sid = this.wsSvc.sid;
+
+    this.wsSvc.sendMessage(MessageTypes.ViewApplications, b);
+    this.lastApplicationView = now;
   }
 
   private showNPCComponentsOnMyFactionTab() {
