@@ -1822,8 +1822,15 @@ func (s *SolarSystem) processClientEventQueues() {
 				continue
 			}
 
-			// todo
-			shared.TeeLog(fmt.Sprintf("not yet implemented %v", data))
+			// remove application on separate goroutine
+			go func(f *Faction, userID uuid.UUID) {
+				// obtain lock
+				f.Lock.Lock("solarsystem.processClientEventQueues::RejectApplication")
+				defer f.Lock.Unlock()
+
+				// remove entry
+				delete(f.Applications, userID.String())
+			}(sh.Faction, data.UserID)
 		}
 	}
 }
