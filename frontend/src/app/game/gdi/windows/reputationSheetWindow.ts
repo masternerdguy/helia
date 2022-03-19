@@ -734,8 +734,14 @@ export class ReputationSheetWindow extends GDIWindow {
             }
 
             if (rel.standingValue > 0) {
+              let openHostileFlag = '';
+
+              if (rel.openlyHostile) {
+                openHostileFlag = '⚔';
+              }
+
               rows.push(
-                infoKeyValueString(f.name, `[${rel.standingValue.toFixed(2)}] `)
+                infoKeyValueString(f.name, `[${rel.standingValue.toFixed(2)}] ` + openHostileFlag)
               );
             }
           }
@@ -781,10 +787,16 @@ export class ReputationSheetWindow extends GDIWindow {
       for (const f of r.faction.relationships) {
         if (f.factionId != r.faction.id) {
           if (f.standingValue > 0) {
+            let openHostileFlag = '';
+
+            if (f.openlyHostile) {
+              openHostileFlag = '⚔';
+            }
+
             const fc = GetFactionCacheEntry(f.factionId);
 
             rows.push(
-              infoKeyValueString(fc.name, `[${f.standingValue.toFixed(2)}] `)
+              infoKeyValueString(fc.name, `[${f.standingValue.toFixed(2)}] ` + openHostileFlag)
             );
           }
         }
@@ -796,10 +808,16 @@ export class ReputationSheetWindow extends GDIWindow {
       for (const f of r.faction.relationships) {
         if (f.factionId != r.faction.id) {
           if (f.standingValue < 0) {
+            let openHostileFlag = '';
+
+            if (f.openlyHostile) {
+              openHostileFlag = '⚔';
+            }
+
             const fc = GetFactionCacheEntry(f.factionId);
 
             rows.push(
-              infoKeyValueString(fc.name, `[${f.standingValue.toFixed(2)}] `)
+              infoKeyValueString(fc.name, `[${f.standingValue.toFixed(2)}] ` + openHostileFlag)
             );
           }
         }
