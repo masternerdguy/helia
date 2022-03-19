@@ -644,7 +644,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				})
 			}
 
-			af.Factions = append(af.Factions, models.ServerFactionBody{
+			ax := models.ServerFactionBody{
 				ID:            f.ID,
 				Name:          f.Name,
 				Description:   f.Description,
@@ -653,7 +653,13 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 				CanHoldSov:    f.CanHoldSov,
 				Ticker:        f.Ticker,
 				Relationships: rels,
-			})
+			}
+
+			if f.OwnerID != nil {
+				ax.OwnerID = f.OwnerID.String()
+			}
+
+			af.Factions = append(af.Factions, ax)
 
 			// fill neutral entry into rep sheet if missing
 			r := client.ReputationSheet.FactionEntries[f.ID.String()]

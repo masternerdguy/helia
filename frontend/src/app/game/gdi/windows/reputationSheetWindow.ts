@@ -19,10 +19,14 @@ import { ClientNewFaction } from '../../wsModels/bodies/newFaction';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { ClientLeaveFaction } from '../../wsModels/bodies/leaveFaction';
 import { ClientApplyToFaction } from '../../wsModels/bodies/applyToFaction';
+import { ServerApplicationsUpdate } from '../../wsModels/bodies/applicationsUpdate';
+import { ViewApplications as ClientViewApplications } from '../../wsModels/bodies/viewApplications';
 
 export class ReputationSheetWindow extends GDIWindow {
   private player: Player;
   private lastFactionId: string;
+  private isFactionOwner: boolean;
+  private lastApplicationView: number = 0;
   private wsSvc: WsService;
 
   // modal base
@@ -44,6 +48,7 @@ export class ReputationSheetWindow extends GDIWindow {
   // "my faction" tab (in player faction)
   private playerFactionLabel = new GDILabel();
   private leaveFactionButton = new GDIButton();
+  private viewApplicantsButton = new GDIButton();
 
   // new faction modal form
   private newFactionNameLabel = new GDILabel();
@@ -66,6 +71,11 @@ export class ReputationSheetWindow extends GDIWindow {
 
   pack() {
     this.setTitle('Reputation Sheet');
+
+    this.setOnShow(() => {
+      // defer refresh
+      setTimeout(() => (this.lastFactionId = ''), 10);
+    });
 
     // tab list
     this.tabs.setWidth(this.getWidth());
@@ -244,43 +254,6 @@ export class ReputationSheetWindow extends GDIWindow {
       // close new faction form
       this.hideNewFactionFormModal();
     });
-
-    // player faction indicator label
-    this.playerFactionLabel.setWidth(this.getWidth());
-    this.playerFactionLabel.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
-    );
-    this.playerFactionLabel.initialize();
-
-    this.playerFactionLabel.setText(
-      'You are currently a member of a player faction.'
-    );
-    this.playerFactionLabel.setFont(FontSize.normal);
-
-    this.playerFactionLabel.setX(0);
-    this.playerFactionLabel.setY(GDIStyle.tabHandleHeight);
-
-    // leave faction button
-    this.leaveFactionButton.setWidth(this.getWidth() * 0.5);
-    this.leaveFactionButton.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
-    );
-    this.leaveFactionButton.initialize();
-
-    this.leaveFactionButton.setText('Leave Faction');
-    this.leaveFactionButton.setFont(FontSize.normal);
-
-    this.leaveFactionButton.setX(this.getWidth() * 0.25);
-    this.leaveFactionButton.setY(100 + GDIStyle.tabHandleHeight);
-
-    this.leaveFactionButton.setOnClick(() => {
-      // send request to leave faction
-      const b = new ClientLeaveFaction();
-
-      b.sid = this.wsSvc.sid;
-
-      this.wsSvc.sendMessage(MessageTypes.LeaveFaction, b);
-    });
   }
 
   private packMyFactionTab() {
@@ -298,6 +271,21 @@ export class ReputationSheetWindow extends GDIWindow {
 
     this.npcFactionLabel.setX(0);
     this.npcFactionLabel.setY(GDIStyle.tabHandleHeight);
+
+    // player faction indicator label
+    this.playerFactionLabel.setWidth(this.getWidth());
+    this.playerFactionLabel.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
+    this.playerFactionLabel.initialize();
+
+    this.playerFactionLabel.setText(
+      'You are currently a member of a player faction.'
+    );
+    this.playerFactionLabel.setFont(FontSize.normal);
+
+    this.playerFactionLabel.setX(0);
+    this.playerFactionLabel.setY(GDIStyle.tabHandleHeight);
 
     // create faction button
     this.createFactionButton.setWidth(this.getWidth() * 0.5);
@@ -318,6 +306,54 @@ export class ReputationSheetWindow extends GDIWindow {
 
       // reset form inputs
       this.resetNewFactionFormInputs();
+    });
+
+    // leave faction button
+    this.leaveFactionButton.setWidth(this.getWidth() * 0.5);
+    this.leaveFactionButton.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
+
+    this.leaveFactionButton.initialize();
+
+    this.leaveFactionButton.setText('Leave Faction');
+    this.leaveFactionButton.setFont(FontSize.normal);
+
+    this.leaveFactionButton.setX(this.getWidth() * 0.25);
+    this.leaveFactionButton.setY(100 + GDIStyle.tabHandleHeight);
+
+    this.leaveFactionButton.setOnClick(() => {
+      // send request to leave faction
+      const b = new ClientLeaveFaction();
+
+      b.sid = this.wsSvc.sid;
+
+      this.wsSvc.sendMessage(MessageTypes.LeaveFaction, b);
+    });
+
+    // view applicants button
+    this.viewApplicantsButton.setWidth(this.getWidth() * 0.5);
+    this.viewApplicantsButton.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
+
+    this.viewApplicantsButton.initialize();
+
+    this.viewApplicantsButton.setText('View Applicants');
+    this.viewApplicantsButton.setFont(FontSize.normal);
+
+    this.viewApplicantsButton.setX(this.getWidth() * 0.25);
+    this.viewApplicantsButton.setY(
+      this.leaveFactionButton.getY() + this.leaveFactionButton.getHeight() + 10
+    );
+
+    this.viewApplicantsButton.setOnClick(() => {
+      // send request to leave faction
+      const b = new ClientLeaveFaction();
+
+      b.sid = this.wsSvc.sid;
+
+      this.wsSvc.sendMessage(MessageTypes.ViewApplications, b);
     });
   }
 
@@ -697,6 +733,26 @@ export class ReputationSheetWindow extends GDIWindow {
       this.factionList.setItems(factionRows);
       this.factionList.setScroll(sp);
       this.factionList.setSelectedIndex(si);
+
+      // check if player is faction owner
+      if (this.player.uid == this.player.getFaction().ownerId) {
+        // set flag
+        this.isFactionOwner = true;
+
+        // check if applications view is stale
+        const now = Date.now();
+
+        if (now - this.lastApplicationView > 5000) {
+          // request current applicants
+          const b = new ClientViewApplications();
+          b.sid = this.wsSvc.sid;
+
+          this.wsSvc.sendMessage(MessageTypes.ViewApplications, b);
+          this.lastApplicationView = now;
+        }
+      } else {
+        this.isFactionOwner = false;
+      }
     }
   }
 
@@ -713,11 +769,16 @@ export class ReputationSheetWindow extends GDIWindow {
   private showPlayerComponentsOnMyFactionTab() {
     this.tabs.addComponent(this.playerFactionLabel, 'My Faction');
     this.tabs.addComponent(this.leaveFactionButton, 'My Faction');
+
+    if (this.isFactionOwner) {
+      this.tabs.addComponent(this.viewApplicantsButton, 'My Faction');
+    }
   }
 
   private hidePlayerComponentsOnMyFactionTab() {
     this.tabs.removeComponent(this.playerFactionLabel, 'My Faction');
     this.tabs.removeComponent(this.leaveFactionButton, 'My Faction');
+    this.tabs.removeComponent(this.viewApplicantsButton, 'My Faction');
   }
 
   private showNewFactionFormModal() {
@@ -760,6 +821,10 @@ export class ReputationSheetWindow extends GDIWindow {
     this.newFactionNameInput.setText('');
     this.newFactionDescriptionInput.setText('');
     this.newFactionTickerInput.setText('');
+  }
+
+  syncApplications(msg: ServerApplicationsUpdate) {
+    console.log(msg);
   }
 }
 

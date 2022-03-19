@@ -42,6 +42,7 @@ type LeaveFactionTicket struct {
 type FactionApplicationTicket struct {
 	UserID         uuid.UUID
 	CurrentFaction *Faction
+	CharacterName  string
 }
 
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities

@@ -1,3 +1,3 @@
 export class ViewApplications {
-    sid: string;
+  sid: string;
 }

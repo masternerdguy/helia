@@ -1686,7 +1686,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					continue
 				}
 
-				// add application
+				// add application on separate goroutine
 				cf := sh.Faction
 
 				go func(f *Faction, cf *Faction, c *shared.GameClient) {
@@ -1698,13 +1698,14 @@ func (s *SolarSystem) processClientEventQueues() {
 					f.Applications[c.UID.String()] = FactionApplicationTicket{
 						UserID:         *c.UID,
 						CurrentFaction: cf,
+						CharacterName:  sh.CharacterName,
 					}
 
 					// notify client
 					c.WriteInfoMessage(fmt.Sprintf("Application to join %v submitted!", f.Name))
 				}(f, cf, c)
 			}
-		} else if evt.Type == msgRegistry.ApplyToFaction {
+		} else if evt.Type == msgRegistry.ViewApplications {
 			// extract data
 			//data := evt.Body.(models.ClientViewApplicationsBody)
 
@@ -1732,8 +1733,37 @@ func (s *SolarSystem) processClientEventQueues() {
 				continue
 			}
 
-			// todo
-			shared.TeeLog(fmt.Sprint("todo: view applications"))
+			// build and send update on separate goroutine
+			go func(c *shared.GameClient, f *Faction) {
+				// obtain lock
+				f.Lock.Lock("solarsystem.processClientEventQueues::ApplyToFaction")
+				defer f.Lock.Unlock()
+
+				// build update
+				um := models.ServerApplicationsUpdateBody{
+					Applications: make([]models.ServerApplicationEntry, 0),
+				}
+
+				for _, v := range f.Applications {
+					um.Applications = append(um.Applications, models.ServerApplicationEntry{
+						UserID:        v.UserID,
+						CharacterName: v.CharacterName,
+						FactionName:   v.CurrentFaction.Name,
+						FactionTicker: v.CurrentFaction.Ticker,
+					})
+				}
+
+				// serialize update
+				b, _ := json.Marshal(&um)
+
+				msg := models.GameMessage{
+					MessageType: msgRegistry.ApplicationsUpdate,
+					MessageBody: string(b),
+				}
+
+				// write update to client
+				c.WriteMessage(&msg)
+			}(c, sh.Faction)
 		}
 	}
 }

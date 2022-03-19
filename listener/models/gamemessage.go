@@ -640,6 +640,7 @@ type ServerFactionBody struct {
 	CanHoldSov    bool                        `json:"canHoldSov"`
 	Relationships []ServerFactionRelationship `json:"relationships"`
 	Ticker        string                      `json:"ticker"`
+	OwnerID       string                      `json:"ownerId"`
 }
 
 // Structure representing a relationship between two factions for the client

@@ -6,6 +6,7 @@ export class WSFaction {
   isJoinable: boolean;
   canHoldSov: boolean;
   ticker: string;
+  ownerId: string;
   relationships: WSFactionRelationship[];
 }
 

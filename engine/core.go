@@ -1118,7 +1118,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 				})
 			}
 
-			af.Factions = append(af.Factions, models.ServerFactionBody{
+			ax := models.ServerFactionBody{
 				ID:            f.ID,
 				Name:          f.Name,
 				Description:   f.Description,
@@ -1127,7 +1127,13 @@ func handleEscalations(sol *universe.SolarSystem) {
 				CanHoldSov:    f.CanHoldSov,
 				Ticker:        f.Ticker,
 				Relationships: rels,
-			})
+			}
+
+			if f.OwnerID != nil {
+				ax.OwnerID = f.OwnerID.String()
+			}
+
+			af.Factions = append(af.Factions, ax)
 
 			// package faction data
 			b, _ := json.Marshal(&af)

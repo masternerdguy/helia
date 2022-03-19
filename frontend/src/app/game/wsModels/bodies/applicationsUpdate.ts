@@ -1,5 +1,5 @@
-import { WSApplication } from "../entities/wsApplication";
+import { WSApplication } from '../entities/wsApplication';
 
-export class ApplicationsUpdate {
-    applications: WSApplication[];
+export class ServerApplicationsUpdate {
+  applications: WSApplication[];
 }
