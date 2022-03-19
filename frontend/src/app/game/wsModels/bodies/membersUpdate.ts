@@ -1,5 +1,5 @@
-import { WSMember } from "../entities/wsMember";
+import { WSMember } from '../entities/wsMember';
 
 export class ServerMembersUpdate {
-    members: WSMember[];
+  members: WSMember[];
 }

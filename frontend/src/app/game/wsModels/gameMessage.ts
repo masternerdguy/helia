@@ -62,7 +62,7 @@ export enum MessageTypes {
   ApplicationsUpdate = 53,
   ApproveApplication = 54,
   RejectApplication = 55,
-  ViewMembers =            56,
-  MembersUpdate =          57,
+  ViewMembers = 56,
+  MembersUpdate = 57,
   KickMember = 58,
 }

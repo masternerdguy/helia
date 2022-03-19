@@ -75,11 +75,11 @@ export class ReputationSheetWindow extends GDIWindow {
   private applicantInfoList = new GDIList();
   private viewApplicantCloseButton = new GDIButton();
 
-    // "view members" modal form
-    private memberList = new GDIList();
-    private memberActionList = new GDIList();
-    private memberInfoList = new GDIList();
-    private viewMembersCloseButton = new GDIButton();
+  // "view members" modal form
+  private memberList = new GDIList();
+  private memberActionList = new GDIList();
+  private memberInfoList = new GDIList();
+  private viewMembersCloseButton = new GDIButton();
 
   initialize() {
     // set dimensions
@@ -185,8 +185,7 @@ export class ReputationSheetWindow extends GDIWindow {
     this.memberActionList.setFont(FontSize.normal);
     this.memberActionList.setOnClick((item) => {
       const action = item.listString();
-      const member =
-        this.memberList.getSelectedItem() as MemberInfoRow;
+      const member = this.memberList.getSelectedItem() as MemberInfoRow;
 
       if (action == 'Kick') {
         // send request to kick member
@@ -592,26 +591,28 @@ export class ReputationSheetWindow extends GDIWindow {
       this.showViewApplicantsModal();
     });
 
-        // view members button
-        this.viewMembersButton.setWidth(this.getWidth() * 0.5);
-        this.viewMembersButton.setHeight(
-          Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
-        );
-    
-        this.viewMembersButton.initialize();
-    
-        this.viewMembersButton.setText('View Members');
-        this.viewMembersButton.setFont(FontSize.normal);
-    
-        this.viewMembersButton.setX(this.getWidth() * 0.25);
-        this.viewMembersButton.setY(
-          this.viewApplicantsButton.getY() + this.viewApplicantsButton.getHeight() + 10
-        );
-    
-        this.viewMembersButton.setOnClick(() => {
-          // show view applicants modal
-          this.showViewMembersModal();
-        });
+    // view members button
+    this.viewMembersButton.setWidth(this.getWidth() * 0.5);
+    this.viewMembersButton.setHeight(
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+    );
+
+    this.viewMembersButton.initialize();
+
+    this.viewMembersButton.setText('View Members');
+    this.viewMembersButton.setFont(FontSize.normal);
+
+    this.viewMembersButton.setX(this.getWidth() * 0.25);
+    this.viewMembersButton.setY(
+      this.viewApplicantsButton.getY() +
+        this.viewApplicantsButton.getHeight() +
+        10
+    );
+
+    this.viewMembersButton.setOnClick(() => {
+      // show view applicants modal
+      this.showViewMembersModal();
+    });
   }
 
   private packReputationTab() {
@@ -852,7 +853,6 @@ export class ReputationSheetWindow extends GDIWindow {
       listString: () => s,
     };
   }
-
 
   private buildApplicantDetails(r: ApplicantInfoRow): ApplicantInfoViewRow[] {
     const rows: string[] = [];
