@@ -628,16 +628,15 @@ func handleEscalations(sol *universe.SolarSystem) {
 			// find their home station
 			home := sol.Universe.FindStation(start.HomeStationID, &sol.ID)
 
-			// make sure correct systemid is stored in-memory
-			if !uf.IsNPC && uf.HomeStationID != nil {
-				start.SystemID = home.SystemID
-			}
-
 			if home == nil {
 				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - no home station!", rs.UID))
 				return
 			}
 
+			// make sure correct systemid is stored in-memory
+			if !uf.IsNPC && uf.HomeStationID != nil {
+				start.SystemID = home.SystemID
+			}
 			// create their noob ship docked in that station
 			u, err := CreateNoobShipForPlayer(start, *rs.UID)
 
