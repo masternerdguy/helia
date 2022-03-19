@@ -62,6 +62,8 @@ type MessageRegistry struct {
 	CreateNewFaction       int
 	LeaveFaction           int
 	ApplyToFaction         int
+	ViewApplications       int
+	ApplicationsUpdate     int
 }
 
 // Registry of target types
@@ -132,6 +134,8 @@ func NewMessageRegistry() *MessageRegistry {
 		CreateNewFaction:       49,
 		LeaveFaction:           50,
 		ApplyToFaction:         51,
+		ViewApplications:       52,
+		ApplicationsUpdate:     53,
 	}
 }
 
@@ -820,4 +824,22 @@ type ClientLeaveFactionBody struct {
 type ClientApplyToFactionBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	FactionID uuid.UUID `json:"factionId"`
+}
+
+// Body containing a request to view applications to the player's faction
+type ClientViewApplicationsBody struct {
+	SessionID uuid.UUID `json:"sid"`
+}
+
+// Body containing current applicants to the player's faction
+type ServerApplicationsUpdateBody struct {
+	Applications []ServerApplicationEntry `json:"applications"`
+}
+
+// Structure representing an application to a player's faction
+type ServerApplicationEntry struct {
+	UserID        uuid.UUID `json:"id"`
+	CharacterName string    `json:"name"`
+	FactionName   string    `json:"faction"`
+	FactionTicker string    `json:"ticker"`
 }

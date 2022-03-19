@@ -58,4 +58,6 @@ export enum MessageTypes {
   CreateNewFaction = 49,
   LeaveFaction = 50,
   ApplyToFaction = 51,
+  ViewApplications =       52,
+  ApplicationsUpdate =     53,
 }

@@ -19,6 +19,9 @@ type Faction struct {
 	Ticker          string
 	OwnerID         *uuid.UUID
 	HomeStationID   *uuid.UUID
+	// in-memory only
+	Lock         shared.LabeledMutex
+	Applications map[string]FactionApplicationTicket
 }
 
 // Structure representing a partially validated request to create a new faction and join the creator into it
@@ -33,6 +36,12 @@ type NewFactionTicket struct {
 // Structure representing a validated request to leave a player faction and rejoin the starter faction
 type LeaveFactionTicket struct {
 	Client *shared.GameClient
+}
+
+// Structure representing a validated request to join a player faction
+type FactionApplicationTicket struct {
+	UserID         uuid.UUID
+	CurrentFaction *Faction
 }
 
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities

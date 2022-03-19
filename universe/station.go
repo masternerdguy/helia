@@ -27,7 +27,7 @@ type Station struct {
 	CurrentSystem          *SolarSystem
 	OpenSellOrders         map[string]*SellOrder
 	Processes              map[string]*StationProcess
-	Faction                Faction
+	Faction                *Faction
 	lastPeriodicUpdateTime time.Time
 }
 

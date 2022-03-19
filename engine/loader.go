@@ -321,7 +321,7 @@ func LoadUniverse() (*universe.Universe, error) {
 					// link solar system into station
 					CurrentSystem: &s,
 					Processes:     processes,
-					Faction:       *u.Factions[currStation.FactionID.String()],
+					Faction:       u.Factions[currStation.FactionID.String()],
 				}
 
 				// initialize station
@@ -933,7 +933,9 @@ func ContainerFromSQL(value *sql.Container) *universe.Container {
 // Converts a Faction from the SQL type to the engine type
 func FactionFromSQL(value *sql.Faction) *universe.Faction {
 	// set up empty faction
-	faction := universe.Faction{}
+	faction := universe.Faction{
+		Applications: make(map[string]universe.FactionApplicationTicket),
+	}
 
 	// null check
 	if value == nil {
@@ -977,6 +979,12 @@ func FactionFromSQL(value *sql.Faction) *universe.Faction {
 	}
 
 	faction.ReputationSheet.WorldPercent = value.ReputationSheet.WorldPercent
+
+	// create mutex
+	faction.Lock = shared.LabeledMutex{
+		Structure: "Faction",
+		UID:       fmt.Sprintf("%v :: %v :: %v", value.ID, time.Now(), rand.Float64()),
+	}
 
 	// return filled faction
 	return &faction
@@ -1524,8 +1532,7 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 	es.ReputationSheet = repSheet
 
 	// inject faction
-	faction := *u.Factions[owner.CurrentFactionID.String()]
-	es.Faction = &faction
+	es.Faction = u.Factions[owner.CurrentFactionID.String()]
 
 	// get pointer to ship
 	sp := &es

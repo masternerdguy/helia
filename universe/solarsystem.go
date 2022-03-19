@@ -1645,8 +1645,12 @@ func (s *SolarSystem) processClientEventQueues() {
 				// extract data
 				data := evt.Body.(models.ClientApplyToFactionBody)
 
-				// null check
+				// null checks
 				if sh.Faction == nil {
+					continue
+				}
+
+				if c.UID == nil {
 					continue
 				}
 
@@ -1682,9 +1686,54 @@ func (s *SolarSystem) processClientEventQueues() {
 					continue
 				}
 
-				// todo
-				shared.TeeLog(fmt.Sprintf("todo: apply to join faction %v", data))
+				// add application
+				cf := sh.Faction
+
+				go func(f *Faction, cf *Faction, c *shared.GameClient) {
+					// obtain lock
+					f.Lock.Lock("solarsystem.processClientEventQueues::ApplyToFaction")
+					defer f.Lock.Unlock()
+
+					// add ticket
+					f.Applications[c.UID.String()] = FactionApplicationTicket{
+						UserID:         *c.UID,
+						CurrentFaction: cf,
+					}
+
+					// notify client
+					c.WriteInfoMessage(fmt.Sprintf("Application to join %v submitted!", f.Name))
+				}(f, cf, c)
 			}
+		} else if evt.Type == models.NewMessageRegistry().ApplyToFaction {
+			// extract data
+			//data := evt.Body.(models.ClientViewApplicationsBody)
+
+			// null check
+			if sh.Faction == nil {
+				continue
+			}
+
+			// verify faction has an owner
+			if sh.Faction.OwnerID == nil {
+				continue
+			}
+
+			// verify faction is player controlled
+			if sh.Faction.IsNPC {
+				continue
+			}
+
+			// verify client is faction owner
+			oID := *sh.Faction.OwnerID
+			cID := *c.UID
+
+			if oID != cID {
+				c.WriteErrorMessage("you are not the owner of this faction")
+				continue
+			}
+
+			// todo
+			shared.TeeLog(fmt.Sprint("todo: view applications"))
 		}
 	}
 }
