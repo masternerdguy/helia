@@ -1764,6 +1764,66 @@ func (s *SolarSystem) processClientEventQueues() {
 				// write update to client
 				c.WriteMessage(&msg)
 			}(c, sh.Faction)
+		} else if evt.Type == msgRegistry.ApproveApplication {
+			// extract data
+			data := evt.Body.(models.ClientApproveApplicationBody)
+
+			// null check
+			if sh.Faction == nil {
+				continue
+			}
+
+			// verify faction has an owner
+			if sh.Faction.OwnerID == nil {
+				continue
+			}
+
+			// verify faction is player controlled
+			if sh.Faction.IsNPC {
+				continue
+			}
+
+			// verify client is faction owner
+			oID := *sh.Faction.OwnerID
+			cID := *c.UID
+
+			if oID != cID {
+				c.WriteErrorMessage("you are not the owner of this faction")
+				continue
+			}
+
+			// todo
+			shared.TeeLog(fmt.Sprintf("not yet implemented %v", data))
+		} else if evt.Type == msgRegistry.RejectApplication {
+			// extract data
+			data := evt.Body.(models.ClientRejectApplicationBody)
+
+			// null check
+			if sh.Faction == nil {
+				continue
+			}
+
+			// verify faction has an owner
+			if sh.Faction.OwnerID == nil {
+				continue
+			}
+
+			// verify faction is player controlled
+			if sh.Faction.IsNPC {
+				continue
+			}
+
+			// verify client is faction owner
+			oID := *sh.Faction.OwnerID
+			cID := *c.UID
+
+			if oID != cID {
+				c.WriteErrorMessage("you are not the owner of this faction")
+				continue
+			}
+
+			// todo
+			shared.TeeLog(fmt.Sprintf("not yet implemented %v", data))
 		}
 	}
 }

@@ -22,6 +22,8 @@ import { ClientApplyToFaction } from '../../wsModels/bodies/applyToFaction';
 import { ServerApplicationsUpdate } from '../../wsModels/bodies/applicationsUpdate';
 import { ViewApplications as ClientViewApplications } from '../../wsModels/bodies/viewApplications';
 import { WSApplication } from '../../wsModels/entities/wsApplication';
+import { ClientApproveApplication } from '../../wsModels/bodies/approveApplication';
+import { ClientRejectApplication } from '../../wsModels/bodies/rejectApplication';
 
 export class ReputationSheetWindow extends GDIWindow {
   private player: Player;
@@ -170,8 +172,26 @@ export class ReputationSheetWindow extends GDIWindow {
     this.applicantActionList.setFont(FontSize.normal);
     this.applicantActionList.setOnClick((item) => {
       const action = item.listString();
+      const application =
+        this.applicantList.getSelectedItem() as ApplicantInfoRow;
 
-      // todo
+      if (action == 'Approve') {
+        // send request to approve application
+        const b = new ClientApproveApplication();
+
+        b.sid = this.wsSvc.sid;
+        b.userId = application.applicant.id;
+
+        this.wsSvc.sendMessage(MessageTypes.ApproveApplication, b);
+      } else if (action == 'Reject') {
+        // send request to reject application
+        const b = new ClientRejectApplication();
+
+        b.sid = this.wsSvc.sid;
+        b.userId = application.applicant.id;
+
+        this.wsSvc.sendMessage(MessageTypes.RejectApplication, b);
+      }
     });
 
     // info list

@@ -60,4 +60,6 @@ export enum MessageTypes {
   ApplyToFaction = 51,
   ViewApplications = 52,
   ApplicationsUpdate = 53,
+  ApproveApplication = 54,
+  RejectApplication = 55,
 }
