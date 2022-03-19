@@ -148,6 +148,47 @@ func (s FactionService) GetAllFactions() ([]Faction, error) {
 	return factions, err
 }
 
+// Retrieves all player factions from the database
+func (s FactionService) GetPlayerFactions() ([]Faction, error) {
+	factions := make([]Faction, 0)
+
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// load factions
+	sql := `
+				SELECT id, name, description, isnpc, isjoinable, canholdsov, meta, ticker, reputationsheet,
+				       ownerid, homestationid
+				FROM public.Factions
+				WHERE isnpc = 'f' AND id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a'
+			`
+
+	rows, err := db.Query(sql)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		s := Faction{}
+
+		// scan into faction structure
+		rows.Scan(&s.ID, &s.Name, &s.Description, &s.IsNPC, &s.IsJoinable, &s.CanHoldSov,
+			&s.Meta, &s.Ticker, &s.ReputationSheet, &s.OwnerID, &s.HomeStationID)
+
+		// append to ship slice
+		factions = append(factions, s)
+	}
+
+	return factions, err
+}
+
 // Creates a new faction
 func (s FactionService) NewFaction(e Faction) (*Faction, error) {
 	// get db handle
