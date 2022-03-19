@@ -45,8 +45,15 @@ type FactionApplicationTicket struct {
 	CharacterName  string
 }
 
+// Structure representing a partially validated request to join a player into a player faction
 type JoinFactionTicket struct {
 	UserID      uuid.UUID
+	FactionID   uuid.UUID
+	OwnerClient *shared.GameClient
+}
+
+// Structure representing a validated request to view the current member list
+type ViewMembersTicket struct {
 	FactionID   uuid.UUID
 	OwnerClient *shared.GameClient
 }

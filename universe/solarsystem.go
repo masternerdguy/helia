@@ -58,6 +58,7 @@ type SolarSystem struct {
 	NewFactions          map[string]*NewFactionTicket      // partially approved requests to create a new faction and automatically join it
 	LeaveFactions        map[string]*LeaveFactionTicket    // approved requests to leave a faction and rejoin the starter faction
 	JoinFactions         map[string]*JoinFactionTicket     // partially approved requests to join a player into a player faction
+	ViewMembers          map[string]*ViewMembersTicket     // approved requests to view player faction member list
 }
 
 // Initializes internal aspects of SolarSystem
@@ -96,6 +97,7 @@ func (s *SolarSystem) Initialize() {
 	s.NewFactions = make(map[string]*NewFactionTicket)
 	s.LeaveFactions = make(map[string]*LeaveFactionTicket)
 	s.JoinFactions = make(map[string]*JoinFactionTicket)
+	s.ViewMembers = make(map[string]*ViewMembersTicket)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -1847,6 +1849,39 @@ func (s *SolarSystem) processClientEventQueues() {
 				// remove entry
 				delete(f.Applications, userID.String())
 			}(sh.Faction, data.UserID)
+		} else if evt.Type == msgRegistry.ViewMembers {
+			// extract data
+			//data := evt.Body.(models.ClientViewMembersBody)
+
+			// null check
+			if sh.Faction == nil {
+				continue
+			}
+
+			// verify faction has an owner
+			if sh.Faction.OwnerID == nil {
+				continue
+			}
+
+			// verify faction is player controlled
+			if sh.Faction.IsNPC {
+				continue
+			}
+
+			// verify client is faction owner
+			oID := *sh.Faction.OwnerID
+			cID := *c.UID
+
+			if oID != cID {
+				c.WriteErrorMessage("you are not the owner of this faction")
+				continue
+			}
+
+			// escalate to core
+			s.ViewMembers[oID.String()] = &ViewMembersTicket{
+				FactionID:   sh.FactionID,
+				OwnerClient: c,
+			}
 		}
 	}
 }

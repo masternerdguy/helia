@@ -57,6 +57,7 @@ import { SchematicRunsWindow } from './gdi/windows/schematicRunsWindow';
 import { ServerSchematicRunsUpdate } from './wsModels/bodies/schematicRunsUpdate';
 import { Wreck } from './engineModels/wreck';
 import { ServerApplicationsUpdate } from './wsModels/bodies/applicationsUpdate';
+import { ServerMembersUpdate } from './wsModels/bodies/membersUpdate';
 
 class EngineSack {
   constructor() {}
@@ -347,6 +348,8 @@ export function clientStart(
       handleSchematicRunsUpdate(d);
     } else if (d.type == MessageTypes.ApplicationsUpdate) {
       handleApplicationsUpdate(d);
+    } else if (d.type == MessageTypes.MembersUpdate) {
+      handleMembersUpdate(d);
     }
   });
 }
@@ -1065,6 +1068,19 @@ function handleApplicationsUpdate(d: GameMessage) {
 
   // update reputation sheet window
   engineSack.reputationSheetWindow.syncApplications(msg);
+}
+
+function handleMembersUpdate(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerMembersUpdate;
+
+  // fix missing lists
+  if (!msg.members) {
+    msg.members = [];
+  }
+
+  // update reputation sheet window
+  engineSack.reputationSheetWindow.syncMembers(msg);
 }
 
 // clears the screen

@@ -1320,6 +1320,55 @@ func handleEscalations(sol *universe.SolarSystem) {
 			}(mi.OwnerClient)
 		}(mi, sol)
 	}
+
+	// iterate over clients in need of a faction member list
+	for id := range sol.ViewMembers {
+		// capture reference and remove from map
+		rs := sol.ViewMembers[id]
+		delete(sol.ViewMembers, id)
+
+		// handle escalation on another goroutine
+		go func(rs *universe.ViewMembersTicket) {
+			// null check
+			if rs.OwnerClient == nil {
+				return
+			}
+
+			// get members
+			members, err := userSvc.GetUsersByFactionID(rs.FactionID)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("Unable to retrieve faction member users: %v, %v", rs, err))
+				return
+			}
+
+			// copy to update message
+			msg := models.ServerMembersUpdateBody{
+				Members: make([]models.ServerMemberEntry, 0),
+			}
+
+			for _, e := range members {
+				msg.Members = append(msg.Members, models.ServerMemberEntry{
+					UserID:        e.ID,
+					CharacterName: e.CharacterName,
+				})
+			}
+
+			// get message registry
+			msgRegistry := models.NewMessageRegistry()
+
+			// serialize message
+			b, _ := json.Marshal(&msg)
+
+			sct := models.GameMessage{
+				MessageType: msgRegistry.MembersUpdate,
+				MessageBody: string(b),
+			}
+
+			// write message to client
+			rs.OwnerClient.WriteMessage(&sct)
+		}(rs)
+	}
 }
 
 func notifyClientOfWorkshopFee(c *shared.GameClient) {

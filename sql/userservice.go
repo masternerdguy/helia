@@ -378,3 +378,43 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 		return nil, err
 	}
 }
+
+// Retrieves all users in a given faction from the database
+func (s UserService) GetUsersByFactionID(factionID uuid.UUID) ([]User, error) {
+	users := make([]User, 0)
+
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// load users
+	sql := `SELECT id, charactername, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid, reputationsheet,
+				   isnpc, behaviourmode, emailaddress, experiencesheet
+			FROM users
+			WHERE current_factionid=$1`
+
+	rows, err := db.Query(sql, factionID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		s := User{}
+
+		// scan into user structure
+		rows.Scan(&s.ID, &s.CharacterName, &s.Hashpass, &s.Registered, &s.Banned, &s.CurrentShipID,
+			&s.EscrowContainerID, &s.CurrentFactionID, &s.ReputationSheet, &s.IsNPC, &s.BehaviourMode, &s.EmailAddress,
+			&s.ExperienceSheet)
+
+		// append to user slice
+		users = append(users, s)
+	}
+
+	return users, err
+}
