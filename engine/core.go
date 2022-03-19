@@ -1369,6 +1369,124 @@ func handleEscalations(sol *universe.SolarSystem) {
 			rs.OwnerClient.WriteMessage(&sct)
 		}(rs)
 	}
+
+	// iterate over kick member requests
+	for id := range sol.KickMembers {
+		// capture reference and remove from map
+		mi := sol.KickMembers[id]
+		delete(sol.KickMembers, id)
+
+		// handle escalation on another goroutine
+		go func(mi *universe.KickMemberTicket, sol *universe.SolarSystem) {
+			// null check
+			if mi.OwnerClient == nil {
+				shared.TeeLog(fmt.Sprintf("No owner client attached to kick request: %v", mi))
+				return
+			}
+
+			// try to find the source faction
+			kickingFaction := sol.Universe.Factions[mi.FactionID.String()]
+
+			if kickingFaction == nil {
+				shared.TeeLog(fmt.Sprintf("Unable to find kicking faction: %v", mi))
+				return
+			}
+
+			// try to find the kickee's game client
+			kickeeClient := sol.Universe.FindCurrentPlayerClient(mi.UserID, nil)
+
+			if kickeeClient != nil {
+				// obtain lock on kickee's game client
+				kickeeClient.Lock.Lock("core.handleEscalations::KickMembers")
+				defer kickeeClient.Lock.Unlock()
+			}
+
+			// try to find kickee's ship
+			kickeeShip := sol.Universe.FindCurrentPlayerShip(mi.UserID, nil)
+
+			// null check
+			if kickeeShip == nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to kick member %v - no ship!", mi))
+				return
+			}
+
+			// obtain lock on kickee's ship
+			kickeeShip.Lock.Lock("core.handleEscalations::KickMembers")
+			defer kickeeShip.Lock.Unlock()
+
+			// verify kickee is in the kicker's faction
+			if kickeeShip.Faction == nil || kickeeShip.Faction.IsNPC || kickeeShip.FactionID != mi.FactionID {
+				// send failure message to owner
+				go func(c *shared.GameClient) {
+					if c != nil {
+						c.WriteErrorMessage("unable to kick - not a member of your faction")
+					}
+				}(mi.OwnerClient)
+
+				// exit
+				return
+			}
+
+			// docked check
+			if kickeeShip.DockedAtStation == nil || kickeeShip.DockedAtStationID == nil {
+				// send failure message to owner
+				go func(c *shared.GameClient) {
+					if c != nil {
+						c.WriteErrorMessage("unable to kick - member is not currently docked")
+					}
+				}(mi.OwnerClient)
+
+				// exit
+				return
+			}
+
+			// find kickee's starting conditions
+			kickee, err := userSvc.GetUserByID(mi.UserID)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to kick member %v - no associated user!", mi.UserID))
+				return
+			}
+
+			kickeeStart, err := startSvc.GetStartByID(kickee.StartID)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to kick member %v - no associated start!", mi.UserID))
+				return
+			}
+
+			// put kickee in their starter faction
+			sfID := kickeeStart.FactionID
+			err = userSvc.SetCurrentFactionID(mi.UserID, &sfID)
+
+			// error check
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("Unable to kick member to starter faction %v: %v", mi, err))
+				return
+			}
+
+			// get faction from cache
+			uf := sol.Universe.Factions[sfID.String()]
+
+			// update kickee's ship with new faction
+			kickeeShip.Faction = uf
+			kickeeShip.FactionID = uf.ID
+
+			// send welcome message to kickee
+			go func(c *shared.GameClient) {
+				if c != nil {
+					c.WriteInfoMessage(fmt.Sprintf("welcome to %v !", uf.Name))
+				}
+			}(kickeeClient)
+
+			// send confirmation message to owner
+			go func(c *shared.GameClient) {
+				if c != nil {
+					c.WriteInfoMessage("kick success!")
+				}
+			}(mi.OwnerClient)
+		}(mi, sol)
+	}
 }
 
 func notifyClientOfWorkshopFee(c *shared.GameClient) {

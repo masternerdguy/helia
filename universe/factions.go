@@ -58,6 +58,13 @@ type ViewMembersTicket struct {
 	OwnerClient *shared.GameClient
 }
 
+// Structure representing a partially validated request to kick a member from a player faction
+type KickMemberTicket struct {
+	UserID      uuid.UUID
+	FactionID   uuid.UUID
+	OwnerClient *shared.GameClient
+}
+
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities
 func (s *Faction) CheckStandings(factionID uuid.UUID) (float64, bool) {
 	// try to find faction relationship

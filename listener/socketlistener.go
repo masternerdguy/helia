@@ -1731,7 +1731,7 @@ func (l *SocketListener) handleClientViewMembers(client *shared.GameClient, body
 
 		// push event onto player's ship queue
 		data := *body
-		client.PushShipEvent(data, msgRegistry.ViewMembers, true)
+		client.PushShipEvent(data, msgRegistry.ViewMembers, false)
 	}
 }
 

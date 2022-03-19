@@ -59,6 +59,7 @@ type SolarSystem struct {
 	LeaveFactions        map[string]*LeaveFactionTicket    // approved requests to leave a faction and rejoin the starter faction
 	JoinFactions         map[string]*JoinFactionTicket     // partially approved requests to join a player into a player faction
 	ViewMembers          map[string]*ViewMembersTicket     // approved requests to view player faction member list
+	KickMembers          map[string]*KickMemberTicket      // partially approved requests to kick a member from a player faction
 }
 
 // Initializes internal aspects of SolarSystem
@@ -98,6 +99,7 @@ func (s *SolarSystem) Initialize() {
 	s.LeaveFactions = make(map[string]*LeaveFactionTicket)
 	s.JoinFactions = make(map[string]*JoinFactionTicket)
 	s.ViewMembers = make(map[string]*ViewMembersTicket)
+	s.KickMembers = make(map[string]*KickMemberTicket)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -1879,6 +1881,46 @@ func (s *SolarSystem) processClientEventQueues() {
 
 			// escalate to core
 			s.ViewMembers[oID.String()] = &ViewMembersTicket{
+				FactionID:   sh.FactionID,
+				OwnerClient: c,
+			}
+		} else if evt.Type == msgRegistry.KickMember {
+			// extract data
+			data := evt.Body.(models.ClientKickMemberBody)
+
+			// null check
+			if sh.Faction == nil {
+				continue
+			}
+
+			// verify faction has an owner
+			if sh.Faction.OwnerID == nil {
+				continue
+			}
+
+			// verify faction is player controlled
+			if sh.Faction.IsNPC {
+				continue
+			}
+
+			// verify client is faction owner
+			oID := *sh.Faction.OwnerID
+			cID := *c.UID
+
+			if oID != cID {
+				c.WriteErrorMessage("you are not the owner of this faction")
+				continue
+			}
+
+			// verify client is not the one being kicked
+			if data.UserID == cID {
+				c.WriteErrorMessage("you can't kick yourself")
+				continue
+			}
+
+			// escalate to core for final validation and handling
+			s.KickMembers[cID.String()] = &KickMemberTicket{
+				UserID:      data.UserID,
 				FactionID:   sh.FactionID,
 				OwnerClient: c,
 			}
