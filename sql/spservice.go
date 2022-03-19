@@ -1,9 +1,5 @@
 package sql
 
-import (
-	"github.com/google/uuid"
-)
-
 // Facility for for calling stored procedures in the database
 type SPService struct{}
 
@@ -13,7 +9,7 @@ func GetSPService() SPService {
 }
 
 // Deletes logs, sessions, dead ships, and untracked items/containers from the database
-func (s SPService) Cleanup(userid uuid.UUID) error {
+func (s SPService) Cleanup() error {
 	// get db handle
 	db, err := connect()
 
@@ -24,7 +20,7 @@ func (s SPService) Cleanup(userid uuid.UUID) error {
 	// run cleanup procedure
 	sql := `call public.sp_cleanup();`
 
-	q, err := db.Query(sql, userid)
+	q, err := db.Query(sql)
 
 	if err != nil {
 		return err

@@ -31,7 +31,14 @@ func main() {
 	shared.TeeLog("Initializing RNG...")
 	rand.Seed(time.Now().UnixNano())
 
-	//
+	// brief sleep
+	time.Sleep(100 * time.Millisecond)
+
+	// run daily downtime jobs
+	shared.TeeLog("Running downtime jobs...")
+	downtimeRunner := engine.DownTimeRunner{}
+	downtimeRunner.Initialize()
+	downtimeRunner.RunDownTimeTasks()
 
 	// initialize game engine
 	shared.TeeLog("Initializing engine...")
