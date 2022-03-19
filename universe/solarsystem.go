@@ -208,7 +208,7 @@ func (s *SolarSystem) processClientEventQueues() {
 		sh.EscrowContainerID = &c.EscrowContainerID
 
 		// process event
-		if evt.Type == models.NewMessageRegistry().GlobalAck {
+		if evt.Type == msgRegistry.GlobalAck {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientGlobalAckBody)
@@ -238,7 +238,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// update token
 				c.SetLastGlobalAckToken(s.globalAckToken)
 			}
-		} else if evt.Type == models.NewMessageRegistry().NavClick {
+		} else if evt.Type == msgRegistry.NavClick {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientNavClickBody)
@@ -246,7 +246,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// apply effect to player's current ship
 				sh.CmdManualNav(data.ScreenTheta, data.ScreenMagnitude, false)
 			}
-		} else if evt.Type == models.NewMessageRegistry().Goto {
+		} else if evt.Type == msgRegistry.Goto {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientGotoBody)
@@ -254,7 +254,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// apply effect to player's current ship
 				sh.CmdGoto(data.TargetID, data.Type, false)
 			}
-		} else if evt.Type == models.NewMessageRegistry().Orbit {
+		} else if evt.Type == msgRegistry.Orbit {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientOrbitBody)
@@ -262,7 +262,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// apply effect to player's current ship
 				sh.CmdOrbit(data.TargetID, data.Type, false)
 			}
-		} else if evt.Type == models.NewMessageRegistry().Dock {
+		} else if evt.Type == msgRegistry.Dock {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientDockBody)
@@ -296,7 +296,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// apply effect to player's current ship
 				sh.CmdDock(data.TargetID, data.Type, false)
 			}
-		} else if evt.Type == models.NewMessageRegistry().Undock {
+		} else if evt.Type == msgRegistry.Undock {
 			if sh != nil {
 				// extract data (currently nothing to process)
 				// data := evt.Body.(models.ClientUndockBody)
@@ -319,7 +319,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// apply effect to player's current ship
 				sh.CmdUndock(false)
 			}
-		} else if evt.Type == models.NewMessageRegistry().ActivateModule {
+		} else if evt.Type == msgRegistry.ActivateModule {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientActivateModuleBody)
@@ -347,7 +347,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().DeactivateModule {
+		} else if evt.Type == msgRegistry.DeactivateModule {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientDeactivateModuleBody)
@@ -375,7 +375,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().ViewCargoBay {
+		} else if evt.Type == msgRegistry.ViewCargoBay {
 			if sh != nil {
 				// extract data (currently nothing to process)
 				// data := evt.Body.(models.ClientViewCargoBayBody)
@@ -457,7 +457,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// write response to client
 				c.WriteMessage(&cu)
 			}
-		} else if evt.Type == models.NewMessageRegistry().UnfitModule {
+		} else if evt.Type == msgRegistry.UnfitModule {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientUnfitModuleBody)
@@ -480,7 +480,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().TrashItem {
+		} else if evt.Type == msgRegistry.TrashItem {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientTrashItemBody)
@@ -503,7 +503,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().PackageItem {
+		} else if evt.Type == msgRegistry.PackageItem {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientPackageItemBody)
@@ -526,7 +526,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().UnpackageItem {
+		} else if evt.Type == msgRegistry.UnpackageItem {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientUnpackageItemBody)
@@ -549,7 +549,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().StackItem {
+		} else if evt.Type == msgRegistry.StackItem {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientStackItemBody)
@@ -572,7 +572,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().SplitItem {
+		} else if evt.Type == msgRegistry.SplitItem {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientSplitItemBody)
@@ -595,7 +595,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().FitModule {
+		} else if evt.Type == msgRegistry.FitModule {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientFitModuleBody)
@@ -618,7 +618,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().SellAsOrder {
+		} else if evt.Type == msgRegistry.SellAsOrder {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientSellAsOrderBody)
@@ -641,7 +641,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().DeactivateModule {
+		} else if evt.Type == msgRegistry.DeactivateModule {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientDeactivateModuleBody)
@@ -669,7 +669,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().ViewOpenSellOrders {
+		} else if evt.Type == msgRegistry.ViewOpenSellOrders {
 			if sh != nil {
 				// extract data (currently nothing to process)
 				// data := evt.Body.(models.ClientViewOpenSellOrdersBody)
@@ -737,7 +737,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// write response to client
 				c.WriteMessage(&cu)
 			}
-		} else if evt.Type == models.NewMessageRegistry().BuySellOrder {
+		} else if evt.Type == msgRegistry.BuySellOrder {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientBuySellOrderBody)
@@ -751,7 +751,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					c.WriteErrorMessage(err.Error())
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().ViewIndustrialOrders {
+		} else if evt.Type == msgRegistry.ViewIndustrialOrders {
 			if sh != nil {
 				// extract data (currently nothing to process)
 				// data := evt.Body.(models.ViewIndustrialOrders)
@@ -817,7 +817,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// write response to client
 				c.WriteMessage(&cu)
 			}
-		} else if evt.Type == models.NewMessageRegistry().BuyFromSilo {
+		} else if evt.Type == msgRegistry.BuyFromSilo {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientBuyFromSiloBody)
@@ -831,7 +831,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					c.WriteErrorMessage(err.Error())
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().SellToSilo {
+		} else if evt.Type == msgRegistry.SellToSilo {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientSellToSiloBody)
@@ -845,7 +845,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					c.WriteErrorMessage(err.Error())
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().ViewStarMap {
+		} else if evt.Type == msgRegistry.ViewStarMap {
 			if sh != nil {
 				// extract data
 				// data := evt.Body.(models.ClientViewStarMapBody)
@@ -865,7 +865,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// write response to client
 				c.WriteMessage(&cu)
 			}
-		} else if evt.Type == models.NewMessageRegistry().ConsumeFuel {
+		} else if evt.Type == msgRegistry.ConsumeFuel {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientConsumeFuelBody)
@@ -879,7 +879,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					c.WriteErrorMessage(err.Error())
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().SelfDestruct {
+		} else if evt.Type == msgRegistry.SelfDestruct {
 			if sh != nil {
 				// extract data
 				//data := evt.Body.(models.ClientSelfDestructBody)
@@ -893,7 +893,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					c.WriteErrorMessage(err.Error())
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().ConsumeRepairKit {
+		} else if evt.Type == msgRegistry.ConsumeRepairKit {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientConsumeRepairKitBody)
@@ -907,7 +907,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					c.WriteErrorMessage(err.Error())
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().ViewProperty {
+		} else if evt.Type == msgRegistry.ViewProperty {
 			if sh != nil {
 				// extract data
 				// data := evt.Body.(models.ClientViewPropertyBody)
@@ -942,7 +942,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// write response to client
 				c.WriteMessage(&z)
 			}
-		} else if evt.Type == models.NewMessageRegistry().Board {
+		} else if evt.Type == msgRegistry.Board {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientBoardBody)
@@ -1001,7 +1001,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					Target: toBoard,
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().TransferCredits {
+		} else if evt.Type == msgRegistry.TransferCredits {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientTransferCreditsBody)
@@ -1068,7 +1068,7 @@ func (s *SolarSystem) processClientEventQueues() {
 
 				c.SetPropertyCache(pc)
 			}
-		} else if evt.Type == models.NewMessageRegistry().SellShipAsOrder {
+		} else if evt.Type == msgRegistry.SellShipAsOrder {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientSellShipAsOrderBody)
@@ -1152,7 +1152,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					c.SetPropertyCache(pc)
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().TrashShip {
+		} else if evt.Type == msgRegistry.TrashShip {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientTrashShipBody)
@@ -1235,7 +1235,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				pc.ShipCaches = no
 				c.SetPropertyCache(pc)
 			}
-		} else if evt.Type == models.NewMessageRegistry().RenameShip {
+		} else if evt.Type == msgRegistry.RenameShip {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientRenameShipBody)
@@ -1302,7 +1302,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				pc.ShipCaches = no
 				c.SetPropertyCache(pc)
 			}
-		} else if evt.Type == models.NewMessageRegistry().PostSystemChatMessage {
+		} else if evt.Type == msgRegistry.PostSystemChatMessage {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientPostSystemChatMessageBody)
@@ -1342,7 +1342,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// update timestamp
 				c.LastChatPostedAt = time.Now()
 			}
-		} else if evt.Type == models.NewMessageRegistry().TransferItem {
+		} else if evt.Type == msgRegistry.TransferItem {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientTransferItemBody)
@@ -1418,7 +1418,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().ViewExperience {
+		} else if evt.Type == msgRegistry.ViewExperience {
 			if sh != nil {
 				// extract data
 				// data := evt.Body.(models.ClientViewExperienceBody)
@@ -1437,7 +1437,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// write response to client
 				c.WriteMessage(&z)
 			}
-		} else if evt.Type == models.NewMessageRegistry().ViewSchematicRuns {
+		} else if evt.Type == msgRegistry.ViewSchematicRuns {
 			if sh != nil {
 				// extract data
 				// data := evt.Body.(models.ClientViewSchematicRunsBody)
@@ -1445,7 +1445,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// escalate to core
 				s.SchematicRunViews[c.UID.String()] = c
 			}
-		} else if evt.Type == models.NewMessageRegistry().RunSchematic {
+		} else if evt.Type == msgRegistry.RunSchematic {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientRunSchematicBody)
@@ -1558,7 +1558,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					item.SchematicInUse = true
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().CreateNewFaction {
+		} else if evt.Type == msgRegistry.CreateNewFaction {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientCreateNewFactionBody)
@@ -1620,7 +1620,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					s.NewFactions[c.UID.String()] = &t
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().LeaveFaction {
+		} else if evt.Type == msgRegistry.LeaveFaction {
 			if sh != nil {
 				// extract data
 				//data := evt.Body.(models.ClientLeaveFactionBody)
@@ -1640,7 +1640,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					s.LeaveFactions[c.UID.String()] = &t
 				}
 			}
-		} else if evt.Type == models.NewMessageRegistry().ApplyToFaction {
+		} else if evt.Type == msgRegistry.ApplyToFaction {
 			if sh != nil {
 				// extract data
 				data := evt.Body.(models.ClientApplyToFactionBody)
@@ -1704,7 +1704,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					c.WriteInfoMessage(fmt.Sprintf("Application to join %v submitted!", f.Name))
 				}(f, cf, c)
 			}
-		} else if evt.Type == models.NewMessageRegistry().ApplyToFaction {
+		} else if evt.Type == msgRegistry.ApplyToFaction {
 			// extract data
 			//data := evt.Body.(models.ClientViewApplicationsBody)
 
