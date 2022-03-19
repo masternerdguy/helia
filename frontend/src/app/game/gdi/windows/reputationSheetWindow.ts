@@ -741,7 +741,10 @@ export class ReputationSheetWindow extends GDIWindow {
               }
 
               rows.push(
-                infoKeyValueString(f.name, `[${rel.standingValue.toFixed(2)}] ` + openHostileFlag)
+                infoKeyValueString(
+                  f.name,
+                  `[${rel.standingValue.toFixed(2)}] ` + openHostileFlag
+                )
               );
             }
           }
@@ -796,7 +799,10 @@ export class ReputationSheetWindow extends GDIWindow {
             const fc = GetFactionCacheEntry(f.factionId);
 
             rows.push(
-              infoKeyValueString(fc.name, `[${f.standingValue.toFixed(2)}] ` + openHostileFlag)
+              infoKeyValueString(
+                fc.name,
+                `[${f.standingValue.toFixed(2)}] ` + openHostileFlag
+              )
             );
           }
         }
@@ -817,7 +823,10 @@ export class ReputationSheetWindow extends GDIWindow {
             const fc = GetFactionCacheEntry(f.factionId);
 
             rows.push(
-              infoKeyValueString(fc.name, `[${f.standingValue.toFixed(2)}] ` + openHostileFlag)
+              infoKeyValueString(
+                fc.name,
+                `[${f.standingValue.toFixed(2)}] ` + openHostileFlag
+              )
             );
           }
         }
