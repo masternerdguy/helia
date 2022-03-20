@@ -14,6 +14,7 @@ type DownTimeRunner struct {
 	spSvc      sql.SPService
 	userSvc    sql.UserService
 	factionSvc sql.FactionService
+	startSvc   sql.StartService
 }
 
 // Initializes downtime job structure
@@ -27,6 +28,7 @@ func (d *DownTimeRunner) Initialize() {
 	d.spSvc = sql.GetSPService()
 	d.userSvc = sql.GetUserService()
 	d.factionSvc = *sql.GetFactionService()
+	d.startSvc = *sql.GetStartService()
 
 	// mark as ready
 	DownTimeInitialized = true
@@ -46,8 +48,15 @@ func (d *DownTimeRunner) RunDownTimeTasks() {
 		panic("downtime structure not ready!")
 	}
 
+	// disband leaderless custom factions
+	err := d.disbandLeaderlessPlayerFactions()
+
+	if err != nil {
+		panic(err)
+	}
+
 	// cleanup old / orphaned records
-	err := d.executeSPCleanup()
+	err = d.executeSPCleanup()
 
 	if err != nil {
 		panic(err)
@@ -170,6 +179,64 @@ func (d *DownTimeRunner) averagePlayerFactionStandings() error {
 
 		if err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+// Closes any factions who's owner has left the faction and returns all members to their starter factions
+func (d *DownTimeRunner) disbandLeaderlessPlayerFactions() error {
+	shared.TeeLog("  - disbandLeaderlessPlayerFactions()")
+
+	// get custom factions
+	customFactions, err := d.factionSvc.GetPlayerFactions()
+
+	if err != nil {
+		return err
+	}
+
+	// loop over custom factions
+	for _, f := range customFactions {
+		// assertion
+		if f.IsNPC || f.OwnerID == nil {
+			panic("! was going to consider disbanding an NPC faction!")
+		}
+
+		// get members
+		members, err := d.userSvc.GetUsersByFactionID(f.ID)
+
+		if err != nil {
+			return err
+		}
+
+		// look for leader in roster
+		leaderFound := false
+
+		for _, m := range members {
+			if m.ID == *f.OwnerID {
+				leaderFound = true
+				break
+			}
+		}
+
+		if !leaderFound {
+			// kick everyone from the faction and place them in their starter factions
+			for _, m := range members {
+				// get their start
+				start, err := d.startSvc.GetStartByID(m.StartID)
+
+				if err != nil {
+					return err
+				}
+
+				// assign them to their starter faction
+				err = d.userSvc.SetCurrentFactionID(m.ID, &start.FactionID)
+
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 
