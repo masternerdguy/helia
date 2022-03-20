@@ -84,7 +84,12 @@ ALTER FUNCTION public.fn_getemptyplayerfactions() OWNER TO developer;
 CREATE PROCEDURE public.sp_cleanup()
     LANGUAGE sql
     AS $$-- delete dead ships
-delete from ships where destroyedat is not null;
+delete from ships where 
+						destroyedat is not null
+				  and   id not in 
+				  (
+					  select current_shipid from users
+				  );
 
 -- delete any extra NPC ships that somehow didn't die
 delete from ships where id in (
