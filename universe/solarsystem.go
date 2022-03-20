@@ -1751,7 +1751,7 @@ func (s *SolarSystem) processClientEventQueues() {
 			// build and send update on separate goroutine
 			go func(c *shared.GameClient, f *Faction) {
 				// obtain lock
-				f.Lock.Lock("solarsystem.processClientEventQueues::ApplyToFaction")
+				f.Lock.Lock("solarsystem.processClientEventQueues::ViewApplications")
 				defer f.Lock.Unlock()
 
 				// build update
