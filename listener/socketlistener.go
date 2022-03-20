@@ -507,6 +507,32 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 					return
 				}
 
+				// check if their home station is overriden by faction membership
+				uf := l.Engine.Universe.Factions[u.CurrentFactionID.String()]
+
+				if uf == nil {
+					shared.TeeLog(fmt.Sprintf("player join recovery - no faction: %v", u.CurrentFactionID))
+					return
+				}
+
+				if !uf.IsNPC && uf.HomeStationID != nil {
+					// override home station on start in-memory only
+					nStart.HomeStationID = *uf.HomeStationID
+
+					// find their home station
+					home := l.Engine.Universe.FindStation(nStart.HomeStationID, nil)
+
+					if home == nil {
+						shared.TeeLog(fmt.Sprintf("player join recovery - no home station: %v", nStart.HomeStationID))
+						return
+					}
+
+					// make sure correct systemid is stored in-memory
+					if !uf.IsNPC && uf.HomeStationID != nil {
+						nStart.SystemID = home.SystemID
+					}
+				}
+
 				u, err = engine.CreateNoobShipForPlayer(nStart, u.ID)
 
 				if err != nil {

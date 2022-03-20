@@ -637,6 +637,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			if !uf.IsNPC && uf.HomeStationID != nil {
 				start.SystemID = home.SystemID
 			}
+
 			// create their noob ship docked in that station
 			u, err := CreateNoobShipForPlayer(start, *rs.UID)
 
