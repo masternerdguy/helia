@@ -28,3 +28,29 @@ type Item struct {
 	CoreDirty      bool
 	SchematicInUse bool
 }
+
+// List of module attributes that can be percentage mutated by mod kits
+var MutableModuleAttributes = [...]string{
+	"range",
+	"shield_damage",
+	"armor_damage",
+	"hull_damage",
+	"ore_mining_volume",
+	"ice_mining_volume",
+	"volume",
+	"fault_tolerance",
+	"flight_time",
+	"shield_boost_amount",
+	"activation_energy",
+	"cooldown",
+	"drag_multiplier",
+	"energy_siphon_amount",
+	"salvage_volume",
+	"salvage_chance",
+	"tracking",
+	"armor_max_add",
+	"energy_max_add",
+	"energy_regen_max_add",
+	"heat_sink_add",
+	"fuel_max_add",
+}
