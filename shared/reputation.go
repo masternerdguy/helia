@@ -45,6 +45,7 @@ type PlayerReputationSheet struct {
 	Lock          LabeledMutex
 	UserID        uuid.UUID
 	CharacterName string
+	FactionID     uuid.UUID
 }
 
 // Adjusts standing relative to an NPC faction
@@ -92,6 +93,12 @@ func (s *PlayerReputationSheet) AdjustStandingPlayer(playerRS *PlayerReputationS
 	// obtain lock on attacker sheet
 	playerRS.Lock.Lock("reputation.AdjustStandingPlayer")
 	defer playerRS.Lock.Unlock()
+
+	// verify they aren't members of the same faction
+	if playerRS.FactionID == s.FactionID {
+		// no penalty for infighting
+		return
+	}
 
 	// iterate over attacked player's faction relationships
 	for _, v := range playerRS.FactionEntries {

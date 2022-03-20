@@ -542,6 +542,11 @@ func (s *Ship) PeriodicUpdate() {
 		s.SystemName = s.CurrentSystem.SystemName
 	}
 
+	// cache player faction id on rep sheet
+	if s.Faction != nil && s.ReputationSheet != nil {
+		s.ReputationSheet.FactionID = s.FactionID
+	}
+
 	// remax some stats if needed for spawning
 	if s.ReMaxDirty {
 		s.ReMaxStatsForSpawn()
