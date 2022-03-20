@@ -392,7 +392,7 @@ func (s UserService) GetUsersByFactionID(factionID uuid.UUID) ([]User, error) {
 
 	// load users
 	sql := `SELECT id, charactername, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid, reputationsheet,
-				   isnpc, behaviourmode, emailaddress, experiencesheet
+				   isnpc, behaviourmode, emailaddress, experiencesheet, startid
 			FROM users
 			WHERE current_factionid=$1`
 
@@ -410,7 +410,7 @@ func (s UserService) GetUsersByFactionID(factionID uuid.UUID) ([]User, error) {
 		// scan into user structure
 		rows.Scan(&s.ID, &s.CharacterName, &s.Hashpass, &s.Registered, &s.Banned, &s.CurrentShipID,
 			&s.EscrowContainerID, &s.CurrentFactionID, &s.ReputationSheet, &s.IsNPC, &s.BehaviourMode, &s.EmailAddress,
-			&s.ExperienceSheet)
+			&s.ExperienceSheet, &s.StartID)
 
 		// append to user slice
 		users = append(users, s)
