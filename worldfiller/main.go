@@ -10,6 +10,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -189,8 +190,8 @@ func calculateSystemSeed(s *universe.SolarSystem) int {
 }
 
 func injectProcess(u *universe.Universe) {
-	pID, err := uuid.Parse("8b5d36ff-c537-456c-b413-7aa7fe86fc0a")
-	prob := 5
+	pID, err := uuid.Parse("f63dd583-1294-4878-b518-79d6c1a6993c")
+	prob := 1
 
 	stationProcessSvc := sql.GetStationProcessService()
 
@@ -198,34 +199,46 @@ func injectProcess(u *universe.Universe) {
 		panic(err)
 	}
 
-	/*var textures = [...]string{
-		"coalition-",
-	}*/
+	var textures = [...]string{
+		"alvaca-",
+		"bad-",
+		"fly-",
+		"interstar-",
+		"sanctuary-",
+	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 1180225)
+			rand.Seed(int64(calculateSystemSeed(s)) - 986687426)
+
+			/*if r.ID.ID()%3 == 0 {
+				continue
+			}
+
+			if s.ID.ID()%2 == 0 {
+				continue
+			}*/
 
 			stations := s.CopyStations(true)
 
 			for _, st := range stations {
-				//for _, t := range textures {
-				//if strings.Contains(st.Texture, t) {
-				roll := physics.RandInRange(0, 100)
+				for _, t := range textures {
+					if strings.Contains(st.Texture, t) {
+						roll := physics.RandInRange(0, 100)
 
-				if roll <= prob {
-					sp := sql.StationProcess{
-						StationID: st.ID,
-						ProcessID: pID,
-						ID:        uuid.New(),
+						if roll <= prob {
+							sp := sql.StationProcess{
+								StationID: st.ID,
+								ProcessID: pID,
+								ID:        uuid.New(),
+							}
+
+							toSave = append(toSave, sp)
+						}
 					}
-
-					toSave = append(toSave, sp)
 				}
-				//}
-				//}
 			}
 		}
 	}
