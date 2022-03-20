@@ -1638,6 +1638,15 @@ func (s *SolarSystem) processClientEventQueues() {
 				}
 
 				if sh.Faction != nil {
+					// check if armed
+					if !sh.LeaveFactionArmed {
+						// arm
+						sh.LeaveFactionArmed = true
+
+						c.WriteErrorMessage("issue leave faction command again to return to your starter faction")
+						continue
+					}
+
 					// escalate to core for leave
 					t := LeaveFactionTicket{
 						Client: c,
@@ -2769,6 +2778,9 @@ func (s *SolarSystem) AddShip(c *Ship, lock bool) {
 
 	// disarm self destruct
 	c.DestructArmed = false
+
+	// disarm leave faction
+	c.LeaveFactionArmed = false
 
 	// add ship
 	s.ships[c.ID.String()] = c

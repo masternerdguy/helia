@@ -561,6 +561,9 @@ export class ReputationSheetWindow extends GDIWindow {
     this.leaveFactionButton.setX(this.getWidth() * 0.25);
     this.leaveFactionButton.setY(100 + GDIStyle.tabHandleHeight);
 
+    this.leaveFactionButton.setBorderColor('red');
+    this.leaveFactionButton.setTextColor('red');
+
     this.leaveFactionButton.setOnClick(() => {
       // send request to leave faction
       const b = new ClientLeaveFaction();

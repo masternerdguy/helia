@@ -11,6 +11,10 @@ export class GDIButton extends GDIBase {
   private onClick: (x: number, y: number) => void;
   private enabled: boolean;
 
+  private fillColor: string = GDIStyle.buttonFillColor;
+  private borderColor: string = GDIStyle.buttonBorderColor;
+  private textColor: string = GDIStyle.buttonTextColor;
+
   initialize() {
     // initialize offscreen canvas
     this.canvas = new OffscreenCanvas(this.getWidth(), this.getHeight());
@@ -25,26 +29,26 @@ export class GDIButton extends GDIBase {
   render(): ImageBitmap {
     if (!this.enabled) {
       // render background
-      this.ctx.fillStyle = GDIStyle.buttonFillColor;
+      this.ctx.fillStyle = this.fillColor;
       this.ctx.fillRect(0, 0, this.getWidth(), this.getHeight());
 
       if (GDIStyle.buttonBorderSize > 0) {
         // render border
         this.ctx.lineWidth = GDIStyle.buttonBorderSize;
-        this.ctx.strokeStyle = GDIStyle.buttonBorderColor;
+        this.ctx.strokeStyle = this.borderColor;
         this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight());
       }
     } else {
       // render background
-      this.ctx.fillStyle = GDIStyle.buttonFillColor;
+      this.ctx.fillStyle = this.fillColor;
       this.ctx.fillRect(0, 0, this.getWidth(), this.getHeight());
 
       // style text
       this.ctx.textAlign = 'center';
       this.ctx.textBaseline = 'middle';
 
-      this.ctx.fillStyle = GDIStyle.buttonTextColor;
-      this.ctx.strokeStyle = GDIStyle.buttonTextColor;
+      this.ctx.fillStyle = this.textColor;
+      this.ctx.strokeStyle = this.textColor;
       this.ctx.font = GDIStyle.getUnderlyingFont(this.getFont());
 
       // render text
@@ -57,7 +61,7 @@ export class GDIButton extends GDIBase {
       if (GDIStyle.buttonBorderSize > 0) {
         // render border
         this.ctx.lineWidth = GDIStyle.buttonBorderSize;
-        this.ctx.strokeStyle = GDIStyle.buttonBorderColor;
+        this.ctx.strokeStyle = this.borderColor;
         this.ctx.strokeRect(0, 0, this.getWidth(), this.getHeight());
       }
     }
@@ -96,5 +100,26 @@ export class GDIButton extends GDIBase {
 
   setEnabled(enabled: boolean) {
     this.enabled = enabled;
+  }
+
+  public getFillColor(): string {
+    return this.fillColor;
+  }
+  public setFillColor(value: string) {
+    this.fillColor = value;
+  }
+
+  public getBorderColor(): string {
+    return this.borderColor;
+  }
+  public setBorderColor(value: string) {
+    this.borderColor = value;
+  }
+
+  public getTextColor(): string {
+    return this.textColor;
+  }
+  public setTextColor(value: string) {
+    this.textColor = value;
   }
 }

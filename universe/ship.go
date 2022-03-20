@@ -197,6 +197,7 @@ type Ship struct {
 	ReputationSheet        *shared.PlayerReputationSheet
 	ExperienceSheet        *shared.PlayerExperienceSheet
 	DestructArmed          bool
+	LeaveFactionArmed      bool
 	TemporaryModifiers     []TemporaryShipModifier
 	IsCloaked              bool
 	Aggressors             map[string]*shared.PlayerReputationSheet
@@ -2389,6 +2390,9 @@ func (s *Ship) doAutopilotOrbit() {
 
 // Causes ship to dock with a target
 func (s *Ship) doAutopilotDock() {
+	// disarm leave faction
+	s.LeaveFactionArmed = false
+
 	// get registry
 	targetTypeReg := models.NewTargetTypeRegistry()
 
@@ -2427,6 +2431,9 @@ func (s *Ship) doAutopilotDock() {
 
 // Causes ship to undock from a target
 func (s *Ship) doAutopilotUndock() {
+	// disarm leave faction
+	s.LeaveFactionArmed = false
+
 	// verify that we are docked (currently only supports stations)
 	if s.DockedAtStationID != nil && s.DockedAtStation != nil {
 		// remove references
