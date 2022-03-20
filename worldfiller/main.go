@@ -213,19 +213,19 @@ func injectProcess(u *universe.Universe) {
 		for _, s := range r.Systems {
 			rand.Seed(int64(calculateSystemSeed(s)) - 9687426)
 
-			if r.ID.ID()%3 != 0 {
+			/*if r.ID.ID()%3 != 0 {
 				continue
 			}
 
 			if s.ID.ID()%2 != 0 {
 				continue
-			}
+			}*/
 
 			stations := s.CopyStations(true)
 
 			for _, st := range stations {
 				for _, t := range textures {
-					if !strings.Contains(st.Texture, t) {
+					if strings.Contains(st.Texture, t) {
 						roll := physics.RandInRange(0, 100)
 
 						if roll <= prob {
