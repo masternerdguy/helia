@@ -943,6 +943,13 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
         actions.push('Run');
       }
 
+      // determine whether or not this is a mod kit
+      const isModKit = m.itemFamilyID == 'mod_kit'
+
+      if (isModKit) {
+        actions.push('Mod Module');
+      }
+
       // determine whether or not this is fuel
       const isFuel = m.itemFamilyID === 'fuel';
 

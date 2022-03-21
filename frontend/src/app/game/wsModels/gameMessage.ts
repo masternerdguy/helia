@@ -65,4 +65,5 @@ export enum MessageTypes {
   ViewMembers = 56,
   MembersUpdate = 57,
   KickMember = 58,
+  UseModKit =              59,
 }

@@ -1933,6 +1933,14 @@ func (s *SolarSystem) processClientEventQueues() {
 				FactionID:   sh.FactionID,
 				OwnerClient: c,
 			}
+		} else if evt.Type == msgRegistry.UseModKit {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientUseModKitBody)
+
+				// todo
+				shared.TeeLog(fmt.Sprintf("not yet implemented, use mod kit: %v", data))
+			}
 		}
 	}
 }

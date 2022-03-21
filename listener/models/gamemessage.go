@@ -69,6 +69,7 @@ type MessageRegistry struct {
 	ViewMembers            int
 	MembersUpdate          int
 	KickMember             int
+	UseModKit              int
 }
 
 // Registry of target types
@@ -146,6 +147,7 @@ func NewMessageRegistry() *MessageRegistry {
 		ViewMembers:            56,
 		MembersUpdate:          57,
 		KickMember:             58,
+		UseModKit:              59,
 	}
 }
 
@@ -887,4 +889,11 @@ type ClientViewMembersBody struct {
 type ClientKickMemberBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	UserID    uuid.UUID `json:"userId"`
+}
+
+// Body containing a request to apply a mod kit to a module in the player's cargo bay
+type ClientUseModKitBody struct {
+	SessionID    uuid.UUID `json:"sid"`
+	ModuleItemID uuid.UUID `json:"moduleId"`
+	ModKitItemID uuid.UUID `json:"kitId"`
 }
