@@ -27,6 +27,7 @@ import {
 import { ClientTransferItem } from '../../wsModels/bodies/transferItem';
 import { ClientViewProperty } from '../../wsModels/bodies/viewProperty';
 import { ClientRunSchematic } from '../../wsModels/bodies/runSchematic';
+import { ClientUseModKit } from '../../wsModels/bodies/useModKit';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -38,6 +39,7 @@ export class ShipFittingWindow extends GDIWindow {
   private modalOverlay: GDIOverlay = new GDIOverlay();
   private modalInput: GDIInput = new GDIInput();
   private modalPropertyView: GDIList = new GDIList();
+  private modalModulesInCargoView: GDIList = new GDIList();
 
   // bars
   private cargoBayUsed: GDIBar = new GDIBar();
@@ -203,6 +205,45 @@ export class ShipFittingWindow extends GDIWindow {
 
         // show modal list
         this.showModalPropertyList();
+      } else if (a === 'Mod Module') {
+        // set up callback
+        this.modalModulesInCargoView.setOnClick((h) => {
+          const sv = h.listString();
+
+          if (sv == '<==' || sv == '') {
+            // hide modules modal
+            this.hideModalModulesInCargoList();
+
+            return;
+          }
+
+          // get selected item
+          const i: ShipViewRow = this.shipView.getSelectedItem();
+
+          // get selected ship
+          const t = h as ShipViewRow;
+
+          // hide modules modal
+          this.hideModalModulesInCargoList();
+
+          // send modding request
+          const tiMsg: ClientUseModKit = {
+            sid: this.wsSvc.sid,
+            kitId: (i.object as WSContainerItem).id,
+            moduleId: (t.object as WSContainerItem).id,
+          };
+
+          this.wsSvc.sendMessage(MessageTypes.UseModKit, tiMsg);
+
+          // request cargo bay refresh
+          this.refreshCargoBay();
+
+          // reset views
+          this.resetViews();
+        });
+
+        // show modal list
+        this.showModalModulesInCargoList();
       } else if (a === 'Package') {
         // get selected item
         const i: ShipViewRow = this.shipView.getSelectedItem();
@@ -398,6 +439,19 @@ export class ShipFittingWindow extends GDIWindow {
     this.modalPropertyView.setFont(FontSize.normal);
     this.modalPropertyView.setOnClick(() => {});
 
+    this.modalModulesInCargoView.setWidth(400);
+    this.modalModulesInCargoView.setHeight(300);
+    this.modalModulesInCargoView.initialize();
+    this.modalModulesInCargoView.setX(
+      this.getWidth() / 2 - this.modalModulesInCargoView.getWidth() / 2
+    );
+    this.modalModulesInCargoView.setY(
+      this.getHeight() / 2 - this.modalModulesInCargoView.getHeight() / 2
+    );
+
+    this.modalModulesInCargoView.setFont(FontSize.normal);
+    this.modalModulesInCargoView.setOnClick(() => {});
+
     // pack
     this.addComponent(this.shipView);
     this.addComponent(this.infoView);
@@ -411,6 +465,7 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.actionView);
     this.removeComponent(this.cargoBayUsed);
     this.removeComponent(this.modalPropertyView);
+    this.removeComponent(this.modalModulesInCargoView);
     this.addComponent(this.modalOverlay);
     this.addComponent(this.modalInput);
   }
@@ -421,8 +476,20 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.actionView);
     this.removeComponent(this.cargoBayUsed);
     this.removeComponent(this.modalInput);
+    this.removeComponent(this.modalModulesInCargoView);
     this.addComponent(this.modalOverlay);
     this.addComponent(this.modalPropertyView);
+  }
+
+  private showModalModulesInCargoList() {
+    this.removeComponent(this.shipView);
+    this.removeComponent(this.infoView);
+    this.removeComponent(this.actionView);
+    this.removeComponent(this.cargoBayUsed);
+    this.removeComponent(this.modalInput);
+    this.removeComponent(this.modalPropertyView);
+    this.addComponent(this.modalOverlay);
+    this.addComponent(this.modalModulesInCargoView);
   }
 
   private hideModalInput() {
@@ -433,6 +500,7 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.modalPropertyView);
     this.removeComponent(this.modalOverlay);
     this.removeComponent(this.modalInput);
+    this.removeComponent(this.modalModulesInCargoView);
   }
 
   private hideModalPropertyList() {
@@ -443,6 +511,18 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.modalPropertyView);
     this.removeComponent(this.modalOverlay);
     this.removeComponent(this.modalInput);
+    this.removeComponent(this.modalModulesInCargoView);
+  }
+
+  private hideModalModulesInCargoList() {
+    this.addComponent(this.shipView);
+    this.addComponent(this.infoView);
+    this.addComponent(this.actionView);
+    this.addComponent(this.cargoBayUsed);
+    this.removeComponent(this.modalPropertyView);
+    this.removeComponent(this.modalOverlay);
+    this.removeComponent(this.modalInput);
+    this.removeComponent(this.modalModulesInCargoView);
   }
 
   private refreshCargoBay() {
@@ -511,6 +591,7 @@ export class ShipFittingWindow extends GDIWindow {
 
     // update cargo display
     const cargo: ShipViewRow[] = [];
+    const modulesInCargo: ShipViewRow[] = [];
 
     if (this.player.currentCargoView) {
       for (const ci of this.player.currentCargoView.items.sort((a, b) =>
@@ -518,10 +599,27 @@ export class ShipFittingWindow extends GDIWindow {
       )) {
         const r = buildCargoRowFromContainerItem(ci, this.isDocked);
         cargo.push(r);
+
+        // store for mod kits if a module
+        if (checkIfModule(ci)) {
+          modulesInCargo.push(r);
+        }
       }
     }
 
     this.cargoBayUsed.setPercentage(this.player.currentShip.cargoP);
+
+    // include cancel option for modding
+    modulesInCargo.push(buildShipViewRowText(''));
+    modulesInCargo.push(buildShipViewRowText('<=='));
+
+    // update modding display
+    const modViewIdx = this.modalModulesInCargoView.getSelectedIndex();
+    const modViewScroll = this.modalModulesInCargoView.getScroll();
+
+    this.modalModulesInCargoView.setItems(modulesInCargo);
+    this.modalModulesInCargoView.setSelectedIndex(modViewIdx);
+    this.modalModulesInCargoView.setScroll(modViewScroll);
 
     // update fitted module display
     const rackAMods: ShipViewRow[] = [];
@@ -912,23 +1010,7 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
       actions.push('Package');
 
       // determine whether or not this is a module
-      const isModule =
-        m.itemFamilyID === 'gun_turret' ||
-        m.itemFamilyID === 'missile_launcher' ||
-        m.itemFamilyID === 'shield_booster' ||
-        m.itemFamilyID === 'fuel_tank' ||
-        m.itemFamilyID === 'armor_plate' ||
-        m.itemFamilyID === 'eng_oc' ||
-        m.itemFamilyID === 'active_sink' ||
-        m.itemFamilyID === 'drag_amp' ||
-        m.itemFamilyID === 'utility_miner' ||
-        m.itemFamilyID === 'utility_siphon' ||
-        m.itemFamilyID === 'utility_cloak' ||
-        m.itemFamilyID === 'battery_pack' ||
-        m.itemFamilyID === 'aux_generator' ||
-        m.itemFamilyID === 'cargo_expander' ||
-        m.itemFamilyID === 'salvager' ||
-        m.itemFamilyID === 'heat_sink';
+      const isModule = checkIfModule(m);
 
       if (isModule) {
         // offer fit action
@@ -944,7 +1026,7 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
       }
 
       // determine whether or not this is a mod kit
-      const isModKit = m.itemFamilyID == 'mod_kit'
+      const isModKit = m.itemFamilyID == 'mod_kit';
 
       if (isModKit) {
         actions.push('Mod Module');
@@ -977,6 +1059,27 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
   }
 
   return actions;
+}
+
+function checkIfModule(m: WSContainerItem) {
+  return (
+    m.itemFamilyID === 'gun_turret' ||
+    m.itemFamilyID === 'missile_launcher' ||
+    m.itemFamilyID === 'shield_booster' ||
+    m.itemFamilyID === 'fuel_tank' ||
+    m.itemFamilyID === 'armor_plate' ||
+    m.itemFamilyID === 'eng_oc' ||
+    m.itemFamilyID === 'active_sink' ||
+    m.itemFamilyID === 'drag_amp' ||
+    m.itemFamilyID === 'utility_miner' ||
+    m.itemFamilyID === 'utility_siphon' ||
+    m.itemFamilyID === 'utility_cloak' ||
+    m.itemFamilyID === 'battery_pack' ||
+    m.itemFamilyID === 'aux_generator' ||
+    m.itemFamilyID === 'cargo_expander' ||
+    m.itemFamilyID === 'salvager' ||
+    m.itemFamilyID === 'heat_sink'
+  );
 }
 
 function buildFittingRowFromModule(
