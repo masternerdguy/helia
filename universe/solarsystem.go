@@ -2077,6 +2077,15 @@ func (s *SolarSystem) processClientEventQueues() {
 				}
 
 				if attributesChanged > 0 {
+					// increment modifications counter
+					mf, _ := module.Meta.GetInt("customization_factor")
+					mf += attributesChanged
+
+					module.Meta["customization_factor"] = mf
+
+					// flag as modified
+					module.Meta["MODIFIED"] = true
+
 					// save module
 					module.CoreDirty = true
 					s.ChangedMetaItems[module.ID.String()] = module
