@@ -2054,7 +2054,7 @@ func (s *SolarSystem) processClientEventQueues() {
 
 					if damageRoll <= damageChance {
 						// roll for damage amount
-						mutationRoll := rand.Float64() * -1.0
+						mutationRoll := rand.Float64() * maxMutation * -1.0
 
 						// get hp
 						hp, _ := module.Meta.GetFloat64("hp")
