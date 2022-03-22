@@ -35,6 +35,7 @@ func (m Meta) GetInt(key string) (int, bool) {
 		return 0, e
 	}
 
+	// type switch to avoid crashes if the underlying type happens to be something unexpected
 	switch x := v.(type) {
 	case int:
 		return x, e
