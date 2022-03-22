@@ -1998,6 +1998,8 @@ func (s *SolarSystem) processClientEventQueues() {
 
 				// iterate over item attributes
 				attributesChanged := 0
+				changedAttributes := make(map[string]float64)
+				damage := 0.0
 
 				for k := range module.Meta {
 					// check if limit reached
@@ -2042,8 +2044,8 @@ func (s *SolarSystem) processClientEventQueues() {
 						scaleFactor := 1.0 + mutationRoll
 						attrVal *= scaleFactor
 
-						// store in meta
-						module.Meta[k] = attrVal
+						// store as changed
+						changedAttributes[k] = attrVal
 
 						// increment counter
 						attributesChanged++
@@ -2055,28 +2057,35 @@ func (s *SolarSystem) processClientEventQueues() {
 					if damageRoll <= damageChance {
 						// roll for damage amount
 						mutationRoll := rand.Float64() * maxMutation
-
-						// get hp
-						hp, _ := module.Meta.GetFloat64("hp")
-
-						// apply damage
-						hp *= 1.0 - mutationRoll
-
-						// check if broken
-						if int(hp) <= 1 {
-							// destroy module
-							module.CoreDirty = true
-							module.Quantity = 0
-
-							s.ChangedQuantityItems[module.ID.String()] = module
-						}
-
-						// update hp
-						module.Meta["hp"] = int(hp)
+						damage += mutationRoll
 					}
 				}
 
+				// apply damage
+				if damage > 0 {
+					// get hp
+					hp, _ := module.Meta.GetFloat64("hp")
+
+					// apply damage
+					hp *= 1.0 - damage
+
+					// check if broken
+					if int(hp) <= 1 {
+						// destroy module
+						module.CoreDirty = true
+						module.Quantity = 0
+
+						s.ChangedQuantityItems[module.ID.String()] = module
+					}
+				}
+
+				// save new attributes
 				if attributesChanged > 0 {
+					// update metadata
+					for k, v := range changedAttributes {
+						module.Meta[k] = v
+					}
+
 					// increment modifications counter
 					mf, _ := module.Meta.GetFloat64("customization_factor")
 					mf += float64(attributesChanged)
