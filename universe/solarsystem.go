@@ -2060,7 +2060,7 @@ func (s *SolarSystem) processClientEventQueues() {
 						hp, _ := module.Meta.GetFloat64("hp")
 
 						// apply damage
-						hp *= mutationRoll
+						hp *= 1.0 - mutationRoll
 
 						// check if broken
 						if int(hp) <= 1 {
