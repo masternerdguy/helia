@@ -2069,6 +2069,9 @@ func (s *SolarSystem) processClientEventQueues() {
 					// apply damage
 					hp *= 1.0 - damage
 
+					// update damage
+					module.Meta["hp"] = int(hp)
+
 					// check if broken
 					if int(hp) <= 1 {
 						// destroy module
