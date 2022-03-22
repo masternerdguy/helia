@@ -2980,7 +2980,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	}
 
 	// get module volume
-	v, _ := item.ItemTypeMeta.GetFloat64("volume")
+	v, _ := item.Meta.GetFloat64("volume")
 
 	// find a free slot
 	idx, fnd := s.getFreeSlotIndex(item.ItemFamilyID, v, r)
@@ -3058,7 +3058,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	}
 
 	// get module volume
-	v, _ := m.ItemTypeMeta.GetFloat64("volume")
+	v, _ := m.ItemMeta.GetFloat64("volume")
 
 	// make sure there is sufficient space in the cargo bay
 	if s.TotalCargoBayVolumeUsed(lock)+v > s.GetRealCargoBayVolume() {
@@ -3372,7 +3372,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 	}
 
 	// calculate order volume
-	unitVolume, _ := output.ItemTypeMeta.GetFloat64("volume")
+	unitVolume, _ := output.Meta.GetFloat64("volume")
 	orderVolume := unitVolume * float64(quantity)
 
 	// determine if this is a ship
