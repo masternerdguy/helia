@@ -2084,7 +2084,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					module.Meta["customization_factor"] = int(mf)
 
 					// flag as modified
-					module.Meta["MODIFIED"] = true
+					module.Meta["**MODIFIED**"] = true
 
 					// save module
 					module.CoreDirty = true
