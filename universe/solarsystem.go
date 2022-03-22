@@ -2072,16 +2072,16 @@ func (s *SolarSystem) processClientEventQueues() {
 						}
 
 						// update hp
-						module.Meta["hp"] = hp
+						module.Meta["hp"] = int(hp)
 					}
 				}
 
 				if attributesChanged > 0 {
 					// increment modifications counter
-					mf, _ := module.Meta.GetInt("customization_factor")
-					mf += attributesChanged
+					mf, _ := module.Meta.GetFloat64("customization_factor")
+					mf += float64(attributesChanged)
 
-					module.Meta["customization_factor"] = mf
+					module.Meta["customization_factor"] = int(mf)
 
 					// flag as modified
 					module.Meta["MODIFIED"] = true
