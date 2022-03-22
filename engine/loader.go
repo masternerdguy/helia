@@ -1675,6 +1675,12 @@ func changeQuantity(itemID uuid.UUID, quantity int) error {
 	return itemSvc.ChangeQuantity(itemID, quantity)
 }
 
+// Changes the metadata of an item in the database
+func changeMeta(itemID uuid.UUID, meta universe.Meta) error {
+	itemSvc := sql.GetItemService()
+	return itemSvc.ChangeMeta(itemID, sql.Meta(meta))
+}
+
 // Saves a new item to the database
 func newItem(item *universe.Item) (*uuid.UUID, error) {
 	itemSvc := sql.GetItemService()

@@ -60,6 +60,7 @@ type SolarSystem struct {
 	JoinFactions         map[string]*JoinFactionTicket     // partially approved requests to join a player into a player faction
 	ViewMembers          map[string]*ViewMembersTicket     // approved requests to view player faction member list
 	KickMembers          map[string]*KickMemberTicket      // partially approved requests to kick a member from a player faction
+	ChangedMetaItems     map[string]*Item                  // items with changed metadata in need of saving
 }
 
 // Initializes internal aspects of SolarSystem
@@ -100,6 +101,7 @@ func (s *SolarSystem) Initialize() {
 	s.JoinFactions = make(map[string]*JoinFactionTicket)
 	s.ViewMembers = make(map[string]*ViewMembersTicket)
 	s.KickMembers = make(map[string]*KickMemberTicket)
+	s.ChangedMetaItems = make(map[string]*Item)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -161,6 +163,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 	s.tickCounter++
 }
 
+// processes the next message from each client in the system, should only be called from PeriodicUpdate
 func (s *SolarSystem) processClientEventQueues() {
 	// get message registry
 	msgRegistry := models.NewMessageRegistry()
@@ -1938,13 +1941,152 @@ func (s *SolarSystem) processClientEventQueues() {
 				// extract data
 				data := evt.Body.(models.ClientUseModKitBody)
 
-				// todo
-				shared.TeeLog(fmt.Sprintf("not yet implemented, use mod kit: %v", data))
+				// verify ship is docked
+				if sh.DockedAtStation == nil {
+					c.WriteErrorMessage("you must be docked to apply a mod kit")
+					continue
+				}
+
+				// find mod kit
+				modKit := sh.FindItemInCargo(data.ModKitItemID)
+
+				if modKit == nil || modKit.ItemFamilyID != "mod_kit" {
+					c.WriteErrorMessage("unable to find mod kit")
+					continue
+				}
+
+				// verify mod kit is unpackaged
+				if modKit.IsPackaged || modKit.Quantity != 1 {
+					c.WriteErrorMessage("you must unpackage a mod kit before use")
+					continue
+				}
+
+				// find module to mod
+				module := sh.FindItemInCargo(data.ModuleItemID)
+
+				if module == nil {
+					c.WriteErrorMessage("unable to find module")
+					continue
+				}
+
+				// verify its a module
+				modFamily := getModuleFamily(module.ItemFamilyID)
+
+				if modFamily == "" {
+					c.WriteErrorMessage("target is not a module")
+					continue
+				}
+
+				// verify the module is unpackaged
+				if module.IsPackaged || module.Quantity != 1 {
+					c.WriteErrorMessage("modules must be unpackaged before applying a mod kit")
+					continue
+				}
+
+				// consume mod kit
+				modKit.Quantity = 0
+				modKit.CoreDirty = true
+
+				// escalate to core for saving
+				s.ChangedQuantityItems[modKit.ID.String()] = modKit
+
+				// get mod kit attributes
+				damageChance, _ := modKit.Meta.GetFloat64("damage_chance")
+				successChance, _ := modKit.Meta.GetFloat64("success_chance")
+				maxAttributesAffected, _ := modKit.Meta.GetInt("max_attributes_affected")
+				maxMutation, _ := modKit.Meta.GetFloat64("max_mutation")
+
+				// iterate over item attributes
+				attributesChanged := 0
+
+				for k := range module.Meta {
+					// check if limit reached
+					if attributesChanged >= maxAttributesAffected {
+						break
+					}
+
+					// check if this is mutable
+					mutable := itemMetaIsMutable(k)
+
+					if !mutable {
+						continue
+					}
+
+					// get float64 value (all mutable attributes must be of this type)
+					attrVal, f := module.Meta.GetFloat64(k)
+
+					if !f {
+						continue
+					}
+
+					// do success roll
+					successRoll := rand.Float64()
+
+					if successRoll <= successChance {
+						// roll for mutation amount
+						mutationRoll := rand.Float64() * maxMutation
+
+						// roll for mutation direction
+						directionRoll := rand.Float64()
+						direction := 0
+
+						if directionRoll <= 0.5 {
+							direction = 1
+						} else {
+							direction = -1
+						}
+
+						mutationRoll *= float64(direction)
+
+						// apply to attribute
+						scaleFactor := 1.0 + mutationRoll
+						attrVal *= scaleFactor
+
+						// store in meta
+						module.Meta[k] = attrVal
+
+						// increment counter
+						attributesChanged++
+					}
+
+					// do damage roll
+					damageRoll := rand.Float64()
+
+					if damageRoll <= damageChance {
+						// roll for damage amount
+						mutationRoll := rand.Float64() * -1.0
+
+						// get hp
+						hp, _ := module.Meta.GetFloat64("hp")
+
+						// apply damage
+						hp *= mutationRoll
+
+						// check if broken
+						if int(hp) <= 1 {
+							// destroy module
+							module.CoreDirty = true
+							module.Quantity = 0
+
+							s.ChangedQuantityItems[module.ID.String()] = module
+						}
+
+						// update hp
+						module.Meta["hp"] = hp
+					}
+				}
+
+				if attributesChanged > 0 {
+					// save module
+					module.CoreDirty = true
+					s.ChangedMetaItems[module.ID.String()] = module
+				}
 			}
 		}
 	}
 }
 
+// Updates the state of ships in the solar system, should only be called from PeriodicUpdate
 func (s *SolarSystem) updateShips() {
 	// update ships
 	for _, e := range s.ships {
@@ -2090,12 +2232,14 @@ func (s *SolarSystem) updateShips() {
 	}
 }
 
+// updates the state of station in the system, should only be called from PeriodicUpdate
 func (s *SolarSystem) updateStations() {
 	for _, e := range s.stations {
 		e.PeriodicUpdate()
 	}
 }
 
+// updates the state of missiles in the system, should only be called from PeriodicUpdate
 func (s *SolarSystem) updateMissiles() {
 	// get target type registry
 	tgtTypeReg := models.NewTargetTypeRegistry()
@@ -2197,6 +2341,7 @@ func (s *SolarSystem) updateMissiles() {
 	}
 }
 
+// tests for and applies the effects of collisions in the system, should only be called from PeriodicUpdate
 func (s *SolarSystem) shipCollisionTesting() {
 	// ship collission testing
 	for _, sA := range s.ships {
@@ -2316,6 +2461,7 @@ func (s *SolarSystem) shipCollisionTesting() {
 	}
 }
 
+// sends routine updates to clients in the system, should only be called from PeriodicUpdate
 func (s *SolarSystem) sendClientUpdates() {
 	// initialize or decay tokens
 	for _, c := range s.clients {

@@ -335,40 +335,7 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume float64, rack string
 	defaultUUID := emptyUUID.String()
 
 	// convert item family to module family
-	var modFamily string = ""
-
-	if itemFamilyID == "gun_turret" {
-		modFamily = "gun"
-	} else if itemFamilyID == "missile_launcher" {
-		modFamily = "missile"
-	} else if itemFamilyID == "shield_booster" ||
-		itemFamilyID == "armor_plate" {
-		modFamily = "tank"
-	} else if itemFamilyID == "fuel_tank" {
-		modFamily = "fuel"
-	} else if itemFamilyID == "eng_oc" {
-		modFamily = "engine"
-	} else if itemFamilyID == "active_sink" {
-		modFamily = "heat"
-	} else if itemFamilyID == "heat_sink" {
-		modFamily = "heat"
-	} else if itemFamilyID == "drag_amp" {
-		modFamily = "tackle"
-	} else if itemFamilyID == "utility_miner" {
-		modFamily = "utility"
-	} else if itemFamilyID == "utility_siphon" {
-		modFamily = "utility"
-	} else if itemFamilyID == "utility_cloak" {
-		modFamily = "utility"
-	} else if itemFamilyID == "battery_pack" {
-		modFamily = "power"
-	} else if itemFamilyID == "aux_generator" {
-		modFamily = "power"
-	} else if itemFamilyID == "cargo_expander" {
-		modFamily = "cargo"
-	} else if itemFamilyID == "salvager" {
-		modFamily = "utility"
-	}
+	modFamily := getModuleFamily(itemFamilyID)
 
 	if modFamily == "" {
 		return -1, false
@@ -425,6 +392,46 @@ func (s *Ship) getFreeSlotIndex(itemFamilyID string, volume float64, rack string
 	}
 
 	return -1, false
+}
+
+// Helper function to map an item family to its module group, if it is a module
+func getModuleFamily(itemFamilyID string) string {
+	var modFamily string = ""
+
+	if itemFamilyID == "gun_turret" {
+		modFamily = "gun"
+	} else if itemFamilyID == "missile_launcher" {
+		modFamily = "missile"
+	} else if itemFamilyID == "shield_booster" ||
+		itemFamilyID == "armor_plate" {
+		modFamily = "tank"
+	} else if itemFamilyID == "fuel_tank" {
+		modFamily = "fuel"
+	} else if itemFamilyID == "eng_oc" {
+		modFamily = "engine"
+	} else if itemFamilyID == "active_sink" {
+		modFamily = "heat"
+	} else if itemFamilyID == "heat_sink" {
+		modFamily = "heat"
+	} else if itemFamilyID == "drag_amp" {
+		modFamily = "tackle"
+	} else if itemFamilyID == "utility_miner" {
+		modFamily = "utility"
+	} else if itemFamilyID == "utility_siphon" {
+		modFamily = "utility"
+	} else if itemFamilyID == "utility_cloak" {
+		modFamily = "utility"
+	} else if itemFamilyID == "battery_pack" {
+		modFamily = "power"
+	} else if itemFamilyID == "aux_generator" {
+		modFamily = "power"
+	} else if itemFamilyID == "cargo_expander" {
+		modFamily = "cargo"
+	} else if itemFamilyID == "salvager" {
+		modFamily = "utility"
+	}
+
+	return modFamily
 }
 
 // Returns a copy of the ship

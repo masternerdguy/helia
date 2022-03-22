@@ -54,3 +54,14 @@ var MutableModuleAttributes = [...]string{
 	"heat_sink_add",
 	"fuel_max_add",
 }
+
+// Helper function to determine whether or not a given item meta attribute can be mutated by a mod kit
+func itemMetaIsMutable(key string) bool {
+	for _, v := range MutableModuleAttributes {
+		if v == key {
+			return true
+		}
+	}
+
+	return false
+}

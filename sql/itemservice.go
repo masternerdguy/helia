@@ -242,3 +242,28 @@ func (s ItemService) ChangeQuantity(id uuid.UUID, quantity int) error {
 
 	return nil
 }
+
+// Updates the Metadata on an item
+func (s ItemService) ChangeMeta(id uuid.UUID, meta Meta) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update item
+	sql := `
+				UPDATE public.items SET meta=$2 WHERE id = $1;
+			`
+
+	q, err := db.Query(sql, id, meta)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}

@@ -324,6 +324,34 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(mi, sol)
 	}
 
+	// iterate over changed meta items
+	for id := range sol.ChangedMetaItems {
+		// capture reference and remove from map
+		mi := sol.ChangedMetaItems[id]
+		delete(sol.ChangedMetaItems, id)
+
+		// handle escalation on another goroutine
+		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			// lock item
+			mi.Lock.Lock("core.handleEscalations::ChangedMetaItems")
+			defer mi.Lock.Unlock()
+
+			// mark as dirty if not marked already
+			mi.CoreDirty = true
+
+			// save metadata of item to db
+			err := changeMeta(mi.ID, mi.Meta)
+
+			// error check
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("Unable to change metadata of item %v: %v", mi.ID, err))
+			} else {
+				// mark as clean
+				mi.CoreDirty = false
+			}
+		}(mi, sol)
+	}
+
 	// iterate over new items
 	for id := range sol.NewItems {
 		// capture reference and remove from map
