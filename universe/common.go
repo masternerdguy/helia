@@ -14,7 +14,17 @@ func (m Meta) GetFloat64(key string) (float64, bool) {
 		return 0, e
 	}
 
-	return v.(float64), e
+	// type switch to avoid crashes if the underlying type happens to be something unexpected
+	switch x := v.(type) {
+	case int:
+		return float64(x), e
+	case float64:
+		return x, e
+	case string:
+		return 0.0, e
+	default:
+		return 0.0, e
+	}
 }
 
 // Gets an int value from the metadata - returns a bool indicating whether it exists
@@ -25,18 +35,16 @@ func (m Meta) GetInt(key string) (int, bool) {
 		return 0, e
 	}
 
-	return int(v.(float64)), e
-}
-
-// Gets an int value from the metadata - returns a bool indicating whether it exists (special case where int is not a float under the hood)
-func (m Meta) GetPureInt(key string) (int, bool) {
-	v, e := m[key]
-
-	if !e {
-		return 0, e
+	switch x := v.(type) {
+	case int:
+		return x, e
+	case float64:
+		return int(x), e
+	case string:
+		return 0.0, e
+	default:
+		return 0.0, e
 	}
-
-	return v.(int), e
 }
 
 // Gets a bool value from the metadata - returns a bool indicating whether it exists
