@@ -2090,8 +2090,8 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 
 					// increment modifications counter
-					mf, _ := module.Meta.GetFloat64("customization_factor")
-					mf += float64(attributesChanged)
+					mf, _ := module.Meta.GetInt("customization_factor")
+					mf += attributesChanged
 
 					module.Meta["customization_factor"] = int(mf)
 
