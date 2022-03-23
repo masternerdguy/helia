@@ -93,8 +93,9 @@ func (e *HeliaEngine) Start() {
 								// log error for inspection
 								shared.TeeLog(fmt.Sprintf("solar system %v panicked: %v", sol.SystemName, r))
 
-								// panic again :)
-								panic(r)
+								// emergency shutdown
+								shared.TeeLog("! Emergency shutdown initiated due to solar system panic!")
+								e.Shutdown()
 							}
 						}(sol)
 
