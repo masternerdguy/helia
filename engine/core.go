@@ -87,6 +87,17 @@ func (e *HeliaEngine) Start() {
 
 					// spawn goroutine so defer works as expected
 					go func(sol *universe.SolarSystem) {
+						// handle panics caused by solar system
+						defer func(sol *universe.SolarSystem) {
+							if r := recover(); r != nil {
+								// log error for inspection
+								shared.TeeLog(fmt.Sprintf("solar system %v panicked: %v", sol.SystemName, r))
+
+								// panic again :)
+								panic(r)
+							}
+						}(sol)
+
 						// update system
 						sol.PeriodicUpdate()
 
