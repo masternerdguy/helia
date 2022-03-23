@@ -1,5 +1,7 @@
 package universe
 
+import "fmt"
+
 // Approximate value of Number.Epsilon in JS
 const Epsilon float64 = 2.2204460492503130808472633361816e-16
 
@@ -20,10 +22,8 @@ func (m Meta) GetFloat64(key string) (float64, bool) {
 		return float64(x), e
 	case float64:
 		return x, e
-	case string:
-		return 0.0, e
 	default:
-		return 0.0, e
+		panic(fmt.Sprintf("attempted to retrieve unexpected type from metadata: %v, %v", key, x))
 	}
 }
 
@@ -41,10 +41,8 @@ func (m Meta) GetInt(key string) (int, bool) {
 		return x, e
 	case float64:
 		return int(x), e
-	case string:
-		return 0.0, e
 	default:
-		return 0.0, e
+		panic(fmt.Sprintf("attempted to retrieve unexpected type from metadata: %v, %v", key, x))
 	}
 }
 
