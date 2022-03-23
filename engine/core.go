@@ -9,6 +9,7 @@ import (
 	"helia/universe"
 	"math/rand"
 	"os"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -92,6 +93,9 @@ func (e *HeliaEngine) Start() {
 							if r := recover(); r != nil {
 								// log error for inspection
 								shared.TeeLog(fmt.Sprintf("solar system %v panicked: %v", sol.SystemName, r))
+
+								// include stack trace
+								shared.TeeLog(fmt.Sprintf("stacktrace from panic: \n" + string(debug.Stack())))
 
 								// emergency shutdown
 								shared.TeeLog("! Emergency shutdown initiated due to solar system panic!")
