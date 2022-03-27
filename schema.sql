@@ -199,11 +199,11 @@ CREATE TABLE public.actionreports (
     id uuid NOT NULL,
     "timestamp" timestamp with time zone NOT NULL,
     shipid uuid NOT NULL,
-    involvedparties character varying[] NOT NULL,
     systemid uuid NOT NULL,
     actionreport jsonb NOT NULL,
     factionid uuid NOT NULL,
-    userid uuid NOT NULL
+    userid uuid NOT NULL,
+    involvedparties uuid[]
 );
 
 
