@@ -223,6 +223,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	itemSvc := sql.GetItemService()
 	schematicRunSvc := sql.GetSchematicRunService()
 	factionSvc := sql.GetFactionService()
+	actionLogSvc := sql.GetActionLogService()
 
 	// obtain lock
 	sol.Lock.Lock("core.handleEscalations")
@@ -526,6 +527,32 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			if err != nil {
 				shared.TeeLog(fmt.Sprintf("! Unable to mark ship %v as dead in db (%v)!", ds.ID, err))
+				return
+			}
+
+			// generate kill log
+			kl := generateKillLog(ds)
+
+			if kl == nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to generate kill log for ship %v!", ds.ID))
+				return
+			}
+
+			// save kill log
+			_, err = actionLogSvc.NewActionLog(
+				sql.ActionLog{
+					Report:          *kl,
+					ShipID:          ds.ID,
+					UserID:          ds.UserID,
+					FactionID:       ds.FactionID,
+					SolarSystemID:   ds.CurrentSystem.ID,
+					Timestamp:       *ds.DestroyedAt,
+					InvolvedUserIDs: []uuid.UUID{},
+				},
+			)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to save action log for ship %v - (%v)!", ds.ID, err))
 				return
 			}
 
