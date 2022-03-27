@@ -203,7 +203,7 @@ CREATE TABLE public.actionreports (
     actionreport jsonb NOT NULL,
     factionid uuid NOT NULL,
     userid uuid NOT NULL,
-    involvedparties uuid[]
+    involvedparties uuid[] NOT NULL
 );
 
 
