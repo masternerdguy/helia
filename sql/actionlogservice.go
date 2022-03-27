@@ -99,7 +99,8 @@ func (s ActionLogService) NewActionLog(e ActionLog) (*ActionLog, error) {
 
 // Structure represening a copy-pastable report of the death of a ship
 type KillLog struct {
-	Header KillLogHeader `json:"header"`
+	Header          KillLogHeader          `json:"header"`
+	InvolvedParties []KillLogInvolvedParty `json:"involvedParties"`
 }
 
 // Converts from a KillLog to JSON
@@ -149,4 +150,82 @@ func (a *KillLogHeader) Scan(value interface{}) error {
 	}
 
 	return json.Unmarshal(b, &a)
+}
+
+// Structure representing any combat between two ships
+type KillLogInvolvedParty struct {
+	// aggressor info
+	UserID        uuid.UUID `json:"userID"`
+	FactionID     uuid.UUID `json:"factionID"`
+	CharacterName string    `json:"characterName"`
+	FactionName   string    `json:"factionNane"`
+	IsNPC         bool      `json:"isNPC"`
+	LastAggressed time.Time `json:"lastAggressed"`
+	// aggressor ship info
+	ShipID           uuid.UUID `json:"shipID"`
+	ShipName         string    `json:"shipName"`
+	ShipTemplateID   uuid.UUID `json:"shipTemplateID"`
+	ShipTemplateName string    `json:"shipTemplateName"`
+	// location info
+	LastSolarSystemID   uuid.UUID `json:"lastSolarSystemID"`
+	LastSolarSystemName string    `json:"lastSolarSystemName"`
+	LastRegionID        uuid.UUID `json:"lastRegionID"`
+	LastRegionName      string    `json:"lastRegionName"`
+	LastPosX            float64   `json:"lastPosX"`
+	LastPosY            float64   `json:"lastPosY"`
+	// weapons used against victim
+	WeaponUse map[string]*KillLogWeaponUse `json:"weaponUse"`
+}
+
+// Converts from a KillLogInvolvedParty to JSON
+func (a KillLogHeader) KillLogInvolvedParty() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a KillLogInvolvedParty
+func (a *KillLogInvolvedParty) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
+}
+
+// Structure representing a weapon used in combat between two ships
+type KillLogWeaponUse struct {
+	ItemID          uuid.UUID `json:"itemID"`
+	ItemTypeID      uuid.UUID `json:"itemTypeID"`
+	ItemFamilyID    string    `json:"itemFamilyID"`
+	ItemFamilyName  string    `json:"itemFamilyName"`
+	ItemTypeName    string    `json:"itemTypeName"`
+	LastUsed        time.Time `json:"lastUsed"`
+	DamageInflicted float64   `json:"damageInflicted"`
+}
+
+// Converts from a KillLogWeaponUse to JSON
+func (a KillLogHeader) KillLogWeaponUse() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a KillLogWeaponUse
+func (a *KillLogWeaponUse) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
+}
+
+// Structure representing a ship fitting for a kill log
+type KillLogFitting struct {
+}
+
+// Structure representing a slot in a kill log fitting
+type KillLogSlot struct {
+}
+
+// Structure representing an item in the dead ship's cargo bay
+type KillLogCargoItem struct {
 }
