@@ -200,10 +200,11 @@ type Ship struct {
 	LeaveFactionArmed      bool
 	TemporaryModifiers     []TemporaryShipModifier
 	IsCloaked              bool
-	Aggressors             map[string]*shared.PlayerReputationSheet
-	aiIncompatibleOreFault bool // true when mining autopilot failed due to incompatible ore (for patch miners)
-	aiNoOrePulledFault     bool // true when mining autopilot failed due to pulling no ore (for patch miners)
-	WreckReady             bool // true when a dead ship has been saved to the db and the wreck can be looted
+	PlayerAggressors       map[string]*shared.PlayerReputationSheet // reputation sheets for human players who have attacked this ship
+	AggressionLog          map[string]*shared.AggressionLog         // details of aggression between any ships (human or otherwise)
+	aiIncompatibleOreFault bool                                     // true when mining autopilot failed due to incompatible ore (for patch miners)
+	aiNoOrePulledFault     bool                                     // true when mining autopilot failed due to pulling no ore (for patch miners)
+	WreckReady             bool                                     // true when a dead ship has been saved to the db and the wreck can be looted
 	Lock                   shared.LabeledMutex
 }
 
@@ -1387,35 +1388,21 @@ func (s *Ship) TotalCargoBayVolumeUsed(lock bool) float64 {
 }
 
 // Deals damage to the ship
-func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64, attackerRS *shared.PlayerReputationSheet) {
-	// update aggression table
-	if attackerRS != nil {
-		// obtain lock
-		attackerRS.Lock.Lock("ship.DealDamage")
-		defer attackerRS.Lock.Unlock()
-
-		// get attacking player's reputation sheet entry for this ship's faction
-		f, ok := attackerRS.FactionEntries[s.FactionID.String()]
-
-		if !ok {
-			// does not exist - create a neutral one
-			ne := shared.PlayerReputationSheetFactionEntry{
-				FactionID:        s.FactionID,
-				StandingValue:    0,
-				AreOpenlyHostile: false,
-			}
-
-			attackerRS.FactionEntries[s.FactionID.String()] = &ne
-			f = attackerRS.FactionEntries[s.FactionID.String()]
-		}
-
-		// update temporary hostility due to aggro flag
-		at := time.Now().Add(15 * time.Minute)
-		f.TemporarilyOpenlyHostileUntil = &at
-
-		// store entry
-		s.Aggressors[attackerRS.UserID.String()] = attackerRS
-	}
+func (s *Ship) DealDamage(
+	shieldDmg float64,
+	armorDmg float64,
+	hullDmg float64,
+	attackerRS *shared.PlayerReputationSheet,
+	attackerModule *FittedSlot,
+) {
+	// update aggression tables
+	s.updateAggressionTables(
+		shieldDmg,
+		armorDmg,
+		hullDmg,
+		attackerRS,
+		attackerModule,
+	)
 
 	// apply shield damage
 	s.Shield -= shieldDmg
@@ -1453,35 +1440,19 @@ func (s *Ship) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64, 
 }
 
 // Siphons energy from the ship, returns the actual amount siphoned
-func (s *Ship) SiphonEnergy(maxSiphonAmount float64, attackerRS *shared.PlayerReputationSheet) float64 {
-	// update aggression table
-	if attackerRS != nil {
-		// obtain lock
-		attackerRS.Lock.Lock("ship.SiphonEnergy")
-		defer attackerRS.Lock.Unlock()
-
-		// get attacking player's reputation sheet entry for this ship's faction
-		f, ok := attackerRS.FactionEntries[s.FactionID.String()]
-
-		if !ok {
-			// does not exist - create a neutral one
-			ne := shared.PlayerReputationSheetFactionEntry{
-				FactionID:        s.FactionID,
-				StandingValue:    0,
-				AreOpenlyHostile: false,
-			}
-
-			attackerRS.FactionEntries[s.FactionID.String()] = &ne
-			f = attackerRS.FactionEntries[s.FactionID.String()]
-		}
-
-		// update temporary hostility due to aggro flag
-		at := time.Now().Add(15 * time.Minute)
-		f.TemporarilyOpenlyHostileUntil = &at
-
-		// store entry
-		s.Aggressors[attackerRS.UserID.String()] = attackerRS
-	}
+func (s *Ship) SiphonEnergy(
+	maxSiphonAmount float64,
+	attackerRS *shared.PlayerReputationSheet,
+	attackerModule *FittedSlot,
+) float64 {
+	// update aggression tables
+	s.updateAggressionTables(
+		0,
+		0,
+		0,
+		attackerRS,
+		attackerModule,
+	)
 
 	// limit amount to siphon so that the remaining amount is positive
 	actualSiphon := 0.0
@@ -4280,7 +4251,7 @@ func (s *Ship) SelfDestruct(lock bool) error {
 	}
 
 	// blow it up
-	s.DealDamage(s.GetRealMaxShield()+1, s.GetRealMaxArmor()+1, s.GetRealMaxHull()+1, nil)
+	s.DealDamage(s.GetRealMaxShield()+1, s.GetRealMaxArmor()+1, s.GetRealMaxHull()+1, nil, nil)
 
 	return nil
 }
@@ -4828,7 +4799,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	// apply damage (or ore / ice pulled if asteroid) to target
 	if *m.TargetType == tgtReg.Ship {
 		c := tgtI.(*Ship)
-		c.DealDamage(shieldDmg, armorDmg, hullDmg, m.shipMountedOn.ReputationSheet)
+		c.DealDamage(shieldDmg, armorDmg, hullDmg, m.shipMountedOn.ReputationSheet, m)
 	} else if *m.TargetType == tgtReg.Station {
 		c := tgtI.(*Station)
 		c.DealDamage(shieldDmg, armorDmg, hullDmg)
@@ -5163,7 +5134,7 @@ func (m *FittedSlot) activateAsShieldBooster() bool {
 	shieldBoost *= m.usageExperienceModifier
 
 	// apply boost to mounting ship
-	m.shipMountedOn.DealDamage(-shieldBoost, 0, 0, nil)
+	m.shipMountedOn.DealDamage(-shieldBoost, 0, 0, nil, nil)
 
 	// include visual effect if present
 	activationPGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
@@ -5338,7 +5309,7 @@ func (m *FittedSlot) activateAsAetherDragger() bool {
 	if *m.TargetType == tgtReg.Ship {
 		c := tgtI.(*Ship)
 
-		// calculate effect duration in ticks\
+		// calculate effect duration in ticks
 		cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
 		dT := (cooldown * 1000) / Heartbeat
 
@@ -5350,6 +5321,15 @@ func (m *FittedSlot) activateAsAetherDragger() bool {
 		}
 
 		c.TemporaryModifiers = append(c.TemporaryModifiers, modifier)
+
+		// update aggression tables
+		c.updateAggressionTables(
+			0,
+			0,
+			0,
+			m.shipMountedOn.ReputationSheet,
+			m,
+		)
 	}
 
 	// include visual effect if present
@@ -5721,7 +5701,12 @@ func (m *FittedSlot) activateAsUtilitySiphon() bool {
 	// siphon energy from target ship
 	if *m.TargetType == tgtReg.Ship {
 		c := tgtI.(*Ship)
-		actualSiphon := c.SiphonEnergy(maxSiphonAmt, m.shipMountedOn.ReputationSheet)
+
+		actualSiphon := c.SiphonEnergy(
+			maxSiphonAmt,
+			m.shipMountedOn.ReputationSheet,
+			m,
+		)
 
 		// add to energy
 		m.shipMountedOn.Energy += actualSiphon
@@ -6037,4 +6022,99 @@ func (m *FittedSlot) GetExperienceModifier() float64 {
 	}
 
 	return mx
+}
+
+// Updates aggression records associated with a ship
+func (s *Ship) updateAggressionTables(
+	shieldDmg float64,
+	armorDmg float64,
+	hullDmg float64,
+	attackerRS *shared.PlayerReputationSheet,
+	attackerModule *FittedSlot,
+) {
+	// update player aggression table
+	if attackerRS != nil {
+		// obtain lock
+		attackerRS.Lock.Lock("ship.updateAggressionTables")
+		defer attackerRS.Lock.Unlock()
+
+		// get attacking player's reputation sheet entry for this ship's faction
+		f, ok := attackerRS.FactionEntries[s.FactionID.String()]
+
+		if !ok {
+			// does not exist - create a neutral one
+			ne := shared.PlayerReputationSheetFactionEntry{
+				FactionID:        s.FactionID,
+				StandingValue:    0,
+				AreOpenlyHostile: false,
+			}
+
+			attackerRS.FactionEntries[s.FactionID.String()] = &ne
+			f = attackerRS.FactionEntries[s.FactionID.String()]
+		}
+
+		if shieldDmg+armorDmg+hullDmg >= 0 {
+			// update temporary hostility due to aggro flag
+			at := time.Now().Add(15 * time.Minute)
+			f.TemporarilyOpenlyHostileUntil = &at
+		}
+
+		// store entry
+		s.PlayerAggressors[attackerRS.UserID.String()] = attackerRS
+	}
+
+	// update aggression table
+	if attackerModule != nil {
+		// get attacker's aggro sheet entry
+		f, ok := s.AggressionLog[attackerModule.shipMountedOn.ID.String()]
+
+		if !ok {
+			// does not exist - create blank one
+			s.AggressionLog[attackerModule.shipMountedOn.ID.String()] = &shared.AggressionLog{
+				UserID:           attackerModule.shipMountedOn.UserID,
+				FactionID:        attackerModule.shipMountedOn.FactionID,
+				CharacterName:    attackerModule.shipMountedOn.CharacterName,
+				FactionName:      attackerModule.shipMountedOn.Faction.Name,
+				IsNPC:            attackerModule.shipMountedOn.IsNPC,
+				LastAggressed:    time.Now(),
+				ShipID:           attackerModule.shipMountedOn.ID,
+				ShipName:         attackerModule.shipMountedOn.ShipName,
+				ShipTemplateID:   attackerModule.shipMountedOn.TemplateData.ID,
+				ShipTemplateName: attackerModule.shipMountedOn.TemplateData.ShipTemplateName,
+				WeaponUse:        make(map[string]*shared.AggressionLogWeaponUse),
+			}
+
+			f = s.AggressionLog[attackerModule.shipMountedOn.ID.String()]
+		}
+
+		// get module entry from aggro row
+		g, ok := f.WeaponUse[attackerModule.ItemID.String()]
+
+		if !ok {
+			// does not exist - create a blank one
+			f.WeaponUse[attackerModule.ItemID.String()] = &shared.AggressionLogWeaponUse{
+				ItemID:          attackerModule.ItemID,
+				ItemTypeID:      attackerModule.ItemTypeID,
+				ItemFamilyName:  attackerModule.ItemTypeFamilyName,
+				ItemTypeName:    attackerModule.ItemTypeName,
+				ItemFamilyID:    attackerModule.ItemTypeFamily,
+				DamageInflicted: 0,
+				LastUsed:        time.Now(),
+			}
+
+			g = f.WeaponUse[attackerModule.ItemID.String()]
+		}
+
+		// update aggro info
+		f.LastSolarSystemID = attackerModule.shipMountedOn.CurrentSystem.ID
+		f.LastSolarSystemName = attackerModule.shipMountedOn.CurrentSystem.SystemName
+		f.LastRegionID = attackerModule.shipMountedOn.CurrentSystem.RegionID
+		f.LastRegionName = attackerModule.shipMountedOn.CurrentSystem.RegionName
+		f.LastPosX = attackerModule.shipMountedOn.PosX
+		f.LastPosY = attackerModule.shipMountedOn.PosY
+		f.LastAggressed = time.Now()
+
+		g.DamageInflicted += (shieldDmg + armorDmg + hullDmg)
+		g.LastUsed = time.Now()
+	}
 }

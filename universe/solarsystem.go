@@ -18,6 +18,7 @@ type SolarSystem struct {
 	ID                    uuid.UUID
 	SystemName            string
 	RegionID              uuid.UUID
+	RegionName            string
 	HoldingFactionID      uuid.UUID
 	PosX                  float64
 	PosY                  float64
@@ -2243,7 +2244,7 @@ func (s *SolarSystem) updateShips() {
 					e.CharacterName,
 					e.Texture,
 					bm,
-					e.Aggressors,
+					e.PlayerAggressors,
 				),
 			)
 		} else {
@@ -2291,7 +2292,13 @@ func (s *SolarSystem) updateMissiles() {
 					hullDmg, _ := m.ItemMeta.GetFloat64("hull_damage")
 
 					// apply damage to ship
-					sB.DealDamage(shieldDmg, armorDmg, hullDmg, m.shipMountedOn.ReputationSheet)
+					sB.DealDamage(
+						shieldDmg,
+						armorDmg,
+						hullDmg,
+						m.shipMountedOn.ReputationSheet,
+						m,
+					)
 
 					// schedule missile removal
 					dropMissiles = append(dropMissiles, mA.ID.String())
