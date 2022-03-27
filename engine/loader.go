@@ -125,14 +125,22 @@ func LoadUniverse() (*universe.Universe, error) {
 		systems := make(map[string]*universe.SolarSystem)
 
 		for _, f := range ss {
+			hf := factions[f.HoldingFactionID.String()]
+			hfn := ""
+
+			if hf != nil {
+				hfn = hf.Name
+			}
+
 			s := universe.SolarSystem{
-				ID:               f.ID,
-				SystemName:       f.SystemName,
-				RegionID:         f.RegionID,
-				RegionName:       e.RegionName,
-				HoldingFactionID: f.HoldingFactionID,
-				PosX:             f.PosX,
-				PosY:             f.PosY,
+				ID:                 f.ID,
+				SystemName:         f.SystemName,
+				RegionID:           f.RegionID,
+				RegionName:         e.RegionName,
+				HoldingFactionID:   f.HoldingFactionID,
+				HoldingFactionName: hfn,
+				PosX:               f.PosX,
+				PosY:               f.PosY,
 				Lock: shared.LabeledMutex{
 					Structure: "SolarSystem",
 					UID:       fmt.Sprintf("%v :: %v :: %v", f.ID, time.Now(), rand.Float64()),
@@ -1602,6 +1610,142 @@ func hookSchematics(sp *universe.Ship) {
 			}
 		}
 	}
+}
+
+// Generates a kill log for a dead ship
+func generateKillLog(ship *universe.Ship) *sql.KillLog {
+	// null check
+	if ship == nil || ship.Faction == nil || ship.CurrentSystem == nil || ship.DestroyedAt == nil {
+		return nil
+	}
+
+	// fill base structure
+	log := sql.KillLog{
+		Header: sql.KillLogHeader{
+			VictimID:               ship.UserID,
+			VictimName:             ship.CharacterName,
+			VictimFactionID:        ship.FactionID,
+			VictimFactionName:      ship.Faction.Name,
+			VictimShipTemplateID:   ship.TemplateData.ID,
+			VictimShipTemplateName: ship.TemplateData.ShipTemplateName,
+			VictimShipID:           ship.ID,
+			VictimShipName:         ship.ShipName,
+			Timestamp:              *ship.DestroyedAt,
+			SolarSystemID:          ship.CurrentSystem.ID,
+			SolarSystemName:        ship.CurrentSystem.SystemName,
+			RegionID:               ship.CurrentSystem.RegionID,
+			RegionName:             ship.CurrentSystem.RegionName,
+			InvolvedParties:        len(ship.AggressionLog),
+			IsNPC:                  ship.IsNPC,
+			HoldingFactionID:       ship.CurrentSystem.HoldingFactionID,
+			HoldingFactionName:     ship.CurrentSystem.HoldingFactionName,
+		},
+		Fitting: sql.KillLogFitting{
+			ARack: []sql.KillLogSlot{},
+			BRack: []sql.KillLogSlot{},
+			CRack: []sql.KillLogSlot{},
+		},
+		Cargo:           []sql.KillLogCargoItem{},
+		InvolvedParties: []sql.KillLogInvolvedParty{},
+	}
+
+	// fill slots
+	for _, e := range ship.Fitting.ARack {
+		m, _ := e.ItemMeta.GetBool("**MODIFIED**")
+
+		log.Fitting.ARack = append(log.Fitting.ARack, sql.KillLogSlot{
+			ItemID:         e.ItemID,
+			ItemTypeID:     e.ItemTypeID,
+			ItemFamilyID:   e.ItemTypeFamily,
+			ItemTypeName:   e.ItemTypeName,
+			ItemFamilyName: e.ItemTypeFamilyName,
+			IsModified:     m,
+		})
+	}
+
+	for _, e := range ship.Fitting.BRack {
+		m, _ := e.ItemMeta.GetBool("**MODIFIED**")
+
+		log.Fitting.BRack = append(log.Fitting.BRack, sql.KillLogSlot{
+			ItemID:         e.ItemID,
+			ItemTypeID:     e.ItemTypeID,
+			ItemFamilyID:   e.ItemTypeFamily,
+			ItemTypeName:   e.ItemTypeName,
+			ItemFamilyName: e.ItemTypeFamilyName,
+			IsModified:     m,
+		})
+	}
+
+	for _, e := range ship.Fitting.CRack {
+		m, _ := e.ItemMeta.GetBool("**MODIFIED**")
+		cf, _ := e.ItemMeta.GetInt("customization_factor")
+
+		log.Fitting.CRack = append(log.Fitting.CRack, sql.KillLogSlot{
+			ItemID:              e.ItemID,
+			ItemTypeID:          e.ItemTypeID,
+			ItemFamilyID:        e.ItemTypeFamily,
+			ItemTypeName:        e.ItemTypeName,
+			ItemFamilyName:      e.ItemTypeFamilyName,
+			IsModified:          m,
+			CustomizationFactor: cf,
+		})
+	}
+
+	// fill cargo
+	for _, e := range ship.CargoBay.Items {
+		log.Cargo = append(log.Cargo, sql.KillLogCargoItem{
+			ItemID:         e.ID,
+			ItemTypeID:     e.ItemTypeID,
+			ItemFamilyID:   e.ItemFamilyID,
+			ItemTypeName:   e.ItemTypeName,
+			ItemFamilyName: e.ItemFamilyName,
+			Quantity:       e.Quantity,
+			IsPackaged:     e.IsPackaged,
+		})
+	}
+
+	// fill involved parties
+	for _, p := range ship.AggressionLog {
+		// core of structure
+		pt := sql.KillLogInvolvedParty{
+			UserID:              p.UserID,
+			FactionID:           p.FactionID,
+			CharacterName:       p.CharacterName,
+			FactionName:         p.FactionName,
+			IsNPC:               p.IsNPC,
+			LastAggressed:       p.LastAggressed,
+			ShipID:              p.ShipID,
+			ShipName:            p.ShipName,
+			ShipTemplateID:      p.ShipTemplateID,
+			ShipTemplateName:    p.ShipTemplateName,
+			LastSolarSystemID:   p.LastSolarSystemID,
+			LastSolarSystemName: p.LastSolarSystemName,
+			LastRegionID:        p.LastRegionID,
+			LastRegionName:      p.LastRegionName,
+			LastPosX:            p.LastPosX,
+			LastPosY:            p.LastPosY,
+			WeaponUse:           map[string]*sql.KillLogWeaponUse{},
+		}
+
+		// fill weapon usages
+		for _, w := range p.WeaponUse {
+			pt.WeaponUse[w.ItemFamilyID] = &sql.KillLogWeaponUse{
+				ItemID:          w.ItemID,
+				ItemTypeID:      w.ItemTypeID,
+				ItemFamilyID:    w.ItemFamilyID,
+				ItemFamilyName:  w.ItemFamilyName,
+				ItemTypeName:    w.ItemTypeName,
+				LastUsed:        w.LastUsed,
+				DamageInflicted: w.DamageInflicted,
+			}
+		}
+
+		// store in log
+		log.InvolvedParties = append(log.InvolvedParties, pt)
+	}
+
+	// return kill log
+	return &log
 }
 
 // Updates a ship in the database

@@ -20,6 +20,7 @@ type SolarSystem struct {
 	RegionID              uuid.UUID
 	RegionName            string
 	HoldingFactionID      uuid.UUID
+	HoldingFactionName    string
 	PosX                  float64
 	PosY                  float64
 	Universe              *Universe

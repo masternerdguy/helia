@@ -100,6 +100,8 @@ func (s ActionLogService) NewActionLog(e ActionLog) (*ActionLog, error) {
 // Structure represening a copy-pastable report of the death of a ship
 type KillLog struct {
 	Header          KillLogHeader          `json:"header"`
+	Fitting         KillLogFitting         `json:"fitting"`
+	Cargo           []KillLogCargoItem     `json:"cargo"`
 	InvolvedParties []KillLogInvolvedParty `json:"involvedParties"`
 }
 
@@ -120,21 +122,23 @@ func (a *KillLog) Scan(value interface{}) error {
 
 // Structure representing a summary header for a kill log
 type KillLogHeader struct {
-	VictimID           uuid.UUID `json:"victimID"`
-	VictimName         string    `json:"victimName"`
-	VictimFactionID    uuid.UUID `json:"victimFactionID"`
-	VictimFactionName  string    `json:"victimFactionName"`
-	VictimShipTypeID   uuid.UUID `json:"victimShipTypeID"`
-	VictimShipTypeName string    `json:"victimShipTypeName"`
-	VictimShipID       uuid.UUID `json:"victimShipID"`
-	VictimShipName     string    `json:"victimShipName"`
-	Timestamp          time.Time `json:"timestamp"`
-	SolarSystemID      uuid.UUID `json:"solarSystemID"`
-	SolarSystemName    string    `json:"solarSystemName"`
-	RegionID           uuid.UUID `json:"regionID"`
-	RegionName         string    `json:"regionName"`
-	InvolvedParties    int       `json:"involvedParties"`
-	IsNPC              bool      `json:"isNPC"`
+	VictimID               uuid.UUID `json:"victimID"`
+	VictimName             string    `json:"victimName"`
+	VictimFactionID        uuid.UUID `json:"victimFactionID"`
+	VictimFactionName      string    `json:"victimFactionName"`
+	VictimShipTemplateID   uuid.UUID `json:"victimShipTemplateID"`
+	VictimShipTemplateName string    `json:"victimShipTemplateName"`
+	VictimShipID           uuid.UUID `json:"victimShipID"`
+	VictimShipName         string    `json:"victimShipName"`
+	Timestamp              time.Time `json:"timestamp"`
+	SolarSystemID          uuid.UUID `json:"solarSystemID"`
+	SolarSystemName        string    `json:"solarSystemName"`
+	RegionID               uuid.UUID `json:"regionID"`
+	RegionName             string    `json:"regionName"`
+	HoldingFactionID       uuid.UUID `json:"holdingFactionID"`
+	HoldingFactionName     string    `json:"holdingFactionName"`
+	InvolvedParties        int       `json:"involvedParties"`
+	IsNPC                  bool      `json:"isNPC"`
 }
 
 // Converts from a KillLogHeader to JSON
@@ -220,12 +224,74 @@ func (a *KillLogWeaponUse) Scan(value interface{}) error {
 
 // Structure representing a ship fitting for a kill log
 type KillLogFitting struct {
+	ARack []KillLogSlot `json:"rackA"`
+	BRack []KillLogSlot `json:"rackB"`
+	CRack []KillLogSlot `json:"rackC"`
+}
+
+// Converts from a KillLogFitting to JSON
+func (a KillLogHeader) KillLogFitting() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a KillLogFitting
+func (a *KillLogFitting) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
 }
 
 // Structure representing a slot in a kill log fitting
 type KillLogSlot struct {
+	ItemID              uuid.UUID `json:"itemID"`
+	ItemTypeID          uuid.UUID `json:"itemTypeID"`
+	ItemFamilyID        string    `json:"itemFamilyID"`
+	ItemTypeName        string    `json:"itemTypeName"`
+	ItemFamilyName      string    `json:"itemFamilyName"`
+	IsModified          bool      `json:"isModified"`
+	CustomizationFactor int       `json:"customizationFactor"`
+}
+
+// Converts from a KillLogSlot to JSON
+func (a KillLogHeader) KillLogSlot() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a KillLogSlot
+func (a *KillLogSlot) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
 }
 
 // Structure representing an item in the dead ship's cargo bay
 type KillLogCargoItem struct {
+	ItemID         uuid.UUID `json:"itemID"`
+	ItemTypeID     uuid.UUID `json:"itemTypeID"`
+	ItemFamilyID   string    `json:"itemFamilyID"`
+	ItemTypeName   string    `json:"ItemTypeName"`
+	ItemFamilyName string    `json:"itemFamilyName"`
+	Quantity       int       `json:"quantity"`
+	IsPackaged     bool      `json:"isPackaged"`
+}
+
+// Converts from a KillLogCargoItem to JSON
+func (a KillLogHeader) KillLogCargoItem() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a KillLogCargoItem
+func (a *KillLogCargoItem) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
 }
