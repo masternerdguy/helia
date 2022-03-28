@@ -223,7 +223,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	itemSvc := sql.GetItemService()
 	schematicRunSvc := sql.GetSchematicRunService()
 	factionSvc := sql.GetFactionService()
-	actionLogSvc := sql.GetActionLogService()
+	actionReportSvc := sql.GetActionReportService()
 
 	// obtain lock
 	sol.Lock.Lock("core.handleEscalations")
@@ -530,24 +530,29 @@ func handleEscalations(sol *universe.SolarSystem) {
 				return
 			}
 
-			// generate kill log
+			// generate action report
 			kl := generateKillLog(ds)
 
 			if kl == nil {
-				shared.TeeLog(fmt.Sprintf("! Unable to generate kill log for ship %v!", ds.ID))
+				shared.TeeLog(fmt.Sprintf("! Unable to generate kill report from ship %v!", ds.ID))
 				return
 			}
 
-			// save kill log
-			_, err = actionLogSvc.NewActionLog(
-				sql.ActionLog{
+			// get involved party user ids
+			ips := make(map[string]interface{})
+
+			for i, p := range kl.InvolvedParties {
+				ips[fmt.Sprint(i+1)] = p.UserID.String()
+			}
+
+			ips[fmt.Sprint(0)] = ds.UserID.String()
+
+			// save action report
+			_, err = actionReportSvc.NewActionReport(
+				sql.ActionReport{
 					Report:          *kl,
-					ShipID:          ds.ID,
-					UserID:          ds.UserID,
-					FactionID:       ds.FactionID,
-					SolarSystemID:   ds.CurrentSystem.ID,
 					Timestamp:       *ds.DestroyedAt,
-					InvolvedUserIDs: []uuid.UUID{},
+					InvolvedParties: ips,
 				},
 			)
 

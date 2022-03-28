@@ -198,12 +198,8 @@ ALTER PROCEDURE public.sp_purgehumans() OWNER TO developer;
 CREATE TABLE public.actionreports (
     id uuid NOT NULL,
     "timestamp" timestamp with time zone NOT NULL,
-    shipid uuid NOT NULL,
-    systemid uuid NOT NULL,
     actionreport jsonb NOT NULL,
-    factionid uuid NOT NULL,
-    userid uuid NOT NULL,
-    involvedparties uuid[] NOT NULL
+    involvedparties jsonb NOT NULL
 );
 
 
@@ -1050,38 +1046,6 @@ CREATE INDEX fki_fk_users_containers_escrow ON public.users USING btree (escrow_
 --
 
 CREATE INDEX fki_fk_users_ships ON public.users USING btree (current_shipid);
-
-
---
--- Name: actionreports fk_actionreports_factionid; Type: FK CONSTRAINT; Schema: public; Owner: developer
---
-
-ALTER TABLE ONLY public.actionreports
-    ADD CONSTRAINT fk_actionreports_factionid FOREIGN KEY (factionid) REFERENCES public.factions(id);
-
-
---
--- Name: actionreports fk_actionreports_ships; Type: FK CONSTRAINT; Schema: public; Owner: developer
---
-
-ALTER TABLE ONLY public.actionreports
-    ADD CONSTRAINT fk_actionreports_ships FOREIGN KEY (shipid) REFERENCES public.ships(id);
-
-
---
--- Name: actionreports fk_actionreports_systems; Type: FK CONSTRAINT; Schema: public; Owner: developer
---
-
-ALTER TABLE ONLY public.actionreports
-    ADD CONSTRAINT fk_actionreports_systems FOREIGN KEY (systemid) REFERENCES public.universe_systems(id);
-
-
---
--- Name: actionreports fk_actionreports_userid; Type: FK CONSTRAINT; Schema: public; Owner: developer
---
-
-ALTER TABLE ONLY public.actionreports
-    ADD CONSTRAINT fk_actionreports_userid FOREIGN KEY (userid) REFERENCES public.users(id);
 
 
 --

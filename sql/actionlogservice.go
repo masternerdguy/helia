@@ -10,28 +10,44 @@ import (
 	"github.com/google/uuid"
 )
 
-// Facility for interacting with the ActionLogs table in the database
-type ActionLogService struct{}
+// Facility for interacting with the ActionReports table in the database
+type ActionReportService struct{}
 
-// Returns a ActionLog service for interacting with ActionLogs in the database
-func GetActionLogService() ActionLogService {
-	return ActionLogService{}
+// Returns a ActionReport service for interacting with ActionReports in the database
+func GetActionReportService() ActionReportService {
+	return ActionReportService{}
 }
 
-// Structure representing a row in the ActionLogs table
-type ActionLog struct {
+// Structure representing a row in the ActionReports table
+type ActionReport struct {
 	ID              uuid.UUID
 	Report          KillLog
-	ShipID          uuid.UUID
-	UserID          uuid.UUID
-	FactionID       uuid.UUID
-	SolarSystemID   uuid.UUID
 	Timestamp       time.Time
+	InvolvedParties Meta
+}
+
+// Structure representing involved parties in an action report
+type InvolvedPartiesMeta struct {
 	InvolvedUserIDs []uuid.UUID
 }
 
-// Finds and returns an ActionLog by its id
-func (s ActionLogService) GetActionLogByID(id uuid.UUID) (*ActionLog, error) {
+// Converts from a InvolvedPartiesMeta to JSON
+func (a InvolvedPartiesMeta) Value() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+// Converts from JSON to a InvolvedPartiesMeta
+func (a *InvolvedPartiesMeta) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
+}
+
+// Finds and returns an ActionReport by its id
+func (s ActionReportService) GetActionReportByID(id uuid.UUID) (*ActionReport, error) {
 	// get db handle
 	db, err := connect()
 
@@ -39,31 +55,31 @@ func (s ActionLogService) GetActionLogByID(id uuid.UUID) (*ActionLog, error) {
 		return nil, err
 	}
 
-	// find ActionLog with this id
-	actionLog := ActionLog{}
+	// find ActionReport with this id
+	actionReport := ActionReport{}
 
 	sqlStatement :=
 		`
-			SELECT id, "timestamp", shipid, systemid, actionreport, factionid, userid, involvedparties
+			SELECT id, "timestamp", actionreport, involvedparties
 			FROM public.actionreports
 			WHERE id=$1;
 		`
 
 	row := db.QueryRow(sqlStatement, id)
 
-	switch err := row.Scan(&actionLog.ID, &actionLog.Timestamp, &actionLog.ShipID, &actionLog.SolarSystemID,
-		&actionLog.Report, &actionLog.FactionID, &actionLog.UserID, &actionLog.InvolvedUserIDs); err {
+	switch err := row.Scan(&actionReport.ID, &actionReport.Timestamp,
+		&actionReport.Report, &actionReport.InvolvedParties); err {
 	case sql.ErrNoRows:
-		return nil, errors.New("actionLog not found")
+		return nil, errors.New("actionReport not found")
 	case nil:
-		return &actionLog, nil
+		return &actionReport, nil
 	default:
 		return nil, err
 	}
 }
 
-// Creates a new action log
-func (s ActionLogService) NewActionLog(e ActionLog) (*ActionLog, error) {
+// Creates a new action report
+func (s ActionReportService) NewActionReport(e ActionReport) (*ActionReport, error) {
 	// get db handle
 	db, err := connect()
 
@@ -75,14 +91,14 @@ func (s ActionLogService) NewActionLog(e ActionLog) (*ActionLog, error) {
 	sql :=
 		`
 			INSERT INTO public.actionreports(
-				id, "timestamp", shipid, systemid, actionreport, factionid, userid, involvedparties)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+				id, "timestamp", actionreport, involvedparties)
+			VALUES ($1, $2, $3, $4);
 		`
 
 	uid := uuid.New()
 
-	q, err := db.Query(sql, e.ID, e.Timestamp, e.ShipID, e.SolarSystemID,
-		e.Report, e.FactionID, e.UserID, e.InvolvedUserIDs)
+	q, err := db.Query(sql, uid, e.Timestamp,
+		e.Report, e.InvolvedParties)
 
 	if err != nil {
 		return nil, err
@@ -93,7 +109,7 @@ func (s ActionLogService) NewActionLog(e ActionLog) (*ActionLog, error) {
 	// update id in model
 	e.ID = uid
 
-	// return pointer to inserted action log model
+	// return pointer to inserted action report model
 	return &e, nil
 }
 
@@ -103,6 +119,7 @@ type KillLog struct {
 	Fitting         KillLogFitting         `json:"fitting"`
 	Cargo           []KillLogCargoItem     `json:"cargo"`
 	InvolvedParties []KillLogInvolvedParty `json:"involvedParties"`
+	Wallet          int64                  `json:"wallet"`
 }
 
 // Converts from a KillLog to JSON

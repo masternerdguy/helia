@@ -1647,6 +1647,7 @@ func generateKillLog(ship *universe.Ship) *sql.KillLog {
 		},
 		Cargo:           []sql.KillLogCargoItem{},
 		InvolvedParties: []sql.KillLogInvolvedParty{},
+		Wallet:          int64(ship.Wallet),
 	}
 
 	// fill slots
