@@ -669,6 +669,26 @@ CREATE TABLE public.users (
 ALTER TABLE public.users OWNER TO developer;
 
 --
+-- Name: vw_flattenactionreportsbyparty; Type: VIEW; Schema: public; Owner: developer
+--
+
+CREATE VIEW public.vw_flattenactionreportsbyparty AS
+ SELECT iu.id,
+    iu.party,
+    iu."timestamp",
+    iu.actionreport,
+    iu.involvedparties
+   FROM ( SELECT actionreports.id,
+            actionreports."timestamp",
+            actionreports.actionreport,
+            actionreports.involvedparties,
+            (jsonb_each(actionreports.involvedparties))::character varying AS party
+           FROM public.actionreports) iu;
+
+
+ALTER TABLE public.vw_flattenactionreportsbyparty OWNER TO developer;
+
+--
 -- Name: factions factions_pkey; Type: CONSTRAINT; Schema: public; Owner: developer
 --
 

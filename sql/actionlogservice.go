@@ -113,6 +113,48 @@ func (s ActionReportService) NewActionReport(e ActionReport) (*ActionReport, err
 	return &e, nil
 }
 
+// Retrieves all action reports involving a given user from the database
+func (s ActionReportService) GetActionReportsByUserID(userID uuid.UUID, skip int, take int) ([]ActionReport, error) {
+	reports := make([]ActionReport, 0)
+
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// load action reports
+	sql := `
+				select id, "timestamp", actionreport, involvedparties from vw_flattenactionreportsbyparty
+				where party like '%$1%'
+				group by id, "timestamp", actionreport, involvedparties
+				order by "timestamp" desc
+				offset $2
+				limit $3
+			`
+
+	rows, err := db.Query(sql, userID, skip, take)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		r := ActionReport{}
+
+		// scan into report structure
+		rows.Scan(&r.ID, &r.Timestamp, &r.Report, &r.InvolvedParties)
+
+		// append to report slice
+		reports = append(reports, r)
+	}
+
+	return reports, err
+}
+
 // Structure represening a copy-pastable report of the death of a ship
 type KillLog struct {
 	Header          KillLogHeader          `json:"header"`
