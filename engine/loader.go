@@ -1730,7 +1730,7 @@ func generateKillLog(ship *universe.Ship) *sql.KillLog {
 
 		// fill weapon usages
 		for _, w := range p.WeaponUse {
-			pt.WeaponUse[w.ItemFamilyID] = &sql.KillLogWeaponUse{
+			pt.WeaponUse[w.ItemID.String()] = &sql.KillLogWeaponUse{
 				ItemID:          w.ItemID,
 				ItemTypeID:      w.ItemTypeID,
 				ItemFamilyID:    w.ItemFamilyID,
