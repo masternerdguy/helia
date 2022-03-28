@@ -1639,6 +1639,8 @@ func generateKillLog(ship *universe.Ship) *sql.KillLog {
 			IsNPC:                  ship.IsNPC,
 			HoldingFactionID:       ship.CurrentSystem.HoldingFactionID,
 			HoldingFactionName:     ship.CurrentSystem.HoldingFactionName,
+			PosX:                   ship.PosX,
+			PosY:                   ship.PosY,
 		},
 		Fitting: sql.KillLogFitting{
 			ARack: []sql.KillLogSlot{},

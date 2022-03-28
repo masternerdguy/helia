@@ -198,6 +198,8 @@ type KillLogHeader struct {
 	HoldingFactionName     string    `json:"holdingFactionName"`
 	InvolvedParties        int       `json:"involvedParties"`
 	IsNPC                  bool      `json:"isNPC"`
+	PosX                   float64   `json:"posX"`
+	PosY                   float64   `json:"posY"`
 }
 
 // Converts from a KillLogHeader to JSON
