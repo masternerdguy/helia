@@ -1653,27 +1653,31 @@ func generateKillLog(ship *universe.Ship) *sql.KillLog {
 	// fill slots
 	for _, e := range ship.Fitting.ARack {
 		m, _ := e.ItemMeta.GetBool("**MODIFIED**")
+		cf, _ := e.ItemMeta.GetInt("customization_factor")
 
 		log.Fitting.ARack = append(log.Fitting.ARack, sql.KillLogSlot{
-			ItemID:         e.ItemID,
-			ItemTypeID:     e.ItemTypeID,
-			ItemFamilyID:   e.ItemTypeFamily,
-			ItemTypeName:   e.ItemTypeName,
-			ItemFamilyName: e.ItemTypeFamilyName,
-			IsModified:     m,
+			ItemID:              e.ItemID,
+			ItemTypeID:          e.ItemTypeID,
+			ItemFamilyID:        e.ItemTypeFamily,
+			ItemTypeName:        e.ItemTypeName,
+			ItemFamilyName:      e.ItemTypeFamilyName,
+			IsModified:          m,
+			CustomizationFactor: cf,
 		})
 	}
 
 	for _, e := range ship.Fitting.BRack {
 		m, _ := e.ItemMeta.GetBool("**MODIFIED**")
+		cf, _ := e.ItemMeta.GetInt("customization_factor")
 
 		log.Fitting.BRack = append(log.Fitting.BRack, sql.KillLogSlot{
-			ItemID:         e.ItemID,
-			ItemTypeID:     e.ItemTypeID,
-			ItemFamilyID:   e.ItemTypeFamily,
-			ItemTypeName:   e.ItemTypeName,
-			ItemFamilyName: e.ItemTypeFamilyName,
-			IsModified:     m,
+			ItemID:              e.ItemID,
+			ItemTypeID:          e.ItemTypeID,
+			ItemFamilyID:        e.ItemTypeFamily,
+			ItemTypeName:        e.ItemTypeName,
+			ItemFamilyName:      e.ItemTypeFamilyName,
+			IsModified:          m,
+			CustomizationFactor: cf,
 		})
 	}
 
