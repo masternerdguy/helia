@@ -70,6 +70,10 @@ type MessageRegistry struct {
 	MembersUpdate          int
 	KickMember             int
 	UseModKit              int
+	ViewActionReportsPage  int
+	ActionReportsPage      int
+	ViewActionReportDetail int
+	ActionReportDetail     int
 }
 
 // Registry of target types
@@ -148,6 +152,10 @@ func NewMessageRegistry() *MessageRegistry {
 		MembersUpdate:          57,
 		KickMember:             58,
 		UseModKit:              59,
+		ViewActionReportsPage:  60,
+		ActionReportsPage:      61,
+		ViewActionReportDetail: 62,
+		ActionReportDetail:     63,
 	}
 }
 
@@ -896,4 +904,135 @@ type ClientUseModKitBody struct {
 	SessionID    uuid.UUID `json:"sid"`
 	ModuleItemID uuid.UUID `json:"moduleId"`
 	ModKitItemID uuid.UUID `json:"kitId"`
+}
+
+// Body containing a request to view a page of action reports
+type ClientViewActionReportsPageBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	Page      int       `json:"page"`
+	Count     int       `json:"count"`
+}
+
+// Body containing a low-overhead index of available action reports on a page
+type ServerActionReportsPage struct {
+	Page int                         `json:"page"`
+	Logs []ServerActionReportSummary `json:"logs"`
+}
+
+// Body containing a request to view a full action report
+type ClientViewActionReportDetailBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	KillID    uuid.UUID `json:"killId"`
+}
+
+// Body containing a full action report requested by the client
+type ServerActionReportDetail struct {
+	ID            uuid.UUID     `json:"id"`
+	ServerKillLog ServerKillLog `json:"log"`
+}
+
+// Structure containing a low-overhead action report row
+type ServerActionReportSummary struct {
+	ID         uuid.UUID `json:"id"`
+	VictimName string    `json:"victim"`
+	VictimShip string    `json:"ship"`
+	Timestamp  string    `json:"timestamp"`
+	SystemName string    `json:"systemName"`
+}
+
+// Structure represening a copy-pastable report of the death of a ship
+type ServerKillLog struct {
+	Header          ServerKillLogHeader          `json:"header"`
+	Fitting         ServerKillLogFitting         `json:"fitting"`
+	Cargo           []ServerKillLogCargoItem     `json:"cargo"`
+	InvolvedParties []ServerKillLogInvolvedParty `json:"involvedParties"`
+	Wallet          int64                        `json:"wallet"`
+}
+
+// Structure representing a summary header for a kill log
+type ServerKillLogHeader struct {
+	VictimID               uuid.UUID `json:"victimID"`
+	VictimName             string    `json:"victimName"`
+	VictimFactionID        uuid.UUID `json:"victimFactionID"`
+	VictimFactionName      string    `json:"victimFactionName"`
+	VictimShipTemplateID   uuid.UUID `json:"victimShipTemplateID"`
+	VictimShipTemplateName string    `json:"victimShipTemplateName"`
+	VictimShipID           uuid.UUID `json:"victimShipID"`
+	VictimShipName         string    `json:"victimShipName"`
+	Timestamp              time.Time `json:"timestamp"`
+	SolarSystemID          uuid.UUID `json:"solarSystemID"`
+	SolarSystemName        string    `json:"solarSystemName"`
+	RegionID               uuid.UUID `json:"regionID"`
+	RegionName             string    `json:"regionName"`
+	HoldingFactionID       uuid.UUID `json:"holdingFactionID"`
+	HoldingFactionName     string    `json:"holdingFactionName"`
+	InvolvedParties        int       `json:"involvedParties"`
+	IsNPC                  bool      `json:"isNPC"`
+	PosX                   float64   `json:"posX"`
+	PosY                   float64   `json:"posY"`
+}
+
+// Structure representing any combat between two ships
+type ServerKillLogInvolvedParty struct {
+	// aggressor info
+	UserID        uuid.UUID `json:"userID"`
+	FactionID     uuid.UUID `json:"factionID"`
+	CharacterName string    `json:"characterName"`
+	FactionName   string    `json:"factionNane"`
+	IsNPC         bool      `json:"isNPC"`
+	LastAggressed time.Time `json:"lastAggressed"`
+	// aggressor ship info
+	ShipID           uuid.UUID `json:"shipID"`
+	ShipName         string    `json:"shipName"`
+	ShipTemplateID   uuid.UUID `json:"shipTemplateID"`
+	ShipTemplateName string    `json:"shipTemplateName"`
+	// location info
+	LastSolarSystemID   uuid.UUID `json:"lastSolarSystemID"`
+	LastSolarSystemName string    `json:"lastSolarSystemName"`
+	LastRegionID        uuid.UUID `json:"lastRegionID"`
+	LastRegionName      string    `json:"lastRegionName"`
+	LastPosX            float64   `json:"lastPosX"`
+	LastPosY            float64   `json:"lastPosY"`
+	// weapons used against victim
+	WeaponUse map[string]*ServerKillLogWeaponUse `json:"weaponUse"`
+}
+
+// Structure representing a weapon used in combat between two ships
+type ServerKillLogWeaponUse struct {
+	ItemID          uuid.UUID `json:"itemID"`
+	ItemTypeID      uuid.UUID `json:"itemTypeID"`
+	ItemFamilyID    string    `json:"itemFamilyID"`
+	ItemFamilyName  string    `json:"itemFamilyName"`
+	ItemTypeName    string    `json:"itemTypeName"`
+	LastUsed        time.Time `json:"lastUsed"`
+	DamageInflicted float64   `json:"damageInflicted"`
+}
+
+// Structure representing a ship fitting for a kill log
+type ServerKillLogFitting struct {
+	ARack []ServerKillLogSlot `json:"rackA"`
+	BRack []ServerKillLogSlot `json:"rackB"`
+	CRack []ServerKillLogSlot `json:"rackC"`
+}
+
+// Structure representing a slot in a kill log fitting
+type ServerKillLogSlot struct {
+	ItemID              uuid.UUID `json:"itemID"`
+	ItemTypeID          uuid.UUID `json:"itemTypeID"`
+	ItemFamilyID        string    `json:"itemFamilyID"`
+	ItemTypeName        string    `json:"itemTypeName"`
+	ItemFamilyName      string    `json:"itemFamilyName"`
+	IsModified          bool      `json:"isModified"`
+	CustomizationFactor int       `json:"customizationFactor"`
+}
+
+// Structure representing an item in the dead ship's cargo bay
+type ServerKillLogCargoItem struct {
+	ItemID         uuid.UUID `json:"itemID"`
+	ItemTypeID     uuid.UUID `json:"itemTypeID"`
+	ItemFamilyID   string    `json:"itemFamilyID"`
+	ItemTypeName   string    `json:"ItemTypeName"`
+	ItemFamilyName string    `json:"itemFamilyName"`
+	Quantity       int       `json:"quantity"`
+	IsPackaged     bool      `json:"isPackaged"`
 }
