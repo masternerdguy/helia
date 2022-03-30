@@ -58,6 +58,7 @@ import { ServerSchematicRunsUpdate } from './wsModels/bodies/schematicRunsUpdate
 import { Wreck } from './engineModels/wreck';
 import { ServerApplicationsUpdate } from './wsModels/bodies/applicationsUpdate';
 import { ServerMembersUpdate } from './wsModels/bodies/membersUpdate';
+import { ActionReportsWindow } from './gdi/windows/actionReportsWindow';
 
 class EngineSack {
   constructor() {}
@@ -91,6 +92,7 @@ class EngineSack {
   experienceSheetWindow: ExperienceSheetWindow;
   schematicRunsWindow: SchematicRunsWindow;
   systemChatWindow: SystemChatWindow;
+  actionReportsWindow: ActionReportsWindow;
   lastShiftDown: number;
 
   windows: GDIWindow[];
@@ -273,6 +275,13 @@ export function clientStart(
   engineSack.schematicRunsWindow.setWsService(engineSack.wsSvc);
   engineSack.schematicRunsWindow.pack();
 
+  engineSack.actionReportsWindow = new ActionReportsWindow();
+  engineSack.actionReportsWindow.setX(410);
+  engineSack.actionReportsWindow.setY(410);
+  engineSack.actionReportsWindow.initialize();
+  engineSack.actionReportsWindow.setWsService(engineSack.wsSvc);
+  engineSack.actionReportsWindow.pack();
+
   // link windows to window manager
   engineSack.windowManager.manageWindow(engineSack.overviewWindow, '☀');
   engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☍');
@@ -289,6 +298,7 @@ export function clientStart(
   engineSack.windowManager.manageWindow(engineSack.systemChatWindow, '⋉');
   engineSack.windowManager.manageWindow(engineSack.experienceSheetWindow, '✇');
   engineSack.windowManager.manageWindow(engineSack.schematicRunsWindow, '⨻');
+  engineSack.windowManager.manageWindow(engineSack.actionReportsWindow, '🄧');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
@@ -306,6 +316,7 @@ export function clientStart(
     engineSack.systemChatWindow,
     engineSack.experienceSheetWindow,
     engineSack.schematicRunsWindow,
+    engineSack.actionReportsWindow,
     engineSack.windowManager,
   ];
 
@@ -406,6 +417,7 @@ function handleJoin(d: GameMessage) {
   engineSack.propertySheetWindow.setHidden(true);
   engineSack.experienceSheetWindow.setHidden(true);
   engineSack.schematicRunsWindow.setHidden(true);
+  engineSack.actionReportsWindow.setHidden(true);
 
   // start game loop
   engineSack.lastFrameTime = Date.now();
@@ -998,6 +1010,10 @@ function handleCurrentShipUpdate(d: GameMessage) {
   // update reputation sheet window
   engineSack.reputationSheetWindow.setWsService(engineSack.wsSvc);
   engineSack.reputationSheetWindow.setPlayer(engineSack.player);
+
+  // update action reports window
+  engineSack.actionReportsWindow.setWsService(engineSack.wsSvc);
+  engineSack.actionReportsWindow.setPlayer(engineSack.player);
 }
 
 function handleFactionUpdate(d: GameMessage) {
