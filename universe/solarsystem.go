@@ -2105,6 +2105,14 @@ func (s *SolarSystem) processClientEventQueues() {
 					s.ChangedMetaItems[module.ID.String()] = module
 				}
 			}
+		} else if evt.Type == msgRegistry.ViewActionReportsPage {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientViewActionReportsPageBody)
+
+				// todo
+				shared.TeeLog(fmt.Sprintf("todo: view action reports page %v", data))
+			}
 		}
 	}
 }

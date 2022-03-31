@@ -447,6 +447,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientUseModKit(&client, &b)
+		} else if m.MessageType == msgRegistry.ViewActionReportsPage {
+			// decode body as ClientViewActionReportsPageBody
+			b := models.ClientViewActionReportsPageBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientViewActionReportsPage(&client, &b)
 		}
 	}
 }
@@ -1811,6 +1818,29 @@ func (l *SocketListener) handleClientUseModKit(client *shared.GameClient, body *
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.UseModKit, true)
+	}
+}
+
+func (l *SocketListener) handleClientViewActionReportsPage(client *shared.GameClient, body *models.ClientViewActionReportsPageBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		shared.TeeLog(fmt.Sprintf("handleClientViewActionReportsPage: id spoof attempt: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.NewMessageRegistry()
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.ViewActionReportsPage, false)
 	}
 }
 
