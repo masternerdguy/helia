@@ -27,7 +27,7 @@ SET default_table_access_method = heap;
 CREATE TABLE public.factions (
     id uuid NOT NULL,
     name character varying(32) NOT NULL,
-    description character varying(8192) NOT NULL,
+    description character varying(16384) NOT NULL,
     meta jsonb NOT NULL,
     ticker character varying(3) DEFAULT '???'::character varying NOT NULL,
     isnpc boolean DEFAULT false NOT NULL,
