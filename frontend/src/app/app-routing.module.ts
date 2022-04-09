@@ -3,8 +3,10 @@ import { Routes, RouterModule } from '@angular/router';
 import { SignupComponent } from './auth/signup/signup.component';
 import { LoginComponent } from './auth/login/login.component';
 import { HomeComponent } from './auth/home/home.component';
+import { LoreComponent } from './auth/lore/lore.component';
 
 const routes: Routes = [
+  { path: 'lore', component: LoreComponent },
   { path: 'auth/signup', component: SignupComponent },
   { path: 'auth/signin', component: LoginComponent },
   { path: '', component: HomeComponent },
