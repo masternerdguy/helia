@@ -124,9 +124,9 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 		// convert to string
 		o := base64.RawStdEncoding.EncodeToString(b.Bytes())
 
-		// obfuscate
+		// obfuscate (must use same key as in socketlistener.go)
 		utc := time.Now().UTC()
-		o = obfuscate(o, fmt.Sprintf("%v^%v|%v*%v", utc.Minute(), utc.Hour(), utc.Month(), utc.Year()))
+		o = obfuscate(o, fmt.Sprintf("%v^%v|%v*%v", utc.Minute(), utc.Hour(), utc.Day(), utc.Year()))
 
 		// send message
 		c.Conn.WriteMessage(1, []byte(o))

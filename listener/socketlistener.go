@@ -118,7 +118,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		// unmarshall
 		json.Unmarshal(r, &m)
 
-		// deobfuscate message
+		// deobfuscate message (must use same key as in gameclient.go)
 		utc := time.Now().UTC()
 		m.DeobfuscateBody(fmt.Sprintf("%v^%v|%v*%v", utc.Minute(), utc.Hour(), utc.Day(), utc.Year()))
 

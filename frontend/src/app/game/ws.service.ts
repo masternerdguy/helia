@@ -13,6 +13,7 @@ export class WsService {
   lastMessageReceivedAt: number;
   sid: string;
   ackToken: number;
+  skew: number = 0;
 
   constructor() {}
 
@@ -23,18 +24,7 @@ export class WsService {
     this.ws = webSocket({
       url: environment.wsUrl + 'connect',
       deserializer: (e: MessageEvent) => {
-        // deobfuscate
-        const z = this.obfuscate(e.data, this.getKey());
-
-        console.log(z);
-
-        // decompress
-        const decompressed = pako.inflate(this.base64ToArrayBuffer(z), {
-          to: 'string',
-        });
-
-        // parse
-        return JSON.parse(decompressed);
+        return this.parse(e);
       },
       serializer: (value: GameMessage) => JSON.stringify(value),
     });
@@ -52,10 +42,46 @@ export class WsService {
     this.sendMessage(MessageTypes.Join, b);
   }
 
+  private parse(e: MessageEvent<any>): any {
+    // deobfuscate
+    let z = this.obfuscate(e.data, this.getKey(this.skew));
+
+    if (!z.startsWith('H4sIAAAAAAAA')) {
+      let skew = -1;
+
+      while (!z.startsWith('H4sIAAAAAAAA')) {
+        skew++;
+        z = this.obfuscate(e.data, this.getKey(skew));
+
+        if (skew > 1) {
+          // not parsable
+          const stub = new GameMessage();
+          stub.body = '';
+          stub.type = -999;
+
+          return stub;
+        }
+      }
+
+      this.skew = skew;
+    }
+
+    // decompress
+    const decompressed = pako.inflate(this.base64ToArrayBuffer(z), {
+      to: 'string',
+    });
+
+    // parse
+    const json = JSON.parse(decompressed);
+
+    // return result
+    return json;
+  }
+
   sendMessage(type: number, body: any) {
     // obfuscate
     const j = JSON.stringify(body);
-    const x = this.obfuscate(j, this.getKey());
+    const x = this.obfuscate(j, this.getKey(this.skew));
 
     // package body as GameMessage
     const g = new GameMessage();
@@ -82,11 +108,13 @@ export class WsService {
     return bytes.buffer;
   }
 
-  getKey(): string {
+  // computes key accounting for potential skew
+  getKey(offset: number): string {
     const now = new Date(Date.now());
 
-    console.log(`${now.getUTCMinutes()}^${now.getUTCHours()}|${now.getUTCDate()}*${now.getUTCFullYear()}`)
-    return `${now.getUTCMinutes()}^${now.getUTCHours()}|${now.getUTCDate()}*${now.getUTCFullYear()}`
+    return `${
+      now.getUTCMinutes() + offset
+    }^${now.getUTCHours()}|${now.getUTCDate()}*${now.getUTCFullYear()}`;
   }
 
   // performs a xor on a string to obfuscate / deobfuscate it
@@ -94,7 +122,9 @@ export class WsService {
     var result = '';
 
     for (var i = 0; i < text.length; i++) {
-      result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+      result += String.fromCharCode(
+        text.charCodeAt(i) ^ key.charCodeAt(i % key.length)
+      );
     }
 
     return result;
