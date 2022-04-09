@@ -316,6 +316,20 @@ type GameMessage struct {
 	MessageBody string `json:"body"`
 }
 
+// Deobfuscates the body of an incoming game message
+func (m *GameMessage) DeobfuscateBody(key string) {
+	m.MessageBody = deobfuscateHelper(m.MessageBody, key)
+}
+
+func deobfuscateHelper(input string, key string) (output string) {
+	// this must be the same logic as obfuscate in gameclient.go!
+	for i := 0; i < len(input); i++ {
+		output += string(input[i] ^ key[i%len(key)])
+	}
+
+	return output
+}
+
 // Body for a server join request from the client
 type ClientJoinBody struct {
 	SessionID uuid.UUID `json:"sid"`

@@ -23,9 +23,17 @@ export class WsService {
     this.ws = webSocket({
       url: environment.wsUrl + 'connect',
       deserializer: (e: MessageEvent) => {
-        const decompressed = pako.inflate(this.base64ToArrayBuffer(e.data), {
+        // deobfuscate
+        const z = this.obfuscate(e.data, this.getKey());
+
+        console.log(z);
+
+        // decompress
+        const decompressed = pako.inflate(this.base64ToArrayBuffer(z), {
           to: 'string',
         });
+
+        // parse
         return JSON.parse(decompressed);
       },
       serializer: (value: GameMessage) => JSON.stringify(value),
@@ -45,9 +53,13 @@ export class WsService {
   }
 
   sendMessage(type: number, body: any) {
+    // obfuscate
+    const j = JSON.stringify(body);
+    const x = this.obfuscate(j, this.getKey());
+
     // package body as GameMessage
     const g = new GameMessage();
-    g.body = JSON.stringify(body);
+    g.body = x;
     g.type = type;
 
     // send message to server
@@ -68,5 +80,23 @@ export class WsService {
     }
 
     return bytes.buffer;
+  }
+
+  getKey(): string {
+    const now = new Date(Date.now());
+
+    console.log(`${now.getUTCMinutes()}^${now.getUTCHours()}|${now.getUTCDate()}*${now.getUTCFullYear()}`)
+    return `${now.getUTCMinutes()}^${now.getUTCHours()}|${now.getUTCDate()}*${now.getUTCFullYear()}`
+  }
+
+  // performs a xor on a string to obfuscate / deobfuscate it
+  obfuscate(text: string, key: string) {
+    var result = '';
+
+    for (var i = 0; i < text.length; i++) {
+      result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+
+    return result;
   }
 }

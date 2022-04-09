@@ -107,15 +107,20 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 	for {
 		// read message from client
 		_, r, err := c.ReadMessage()
-
 		m := models.GameMessage{}
-		json.Unmarshal(r, &m)
 
 		// exit if read failed
 		if err != nil {
 			shared.TeeLog(fmt.Sprintf("ws read error: %v", err.Error()))
 			break
 		}
+
+		// unmarshall
+		json.Unmarshal(r, &m)
+
+		// deobfuscate message
+		utc := time.Now().UTC()
+		m.DeobfuscateBody(fmt.Sprintf("%v^%v|%v*%v", utc.Minute(), utc.Hour(), utc.Day(), utc.Year()))
 
 		// handle message based on type
 		if m.MessageType == msgRegistry.GlobalAck {

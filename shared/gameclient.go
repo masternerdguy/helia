@@ -124,6 +124,10 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 		// convert to string
 		o := base64.RawStdEncoding.EncodeToString(b.Bytes())
 
+		// obfuscate
+		utc := time.Now().UTC()
+		o = obfuscate(o, fmt.Sprintf("%v^%v|%v*%v", utc.Minute(), utc.Hour(), utc.Month(), utc.Year()))
+
 		// send message
 		c.Conn.WriteMessage(1, []byte(o))
 	} else {
@@ -244,4 +248,14 @@ func (c *GameClient) ClearLastGlobalAckToken() {
 	defer c.Lock.Unlock()
 
 	c.lastGlobalAckToken = -1
+}
+
+// performs a XOR on a string to obfuscate / deobfuscate it
+func obfuscate(input string, key string) (output string) {
+	// this must be the same logic as deobfuscateHelper in gamemessage.go!
+	for i := 0; i < len(input); i++ {
+		output += string(input[i] ^ key[i%len(key)])
+	}
+
+	return output
 }
