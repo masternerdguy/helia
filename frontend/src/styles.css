@@ -32,7 +32,10 @@
 
 body {
     background-image: url("/assets/site/background.png");
-    background-size: fill;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
 }
 
 div {

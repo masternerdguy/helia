@@ -1,6 +1,9 @@
 #site-header {
     background-color: black;
     color: white;
+    position: fixed;
+    width: 100%;
+    top: 0;
 }
 
 #site-container {
@@ -8,6 +11,7 @@
     color: white;
     padding: 5px;
     border-radius: 7px;
+    margin-top: 70px;
 }
 
 #header-branding {
