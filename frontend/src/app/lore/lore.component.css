@@ -1,0 +1,13 @@
+.lore-container {
+    padding: 10px;
+}
+
+.lore-description {
+    margin-top: 15px;
+    white-space: pre-wrap;
+}
+
+.lore-header {
+    color: antiquewhite;
+    cursor: pointer;
+}

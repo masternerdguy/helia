@@ -1,3 +1,17 @@
 <div>
-    
+    <div>
+        <h2>Factions</h2>
+        <div *ngFor="let data of factionLoreData">
+            <div class="lore-container">
+                <div class="lore-header">
+                    <span>{{data.factionName}}</span>
+                    <span style="float: right;">{{data.factionTicker}}</span>
+                    <span class="clearfix"></span>
+                </div>
+                <div class="lore-description" style="display: none;">
+                    <p>{{data.factionDescription}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
