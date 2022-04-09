@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { IFactionLoreData } from './factions/iFactionLoreData';
 import { WanderersLoreData } from './factions/wanderers';
 import * as $ from 'jquery';
+import { InterstarLoreData } from './factions/interstar';
 
 @Component({
   selector: 'app-lore',
@@ -9,7 +10,10 @@ import * as $ from 'jquery';
   styleUrls: ['./lore.component.css'],
 })
 export class LoreComponent implements OnInit {
-  factionLoreData: IFactionLoreData[] = [new WanderersLoreData()];
+  factionLoreData: IFactionLoreData[] = [
+    new InterstarLoreData(),
+    new WanderersLoreData()
+  ];
 
   constructor() {}
 
