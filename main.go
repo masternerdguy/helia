@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"helia/engine"
 	"helia/listener"
 	"helia/shared"
@@ -18,9 +17,6 @@ func main() {
 		printLogger,
 		dbLogger,
 	)
-
-	utc := time.Now().UTC()
-	log.Println(fmt.Sprintf("%v^%v|%v*%v", utc.Minute(), utc.Hour(), utc.Day(), utc.Year()))
 
 	// purge old logs
 	shared.TeeLog("Nuking logs from previous boots...")
