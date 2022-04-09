@@ -30,20 +30,32 @@ export class StarMapWindow extends GDIWindow {
         };
 
         this.wsSvc.sendMessage(MessageTypes.ViewStarMap, msg);
-        this.needInitialFetch = false;
       }
 
       // center map on current system
-      setTimeout(() => {
-        try {
-          this.centerMap();
-        } catch(error) {
-          // try again
-          setTimeout(() => {
+      let done = false;
+
+      if (this.needInitialFetch) {
+        // keep trying to center until fetch is finished
+        setInterval(() => {
+          if (done) {
+            return;
+          }
+
+          try {
             this.centerMap();
-          }, 500)
-        }
-      }, 500);
+            done = true;
+          } catch (error) {}
+        }, 500);
+      } else {
+        // just center it
+        this.centerMap();
+      }
+
+      // clear initial fetch flag
+      if (this.needInitialFetch) {
+        this.needInitialFetch = false;
+      }
     });
 
     super.setOnPreHandleRender((ctx) => {
