@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AccountService } from '../account.service';
 import { WsService } from 'src/app/game/ws.service';
 import { clientStart } from 'src/app/game/clientEngine';
+import * as $ from 'jquery';
 
 @Component({
   selector: 'app-login',
@@ -39,8 +40,10 @@ export class LoginComponent implements OnInit {
         )[0].parentNode.parentNode as any;
         layoutContainer.removeAttribute('class');
 
-        const header = document.getElementsByTagName('h1')[0] as any;
-        header.style.display = 'none';
+        $('#site-header').remove();
+        $('#site-container').removeAttr('id');
+        $('router-outlet').remove();
+        $('br').remove();
 
         // prevent overflow causing scroll in body
         const documentBody = document.getElementsByTagName('body')[0] as any;
