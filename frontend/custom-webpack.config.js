@@ -28,6 +28,6 @@ module.exports = {
             stringArrayWrappersType: 'variable',
             stringArrayThreshold: 1,
             target: 'browser',
-        }, ['vendor.js', 'scripts.js', 'styles.js', 'runtime.js', 'polyfill.js'])
+        }, [])
     ]
 };
