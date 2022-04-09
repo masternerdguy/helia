@@ -29,3 +29,32 @@
     font-family: FiraCode-VF;
     src: url(assets/fonts/FiraCode-VF.woff2) format("woff2");
 }
+
+body {
+    background-image: url("/assets/site/background.png");
+    background-size: fill;
+}
+
+div {
+    font-family: "FiraCode-Regular";
+}
+
+h2 {
+    color: aquamarine;
+    margin-bottom: 15px;
+}
+
+label {
+    color: aqua;
+    margin-top: 10px;
+}
+
+.info-text {
+    font-size: 10px;
+    color: lightblue;
+}
+
+.center {
+    margin:0 auto !important;
+    display:block !important;
+}

@@ -66,8 +66,8 @@ export enum MessageTypes {
   MembersUpdate = 57,
   KickMember = 58,
   UseModKit = 59,
-  ViewActionReportsPage =  60,
-  ActionReportsPage =      61,
+  ViewActionReportsPage = 60,
+  ActionReportsPage = 61,
   ViewActionReportDetail = 62,
-  ActionReportDetail =     63,
+  ActionReportDetail = 63,
 }

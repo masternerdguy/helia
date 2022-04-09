@@ -11,7 +11,7 @@
         </div>
         <br/>
         <div>
-            <label>Choose your starting faction...</label>
+            <label>Choose your starting faction</label>
             <div>
                 <input 
                     type="radio" id="ksr" name="startgroup" value="282b12c9-59e6-412a-8122-6fe07640a0c0" (change)="setStart($event)"/>
@@ -43,8 +43,10 @@
             <input type="password" class="form-control" placeholder="Confirm your good password..." id="confirmpassword" #confirmpassword />
         </div>
         <br/>
-        <button type="button" class="btn btn-primary" (click)="register()">
-            Submit
-        </button>
+        <p>
+            <button type="button" class="btn btn-primary center" (click)="register()">
+                Submit
+            </button>
+        </p>
     </form>
 </div>

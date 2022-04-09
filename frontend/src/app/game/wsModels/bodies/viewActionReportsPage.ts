@@ -1,5 +1,5 @@
 export class ClientViewActionReportsPage {
-    sid: string;
-    page: number;
-    count: number;
+  sid: string;
+  page: number;
+  count: number;
 }

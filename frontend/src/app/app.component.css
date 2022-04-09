@@ -1,0 +1,35 @@
+#site-header {
+    background-color: black;
+    color: white;
+}
+
+#site-container {
+    background-color: black;
+    color: white;
+    padding: 5px;
+    border-radius: 7px;
+}
+
+#header-branding {
+    margin-left: 10px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.header-cell {
+    margin-top: 9px; 
+    display: inline-block;
+}
+
+.menu-item {
+    margin-left: 15px;
+    display: inline-block;
+    font-family: "FiraCode-Light";
+    border: 1px solid aquamarine;
+    color: antiquewhite;
+    position: relative;
+    top: -7px;
+    padding: 9px;
+    border-radius: 10px;
+    cursor: pointer;
+}

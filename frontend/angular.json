@@ -29,7 +29,8 @@
               "src/assets/asteroids",
               "src/assets/missiles",
               "src/assets/wrecks",
-              "src/assets/fonts"
+              "src/assets/fonts",
+              "src/assets/site"
             ],
             "styles": [
               "src/styles.css",
@@ -37,7 +38,8 @@
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js"
+              "node_modules/bootstrap/dist/js/bootstrap.min.js",
+              "node_modules/jquery/dist/jquery.min.js"
             ],
             "vendorChunk": true,
             "extractLicenses": false,
