@@ -44,7 +44,7 @@ export class StarMapWindow extends GDIWindow {
 
         this.camera.x = currentSystemEntry.x;
         this.camera.y = currentSystemEntry.y;
-      }, 100);
+      }, 500);
     });
 
     super.setOnPreHandleRender((ctx) => {
