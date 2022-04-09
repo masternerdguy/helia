@@ -92,48 +92,51 @@ func (c *GameClient) Initialize() {
 
 // Writes a message to a client
 func (c *GameClient) WriteMessage(msg *models.GameMessage) {
-	// return if connection closed
-	if c.Dead {
-		return
-	}
-
-	// obtain lock
-	c.Lock.Lock("gameclient.WriteMessage")
-	defer c.Lock.Unlock()
-
-	// package message as json
-	json, err := json.Marshal(msg)
-
-	if err == nil {
-		// compress message
-		var b bytes.Buffer
-		gz := gzip.NewWriter(&b)
-
-		if _, err := gz.Write([]byte(json)); err != nil {
-			// dump error message to console
-			TeeLog(err.Error())
+	// dispatch to a separate goroutine
+	go func(c *GameClient) {
+		// return if connection closed
+		if c.Dead {
 			return
 		}
 
-		if err := gz.Close(); err != nil {
+		// package message as json
+		json, err := json.Marshal(msg)
+
+		if err == nil {
+			// compress message
+			var b bytes.Buffer
+			gz := gzip.NewWriter(&b)
+
+			if _, err := gz.Write([]byte(json)); err != nil {
+				// dump error message to console
+				TeeLog(err.Error())
+				return
+			}
+
+			if err := gz.Close(); err != nil {
+				// dump error message to console
+				TeeLog(err.Error())
+				return
+			}
+
+			// convert to string
+			o := base64.RawStdEncoding.EncodeToString(b.Bytes())
+
+			// obfuscate (must use same key as in socketlistener.go)
+			utc := time.Now().UTC()
+			o = obfuscate(o, fmt.Sprintf("%v^%v|%v*%v", utc.Minute(), utc.Hour(), utc.Day(), utc.Year()))
+
+			// obtain lock (doing so way down here as an optimization)
+			c.Lock.Lock("gameclient.WriteMessage")
+			defer c.Lock.Unlock()
+
+			// send message
+			c.Conn.WriteMessage(1, []byte(o))
+		} else {
 			// dump error message to console
 			TeeLog(err.Error())
-			return
 		}
-
-		// convert to string
-		o := base64.RawStdEncoding.EncodeToString(b.Bytes())
-
-		// obfuscate (must use same key as in socketlistener.go)
-		utc := time.Now().UTC()
-		o = obfuscate(o, fmt.Sprintf("%v^%v|%v*%v", utc.Minute(), utc.Hour(), utc.Day(), utc.Year()))
-
-		// send message
-		c.Conn.WriteMessage(1, []byte(o))
-	} else {
-		// dump error message to console
-		TeeLog(err.Error())
-	}
+	}(c)
 }
 
 // Send an error string to the client to be displayed
