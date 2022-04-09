@@ -12,7 +12,7 @@ import { InterstarLoreData } from './factions/interstar';
 export class LoreComponent implements OnInit {
   factionLoreData: IFactionLoreData[] = [
     new InterstarLoreData(),
-    new WanderersLoreData()
+    new WanderersLoreData(),
   ];
 
   constructor() {}
