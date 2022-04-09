@@ -47,13 +47,13 @@ export class WsService {
     let z = this.obfuscate(e.data, this.getKey(this.skew));
 
     if (!z.startsWith('H4sIAAAAAAAA')) {
-      let skew = -1;
+      let skew = -5;
 
       while (!z.startsWith('H4sIAAAAAAAA')) {
         skew++;
         z = this.obfuscate(e.data, this.getKey(skew));
 
-        if (skew > 1) {
+        if (skew > 5) {
           // not parsable
           const stub = new GameMessage();
           stub.body = '';
