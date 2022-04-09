@@ -33,17 +33,16 @@ export class StarMapWindow extends GDIWindow {
         this.needInitialFetch = false;
       }
 
+      // center map on current system
       setTimeout(() => {
-        // with current star map
-        const map = this.player.currentStarMap;
-
-        // center map camera on player's current system
-        const currentSystemEntry = map.findRawSystemByID(
-          this.player.currentSystem.id
-        );
-
-        this.camera.x = currentSystemEntry.x;
-        this.camera.y = currentSystemEntry.y;
+        try {
+          this.centerMap();
+        } catch(error) {
+          // try again
+          setTimeout(() => {
+            this.centerMap();
+          }, 500)
+        }
       }, 500);
     });
 
@@ -158,6 +157,19 @@ export class StarMapWindow extends GDIWindow {
         }
       }
     });
+  }
+
+  private centerMap() {
+    // with current star map
+    const map = this.player.currentStarMap;
+
+    // center map camera on player's current system
+    const currentSystemEntry = map.findRawSystemByID(
+      this.player.currentSystem.id
+    );
+
+    this.camera.x = currentSystemEntry.x;
+    this.camera.y = currentSystemEntry.y;
   }
 
   pack() {
