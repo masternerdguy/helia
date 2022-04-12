@@ -42,6 +42,9 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	c, err := upgrader.Upgrade(w, r, nil)
 
+	// short wait
+	time.Sleep(1000 * time.Millisecond)
+
 	// return if protocol change failed
 	if err != nil {
 		shared.TeeLog(fmt.Sprintf("ws protocol update error: %v", err))
@@ -698,6 +701,9 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		// send welcome message to client
 		client.WriteMessage(&msg)
 
+		// short sleep
+		time.Sleep(1000 * time.Millisecond)
+
 		// prepare initial faction info for client
 		af := models.ServerFactionUpdateBody{
 			Factions: make([]models.ServerFactionBody, 0),
@@ -756,6 +762,9 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 		// send all faction update message to client
 		client.WriteMessage(&msg)
+
+		// short sleep
+		time.Sleep(1000 * time.Millisecond)
 
 		// debug out
 		shared.TeeLog(fmt.Sprintf("player joined: %v", &body.SessionID))
