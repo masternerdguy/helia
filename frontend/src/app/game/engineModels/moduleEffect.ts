@@ -64,6 +64,8 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicShieldLaser();
     } else if (b.gfxEffect === 'basic_hull_laser') {
       this.vfxData = repo.basicHullLaser();
+    } else if (b.gfxEffect === 'basic_hull_laser') {
+      this.vfxData = repo.basicGeneralLaser();
     }
 
     this.maxLifeTime = this.vfxData?.duration ?? 0;

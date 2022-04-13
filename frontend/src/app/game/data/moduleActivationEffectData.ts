@@ -39,6 +39,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  basicGeneralLaser(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 1410,
+      color: 'wheat',
+      filter: 'blur(1px)', // "feather"
+      thickness: 0.5,
+    };
+  }
+
   basicGaussRifle(): ModuleActivationEffectData {
     return {
       type: 'gauss',
