@@ -60,6 +60,10 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.lecheOreHarvester();
     } else if (b.gfxEffect === 'basic_salvager') {
       this.vfxData = repo.basicSalvager();
+    } else if (b.gfxEffect === 'basic_shield_laser') {
+      this.vfxData = repo.basicShieldLaser();
+    } else if (b.gfxEffect === 'basic_hull_laser') {
+      this.vfxData = repo.basicHullLaser();
     }
 
     this.maxLifeTime = this.vfxData?.duration ?? 0;
