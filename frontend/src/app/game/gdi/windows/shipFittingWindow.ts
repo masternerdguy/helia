@@ -1074,6 +1074,7 @@ function checkIfModule(m: WSContainerItem) {
     m.itemFamilyID === 'utility_miner' ||
     m.itemFamilyID === 'utility_siphon' ||
     m.itemFamilyID === 'utility_cloak' ||
+    m.itemFamilyID === 'utility_veil' ||
     m.itemFamilyID === 'battery_pack' ||
     m.itemFamilyID === 'aux_generator' ||
     m.itemFamilyID === 'cargo_expander' ||

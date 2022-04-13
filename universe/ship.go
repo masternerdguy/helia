@@ -422,6 +422,8 @@ func getModuleFamily(itemFamilyID string) string {
 		modFamily = "utility"
 	} else if itemFamilyID == "utility_cloak" {
 		modFamily = "utility"
+	} else if itemFamilyID == "utility_veil" {
+		modFamily = "utility"
 	} else if itemFamilyID == "battery_pack" {
 		modFamily = "power"
 	} else if itemFamilyID == "aux_generator" {
@@ -1403,6 +1405,29 @@ func (s *Ship) DealDamage(
 		attackerRS,
 		attackerModule,
 	)
+
+	// check for active omni hardeners
+	genericHardening := 0.0
+
+	for _, x := range s.TemporaryModifiers {
+		if x.RemainingTicks > 0 && x.Attribute == "veil" {
+			genericHardening += x.Percentage
+		}
+	}
+
+	// clamp active omni hardening
+	if genericHardening > 0.99 {
+		genericHardening = 0.99
+	}
+
+	if genericHardening < 0 {
+		genericHardening = 0
+	}
+
+	// apply active omni hardeners
+	shieldDmg *= 1.0 - genericHardening
+	armorDmg *= 1.0 - genericHardening
+	hullDmg *= 1.0 - genericHardening
 
 	// apply shield damage
 	s.Shield -= shieldDmg
@@ -4612,6 +4637,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsUtilityCloak()
 			} else if m.ItemTypeFamily == "salvager" {
 				canActivate = m.activateAsSalvager()
+			} else if m.ItemTypeFamily == "utility_veil" {
+				canActivate = m.activateAsUtilityVeil()
 			}
 
 			if canActivate {
@@ -5960,6 +5987,39 @@ func (m *FittedSlot) activateAsSalvager() bool {
 		// push to solar system list for next update
 		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
 	}
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsUtilityVeil() bool {
+	// get attributes
+	activationEnergy, _ := m.ItemMeta.GetFloat64("activation_energy")
+	cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
+
+	// get ship mass
+	mx := m.shipMountedOn.GetRealMass()
+
+	// calculate "veil amount" (amount of incoming damage absorbed)
+	dC := (activationEnergy / mx)
+
+	// apply usage experience modifier
+	dC *= m.usageExperienceModifier
+
+	// make sure its never 100%
+	dC *= 0.99
+
+	// calculate effect duration in ticks
+	dT := (cooldown * 1000) / Heartbeat
+
+	// add temporary modifier
+	modifier := TemporaryShipModifier{
+		Attribute:      "veil",
+		Percentage:     dC,
+		RemainingTicks: int(dT),
+	}
+
+	m.shipMountedOn.TemporaryModifiers = append(m.shipMountedOn.TemporaryModifiers, modifier)
 
 	// module activates!
 	return true
