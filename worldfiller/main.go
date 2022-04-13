@@ -190,8 +190,8 @@ func calculateSystemSeed(s *universe.SolarSystem) int {
 }
 
 func injectProcess(u *universe.Universe) {
-	pID, err := uuid.Parse("98b8c19b-5ad5-48c1-9bd3-2b666eed9c2f")
-	prob := 3
+	pID, err := uuid.Parse("d9dad489-e2fc-4ecf-94ea-363a5fe14a69")
+	prob := 30
 
 	stationProcessSvc := sql.GetStationProcessService()
 
@@ -200,14 +200,14 @@ func injectProcess(u *universe.Universe) {
 	}
 
 	var textures = [...]string{
-		"!!!!",
+		"interstar-",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 1927)
+			rand.Seed(int64(calculateSystemSeed(s)) - 8427)
 
 			/*if r.ID.ID()%3 != 0 {
 				continue
@@ -221,7 +221,7 @@ func injectProcess(u *universe.Universe) {
 
 			for _, st := range stations {
 				for _, t := range textures {
-					if !strings.Contains(st.Texture, t) {
+					if strings.Contains(st.Texture, t) {
 						roll := physics.RandInRange(0, 100)
 
 						if roll <= prob {
