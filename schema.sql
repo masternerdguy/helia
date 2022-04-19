@@ -192,6 +192,17 @@ $$;
 ALTER PROCEDURE public.sp_purgehumans() OWNER TO developer;
 
 --
+-- Name: sp_resetstationprocesses(); Type: PROCEDURE; Schema: public; Owner: developer
+--
+
+CREATE PROCEDURE public.sp_resetstationprocesses()
+    LANGUAGE sql
+    AS $$update stationprocesses set installed = 'f', internalstate = '{}'::jsonb, progress = 0$$;
+
+
+ALTER PROCEDURE public.sp_resetstationprocesses() OWNER TO developer;
+
+--
 -- Name: actionreports; Type: TABLE; Schema: public; Owner: developer
 --
 
