@@ -3,7 +3,6 @@ package listener
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"helia/engine"
 	"helia/listener/models"
 	"helia/sql"
@@ -35,14 +34,6 @@ func enableCors(w *http.ResponseWriter) {
 
 func (l *HTTPListener) GetPort() int {
 	return l.Configuration.Port
-}
-
-func (l *HTTPListener) HandlePing(w http.ResponseWriter, r *http.Request) {
-	// enable cors
-	enableCors(&w)
-
-	// write pingback
-	fmt.Fprintf(w, "alive!")
 }
 
 // Handles a user registering
