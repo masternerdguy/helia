@@ -97,6 +97,7 @@ class EngineSack {
 
   windows: GDIWindow[];
   windowManager: WindowManager;
+  alternateFrame: boolean;
 
   // client-server communication
   wsSvc: WsService;
@@ -106,6 +107,7 @@ class EngineSack {
   lastSyncTime: number;
   tpf: number;
   tps: number;
+  tpi: number;
 
   reloading = false;
 
@@ -299,7 +301,7 @@ export function clientStart(
   engineSack.windowManager.manageWindow(engineSack.systemChatWindow, '⋉');
   engineSack.windowManager.manageWindow(engineSack.experienceSheetWindow, '✇');
   engineSack.windowManager.manageWindow(engineSack.schematicRunsWindow, '⨻');
-  engineSack.windowManager.manageWindow(engineSack.actionReportsWindow, 'ⓚ');
+  // engineSack.windowManager.manageWindow(engineSack.actionReportsWindow, 'ⓚ');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
@@ -425,7 +427,8 @@ function handleJoin(d: GameMessage) {
   engineSack.lastSyncTime = Date.now();
   engineSack.tpf = 0;
 
-  setInterval(clientLoop, 20);
+  setTimeout(clientLoop, 0);
+  setTimeout(interpolate, 0);
 }
 
 function handleGlobalUpdate(d: GameMessage) {
@@ -1064,7 +1067,7 @@ function gfxBackplate() {
   engineSack.ctx.drawImage(engineSack.player.currentSystem.backplateImg, 0, 0);
 }
 
-function clientLoop() {
+function clientLoop() {  
   // periodic update
   periodicUpdate();
 
@@ -1092,12 +1095,12 @@ function clientLoop() {
 
   // store frame time
   engineSack.lastFrameTime = Date.now();
+
+  // queue next iteration
+  setTimeout(clientLoop, 30 - engineSack.tpf)
 }
 
 function periodicUpdate() {
-  // interpolate positions
-  interpolate();
-
   // update target selection
   updateTargetSelection();
 
@@ -1118,22 +1121,29 @@ function periodicUpdate() {
 }
 
 function interpolate() {
+  const start = Date.now();
+
   // interate over ships
   for (const sh of engineSack.player.currentSystem.ships) {
-    // get sync time
-    const tps = sh.tps;
+    // get average delta
+    const delta = sh.getAverageSyncDelta();
+    const tps = delta.tps;
 
-    if (tps < 1) {
+    // skip if within minimum tpi window
+    if (tps < 5) {
       continue;
     }
 
+    // get scale
+    const s = 30 / engineSack.tpi;
+
     // get frame velocity
-    const fVx = sh.deltaX / tps;
-    const fVy = sh.deltaY / tps;
+    const fVx = delta.deltaX / s;
+    const fVy = delta.deltaY / s;
 
     // adjust position
-    sh.x += fVx / tps;
-    sh.y += fVy / tps;
+    sh.x += fVx;
+    sh.y += fVy;
 
     // check if player ship
     if (sh.id == engineSack.player.currentShip.id) {
@@ -1142,6 +1152,18 @@ function interpolate() {
       engineSack.camera.y = sh.y;
     }
   }
+
+  // calculate tpi
+  const done = Date.now();
+  engineSack.tpi = done - start;
+
+  // clamp tpi
+  if (engineSack.tpi < 5) {
+    engineSack.tpi = 5;
+  }
+
+  // queue next iteration
+  setTimeout(interpolate, engineSack.tpi);
 }
 
 function updateTargetSelection() {
@@ -1273,6 +1295,9 @@ function updateTargetSelection() {
 }
 
 function clientRender() {
+  // alternate frame flag
+  engineSack.alternateFrame = !engineSack.alternateFrame;
+
   // blank screen
   gfxBlank();
 
@@ -1360,8 +1385,19 @@ function clientRender() {
       continue;
     }
 
-    const bmp = w.render();
-    engineSack.ctx.drawImage(bmp, w.getX(), w.getY());
+    let bmp: ImageBitmap = null;
+
+    if (engineSack.alternateFrame) {
+      // render new frame
+      bmp = w.render();
+    } else {
+      // reshow last frame
+      bmp = w.getLastRender();
+    }
+
+    if (bmp != null) {
+      engineSack.ctx.drawImage(bmp, w.getX(), w.getY());
+    }
   }
 }
 

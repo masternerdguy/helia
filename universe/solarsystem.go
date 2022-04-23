@@ -2517,13 +2517,13 @@ func (s *SolarSystem) sendClientUpdates() {
 	s.globalAckToken++
 
 	// check tick counter to determine whether to send static world data
-	sendStatic := s.tickCounter > 100
+	sendStatic := s.tickCounter > 200
 
 	// check tick counter to determine whether to send secret updates
 	sendSecret := s.tickCounter%12 == 0
 
 	// check tick counter to determine whether to send player rep sheets
-	sendPlayerRepSheets := s.tickCounter%16 == 0
+	sendPlayerRepSheets := s.tickCounter%128 == 0
 
 	if sendStatic {
 		// reset tick counter

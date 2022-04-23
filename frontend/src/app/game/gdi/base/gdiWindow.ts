@@ -17,6 +17,8 @@ export class GDIWindow extends GDIBase {
   private onShow = () => {};
   private onPreHandleRender = (ctx: any) => {};
 
+  private lastRender: ImageBitmap;
+
   initialize() {
     // initialize offscreen canvas
     this.buildCanvas();
@@ -120,8 +122,11 @@ export class GDIWindow extends GDIBase {
       );
     }
 
-    // convert to image and return
-    return this.canvas.transferToImageBitmap();
+    // convert to image
+    this.lastRender = this.canvas.transferToImageBitmap();
+
+    // return
+    return this.lastRender;
   }
 
   setOnPreHandleRender(f: (ctx: any) => void) {
@@ -257,5 +262,9 @@ export class GDIWindow extends GDIBase {
 
   setBorderless(b: boolean) {
     this.borderless = b;
+  }
+
+  getLastRender(): ImageBitmap {
+    return this.lastRender;
   }
 }

@@ -12,6 +12,7 @@ export class Ship extends WSShip {
   lastWsY: number;
   deltaX: number;
   deltaY: number;
+  deltaTail: DeltaTailEntry[];
   tps: number;
 
   faction: Faction;
@@ -34,6 +35,7 @@ export class Ship extends WSShip {
     this.velY = ws.velY;
     this.radius = ws.radius;
     this.factionId = ws.factionId;
+    this.deltaTail = [];
     this.lastSeen = Date.now();
 
     if (ws.accel) {
@@ -171,6 +173,20 @@ export class Ship extends WSShip {
     this.deltaY = sh.y - this.lastWsY;
     this.tps = now - this.lastSeen;
 
+    // update sync delta tail
+    this.deltaTail.push({
+      deltaX: this.deltaX,
+      deltaY: this.deltaY,
+      tps: this.tps
+    });
+
+  // remove oldest entry
+  if (this.deltaTail.length >= 10) {
+    const reversed = this.deltaTail.reverse();
+    reversed.pop();
+    this.deltaTail = reversed.reverse();
+  }
+
     // copy from message
     this.createdAt = sh.createdAt;
     this.shipName = sh.shipName;
@@ -261,6 +277,28 @@ export class Ship extends WSShip {
     }
   }
 
+  getAverageSyncDelta(): DeltaTailEntry {
+    let deltaX = 0;
+    let deltaY = 0;
+    let tps = 0;
+
+    for (const t of this.deltaTail) {
+      deltaX += t.deltaX;
+      deltaY += t.deltaY;
+      tps += t.tps;
+    }
+
+    deltaX /= this.deltaTail.length + Number.EPSILON;
+    deltaY /= this.deltaTail.length + Number.EPSILON;
+    tps /= this.deltaTail.length + Number.EPSILON;
+
+    return {
+      deltaX: deltaX,
+      deltaY: deltaY,
+      tps: tps
+    }
+  }
+
   getFaction(): Faction {
     return GetFactionCacheEntry(this.factionId);
   }
@@ -285,4 +323,10 @@ export class Ship extends WSShip {
     // return hp position on screen
     return [hx, hy];
   }
+}
+
+export class DeltaTailEntry {
+  deltaX: number;
+  deltaY: number;
+  tps: number;
 }
