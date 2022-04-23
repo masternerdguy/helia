@@ -8,12 +8,16 @@ export class Ship extends WSShip {
   lastSeen: number;
   isTargeted: boolean;
   isPlayer: boolean;
+  lastWsX: number;
+  lastWsY: number;
+  deltaX: number;
+  deltaY: number;
+  tps: number;
 
   faction: Faction;
 
   constructor(ws: WSShip) {
     super();
-
     // copy from ws model
     this.id = ws.id;
     this.createdAt = ws.createdAt;
@@ -22,6 +26,8 @@ export class Ship extends WSShip {
     this.uid = ws.uid;
     this.x = ws.x;
     this.y = ws.y;
+    this.lastWsX = ws.x;
+    this.lastWsY = ws.y;
     this.texture = ws.texture;
     this.theta = ws.theta;
     this.velX = ws.velX;
@@ -158,6 +164,14 @@ export class Ship extends WSShip {
   }
 
   sync(sh: WSShip) {
+    const now = Date.now();
+
+    // for interpolation
+    this.deltaX = sh.x - this.lastWsX;
+    this.deltaY = sh.y - this.lastWsY;
+    this.tps = now - this.lastSeen;
+
+    // copy from message
     this.createdAt = sh.createdAt;
     this.shipName = sh.shipName;
     this.ownerName = sh.ownerName;
@@ -165,12 +179,14 @@ export class Ship extends WSShip {
     this.systemId = sh.systemId;
     this.x = sh.x;
     this.y = sh.y;
+    this.lastWsX = sh.x;
+    this.lastWsY = sh.y;
     this.theta = sh.theta;
     this.velX = sh.velX;
     this.velY = sh.velY;
     this.mass = sh.mass;
     this.radius = sh.radius;
-    this.lastSeen = Date.now();
+    this.lastSeen = now;
 
     // reset texture if changed
     if (this.texture !== sh.texture) {

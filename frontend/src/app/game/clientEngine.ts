@@ -105,6 +105,7 @@ class EngineSack {
   lastFrameTime: number;
   lastSyncTime: number;
   tpf: number;
+  tps: number;
 
   reloading = false;
 
@@ -429,7 +430,10 @@ function handleJoin(d: GameMessage) {
 
 function handleGlobalUpdate(d: GameMessage) {
   // store sync time
-  engineSack.lastSyncTime = Date.now();
+  const now = Date.now();
+
+  engineSack.tps = now - engineSack.lastSyncTime;
+  engineSack.lastSyncTime = now;
 
   // parse body
   const msg = JSON.parse(d.body) as ServerGlobalUpdateBody;
@@ -1091,6 +1095,9 @@ function clientLoop() {
 }
 
 function periodicUpdate() {
+  // interpolate positions
+  interpolate();
+
   // update target selection
   updateTargetSelection();
 
@@ -1107,6 +1114,33 @@ function periodicUpdate() {
   // update point visual effects
   for (const ef of engineSack.player.currentSystem.pointEffects) {
     ef.periodicUpdate();
+  }
+}
+
+function interpolate() {
+  // interate over ships
+  for (const sh of engineSack.player.currentSystem.ships) {
+    // get sync time
+    const tps = sh.tps;
+
+    if (tps < 1) {
+      continue;
+    }
+
+    // get frame velocity
+    const fVx = sh.deltaX / tps;
+    const fVy = sh.deltaY / tps;
+
+    // adjust position
+    sh.x += fVx / tps;
+    sh.y += fVy / tps;
+
+    // check if player ship
+    if (sh.id == engineSack.player.currentShip.id) {
+      // sync camera
+      engineSack.camera.x = sh.x;
+      engineSack.camera.y = sh.y;
+    }
   }
 }
 
