@@ -2600,10 +2600,11 @@ func (s *SolarSystem) sendClientUpdates() {
 
 	if sendStatic {
 		/*
-		 * Performance note: This data is very static and can be sent rarely. Once every second is fine,
-		 * and saves a significant amount of bandwidth. Note it needs to be sent often enough for someone
-		 * jumping into the system to receive data about the celestial objects it contains within a
-		 * reasonable amount of time (which I feel is ~2 seconds).
+		 * Performance note: This data is very static and can be sent rarely. As long as
+		 * a client is guaranteed to get it within a few seconds of entering a system, it
+		 * should be fine. Sending this frequently wastes an enormous amount of bandwidth.
+		 * Clients will only be sent static data if they need it, which would be when they
+		 * enter the system.
 		 */
 
 		emptyWreckIDs := make([]string, 0)
