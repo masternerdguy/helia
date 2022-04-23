@@ -580,6 +580,7 @@ function handleGlobalUpdate(d: GameMessage) {
       // find wreck in memory
       for (const sm of engineSack.player.currentSystem.wrecks) {
         if (sh.id === sm.id) {
+          match = true;
 
           // sync wreck in memory
           sm.sync(sh);
