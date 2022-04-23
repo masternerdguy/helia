@@ -525,17 +525,6 @@ function handleGlobalUpdate(d: GameMessage) {
           // sync ship in memory
           sm.sync(sh);
 
-          // current ship target check if undocked
-          if (!engineSack.player.currentShip.dockedAtStationID) {
-            if (
-              sm.id === engineSack.player.currentTargetID &&
-              engineSack.player.currentTargetType === TargetType.Ship
-            ) {
-              sm.isTargeted = true;
-              engineSack.targetInteractionWindow.setTarget(sm, TargetType.Ship);
-            }
-          }
-
           // is this the player ship?
           if (sm.id === engineSack.player.currentShip.id) {
             // flag as player's ship
@@ -591,24 +580,9 @@ function handleGlobalUpdate(d: GameMessage) {
       // find wreck in memory
       for (const sm of engineSack.player.currentSystem.wrecks) {
         if (sh.id === sm.id) {
-          match = true;
 
           // sync wreck in memory
           sm.sync(sh);
-
-          // current ship target check if undocked
-          if (!engineSack.player.currentShip.dockedAtStationID) {
-            if (
-              sm.id === engineSack.player.currentTargetID &&
-              engineSack.player.currentTargetType === TargetType.Wreck
-            ) {
-              sm.isTargeted = true;
-              engineSack.targetInteractionWindow.setTarget(
-                sm,
-                TargetType.Wreck
-              );
-            }
-          }
 
           // exit loop
           break;
@@ -629,21 +603,9 @@ function handleGlobalUpdate(d: GameMessage) {
       for (const sm of engineSack.player.currentSystem.stars) {
         if (st.id === sm.id) {
           match = true;
-          sm.isTargeted = false;
 
           // sync star in memory
           sm.sync(st);
-
-          // current ship target check if undocked
-          if (!engineSack.player.currentShip.dockedAtStationID) {
-            if (
-              sm.id === engineSack.player.currentTargetID &&
-              engineSack.player.currentTargetType === TargetType.Star
-            ) {
-              sm.isTargeted = true;
-              engineSack.targetInteractionWindow.setTarget(sm, TargetType.Star);
-            }
-          }
 
           // exit loop
           break;
@@ -664,24 +626,9 @@ function handleGlobalUpdate(d: GameMessage) {
       for (const sm of engineSack.player.currentSystem.planets) {
         if (p.id === sm.id) {
           match = true;
-          sm.isTargeted = false;
 
           // sync planet in memory
           sm.sync(p);
-
-          // current ship target check if undocked
-          if (!engineSack.player.currentShip.dockedAtStationID) {
-            if (
-              sm.id === engineSack.player.currentTargetID &&
-              engineSack.player.currentTargetType === TargetType.Planet
-            ) {
-              sm.isTargeted = true;
-              engineSack.targetInteractionWindow.setTarget(
-                sm,
-                TargetType.Planet
-              );
-            }
-          }
 
           // exit loop
           break;
@@ -702,24 +649,9 @@ function handleGlobalUpdate(d: GameMessage) {
       for (const sm of engineSack.player.currentSystem.asteroids) {
         if (p.id === sm.id) {
           match = true;
-          sm.isTargeted = false;
 
           // sync asteroid in memory
           sm.sync(p);
-
-          // current ship target check if undocked
-          if (!engineSack.player.currentShip.dockedAtStationID) {
-            if (
-              sm.id === engineSack.player.currentTargetID &&
-              engineSack.player.currentTargetType === TargetType.Asteroid
-            ) {
-              sm.isTargeted = true;
-              engineSack.targetInteractionWindow.setTarget(
-                sm,
-                TargetType.Asteroid
-              );
-            }
-          }
 
           // exit loop
           break;
@@ -740,24 +672,9 @@ function handleGlobalUpdate(d: GameMessage) {
       for (const sm of engineSack.player.currentSystem.jumpholes) {
         if (j.id === sm.id) {
           match = true;
-          sm.isTargeted = false;
 
           // sync jumphole in memory
           sm.sync(j);
-
-          // current ship target check if undocked
-          if (!engineSack.player.currentShip.dockedAtStationID) {
-            if (
-              sm.id === engineSack.player.currentTargetID &&
-              engineSack.player.currentTargetType === TargetType.Jumphole
-            ) {
-              sm.isTargeted = true;
-              engineSack.targetInteractionWindow.setTarget(
-                sm,
-                TargetType.Jumphole
-              );
-            }
-          }
 
           // exit loop
           break;
@@ -781,20 +698,6 @@ function handleGlobalUpdate(d: GameMessage) {
 
           // sync station in memory
           sm.sync(p);
-
-          // current ship target check
-          sm.isTargeted = false;
-
-          if (
-            sm.id === engineSack.player.currentTargetID &&
-            engineSack.player.currentTargetType === TargetType.Station
-          ) {
-            sm.isTargeted = true;
-            engineSack.targetInteractionWindow.setTarget(
-              sm,
-              TargetType.Station
-            );
-          }
 
           // exit loop
           break;
