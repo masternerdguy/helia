@@ -158,8 +158,10 @@ func (s *SolarSystem) PeriodicUpdate() {
 	s.Lock.LogInternalProgress("solarsystem.shipCollisionTesting done!")
 
 	// send client updates
-	s.sendClientUpdates()
-	s.Lock.LogInternalProgress("solarsystem.sendClientUpdates done!")
+	if s.tickCounter%2 == 0 {
+		s.sendClientUpdates()
+		s.Lock.LogInternalProgress("solarsystem.sendClientUpdates done!")
+	}
 
 	// increment tick counter
 	s.tickCounter++
@@ -2518,7 +2520,7 @@ func (s *SolarSystem) sendClientUpdates() {
 	sendStatic := s.tickCounter > 100
 
 	// check tick counter to determine whether to send secret updates
-	sendSecret := s.tickCounter%8 == 0
+	sendSecret := s.tickCounter%12 == 0
 
 	// check tick counter to determine whether to send player rep sheets
 	sendPlayerRepSheets := s.tickCounter%16 == 0
@@ -2740,6 +2742,11 @@ func (s *SolarSystem) sendClientUpdates() {
 			continue
 		}
 
+		// skip if already has static and sending static data
+		if sendStatic && c.HasStatic {
+			continue
+		}
+
 		// get token
 		ct := c.GetLastGlobalAckToken()
 
@@ -2753,6 +2760,17 @@ func (s *SolarSystem) sendClientUpdates() {
 		if ur >= int(up) {
 			// send global update
 			c.WriteMessage(&msg)
+
+			if sendStatic {
+				go func(c *shared.GameClient) {
+					// obtain lock
+					c.Lock.Lock("solarsystem.sendClientUpdates::postGlobalStatic")
+					defer c.Lock.Unlock()
+
+					// mark as having static
+					c.HasStatic = true
+				}(c)
+			}
 
 			// allow additional updates
 			receivedGlobal[c.UID.String()] = c
@@ -3103,6 +3121,23 @@ func (s *SolarSystem) AddClient(c *shared.GameClient, lock bool) {
 	// clear token
 	c.ClearLastGlobalAckToken()
 
+	// ensure client gets new static data
+	go func(c *shared.GameClient) {
+		for i := 0; i < 3; i++ {
+			// obtain lock
+			c.Lock.Lock("solarsystem.AddClient::ensureStatic")
+
+			// mark as needing static data
+			c.HasStatic = false
+
+			// unlock
+			c.Lock.Unlock()
+
+			// short sleep
+			time.Sleep(100 * time.Millisecond)
+		}
+	}(c)
+
 	// add client
 	s.clients[(*c.UID).String()] = c
 }
@@ -3119,6 +3154,9 @@ func (s *SolarSystem) RemoveClient(c *shared.GameClient, lock bool) {
 		s.Lock.Lock("solarsystem.RemoveClient")
 		defer s.Lock.Unlock()
 	}
+
+	// mark as needing static data
+	c.HasStatic = false
 
 	// remove client
 	delete(s.clients, (*c.UID).String())
@@ -3155,6 +3193,7 @@ func (s *SolarSystem) CopyClients(lock bool) []*shared.GameClient {
 			CurrentSystemID:   c.CurrentSystemID,
 			StartID:           c.StartID,
 			EscrowContainerID: c.EscrowContainerID,
+			HasStatic:         c.HasStatic,
 		}
 
 		// label mutex

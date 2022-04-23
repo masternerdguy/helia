@@ -16,11 +16,12 @@ import (
 
 // Structure representing a game client connected to the server
 type GameClient struct {
-	SID    *uuid.UUID
-	UID    *uuid.UUID
-	Conn   *websocket.Conn
-	Lock   LabeledMutex
-	Joined bool
+	SID       *uuid.UUID
+	UID       *uuid.UUID
+	Conn      *websocket.Conn
+	Lock      LabeledMutex
+	Joined    bool
+	HasStatic bool
 
 	// standing to be kept in sync with flown ship(s)
 	ReputationSheet PlayerReputationSheet

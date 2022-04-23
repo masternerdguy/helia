@@ -123,7 +123,7 @@ func (m *LabeledMutex) Lock(caller string) {
 				break
 			}
 
-			if it > 50 {
+			if it > 500 {
 				// are we still locked?
 				if m.lastLocked >= m.lastUnlocked {
 					MutexFreeze = true
@@ -146,7 +146,7 @@ func (m *LabeledMutex) Lock(caller string) {
 			}
 
 			// sleep in small increments to avoid pegging cpu
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(10 * time.Millisecond)
 			it++
 		}
 	}(m)
