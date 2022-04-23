@@ -4,8 +4,8 @@
 
 export const environment = {
   production: true,
-  apiUrl: `https://helia-alpha-engine.azurewebsites.net:443/api/`,
-  wsUrl: `https://helia-alpha-engine.azurewebsites.net:443/ws/`,
+  apiUrl: `https://52.188.125.241:8472/api/`,
+  wsUrl: `https://52.188.125.241:8472/ws/`,
 };
 
 /*
