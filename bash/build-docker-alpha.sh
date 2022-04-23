@@ -24,3 +24,6 @@ docker build -t heliaalpha . -f Dockerfile.single
 git clean -fxd
 git reset --hard
 git stash pop
+
+# restore executable permission
+chmod a+x bash/build-docker-alpha.sh
