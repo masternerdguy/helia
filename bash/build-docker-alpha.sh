@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# get to repository root
+cd ~/go/src/helia
+
 # clean repository
 git stash
 git clean -fxd
