@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"helia/engine"
 	"helia/listener"
 	"helia/shared"
@@ -72,10 +73,7 @@ func main() {
 
 	shared.TeeLog("Helia is running!")
 
-	// don't exit
-	for {
-		time.Sleep(5000 * time.Millisecond)
-	}
+	http.ListenAndServe(fmt.Sprintf(":%v", httpListener.GetPort()), nil)
 }
 
 func printLogger(s string, t time.Time) {
