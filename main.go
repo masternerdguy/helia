@@ -71,8 +71,11 @@ func main() {
 	http.HandleFunc("/api/login", httpListener.HandleLogin)
 	http.HandleFunc("/api/shutdown", httpListener.HandleShutdown)
 
-	shared.TeeLog("Helia is running!")
+	// give the user a chance to accept the self signed cert
+	http.HandleFunc("/dev/accept-cert", httpListener.HandleAcceptCert)
 
+	// up and running!
+	shared.TeeLog("Helia is running!")
 	http.ListenAndServeTLS(fmt.Sprintf(":%v", httpListener.GetPort()), "ssl.cert.pem", "ssl.key.pem", nil)
 }
 

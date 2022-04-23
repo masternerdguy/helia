@@ -3,6 +3,7 @@ package listener
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"helia/engine"
 	"helia/listener/models"
 	"helia/sql"
@@ -256,6 +257,15 @@ func (l *HTTPListener) HandleShutdown(w http.ResponseWriter, r *http.Request) {
 		// initiate shutdown
 		l.Engine.Shutdown()
 	}
+}
+
+// This only exists to allow a user to accept the self-signed cert
+func (l *HTTPListener) HandleAcceptCert(w http.ResponseWriter, r *http.Request) {
+	// enable cors
+	enableCors(&w)
+
+	// write response
+	fmt.Fprintln(w, "you've accepted the high quality, self-signed, certificate - woohoo!")
 }
 
 func isValidEmailAddress(e string) (string, bool) {
