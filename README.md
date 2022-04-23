@@ -21,8 +21,8 @@ To start the angular frontend, run `npm start` in the frontend directory (one le
 A server shutdown can be initiated using the "Save and Shutdown" endpoint (see Useful Links). This will save key aspects of the current state of the simulation and shutdown the server.
 
 # Useful links
-* Register: http://localhost:4200/auth/signup
-* Login: http://localhost:4200/auth/signin
-* Save and Shutdown: localhost:8080/api/shutdown?key=shutdownToken
+* Register: http://localhost:4200/#/auth/signup
+* Login: http://localhost:4200/#/auth/signin
+* Save and Shutdown: localhost:8472/api/shutdown?key=shutdownToken
 
 The shutdown token is in `listener-configuration.json`

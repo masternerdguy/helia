@@ -43,7 +43,7 @@ export class SignupComponent implements OnInit {
       .then(() => {
         if (ok) {
           // redirect to login page
-          window.location.href = '/auth/signin';
+          window.location.href = '/#/auth/signin';
         }
       });
   }
