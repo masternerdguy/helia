@@ -123,7 +123,7 @@ func (m *LabeledMutex) Lock(caller string) {
 				break
 			}
 
-			if it > 500 {
+			if it > 1500 {
 				// are we still locked?
 				if m.lastLocked >= m.lastUnlocked {
 					MutexFreeze = true
