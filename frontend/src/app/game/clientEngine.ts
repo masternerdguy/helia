@@ -1187,6 +1187,9 @@ function clientLoop() {
 }
 
 function periodicUpdate() {
+  // update target selection
+  updateTargetSelection();
+
   // update ui
   for (const w of engineSack.windows) {
     w.periodicUpdate();
@@ -1200,6 +1203,134 @@ function periodicUpdate() {
   // update point visual effects
   for (const ef of engineSack.player.currentSystem.pointEffects) {
     ef.periodicUpdate();
+  }
+}
+
+function updateTargetSelection() {
+  // wrecks
+  for (const sm of engineSack.player.currentSystem.wrecks) {
+    // current ship target check if undocked
+    if (!engineSack.player.currentShip.dockedAtStationID) {
+      if (
+        sm.id === engineSack.player.currentTargetID &&
+        engineSack.player.currentTargetType === TargetType.Wreck
+      ) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Wreck);
+      } else {
+        // mark as untargeted
+        sm.isTargeted = false;
+      }
+    }
+  }
+
+  // stars
+  for (const sm of engineSack.player.currentSystem.stars) {
+    // current ship target check if undocked
+    if (!engineSack.player.currentShip.dockedAtStationID) {
+      if (
+        sm.id === engineSack.player.currentTargetID &&
+        engineSack.player.currentTargetType === TargetType.Star
+      ) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Star);
+      } else {
+        // mark as untargeted
+        sm.isTargeted = false;
+      }
+    }
+  }
+
+  // planets
+  for (const sm of engineSack.player.currentSystem.planets) {
+    // current ship target check if undocked
+    if (!engineSack.player.currentShip.dockedAtStationID) {
+      if (
+        sm.id === engineSack.player.currentTargetID &&
+        engineSack.player.currentTargetType === TargetType.Planet
+      ) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Planet);
+      } else {
+        // mark as untargeted
+        sm.isTargeted = false;
+      }
+    }
+  }
+
+  // jumpholes
+  for (const sm of engineSack.player.currentSystem.jumpholes) {
+    // current ship target check if undocked
+    if (!engineSack.player.currentShip.dockedAtStationID) {
+      if (
+        sm.id === engineSack.player.currentTargetID &&
+        engineSack.player.currentTargetType === TargetType.Jumphole
+      ) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Jumphole);
+      } else {
+        // mark as untargeted
+        sm.isTargeted = false;
+      }
+    }
+  }
+
+  // asteroids
+  for (const sm of engineSack.player.currentSystem.asteroids) {
+    // current ship target check if undocked
+    if (!engineSack.player.currentShip.dockedAtStationID) {
+      if (
+        sm.id === engineSack.player.currentTargetID &&
+        engineSack.player.currentTargetType === TargetType.Asteroid
+      ) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Asteroid);
+      } else {
+        // mark as untargeted
+        sm.isTargeted = false;
+      }
+    }
+  }
+
+  // stations
+  for (const sm of engineSack.player.currentSystem.stations) {
+    // current ship target check if undocked
+    if (!engineSack.player.currentShip.dockedAtStationID) {
+      if (
+        sm.id === engineSack.player.currentTargetID &&
+        engineSack.player.currentTargetType === TargetType.Station
+      ) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Station);
+      } else {
+        // mark as untargeted
+        sm.isTargeted = false;
+      }
+    }
+  }
+
+  // stars
+  for (const sm of engineSack.player.currentSystem.ships) {
+    // current ship target check if undocked
+    if (!engineSack.player.currentShip.dockedAtStationID) {
+      if (
+        sm.id === engineSack.player.currentTargetID &&
+        engineSack.player.currentTargetType === TargetType.Ship
+      ) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Ship);
+      } else {
+        // mark as untargeted
+        sm.isTargeted = false;
+      }
+    }
   }
 }
 
