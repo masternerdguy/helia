@@ -14,7 +14,7 @@ export class AppComponent {
     const queryString = getQueryStringVars();
     let safe = false;
 
-    if (window.location.href.indexOf('localhost') > 0) {
+    if (window.location.href.indexOf('localhost:4200') > 0) {
       safe = true;
     } else {
       for (const k of queryString) {
