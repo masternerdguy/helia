@@ -3,5 +3,6 @@
     "dbuser": "heliaagent@helia-alpha",
     "dbpass": "Tgbe{67h?3f4\\~~",
     "dbport": 5432,
-    "dbname": "helia"
+    "dbname": "helia",
+    "sslmode": "require"
 }

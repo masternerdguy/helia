@@ -20,11 +20,12 @@ var sharedDbLock shared.LabeledMutex = shared.LabeledMutex{
 }
 
 type dbConfig struct {
-	DbName string `json:"dbname"`
-	DbHost string `json:"dbhost"`
-	DbUser string `json:"dbuser"`
-	DbPass string `json:"dbpass"`
-	DbPort int    `json:"dbport"`
+	DbName  string `json:"dbname"`
+	DbHost  string `json:"dbhost"`
+	DbUser  string `json:"dbuser"`
+	DbPass  string `json:"dbpass"`
+	DbPort  int    `json:"dbport"`
+	SSLMode string `json:"sslmode"`
 }
 
 func connect() (*sql.DB, error) {
@@ -54,8 +55,8 @@ func connect() (*sql.DB, error) {
 
 	// create connection string
 	conn := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		config.DbHost, config.DbPort, config.DbUser, config.DbPass, config.DbName)
+		"password=%s dbname=%s sslmode=%s",
+		config.DbHost, config.DbPort, config.DbUser, config.DbPass, config.DbName, config.SSLMode)
 
 	// connect to the db
 	db, err := sql.Open("postgres", conn)

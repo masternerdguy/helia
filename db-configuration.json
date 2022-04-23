@@ -3,5 +3,6 @@
     "dbuser": "developer",
     "dbpass": "thisiswherewefight",
     "dbport": 5432,
-    "dbname": "helia"
+    "dbname": "helia",
+    "sslmode": "disable"
 }
