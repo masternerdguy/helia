@@ -18,7 +18,7 @@ rm -rfv ~/go/src/helia/bash
 rm -rfv ~/go/src/helia/*.sql
 
 # build docker image
-docker build -t heliaalpha:0.1 . -f Dockerfile.single
+docker build -t heliaalpha . -f Dockerfile.single
 
 # restore repo state
 git clean -fxd
