@@ -1,7 +1,7 @@
 {
     "dbhost": "helia-alpha.postgres.database.azure.com",
     "dbuser": "heliaagent@helia-alpha",
-    "dbpass": "Tgbe{67h?3f4\\~~",
+    "dbpass": "fdb01db4749748cfbdb21e4766570561!",
     "dbport": 5432,
     "dbname": "helia",
     "sslmode": "require"
