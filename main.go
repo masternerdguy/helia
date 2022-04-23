@@ -73,7 +73,7 @@ func main() {
 
 	shared.TeeLog("Helia is running!")
 
-	http.ListenAndServe(fmt.Sprintf(":%v", httpListener.GetPort()), nil)
+	http.ListenAndServeTLS(fmt.Sprintf(":%v", httpListener.GetPort()), "ssl.cert.pem", "ssl.key.pem", nil)
 }
 
 func printLogger(s string, t time.Time) {
