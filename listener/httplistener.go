@@ -3,6 +3,7 @@ package listener
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"helia/engine"
 	"helia/listener/models"
 	"helia/sql"
@@ -13,11 +14,35 @@ import (
 
 // Listener for handling and dispatching incoming http requests
 type HTTPListener struct {
-	Engine *engine.HeliaEngine
+	Engine        *engine.HeliaEngine
+	Configuration *listenerConfig
+}
+
+func (l *HTTPListener) Initialize() {
+	// load listener configuration
+	config, err := loadConfiguration()
+
+	if err != nil {
+		panic("unable to load listener configuration")
+	}
+
+	l.Configuration = &config
 }
 
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
+func (l *HTTPListener) GetPort() int {
+	return l.Configuration.Port
+}
+
+func (l *HTTPListener) HandlePing(w http.ResponseWriter, r *http.Request) {
+	// enable cors
+	enableCors(&w)
+
+	// write pingback
+	fmt.Fprintf(w, "alive!")
 }
 
 // Handles a user registering
@@ -235,14 +260,8 @@ func (l *HTTPListener) HandleShutdown(w http.ResponseWriter, r *http.Request) {
 
 	key := keys[0]
 
-	// load listener configuration
-	config, err := loadConfiguration()
-	if err != nil {
-		return
-	}
-
 	// validate auth token
-	if config.ShutdownToken == key {
+	if l.Configuration.ShutdownToken == key {
 		// initiate shutdown
 		l.Engine.Shutdown()
 	}

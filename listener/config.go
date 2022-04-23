@@ -8,6 +8,7 @@ import (
 
 type listenerConfig struct {
 	ShutdownToken string `json:"shutdownToken"`
+	Port          int    `json:"port"`
 }
 
 func loadConfiguration() (listenerConfig, error) {

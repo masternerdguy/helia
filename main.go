@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"helia/engine"
 	"helia/listener"
 	"helia/shared"
@@ -61,6 +62,7 @@ func main() {
 	// instantiate http listener
 	shared.TeeLog("Initializing HTTP listener...")
 	httpListener := &listener.HTTPListener{}
+	httpListener.Initialize()
 	httpListener.Engine = &engine
 
 	// listen an serve api requests
@@ -68,9 +70,10 @@ func main() {
 	http.HandleFunc("/api/register", httpListener.HandleRegister)
 	http.HandleFunc("/api/login", httpListener.HandleLogin)
 	http.HandleFunc("/api/shutdown", httpListener.HandleShutdown)
+	http.HandleFunc("/", httpListener.HandlePing)
 
 	shared.TeeLog("Helia is running!")
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(fmt.Sprintf(":%v", httpListener.GetPort()), nil)
 }
 
 func printLogger(s string, t time.Time) {
