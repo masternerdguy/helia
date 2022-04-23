@@ -34,11 +34,6 @@ func main() {
 	// brief sleep
 	time.Sleep(100 * time.Millisecond)
 
-	// instantiate http listener
-	shared.TeeLog("Initializing HTTP listener...")
-	httpListener := &listener.HTTPListener{}
-	httpListener.Initialize()
-
 	// run daily downtime jobs
 	shared.TeeLog("Running downtime jobs...")
 	downtimeRunner := engine.DownTimeRunner{}
@@ -55,7 +50,6 @@ func main() {
 	socketListener := &listener.SocketListener{}
 	socketListener.Initialize()
 	socketListener.Engine = &engine
-	httpListener.Engine = &engine
 
 	shared.TeeLog("Wiring up socket handlers...")
 	http.HandleFunc("/ws/connect", socketListener.HandleConnect)
@@ -64,7 +58,13 @@ func main() {
 	shared.TeeLog("Starting engine...")
 	engine.Start()
 
-	// listen an serve api requests
+	// instantiate http listener
+	shared.TeeLog("Initializing HTTP listener...")
+	httpListener := &listener.HTTPListener{}
+	httpListener.Initialize()
+	httpListener.Engine = &engine
+
+	// listen and serve api requests
 	shared.TeeLog("Wiring up API HTTP handlers...")
 	http.HandleFunc("/api/register", httpListener.HandleRegister)
 	http.HandleFunc("/api/login", httpListener.HandleLogin)
