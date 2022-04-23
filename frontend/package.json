@@ -14,7 +14,8 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "pretty": "prettier --write \"./**/*.{ts,js,jsx,json}\"",
-    "ngupdate": "ng update @angular/core @angular/cli"
+    "ngupdate": "ng update @angular/core @angular/cli",
+    "build-docker-alpha": "chmod a+x ../bash/build-docker-alpha.sh && bash ../bash/build-docker-alpha.sh"
   },
   "private": true,
   "dependencies": {
