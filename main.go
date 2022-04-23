@@ -40,9 +40,11 @@ func main() {
 	httpListener := &listener.HTTPListener{}
 	httpListener.Initialize()
 
+	// listen for pings early
 	go func() {
+		shared.TeeLog("Hooking early ping listener...")
 		http.HandleFunc("/", httpListener.HandlePing)
-		http.ListenAndServe(fmt.Sprintf(":%v", httpListener.GetPort()), nil)
+		http.ListenAndServe(":80", nil)
 	}()
 
 	// run daily downtime jobs
@@ -71,10 +73,14 @@ func main() {
 	engine.Start()
 
 	// listen an serve api requests
-	shared.TeeLog("Wiring up HTTP handlers...")
+	shared.TeeLog("Wiring up API HTTP handlers...")
 	http.HandleFunc("/api/register", httpListener.HandleRegister)
 	http.HandleFunc("/api/login", httpListener.HandleLogin)
 	http.HandleFunc("/api/shutdown", httpListener.HandleShutdown)
+
+	go func() {
+		http.ListenAndServe(fmt.Sprintf(":%v", httpListener.GetPort()), nil)
+	}()
 
 	shared.TeeLog("Helia is running!")
 
