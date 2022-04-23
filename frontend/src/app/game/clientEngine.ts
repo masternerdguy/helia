@@ -1171,6 +1171,11 @@ function clientLoop() {
     window.location.reload();
   }
 
+  // print metrics
+  if (Date.now() % 333 == 0) {
+    console.log(engineSack.wsSvc.metrics);
+  }
+
   // clamp player's ship to interaction window as host
   engineSack.targetInteractionWindow.setHost(engineSack.player.currentShip);
 

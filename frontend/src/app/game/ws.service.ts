@@ -14,6 +14,7 @@ export class WsService {
   sid: string;
   ackToken: number;
   skew: number = 0;
+  metrics = {};
 
   constructor() {}
 
@@ -73,6 +74,15 @@ export class WsService {
 
     // parse
     const json = JSON.parse(decompressed);
+
+    // record metrics
+    var gm = json as GameMessage;
+
+    if (!this.metrics[gm.type]) {
+      this.metrics[gm.type] = 0;
+    }
+
+    this.metrics[gm.type] += z.length;
 
     // return result
     return json;
