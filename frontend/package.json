@@ -15,7 +15,8 @@
     "e2e": "ng e2e",
     "pretty": "prettier --write \"./**/*.{ts,js,jsx,json}\"",
     "ngupdate": "ng update @angular/core @angular/cli",
-    "build-docker-alpha": "chmod a+x ../bash/build-docker-alpha.sh && bash ../bash/build-docker-alpha.sh"
+    "build-docker-alpha": "chmod a+x ../bash/build-docker-alpha.sh && bash ../bash/build-docker-alpha.sh",
+    "deploy-docker-alpha": "chmod a+x ../bash/deploy-docker-alpha.sh && bash ../bash/deploy-docker-alpha.sh"
   },
   "private": true,
   "dependencies": {
