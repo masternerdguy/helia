@@ -53,24 +53,24 @@ func main() {
 	downtimeRunner.Initialize()
 	downtimeRunner.RunDownTimeTasks()
 
-	// initialize game engine
+	/*// initialize game engine
 	shared.TeeLog("Initializing engine...")
 	engine := engine.HeliaEngine{}
-	engine.Initialize()
+	engine.Initialize()*/
 
 	// instantiate socket listener
 	shared.TeeLog("Initializing socket listener...")
 	socketListener := &listener.SocketListener{}
 	socketListener.Initialize()
-	socketListener.Engine = &engine
-	httpListener.Engine = &engine
+	/*socketListener.Engine = &engine
+	httpListener.Engine = &engine*/
 
 	shared.TeeLog("Wiring up socket handlers...")
 	http.HandleFunc("/ws/connect", socketListener.HandleConnect)
 
-	// start engine
+	/*// start engine
 	shared.TeeLog("Starting engine...")
-	engine.Start()
+	engine.Start()*/
 
 	// listen an serve api requests
 	shared.TeeLog("Wiring up API HTTP handlers...")
