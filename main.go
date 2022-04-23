@@ -35,6 +35,16 @@ func main() {
 	// brief sleep
 	time.Sleep(100 * time.Millisecond)
 
+	// instantiate http listener
+	shared.TeeLog("Initializing HTTP listener...")
+	httpListener := &listener.HTTPListener{}
+	httpListener.Initialize()
+
+	go func() {
+		http.HandleFunc("/", httpListener.HandlePing)
+		http.ListenAndServe(fmt.Sprintf(":%v", httpListener.GetPort()), nil)
+	}()
+
 	// run daily downtime jobs
 	shared.TeeLog("Running downtime jobs...")
 	downtimeRunner := engine.DownTimeRunner{}
@@ -51,6 +61,7 @@ func main() {
 	socketListener := &listener.SocketListener{}
 	socketListener.Initialize()
 	socketListener.Engine = &engine
+	httpListener.Engine = &engine
 
 	shared.TeeLog("Wiring up socket handlers...")
 	http.HandleFunc("/ws/connect", socketListener.HandleConnect)
@@ -59,21 +70,18 @@ func main() {
 	shared.TeeLog("Starting engine...")
 	engine.Start()
 
-	// instantiate http listener
-	shared.TeeLog("Initializing HTTP listener...")
-	httpListener := &listener.HTTPListener{}
-	httpListener.Initialize()
-	httpListener.Engine = &engine
-
 	// listen an serve api requests
 	shared.TeeLog("Wiring up HTTP handlers...")
 	http.HandleFunc("/api/register", httpListener.HandleRegister)
 	http.HandleFunc("/api/login", httpListener.HandleLogin)
 	http.HandleFunc("/api/shutdown", httpListener.HandleShutdown)
-	http.HandleFunc("/", httpListener.HandlePing)
 
 	shared.TeeLog("Helia is running!")
-	http.ListenAndServe(fmt.Sprintf(":%v", httpListener.GetPort()), nil)
+
+	// don't exit
+	for {
+		time.Sleep(5000 * time.Millisecond)
+	}
 }
 
 func printLogger(s string, t time.Time) {
