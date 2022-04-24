@@ -160,7 +160,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 	s.Lock.LogInternalProgress("solarsystem.shipCollisionTesting done!")
 
 	// send client updates
-	if s.tickCounter%2 == 0 {
+	if s.tickCounter%2 == 0 && len(s.clients) > 0 {
 		s.sendClientUpdates()
 		s.Lock.LogInternalProgress("solarsystem.sendClientUpdates done!")
 	}
