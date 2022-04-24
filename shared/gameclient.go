@@ -103,7 +103,7 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 	}
 
 	// set a deadline to write the message
-	c.Conn.SetWriteDeadline(time.Now().Add(time.Millisecond * 500))
+	c.Conn.SetWriteDeadline(time.Now().Add(time.Millisecond * 5000))
 
 	// package message as json
 	json, err := json.Marshal(msg)
