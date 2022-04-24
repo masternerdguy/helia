@@ -26,7 +26,6 @@ type LabeledMutex struct {
 	lastCallerMutex       sync.Mutex
 	aggressiveMode        bool // if true, performance-intensive logging will be performed
 	enforceWait           bool // if true, the goroutine will be required to briefly sleep before acquiring a lock
-	deadlockDetection     bool // if true, a suspiciously long lock will be considered a deadlock and the system will shut down cleanly
 	internalProgressMutex sync.Mutex
 	internalProgressLog   []string
 }
@@ -113,56 +112,54 @@ func (m *LabeledMutex) Lock(caller string) {
 		panic(fmt.Sprintf("Unlabeled LabeledMutex! Make sure a label is assigned to every instance of the associated structure: %v", m))
 	}
 
-	if m.deadlockDetection {
-		// monitor for suspiciously long locks on a separate goroutine
-		go func(m *LabeledMutex) {
-			it := 0
+	// monitor for suspiciously long locks on a separate goroutine
+	go func(m *LabeledMutex) {
+		it := 0
 
-			// wait ~5 seconds
-			for {
-				// exit goroutine if shutting down
-				if ShutdownSignal {
-					break
-				}
-
-				// exit goroutine if lock released
-				if !m.isLocked {
-					break
-				}
-
-				// exit goroutine if global freeze declared
-				if MutexFreeze {
-					break
-				}
-
-				if it > 1500 {
-					// are we still locked?
-					if m.lastLocked >= m.lastUnlocked {
-						MutexFreeze = true
-
-						// this is a freeze - core will save the world state and shut down the system
-						go func() {
-							time.Sleep(10 * time.Second)
-
-							// print diagnostic output
-							TeeLog(fmt.Sprintf("Mutex locked for a very suspicious amount of time, this was almost certainly a freeze: %v", m))
-							m.Print()
-						}()
-
-						TeeLog(fmt.Sprintf("! Emergency shutdown - deadlock detected: %v", m))
-						return
-					} else {
-						// lock released!
-						break
-					}
-				}
-
-				// sleep in small increments to avoid pegging cpu
-				time.Sleep(10 * time.Millisecond)
-				it++
+		// wait ~5 seconds
+		for {
+			// exit goroutine if shutting down
+			if ShutdownSignal {
+				break
 			}
-		}(m)
-	}
+
+			// exit goroutine if lock released
+			if !m.isLocked {
+				break
+			}
+
+			// exit goroutine if global freeze declared
+			if MutexFreeze {
+				break
+			}
+
+			if it > 1500 {
+				// are we still locked?
+				if m.lastLocked >= m.lastUnlocked {
+					MutexFreeze = true
+
+					// this is a freeze - core will save the world state and shut down the system
+					go func() {
+						time.Sleep(10 * time.Second)
+
+						// print diagnostic output
+						TeeLog(fmt.Sprintf("Mutex locked for a very suspicious amount of time, this was almost certainly a freeze: %v", m))
+						m.Print()
+					}()
+
+					TeeLog(fmt.Sprintf("! Emergency shutdown - deadlock detected: %v", m))
+					return
+				} else {
+					// lock released!
+					break
+				}
+			}
+
+			// sleep in small increments to avoid pegging cpu
+			time.Sleep(10 * time.Millisecond)
+			it++
+		}
+	}(m)
 }
 
 func (m *LabeledMutex) Unlock() {
