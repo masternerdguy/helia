@@ -146,8 +146,10 @@ func (s *SolarSystem) PeriodicUpdate() {
 	s.Lock.LogInternalProgress("solarsystem.updateShips done!")
 
 	// update npc stations
-	s.updateStations()
-	s.Lock.LogInternalProgress("solarsystem.updateStations done!")
+	if s.tickCounter%32 == 0 {
+		s.updateStations()
+		s.Lock.LogInternalProgress("solarsystem.updateStations done!")
+	}
 
 	// update in-flight missiles
 	s.updateMissiles()
