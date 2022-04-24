@@ -44,6 +44,7 @@ func main() {
 	go func() {
 		shared.TeeLog("Hooking early ping listener...")
 		http.HandleFunc("/", httpListener.HandlePing)
+
 		http.ListenAndServeTLS(fmt.Sprintf(":%v", httpListener.GetPort()), "ssl.cert.pem", "ssl.key.pem", nil)
 	}()
 
