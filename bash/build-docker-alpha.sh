@@ -15,11 +15,17 @@ cp -v ~/go/src/helia/db-configuration-alpha.json ~/go/src/helia/db-configuration
 rm -rfv ~/go/src/helia/frontend
 rm -rfv ~/go/src/helia/bash
 
+# temporarily move .git out of repo
+mv ~/go/src/helia/.git ~/tmpgit
+
 # remove sql backups
 rm -rfv ~/go/src/helia/*.sql
 
 # build docker image
 docker build -t heliaalpha . -f Dockerfile.single
+
+# move .git back into repo
+mv ~/tmpgit ~/go/src/helia/.git
 
 # restore repo state
 git clean -fxd
