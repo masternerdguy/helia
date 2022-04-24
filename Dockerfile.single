@@ -5,5 +5,5 @@ WORKDIR /app
 RUN go build -buildvcs=false -o main .
 RUN adduser -S -D -H -h /app appuser
 USER appuser
-EXPOSE 8472
+EXPOSE 8000
 CMD ["./main"]
