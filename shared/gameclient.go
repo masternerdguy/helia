@@ -100,6 +100,9 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 			return
 		}
 
+		// set a deadline to write the message
+		c.Conn.SetWriteDeadline(time.Now().Add(time.Second * 5))
+
 		// package message as json
 		json, err := json.Marshal(msg)
 
@@ -128,7 +131,13 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 			defer c.Lock.Unlock()
 
 			// send message
-			c.Conn.WriteMessage(1, []byte(o))
+			err := c.Conn.WriteMessage(1, []byte(o))
+
+			if err != nil {
+				// close connection
+				c.Conn.Close()
+				c.Dead = true
+			}
 		} else {
 			// dump error message to console
 			TeeLog(err.Error())
