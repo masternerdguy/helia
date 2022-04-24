@@ -93,59 +93,56 @@ func (c *GameClient) Initialize() {
 
 // Writes a message to a client
 func (c *GameClient) WriteMessage(msg *models.GameMessage) {
-	// dispatch to a separate goroutine
-	go func(c *GameClient) {
-		// return if connection closed
-		if c.Dead {
+	// obtain lock
+	c.Lock.Lock("gameclient.WriteMessage")
+	defer c.Lock.Unlock()
+
+	// return if connection closed
+	if c.Dead {
+		return
+	}
+
+	// set a deadline to write the message
+	c.Conn.SetWriteDeadline(time.Now().Add(time.Millisecond * 500))
+
+	// package message as json
+	json, err := json.Marshal(msg)
+
+	if err == nil {
+		// compress message
+		var b bytes.Buffer
+		gz := gzip.NewWriter(&b)
+
+		if _, err := gz.Write([]byte(json)); err != nil {
+			// dump error message to console
+			TeeLog(err.Error())
 			return
 		}
 
-		// package message as json
-		json, err := json.Marshal(msg)
-
-		if err == nil {
-			// compress message
-			var b bytes.Buffer
-			gz := gzip.NewWriter(&b)
-
-			if _, err := gz.Write([]byte(json)); err != nil {
-				// dump error message to console
-				TeeLog(err.Error())
-				return
-			}
-
-			if err := gz.Close(); err != nil {
-				// dump error message to console
-				TeeLog(err.Error())
-				return
-			}
-
-			// convert to string
-			o := base64.RawStdEncoding.EncodeToString(b.Bytes())
-
-			// obtain lock (doing so way down here as an optimization)
-			c.Lock.Lock("gameclient.WriteMessage")
-			defer c.Lock.Unlock()
-
-			// set a deadline to write the message
-			c.Conn.SetWriteDeadline(time.Now().Add(time.Millisecond * 1500))
-
-			// send message
-			err := c.Conn.WriteMessage(1, []byte(o))
-
-			if err != nil {
-				// dump error message to console
-				TeeLog(err.Error())
-
-				// close connection
-				c.Conn.Close()
-				c.Dead = true
-			}
-		} else {
+		if err := gz.Close(); err != nil {
 			// dump error message to console
 			TeeLog(err.Error())
+			return
 		}
-	}(c)
+
+		// convert to string
+		o := base64.RawStdEncoding.EncodeToString(b.Bytes())
+
+		// send message
+		err := c.Conn.WriteMessage(1, []byte(o))
+
+		if err != nil {
+			// dump error message to console
+			TeeLog(err.Error())
+
+			// close connection
+			c.Conn.Close()
+			c.Dead = true
+		}
+	} else {
+		// dump error message to console
+		TeeLog(err.Error())
+	}
 }
 
 // Send an error string to the client to be displayed
