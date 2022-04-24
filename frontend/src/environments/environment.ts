@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: `https://52.188.125.241:8472/api/`,
-  wsUrl: `wss://52.188.125.241:8472/ws/`,
+  apiUrl: `https://${window.location.hostname}:8472/api/`,
+  wsUrl: `wss://${window.location.hostname}:8472/ws/`,
 };
 
 /*
