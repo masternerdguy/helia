@@ -95,6 +95,9 @@ class EngineSack {
   actionReportsWindow: ActionReportsWindow;
   lastShiftDown: number;
 
+  tpsTail: number[] = [];
+  rollingQ: number = 0;
+
   windows: GDIWindow[];
   windowManager: WindowManager;
   alternateFrame: boolean;
@@ -437,6 +440,14 @@ function handleGlobalUpdate(d: GameMessage) {
 
   engineSack.tps = now - engineSack.lastSyncTime;
   engineSack.lastSyncTime = now;
+
+  if (engineSack.tpsTail.length >= 3) {
+    engineSack.tpsTail = engineSack.tpsTail.reverse();
+    engineSack.tpsTail.pop();
+    engineSack.tpsTail = engineSack.tpsTail.reverse();
+  }
+
+  engineSack.tpsTail.push(engineSack.tps);
 
   // parse body
   const msg = JSON.parse(d.body) as ServerGlobalUpdateBody;
@@ -1067,7 +1078,7 @@ function gfxBackplate() {
   engineSack.ctx.drawImage(engineSack.player.currentSystem.backplateImg, 0, 0);
 }
 
-function clientLoop() {  
+function clientLoop() {
   // periodic update
   periodicUpdate();
 
@@ -1097,7 +1108,7 @@ function clientLoop() {
   engineSack.lastFrameTime = Date.now();
 
   // queue next iteration
-  setTimeout(clientLoop, 30 - engineSack.tpf)
+  setTimeout(clientLoop, 30 - engineSack.tpf);
 }
 
 function periodicUpdate() {
@@ -1123,33 +1134,31 @@ function periodicUpdate() {
 function interpolate() {
   const start = Date.now();
 
+  // calculate rolling q
+  let resync = recalculateRollingQ();
+
   // interate over ships
   for (const sh of engineSack.player.currentSystem.ships) {
-    // get average delta
-    const delta = sh.getAverageSyncDelta();
-    const tps = delta.tps;
+    if (!resync) {
+      // get average delta
+      const delta = sh.getAverageSyncDelta();
 
-    // skip if within minimum tpi window
-    if (tps < 5) {
-      continue;
-    }
+      // get frame velocity
+      const fVx = delta.deltaX / engineSack.rollingQ;
+      const fVy = delta.deltaY / engineSack.rollingQ;
 
-    // get scale
-    const s = 30 / engineSack.tpi;
+      // adjust position
+      sh.x += fVx;
+      sh.y += fVy;
 
-    // get frame velocity
-    const fVx = delta.deltaX / s;
-    const fVy = delta.deltaY / s;
+      // check if player ship
+      if (sh.id == engineSack.player.currentShip.id) {
+        // sync camera
+        engineSack.camera.x = sh.x;
+        engineSack.camera.y = sh.y;
 
-    // adjust position
-    sh.x += fVx;
-    sh.y += fVy;
-
-    // check if player ship
-    if (sh.id == engineSack.player.currentShip.id) {
-      // sync camera
-      engineSack.camera.x = sh.x;
-      engineSack.camera.y = sh.y;
+        console.log(engineSack.rollingQ);
+      }
     }
   }
 
@@ -1164,6 +1173,41 @@ function interpolate() {
 
   // queue next iteration
   setTimeout(interpolate, engineSack.tpi);
+}
+
+function recalculateRollingQ(): boolean {
+  let avgTps = 0;
+
+  for (const qx of engineSack.tpsTail) {
+    avgTps += qx;
+  }
+
+  avgTps /= engineSack.tpsTail.length;
+
+  // get scale
+  const q = Math.round(Math.max(avgTps / engineSack.tpi, 30 / engineSack.tpi));
+  const rqr = q / engineSack.rollingQ;
+
+  // calculate a new rolling q
+  let newRollingQ = engineSack.rollingQ;
+
+  if (rqr > 1.2) {
+    newRollingQ = (q + engineSack.rollingQ) / 2;
+  } else {
+    if (q / engineSack.rollingQ < 0.7) {
+      newRollingQ = (q + engineSack.rollingQ) / 2;
+    }
+  }
+
+  newRollingQ = Math.round(newRollingQ);
+
+  // check for significant change
+  const nqr = Math.abs(newRollingQ) / Math.abs(engineSack.rollingQ);
+  let resync = nqr >= 1.7 || nqr < 0.3;
+
+  // store new rolling q
+  engineSack.rollingQ = Math.round(newRollingQ);
+  return resync;
 }
 
 function updateTargetSelection() {

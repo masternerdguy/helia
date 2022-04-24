@@ -173,19 +173,19 @@ export class Ship extends WSShip {
     this.deltaY = sh.y - this.lastWsY;
     this.tps = now - this.lastSeen;
 
+    // remove oldest entry
+    if (this.deltaTail.length >= 3) {
+      const reversed = this.deltaTail.reverse();
+      reversed.pop();
+      this.deltaTail = reversed.reverse();
+    }
+
     // update sync delta tail
     this.deltaTail.push({
       deltaX: this.deltaX,
       deltaY: this.deltaY,
-      tps: this.tps
+      tps: this.tps,
     });
-
-  // remove oldest entry
-  if (this.deltaTail.length >= 10) {
-    const reversed = this.deltaTail.reverse();
-    reversed.pop();
-    this.deltaTail = reversed.reverse();
-  }
 
     // copy from message
     this.createdAt = sh.createdAt;
@@ -295,8 +295,8 @@ export class Ship extends WSShip {
     return {
       deltaX: deltaX,
       deltaY: deltaY,
-      tps: tps
-    }
+      tps: tps,
+    };
   }
 
   getFaction(): Faction {
