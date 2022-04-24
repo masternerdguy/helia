@@ -3,7 +3,7 @@ RUN mkdir /app
 ADD . /app/
 WORKDIR /app
 RUN go build -buildvcs=false -o main .
-RUN sudo setcap CAP_NET_BIND_SERVICE+ep main
+RUN setcap CAP_NET_BIND_SERVICE+ep main
 RUN adduser -S -D -H -h /app appuser
 USER appuser
 EXPOSE 8000
