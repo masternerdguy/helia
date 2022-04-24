@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # login to registry
-docker login heliaalpharegistry.azurecr.io --username 'heliaalpharegistry' --password 'wN/oE7R0+3jxiCKAxfIcdEWv4tqHwUu1'
+docker login heliaalpharegistry.azurecr.io --username 'heliaalpharegistry' --password 'u441Vgr2AEasyW0fLqCSQcdJPL5XQ=pH'
 
 # tag local image
 docker tag heliaalpha heliaalpharegistry.azurecr.io/heliaalpha

@@ -9,7 +9,7 @@ git clean -fxd
 
 # copy alpha config
 cp -v ~/go/src/helia/db-configuration-alpha.json ~/go/src/helia/db-configuration.json
-cp -v ~/go/src/helia/listener-configuration-alpha.json ~/go/src/helia/listener-configuration.json
+# cp -v ~/go/src/helia/listener-configuration-alpha.json ~/go/src/helia/listener-configuration.json
 
 # remove frontend and scripting files
 rm -rfv ~/go/src/helia/frontend
