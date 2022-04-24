@@ -100,9 +100,6 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 			return
 		}
 
-		// set a deadline to write the message
-		c.Conn.SetWriteDeadline(time.Now().Add(time.Second * 5))
-
 		// package message as json
 		json, err := json.Marshal(msg)
 
@@ -129,6 +126,9 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 			// obtain lock (doing so way down here as an optimization)
 			c.Lock.Lock("gameclient.WriteMessage")
 			defer c.Lock.Unlock()
+
+			// set a deadline to write the message
+			c.Conn.SetWriteDeadline(time.Now().Add(time.Millisecond * 1500))
 
 			// send message
 			err := c.Conn.WriteMessage(1, []byte(o))
