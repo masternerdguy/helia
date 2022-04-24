@@ -45,27 +45,7 @@ export class WsService {
 
   private parse(e: MessageEvent<any>): any {
     // deobfuscate
-    let z = this.obfuscate(e.data, this.getKey(this.skew));
-
-    if (!z.startsWith('H4sIAAAAAAAA')) {
-      let skew = -5;
-
-      while (!z.startsWith('H4sIAAAAAAAA')) {
-        skew++;
-        z = this.obfuscate(e.data, this.getKey(skew));
-
-        if (skew > 5) {
-          // not parsable
-          const stub = new GameMessage();
-          stub.body = '';
-          stub.type = -999;
-
-          return stub;
-        }
-      }
-
-      this.skew = skew;
-    }
+    let z = e.data;
 
     // decompress
     const decompressed = pako.inflate(this.base64ToArrayBuffer(z), {
@@ -89,13 +69,12 @@ export class WsService {
   }
 
   sendMessage(type: number, body: any) {
-    // obfuscate
+    // serialize
     const j = JSON.stringify(body);
-    const x = this.obfuscate(j, this.getKey(this.skew));
 
     // package body as GameMessage
     const g = new GameMessage();
-    g.body = x;
+    g.body = j;
     g.type = type;
 
     // send message to server
@@ -116,27 +95,5 @@ export class WsService {
     }
 
     return bytes.buffer;
-  }
-
-  // computes key accounting for potential skew
-  getKey(offset: number): string {
-    const now = new Date(Date.now());
-
-    return `${
-      now.getUTCMinutes() + offset
-    }^${now.getUTCHours()}|${now.getUTCDate()}*${now.getUTCFullYear()}`;
-  }
-
-  // performs a xor on a string to obfuscate / deobfuscate it
-  obfuscate(text: string, key: string) {
-    var result = '';
-
-    for (var i = 0; i < text.length; i++) {
-      result += String.fromCharCode(
-        text.charCodeAt(i) ^ key.charCodeAt(i % key.length)
-      );
-    }
-
-    return result;
   }
 }
