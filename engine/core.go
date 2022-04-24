@@ -137,6 +137,40 @@ func (e *HeliaEngine) Start() {
 
 	shared.TeeLog("System goroutines started!")
 
+	// start watchdog goroutine (to alert of any deadlocks for debugging purposes)
+	go func(e *HeliaEngine) {
+		for {
+			if shutdownSignal {
+				shared.TeeLog("! Deadlock Check [goroutine] Halted!")
+				break
+			}
+
+			shared.TeeLog("* Deadlock Check Starting")
+
+			// iterate over systems
+			for _, r := range e.Universe.Regions {
+				for _, s := range r.Systems {
+					shared.TeeLog(fmt.Sprintf("* Testing [%v]", s.SystemName))
+
+					// test locks
+					s.TestLocks()
+					shared.TeeLog(fmt.Sprintf("* [%v] Passed", s.SystemName))
+
+					// small sleep between systems
+					time.Sleep(5 * time.Millisecond)
+				}
+
+				// larger sleep between regions
+				time.Sleep(20 * time.Millisecond)
+			}
+
+			shared.TeeLog("* All systems passed deadlock check!")
+
+			// wait 5 minutes
+			time.Sleep(time.Second * 300)
+		}
+	}(e)
+
 	go func() {
 		for {
 			// automatic shutdown in event of deadlock
