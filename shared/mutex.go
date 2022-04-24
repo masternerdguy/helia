@@ -51,6 +51,16 @@ func (m *LabeledMutex) SetEnforceWaitFlag(f bool) {
 	m.enforceWait = f
 }
 
+// When set to true, this mutex will monitor itself on a separate goroutine and trigger a system shutdown if an unlock wait time is exceeded
+func (m *LabeledMutex) SetDeadlockDetectionFlag(f bool) {
+	// obtain lock
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	// set flag
+	m.deadlockDetection = f
+}
+
 // Stores an arbitrary log entry on the mutex. It is assumed that the caller has a lock, and the log is cleared when the mutex is released.
 func (m *LabeledMutex) LogInternalProgress(log string) {
 	// obtain lock
