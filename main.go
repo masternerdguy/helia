@@ -35,6 +35,18 @@ func main() {
 	// brief sleep
 	time.Sleep(100 * time.Millisecond)
 
+	// instantiate http listener
+	shared.TeeLog("Initializing HTTP listener...")
+	httpListener := &listener.HTTPListener{}
+	httpListener.Initialize()
+
+	// listen for pings early
+	go func() {
+		shared.TeeLog("Hooking early ping listener...")
+		http.HandleFunc("/", httpListener.HandlePing)
+		http.ListenAndServeTLS(fmt.Sprintf(":%v", httpListener.GetPort()), "ssl.cert.pem", "ssl.key.pem", nil)
+	}()
+
 	// run daily downtime jobs
 	shared.TeeLog("Running downtime jobs...")
 	downtimeRunner := engine.DownTimeRunner{}
@@ -44,6 +56,7 @@ func main() {
 	// initialize game engine
 	shared.TeeLog("Initializing engine...")
 	engine := engine.HeliaEngine{}
+	httpListener.Engine = &engine
 	engine.Initialize()
 
 	// instantiate socket listener
@@ -59,12 +72,6 @@ func main() {
 	shared.TeeLog("Starting engine...")
 	engine.Start()
 
-	// instantiate http listener
-	shared.TeeLog("Initializing HTTP listener...")
-	httpListener := &listener.HTTPListener{}
-	httpListener.Initialize()
-	httpListener.Engine = &engine
-
 	// listen and serve api requests
 	shared.TeeLog("Wiring up API HTTP handlers...")
 	http.HandleFunc("/api/register", httpListener.HandleRegister)
@@ -76,7 +83,6 @@ func main() {
 
 	// up and running!
 	shared.TeeLog("Helia is running!")
-	http.ListenAndServeTLS(fmt.Sprintf(":%v", httpListener.GetPort()), "ssl.cert.pem", "ssl.key.pem", nil)
 
 	// don't exit
 	for {

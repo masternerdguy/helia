@@ -37,6 +37,14 @@ func (l *HTTPListener) GetPort() int {
 	return l.Configuration.Port
 }
 
+func (l *HTTPListener) HandlePing(w http.ResponseWriter, r *http.Request) {
+	// enable cors
+	enableCors(&w)
+
+	// write pingback
+	fmt.Fprintf(w, "alive!")
+}
+
 // Handles a user registering
 func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	// enable cors
