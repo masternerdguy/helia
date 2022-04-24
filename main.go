@@ -45,7 +45,7 @@ func main() {
 		shared.TeeLog("Hooking early ping listener...")
 		http.HandleFunc("/", httpListener.HandlePing)
 
-		http.ListenAndServeTLS(fmt.Sprintf(":%v", httpListener.GetPort()), "ssl.cert.pem", "ssl.key.pem", nil)
+		http.ListenAndServe(fmt.Sprintf(":%v", httpListener.GetPort()), nil)
 	}()
 
 	// run daily downtime jobs
