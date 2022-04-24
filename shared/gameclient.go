@@ -134,6 +134,9 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 			err := c.Conn.WriteMessage(1, []byte(o))
 
 			if err != nil {
+				// dump error message to console
+				TeeLog(err.Error())
+
 				// close connection
 				c.Conn.Close()
 				c.Dead = true
