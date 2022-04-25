@@ -21,12 +21,24 @@ Helia's open alpha is currently hosted on an Azure storage accout as a static we
 2. Replace the files in the `$web` container of the `heliaalphafrontend` storage account with the new files under the `dist` folder - the easiest way is to just use Azure Storage Explorer which takes ~1 minute.
 
 # Deployment Process (alpha, backend)
-Deploying the backend is less trivial than the frontend. Currently, the only way to run go code in an Azure app service is to use a docker container hosted in some kind of docker registry. For privacy reasons, the `helia-backend-engine` app service is configured to pull from the `heliaalpharegistry` Azure Container Registry automatically. Whenever a new docker image is pushed, a deployment occurs. Be aware that this will result in a sudden restart, so it is critical perform a clean shutdown using the `Save and Shutdown` endpoint, allow it to complete, and then stop the app service before the deployment. Otherwise, players will lose progress and players don't tend to like that.
+Deploying the backend is less trivial than the frontend. Currently, the only way to run go code in an Azure app service is to use a docker container hosted in some kind of docker registry. For privacy reasons, the `helia-backend-engine` app service is configured to pull from the `heliaalpharegistry` Azure Container Registry automatically. Whenever a new docker image is pushed, a deployment occurs. Be aware that this will result in a sudden restart, so it is critical to perform a clean shutdown using the `Save and Shutdown` endpoint, allow it to complete, and then manually stop the app service before the deployment. Otherwise, players will lose progress and players don't tend to like that.
+
+Given the above, performing a backend deployment can be done by
+
+1. `cd` into the frontend directory - npm is being used as a helper here, at least for now. This isn't ideal as you will see.
+2. Run `npm run build-docker:alpha` to build the docker image. To reduce image size significantly (large images are unreliable on Azure) some interesting tricks are done before building the container.
+3. Run `cd .. && cd frontend` to get into the restored frontend folder again - one of the interesting tricks done by the build script is deleting that folder and then letting git restore it after the image is built. As a result, you lose your path reference.
+3. Run `npm run deploy-docker:alpha` to push the image to Azure.
+
+Note that you will also need a local docker instance for this to work - otherwise you can't build the image locally for deployment. This is very easy to set up using `WSL` and `Docker Desktop` on Windows - WSL works as a dev environment for Helia quite well!
 
 # Shutting down the server properly (aka not making players very angry)
 A server shutdown can be initiated using the `Save and Shutdown` endpoint (see Useful Links). This will save key aspects of the current state of the simulation and shut down the server. It is critical to always perform a clean shutdown - whether before a backend deployment or otherwise. If a clean shutdown is not performed, players will lose progress.
 
 Also note that the app service will try to restart automatically a few minutes after the shutdown because it detects an "unhealthy resource" - it is important to monitor the logs table for the `shutdown complete` message and then manually stop the app service. Note that helia does take ~10 minutes to boot within this particular Azure app service, and it is completely safe to stop the app service during startup. However, if the simulation is allowed to fully start a clean shutdown must be performed again.
+
+# Daily Downtime
+Helia is intended to be cleanly shut down and restarted once a day. If this doesn't happen, some gameplay aspects (such as transient jumphole connections) will become stale and won't be regenerated. This is currently manual, but is quite easy because once the clean shutdown completes Azure will see it as an "unhealthy resource" and bring it back online automatically :) I intend to automate this quite soon.
 
 # Useful links
 * Register: http://localhost:4200/#/auth/signup
