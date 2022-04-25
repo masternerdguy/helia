@@ -77,8 +77,6 @@ func (e *HeliaEngine) Start() {
 
 				// game loop
 				for {
-					alternateFrame := false
-
 					// check for shutdown signal
 					if shutdownSignal {
 						sol.HandleShutdownSignal()
@@ -108,10 +106,8 @@ func (e *HeliaEngine) Start() {
 						// update system
 						sol.PeriodicUpdate()
 
-						if alternateFrame {
-							// handle escalations from system
-							handleEscalations(sol)
-						}
+						// handle escalations from system
+						handleEscalations(sol)
 
 						// get time of last frame
 						now := makeTimestamp()
@@ -134,9 +130,6 @@ func (e *HeliaEngine) Start() {
 
 					// wait for goroutine to return
 					<-c
-
-					// alternate frame
-					alternateFrame = !alternateFrame
 
 					// update last frame time
 					lastFrame = makeTimestamp()
