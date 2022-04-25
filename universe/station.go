@@ -1,10 +1,8 @@
 package universe
 
 import (
-	"fmt"
 	"helia/physics"
-	"helia/shared"
-	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -23,7 +21,7 @@ type Station struct {
 	Theta       float64
 	FactionID   uuid.UUID
 	// in-memory only
-	Lock                   shared.LabeledMutex
+	Lock                   sync.Mutex
 	CurrentSystem          *SolarSystem
 	OpenSellOrders         map[string]*SellOrder
 	Processes              map[string]*StationProcess
@@ -34,7 +32,7 @@ type Station struct {
 // Initializes internal aspects of Station
 func (s *Station) Initialize() {
 	// obtain lock
-	s.Lock.Lock("station.Initialize")
+	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	// initialize maps
@@ -111,7 +109,7 @@ func (s *Station) Initialize() {
 
 // Processes the station for a tick
 func (s *Station) PeriodicUpdate() {
-	s.Lock.Lock("station.PeriodicUpdate")
+	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	// calculate delta and store time
@@ -129,7 +127,7 @@ func (s *Station) PeriodicUpdate() {
 
 // Returns a copy of the station
 func (s *Station) CopyStation() Station {
-	s.Lock.Lock("station.CopyStation")
+	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	copiedProcesses := make(map[string]*StationProcess)
@@ -151,10 +149,7 @@ func (s *Station) CopyStation() Station {
 		Mass:        s.Mass,
 		FactionID:   s.FactionID,
 		// in-memory only
-		Lock: shared.LabeledMutex{
-			Structure: "Station",
-			UID:       fmt.Sprintf("%v :: %v :: %v", s.ID, time.Now(), rand.Float64()),
-		},
+		Lock:      sync.Mutex{},
 		Processes: copiedProcesses,
 	}
 }

@@ -1,7 +1,7 @@
 package universe
 
 import (
-	"helia/shared"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,7 +19,7 @@ type Item struct {
 	Quantity      int
 	IsPackaged    bool
 	// in-memory only
-	Lock           shared.LabeledMutex
+	Lock           sync.Mutex
 	ItemTypeName   string
 	ItemFamilyID   string
 	ItemFamilyName string

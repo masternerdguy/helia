@@ -6,8 +6,7 @@ import (
 	"helia/shared"
 	"helia/sql"
 	"helia/universe"
-	"math/rand"
-	"time"
+	"sync"
 
 	"github.com/google/uuid"
 )
@@ -53,10 +52,7 @@ func LoadUniverse() (*universe.Universe, error) {
 			Progress:        sr.Progress,
 			SchematicItemID: sr.SchematicItemID,
 			UserID:          sr.UserID,
-			Lock: shared.LabeledMutex{
-				Structure: "SchematicRun",
-				UID:       fmt.Sprintf("%v :: %v :: %v", sr.ID, time.Now(), rand.Float64()),
-			},
+			Lock:            sync.Mutex{},
 		}
 
 		// don't load stuck ones
@@ -141,10 +137,7 @@ func LoadUniverse() (*universe.Universe, error) {
 				HoldingFactionName: hfn,
 				PosX:               f.PosX,
 				PosY:               f.PosY,
-				Lock: shared.LabeledMutex{
-					Structure: "SolarSystem",
-					UID:       fmt.Sprintf("%v :: %v :: %v", f.ID, time.Now(), rand.Float64()),
-				},
+				Lock:               sync.Mutex{},
 			}
 
 			// initialize and store system
@@ -241,10 +234,7 @@ func LoadUniverse() (*universe.Universe, error) {
 					ItemFamilyName: of.FriendlyName,
 					ItemFamilyID:   oi.Family,
 					ItemTypeMeta:   universe.Meta(oi.Meta),
-					Lock: shared.LabeledMutex{
-						Structure: "Asteroid",
-						UID:       fmt.Sprintf("%v :: %v :: %v", p.ID, time.Now(), rand.Float64()),
-					},
+					Lock:           sync.Mutex{},
 				}
 
 				// store in universe
@@ -270,10 +260,7 @@ func LoadUniverse() (*universe.Universe, error) {
 					Radius:       j.Radius,
 					Mass:         j.Mass,
 					Theta:        j.Theta,
-					Lock: shared.LabeledMutex{
-						Structure: "Jumphole",
-						UID:       fmt.Sprintf("%v :: %v :: %v", j.ID, time.Now(), rand.Float64()),
-					},
+					Lock:         sync.Mutex{},
 				}
 
 				s.AddJumphole(&jumphole)
@@ -323,10 +310,7 @@ func LoadUniverse() (*universe.Universe, error) {
 					Mass:        currStation.Mass,
 					Theta:       currStation.Theta,
 					FactionID:   currStation.FactionID,
-					Lock: shared.LabeledMutex{
-						Structure: "Station",
-						UID:       fmt.Sprintf("%v :: %v :: %v", currStation.ID, time.Now(), rand.Float64()),
-					},
+					Lock:        sync.Mutex{},
 					// link solar system into station
 					CurrentSystem: &s,
 					Processes:     processes,
@@ -436,7 +420,7 @@ func saveUniverse(u *universe.Universe) {
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
 			// get ships in system
-			ships := s.CopyShips(!shared.MutexFreeze)
+			ships := s.CopyShips(false)
 
 			// save ships to database
 			for _, ship := range ships {
@@ -448,7 +432,7 @@ func saveUniverse(u *universe.Universe) {
 			}
 
 			// get npc stations in system
-			stations := s.CopyStations(!shared.MutexFreeze)
+			stations := s.CopyStations(false)
 
 			// save npc stations to database
 			for _, station := range stations {
@@ -914,10 +898,7 @@ func StartFittedSlotFromSQL(value *sql.StartFittedSlot) universe.StartFittedSlot
 func ContainerFromSQL(value *sql.Container) *universe.Container {
 	// set up empty container
 	container := universe.Container{
-		Lock: shared.LabeledMutex{
-			Structure: "Container",
-			UID:       fmt.Sprintf("%v :: %v :: %v", "not initialized", time.Now(), rand.Float64()),
-		},
+		Lock: sync.Mutex{},
 	}
 
 	// null check
@@ -925,10 +906,6 @@ func ContainerFromSQL(value *sql.Container) *universe.Container {
 		// return nil
 		return nil
 	}
-
-	// label mutex
-	container.Lock.Structure = "Container"
-	container.Lock.UID = fmt.Sprintf("%v :: %v :: %v", value.ID, time.Now(), rand.Float64())
 
 	// copy container data
 	container.ID = value.ID
@@ -990,10 +967,7 @@ func FactionFromSQL(value *sql.Faction) *universe.Faction {
 	faction.ReputationSheet.WorldPercent = value.ReputationSheet.WorldPercent
 
 	// create mutex
-	faction.Lock = shared.LabeledMutex{
-		Structure: "Faction",
-		UID:       fmt.Sprintf("%v :: %v :: %v", value.ID, time.Now(), rand.Float64()),
-	}
+	faction.Lock = sync.Mutex{}
 
 	// return filled faction
 	return &faction
@@ -1009,10 +983,6 @@ func SellOrderFromSQL(value *sql.SellOrder) *universe.SellOrder {
 		// return nil
 		return nil
 	}
-
-	// label mutex
-	order.Lock.Structure = "SellOrder"
-	order.Lock.UID = fmt.Sprintf("%v :: %v :: %v", value.ID, time.Now(), rand.Float64())
 
 	// copy order data
 	order.ID = value.ID
@@ -1057,10 +1027,7 @@ func SQLFromSellOrder(value *universe.SellOrder) *sql.SellOrder {
 func ItemFromSQL(value *sql.Item) *universe.Item {
 	// set up empty item
 	item := universe.Item{
-		Lock: shared.LabeledMutex{
-			Structure: "Item",
-			UID:       fmt.Sprintf("%v :: %v :: %v", "not initialized", time.Now(), rand.Float64()),
-		},
+		Lock: sync.Mutex{},
 	}
 
 	// null check
@@ -1068,10 +1035,6 @@ func ItemFromSQL(value *sql.Item) *universe.Item {
 		// return nil
 		return nil
 	}
-
-	// label mutex
-	item.Lock.Structure = "Item"
-	item.Lock.UID = fmt.Sprintf("%v :: %v :: %v", value.ID, time.Now(), rand.Float64())
 
 	// copy item data
 	item.ID = value.ID
@@ -1354,10 +1317,7 @@ func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error
 		InternalState: internalState,
 		Meta:          universe.Meta(sp.Meta),
 		Process:       *process,
-		Lock: shared.LabeledMutex{
-			Structure: "StationProcess",
-			UID:       fmt.Sprintf("%v :: %v :: %v", sp.ID, time.Now(), rand.Float64()),
-		},
+		Lock:          sync.Mutex{},
 	}
 
 	return &o, nil
@@ -1370,9 +1330,6 @@ func LoadReputationSheet(u *sql.User) *shared.PlayerReputationSheet {
 		UserID:         u.ID,
 		CharacterName:  u.CharacterName,
 	}
-
-	repSheet.Lock.Structure = "PlayerReputationSheet"
-	repSheet.Lock.UID = fmt.Sprintf("%v :: %v :: %v", u.ID, time.Now(), rand.Float64())
 
 	for k, v := range u.ReputationSheet.FactionEntries {
 		repSheet.FactionEntries[k] = &shared.PlayerReputationSheetFactionEntry{
@@ -1391,9 +1348,6 @@ func LoadExperienceSheet(u *sql.User) *shared.PlayerExperienceSheet {
 		ShipExperience:   make(map[string]*shared.ShipExperienceEntry),
 		ModuleExperience: make(map[string]*shared.ModuleExperienceEntry),
 	}
-
-	expSheet.Lock.Structure = "PlayerExperienceSheet"
-	expSheet.Lock.UID = fmt.Sprintf("%v :: %v :: %v", u.ID, time.Now(), rand.Float64())
 
 	for k, v := range u.ExperienceSheet.ShipExperience {
 		expSheet.ShipExperience[k] = &shared.ShipExperienceEntry{
@@ -1531,10 +1485,7 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 		BehaviourMode:    owner.BehaviourMode,
 		PlayerAggressors: make(map[string]*shared.PlayerReputationSheet),
 		AggressionLog:    make(map[string]*shared.AggressionLog),
-		Lock: shared.LabeledMutex{
-			Structure: "Ship",
-			UID:       fmt.Sprintf("%v :: %v :: %v", sh.ID, time.Now(), rand.Float64()),
-		},
+		Lock:             sync.Mutex{},
 	}
 
 	// load and inject reputation sheet
@@ -1580,7 +1531,7 @@ func hookSchematics(sp *universe.Ship) {
 
 	for _, r := range runs {
 		// obtain lock
-		r.Lock.Lock("loader::HookSchematics()")
+		r.Lock.Lock()
 		defer r.Lock.Unlock()
 
 		// skip if initialized
@@ -1761,7 +1712,7 @@ func saveShip(ship *universe.Ship) error {
 	shipSvc := sql.GetShipService()
 
 	// obtain lock on copy
-	ship.Lock.Lock("loader.saveShip")
+	ship.Lock.Lock()
 	defer ship.Lock.Unlock()
 
 	dbShip := sql.Ship{

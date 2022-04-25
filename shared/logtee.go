@@ -8,7 +8,7 @@ import (
 var teeLogChannel chan teeLog
 var teeLogInitialized = false
 var teeLogHandlers []logTeeHandler
-var teeLogWrite sync.Mutex // intentionally not using LabeledMutex to avoid dying if logging is slow
+var teeLogWrite sync.Mutex // intentionally not using sync.Mutex to avoid dying if logging is slow
 
 type logTeeHandler func(string, time.Time)
 

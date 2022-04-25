@@ -6,8 +6,7 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"math/rand"
-	"time"
+	"sync"
 
 	"github.com/google/uuid"
 )
@@ -169,10 +168,7 @@ func (u *Universe) BuildTransientCelestials() {
 			Mass:         float64(physics.RandInRange(1000, 10000)),
 			Theta:        float64(physics.RandInRange(0, 360)),
 			Transient:    true,
-			Lock: shared.LabeledMutex{
-				Structure: "Jumphole",
-				UID:       fmt.Sprintf("%v :: %v :: %v", nidA, time.Now(), rand.Float64()),
-			},
+			Lock:         sync.Mutex{},
 		}
 
 		nidB := uuid.New()
@@ -189,10 +185,7 @@ func (u *Universe) BuildTransientCelestials() {
 			Mass:         float64(physics.RandInRange(1000, 10000)),
 			Theta:        float64(physics.RandInRange(0, 360)),
 			Transient:    true,
-			Lock: shared.LabeledMutex{
-				Structure: "Jumphole",
-				UID:       fmt.Sprintf("%v :: %v :: %v", nidB, time.Now(), rand.Float64()),
-			},
+			Lock:         sync.Mutex{},
 		}
 
 		// link jumpholes
@@ -362,7 +355,7 @@ func (u *Universe) SendGlobalMessage(msg *models.GameMessage) {
 		for _, s := range r.Systems {
 			go func(s *SolarSystem) {
 				// obtain lock
-				s.Lock.Lock("universe.SendGlobalMessage")
+				s.Lock.Lock()
 				defer s.Lock.Unlock()
 
 				// send messages to clients

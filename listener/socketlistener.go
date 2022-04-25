@@ -7,8 +7,8 @@ import (
 	"helia/listener/models"
 	"helia/shared"
 	"helia/sql"
-	"math/rand"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -25,14 +25,11 @@ var upgrader = websocket.Upgrader{
 type SocketListener struct {
 	Engine  *engine.HeliaEngine
 	clients []*shared.GameClient
-	lock    shared.LabeledMutex
+	lock    sync.Mutex
 }
 
 // Initializes the internals of the SocketListener
-func (s *SocketListener) Initialize() {
-	s.lock.Structure = "SocketListener"
-	s.lock.UID = fmt.Sprintf("%v :: %v :: %v", "core", time.Now(), rand.Float64())
-}
+func (s *SocketListener) Initialize() {}
 
 // Handles a client joining the server
 func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
@@ -81,7 +78,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		userSvc := sql.GetUserService()
 
 		// save reputation sheet
-		client.ReputationSheet.Lock.Lock("socketlistener.HandleConnect::DisconnectSave")
+		client.ReputationSheet.Lock.Lock()
 		defer client.ReputationSheet.Lock.Unlock()
 
 		srs := engine.SQLFromPlayerReputationSheet(&client.ReputationSheet)
@@ -92,7 +89,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// save experience sheet
-		client.ExperienceSheet.Lock.Lock("socketlistener.HandleConnect::DisconnectSave")
+		client.ExperienceSheet.Lock.Lock()
 		defer client.ExperienceSheet.Lock.Unlock()
 
 		ers := engine.SQLFromPlayerExperienceSheet(&client.ExperienceSheet)
@@ -578,7 +575,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		}
 
 		// obtain ship lock
-		currShip.Lock.Lock("socketlistener.handleClientJoin")
+		currShip.Lock.Lock()
 		defer currShip.Lock.Unlock()
 
 		// load reputation sheet
@@ -587,10 +584,6 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			UserID:         u.ID,
 			CharacterName:  u.CharacterName,
 		}
-
-		// label mutex
-		client.ReputationSheet.Lock.Structure = "PlayerReputationSheet"
-		client.ReputationSheet.Lock.UID = fmt.Sprintf("%v :: %v :: %v", u.ID, time.Now(), rand.Float64())
 
 		for k, v := range u.ReputationSheet.FactionEntries {
 			client.ReputationSheet.FactionEntries[k] = &shared.PlayerReputationSheetFactionEntry{
@@ -608,10 +601,6 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			ShipExperience:   make(map[string]*shared.ShipExperienceEntry),
 			ModuleExperience: make(map[string]*shared.ModuleExperienceEntry),
 		}
-
-		// label mutex
-		client.ExperienceSheet.Lock.Structure = "PlayerExperienceSheet"
-		client.ExperienceSheet.Lock.UID = fmt.Sprintf("%v :: %v :: %v", u.ID, time.Now(), rand.Float64())
 
 		for k, v := range u.ExperienceSheet.ShipExperience {
 			client.ExperienceSheet.ShipExperience[k] = &shared.ShipExperienceEntry{
@@ -1856,7 +1845,7 @@ func (l *SocketListener) handleClientViewActionReportsPage(client *shared.GameCl
 
 // Adds a client to the server
 func (l *SocketListener) addClient(c *shared.GameClient) {
-	l.lock.Lock("socketlistener.addClient")
+	l.lock.Lock()
 	defer l.lock.Unlock()
 
 	l.clients = append(l.clients, c)
@@ -1913,7 +1902,7 @@ func (l *SocketListener) addClient(c *shared.GameClient) {
 
 // Removes a client from the server
 func (l *SocketListener) removeClient(c *shared.GameClient) {
-	l.lock.Lock("socketlistener.removeClient")
+	l.lock.Lock()
 	defer l.lock.Unlock()
 
 	// find the client to remove

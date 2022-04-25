@@ -7,10 +7,10 @@ import (
 	"helia/shared"
 	"helia/sql"
 	"helia/universe"
-	"math/rand"
 	"os"
 	"runtime/debug"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -170,18 +170,6 @@ func (e *HeliaEngine) Start() {
 			time.Sleep(time.Second * 300)
 		}
 	}(e)
-
-	go func() {
-		for {
-			// automatic shutdown in event of deadlock
-			if shared.MutexFreeze {
-				e.Shutdown()
-			}
-
-			// avoid pegging CPU
-			time.Sleep(1 * time.Second)
-		}
-	}()
 }
 
 // Saves the current state of the simulation and halts
@@ -196,7 +184,6 @@ func (e *HeliaEngine) Shutdown() {
 	// shut down simulation
 	shared.TeeLog("Stopping simulation...")
 	shutdownSignal = true
-	shared.ShutdownSignal = true
 
 	// wait for 30 seconds to give everything a chance to exit
 	time.Sleep(30 * time.Second)
@@ -226,7 +213,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	actionReportSvc := sql.GetActionReportService()
 
 	// obtain lock
-	sol.Lock.Lock("core.handleEscalations")
+	sol.Lock.Lock()
 	defer sol.Lock.Unlock()
 
 	// iterate over moved items
@@ -238,7 +225,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
-			mi.Lock.Lock("core.handleEscalations::MovedItems")
+			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
 
 			// mark as dirty if not marked already
@@ -266,7 +253,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
-			mi.Lock.Lock("core.handleEscalations::PackagedItems")
+			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
 
 			// mark as dirty if not marked already
@@ -294,7 +281,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
-			mi.Lock.Lock("core.handleEscalations::UnpackagedItems")
+			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
 
 			// mark as dirty if not marked already
@@ -322,7 +309,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
-			mi.Lock.Lock("core.handleEscalations::ChangedQuantityItems")
+			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
 
 			// mark as dirty if not marked already
@@ -350,7 +337,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
-			mi.Lock.Lock("core.handleEscalations::ChangedMetaItems")
+			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
 
 			// mark as dirty if not marked already
@@ -378,7 +365,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
-			mi.Lock.Lock("core.handleEscalations::NewItems")
+			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
 
 			// save new item to db
@@ -436,7 +423,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.SellOrder, sol *universe.SolarSystem) {
 			// lock sell order
-			mi.Lock.Lock("core.handleEscalations::NewSellOrders")
+			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
 
 			// get item id from item if linked and flag set
@@ -472,7 +459,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.SellOrder, sol *universe.SolarSystem) {
 			// lock sell order
-			mi.Lock.Lock("core.handleEscalations::BoughtSellOrders")
+			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
 
 			// mark sell order as bought in db
@@ -970,7 +957,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			for _, e := range runs {
 				// obtain lock
-				e.Lock.Lock("core.handleEscalations::SchematicRunViews::runs")
+				e.Lock.Lock()
 				defer e.Lock.Unlock()
 
 				// skip if uninitialized
@@ -1040,13 +1027,13 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(rs *universe.NewSchematicRunTicket, sol *universe.SolarSystem) {
 			// obtain locks
-			rs.Client.Lock.Lock("core.handleEscalations::NewSchematicRuns")
+			rs.Client.Lock.Lock()
 			defer rs.Client.Lock.Unlock()
 
-			rs.Ship.Lock.Lock("core.handleEscalations::NewSchematicRuns")
+			rs.Ship.Lock.Lock()
 			defer rs.Ship.Lock.Unlock()
 
-			rs.SchematicItem.Lock.Lock("core.handleEscalations::NewSchematicRuns")
+			rs.SchematicItem.Lock.Lock()
 			defer rs.SchematicItem.Lock.Unlock()
 
 			// create new run in database
@@ -1071,10 +1058,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 				Progress:        r.Progress,
 				SchematicItemID: r.SchematicItemID,
 				UserID:          r.UserID,
-				Lock: shared.LabeledMutex{
-					Structure: "SchematicRun",
-					UID:       fmt.Sprintf("%v :: %v :: %v", r.ID, time.Now(), rand.Float64()),
-				},
+				Lock:            sync.Mutex{},
 			}
 
 			// hook schematic
@@ -1098,7 +1082,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.NewFactionTicket, sol *universe.SolarSystem) {
 			// obtain lock on game client
-			mi.Client.Lock.Lock("core.handleEscalations::NewFactions")
+			mi.Client.Lock.Lock()
 			defer mi.Client.Lock.Unlock()
 
 			// obtain lock on ship attached to client
@@ -1110,7 +1094,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 				return
 			}
 
-			sh.Lock.Lock("core.handleEscalations::NewFactions")
+			sh.Lock.Lock()
 			defer sh.Lock.Unlock()
 
 			// one last docked check
@@ -1267,7 +1251,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 		// handle escalation on another goroutine
 		go func(mi *universe.LeaveFactionTicket, sol *universe.SolarSystem) {
 			// obtain lock on game client
-			mi.Client.Lock.Lock("core.handleEscalations::LeaveFactions")
+			mi.Client.Lock.Lock()
 			defer mi.Client.Lock.Unlock()
 
 			// obtain lock on ship attached to client
@@ -1279,7 +1263,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 				return
 			}
 
-			sh.Lock.Lock("core.handleEscalations::LeaveFactions")
+			sh.Lock.Lock()
 			defer sh.Lock.Unlock()
 
 			// one last docked check
@@ -1362,7 +1346,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			if appClient != nil {
 				// obtain lock on applicant's game client
-				appClient.Lock.Lock("core.handleEscalations::JoinFactions")
+				appClient.Lock.Lock()
 				defer appClient.Lock.Unlock()
 			}
 
@@ -1376,7 +1360,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			}
 
 			// obtain lock on applicant's ship
-			appShip.Lock.Lock("core.handleEscalations::JoinFactions")
+			appShip.Lock.Lock()
 			defer appShip.Lock.Unlock()
 
 			// put player in the target faction
@@ -1498,7 +1482,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 			if kickeeClient != nil {
 				// obtain lock on kickee's game client
-				kickeeClient.Lock.Lock("core.handleEscalations::KickMembers")
+				kickeeClient.Lock.Lock()
 				defer kickeeClient.Lock.Unlock()
 			}
 
@@ -1512,7 +1496,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			}
 
 			// obtain lock on kickee's ship
-			kickeeShip.Lock.Lock("core.handleEscalations::KickMembers")
+			kickeeShip.Lock.Lock()
 			defer kickeeShip.Lock.Unlock()
 
 			// verify kickee is in the kicker's faction

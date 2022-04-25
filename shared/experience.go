@@ -3,6 +3,7 @@ package shared
 import (
 	"helia/listener/models"
 	"math"
+	"sync"
 
 	"github.com/google/uuid"
 )
@@ -12,7 +13,7 @@ type PlayerExperienceSheet struct {
 	ShipExperience   map[string]*ShipExperienceEntry
 	ModuleExperience map[string]*ModuleExperienceEntry
 	// in-memory only
-	Lock LabeledMutex
+	Lock sync.Mutex
 }
 
 // Structure representing a player's experience flying ships of a ship template
@@ -30,7 +31,7 @@ type ModuleExperienceEntry struct {
 }
 
 func (e *PlayerExperienceSheet) CopyAsUpdate() models.ServerExperienceUpdateBody {
-	e.Lock.Lock("playerexperiencesheet.CopyAsUpdate")
+	e.Lock.Lock()
 	defer e.Lock.Unlock()
 
 	u := models.ServerExperienceUpdateBody{}
@@ -65,7 +66,7 @@ func (e *PlayerExperienceSheet) CopyAsUpdate() models.ServerExperienceUpdateBody
 // Returns a ship experience entry from the map or returns a blank one if not found
 func (e *PlayerExperienceSheet) GetShipExperienceEntry(shipTemplateID uuid.UUID) ShipExperienceEntry {
 	// obtain lock
-	e.Lock.Lock("playerexperiencesheet.GetShipExperienceEntry")
+	e.Lock.Lock()
 	defer e.Lock.Unlock()
 
 	// build empty entry
@@ -88,7 +89,7 @@ func (e *PlayerExperienceSheet) GetShipExperienceEntry(shipTemplateID uuid.UUID)
 // Overwrites a ship experience entry in the map
 func (e *PlayerExperienceSheet) SetShipExperienceEntry(value ShipExperienceEntry) {
 	// obtain lock
-	e.Lock.Lock("playerexperiencesheet.SetShipExperienceEntry")
+	e.Lock.Lock()
 	defer e.Lock.Unlock()
 
 	// update map
@@ -103,7 +104,7 @@ func (e *ShipExperienceEntry) GetExperience() float64 {
 // Returns a module experience entry from the map or returns a blank one if not found
 func (e *PlayerExperienceSheet) GetModuleExperienceEntry(itemTypeID uuid.UUID) ModuleExperienceEntry {
 	// obtain lock
-	e.Lock.Lock("playerexperiencesheet.GetModuleExperienceEntry")
+	e.Lock.Lock()
 	defer e.Lock.Unlock()
 
 	// build empty entry
@@ -126,7 +127,7 @@ func (e *PlayerExperienceSheet) GetModuleExperienceEntry(itemTypeID uuid.UUID) M
 // Overwrites a module experience entry in the map
 func (e *PlayerExperienceSheet) SetModuleExperienceEntry(value ModuleExperienceEntry) {
 	// obtain lock
-	e.Lock.Lock("playerexperiencesheet.SetModuleExperienceEntry")
+	e.Lock.Lock()
 	defer e.Lock.Unlock()
 
 	// update map

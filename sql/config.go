@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"helia/shared"
 	"os"
+	"sync"
 
 	_ "github.com/lib/pq" // driver
 )
@@ -14,10 +14,7 @@ import (
 var sharedConfig *sql.DB = nil
 
 // Shared mutex for connection with db
-var sharedDbLock shared.LabeledMutex = shared.LabeledMutex{
-	Structure: "dbConfig",
-	UID:       "dbConfig",
-}
+var sharedDbLock sync.Mutex = sync.Mutex{}
 
 type dbConfig struct {
 	DbName  string `json:"dbname"`
@@ -30,7 +27,7 @@ type dbConfig struct {
 
 func connect() (*sql.DB, error) {
 	// lock connect to handle excessive clients
-	sharedDbLock.Lock("config.connect")
+	sharedDbLock.Lock()
 	defer sharedDbLock.Unlock()
 
 	// check if we are already connected

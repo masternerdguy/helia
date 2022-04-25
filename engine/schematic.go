@@ -2,10 +2,9 @@ package engine
 
 import (
 	"fmt"
-	"helia/physics"
 	"helia/shared"
 	"helia/universe"
-	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,7 +13,7 @@ import (
 var schematicRunnerStarted = false // indicates whether or not the schematics watcher has been initialized
 
 var schematicRunMap map[string][]*universe.SchematicRun // map of users to schematic runs
-var schematicRunMapLock shared.LabeledMutex             // lock to share user<->schematic runs map
+var schematicRunMapLock sync.Mutex                      // lock to share user<->schematic runs map
 
 // Initializes the schematics run watcher
 func initializeSchematicsWatcher() {
@@ -25,10 +24,7 @@ func initializeSchematicsWatcher() {
 
 	// initialize map and mutex
 	schematicRunMap = make(map[string][]*universe.SchematicRun)
-	schematicRunMapLock = shared.LabeledMutex{
-		Structure: "core::startSchematics",
-		UID:       fmt.Sprintf("%v-%v-%v", uuid.New(), time.Now(), physics.RandInRange(0, 1000)),
-	}
+	schematicRunMapLock = sync.Mutex{}
 }
 
 // Starts the schematics run watcher
@@ -54,7 +50,7 @@ func startSchematics() {
 			}
 
 			// obtain lock
-			schematicRunMapLock.Lock("core::startSchematics::watcher")
+			schematicRunMapLock.Lock()
 
 			// get tpf
 			now := makeTimestamp()
@@ -92,7 +88,7 @@ func updateRunningSchematics() {
 		// iterate over associated jobs
 		for _, j := range s {
 			// obtain lock
-			j.Lock.Lock("core::startSchematics::watcher::iter")
+			j.Lock.Lock()
 			defer j.Lock.Unlock()
 
 			// skip if uninitialized
@@ -128,7 +124,7 @@ func updateRunningSchematics() {
 
 					go func(j *universe.SchematicRun) {
 						// obtain lock
-						j.Lock.Lock("core::startSchematics::watcher::delivery")
+						j.Lock.Lock()
 						defer j.Lock.Unlock()
 
 						// obtain lock on delivery system and ship
@@ -136,11 +132,11 @@ func updateRunningSchematics() {
 							sh := j.Ship
 							s := sh.CurrentSystem
 
-							sh.Lock.Lock("core::startSchematics::watcher::delivery[2]")
+							sh.Lock.Lock()
 							defer sh.Lock.Unlock()
 
 							if s != nil {
-								s.Lock.Lock("core::startSchematics::watcher::delivery[3]")
+								s.Lock.Lock()
 								defer s.Lock.Unlock()
 
 								// use core to create new items
@@ -161,19 +157,16 @@ func updateRunningSchematics() {
 									if !isShip {
 										// make a new item stack of the given size
 										newItem := universe.Item{
-											ID:            nid,
-											ItemTypeID:    o.ItemTypeID,
-											Meta:          o.ItemTypeMeta,
-											Created:       time.Now(),
-											CreatedBy:     &sh.UserID,
-											CreatedReason: "Delivered from schematic run",
-											ContainerID:   sh.CargoBayContainerID,
-											Quantity:      o.Quantity,
-											IsPackaged:    true,
-											Lock: shared.LabeledMutex{
-												Structure: "Item",
-												UID:       fmt.Sprintf("%v :: %v :: %v", nid, time.Now(), rand.Float64()),
-											},
+											ID:             nid,
+											ItemTypeID:     o.ItemTypeID,
+											Meta:           o.ItemTypeMeta,
+											Created:        time.Now(),
+											CreatedBy:      &sh.UserID,
+											CreatedReason:  "Delivered from schematic run",
+											ContainerID:    sh.CargoBayContainerID,
+											Quantity:       o.Quantity,
+											IsPackaged:     true,
+											Lock:           sync.Mutex{},
 											ItemTypeName:   o.ItemTypeName,
 											ItemFamilyID:   o.ItemFamilyID,
 											ItemFamilyName: o.ItemFamilyName,
@@ -185,7 +178,7 @@ func updateRunningSchematics() {
 										s.NewItems[nid.String()] = &newItem
 
 										// obtain lock on cargo bay
-										sh.CargoBay.Lock.Lock("core::startSchematics::watcher::delivery[4]")
+										sh.CargoBay.Lock.Lock()
 										defer sh.CargoBay.Lock.Unlock()
 
 										// place item in cargo bay
@@ -240,7 +233,7 @@ func updateRunningSchematics() {
 // Returns pointers to hooked schematic runs for a given user
 func getSchematicRunsByUser(userID uuid.UUID) []*universe.SchematicRun {
 	// obtain lock
-	schematicRunMapLock.Lock("schematic::getSchematicRunsByUser")
+	schematicRunMapLock.Lock()
 	defer schematicRunMapLock.Unlock()
 
 	// check if user known
@@ -258,7 +251,7 @@ func getSchematicRunsByUser(userID uuid.UUID) []*universe.SchematicRun {
 // Hooks a schematic run into the watcher
 func addSchematicRunForUser(userID uuid.UUID, run *universe.SchematicRun) {
 	// obtain lock
-	schematicRunMapLock.Lock("schematic::addSchematicRunForUser")
+	schematicRunMapLock.Lock()
 	defer schematicRunMapLock.Unlock()
 
 	// check if user known

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"sync"
 	"time"
 
 	"helia/listener/models"
@@ -205,7 +206,7 @@ type Ship struct {
 	aiIncompatibleOreFault bool                                     // true when mining autopilot failed due to incompatible ore (for patch miners)
 	aiNoOrePulledFault     bool                                     // true when mining autopilot failed due to pulling no ore (for patch miners)
 	WreckReady             bool                                     // true when a dead ship has been saved to the db and the wreck can be looted
-	Lock                   shared.LabeledMutex
+	Lock                   sync.Mutex
 }
 
 type TemporaryShipModifier struct {
@@ -440,7 +441,7 @@ func getModuleFamily(itemFamilyID string) string {
 // Returns a copy of the ship
 func (s *Ship) CopyShip(lock bool) *Ship {
 	if lock {
-		s.Lock.Lock("ship.CopyShip")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -497,10 +498,7 @@ func (s *Ship) CopyShip(lock bool) *Ship {
 		},
 		FactionID: s.FactionID,
 		// in-memory only
-		Lock: shared.LabeledMutex{
-			Structure: "Ship",
-			UID:       fmt.Sprintf("%v :: %v :: %v", s.ID, time.Now(), rand.Float64()),
-		},
+		Lock:               sync.Mutex{},
 		IsDocked:           s.IsDocked,
 		AutopilotMode:      s.AutopilotMode,
 		AutopilotManualNav: s.AutopilotManualNav,
@@ -540,7 +538,7 @@ func (s *Ship) CopyShip(lock bool) *Ship {
 // Processes the ship for a tick
 func (s *Ship) PeriodicUpdate() {
 	// lock entity
-	s.Lock.Lock("ship.PeriodicUpdate")
+	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	// update experience modifier
@@ -909,7 +907,7 @@ func (s *Ship) updateHeat() {
 func (s *Ship) CmdAbort(lock bool) {
 	if lock {
 		// obtain lock
-		s.Lock.Lock("ship.CmdAbort")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -949,7 +947,7 @@ func (s *Ship) CmdManualNav(screenT float64, screenM float64, lock bool) {
 
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.CmdManualNav")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -969,7 +967,7 @@ func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int, lock bool) {
 
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.CmdGoto")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -989,7 +987,7 @@ func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int, lock bool) {
 
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.CmdOrbit")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -1009,7 +1007,7 @@ func (s *Ship) CmdDock(targetID uuid.UUID, targetType int, lock bool) {
 
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.CmdDock")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -1042,7 +1040,7 @@ func (s *Ship) CmdUndock(lock bool) {
 
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.CmdUndock")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -1059,7 +1057,7 @@ func (s *Ship) CmdFight(targetID uuid.UUID, targetType int, lock bool) {
 
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.CmdFight")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -1079,7 +1077,7 @@ func (s *Ship) CmdMine(targetID uuid.UUID, targetType int, lock bool) {
 
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.CmdMine")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -1359,7 +1357,7 @@ func (s *Ship) GetRealCargoBayVolume() float64 {
 func (s *Ship) TotalCargoBayVolumeUsed(lock bool) float64 {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.TotalCargoBayVolumeUsed")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -1521,7 +1519,7 @@ func (s *Ship) CheckStandings(factionID uuid.UUID) (float64, bool) {
 	}
 
 	// obtain lock (pointer to player's entry on their game client)
-	s.ReputationSheet.Lock.Lock("ship.CheckStandings")
+	s.ReputationSheet.Lock.Lock()
 	defer s.ReputationSheet.Lock.Unlock()
 
 	// try to find faction relationship
@@ -2936,15 +2934,15 @@ func (s *Ship) FindFirstAvailablePackagedStackOfSizeInCargo(typeID uuid.UUID, si
 func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.FitModule")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock containers
-	s.CargoBay.Lock.Lock("ship.FitModule")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
-	s.FittingBay.Lock.Lock("ship.FitModule")
+	s.FittingBay.Lock.Lock()
 	defer s.FittingBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -3037,15 +3035,15 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.UnfitModule")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock containers
-	m.shipMountedOn.CargoBay.Lock.Lock("ship.UnfitModule")
+	m.shipMountedOn.CargoBay.Lock.Lock()
 	defer m.shipMountedOn.CargoBay.Lock.Unlock()
 
-	m.shipMountedOn.FittingBay.Lock.Lock("ship.UnfitModule")
+	m.shipMountedOn.FittingBay.Lock.Lock()
 	defer m.shipMountedOn.FittingBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -3083,7 +3081,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 		o := m.shipMountedOn.FittingBay.Items[i]
 
 		// lock item
-		o.Lock.Lock("ship.UnfitModule")
+		o.Lock.Lock()
 		defer o.Lock.Unlock()
 
 		// skip if not this module
@@ -3113,12 +3111,12 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.TrashItemInCargo")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.TrashItemInCargo")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -3154,12 +3152,12 @@ func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
 func (s *Ship) RemoveItemFromCargo(id uuid.UUID, lock bool) (*Item, error) {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.RemoveItemFromCargo")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.RemoveItemFromCargo")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// remove from cargo bay
@@ -3189,12 +3187,12 @@ func (s *Ship) RemoveItemFromCargo(id uuid.UUID, lock bool) (*Item, error) {
 func (s *Ship) PutItemInCargo(item *Item, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.PutItemInCargoHold")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.PutItemInCargoHold")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// null check
@@ -3238,12 +3236,12 @@ func (s *Ship) PutItemInCargo(item *Item, lock bool) error {
 func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.PackageItemInCargo")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.PackageItemInCargo")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -3295,12 +3293,12 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity int, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.BuyItemFromSilo")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.BuyItemFromSilo")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -3351,7 +3349,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 
 	// lock silo if needed
 	if lock {
-		silo.Lock.Lock("ship.BuyItemFromSilo")
+		silo.Lock.Lock()
 		defer silo.Lock.Unlock()
 	}
 
@@ -3423,19 +3421,16 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 	if !isShip {
 		// make a new item stack of the given size
 		newItem := Item{
-			ID:            nid,
-			ItemTypeID:    output.ItemTypeID,
-			Meta:          output.ItemTypeMeta,
-			Created:       time.Now(),
-			CreatedBy:     &s.UserID,
-			CreatedReason: "Bought from silo",
-			ContainerID:   s.CargoBayContainerID,
-			Quantity:      quantity,
-			IsPackaged:    true,
-			Lock: shared.LabeledMutex{
-				Structure: "Item",
-				UID:       fmt.Sprintf("%v :: %v :: %v", nid, time.Now(), rand.Float64()),
-			},
+			ID:             nid,
+			ItemTypeID:     output.ItemTypeID,
+			Meta:           output.ItemTypeMeta,
+			Created:        time.Now(),
+			CreatedBy:      &s.UserID,
+			CreatedReason:  "Bought from silo",
+			ContainerID:    s.CargoBayContainerID,
+			Quantity:       quantity,
+			IsPackaged:     true,
+			Lock:           sync.Mutex{},
 			ItemTypeName:   output.ItemTypeName,
 			ItemFamilyID:   output.ItemFamilyID,
 			ItemFamilyName: output.ItemFamilyName,
@@ -3501,12 +3496,12 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 func (s *Ship) SellItemToSilo(siloID uuid.UUID, itemId uuid.UUID, quantity int, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.SellItemToSilo")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.SellItemToSilo")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -3528,7 +3523,7 @@ func (s *Ship) SellItemToSilo(siloID uuid.UUID, itemId uuid.UUID, quantity int, 
 
 	// lock item if needed
 	if lock {
-		item.Lock.Lock("ship.SellItemToSilo")
+		item.Lock.Lock()
 		defer item.Lock.Unlock()
 	}
 
@@ -3628,12 +3623,12 @@ func (s *Ship) SellItemToSilo(siloID uuid.UUID, itemId uuid.UUID, quantity int, 
 func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.BuyItemFromOrder")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.BuyItemFromOrder")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -3666,10 +3661,10 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 
 	// lock order and item if needed
 	if lock {
-		order.Lock.Lock("ship.BuyItemFromOrder")
+		order.Lock.Lock()
 		defer order.Lock.Unlock()
 
-		order.Item.Lock.Lock("ship.BuyItemFromOrder")
+		order.Item.Lock.Lock()
 		defer order.Item.Lock.Unlock()
 	}
 
@@ -3717,7 +3712,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	// check if we need to lock the seller
 	if seller.CurrentSystem.ID != s.CurrentSystem.ID {
 		// obtain lock
-		seller.Lock.Lock("ship.BuyItemFromOrder")
+		seller.Lock.Lock()
 		defer seller.Lock.Unlock()
 	}
 
@@ -3802,12 +3797,12 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.SellSelfAsOrder")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.SellSelfAsOrder")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -3872,10 +3867,7 @@ func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 		Quantity:      1,
 		IsPackaged:    false,
 		CoreDirty:     true,
-		Lock: shared.LabeledMutex{
-			Structure: "Item",
-			UID:       fmt.Sprintf("%v :: %v :: %v", stubID, time.Now(), rand.Float64()),
-		},
+		Lock:          sync.Mutex{},
 	}
 
 	// escalate ship and stub item for saving in db
@@ -3901,10 +3893,7 @@ func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 		Created:      time.Now(),
 		CoreDirty:    true,
 		CoreWait:     20, // defer for 20 cycles so that the stub item can be saved first
-		Lock: shared.LabeledMutex{
-			Structure: "SellOrder",
-			UID:       fmt.Sprintf("%v :: %v :: %v", nid, time.Now(), rand.Float64()),
-		},
+		Lock:         sync.Mutex{},
 	}
 
 	// link stub into sell order
@@ -3940,12 +3929,12 @@ func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.SellItemAsOrder")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.SellItemAsOrder")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -4011,10 +4000,7 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 		AskPrice:     price,
 		Created:      time.Now(),
 		CoreDirty:    true,
-		Lock: shared.LabeledMutex{
-			Structure: "SellOrder",
-			UID:       fmt.Sprintf("%v :: %v :: %v", nid, time.Now(), rand.Float64()),
-		},
+		Lock:         sync.Mutex{},
 	}
 
 	// link item into sell order
@@ -4051,12 +4037,12 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.UnpackageItemInCargo")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.UnpackageItemInCargo")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -4103,12 +4089,12 @@ func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.StackItemInCargo")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.StackItemInCargo")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// get the item to be stacked
@@ -4179,12 +4165,12 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.SplitItemInCargo")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.SplitItemInCargo")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// get the item to be split
@@ -4238,10 +4224,7 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 		ContainerID:   s.CargoBayContainerID,
 		Quantity:      size,
 		IsPackaged:    true,
-		Lock: shared.LabeledMutex{
-			Structure: "Item",
-			UID:       fmt.Sprintf("%v :: %v :: %v", nid, time.Now(), rand.Float64()),
-		}, ItemTypeName: item.ItemTypeName,
+		Lock:          sync.Mutex{}, ItemTypeName: item.ItemTypeName,
 		ItemFamilyID:   item.ItemFamilyID,
 		ItemFamilyName: item.ItemFamilyName,
 		ItemTypeMeta:   item.ItemTypeMeta,
@@ -4260,7 +4243,7 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 func (s *Ship) SelfDestruct(lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.SelfDestruct")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -4285,12 +4268,12 @@ func (s *Ship) SelfDestruct(lock bool) error {
 func (s *Ship) ConsumeFuelFromCargo(itemID uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.ConsumeFuelFromCargo")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.ConsumeFuelFromCargo")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -4344,12 +4327,12 @@ func (s *Ship) ConsumeFuelFromCargo(itemID uuid.UUID, lock bool) error {
 func (s *Ship) ConsumeRepairKitFromCargo(itemID uuid.UUID, lock bool) error {
 	if lock {
 		// lock entity
-		s.Lock.Lock("ship.ConsumeRepairKitFromCargo")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// lock cargo bay
-	s.CargoBay.Lock.Lock("ship.ConsumeRepairKitFromCargo")
+	s.CargoBay.Lock.Lock()
 	defer s.CargoBay.Lock.Unlock()
 
 	// make sure ship is docked
@@ -4916,10 +4899,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 						ContainerID:   m.shipMountedOn.CargoBayContainerID,
 						Quantity:      q,
 						IsPackaged:    true,
-						Lock: shared.LabeledMutex{
-							Structure: "Item",
-							UID:       fmt.Sprintf("%v :: %v :: %v", nid, time.Now(), rand.Float64()),
-						}, ItemTypeName: c.ItemTypeName,
+						Lock:          sync.Mutex{}, ItemTypeName: c.ItemTypeName,
 						ItemFamilyID:   c.ItemFamilyID,
 						ItemFamilyName: c.ItemFamilyName,
 						ItemTypeMeta:   c.ItemTypeMeta,
@@ -5550,10 +5530,7 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 						ContainerID:   m.shipMountedOn.CargoBayContainerID,
 						Quantity:      q,
 						IsPackaged:    true,
-						Lock: shared.LabeledMutex{
-							Structure: "Item",
-							UID:       fmt.Sprintf("%v :: %v :: %v", nid, time.Now(), rand.Float64()),
-						}, ItemTypeName: c.ItemTypeName,
+						Lock:          sync.Mutex{}, ItemTypeName: c.ItemTypeName,
 						ItemFamilyID:   c.ItemFamilyID,
 						ItemFamilyName: c.ItemFamilyName,
 						ItemTypeMeta:   c.ItemTypeMeta,
@@ -6095,7 +6072,7 @@ func (s *Ship) updateAggressionTables(
 	// update player aggression table
 	if attackerRS != nil {
 		// obtain lock
-		attackerRS.Lock.Lock("ship.updateAggressionTables")
+		attackerRS.Lock.Lock()
 		defer attackerRS.Lock.Unlock()
 
 		// get attacking player's reputation sheet entry for this ship's faction

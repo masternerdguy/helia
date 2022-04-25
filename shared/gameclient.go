@@ -5,9 +5,8 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"helia/listener/models"
-	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,7 +18,7 @@ type GameClient struct {
 	SID       *uuid.UUID
 	UID       *uuid.UUID
 	Conn      *websocket.Conn
-	Lock      LabeledMutex
+	Lock      sync.Mutex
 	Joined    bool
 	HasStatic bool
 
@@ -71,12 +70,8 @@ type ShipPropertyCacheEntry struct {
 
 // Initializes the internals of a GameClient
 func (c *GameClient) Initialize() {
-	// label mutex
-	c.Lock.Structure = "GameClient"
-	c.Lock.UID = fmt.Sprintf("%v :: %v :: %v", c.UID, time.Now(), rand.Float64())
-
 	// obtain lock
-	c.Lock.Lock("gameclient.Initialize")
+	c.Lock.Lock()
 	defer c.Lock.Unlock()
 
 	// initialize empty event queue
@@ -94,7 +89,7 @@ func (c *GameClient) Initialize() {
 // Writes a message to a client
 func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 	// obtain lock
-	c.Lock.Lock("gameclient.WriteMessage")
+	c.Lock.Lock()
 	defer c.Lock.Unlock()
 
 	// return if connection closed
@@ -189,7 +184,7 @@ func (c *GameClient) WriteInfoMessage(msg string) {
 
 // Adds an event to the ship event queue
 func (c *GameClient) PushShipEvent(evt interface{}, eventType int, meaningful bool) {
-	c.Lock.Lock("gameclient.PushShipEvent")
+	c.Lock.Lock()
 	defer c.Lock.Unlock()
 
 	if meaningful {
@@ -204,7 +199,7 @@ func (c *GameClient) PushShipEvent(evt interface{}, eventType int, meaningful bo
 
 // Gets the latest event for the player's current ship
 func (c *GameClient) PopShipEvent() (*Event, time.Time) {
-	c.Lock.Lock("gameclient.PopShipEvent")
+	c.Lock.Lock()
 	defer c.Lock.Unlock()
 
 	if len(c.shipEventQueue.Events) > 0 {
@@ -222,14 +217,14 @@ func (c *GameClient) PopShipEvent() (*Event, time.Time) {
 }
 
 func (c *GameClient) GetPropertyCache() PropertyCache {
-	c.Lock.Lock("gameclient.GetPropertyCache")
+	c.Lock.Lock()
 	defer c.Lock.Unlock()
 
 	return c.propertyCache
 }
 
 func (c *GameClient) SetPropertyCache(x PropertyCache) {
-	c.Lock.Lock("gameclient.SetPropertyCache")
+	c.Lock.Lock()
 	defer c.Lock.Unlock()
 
 	c.propertyCache = x
@@ -237,7 +232,7 @@ func (c *GameClient) SetPropertyCache(x PropertyCache) {
 
 // Sets the value of a client's global update counter
 func (c *GameClient) SetLastGlobalAckToken(x int) {
-	c.Lock.Lock("gameclient.SetLastGlobalAckToken")
+	c.Lock.Lock()
 	defer c.Lock.Unlock()
 
 	c.lastGlobalAckToken = x
@@ -245,7 +240,7 @@ func (c *GameClient) SetLastGlobalAckToken(x int) {
 
 // Returns a client's global update counter
 func (c *GameClient) GetLastGlobalAckToken() int {
-	c.Lock.Lock("gameclient.GetLastGlobalAckToken")
+	c.Lock.Lock()
 	defer c.Lock.Unlock()
 
 	return c.lastGlobalAckToken
@@ -253,7 +248,7 @@ func (c *GameClient) GetLastGlobalAckToken() int {
 
 // Resets a client's global update counter to -1
 func (c *GameClient) ClearLastGlobalAckToken() {
-	c.Lock.Lock("gameclient.ClearLastGlobalAckToken")
+	c.Lock.Lock()
 	defer c.Lock.Unlock()
 
 	c.lastGlobalAckToken = -1

@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -42,7 +43,7 @@ type PlayerReputationSheetFactionEntry struct {
 type PlayerReputationSheet struct {
 	FactionEntries map[string]*PlayerReputationSheetFactionEntry // map key is faction id string
 	// in-memory only
-	Lock          LabeledMutex
+	Lock          sync.Mutex
 	UserID        uuid.UUID
 	CharacterName string
 	FactionID     uuid.UUID
@@ -52,7 +53,7 @@ type PlayerReputationSheet struct {
 func (s *PlayerReputationSheet) AdjustStandingNPC(factionID uuid.UUID, factionRS FactionReputationSheet, amount float64, lock bool) {
 	if lock {
 		// obtain lock on this reputation sheet
-		s.Lock.Lock("reputation.AdjustStanding")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -86,12 +87,12 @@ func (s *PlayerReputationSheet) AdjustStandingPlayer(playerRS *PlayerReputationS
 
 	if lock {
 		// obtain lock on this reputation sheet
-		s.Lock.Lock("reputation.AdjustStandingPlayer")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
 	// obtain lock on attacker sheet
-	playerRS.Lock.Lock("reputation.AdjustStandingPlayer")
+	playerRS.Lock.Lock()
 	defer playerRS.Lock.Unlock()
 
 	// verify they aren't members of the same faction
@@ -142,7 +143,7 @@ func (s *PlayerReputationSheet) applyStandingChange(factionID uuid.UUID, amount 
 // Enforces standing bounds on reputation entries
 func (s *PlayerReputationSheet) EnforceBounds(lock bool) {
 	if lock {
-		s.Lock.Lock("reputation.EnforceBounds")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 

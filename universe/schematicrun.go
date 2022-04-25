@@ -1,7 +1,7 @@
 package universe
 
 import (
-	"helia/shared"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,7 +18,7 @@ type SchematicRun struct {
 	UserID          uuid.UUID
 	// in-memory only
 	Initialized   bool
-	Lock          shared.LabeledMutex
+	Lock          sync.Mutex
 	SchematicItem *Item
 	Process       *Process
 	Ship          *Ship

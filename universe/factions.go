@@ -2,6 +2,7 @@ package universe
 
 import (
 	"helia/shared"
+	"sync"
 
 	"github.com/google/uuid"
 )
@@ -20,7 +21,7 @@ type Faction struct {
 	OwnerID         *uuid.UUID
 	HomeStationID   *uuid.UUID
 	// in-memory only
-	Lock         shared.LabeledMutex
+	Lock         sync.Mutex
 	Applications map[string]FactionApplicationTicket
 }
 

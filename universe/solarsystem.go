@@ -8,6 +8,7 @@ import (
 	"helia/shared"
 	"math"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -38,7 +39,7 @@ type SolarSystem struct {
 	tickCounter           int                                 // counter that is used to control frequency of certain global updates
 	newSystemChatMessages []models.ServerSystemChatBody
 	globalAckToken        int // counter for number of ticks this system has gone through since server start (daily restart is assumed)
-	Lock                  shared.LabeledMutex
+	Lock                  sync.Mutex
 	// event escalations to engine core
 	PlayerNeedRespawn    map[string]*shared.GameClient     // clients in need of a respawn by core
 	NPCNeedRespawn       map[string]*Ship                  // NPCs in need of a respawn by core
@@ -68,7 +69,7 @@ type SolarSystem struct {
 // Initializes internal aspects of SolarSystem
 func (s *SolarSystem) Initialize() {
 	// obtain lock
-	s.Lock.Lock("solarsystem.Initialize")
+	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	// initialize maps
@@ -113,7 +114,7 @@ func (s *SolarSystem) Initialize() {
 // Performs one-time shutdown actions when the server is stopping
 func (s *SolarSystem) HandleShutdownSignal() {
 	// obtain lock
-	s.Lock.Lock("solarsystem.HandleShutdownSignal")
+	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	// propagate shutdown to connected clients
@@ -129,7 +130,7 @@ func (s *SolarSystem) HandleShutdownSignal() {
 // Processes the solar system for a tick
 func (s *SolarSystem) PeriodicUpdate() {
 	// obtain lock
-	s.Lock.Lock("solarsystem.PeriodicUpdate")
+	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	// skip if nobody in system
@@ -139,30 +140,24 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	// process player current ship event queues
 	s.processClientEventQueues()
-	s.Lock.LogInternalProgress("solarsystem.processClientEventQueues done!")
 
 	// update ships (both player + npc)
 	s.updateShips()
-	s.Lock.LogInternalProgress("solarsystem.updateShips done!")
 
 	// update npc stations
 	if s.tickCounter%32 == 0 {
 		s.updateStations()
-		s.Lock.LogInternalProgress("solarsystem.updateStations done!")
 	}
 
 	// update in-flight missiles
 	s.updateMissiles()
-	s.Lock.LogInternalProgress("solarsystem.updateMissiles done!")
 
 	// ship collision testing
 	s.shipCollisionTesting()
-	s.Lock.LogInternalProgress("solarsystem.shipCollisionTesting done!")
 
 	// send client updates
 	if s.tickCounter%2 == 0 && len(s.clients) > 0 {
 		s.sendClientUpdates()
-		s.Lock.LogInternalProgress("solarsystem.sendClientUpdates done!")
 	}
 
 	// increment tick counter
@@ -1715,7 +1710,7 @@ func (s *SolarSystem) processClientEventQueues() {
 
 				go func(f *Faction, cf *Faction, c *shared.GameClient) {
 					// obtain lock
-					f.Lock.Lock("solarsystem.processClientEventQueues::ApplyToFaction")
+					f.Lock.Lock()
 					defer f.Lock.Unlock()
 
 					// add ticket
@@ -1760,7 +1755,7 @@ func (s *SolarSystem) processClientEventQueues() {
 			// build and send update on separate goroutine
 			go func(c *shared.GameClient, f *Faction) {
 				// obtain lock
-				f.Lock.Lock("solarsystem.processClientEventQueues::ViewApplications")
+				f.Lock.Lock()
 				defer f.Lock.Unlock()
 
 				// build update
@@ -1826,7 +1821,7 @@ func (s *SolarSystem) processClientEventQueues() {
 			// remove application on separate goroutine
 			go func(f *Faction, userID uuid.UUID) {
 				// obtain lock
-				f.Lock.Lock("solarsystem.processClientEventQueues::ApproveApplication")
+				f.Lock.Lock()
 				defer f.Lock.Unlock()
 
 				// remove entry
@@ -1863,7 +1858,7 @@ func (s *SolarSystem) processClientEventQueues() {
 			// remove application on separate goroutine
 			go func(f *Faction, userID uuid.UUID) {
 				// obtain lock
-				f.Lock.Lock("solarsystem.processClientEventQueues::RejectApplication")
+				f.Lock.Lock()
 				defer f.Lock.Unlock()
 
 				// remove entry
@@ -2767,7 +2762,7 @@ func (s *SolarSystem) sendClientUpdates() {
 			if sendStatic {
 				go func(c *shared.GameClient) {
 					// obtain lock
-					c.Lock.Lock("solarsystem.sendClientUpdates::postGlobalStatic")
+					c.Lock.Lock()
 					defer c.Lock.Unlock()
 
 					// mark as having static
@@ -2967,7 +2962,7 @@ func (s *SolarSystem) AddShip(c *Ship, lock bool) {
 
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.AddShip")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3007,7 +3002,7 @@ func (s *SolarSystem) RemoveShip(c *Ship, lock bool) {
 
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.RemoveShip")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3041,7 +3036,7 @@ func (s *SolarSystem) AddStar(c *Star) {
 	}
 
 	// obtain lock
-	s.Lock.Lock("solarsystem.AddStar")
+	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	// add star
@@ -3056,7 +3051,7 @@ func (s *SolarSystem) AddPlanet(c *Planet) {
 	}
 
 	// obtain lock
-	s.Lock.Lock("solarsystem.AddPlanet")
+	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	// add planet
@@ -3071,7 +3066,7 @@ func (s *SolarSystem) AddAsteroid(c *Asteroid) {
 	}
 
 	// obtain lock
-	s.Lock.Lock("solarsystem.AddAsteroid")
+	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	// add asteroid
@@ -3086,7 +3081,7 @@ func (s *SolarSystem) AddJumphole(c *Jumphole) {
 	}
 
 	// obtain lock
-	s.Lock.Lock("solarsystem.AddJumphole")
+	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	// add jumphole
@@ -3101,7 +3096,7 @@ func (s *SolarSystem) AddStation(c *Station) {
 	}
 
 	// obtain lock
-	s.Lock.Lock("solarsystem.AddStation")
+	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	// add planet
@@ -3117,7 +3112,7 @@ func (s *SolarSystem) AddClient(c *shared.GameClient, lock bool) {
 
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.AddClient")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3128,7 +3123,7 @@ func (s *SolarSystem) AddClient(c *shared.GameClient, lock bool) {
 	go func(c *shared.GameClient) {
 		for i := 0; i < 3; i++ {
 			// obtain lock
-			c.Lock.Lock("solarsystem.AddClient::ensureStatic")
+			c.Lock.Lock()
 
 			// mark as needing static data
 			c.HasStatic = false
@@ -3154,7 +3149,7 @@ func (s *SolarSystem) RemoveClient(c *shared.GameClient, lock bool) {
 
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.RemoveClient")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3171,7 +3166,7 @@ func (s *SolarSystem) CopyClients(lock bool) []*shared.GameClient {
 
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.CopyClients")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3186,11 +3181,7 @@ func (s *SolarSystem) CopyClients(lock bool) []*shared.GameClient {
 			Conn: nil,
 			ReputationSheet: shared.PlayerReputationSheet{
 				FactionEntries: make(map[string]*shared.PlayerReputationSheetFactionEntry),
-				Lock: shared.LabeledMutex{
-					// label mutex
-					Structure: "PlayerReputationSheet",
-					UID:       fmt.Sprintf("%v :: %v :: %v", c.UID, time.Now(), rand.Float64()),
-				},
+				Lock:           sync.Mutex{},
 			},
 			CurrentShipID:     c.CurrentShipID,
 			CurrentSystemID:   c.CurrentSystemID,
@@ -3198,10 +3189,6 @@ func (s *SolarSystem) CopyClients(lock bool) []*shared.GameClient {
 			EscrowContainerID: c.EscrowContainerID,
 			HasStatic:         c.HasStatic,
 		}
-
-		// label mutex
-		c.Lock.Structure = "GameClient"
-		c.Lock.UID = fmt.Sprintf("%v :: %v :: %v", c.UID, time.Now(), rand.Float64())
 
 		for k, f := range c.ReputationSheet.FactionEntries {
 			if f != nil {
@@ -3223,7 +3210,7 @@ func (s *SolarSystem) CopyClients(lock bool) []*shared.GameClient {
 func (s *SolarSystem) CopyShips(lock bool) map[string]*Ship {
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.CopyShips")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3245,7 +3232,7 @@ func (s *SolarSystem) MirrorShipMap(lock bool) map[string]*Ship {
 
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.MirrorShipMap")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3265,7 +3252,7 @@ func (s *SolarSystem) MirrorClientMap(lock bool) map[string]*shared.GameClient {
 
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.MirrorClientMap")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3284,7 +3271,7 @@ func (s *SolarSystem) MirrorClientMap(lock bool) map[string]*shared.GameClient {
 func (s *SolarSystem) CopyStations(lock bool) map[string]*Station {
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.CopyStations")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3305,7 +3292,7 @@ func (s *SolarSystem) CopyStations(lock bool) map[string]*Station {
 func (s *SolarSystem) MirrorStationMap(lock bool) map[string]*Station {
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.MirrorStationMap")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3324,7 +3311,7 @@ func (s *SolarSystem) MirrorStationMap(lock bool) map[string]*Station {
 func (s *SolarSystem) CopyJumpholes(lock bool) map[string]*Jumphole {
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.CopyJumpholes")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3345,7 +3332,7 @@ func (s *SolarSystem) CopyJumpholes(lock bool) map[string]*Jumphole {
 func (s *SolarSystem) CopyAsteroids(lock bool) map[string]*Asteroid {
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.CopyAsteroids")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3366,7 +3353,7 @@ func (s *SolarSystem) CopyAsteroids(lock bool) map[string]*Asteroid {
 func (s *SolarSystem) CopyStars(lock bool) map[string]*Star {
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.CopyStars")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3387,7 +3374,7 @@ func (s *SolarSystem) CopyStars(lock bool) map[string]*Star {
 func (s *SolarSystem) CopyPlanets(lock bool) map[string]*Planet {
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.CopyPlanets")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3408,7 +3395,7 @@ func (s *SolarSystem) CopyPlanets(lock bool) map[string]*Planet {
 func (s *SolarSystem) StoreOpenSellOrder(order *SellOrder, lock bool) {
 	if lock {
 		// obtain lock
-		s.Lock.Lock("solarsystem.StoreOpenSellOrder")
+		s.Lock.Lock()
 		defer s.Lock.Unlock()
 	}
 
@@ -3418,26 +3405,26 @@ func (s *SolarSystem) StoreOpenSellOrder(order *SellOrder, lock bool) {
 
 // Attempt to lock every entity in the system, and the system itself - never call from within the system!
 func (s *SolarSystem) TestLocks() {
-	s.Lock.Lock("solarsystem.TestLocks")
+	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
 	for _, e := range s.asteroids {
-		e.Lock.Lock("solarsystem.TestLocks::asteroids")
+		e.Lock.Lock()
 		defer e.Lock.Unlock()
 	}
 
 	for _, e := range s.jumpholes {
-		e.Lock.Lock("solarsystem.TestLocks::jumpholes")
+		e.Lock.Lock()
 		defer e.Lock.Unlock()
 	}
 
 	for _, e := range s.stations {
-		e.Lock.Lock("solarsystem.TestLocks::stations")
+		e.Lock.Lock()
 		defer e.Lock.Unlock()
 	}
 
 	for _, e := range s.ships {
-		e.Lock.Lock("solarsystem.TestLocks::ships")
+		e.Lock.Lock()
 		defer e.Lock.Unlock()
 	}
 }

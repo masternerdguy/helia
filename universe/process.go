@@ -1,10 +1,7 @@
 package universe
 
 import (
-	"fmt"
-	"helia/shared"
-	"math/rand"
-	"time"
+	"sync"
 
 	"github.com/google/uuid"
 )
@@ -19,7 +16,7 @@ type StationProcess struct {
 	InternalState StationProcessInternalState
 	Meta          Meta
 	// in-memory only
-	Lock            shared.LabeledMutex
+	Lock            sync.Mutex
 	Process         Process
 	StationName     string
 	SolarSystemName string
@@ -29,7 +26,7 @@ type StationProcess struct {
 // Updates a station manufacturing process for a tick
 func (p *StationProcess) PeriodicUpdate(dT int64) {
 	// obtain lock
-	p.Lock.Lock("process.PeriodicUpdate")
+	p.Lock.Lock()
 	defer p.Lock.Unlock()
 
 	// check process status
@@ -156,9 +153,9 @@ type ProcessOutput struct {
 
 // Structure representing the standardized metadata for item types on the industrial market
 type IndustrialMetadata struct {
-	MinPrice   int
-	MaxPrice   int
-	SiloSize   int
+	MinPrice  int
+	MaxPrice  int
+	SiloSize  int
 	ProcessID *uuid.UUID
 }
 
@@ -215,17 +212,14 @@ func (p *ProcessOutput) GetIndustrialMetadata() IndustrialMetadata {
 // Returns a copy of a station process
 func (p *StationProcess) CopyStationProcess() *StationProcess {
 	copy := StationProcess{
-		ID:            p.ID,
-		StationID:     p.StationID,
-		ProcessID:     p.ProcessID,
-		Progress:      p.Progress,
-		Installed:     p.Installed,
-		InternalState: p.InternalState,
-		Meta:          p.Meta,
-		Lock: shared.LabeledMutex{
-			Structure: "StationProcess",
-			UID:       fmt.Sprintf("%v :: %v :: %v", p.ID, time.Now(), rand.Float64()),
-		},
+		ID:              p.ID,
+		StationID:       p.StationID,
+		ProcessID:       p.ProcessID,
+		Progress:        p.Progress,
+		Installed:       p.Installed,
+		InternalState:   p.InternalState,
+		Meta:            p.Meta,
+		Lock:            sync.Mutex{},
 		Process:         p.Process,
 		MSCounter:       p.MSCounter,
 		StationName:     p.StationName,
