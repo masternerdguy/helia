@@ -2120,6 +2120,13 @@ func (s *SolarSystem) processClientEventQueues() {
 func (s *SolarSystem) updateShips() {
 	// update ships
 	for _, e := range s.ships {
+		// check if dead
+		if e.Destroyed {
+			// remove from system and skip
+			s.RemoveShip(e, false)
+			continue
+		}
+
 		if e.DockedAtStationID == nil {
 			// update player flight experience
 			if e.BeingFlownByPlayer && e.ExperienceSheet != nil {
