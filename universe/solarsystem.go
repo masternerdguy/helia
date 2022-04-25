@@ -6,6 +6,7 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"math"
 	"math/rand"
 	"sync"
@@ -2110,7 +2111,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				data := evt.Body.(models.ClientViewActionReportsPageBody)
 
 				// todo
-				shared.TeeLog(fmt.Sprintf("todo: view action reports page %v", data))
+				log.Println(fmt.Sprintf("todo: view action reports page %v", data))
 			}
 		}
 	}
@@ -2251,7 +2252,7 @@ func (s *SolarSystem) updateShips() {
 				bm = *e.BehaviourMode
 			}
 
-			shared.TeeLog(
+			log.Println(
 				fmt.Sprintf(
 					"[%v] %v was destroyed (%v::%v>>%v)",
 					s.SystemName,

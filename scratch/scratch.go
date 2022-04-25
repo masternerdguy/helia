@@ -99,7 +99,7 @@ func main() {
 	// save faction
 	t, u := factionSvc.NewFaction(f)
 
-	shared.TeeLog(fmt.Sprintf("%v, %v", t, u))*/
+	log.Println(fmt.Sprintf("%v, %v", t, u))*/
 }
 
 /*

@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"helia/physics"
-	"helia/shared"
 	"helia/sql"
+	"log"
 	"math"
 	"math/rand"
 	"sort"
@@ -121,7 +121,7 @@ func main() {
 	regionCount := physics.RandInRange(MinRegions, MaxRegions)
 
 	// output chosen values
-	shared.TeeLog(fmt.Sprintf("Extent: %v, Regions: %v, Systems: %v", extent, regionCount, systemCount))
+	log.Println(fmt.Sprintf("Extent: %v, Regions: %v, Systems: %v", extent, regionCount, systemCount))
 
 	// generate empty systems in a spiral
 	systems := generateEmptySystems(extent, systemCount)

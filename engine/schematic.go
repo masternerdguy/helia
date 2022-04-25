@@ -2,8 +2,8 @@ package engine
 
 import (
 	"fmt"
-	"helia/shared"
 	"helia/universe"
+	"log"
 	"sync"
 	"time"
 
@@ -40,7 +40,7 @@ func startSchematics() {
 	// start watcher
 	go func() {
 		// exit notification
-		defer shared.TeeLog("! Schematic watcher has halted")
+		defer log.Println("! Schematic watcher has halted")
 
 		// watcher loop
 		for {
@@ -145,7 +145,7 @@ func updateRunningSchematics() {
 									nid, err := uuid.NewUUID()
 
 									if err != nil {
-										shared.TeeLog(fmt.Sprintf("Error delivering run result: %v, %v", err, j))
+										log.Println(fmt.Sprintf("Error delivering run result: %v, %v", err, j))
 										j.StatusID = "error"
 
 										return
@@ -188,7 +188,7 @@ func updateRunningSchematics() {
 										stID, err := uuid.Parse(stIDStr)
 
 										if err != nil {
-											shared.TeeLog(fmt.Sprintf("Error delivering run result: %v, %v", err, j))
+											log.Println(fmt.Sprintf("Error delivering run result: %v, %v", err, j))
 											j.StatusID = "error"
 
 											return
@@ -212,18 +212,18 @@ func updateRunningSchematics() {
 								// free schematic
 								j.SchematicItem.SchematicInUse = false
 							} else {
-								shared.TeeLog(fmt.Sprintf("Schematic ship is not in a system! %v", sh))
+								log.Println(fmt.Sprintf("Schematic ship is not in a system! %v", sh))
 								j.StatusID = "error"
 							}
 
 						} else {
-							shared.TeeLog(fmt.Sprintf("Schematic run does not have ship attached! %v", j))
+							log.Println(fmt.Sprintf("Schematic run does not have ship attached! %v", j))
 							j.StatusID = "error"
 						}
 					}(j)
 				}
 			} else {
-				shared.TeeLog(fmt.Sprintf("Schematic run does not have process attached! %v", j))
+				log.Println(fmt.Sprintf("Schematic run does not have process attached! %v", j))
 				j.StatusID = "error"
 			}
 		}

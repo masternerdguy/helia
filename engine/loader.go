@@ -6,6 +6,7 @@ import (
 	"helia/shared"
 	"helia/sql"
 	"helia/universe"
+	"log"
 	"sync"
 
 	"github.com/google/uuid"
@@ -57,13 +58,13 @@ func LoadUniverse() (*universe.Universe, error) {
 
 		// don't load stuck ones
 		if usr.StatusID == "error" {
-			shared.TeeLog(fmt.Sprintf("Not loading schematic run %v (error)", usr.ID))
+			log.Println(fmt.Sprintf("Not loading schematic run %v (error)", usr.ID))
 			continue
 		} else if usr.StatusID == "deliverypending" {
-			shared.TeeLog(fmt.Sprintf("Not loading schematic run %v (deliverypending)", usr.ID))
+			log.Println(fmt.Sprintf("Not loading schematic run %v (deliverypending)", usr.ID))
 			continue
 		} else if usr.StatusID == "delivered" {
-			shared.TeeLog(fmt.Sprintf("Not loading schematic run %v (delivered)", usr.ID))
+			log.Println(fmt.Sprintf("Not loading schematic run %v (delivered)", usr.ID))
 			continue
 		}
 
@@ -101,7 +102,7 @@ func LoadUniverse() (*universe.Universe, error) {
 	regions := make(map[string]*universe.Region)
 	for rIDX, e := range rs {
 		// progress output
-		shared.TeeLog(fmt.Sprintf("loading region %v of %v", rIDX+1, len(rs)))
+		log.Println(fmt.Sprintf("loading region %v of %v", rIDX+1, len(rs)))
 
 		// load basic region information
 		r := universe.Region{
@@ -427,7 +428,7 @@ func saveUniverse(u *universe.Universe) {
 				err := saveShip(ship)
 
 				if err != nil {
-					shared.TeeLog(fmt.Sprintf("Error saving ship: %v | %v", ship, err))
+					log.Println(fmt.Sprintf("Error saving ship: %v | %v", ship, err))
 				}
 			}
 
@@ -452,7 +453,7 @@ func saveUniverse(u *universe.Universe) {
 				err := stationSvc.UpdateStation(dbStation)
 
 				if err != nil {
-					shared.TeeLog(fmt.Sprintf("Error saving station: %v | %v", dbStation, err))
+					log.Println(fmt.Sprintf("Error saving station: %v | %v", dbStation, err))
 				}
 
 				// save manufacturing processes
@@ -495,7 +496,7 @@ func saveUniverse(u *universe.Universe) {
 					err := stationProcessSvc.UpdateStationProcess(dbProcess)
 
 					if err != nil {
-						shared.TeeLog(fmt.Sprintf("Error saving station process: %v | %v", dbProcess, err))
+						log.Println(fmt.Sprintf("Error saving station process: %v | %v", dbProcess, err))
 					}
 				}
 			}
@@ -527,7 +528,7 @@ func saveUniverse(u *universe.Universe) {
 			err := schematicRunSvc.UpdateSchematicRun(usr)
 
 			if err != nil {
-				shared.TeeLog(fmt.Sprintf("Error saving schematic run: %v | %v", usr, err))
+				log.Println(fmt.Sprintf("Error saving schematic run: %v | %v", usr, err))
 			}
 		}
 	}
@@ -1749,7 +1750,7 @@ func saveShip(ship *universe.Ship) error {
 	err := shipSvc.UpdateShip(dbShip)
 
 	if err != nil {
-		shared.TeeLog(fmt.Sprintf("Error saving ship: %v | %v", dbShip, err))
+		log.Println(fmt.Sprintf("Error saving ship: %v | %v", dbShip, err))
 	}
 
 	return err
