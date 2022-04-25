@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"helia/engine"
 	"helia/physics"
+	"helia/shared"
 	"helia/sql"
 	"helia/universe"
 	"log"
@@ -21,15 +22,20 @@ import (
  */
 
 func main() {
+	// configure global tee logging
+	shared.InitializeTeeLog(
+		printLogger,
+	)
+
 	// load universe from database
-	log.Println("Loading universe from database...")
+	shared.TeeLog("Loading universe from database...")
 	universe, err := engine.LoadUniverse()
 
 	if err != nil {
 		panic(err)
 	}
 
-	log.Println("Loaded universe!")
+	shared.TeeLog("Loaded universe!")
 
 	/*
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED

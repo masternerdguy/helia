@@ -3,7 +3,6 @@ package engine
 import (
 	"helia/shared"
 	"helia/sql"
-	"log"
 	"time"
 )
 
@@ -76,13 +75,13 @@ func (d *DownTimeRunner) RunDownTimeTasks() {
 
 // Runs the sp_cleanup stored procedure to purge old / orphaned records
 func (d *DownTimeRunner) executeSPCleanup() error {
-	log.Println("  - executeSPCleanup()")
+	shared.TeeLog("  - executeSPCleanup()")
 	return d.spSvc.Cleanup()
 }
 
 // Recalculates the aggregate standings value for player custom factions based on the reputation sheets of their members
 func (d *DownTimeRunner) averagePlayerFactionStandings() error {
-	log.Println("  - averagePlayerFactionStandings()")
+	shared.TeeLog("  - averagePlayerFactionStandings()")
 
 	// get custom factions
 	customFactions, err := d.factionSvc.GetPlayerFactions()
@@ -188,7 +187,7 @@ func (d *DownTimeRunner) averagePlayerFactionStandings() error {
 
 // Closes any factions who's owner has left the faction and returns all members to their starter factions
 func (d *DownTimeRunner) disbandLeaderlessPlayerFactions() error {
-	log.Println("  - disbandLeaderlessPlayerFactions()")
+	shared.TeeLog("  - disbandLeaderlessPlayerFactions()")
 
 	// get custom factions
 	customFactions, err := d.factionSvc.GetPlayerFactions()

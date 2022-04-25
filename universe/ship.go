@@ -3,7 +3,6 @@ package universe
 import (
 	"errors"
 	"fmt"
-	"log"
 	"math"
 	"math/rand"
 	"sync"
@@ -3484,7 +3483,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 		bm = *s.BehaviourMode
 	}
 
-	log.Println(
+	shared.TeeLog(
 		fmt.Sprintf(
 			"[%v] %v (%v::%v) bought %v %v from %v (silo)",
 			s.CurrentSystem.SystemName,
@@ -3611,7 +3610,7 @@ func (s *Ship) SellItemToSilo(siloID uuid.UUID, itemId uuid.UUID, quantity int, 
 		bm = *s.BehaviourMode
 	}
 
-	log.Println(
+	shared.TeeLog(
 		fmt.Sprintf(
 			"[%v] %v (%v::%v) sold %v %v to %v (silo)",
 			s.CurrentSystem.SystemName,
@@ -3785,7 +3784,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 		bm = *s.BehaviourMode
 	}
 
-	log.Println(
+	shared.TeeLog(
 		fmt.Sprintf(
 			"[%v] %v (%v::%v) bought %v %v at %v (order)",
 			s.CurrentSystem.SystemName,
@@ -3919,7 +3918,7 @@ func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 		bm = *s.BehaviourMode
 	}
 
-	log.Println(
+	shared.TeeLog(
 		fmt.Sprintf(
 			"[%v] %v (%v::%v) listed itself for sale at %v (order)",
 			s.CurrentSystem.SystemName,
@@ -4025,7 +4024,7 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 		bm = *s.BehaviourMode
 	}
 
-	log.Println(
+	shared.TeeLog(
 		fmt.Sprintf(
 			"[%v] %v (%v::%v) listed %v %v at %v (order)",
 			s.CurrentSystem.SystemName,
@@ -4929,7 +4928,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 					bm = *m.shipMountedOn.BehaviourMode
 				}
 
-				log.Println(
+				shared.TeeLog(
 					fmt.Sprintf(
 						"[%v] %v (%v::%v) mined %v %v from %v",
 						m.shipMountedOn.CurrentSystem.SystemName,
@@ -5560,7 +5559,7 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 					bm = *m.shipMountedOn.BehaviourMode
 				}
 
-				log.Println(
+				shared.TeeLog(
 					fmt.Sprintf(
 						"[%v] %v (%v::%v) mined %v %v from %v",
 						m.shipMountedOn.CurrentSystem.SystemName,
