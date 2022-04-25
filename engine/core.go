@@ -178,9 +178,11 @@ func (e *HeliaEngine) Start() {
 						}
 
 						// check for too much time passing
-						if wgi == 0 {
+						if wgi <= 0 {
 							shared.TeeLog("! Deadlock check failed - initiating shutdown")
 							shutdownSignal = true
+
+							break
 						}
 
 						// decrement counter
