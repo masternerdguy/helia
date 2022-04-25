@@ -25,10 +25,12 @@ Deploying the backend is less trivial than the frontend. Currently, the only way
 
 Given the above, performing a backend deployment can be done by
 
+0. Perform a clean shutdown, wait for it to complete, and then manually stop the app service.
 1. `cd` into the frontend directory - npm is being used as a helper here, at least for now. This isn't ideal as you will see.
 2. Run `npm run build-docker:alpha` to build the docker image. To reduce image size significantly (large images are unreliable on Azure) some interesting tricks are done before building the container.
 3. Run `cd .. && cd frontend` to get into the restored frontend folder again - one of the interesting tricks done by the build script is deleting that folder and then letting git restore it after the image is built. As a result, you lose your path reference.
-3. Run `npm run deploy-docker:alpha` to push the image to Azure.
+4. Run `npm run deploy-docker:alpha` to push the image to Azure.
+5. Start the app service.
 
 Note that you will also need a local docker instance for this to work - otherwise you can't build the image locally for deployment. This is very easy to set up using `WSL` and `Docker Desktop` on Windows - WSL works as a dev environment for Helia quite well!
 
