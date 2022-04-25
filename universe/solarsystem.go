@@ -2601,6 +2601,32 @@ func (s *SolarSystem) sendClientUpdates() {
 		})
 	}
 
+	emptyWreckIDs := make([]string, 0)
+
+	for k, r := range s.wrecks {
+		// skip empty wrecks and mark for deletion
+		if len(r.DeadShipItems) == 0 {
+			emptyWreckIDs = append(emptyWreckIDs, k)
+			continue
+		}
+
+		gu.Wrecks = append(gu.Wrecks, models.GlobalWreckInfo{
+			ID:        r.ID,
+			SystemID:  r.SystemID,
+			WreckName: r.WreckName,
+			PosX:      r.PosX,
+			PosY:      r.PosY,
+			Texture:   r.Texture,
+			Radius:    r.Radius,
+			Theta:     r.Theta,
+		})
+	}
+
+	// delete empty wrecks
+	for _, i := range emptyWreckIDs {
+		delete(s.wrecks, i)
+	}
+
 	if sendStatic {
 		/*
 		 * Performance note: This data is very static and can be sent rarely. As long as
@@ -2609,32 +2635,6 @@ func (s *SolarSystem) sendClientUpdates() {
 		 * Clients will only be sent static data if they need it, which would be when they
 		 * enter the system.
 		 */
-
-		emptyWreckIDs := make([]string, 0)
-
-		for k, r := range s.wrecks {
-			// skip empty wrecks and mark for deletion
-			if len(r.DeadShipItems) == 0 {
-				emptyWreckIDs = append(emptyWreckIDs, k)
-				continue
-			}
-
-			gu.Wrecks = append(gu.Wrecks, models.GlobalWreckInfo{
-				ID:        r.ID,
-				SystemID:  r.SystemID,
-				WreckName: r.WreckName,
-				PosX:      r.PosX,
-				PosY:      r.PosY,
-				Texture:   r.Texture,
-				Radius:    r.Radius,
-				Theta:     r.Theta,
-			})
-		}
-
-		// delete empty wrecks
-		for _, i := range emptyWreckIDs {
-			delete(s.wrecks, i)
-		}
 
 		// stars
 		for _, d := range s.stars {
