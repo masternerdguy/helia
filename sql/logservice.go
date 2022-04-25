@@ -60,7 +60,7 @@ func (s LogService) NukeLogs() error {
 				delete from public.logs where timestamp <= $1
 			`
 
-	q, err := db.Query(sql, time.Now().Add(-2*time.Hour*48))
+	q, err := db.Query(sql, time.Now().Add(-2*time.Hour*24))
 
 	if err != nil {
 		return err
