@@ -39,19 +39,20 @@ func InitializeTeeLog(fns ...logTeeHandler) {
 			log := <-teeLogChannel
 
 			// pass to logger functions on separate goroutines
-			for _, h := range teeLogHandlers {
-				go func(h logTeeHandler) {
-					// obtain write lock
-					teeLogWrite.Lock()
-					defer teeLogWrite.Unlock()
 
+			go func() {
+				// obtain write lock
+				teeLogWrite.Lock()
+				defer teeLogWrite.Unlock()
+
+				for _, h := range teeLogHandlers {
 					// write message
 					h(log.Message, log.EventTime)
-				}(h)
-			}
+				}
+			}()
 
 			// short sleep
-			time.Sleep(time.Millisecond * 5)
+			time.Sleep(time.Millisecond * 20)
 		}
 	}()
 
