@@ -17,6 +17,15 @@ import (
 	"github.com/google/uuid"
 )
 
+// shared services
+var startSvc = sql.GetStartService()
+var shipSvc = sql.GetShipService()
+var userSvc = sql.GetUserService()
+var itemSvc = sql.GetItemService()
+var schematicRunSvc = sql.GetSchematicRunService()
+var factionSvc = sql.GetFactionService()
+var actionReportSvc = sql.GetActionReportService()
+
 // Will cause all system goroutines to stop when true
 var shutdownSignal = false
 
@@ -239,15 +248,6 @@ func (e *HeliaEngine) Shutdown() {
 }
 
 func handleEscalations(sol *universe.SolarSystem) {
-	// get services
-	startSvc := sql.GetStartService()
-	shipSvc := sql.GetShipService()
-	userSvc := sql.GetUserService()
-	itemSvc := sql.GetItemService()
-	schematicRunSvc := sql.GetSchematicRunService()
-	factionSvc := sql.GetFactionService()
-	actionReportSvc := sql.GetActionReportService()
-
 	// obtain lock
 	sol.Lock.Lock()
 	defer sol.Lock.Unlock()
