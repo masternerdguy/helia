@@ -9,6 +9,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"runtime"
 	"time"
 )
 
@@ -87,6 +88,8 @@ func main() {
 
 	// don't exit
 	for {
+		// monitor total number of goroutines running
+		shared.TeeLog(fmt.Sprintf("<TOTAL GOROUTINES> %v", runtime.NumGoroutine()))
 		time.Sleep(5000 * time.Millisecond)
 	}
 }
