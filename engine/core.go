@@ -123,7 +123,7 @@ func (e *HeliaEngine) Start() {
 						tpf = int(now - lastFrame)
 
 						// find remaining portion of server heatbeat
-						if tpf < universe.Heartbeat {
+						if tpf <= universe.Heartbeat {
 							// sleep for remainder of server heartbeat
 							time.Sleep(time.Duration(universe.Heartbeat-tpf) * time.Millisecond)
 						} else {
