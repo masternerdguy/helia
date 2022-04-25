@@ -55,12 +55,12 @@ func (s LogService) NukeLogs() error {
 		return err
 	}
 
-	// delete logs
+	// delete logs more than 2 days old
 	sql := `
-				delete from public.logs
+				delete from public.logs where timestamp <= $1
 			`
 
-	q, err := db.Query(sql)
+	q, err := db.Query(sql, time.Now().Add(-2*time.Hour*48))
 
 	if err != nil {
 		return err
