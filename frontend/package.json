@@ -10,15 +10,14 @@
     "restore-db:dev": "chmod a+x ../bash/restore-db-dev.sh && bash ../bash/restore-db-dev.sh",
     "backup-db:alpha": "chmod a+x ../bash/backup-db-alpha.sh && bash ../bash/backup-db-alpha.sh",
     "restore-db:alpha": "chmod a+x ../bash/restore-db-alpha.sh && bash ../bash/restore-db-alpha.sh",
-    "self-sign": "chmod a+x ../bash/self-sign-cert.sh && bash ../bash/self-sign-cert.sh",
     "ncu": "ncu -u",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "pretty": "prettier --write \"./**/*.{ts,js,jsx,json}\"",
     "ngupdate": "ng update @angular/core @angular/cli",
-    "build-docker-alpha": "chmod a+x ../bash/build-docker-alpha.sh && bash ../bash/build-docker-alpha.sh",
-    "deploy-docker-alpha": "chmod a+x ../bash/deploy-docker-alpha.sh && bash ../bash/deploy-docker-alpha.sh"
+    "build-docker:alpha": "chmod a+x ../bash/build-docker-alpha.sh && bash ../bash/build-docker-alpha.sh",
+    "deploy-docker:alpha": "chmod a+x ../bash/deploy-docker-alpha.sh && bash ../bash/deploy-docker-alpha.sh"
   },
   "private": true,
   "dependencies": {
