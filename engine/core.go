@@ -123,7 +123,7 @@ func (e *HeliaEngine) Start() {
 						tpf = int(now - lastFrame)
 
 						// find remaining portion of server heatbeat
-						if tpf <= universe.Heartbeat {
+						if tpf < universe.Heartbeat {
 							// sleep for remainder of server heartbeat
 							time.Sleep(time.Duration(universe.Heartbeat-tpf) * time.Millisecond)
 						} else {
@@ -257,11 +257,15 @@ func handleEscalations(sol *universe.SolarSystem) {
 		mi := sol.MovedItems[id]
 		delete(sol.MovedItems, id)
 
-		// mark as dirty if not marked already
-		mi.CoreDirty = true
-
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			// lock item
+			mi.Lock.Lock()
+			defer mi.Lock.Unlock()
+
+			// mark as dirty if not marked already
+			mi.CoreDirty = true
+
 			// save new location of item to db
 			err := saveItemLocation(mi.ID, mi.ContainerID)
 
@@ -281,11 +285,15 @@ func handleEscalations(sol *universe.SolarSystem) {
 		mi := sol.PackagedItems[id]
 		delete(sol.PackagedItems, id)
 
-		// mark as dirty if not marked already
-		mi.CoreDirty = true
-
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			// lock item
+			mi.Lock.Lock()
+			defer mi.Lock.Unlock()
+
+			// mark as dirty if not marked already
+			mi.CoreDirty = true
+
 			// mark item as packaged in the db
 			err := packageItem(mi.ID)
 
@@ -305,11 +313,15 @@ func handleEscalations(sol *universe.SolarSystem) {
 		mi := sol.UnpackagedItems[id]
 		delete(sol.UnpackagedItems, id)
 
-		// mark as dirty if not marked already
-		mi.CoreDirty = true
-
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			// lock item
+			mi.Lock.Lock()
+			defer mi.Lock.Unlock()
+
+			// mark as dirty if not marked already
+			mi.CoreDirty = true
+
 			// save unpackaged item to db
 			err := unpackageItem(mi.ID, mi.Meta)
 
@@ -329,11 +341,15 @@ func handleEscalations(sol *universe.SolarSystem) {
 		mi := sol.ChangedQuantityItems[id]
 		delete(sol.ChangedQuantityItems, id)
 
-		// mark as dirty if not marked already
-		mi.CoreDirty = true
-
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			// lock item
+			mi.Lock.Lock()
+			defer mi.Lock.Unlock()
+
+			// mark as dirty if not marked already
+			mi.CoreDirty = true
+
 			// save quantity of item to db
 			err := changeQuantity(mi.ID, mi.Quantity)
 
@@ -353,11 +369,15 @@ func handleEscalations(sol *universe.SolarSystem) {
 		mi := sol.ChangedMetaItems[id]
 		delete(sol.ChangedMetaItems, id)
 
-		// mark as dirty if not marked already
-		mi.CoreDirty = true
-
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			// lock item
+			mi.Lock.Lock()
+			defer mi.Lock.Unlock()
+
+			// mark as dirty if not marked already
+			mi.CoreDirty = true
+
 			// save metadata of item to db
 			err := changeMeta(mi.ID, mi.Meta)
 
@@ -377,11 +397,12 @@ func handleEscalations(sol *universe.SolarSystem) {
 		mi := sol.NewItems[id]
 		delete(sol.NewItems, id)
 
-		// mark as dirty if not marked already
-		mi.CoreDirty = true
-
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			// lock item
+			mi.Lock.Lock()
+			defer mi.Lock.Unlock()
+
 			// save new item to db
 			id, err := newItem(mi)
 
