@@ -169,9 +169,13 @@ export class Ship extends WSShip {
     const now = Date.now();
 
     // for interpolation
+    this.tps = now - this.lastSeen;
+    const tpsR = Math.max(this.tps / 30, 0.5);
+    const tpsA = tpsR * 2;
+    const tpsB = tpsA + 1;
+
     this.deltaX = sh.x - this.lastWsX;
     this.deltaY = sh.y - this.lastWsY;
-    this.tps = now - this.lastSeen;
 
     // remove oldest entry
     if (this.deltaTail.length >= 3) {
@@ -187,14 +191,16 @@ export class Ship extends WSShip {
       tps: this.tps,
     });
 
+    // slew new position
+    this.x = (this.x * tpsA + sh.x) / tpsB;
+    this.y = (this.y * tpsA + sh.y) / tpsB;
+
     // copy from message
     this.createdAt = sh.createdAt;
     this.shipName = sh.shipName;
     this.ownerName = sh.ownerName;
     this.uid = sh.uid;
     this.systemId = sh.systemId;
-    this.x = sh.x;
-    this.y = sh.y;
     this.lastWsX = sh.x;
     this.lastWsY = sh.y;
     this.theta = sh.theta;
