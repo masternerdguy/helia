@@ -167,7 +167,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 // processes the next message from each client in the system, should only be called from PeriodicUpdate
 func (s *SolarSystem) processClientEventQueues() {
 	// get message registry
-	msgRegistry := models.NewMessageRegistry()
+	msgRegistry := models.SharedMessageRegistry
 
 	for _, c := range s.clients {
 		// skip if connection dead
@@ -278,7 +278,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				data := evt.Body.(models.ClientDockBody)
 
 				// get registry
-				targetTypeReg := models.NewTargetTypeRegistry()
+				targetTypeReg := models.SharedTargetTypeRegistry
 
 				if data.Type == targetTypeReg.Station {
 					// find station
@@ -2272,7 +2272,7 @@ func (s *SolarSystem) updateStations() {
 // updates the state of missiles in the system, should only be called from PeriodicUpdate
 func (s *SolarSystem) updateMissiles() {
 	// get target type registry
-	tgtTypeReg := models.NewTargetTypeRegistry()
+	tgtTypeReg := models.SharedTargetTypeRegistry
 
 	// missile collission testing
 	dropMissiles := make([]string, 0)
@@ -2528,7 +2528,7 @@ func (s *SolarSystem) sendClientUpdates() {
 	}
 
 	// get message registry
-	msgRegistry := models.NewMessageRegistry()
+	msgRegistry := models.SharedMessageRegistry
 
 	// build global update of non-secret info for clients
 	gu := models.ServerGlobalUpdateBody{
@@ -3007,7 +3007,7 @@ func (s *SolarSystem) RemoveShip(c *Ship, lock bool) {
 	}
 
 	// get target type registry
-	tgtRegistry := models.NewTargetTypeRegistry()
+	tgtRegistry := models.SharedTargetTypeRegistry
 
 	// remove missiles tracking or fired by ship
 	dropMissiles := make([]string, 0)

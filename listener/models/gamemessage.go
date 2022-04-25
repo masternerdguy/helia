@@ -6,6 +6,10 @@ import (
 	"github.com/google/uuid"
 )
 
+// Shared registries - do not modify at runtime!
+var SharedTargetTypeRegistry = NewTargetTypeRegistry()
+var SharedMessageRegistry = NewMessageRegistry()
+
 // Registry of game message types
 type MessageRegistry struct {
 	PushInfo               int

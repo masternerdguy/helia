@@ -143,7 +143,7 @@ func (c *GameClient) WriteMessage(msg *models.GameMessage) {
 // Send an error string to the client to be displayed
 func (c *GameClient) WriteErrorMessage(msg string) {
 	// get message registry
-	msgRegistry := models.NewMessageRegistry()
+	msgRegistry := models.SharedMessageRegistry
 
 	// package message
 	d := models.ServerPushErrorMessage{
@@ -164,7 +164,7 @@ func (c *GameClient) WriteErrorMessage(msg string) {
 // Send an informational string to the client to be displayed
 func (c *GameClient) WriteInfoMessage(msg string) {
 	// get message registry
-	msgRegistry := models.NewMessageRegistry()
+	msgRegistry := models.SharedMessageRegistry
 
 	// package message
 	d := models.ServerPushInfoMessage{

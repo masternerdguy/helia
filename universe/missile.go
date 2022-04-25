@@ -43,7 +43,7 @@ func (s *Missile) PeriodicUpdate() {
 	}
 
 	// get target type registry
-	tgtTypeReg := models.NewTargetTypeRegistry()
+	tgtTypeReg := models.SharedTargetTypeRegistry
 
 	// get target position
 	sB := physics.Dummy{}

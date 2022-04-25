@@ -1031,7 +1031,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			}
 
 			// get message registry
-			msgRegistry := models.NewMessageRegistry()
+			msgRegistry := models.SharedMessageRegistry
 
 			// serialize message
 			b, _ := json.Marshal(&msg)
@@ -1252,7 +1252,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			b, _ := json.Marshal(&af)
 
 			msg := models.GameMessage{
-				MessageType: models.NewMessageRegistry().FactionUpdate,
+				MessageType: models.SharedMessageRegistry.FactionUpdate,
 				MessageBody: string(b),
 			}
 
@@ -1468,7 +1468,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 			}
 
 			// get message registry
-			msgRegistry := models.NewMessageRegistry()
+			msgRegistry := models.SharedMessageRegistry
 
 			// serialize message
 			b, _ := json.Marshal(&msg)

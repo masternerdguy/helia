@@ -51,6 +51,10 @@ const ShipMinShieldRegenPercent = 0.05
 // Percentage of energy regen to be applied to a ship at 100% energy
 const ShipMinEnergyRegenPercent = 0.07
 
+// Shared registries - do not modify at runtime!
+var SharedAutopilotRegistry = NewAutopilotRegistry()
+var SharedBehaviourRegistry = NewBehaviourRegistry()
+
 // Autopilot states for ships
 type AutopilotRegistry struct {
 	None      int
@@ -912,7 +916,7 @@ func (s *Ship) CmdAbort(lock bool) {
 	}
 
 	// stop autopilot
-	s.AutopilotMode = NewAutopilotRegistry().None
+	s.AutopilotMode = SharedAutopilotRegistry.None
 
 	// reset autopilot parameters
 	s.AutopilotManualNav = ManualNavData{}
@@ -943,7 +947,7 @@ func (s *Ship) CmdAbort(lock bool) {
 // Invokes manual nav autopilot on the ship
 func (s *Ship) CmdManualNav(screenT float64, screenM float64, lock bool) {
 	// get registry
-	registry := NewAutopilotRegistry()
+	registry := SharedAutopilotRegistry
 
 	if lock {
 		// lock entity
@@ -963,7 +967,7 @@ func (s *Ship) CmdManualNav(screenT float64, screenM float64, lock bool) {
 // Invokes goto autopilot on the ship
 func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int, lock bool) {
 	// get registry
-	registry := NewAutopilotRegistry()
+	registry := SharedAutopilotRegistry
 
 	if lock {
 		// lock entity
@@ -983,7 +987,7 @@ func (s *Ship) CmdGoto(targetID uuid.UUID, targetType int, lock bool) {
 // Invokes orbit autopilot on the ship
 func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int, lock bool) {
 	// get registry
-	registry := NewAutopilotRegistry()
+	registry := SharedAutopilotRegistry
 
 	if lock {
 		// lock entity
@@ -1003,7 +1007,7 @@ func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int, lock bool) {
 // Invokes dock autopilot on the ship
 func (s *Ship) CmdDock(targetID uuid.UUID, targetType int, lock bool) {
 	// get registry
-	registry := NewAutopilotRegistry()
+	registry := SharedAutopilotRegistry
 
 	if lock {
 		// lock entity
@@ -1036,7 +1040,7 @@ func (s *Ship) CmdUndock(lock bool) {
 	}
 
 	// get registry
-	registry := NewAutopilotRegistry()
+	registry := SharedAutopilotRegistry
 
 	if lock {
 		// lock entity
@@ -1053,7 +1057,7 @@ func (s *Ship) CmdUndock(lock bool) {
 // Invokes fight autopilot on the ship
 func (s *Ship) CmdFight(targetID uuid.UUID, targetType int, lock bool) {
 	// get registry
-	registry := NewAutopilotRegistry()
+	registry := SharedAutopilotRegistry
 
 	if lock {
 		// lock entity
@@ -1073,7 +1077,7 @@ func (s *Ship) CmdFight(targetID uuid.UUID, targetType int, lock bool) {
 // Invokes mine autopilot on the ship
 func (s *Ship) CmdMine(targetID uuid.UUID, targetType int, lock bool) {
 	// get registry
-	registry := NewAutopilotRegistry()
+	registry := SharedAutopilotRegistry
 
 	if lock {
 		// lock entity
@@ -1564,7 +1568,7 @@ func (s *Ship) behave() {
 			s.behaviourPatrol()
 		} else {
 			// get registry
-			registry := NewBehaviourRegistry()
+			registry := SharedBehaviourRegistry
 
 			switch *s.BehaviourMode {
 			case registry.None:
@@ -1595,7 +1599,7 @@ func (s *Ship) behaviourWander() {
 	}
 
 	// get registry
-	autoReg := NewAutopilotRegistry()
+	autoReg := SharedAutopilotRegistry
 
 	// check if idle
 	if s.AutopilotMode == autoReg.None {
@@ -1623,7 +1627,7 @@ func (s *Ship) behaviourWander() {
 // wanders around the universe looking for hostiles to attack
 func (s *Ship) behaviourPatrol() {
 	// get registry
-	autoReg := NewAutopilotRegistry()
+	autoReg := SharedAutopilotRegistry
 
 	// get heat level
 	maxHeat := s.GetRealMaxHeat()
@@ -1661,7 +1665,7 @@ func (s *Ship) behaviourPatrol() {
 		// look for any hostile ships to attack
 		if s.CurrentSystem.tickCounter%16 == 0 {
 			// get registry
-			tgtReg := models.NewTargetTypeRegistry()
+			tgtReg := models.SharedTargetTypeRegistry
 
 			// scan ships in system
 			var tgtS *Ship = nil
@@ -1719,7 +1723,7 @@ func (s *Ship) behaviourPatchTrade() {
 	}
 
 	// get registry
-	autoReg := NewAutopilotRegistry()
+	autoReg := SharedAutopilotRegistry
 
 	// check if idle
 	if s.AutopilotMode == autoReg.None {
@@ -1856,7 +1860,7 @@ func (s *Ship) behaviourPatchMine() {
 	}
 
 	// get registry
-	autoReg := NewAutopilotRegistry()
+	autoReg := SharedAutopilotRegistry
 
 	// check for faults
 	if s.aiIncompatibleOreFault {
@@ -1979,7 +1983,7 @@ func (s *Ship) behaviourPatchMine() {
 
 				if tgtAst != nil {
 					// go mine it
-					s.CmdMine(tgtAst.ID, models.NewTargetTypeRegistry().Asteroid, false)
+					s.CmdMine(tgtAst.ID, models.SharedTargetTypeRegistry.Asteroid, false)
 				} else {
 					// no asteroids here? wander
 					s.gotoNextWanderDestination(15)
@@ -1992,7 +1996,7 @@ func (s *Ship) behaviourPatchMine() {
 // helper for behaviour routines that need to wander around the universe
 func (s *Ship) gotoNextWanderDestination(stationDockChance int) {
 	// get registry
-	tgtReg := models.NewTargetTypeRegistry()
+	tgtReg := models.SharedTargetTypeRegistry
 
 	// chance of docking at a station vs flying through a jumphole is based on the stationDockChance parameter
 	roll := physics.RandInRange(0, 100)
@@ -2061,7 +2065,7 @@ func (s *Ship) gotoNextWanderDestination(stationDockChance int) {
 // Flies the ship automatically when undocked
 func (s *Ship) doUndockedAutopilot() {
 	// get registry
-	registry := NewAutopilotRegistry()
+	registry := SharedAutopilotRegistry
 
 	switch s.AutopilotMode {
 	case registry.None:
@@ -2084,7 +2088,7 @@ func (s *Ship) doUndockedAutopilot() {
 // Flies the ship automatically when docked
 func (s *Ship) doDockedAutopilot() {
 	// get registry
-	registry := NewAutopilotRegistry()
+	registry := SharedAutopilotRegistry
 
 	switch s.AutopilotMode {
 	case registry.None:
@@ -2119,14 +2123,14 @@ func (s *Ship) doAutopilotManualNav() {
 
 	// stop when magnitude is low
 	if s.AutopilotManualNav.Magnitude < 0.0001 {
-		s.AutopilotMode = NewAutopilotRegistry().None
+		s.AutopilotMode = SharedAutopilotRegistry.None
 	}
 }
 
 // Causes ship to turn to move towards a target and stop when within range
 func (s *Ship) doAutopilotGoto() {
 	// get registry
-	targetTypeReg := models.NewTargetTypeRegistry()
+	targetTypeReg := models.SharedTargetTypeRegistry
 
 	// target details
 	var tX float64 = 0
@@ -2262,7 +2266,7 @@ func (s *Ship) doAutopilotGoto() {
 // Causes ship to fly a circle around the target
 func (s *Ship) doAutopilotOrbit() {
 	// get registry
-	targetTypeReg := models.NewTargetTypeRegistry()
+	targetTypeReg := models.SharedTargetTypeRegistry
 
 	// target details
 	var tX float64 = 0
@@ -2395,7 +2399,7 @@ func (s *Ship) doAutopilotDock() {
 	s.LeaveFactionArmed = false
 
 	// get registry
-	targetTypeReg := models.NewTargetTypeRegistry()
+	targetTypeReg := models.SharedTargetTypeRegistry
 
 	if s.AutopilotDock.Type == targetTypeReg.Station {
 		// find station
@@ -2422,7 +2426,7 @@ func (s *Ship) doAutopilotDock() {
 			// dock with station
 			s.DockedAtStation = station
 			s.DockedAtStationID = &station.ID
-			s.AutopilotMode = NewAutopilotRegistry().None
+			s.AutopilotMode = SharedAutopilotRegistry.None
 		}
 	} else {
 		s.CmdAbort(false)
@@ -2442,17 +2446,17 @@ func (s *Ship) doAutopilotUndock() {
 		s.DockedAtStation = nil
 
 		// not docked - cancel autopilot
-		s.AutopilotMode = NewAutopilotRegistry().None
+		s.AutopilotMode = SharedAutopilotRegistry.None
 	} else {
 		// not docked - cancel autopilot
-		s.AutopilotMode = NewAutopilotRegistry().None
+		s.AutopilotMode = SharedAutopilotRegistry.None
 	}
 }
 
 // Causes ship to fight with a target
 func (s *Ship) doAutopilotFight() {
 	// get registry
-	targetTypeReg := models.NewTargetTypeRegistry()
+	targetTypeReg := models.SharedTargetTypeRegistry
 
 	if s.AutopilotFight.Type == targetTypeReg.Ship {
 		// find ship
@@ -2583,7 +2587,7 @@ func (s *Ship) doAutopilotFight() {
 // Causes ship to mine a target
 func (s *Ship) doAutopilotMine() {
 	// get registry
-	targetTypeReg := models.NewTargetTypeRegistry()
+	targetTypeReg := models.SharedTargetTypeRegistry
 
 	if s.AutopilotMine.Type == targetTypeReg.Asteroid {
 		// find asteroid
@@ -4480,7 +4484,7 @@ func (m *FittedSlot) PeriodicUpdate() {
 				}
 
 				// make sure the target actually exists in this solar system
-				tgtReg := models.NewTargetTypeRegistry()
+				tgtReg := models.SharedTargetTypeRegistry
 
 				if *m.TargetType == tgtReg.Ship {
 					// find ship
@@ -4648,7 +4652,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	}
 
 	// get target
-	tgtReg := models.NewTargetTypeRegistry()
+	tgtReg := models.SharedTargetTypeRegistry
 
 	// target details
 	var tgtDummy physics.Dummy = physics.Dummy{}
@@ -4983,7 +4987,7 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 	}
 
 	// get target
-	tgtReg := models.NewTargetTypeRegistry()
+	tgtReg := models.SharedTargetTypeRegistry
 
 	// target details
 	var tgtDummy physics.Dummy = physics.Dummy{}
@@ -5147,7 +5151,7 @@ func (m *FittedSlot) activateAsShieldBooster() bool {
 	activationPGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
 
 	if found {
-		tgtReg := models.NewTargetTypeRegistry()
+		tgtReg := models.SharedTargetTypeRegistry
 
 		// build effect trigger
 		gfxEffect := models.GlobalPushModuleEffectBody{
@@ -5232,7 +5236,7 @@ func (m *FittedSlot) activateAsAetherDragger() bool {
 	}
 
 	// get target
-	tgtReg := models.NewTargetTypeRegistry()
+	tgtReg := models.SharedTargetTypeRegistry
 
 	// target details
 	var tgtDummy physics.Dummy = physics.Dummy{}
@@ -5368,7 +5372,7 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 	}
 
 	// get target
-	tgtReg := models.NewTargetTypeRegistry()
+	tgtReg := models.SharedTargetTypeRegistry
 
 	// target details
 	var tgtDummy physics.Dummy = physics.Dummy{}
@@ -5614,7 +5618,7 @@ func (m *FittedSlot) activateAsUtilitySiphon() bool {
 	}
 
 	// get target
-	tgtReg := models.NewTargetTypeRegistry()
+	tgtReg := models.SharedTargetTypeRegistry
 
 	// target details
 	var tgtDummy physics.Dummy = physics.Dummy{}
@@ -5816,7 +5820,7 @@ func (m *FittedSlot) activateAsSalvager() bool {
 	}
 
 	// get target
-	tgtReg := models.NewTargetTypeRegistry()
+	tgtReg := models.SharedTargetTypeRegistry
 
 	// target details
 	var tgtDummy physics.Dummy = physics.Dummy{}

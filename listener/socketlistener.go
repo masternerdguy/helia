@@ -101,7 +101,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 	}(&client)
 
 	// get message type registry
-	msgRegistry := models.NewMessageRegistry()
+	msgRegistry := models.SharedMessageRegistry
 
 	// socket listener loop
 	for {
@@ -475,7 +475,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 	// initialize services
 	sessionSvc := sql.GetSessionService()
 	userSvc := sql.GetUserService()
-	msgRegistry := models.NewMessageRegistry()
+	msgRegistry := models.SharedMessageRegistry
 	shipSvc := sql.GetShipService()
 	startSvc := sql.GetStartService()
 
@@ -777,7 +777,7 @@ func (l *SocketListener) handleClientGlobalAck(client *shared.GameClient, body *
 		shared.TeeLog(fmt.Sprintf("handleClientGlobalAck: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -800,7 +800,7 @@ func (l *SocketListener) handleClientNavClick(client *shared.GameClient, body *m
 		shared.TeeLog(fmt.Sprintf("handleClientNavClick: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -823,7 +823,7 @@ func (l *SocketListener) handleClientGoto(client *shared.GameClient, body *model
 		shared.TeeLog(fmt.Sprintf("handleClientGoto: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -846,7 +846,7 @@ func (l *SocketListener) handleClientOrbit(client *shared.GameClient, body *mode
 		shared.TeeLog(fmt.Sprintf("handleClientOrbit: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -869,7 +869,7 @@ func (l *SocketListener) handleClientDock(client *shared.GameClient, body *model
 		shared.TeeLog(fmt.Sprintf("handleClientDock: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -892,7 +892,7 @@ func (l *SocketListener) handleClientUndock(client *shared.GameClient, body *mod
 		shared.TeeLog(fmt.Sprintf("handleClientUndock: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -915,7 +915,7 @@ func (l *SocketListener) handleClientActivateModule(client *shared.GameClient, b
 		shared.TeeLog(fmt.Sprintf("handleClientActivateModule: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -938,7 +938,7 @@ func (l *SocketListener) handleClientDeactivateModule(client *shared.GameClient,
 		shared.TeeLog(fmt.Sprintf("handleClientDeactivateModule: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -961,7 +961,7 @@ func (l *SocketListener) handleClientViewCargoBay(client *shared.GameClient, bod
 		shared.TeeLog(fmt.Sprintf("handleClientViewCargoBay: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -984,7 +984,7 @@ func (l *SocketListener) handleClientUnfitModule(client *shared.GameClient, body
 		shared.TeeLog(fmt.Sprintf("handleClientUnfitModule: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1007,7 +1007,7 @@ func (l *SocketListener) handleClientTrashItem(client *shared.GameClient, body *
 		shared.TeeLog(fmt.Sprintf("handleClientTrashItem: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1030,7 +1030,7 @@ func (l *SocketListener) handleClientPackageItem(client *shared.GameClient, body
 		shared.TeeLog(fmt.Sprintf("handleClientPackageItem: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1053,7 +1053,7 @@ func (l *SocketListener) handleClientUnpackageItem(client *shared.GameClient, bo
 		shared.TeeLog(fmt.Sprintf("handleClientUnpackageItem: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1076,7 +1076,7 @@ func (l *SocketListener) handleClientStackItem(client *shared.GameClient, body *
 		shared.TeeLog(fmt.Sprintf("handleClientStackItem: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1099,7 +1099,7 @@ func (l *SocketListener) handleClientSplitItem(client *shared.GameClient, body *
 		shared.TeeLog(fmt.Sprintf("handleClientSplitItem: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1122,7 +1122,7 @@ func (l *SocketListener) handleClientFitModule(client *shared.GameClient, body *
 		shared.TeeLog(fmt.Sprintf("handleClientFitModule: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1145,7 +1145,7 @@ func (l *SocketListener) handleClientSellAsOrder(client *shared.GameClient, body
 		shared.TeeLog(fmt.Sprintf("handleClientSellAsOrder: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1168,7 +1168,7 @@ func (l *SocketListener) handleClientViewOpenSellOrders(client *shared.GameClien
 		shared.TeeLog(fmt.Sprintf("handleClientViewOpenSellOrders: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1191,7 +1191,7 @@ func (l *SocketListener) handleClientBuySellOrder(client *shared.GameClient, bod
 		shared.TeeLog(fmt.Sprintf("handleClientBuySellOrder: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1214,7 +1214,7 @@ func (l *SocketListener) handleClientViewIndustrialOrders(client *shared.GameCli
 		shared.TeeLog(fmt.Sprintf("handleClientViewIndustrialOrders: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1237,7 +1237,7 @@ func (l *SocketListener) handleClientBuyFromSilo(client *shared.GameClient, body
 		shared.TeeLog(fmt.Sprintf("handleClientBuyFromSilo: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1260,7 +1260,7 @@ func (l *SocketListener) handleClientSellToSilo(client *shared.GameClient, body 
 		shared.TeeLog(fmt.Sprintf("handleClientSellToSilo: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1283,7 +1283,7 @@ func (l *SocketListener) handleClientViewStarMap(client *shared.GameClient, body
 		shared.TeeLog(fmt.Sprintf("handleClientViewStarMap: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1306,7 +1306,7 @@ func (l *SocketListener) handleClientConsumeFuel(client *shared.GameClient, body
 		shared.TeeLog(fmt.Sprintf("handleClientConsumeFuel: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1329,7 +1329,7 @@ func (l *SocketListener) handleClientSelfDestruct(client *shared.GameClient, bod
 		shared.TeeLog(fmt.Sprintf("handleClientSelfDestruct: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1352,7 +1352,7 @@ func (l *SocketListener) handleClientConsumeRepairKit(client *shared.GameClient,
 		shared.TeeLog(fmt.Sprintf("handleClientConsumeRepairKit: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1375,7 +1375,7 @@ func (l *SocketListener) handleClientViewProperty(client *shared.GameClient, bod
 		shared.TeeLog(fmt.Sprintf("handleClientViewProperty: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1398,7 +1398,7 @@ func (l *SocketListener) handleClientBoard(client *shared.GameClient, body *mode
 		shared.TeeLog(fmt.Sprintf("handleClientBoard: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1421,7 +1421,7 @@ func (l *SocketListener) handleClientTransferCredits(client *shared.GameClient, 
 		shared.TeeLog(fmt.Sprintf("handleClientTransferCredits: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1444,7 +1444,7 @@ func (l *SocketListener) handleClientSellShipAsOrder(client *shared.GameClient, 
 		shared.TeeLog(fmt.Sprintf("handleClientSellShipAsOrder: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1467,7 +1467,7 @@ func (l *SocketListener) handleClientTrashShip(client *shared.GameClient, body *
 		shared.TeeLog(fmt.Sprintf("handleClientTrashShip: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1490,7 +1490,7 @@ func (l *SocketListener) handleClientRenameShip(client *shared.GameClient, body 
 		shared.TeeLog(fmt.Sprintf("handleClientRenameShip: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1513,7 +1513,7 @@ func (l *SocketListener) handleClientPostSystemChatMessage(client *shared.GameCl
 		shared.TeeLog(fmt.Sprintf("handleClientPostSystemChatMessageBody: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1536,7 +1536,7 @@ func (l *SocketListener) handleClientTransferItem(client *shared.GameClient, bod
 		shared.TeeLog(fmt.Sprintf("handleClientTransferItem: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1559,7 +1559,7 @@ func (l *SocketListener) handleClientViewExperience(client *shared.GameClient, b
 		shared.TeeLog(fmt.Sprintf("handleClientViewExperience: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1582,7 +1582,7 @@ func (l *SocketListener) handleClientViewSchematicRuns(client *shared.GameClient
 		shared.TeeLog(fmt.Sprintf("handleClientViewSchematicRuns: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1605,7 +1605,7 @@ func (l *SocketListener) handleClientRunSchematic(client *shared.GameClient, bod
 		shared.TeeLog(fmt.Sprintf("handleClientRunSchematic: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1628,7 +1628,7 @@ func (l *SocketListener) handleClientCreateNewFaction(client *shared.GameClient,
 		shared.TeeLog(fmt.Sprintf("handleClientCreateNewFaction: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1651,7 +1651,7 @@ func (l *SocketListener) handleClientLeaveFaction(client *shared.GameClient, bod
 		shared.TeeLog(fmt.Sprintf("handleClientLeaveFaction: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1674,7 +1674,7 @@ func (l *SocketListener) handleClientApplyToFaction(client *shared.GameClient, b
 		shared.TeeLog(fmt.Sprintf("handleClientApplyToFaction: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1697,7 +1697,7 @@ func (l *SocketListener) handleClientViewApplications(client *shared.GameClient,
 		shared.TeeLog(fmt.Sprintf("handleClientViewApplications: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1720,7 +1720,7 @@ func (l *SocketListener) handleClientApproveApplication(client *shared.GameClien
 		shared.TeeLog(fmt.Sprintf("handleClientApproveApplication: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1743,7 +1743,7 @@ func (l *SocketListener) handleClientRejectApplication(client *shared.GameClient
 		shared.TeeLog(fmt.Sprintf("handleClientRejectApplication: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1766,7 +1766,7 @@ func (l *SocketListener) handleClientViewMembers(client *shared.GameClient, body
 		shared.TeeLog(fmt.Sprintf("handleClientViewMembers: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1789,7 +1789,7 @@ func (l *SocketListener) handleClientKickMember(client *shared.GameClient, body 
 		shared.TeeLog(fmt.Sprintf("handleClientKickMember: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1812,7 +1812,7 @@ func (l *SocketListener) handleClientUseModKit(client *shared.GameClient, body *
 		shared.TeeLog(fmt.Sprintf("handleClientUseModKit: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
@@ -1835,7 +1835,7 @@ func (l *SocketListener) handleClientViewActionReportsPage(client *shared.GameCl
 		shared.TeeLog(fmt.Sprintf("handleClientViewActionReportsPage: unexpected id: %v vs %v", &body.SessionID, &client.SID))
 	} else {
 		// initialize services
-		msgRegistry := models.NewMessageRegistry()
+		msgRegistry := models.SharedMessageRegistry
 
 		// push event onto player's ship queue
 		data := *body
