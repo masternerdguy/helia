@@ -1370,6 +1370,11 @@ func (s *Ship) TotalCargoBayVolumeUsed(lock bool) float64 {
 
 	// loop over items in cargo hold
 	for _, i := range s.CargoBay.Items {
+		// skip if dirty or empty
+		if i.CoreDirty || i.Quantity <= 0 {
+			continue
+		}
+
 		if i.IsPackaged {
 			// get item type volume metadata
 			volume, f := i.ItemTypeMeta.GetFloat64("volume")
@@ -3370,7 +3375,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 	}
 
 	// calculate order volume
-	unitVolume, _ := output.Meta.GetFloat64("volume")
+	unitVolume, _ := output.ItemTypeMeta.GetFloat64("volume")
 	orderVolume := unitVolume * float64(quantity)
 
 	// determine if this is a ship
