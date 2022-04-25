@@ -52,6 +52,9 @@ func InitializeTeeLog(fns ...logTeeHandler) {
 					}(h)
 				}
 			}()
+
+			// short sleep
+			time.Sleep(time.Millisecond * 5)
 		}
 	}()
 
