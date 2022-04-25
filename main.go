@@ -16,7 +16,7 @@ func main() {
 	// configure global tee logging
 	shared.InitializeTeeLog(
 		printLogger,
-		// dbLogger,
+		dbLogger,
 	)
 
 	// purge old logs
