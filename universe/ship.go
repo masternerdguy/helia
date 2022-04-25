@@ -3374,7 +3374,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 	}
 
 	// calculate order volume
-	unitVolume, _ := output.Meta.GetFloat64("volume")
+	unitVolume, _ := output.ItemTypeMeta.GetFloat64("volume")
 	orderVolume := unitVolume * float64(quantity)
 
 	// determine if this is a ship
