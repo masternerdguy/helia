@@ -19,15 +19,6 @@ func main() {
 		dbLogger,
 	)
 
-	// purge old logs
-	shared.TeeLog("Nuking logs from previous boots...")
-	err := sql.GetLogService().NukeLogs()
-
-	if err != nil {
-		shared.TeeLog(err.Error())
-		panic(err)
-	}
-
 	// initialize RNG
 	shared.TeeLog("Initializing RNG...")
 	rand.Seed(time.Now().UnixNano())
