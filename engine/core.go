@@ -152,22 +152,50 @@ func (e *HeliaEngine) Start() {
 				for _, s := range r.Systems {
 					shared.TeeLog(fmt.Sprintf("* Testing [%v]", s.SystemName))
 
-					// test locks
-					s.TestLocks()
-					shared.TeeLog(fmt.Sprintf("* [%v] Passed", s.SystemName))
+					wgi := 500 // 5 second limit
+					done := false
 
-					// small sleep between systems
-					time.Sleep(5 * time.Millisecond)
+					go func(s *universe.SolarSystem) {
+						// test locks
+						s.TestLocks()
+						shared.TeeLog(fmt.Sprintf("* [%v] Passed", s.SystemName))
+
+						// small sleep between systems
+						time.Sleep(50 * time.Millisecond)
+
+						// mark done
+						done = true
+					}(s)
+
+					// wait for exit
+					for {
+						// short sleep
+						time.Sleep(10 * time.Millisecond)
+
+						// check for exit
+						if done {
+							break
+						}
+
+						// check for too much time passing
+						if wgi == 0 {
+							shared.TeeLog("! Deadlock check failed - initiating shutdown")
+							shutdownSignal = true
+						}
+
+						// decrement counter
+						wgi--
+					}
 				}
 
 				// larger sleep between regions
-				time.Sleep(20 * time.Millisecond)
+				time.Sleep(500 * time.Millisecond)
 			}
 
 			shared.TeeLog("* All systems passed deadlock check!")
 
-			// wait 5 minutes
-			time.Sleep(time.Second * 300)
+			// wait 30 minutes
+			time.Sleep(time.Minute * 30)
 		}
 	}(e)
 }
