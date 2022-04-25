@@ -117,6 +117,11 @@ func (e *HeliaEngine) Start() {
 						if tpf < universe.Heartbeat {
 							// sleep for remainder of server heartbeat
 							time.Sleep(time.Duration(universe.Heartbeat-tpf) * time.Millisecond)
+						} else {
+							if time.Now().Second() == 30 {
+								// log slowness
+								shared.TeeLog(fmt.Sprintf("[%v] Slowness detected at 30th second: %v / %v", sol.SystemName, tpf, universe.Heartbeat))
+							}
 						}
 
 						// done!
