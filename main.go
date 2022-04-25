@@ -16,8 +16,8 @@ import (
 func main() {
 	// configure global tee logging
 	shared.InitializeTeeLog(
-		printLogger,
-		dbLogger,
+	//printLogger,  // disabled all logging as an experiment
+	//dbLogger,
 	)
 
 	// purge old logs
