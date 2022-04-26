@@ -264,6 +264,9 @@ func (l *HTTPListener) HandleShutdown(w http.ResponseWriter, r *http.Request) {
 	if l.Configuration.ShutdownToken == key {
 		// initiate shutdown
 		l.Engine.Shutdown()
+
+		// write response
+		fmt.Fprintln(w, "shutdown complete")
 	}
 }
 

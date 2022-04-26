@@ -14,10 +14,13 @@ import (
 )
 
 func main() {
+	// use one less core for goroutines than is available
+	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
+
 	// configure global tee logging
 	shared.InitializeTeeLog(
-	//printLogger,  // disabled all logging as an experiment
-	//dbLogger,
+		printLogger,
+		dbLogger,
 	)
 
 	// purge old logs
@@ -88,9 +91,7 @@ func main() {
 
 	// don't exit
 	for {
-		// monitor total number of goroutines running
-		shared.TeeLog(fmt.Sprintf("<TOTAL GOROUTINES> %v", runtime.NumGoroutine()))
-		time.Sleep(5000 * time.Millisecond)
+		time.Sleep(30000 * time.Millisecond)
 	}
 }
 
@@ -98,10 +99,10 @@ func printLogger(s string, t time.Time) {
 	log.Println(s) // t is intentionally discarded because Println already provides a timestamp
 }
 
-func dbLogger(s string, t time.Time) {
-	// get log service
-	logSvc := sql.GetLogService()
+// get log service
+var logSvc = sql.GetLogService()
 
+func dbLogger(s string, t time.Time) {
 	// write log
 	logSvc.WriteLog(s, t)
 }

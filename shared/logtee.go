@@ -1,14 +1,12 @@
 package shared
 
 import (
-	"sync"
 	"time"
 )
 
 var teeLogChannel chan teeLog
 var teeLogInitialized = false
 var teeLogHandlers []logTeeHandler
-var teeLogWrite sync.Mutex // intentionally not using sync.Mutex to avoid dying if logging is slow
 
 type logTeeHandler func(string, time.Time)
 
@@ -29,30 +27,16 @@ func InitializeTeeLog(fns ...logTeeHandler) {
 	// initialize channel
 	teeLogChannel = make(chan teeLog)
 
-	// initialize mutex
-	teeLogWrite = sync.Mutex{}
-
 	// start watcher
 	go func() {
 		for {
 			// wait for log
 			log := <-teeLogChannel
 
-			// pass to logger functions on separate goroutines
-
-			go func() {
-				// obtain write lock
-				teeLogWrite.Lock()
-				defer teeLogWrite.Unlock()
-
-				for _, h := range teeLogHandlers {
-					// write message
-					h(log.Message, log.EventTime)
-				}
-			}()
-
-			// short sleep
-			time.Sleep(time.Millisecond * 20)
+			for _, h := range teeLogHandlers {
+				// write message
+				h(log.Message, log.EventTime)
+			}
 		}
 	}()
 

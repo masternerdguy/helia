@@ -6,15 +6,17 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 
 	_ "github.com/lib/pq" // driver
 )
 
 // Shared database connection for services
-var sharedConfig *sql.DB = nil
+var sharedPool *sql.DB = nil
+var poolExpires time.Time
 
 // Shared mutex for connection with db
-var sharedDbLock sync.Mutex = sync.Mutex{}
+var sharedPoolLock sync.Mutex = sync.Mutex{}
 
 type dbConfig struct {
 	DbName  string `json:"dbname"`
@@ -27,19 +29,20 @@ type dbConfig struct {
 
 func connect() (*sql.DB, error) {
 	// lock connect to handle excessive clients
-	sharedDbLock.Lock()
-	defer sharedDbLock.Unlock()
+	sharedPoolLock.Lock()
+	defer sharedPoolLock.Unlock()
 
 	// check if we are already connected
-	if sharedConfig != nil {
-		// make sure we aren't over on connections
-		if sharedConfig.Stats().OpenConnections+1 >= sharedConfig.Stats().MaxOpenConnections {
+	if sharedPool != nil {
+		now := time.Now()
+		// check for expiration
+		if now.After(poolExpires) {
 			// reset shared connection
-			sharedConfig.Close()
-			sharedConfig = nil
+			sharedPool.Close()
+			sharedPool = nil
 		} else {
 			// return existing connection
-			return sharedConfig, nil
+			return sharedPool, nil
 		}
 	}
 
@@ -58,10 +61,11 @@ func connect() (*sql.DB, error) {
 	// connect to the db
 	db, err := sql.Open("postgres", conn)
 	db.SetMaxOpenConns(50)
-	db.SetMaxIdleConns(2)
+	db.SetMaxIdleConns(50)
 
 	// stash config for reuse across goroutines
-	sharedConfig = db
+	sharedPool = db
+	poolExpires = time.Now().Add(time.Minute * 30)
 
 	// return handle to db
 	return db, err
