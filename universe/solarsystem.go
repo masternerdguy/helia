@@ -135,6 +135,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	// skip if nobody in system
 	if len(s.ships) == 0 {
+		time.Sleep(1 * time.Second)
 		return
 	}
 
@@ -154,6 +155,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	// ship collision testing
 	s.shipCollisionTesting()
+
+	// brief sleep
+	time.Sleep(250 * time.Microsecond)
 
 	// send client updates
 	if s.tickCounter%2 == 0 && len(s.clients) > 0 {
