@@ -440,7 +440,7 @@ function handleGlobalUpdate(d: GameMessage) {
   engineSack.tps = now - engineSack.lastSyncTime;
   engineSack.lastSyncTime = now;
 
-  if (engineSack.tpsTail.length >= 7) {
+  if (engineSack.tpsTail.length >= 5) {
     engineSack.tpsTail = engineSack.tpsTail.reverse();
     engineSack.tpsTail.pop();
     engineSack.tpsTail = engineSack.tpsTail.reverse();
@@ -1179,7 +1179,7 @@ function calculateQ(): number {
   avgTps /= engineSack.tpsTail.length;
 
   // get scale
-  const q = Math.round(Math.max(avgTps / engineSack.tpi, 30 / engineSack.tpi));
+  const q = Math.round(Math.max(avgTps / engineSack.tpi, 40 / engineSack.tpi));
 
   // return result
   return q;
