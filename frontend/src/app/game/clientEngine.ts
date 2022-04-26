@@ -1101,6 +1101,16 @@ function periodicUpdate() {
   // update target selection
   updateTargetSelection();
 
+  // update position if docked
+  if (!!engineSack.player.currentShip.dockedAtStationID) {
+    for (const st of engineSack.player.currentSystem.stations) {
+      if (st.id == engineSack.player.currentShip.dockedAtStationID) {
+        engineSack.camera.x = st.x;
+        engineSack.camera.y = st.y;
+      }
+    }
+  }
+
   // update ui
   for (const w of engineSack.windows) {
     w.periodicUpdate();
