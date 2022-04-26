@@ -127,9 +127,6 @@ func (e *HeliaEngine) Start() {
 						tpf = int(now - lastFrame)
 						residual = universe.Heartbeat - tpf
 
-						// guarantee routine yields
-						time.Sleep(250 * time.Microsecond)
-
 						// done!
 						c <- struct{}{}
 					}(sol)
@@ -139,6 +136,9 @@ func (e *HeliaEngine) Start() {
 
 					// update last frame time
 					lastFrame = makeTimestamp()
+
+					// guarantee routine yields
+					time.Sleep(250 * time.Microsecond)
 				}
 
 				shared.TeeLog(fmt.Sprintf("System %s has halted.", sol.SystemName))
