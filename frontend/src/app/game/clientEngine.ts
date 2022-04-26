@@ -876,6 +876,14 @@ function handleCurrentShipUpdate(d: GameMessage) {
   // make sure it's synced on the ship list as well
   for (const sh of engineSack.player.currentSystem.ships) {
     if (sh.id == engineSack.player.currentShip.id) {
+      // don't accept new position
+      const cx = sh.x;
+      const cy = sh.y;
+
+      msg.currentShipInfo.x = cx;
+      msg.currentShipInfo.y = cy;
+
+      // sync everything else
       sh.sync(msg.currentShipInfo);
       break;
     }
