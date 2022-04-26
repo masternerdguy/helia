@@ -2941,7 +2941,7 @@ func (s *Ship) FindFirstAvailablePackagedStackOfSizeInCargo(typeID uuid.UUID, si
 	return nil
 }
 
-// Removes an item from the cargo hold and fits it to the ship
+// Removes all items with a zero quantity from the cargo of the ship
 func (s *Ship) removeZeroQuantityItemsFromCargo() {
 	// lock container
 	s.CargoBay.Lock.Lock()
