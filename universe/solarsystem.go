@@ -131,13 +131,19 @@ func (s *SolarSystem) HandleShutdownSignal() {
 func (s *SolarSystem) PeriodicUpdate() {
 	// obtain lock
 	s.Lock.Lock()
-	defer s.Lock.Unlock()
 
 	// skip if nobody in system
 	if len(s.ships) == 0 {
+		// unlock
+		s.Lock.Unlock()
+
+		// sleep and return
 		time.Sleep(1 * time.Second)
 		return
 	}
+
+	// defer unlock
+	defer s.Lock.Unlock()
 
 	// process player current ship event queues
 	s.processClientEventQueues()
