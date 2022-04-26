@@ -82,6 +82,7 @@ func (e *HeliaEngine) Start() {
 		for _, s := range r.Systems {
 			go func(sol *universe.SolarSystem) {
 				var tpf int = 0
+				var residual int = 0
 				lastFrame := makeTimestamp()
 
 				// game loop
@@ -94,6 +95,9 @@ func (e *HeliaEngine) Start() {
 
 					// for monitoring spawn exit
 					c := make(chan struct{}, 1)
+
+					// sleep for residual tick duration
+					time.Sleep(time.Duration(residual) * time.Millisecond)
 
 					// spawn goroutine so defer works as expected
 					go func(sol *universe.SolarSystem) {
@@ -121,12 +125,7 @@ func (e *HeliaEngine) Start() {
 						// get time of last frame
 						now := makeTimestamp()
 						tpf = int(now - lastFrame)
-
-						// find remaining portion of server heatbeat
-						if tpf <= universe.Heartbeat {
-							// sleep for remainder of server heartbeat
-							time.Sleep(time.Duration(universe.Heartbeat-tpf) * time.Millisecond)
-						}
+						residual = universe.Heartbeat - tpf
 
 						// done!
 						c <- struct{}{}
