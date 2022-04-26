@@ -591,6 +591,9 @@ func (s *Ship) PeriodicUpdate() {
 
 	s.TemporaryModifiers = keptTemporaryModifiers
 
+	// remove zero-quantity items from cargo bay
+	s.removeZeroQuantityItemsFromCargo()
+
 	// update cloaking
 	s.updateCloaking()
 
@@ -2936,6 +2939,25 @@ func (s *Ship) FindFirstAvailablePackagedStackOfSizeInCargo(typeID uuid.UUID, si
 
 	// nothing found
 	return nil
+}
+
+// Removes an item from the cargo hold and fits it to the ship
+func (s *Ship) removeZeroQuantityItemsFromCargo() {
+	// lock container
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	// remove zero-quantity items from cargo bay
+	newCB := make([]*Item, 0)
+
+	for _, i := range s.CargoBay.Items {
+		if i.Quantity > 0 {
+			// keep in cargo bay
+			newCB = append(newCB, i)
+		}
+	}
+
+	s.CargoBay.Items = newCB
 }
 
 // Removes an item from the cargo hold and fits it to the ship
