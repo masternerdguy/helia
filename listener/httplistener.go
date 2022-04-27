@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/mail"
+	"runtime/pprof"
 )
 
 // Listener for handling and dispatching incoming http requests
@@ -264,6 +265,9 @@ func (l *HTTPListener) HandleShutdown(w http.ResponseWriter, r *http.Request) {
 	if l.Configuration.ShutdownToken == key {
 		// initiate shutdown
 		l.Engine.Shutdown()
+
+		// stop profiling
+		pprof.StopCPUProfile()
 
 		// write response
 		fmt.Fprintln(w, "shutdown complete")

@@ -128,7 +128,7 @@ func (s *SolarSystem) HandleShutdownSignal() {
 }
 
 // Processes the solar system for a tick
-func (s *SolarSystem) PeriodicUpdate() {
+func (s *SolarSystem) PeriodicUpdate() bool {
 	// obtain lock
 	s.Lock.Lock()
 
@@ -139,7 +139,7 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 		// sleep and return
 		time.Sleep(1 * time.Second)
-		return
+		return true
 	}
 
 	// defer unlock
@@ -172,6 +172,8 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	// increment tick counter
 	s.tickCounter++
+
+	return false
 }
 
 // processes the next message from each client in the system, should only be called from PeriodicUpdate
@@ -182,6 +184,12 @@ func (s *SolarSystem) processClientEventQueues() {
 	for _, c := range s.clients {
 		// skip if connection dead
 		if c.Dead {
+			// queue cleanup
+			defer func(c *shared.GameClient) {
+				delete(s.clients, c.UID.String())
+			}(c)
+
+			// go to next one
 			continue
 		}
 
@@ -3137,7 +3145,7 @@ func (s *SolarSystem) AddClient(c *shared.GameClient, lock bool) {
 
 	// ensure client gets new static data
 	go func(c *shared.GameClient) {
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 10; i++ {
 			// obtain lock
 			c.Lock.Lock()
 
@@ -3147,8 +3155,8 @@ func (s *SolarSystem) AddClient(c *shared.GameClient, lock bool) {
 			// unlock
 			c.Lock.Unlock()
 
-			// short sleep
-			time.Sleep(100 * time.Millisecond)
+			// sleep
+			time.Sleep(500 * time.Millisecond)
 		}
 	}(c)
 
@@ -3156,7 +3164,7 @@ func (s *SolarSystem) AddClient(c *shared.GameClient, lock bool) {
 	s.clients[(*c.UID).String()] = c
 }
 
-// Removes a client from the server
+// Removes a client from the system
 func (s *SolarSystem) RemoveClient(c *shared.GameClient, lock bool) {
 	// safety check
 	if c == nil {

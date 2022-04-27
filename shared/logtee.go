@@ -37,6 +37,9 @@ func InitializeTeeLog(fns ...logTeeHandler) {
 				// write message
 				h(log.Message, log.EventTime)
 			}
+
+			// short sleep
+			time.Sleep(20 * time.Millisecond)
 		}
 	}()
 

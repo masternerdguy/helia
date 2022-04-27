@@ -592,7 +592,9 @@ func (s *Ship) PeriodicUpdate() {
 	s.TemporaryModifiers = keptTemporaryModifiers
 
 	// remove zero-quantity items from cargo bay
-	s.removeZeroQuantityItemsFromCargo()
+	if s.CurrentSystem != nil && s.CurrentSystem.tickCounter%50 == 0 {
+		s.removeZeroQuantityItemsFromCargo()
+	}
 
 	// update cloaking
 	s.updateCloaking()

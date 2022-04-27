@@ -71,17 +71,20 @@ func (e *HeliaEngine) Initialize() *HeliaEngine {
 	shared.TeeLog("Universe ready!")
 	engine := HeliaEngine{}
 
+	// return pointer to engine
 	return &engine
 }
 
 // Start the goroutines for each system
 func (e *HeliaEngine) Start() {
+	// log progress
 	shared.TeeLog("Starting system goroutines...")
 
+	// iterate over each system
 	for _, r := range e.Universe.Regions {
 		for _, s := range r.Systems {
 			go func(sol *universe.SolarSystem) {
-				var tpf int = 0
+				// set up time keeping variables for system
 				var residual int = 0
 				lastFrame := makeTimestamp()
 
@@ -93,46 +96,11 @@ func (e *HeliaEngine) Start() {
 						break
 					}
 
-					// for monitoring spawn exit
-					c := make(chan struct{}, 1)
-
 					// sleep for residual tick duration
 					time.Sleep(time.Duration(residual) * time.Millisecond)
 
-					// spawn goroutine so defer works as expected
-					go func(sol *universe.SolarSystem) {
-						// handle panics caused by solar system
-						defer func(sol *universe.SolarSystem) {
-							if r := recover(); r != nil {
-								// log error for inspection
-								shared.TeeLog(fmt.Sprintf("solar system %v panicked: %v", sol.SystemName, r))
-
-								// include stack trace
-								shared.TeeLog(fmt.Sprintf("stacktrace from panic: \n" + string(debug.Stack())))
-
-								// emergency shutdown
-								shared.TeeLog("! Emergency shutdown initiated due to solar system panic!")
-								e.Shutdown()
-							}
-						}(sol)
-
-						// update system
-						sol.PeriodicUpdate()
-
-						// handle escalations from system
-						handleEscalations(sol)
-
-						// get time of last frame
-						now := makeTimestamp()
-						tpf = int(now - lastFrame)
-						residual = universe.Heartbeat - tpf
-
-						// done!
-						c <- struct{}{}
-					}(sol)
-
-					// wait for goroutine to return
-					<-c
+					// call periodic update with a wrapper function so defer works properly
+					residual = wrapSystemPeriodicUpdate(sol, e, lastFrame)
 
 					// update last frame time
 					lastFrame = makeTimestamp()
@@ -141,12 +109,51 @@ func (e *HeliaEngine) Start() {
 					time.Sleep(250 * time.Microsecond)
 				}
 
+				// detect routine exit
 				shared.TeeLog(fmt.Sprintf("System %s has halted.", sol.SystemName))
 			}(s)
 		}
 	}
 
+	// log progress
 	shared.TeeLog("System goroutines started!")
+}
+
+// Wrapper so defer works as expected when updating a solar system, returns residual time not spend executing for the tick
+func wrapSystemPeriodicUpdate(sol *universe.SolarSystem, e *HeliaEngine, lastFrame int64) int {
+	// handle panics caused by solar system
+	defer func(sol *universe.SolarSystem) {
+		if r := recover(); r != nil {
+			// log error for inspection
+			shared.TeeLog(fmt.Sprintf("solar system %v panicked: %v", sol.SystemName, r))
+
+			// include stack trace
+			shared.TeeLog(fmt.Sprintf("stacktrace from panic: \n" + string(debug.Stack())))
+
+			// emergency shutdown
+			shared.TeeLog("! Emergency shutdown initiated due to solar system panic!")
+			e.Shutdown()
+		}
+	}(sol)
+
+	// update system
+	isEmpty := sol.PeriodicUpdate()
+
+	// handle escalations from system
+	handleEscalations(sol)
+
+	// get time of last frame
+	now := makeTimestamp()
+	tpf := int(now - lastFrame)
+	residual := universe.Heartbeat - tpf
+
+	if isEmpty {
+		// sleep for a second before the next update since its empty
+		residual = 1000
+	}
+
+	// return unused time for next frame
+	return residual
 }
 
 // Saves the current state of the simulation and halts
@@ -156,6 +163,7 @@ func (e *HeliaEngine) Shutdown() {
 		return
 	}
 
+	// log progress
 	shared.TeeLog("! Server shutdown initiated")
 
 	// shut down simulation
