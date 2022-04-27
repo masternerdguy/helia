@@ -75,52 +75,64 @@ func (e *HeliaEngine) Initialize() *HeliaEngine {
 	return &engine
 }
 
-// Start the goroutines for each system
+// Start a goroutine for each region
 func (e *HeliaEngine) Start() {
 	// log progress
-	shared.TeeLog("Starting system goroutines...")
+	shared.TeeLog("Starting region goroutines...")
 
-	// iterate over each system
+	// iterate over each region
 	for _, r := range e.Universe.Regions {
-		for _, s := range r.Systems {
-			go func(sol *universe.SolarSystem) {
-				// set up time keeping variables for system
-				var residual int = 0
-				lastFrame := makeTimestamp()
+		go func(r *universe.Region) {
+			// set up time keeping variables for region
+			var tpf int = 0
+			lastFrame := makeTimestamp()
 
-				// game loop
-				for {
-					// check for shutdown signal
-					if shutdownSignal {
-						sol.HandleShutdownSignal()
-						break
-					}
+			// game loop
+			for {
+				// check for shutdown signal
+				if shutdownSignal {
+					// pass to systems
+					defer func() {
+						for _, s := range r.Systems {
+							s.HandleShutdownSignal()
+						}
+					}()
 
-					// sleep for residual tick duration
-					time.Sleep(time.Duration(residual) * time.Millisecond)
-
-					// call periodic update with a wrapper function so defer works properly
-					residual = wrapSystemPeriodicUpdate(sol, e, lastFrame)
-
-					// update last frame time
-					lastFrame = makeTimestamp()
-
-					// guarantee routine yields
-					time.Sleep(750 * time.Microsecond)
+					// exit routine
+					break
 				}
 
-				// detect routine exit
-				shared.TeeLog(fmt.Sprintf("System %s has halted.", sol.SystemName))
-			}(s)
-		}
+				// sleep for residual tick duration
+				time.Sleep(time.Duration(universe.Heartbeat-tpf) * time.Millisecond)
+
+				// process each system in the region
+				for _, s := range r.Systems {
+					// call periodic update with a wrapper function so defer works properly
+					wrapSystemPeriodicUpdate(s, e)
+				}
+
+				// calculate residual
+				now := makeTimestamp()
+				tpf = int(now - lastFrame)
+
+				// update last frame time
+				lastFrame = now
+
+				// guarantee routine yields
+				time.Sleep(250 * time.Microsecond)
+			}
+
+			// detect routine exit
+			shared.TeeLog(fmt.Sprintf("Region %s has halted.", r.RegionName))
+		}(r)
 	}
 
 	// log progress
-	shared.TeeLog("System goroutines started!")
+	shared.TeeLog("Region goroutines started!")
 }
 
-// Wrapper so defer works as expected when updating a solar system, returns residual time not spent executing for the tick
-func wrapSystemPeriodicUpdate(sol *universe.SolarSystem, e *HeliaEngine, lastFrame int64) int {
+// Wrapper so defer works as expected when updating a solar system
+func wrapSystemPeriodicUpdate(sol *universe.SolarSystem, e *HeliaEngine) {
 	// handle panics caused by solar system
 	defer func(sol *universe.SolarSystem) {
 		if r := recover(); r != nil {
@@ -137,23 +149,10 @@ func wrapSystemPeriodicUpdate(sol *universe.SolarSystem, e *HeliaEngine, lastFra
 	}(sol)
 
 	// update system
-	isEmpty := sol.PeriodicUpdate()
+	sol.PeriodicUpdate()
 
 	// handle escalations from system
 	handleEscalations(sol)
-
-	// get time of last frame
-	now := makeTimestamp()
-	tpf := int(now - lastFrame)
-	residual := universe.Heartbeat - tpf
-
-	if isEmpty {
-		// sleep for a second before the next update since its empty
-		residual = 1000
-	}
-
-	// return unused time for next frame
-	return residual
 }
 
 // Saves the current state of the simulation and halts

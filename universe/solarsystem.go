@@ -128,22 +128,15 @@ func (s *SolarSystem) HandleShutdownSignal() {
 }
 
 // Processes the solar system for a tick
-func (s *SolarSystem) PeriodicUpdate() bool {
+func (s *SolarSystem) PeriodicUpdate() {
 	// obtain lock
 	s.Lock.Lock()
+	defer s.Lock.Unlock()
 
 	// skip if nobody in system
 	if len(s.ships) == 0 {
-		// unlock
-		s.Lock.Unlock()
-
-		// sleep and return
-		time.Sleep(1 * time.Second)
-		return true
+		return
 	}
-
-	// defer unlock
-	defer s.Lock.Unlock()
 
 	// process player current ship event queues
 	s.processClientEventQueues()
@@ -170,7 +163,7 @@ func (s *SolarSystem) PeriodicUpdate() bool {
 	// increment tick counter
 	s.tickCounter++
 
-	return false
+	return
 }
 
 // processes the next message from each client in the system, should only be called from PeriodicUpdate
