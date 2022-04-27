@@ -119,7 +119,7 @@ func (e *HeliaEngine) Start() {
 	shared.TeeLog("System goroutines started!")
 }
 
-// Wrapper so defer works as expected when updating a solar system, returns residual time not spend executing for the tick
+// Wrapper so defer works as expected when updating a solar system, returns residual time not spent executing for the tick
 func wrapSystemPeriodicUpdate(sol *universe.SolarSystem, e *HeliaEngine, lastFrame int64) int {
 	// handle panics caused by solar system
 	defer func(sol *universe.SolarSystem) {
