@@ -73,7 +73,7 @@ func startSchematics() {
 			schematicRunMapLock.Unlock()
 
 			// sleep to avoid pegging cpu
-			time.Sleep(80 * time.Millisecond)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}()
 

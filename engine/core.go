@@ -106,7 +106,7 @@ func (e *HeliaEngine) Start() {
 					lastFrame = makeTimestamp()
 
 					// guarantee routine yields
-					time.Sleep(250 * time.Microsecond)
+					time.Sleep(750 * time.Microsecond)
 				}
 
 				// detect routine exit

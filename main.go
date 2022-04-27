@@ -11,7 +11,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"runtime"
 	"runtime/pprof"
 	"time"
 )
@@ -20,9 +19,6 @@ import (
 var cpuProfile = flag.String("cpuprofile", "", "write cpu profile to `file`")
 
 func main() {
-	// use one less core for goroutines than is available
-	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
-
 	// configure global tee logging
 	shared.InitializeTeeLog(
 		printLogger,
@@ -114,7 +110,7 @@ func main() {
 
 	// don't exit
 	for {
-		time.Sleep(30000 * time.Millisecond)
+		time.Sleep(120 * time.Minute)
 	}
 }
 

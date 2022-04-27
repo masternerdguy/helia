@@ -162,9 +162,6 @@ func (s *SolarSystem) PeriodicUpdate() bool {
 	// ship collision testing
 	s.shipCollisionTesting()
 
-	// brief sleep
-	time.Sleep(250 * time.Microsecond)
-
 	// send client updates
 	if s.tickCounter%2 == 0 && len(s.clients) > 0 {
 		s.sendClientUpdates()
