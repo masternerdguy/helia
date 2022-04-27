@@ -20,23 +20,6 @@ import (
 var cpuProfile = flag.String("cpuprofile", "", "write cpu profile to `file`")
 
 func main() {
-	// start profiling if requested
-	flag.Parse()
-
-	if *cpuProfile != "" {
-		shared.TeeLog("Starting CPU profiling...")
-
-		f, err := os.Create(*cpuProfile)
-
-		if err != nil {
-			log.Fatal("could not create CPU profile: ", err)
-		}
-
-		if err := pprof.StartCPUProfile(f); err != nil {
-			log.Fatal("could not start CPU profile: ", err)
-		}
-	}
-
 	// use one less core for goroutines than is available
 	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
 
@@ -58,6 +41,23 @@ func main() {
 	// initialize RNG
 	shared.TeeLog("Initializing RNG...")
 	rand.Seed(time.Now().UnixNano())
+
+	// start profiling if requested
+	flag.Parse()
+
+	if *cpuProfile != "" {
+		shared.TeeLog("Starting CPU profiling...")
+
+		f, err := os.Create(*cpuProfile)
+
+		if err != nil {
+			log.Fatal("could not create CPU profile: ", err)
+		}
+
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal("could not start CPU profile: ", err)
+		}
+	}
 
 	// brief sleep
 	time.Sleep(100 * time.Millisecond)
