@@ -3023,7 +3023,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 			// reassign to fitting bay and escalate to save
 			i.ContainerID = s.FittingBayContainerID
 			s.FittingBay.Items = append(s.FittingBay.Items, i)
-			s.CurrentSystem.MovedItems[i.ID.String()] = i
+			s.CurrentSystem.MovedItems = append(s.CurrentSystem.MovedItems, i)
 		} else {
 			// keep in cargo bay
 			newCB = append(newCB, i)
@@ -3126,7 +3126,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 				o.ContainerID = m.shipMountedOn.CargoBayContainerID
 
 				// escalate to core to save to db
-				s.CurrentSystem.MovedItems[o.ID.String()] = o
+				s.CurrentSystem.MovedItems = append(s.CurrentSystem.MovedItems, o)
 			} else {
 				return errors.New("insufficient room in cargo bay to unfit module")
 			}
@@ -3171,7 +3171,7 @@ func (s *Ship) TrashItemInCargo(id uuid.UUID, lock bool) error {
 			o.CoreDirty = true
 
 			// escalate to core to save to db
-			s.CurrentSystem.MovedItems[o.ID.String()] = o
+			s.CurrentSystem.MovedItems = append(s.CurrentSystem.MovedItems, o)
 		}
 	}
 
@@ -3316,7 +3316,7 @@ func (s *Ship) PackageItemInCargo(id uuid.UUID, lock bool) error {
 	item.Meta = Meta{}
 
 	// escalate item for packaging in db
-	s.CurrentSystem.PackagedItems[item.ID.String()] = item
+	s.CurrentSystem.PackagedItems = append(s.CurrentSystem.PackagedItems, item)
 
 	return nil
 }
@@ -3471,7 +3471,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 		}
 
 		// escalate order save request to core
-		s.CurrentSystem.NewItems[nid.String()] = &newItem
+		s.CurrentSystem.NewItems = append(s.CurrentSystem.NewItems, &newItem)
 
 		// place item in cargo bay
 		s.CargoBay.Items = append(s.CargoBay.Items, &newItem)
@@ -3497,7 +3497,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 		}
 
 		// escalate order save request to core
-		s.CurrentSystem.NewShipTickets[nid.String()] = &r
+		s.CurrentSystem.NewShipTickets = append(s.CurrentSystem.NewShipTickets, &r)
 	}
 
 	// log buy to console
@@ -3625,7 +3625,7 @@ func (s *Ship) SellItemToSilo(siloID uuid.UUID, itemId uuid.UUID, quantity int, 
 	item.CoreDirty = true
 
 	// save item
-	s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
+	s.CurrentSystem.ChangedQuantityItems = append(s.CurrentSystem.ChangedQuantityItems, item)
 
 	// log sell to console
 	bm := 0
@@ -3763,7 +3763,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 	delete(s.DockedAtStation.OpenSellOrders, order.ID.String())
 
 	// escalate order save request to core
-	s.CurrentSystem.BoughtSellOrders[order.ID.String()] = order
+	s.CurrentSystem.BoughtSellOrders = append(s.CurrentSystem.BoughtSellOrders, order)
 
 	if order.Item.ItemFamilyID != "ship" {
 		// mark item as dirty and place it in the cargo container
@@ -3771,7 +3771,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 		order.Item.ContainerID = s.CargoBayContainerID
 
 		// escalate item for saving in db
-		s.CurrentSystem.MovedItems[order.Item.ID.String()] = order.Item
+		s.CurrentSystem.MovedItems = append(s.CurrentSystem.MovedItems, order.Item)
 
 		// place item in cargo bay
 		s.CargoBay.Items = append(s.CargoBay.Items, order.Item)
@@ -3791,14 +3791,14 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 			r.Client = c
 		}
 
-		s.CurrentSystem.UsedShipPurchases[order.ID.String()] = &r
+		s.CurrentSystem.UsedShipPurchases = append(s.CurrentSystem.UsedShipPurchases, &r)
 
 		// mark stub item as dirty and place it in the trash container
 		order.Item.CoreDirty = true
 		order.Item.ContainerID = s.TrashContainerID
 
 		// escalate stub item for saving in db
-		s.CurrentSystem.MovedItems[order.Item.ID.String()] = order.Item
+		s.CurrentSystem.MovedItems = append(s.CurrentSystem.MovedItems, order.Item)
 	}
 
 	// log buy to console
@@ -3903,11 +3903,11 @@ func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 	}
 
 	// escalate ship and stub item for saving in db
-	s.CurrentSystem.NewItems[stub.ID.String()] = &stub
-	s.CurrentSystem.SetNoLoad[s.ID.String()] = &ShipNoLoadSet{
+	s.CurrentSystem.NewItems = append(s.CurrentSystem.NewItems, &stub)
+	s.CurrentSystem.SetNoLoad = append(s.CurrentSystem.SetNoLoad, &ShipNoLoadSet{
 		ID:   s.ID,
 		Flag: true,
-	}
+	})
 
 	// create sell order for stub item
 	nid, err := uuid.NewUUID()
@@ -3933,7 +3933,7 @@ func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 	newOrder.GetItemIDFromItem = true // we won't know the real item id until after it saves
 
 	// escalate to core for saving in db
-	s.CurrentSystem.NewSellOrders[newOrder.ID.String()] = &newOrder
+	s.CurrentSystem.NewSellOrders = append(s.CurrentSystem.NewSellOrders, &newOrder)
 
 	// log listing to console
 	bm := 0
@@ -4015,7 +4015,7 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 	item.ContainerID = *s.EscrowContainerID
 
 	// escalate item for saving in db
-	s.CurrentSystem.MovedItems[item.ID.String()] = item
+	s.CurrentSystem.MovedItems = append(s.CurrentSystem.MovedItems, item)
 
 	// create sell order for item
 	nid, err := uuid.NewUUID()
@@ -4039,7 +4039,7 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 	newOrder.Item = item
 
 	// escalate to core for saving in db
-	s.CurrentSystem.NewSellOrders[newOrder.ID.String()] = &newOrder
+	s.CurrentSystem.NewSellOrders = append(s.CurrentSystem.NewSellOrders, &newOrder)
 
 	// log listing to console
 	bm := 0
@@ -4112,7 +4112,7 @@ func (s *Ship) UnpackageItemInCargo(id uuid.UUID, lock bool) error {
 	item.Meta = item.ItemTypeMeta
 
 	// escalate item for unpackaging in db
-	s.CurrentSystem.UnpackagedItems[item.ID.String()] = item
+	s.CurrentSystem.UnpackagedItems = append(s.CurrentSystem.UnpackagedItems, item)
 
 	return nil
 }
@@ -4166,8 +4166,8 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 				item.CoreDirty = true
 
 				// escalate to core for saving in db
-				s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
-				s.CurrentSystem.ChangedQuantityItems[o.ID.String()] = o
+				s.CurrentSystem.ChangedQuantityItems = append(s.CurrentSystem.ChangedQuantityItems, item)
+				s.CurrentSystem.ChangedQuantityItems = append(s.CurrentSystem.ChangedQuantityItems, o)
 
 				// exit loop
 				break
@@ -4237,7 +4237,7 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 	item.CoreDirty = true
 
 	// escalate to core for saving in db
-	s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
+	s.CurrentSystem.ChangedQuantityItems = append(s.CurrentSystem.ChangedQuantityItems, item)
 
 	// make a new item stack of the given size
 	nid, err := uuid.NewUUID()
@@ -4264,7 +4264,7 @@ func (s *Ship) SplitItemInCargo(id uuid.UUID, size int, lock bool) error {
 	}
 
 	// escalate to core for saving in db
-	s.CurrentSystem.NewItems[newItem.ID.String()] = &newItem
+	s.CurrentSystem.NewItems = append(s.CurrentSystem.NewItems, &newItem)
 
 	// add new item to cargo hold
 	s.CargoBay.Items = append(s.CargoBay.Items, &newItem)
@@ -4350,7 +4350,7 @@ func (s *Ship) ConsumeFuelFromCargo(itemID uuid.UUID, lock bool) error {
 	item.CoreDirty = true
 
 	// escalate to core for saving in db
-	s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
+	s.CurrentSystem.ChangedQuantityItems = append(s.CurrentSystem.ChangedQuantityItems, item)
 
 	return nil
 }
@@ -4419,7 +4419,7 @@ func (s *Ship) ConsumeRepairKitFromCargo(itemID uuid.UUID, lock bool) error {
 	item.CoreDirty = true
 
 	// escalate to core for saving in db
-	s.CurrentSystem.ChangedQuantityItems[item.ID.String()] = item
+	s.CurrentSystem.ChangedQuantityItems = append(s.CurrentSystem.ChangedQuantityItems, item)
 
 	return nil
 }
@@ -4835,7 +4835,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		ammoItem.CoreDirty = true
 
 		// escalate for saving
-		m.shipMountedOn.CurrentSystem.ChangedQuantityItems[ammoItem.ID.String()] = ammoItem
+		m.shipMountedOn.CurrentSystem.ChangedQuantityItems = append(m.shipMountedOn.CurrentSystem.ChangedQuantityItems, ammoItem)
 	}
 
 	// apply damage (or ore / ice pulled if asteroid) to target
@@ -4909,7 +4909,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 						itm.Quantity += q
 
 						// escalate for saving
-						m.shipMountedOn.CurrentSystem.ChangedQuantityItems[itm.ID.String()] = itm
+						m.shipMountedOn.CurrentSystem.ChangedQuantityItems = append(m.shipMountedOn.CurrentSystem.ChangedQuantityItems, itm)
 
 						// mark as found
 						found = true
@@ -4939,7 +4939,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 					}
 
 					// escalate to core for saving in db
-					m.shipMountedOn.CurrentSystem.NewItems[newItem.ID.String()] = &newItem
+					m.shipMountedOn.CurrentSystem.NewItems = append(m.shipMountedOn.CurrentSystem.NewItems, &newItem)
 
 					// add new item to cargo hold
 					m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, &newItem)
@@ -5104,7 +5104,7 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 		ammoItem.CoreDirty = true
 
 		// escalate for saving
-		m.shipMountedOn.CurrentSystem.ChangedQuantityItems[ammoItem.ID.String()] = ammoItem
+		m.shipMountedOn.CurrentSystem.ChangedQuantityItems = append(m.shipMountedOn.CurrentSystem.ChangedQuantityItems, ammoItem)
 	}
 
 	// build and hook missile projectile
@@ -5540,7 +5540,7 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 						itm.Quantity += q
 
 						// escalate for saving
-						m.shipMountedOn.CurrentSystem.ChangedQuantityItems[itm.ID.String()] = itm
+						m.shipMountedOn.CurrentSystem.ChangedQuantityItems = append(m.shipMountedOn.CurrentSystem.ChangedQuantityItems, itm)
 
 						// mark as found
 						found = true
@@ -5570,7 +5570,7 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 					}
 
 					// escalate to core for saving in db
-					m.shipMountedOn.CurrentSystem.NewItems[newItem.ID.String()] = &newItem
+					m.shipMountedOn.CurrentSystem.NewItems = append(m.shipMountedOn.CurrentSystem.NewItems, &newItem)
 
 					// add new item to cargo hold
 					m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, &newItem)
@@ -5959,7 +5959,7 @@ func (m *FittedSlot) activateAsSalvager() bool {
 
 				// escalate to core for saving
 				i.CoreDirty = true
-				m.shipMountedOn.CurrentSystem.MovedItems[i.ID.String()] = i
+				m.shipMountedOn.CurrentSystem.MovedItems = append(m.shipMountedOn.CurrentSystem.MovedItems, i)
 			}
 		}
 	} else {

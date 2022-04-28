@@ -175,7 +175,7 @@ func updateRunningSchematics() {
 										}
 
 										// escalate order save request to core
-										s.NewItems[nid.String()] = &newItem
+										s.NewItems = append(s.NewItems, &newItem)
 
 										// obtain lock on cargo bay
 										sh.CargoBay.Lock.Lock()
@@ -202,7 +202,7 @@ func updateRunningSchematics() {
 										}
 
 										// escalate order save request to core
-										s.NewShipTickets[nid.String()] = &r
+										s.NewShipTickets = append(s.NewShipTickets, &r)
 									}
 								}
 

@@ -241,11 +241,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	defer sol.Lock.Unlock()
 
 	// iterate over moved items
-	for id := range sol.MovedItems {
-		// capture reference and remove from map
-		mi := sol.MovedItems[id]
-		delete(sol.MovedItems, id)
-
+	for _, mi := range sol.MovedItems {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
@@ -268,12 +264,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(mi, sol)
 	}
 
-	// iterate over packaged items
-	for id := range sol.PackagedItems {
-		// capture reference and remove from map
-		mi := sol.PackagedItems[id]
-		delete(sol.PackagedItems, id)
+	// clear moved items
+	sol.MovedItems = make([]*universe.Item, 0)
 
+	// iterate over packaged items
+	for _, mi := range sol.PackagedItems {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
@@ -296,12 +291,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(mi, sol)
 	}
 
-	// iterate over unpackaged items
-	for id := range sol.UnpackagedItems {
-		// capture reference and remove from map
-		mi := sol.UnpackagedItems[id]
-		delete(sol.UnpackagedItems, id)
+	// clear packaged items
+	sol.PackagedItems = make([]*universe.Item, 0)
 
+	// iterate over unpackaged items
+	for _, mi := range sol.UnpackagedItems {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
@@ -324,12 +318,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(mi, sol)
 	}
 
-	// iterate over changed quantity items
-	for id := range sol.ChangedQuantityItems {
-		// capture reference and remove from map
-		mi := sol.ChangedQuantityItems[id]
-		delete(sol.ChangedQuantityItems, id)
+	// clear unpackaged items
+	sol.UnpackagedItems = make([]*universe.Item, 0)
 
+	// iterate over changed quantity items
+	for _, mi := range sol.ChangedQuantityItems {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
@@ -351,6 +344,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 			}
 		}(mi, sol)
 	}
+
+	// clear changed quantity items
+	sol.ChangedQuantityItems = make([]*universe.Item, 0)
 
 	// iterate over changed meta items
 	for id := range sol.ChangedMetaItems {
@@ -381,11 +377,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	}
 
 	// iterate over new items
-	for id := range sol.NewItems {
-		// capture reference and remove from map
-		mi := sol.NewItems[id]
-		delete(sol.NewItems, id)
-
+	for _, mi := range sol.NewItems {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
 			// lock item
@@ -429,20 +421,17 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(mi, sol)
 	}
 
-	// iterate over new sell orders
-	for id := range sol.NewSellOrders {
-		// capture reference
-		mi := sol.NewSellOrders[id]
+	// clear new items
+	sol.NewItems = make([]*universe.Item, 0)
 
+	// iterate over new sell orders
+	for _, mi := range sol.NewSellOrders {
 		// make sure we have waited long enough
 		mi.CoreWait--
 
 		if mi.CoreWait > -1 {
 			continue
 		}
-
-		// remove from map
-		delete(sol.NewSellOrders, id)
 
 		// handle escalation on another goroutine
 		go func(mi *universe.SellOrder, sol *universe.SolarSystem) {
@@ -474,12 +463,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(mi, sol)
 	}
 
-	// iterate over bought sell orders
-	for id := range sol.BoughtSellOrders {
-		// capture reference and remove from map
-		mi := sol.BoughtSellOrders[id]
-		delete(sol.BoughtSellOrders, id)
+	// clear new sell orders
+	sol.NewSellOrders = make([]*universe.SellOrder, 0)
 
+	// iterate over bought sell orders
+	for _, mi := range sol.BoughtSellOrders {
 		// handle escalation on another goroutine
 		go func(mi *universe.SellOrder, sol *universe.SolarSystem) {
 			// lock sell order
@@ -499,12 +487,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(mi, sol)
 	}
 
-	// iterate over dead ships
-	for id := range sol.DeadShips {
-		// capture reference and remove from map
-		ds := sol.DeadShips[id]
-		delete(sol.DeadShips, id)
+	// clear bought sell orders
+	sol.BoughtSellOrders = make([]*universe.SellOrder, 0)
 
+	// iterate over dead ships
+	for _, ds := range sol.DeadShips {
 		// handle escalation on another goroutine
 		go func(ds *universe.Ship, sol *universe.SolarSystem) {
 			// remove ship from system
@@ -577,12 +564,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(ds, sol)
 	}
 
-	// iterate over NPCs in need of respawn
-	for id := range sol.NPCNeedRespawn {
-		// capture reference and remove from map
-		rs := sol.NPCNeedRespawn[id]
-		delete(sol.NPCNeedRespawn, id)
+	// clear dead ships
+	sol.DeadShips = make([]*universe.Ship, 0)
 
+	// iterate over NPCs in need of respawn
+	for _, rs := range sol.NPCNeedRespawn {
 		// handle escalation on another goroutine
 		go func(rs *universe.Ship, sol *universe.SolarSystem) {
 			// find their starting conditions
@@ -673,12 +659,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(rs, sol)
 	}
 
-	// iterate over clients in need of respawn
-	for id := range sol.PlayerNeedRespawn {
-		// capture reference and remove from map
-		rs := sol.PlayerNeedRespawn[id]
-		delete(sol.PlayerNeedRespawn, id)
+	// clear npcs in need of respawn
+	sol.NPCNeedRespawn = make([]*universe.Ship, 0)
 
+	// iterate over clients in need of respawn
+	for _, rs := range sol.PlayerNeedRespawn {
 		// handle escalation on another goroutine
 		go func(rs *shared.GameClient, sol *universe.SolarSystem) {
 			// remove client from system
@@ -794,12 +779,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(rs, sol)
 	}
 
-	// iterate over new ship tickets
-	for id := range sol.NewShipTickets {
-		// capture reference and remove from map
-		rs := sol.NewShipTickets[id]
-		delete(sol.NewShipTickets, id)
+	// clear clients in need of respawn
+	sol.PlayerNeedRespawn = make([]*shared.GameClient, 0)
 
+	// iterate over new ship tickets
+	for _, rs := range sol.NewShipTickets {
 		// handle escalation on another goroutine
 		go func(rs *universe.NewShipTicket, sol *universe.SolarSystem) {
 			// create new ship for player
@@ -836,12 +820,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(rs, sol)
 	}
 
-	// iterate over ship switches
-	for id := range sol.ShipSwitches {
-		// capture reference and remove from map
-		rs := sol.ShipSwitches[id]
-		delete(sol.ShipSwitches, id)
+	// clear new ship tickets
+	sol.NewShipTickets = make([]*universe.NewShipTicket, 0)
 
+	// iterate over ship switches
+	for _, rs := range sol.ShipSwitches {
 		// handle escalation on another goroutine
 		go func(rs *universe.ShipSwitch, sol *universe.SolarSystem) {
 			// update currently flown ship in database
@@ -873,12 +856,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(rs, sol)
 	}
 
-	// iterate over ship no load flag sets
-	for id := range sol.SetNoLoad {
-		// capture reference and remove from map
-		rs := sol.SetNoLoad[id]
-		delete(sol.SetNoLoad, id)
+	// clear ship switches
+	sol.ShipSwitches = make([]*universe.ShipSwitch, 0)
 
+	// iterate over ship no load flag sets
+	for _, rs := range sol.SetNoLoad {
 		// handle escalation on another goroutine
 		go func(rs *universe.ShipNoLoadSet, sol *universe.SolarSystem) {
 			// update flag in database
@@ -891,12 +873,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(rs, sol)
 	}
 
-	// iterate over used ship purchases
-	for id := range sol.UsedShipPurchases {
-		// capture reference and remove from map
-		rs := sol.UsedShipPurchases[id]
-		delete(sol.UsedShipPurchases, id)
+	// clear set no loads
+	sol.SetNoLoad = make([]*universe.ShipNoLoadSet, 0)
 
+	// iterate over used ship purchases
+	for _, rs := range sol.UsedShipPurchases {
 		// handle escalation on another goroutine
 		go func(rs *universe.UsedShipPurchase, sol *universe.SolarSystem) {
 			// update owner in database
@@ -945,12 +926,11 @@ func handleEscalations(sol *universe.SolarSystem) {
 		}(rs, sol)
 	}
 
-	// iterate over ship renames
-	for id := range sol.ShipRenames {
-		// capture reference and remove from map
-		rs := sol.ShipRenames[id]
-		delete(sol.ShipRenames, id)
+	// clear used ship purchases
+	sol.UsedShipPurchases = make([]*universe.UsedShipPurchase, 0)
 
+	// iterate over ship renames
+	for _, rs := range sol.ShipRenames {
 		// handle escalation on another goroutine
 		go func(rs *universe.ShipRename, sol *universe.SolarSystem) {
 			// update name in database
@@ -962,6 +942,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 			}
 		}(rs, sol)
 	}
+
+	// clear ship renames
+	sol.ShipRenames = make([]*universe.ShipRename, 0)
 
 	// iterate over clients in need of a schematic runs update
 	for id := range sol.SchematicRunViews {

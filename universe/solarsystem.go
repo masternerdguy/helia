@@ -40,22 +40,22 @@ type SolarSystem struct {
 	newSystemChatMessages []models.ServerSystemChatBody
 	globalAckToken        int // counter for number of ticks this system has gone through since server start (daily restart is assumed)
 	Lock                  sync.Mutex
-	// event escalations to engine core
-	PlayerNeedRespawn    map[string]*shared.GameClient     // clients in need of a respawn by core
-	NPCNeedRespawn       map[string]*Ship                  // NPCs in need of a respawn by core
-	DeadShips            map[string]*Ship                  // dead ships in need of cleanup by core
-	MovedItems           map[string]*Item                  // items moved to a new container in need of saving by core
-	PackagedItems        map[string]*Item                  // items packaged in need of saving by core
-	UnpackagedItems      map[string]*Item                  // items unpackaged in need of saving by core
-	ChangedQuantityItems map[string]*Item                  // stacks of items that have changed quantity and need saving by core
-	NewItems             map[string]*Item                  // stacks of items that are newly created and need to be saved by core
-	NewSellOrders        map[string]*SellOrder             // new sell orders in need of saving by core
-	BoughtSellOrders     map[string]*SellOrder             // sell orders that have been fulfilled in need of saving by core
-	NewShipTickets       map[string]*NewShipTicket         // newly purchased/delivered ships that need to be generated and saved by core
-	ShipSwitches         map[string]*ShipSwitch            // approved requests to switch a client to another ship in need of saving by core
-	SetNoLoad            map[string]*ShipNoLoadSet         // updates to the no load flag in need of saving by core
-	UsedShipPurchases    map[string]*UsedShipPurchase      // purchased used ships that need to be hooked in and saved by core
-	ShipRenames          map[string]*ShipRename            // renamed ships that need to be saved by core
+	// event escalations to engine core (todo - turn all of these into slices)
+	PlayerNeedRespawn    []*shared.GameClient              // clients in need of a respawn by core
+	NPCNeedRespawn       []*Ship                           // NPCs in need of a respawn by core
+	DeadShips            []*Ship                           // dead ships in need of cleanup by core
+	MovedItems           []*Item                           // items moved to a new container in need of saving by core
+	PackagedItems        []*Item                           // items packaged in need of saving by core
+	UnpackagedItems      []*Item                           // items unpackaged in need of saving by core
+	ChangedQuantityItems []*Item                           // stacks of items that have changed quantity and need saving by core
+	NewItems             []*Item                           // stacks of items that are newly created and need to be saved by core
+	NewSellOrders        []*SellOrder                      // new sell orders in need of saving by core
+	BoughtSellOrders     []*SellOrder                      // sell orders that have been fulfilled in need of saving by core
+	NewShipTickets       []*NewShipTicket                  // newly purchased/delivered ships that need to be generated and saved by core
+	ShipSwitches         []*ShipSwitch                     // approved requests to switch a client to another ship in need of saving by core
+	SetNoLoad            []*ShipNoLoadSet                  // updates to the no load flag in need of saving by core
+	UsedShipPurchases    []*UsedShipPurchase               // purchased used ships that need to be hooked in and saved by core
+	ShipRenames          []*ShipRename                     // renamed ships that need to be saved by core
 	SchematicRunViews    map[string]*shared.GameClient     // requests for a schematic run summary
 	NewSchematicRuns     map[string]*NewSchematicRunTicket // newly invoked schematics that need to be started
 	NewFactions          map[string]*NewFactionTicket      // partially approved requests to create a new faction and automatically join it
@@ -72,7 +72,7 @@ func (s *SolarSystem) Initialize() {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	// initialize maps
+	// initialize maps and slices
 	s.clients = make(map[string]*shared.GameClient)
 	s.missiles = make(map[string]*Missile)
 	s.wrecks = make(map[string]*Wreck)
@@ -82,21 +82,21 @@ func (s *SolarSystem) Initialize() {
 	s.jumpholes = make(map[string]*Jumphole)
 	s.stations = make(map[string]*Station)
 	s.asteroids = make(map[string]*Asteroid)
-	s.DeadShips = make(map[string]*Ship)
-	s.PlayerNeedRespawn = make(map[string]*shared.GameClient)
-	s.NPCNeedRespawn = make(map[string]*Ship)
-	s.MovedItems = make(map[string]*Item)
-	s.PackagedItems = make(map[string]*Item)
-	s.UnpackagedItems = make(map[string]*Item)
-	s.ChangedQuantityItems = make(map[string]*Item)
-	s.NewItems = make(map[string]*Item)
-	s.NewSellOrders = make(map[string]*SellOrder)
-	s.BoughtSellOrders = make(map[string]*SellOrder)
-	s.NewShipTickets = make(map[string]*NewShipTicket)
-	s.ShipSwitches = make(map[string]*ShipSwitch)
-	s.SetNoLoad = make(map[string]*ShipNoLoadSet)
-	s.UsedShipPurchases = make(map[string]*UsedShipPurchase)
-	s.ShipRenames = make(map[string]*ShipRename)
+	s.DeadShips = make([]*Ship, 0)
+	s.PlayerNeedRespawn = make([]*shared.GameClient, 0)
+	s.NPCNeedRespawn = make([]*Ship, 0)
+	s.MovedItems = make([]*Item, 0)
+	s.PackagedItems = make([]*Item, 0)
+	s.UnpackagedItems = make([]*Item, 0)
+	s.ChangedQuantityItems = make([]*Item, 0)
+	s.NewItems = make([]*Item, 0)
+	s.NewSellOrders = make([]*SellOrder, 0)
+	s.BoughtSellOrders = make([]*SellOrder, 0)
+	s.NewShipTickets = make([]*NewShipTicket, 0)
+	s.ShipSwitches = make([]*ShipSwitch, 0)
+	s.SetNoLoad = make([]*ShipNoLoadSet, 0)
+	s.UsedShipPurchases = make([]*UsedShipPurchase, 0)
+	s.ShipRenames = make([]*ShipRename, 0)
 	s.SchematicRunViews = make(map[string]*shared.GameClient)
 	s.NewSchematicRuns = make(map[string]*NewSchematicRunTicket)
 	s.NewFactions = make(map[string]*NewFactionTicket)
@@ -1010,14 +1010,11 @@ func (s *SolarSystem) processClientEventQueues() {
 					continue
 				}
 
-				// escalate ship switch request to core
-				key := fmt.Sprintf("%v>>%v", sh.ID, toBoard.ID)
-
-				s.ShipSwitches[key] = &ShipSwitch{
+				s.ShipSwitches = append(s.ShipSwitches, &ShipSwitch{
 					Client: c,
 					Source: sh,
 					Target: toBoard,
-				}
+				})
 			}
 		} else if evt.Type == msgRegistry.TransferCredits {
 			if sh != nil {
@@ -1236,7 +1233,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					Flag: true,
 				}
 
-				s.SetNoLoad[toTrash.ID.String()] = &nl
+				s.SetNoLoad = append(s.SetNoLoad, &nl)
 
 				// remove trashed ship from property cache (so it goes away immediately instead of as part of the periodic rebuild)
 				pc := c.GetPropertyCache()
@@ -1303,7 +1300,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					Name:   data.Name,
 				}
 
-				s.ShipRenames[toRename.ID.String()] = &rn
+				s.ShipRenames = append(s.ShipRenames, &rn)
 
 				// update renamed ship in property cache (so it changes immediately instead of as part of the periodic rebuild)
 				pc := c.GetPropertyCache()
@@ -1432,7 +1429,7 @@ func (s *SolarSystem) processClientEventQueues() {
 						// escalate to core for saving
 						item.ContainerID = receiver.CargoBayContainerID
 						item.CoreDirty = true
-						s.MovedItems[item.ID.String()] = item
+						s.MovedItems = append(s.MovedItems, item)
 					}
 				}
 			}
@@ -1561,7 +1558,7 @@ func (s *SolarSystem) processClientEventQueues() {
 						i.Quantity -= inputsSize[x]
 
 						// escalate to core for saving
-						s.ChangedQuantityItems[i.ID.String()] = i
+						s.ChangedQuantityItems = append(s.ChangedQuantityItems, i)
 						i.CoreDirty = true
 					}
 
@@ -1997,7 +1994,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				modKit.CoreDirty = true
 
 				// escalate to core for saving
-				s.ChangedQuantityItems[modKit.ID.String()] = modKit
+				s.ChangedQuantityItems = append(s.ChangedQuantityItems, modKit)
 
 				// get mod kit attributes
 				damageChance, _ := modKit.Meta.GetFloat64("damage_chance")
@@ -2087,7 +2084,7 @@ func (s *SolarSystem) processClientEventQueues() {
 						module.CoreDirty = true
 						module.Quantity = 0
 
-						s.ChangedQuantityItems[module.ID.String()] = module
+						s.ChangedQuantityItems = append(s.ChangedQuantityItems, module)
 					}
 				}
 
@@ -2183,18 +2180,18 @@ func (s *SolarSystem) updateShips() {
 			if c != nil {
 				if c.CurrentShipID == e.ID {
 					// escalate respawn request to core
-					s.PlayerNeedRespawn[e.UserID.String()] = c
+					s.PlayerNeedRespawn = append(s.PlayerNeedRespawn, c)
 				}
 			} else {
 				// check if an NPC
 				if e.IsNPC {
 					// escalate NPC respawn request to core
-					s.NPCNeedRespawn[e.UserID.String()] = e
+					s.NPCNeedRespawn = append(s.NPCNeedRespawn, e)
 				}
 			}
 
 			// escalate ship cleanup request to core
-			s.DeadShips[e.ID.String()] = e
+			s.DeadShips = append(s.DeadShips, e)
 
 			// drop explosion for ship
 			exp := models.GlobalPushPointEffectBody{
