@@ -34,7 +34,7 @@ func main() {
 		 * eye on this known future problem. The long term solution is to convert frequently
 		 * iterated maps to slices, which has implications for other things like searching them.
 		 *
-		 * Note that these gargage collection issues don't occur on any other system that I've
+		 * Note that these garbage collection issues don't occur on any other system that I've
 		 * tested, which really shows how weak Azure app services actually are - the other systems
 		 * are fast enough that this simply doesn't become a problem and go can manage its own
 		 * garbage collection timing like its designed to.
