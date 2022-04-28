@@ -46,6 +46,8 @@ func main() {
 		 * garbage collection timing like its designed to.
 		 */
 
+		gcRuns := 0
+
 		for {
 			// throttle rate
 			time.Sleep(50 * time.Millisecond)
@@ -58,15 +60,20 @@ func main() {
 			commitedMb := 0.000001 * float64(m.Alloc)
 
 			// disgusting... :hug: :party parrot:
-			if commitedMb > 2048 {
-				// log memory usage
-				shared.TeeLog(fmt.Sprintf("<MEMORY COMMITED> %v", commitedMb))
-
-				// log invocation
-				shared.TeeLog(fmt.Sprintf("<RUNNING GC + RELEASING MEMORY>"))
+			if commitedMb > 4096 {
+				// increment gc run counter
+				gcRuns++
 
 				// invoke garbage collection and release extra pages to os
 				debug.FreeOSMemory()
+
+				if gcRuns > 100 {
+					// log memory usage
+					shared.TeeLog(fmt.Sprintf("<MEMORY COMMITED> %v [%v gc runs since last log]", commitedMb, gcRuns))
+
+					// reset counter
+					gcRuns = 0
+				}
 			}
 		}
 	}()
