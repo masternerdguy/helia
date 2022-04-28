@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"helia/engine"
 	"helia/listener"
@@ -16,8 +15,7 @@ import (
 	"time"
 )
 
-// flag for cpu profiling output file
-var cpuProfile = flag.String("cpuprofile", "", "write cpu profile to `file`")
+var profileCpu = false
 
 func main() {
 	// use one less core than is available for goroutines
@@ -43,12 +41,9 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	// start profiling if requested
-	flag.Parse()
-
-	if *cpuProfile != "" {
+	if profileCpu {
 		shared.TeeLog("Starting CPU profiling...")
-
-		f, err := os.Create(*cpuProfile)
+		f, err := os.Create("cpu.prof")
 
 		if err != nil {
 			log.Fatal("could not create CPU profile: ", err)

@@ -162,6 +162,15 @@ func (e *HeliaEngine) Shutdown() {
 		return
 	}
 
+	// get blob storage service
+	bss, err := shared.LoadBlobStorageConfiguration()
+	bssReady := true
+
+	if err != nil {
+		shared.TeeLog(fmt.Sprintf("Unable to load blob storage configuration: %v", err))
+		bssReady = false
+	}
+
 	// log progress
 	shared.TeeLog("! Server shutdown initiated")
 
@@ -178,6 +187,34 @@ func (e *HeliaEngine) Shutdown() {
 	shared.TeeLog("Saving world state...")
 	saveUniverse(e.Universe)
 	shared.TeeLog("World state saved!")
+
+	// upload executable and cpu profile
+	cpuProf, f := shared.ReadFileBytes("cpu.prof")
+	heliaEx, g := shared.ReadFileBytes("main")
+
+	if f && g && bssReady {
+		ts := makeTimestamp()
+
+		// profile
+		shared.TeeLog("Uploading cpu profile...")
+		v, err := bss.UploadBytesToBlob(*cpuProf, fmt.Sprintf("%v-cpu.prof", ts), "application/octet-stream")
+
+		if err != nil {
+			shared.TeeLog(fmt.Sprintf("Error uploading cpu profile: %v", err))
+		} else {
+			shared.TeeLog(fmt.Sprintf("Profile uploaded: %v", v))
+		}
+
+		// executable
+		shared.TeeLog("Uploading executable...")
+		v, err = bss.UploadBytesToBlob(*heliaEx, fmt.Sprintf("%v-helia", ts), "application/octet-stream")
+
+		if err != nil {
+			shared.TeeLog(fmt.Sprintf("Error uploading executable: %v", err))
+		} else {
+			shared.TeeLog(fmt.Sprintf("Executable uploaded: %v", v))
+		}
+	}
 
 	// end program
 	shared.TeeLog("Shutdown complete! Goodbye :)")
