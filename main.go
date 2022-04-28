@@ -24,6 +24,17 @@ func main() {
 
 	// polling-based garbage collection
 	go func() {
+		/*
+		 * This is a workaround to make helia more cpu efficient when running as a docker container
+		 * within an Azure app service. Based on profiling, there are memory allocation issues -
+		 * most likely due to heavy iteration over maps. These are a big deal to fix, and I don't
+		 * have time right now, so this will act as a bandaid fix until then. Helia actually uses
+		 * very little memory, so we can defer running the garbage collector significantly until
+		 * traffic gets high enough to overwhelm this hack. Telemetry is logged to help keep an
+		 * eye on this known future problem. The long term solution is to convert frequently
+		 * iterated maps to slices, which has implications for other things like searching them.
+		 */
+
 		for {
 			// throttle rate
 			time.Sleep(50 * time.Millisecond)
