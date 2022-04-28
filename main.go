@@ -25,7 +25,7 @@ func main() {
 	// polling-based garbage collection
 	go func() {
 		/*
-		 * This is a workaround to make helia more cpu efficient when running as a docker container
+		 * This is a workaround to make Helia more cpu efficient when running as a docker container
 		 * within an Azure app service. Based on profiling, there are memory allocation issues -
 		 * most likely due to heavy iteration over maps. These are a big deal to fix, and I don't
 		 * have time right now, so this will act as a bandaid fix until then. Helia actually uses
