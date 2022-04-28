@@ -9,6 +9,7 @@ import (
 	"helia/universe"
 	"os"
 	"runtime/debug"
+	"runtime/pprof"
 	"strings"
 	"sync"
 	"time"
@@ -193,6 +194,10 @@ func (e *HeliaEngine) Shutdown() {
 	heliaEx, g := shared.ReadFileBytes("main")
 
 	if f && g && bssReady {
+		// stop profiling now
+		pprof.StopCPUProfile()
+
+		// make timestamp
 		ts := makeTimestamp()
 
 		// profile

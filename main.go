@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-var profileCpu = false
+var profileCpu = true
 
 func main() {
 	// use one less core than is available for goroutines
