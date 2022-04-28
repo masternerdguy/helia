@@ -1,7 +1,7 @@
 {
     "dbhost": "localhost",
-    "dbuser": "heliaagent",
-    "dbpass": "fdb01db4749748cfbdb21e4766570561!",
+    "dbuser": "developer",
+    "dbpass": "thisiswherewefight",
     "dbport": 5432,
     "dbname": "helia",
     "sslmode": "disable"

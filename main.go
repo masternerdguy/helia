@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"runtime/debug"
 	"runtime/pprof"
 	"time"
 )
@@ -18,8 +19,35 @@ import (
 var profileCpu = true
 
 func main() {
-	// use one less core than is available for goroutines
-	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
+	// disable automatic garbage collection :activex: :roach party:
+	debug.SetGCPercent(-1)
+
+	// polling-based garbage collection
+	go func() {
+		for {
+			// throttle rate
+			time.Sleep(500 * time.Millisecond)
+
+			// get memory allocation
+			var m runtime.MemStats
+			runtime.ReadMemStats(&m)
+
+			// convert to megabytes
+			commitedMb := 0.000001 * float64(m.Alloc)
+
+			// disgusting... :hug: :party parrot:
+			if commitedMb > 2048 {
+				// log memory usage
+				shared.TeeLog(fmt.Sprintf("<MEMORY COMMITED> %v", commitedMb))
+
+				// log invocation
+				shared.TeeLog(fmt.Sprintf("<RUNNING GC + RELEASING MEMORY>"))
+
+				// invoke garbage collection and release extra pages to os
+				debug.FreeOSMemory()
+			}
+		}
+	}()
 
 	// configure global tee logging
 	shared.InitializeTeeLog(
