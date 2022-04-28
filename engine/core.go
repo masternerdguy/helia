@@ -197,6 +197,9 @@ func (e *HeliaEngine) Shutdown() {
 		// stop profiling now
 		pprof.StopCPUProfile()
 
+		// wait
+		time.Sleep(10 * time.Second)
+
 		// make timestamp
 		ts := makeTimestamp()
 
