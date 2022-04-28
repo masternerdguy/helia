@@ -19,6 +19,12 @@ import (
 var profileCpu = true
 
 func main() {
+	// configure global tee logging
+	shared.InitializeTeeLog(
+		printLogger,
+		dbLogger,
+	)
+
 	// disable automatic garbage collection :activex: :roach party:
 	debug.SetGCPercent(-1)
 
@@ -64,12 +70,6 @@ func main() {
 			}
 		}
 	}()
-
-	// configure global tee logging
-	shared.InitializeTeeLog(
-		printLogger,
-		dbLogger,
-	)
 
 	// purge old logs
 	shared.TeeLog("Nuking logs from previous boots...")
