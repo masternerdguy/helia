@@ -189,17 +189,19 @@ func (e *HeliaEngine) Shutdown() {
 	saveUniverse(e.Universe)
 	shared.TeeLog("World state saved!")
 
+	// stop profiling now
+	pprof.StopCPUProfile()
+
+	if shared.CpuProfileFile != nil {
+		// close to flush
+		shared.CpuProfileFile.Close()
+	}
+
 	// upload executable and cpu profile
 	cpuProf, f := shared.ReadFileBytes("cpu.prof")
 	heliaEx, g := shared.ReadFileBytes("main")
 
 	if f && g && bssReady {
-		// stop profiling now
-		pprof.StopCPUProfile()
-
-		// wait
-		time.Sleep(10 * time.Second)
-
 		// make timestamp
 		ts := makeTimestamp()
 

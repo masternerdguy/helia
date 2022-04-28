@@ -43,13 +43,13 @@ func main() {
 	// start profiling if requested
 	if profileCpu {
 		shared.TeeLog("Starting CPU profiling...")
-		f, err := os.Create("cpu.prof")
+		shared.CpuProfileFile, err = os.Create("cpu.prof")
 
 		if err != nil {
 			log.Fatal("could not create CPU profile: ", err)
 		}
 
-		if err := pprof.StartCPUProfile(f); err != nil {
+		if err := pprof.StartCPUProfile(shared.CpuProfileFile); err != nil {
 			log.Fatal("could not start CPU profile: ", err)
 		}
 	}
