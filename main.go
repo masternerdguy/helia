@@ -55,7 +55,7 @@ func main() {
 
 		for {
 			// throttle rate
-			time.Sleep(50 * time.Millisecond)
+			time.Sleep(60 * time.Millisecond)
 
 			// get memory allocation
 			var m runtime.MemStats
