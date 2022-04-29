@@ -27,14 +27,14 @@ func main() {
 
 	/* BEGIN AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
 
+	// use one less core than available
+	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
+
 	// disable automatic garbage collection :activex: :roach party:
 	debug.SetGCPercent(-1)
 
 	// polling-based garbage collection
 	go func() {
-		// keep gc invocation on the same os thread (this dedicates a thread to garbage collection)
-		runtime.LockOSThread()
-
 		/*
 		 * This is a workaround to make Helia more cpu efficient when running as a docker container
 		 * within an Azure app service. Based on profiling, there are memory allocation issues -
