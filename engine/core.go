@@ -26,7 +26,7 @@ var schematicRunSvc = sql.GetSchematicRunService()
 var factionSvc = sql.GetFactionService()
 var actionReportSvc = sql.GetActionReportService()
 
-// Will cause all system goroutines to stop when true
+// Will cause all region goroutines to stop when true
 var shutdownSignal = false
 
 // Structure representing the core server-side game engine
@@ -130,6 +130,70 @@ func (e *HeliaEngine) Start() {
 
 	// log progress
 	shared.TeeLog("Region goroutines started!")
+
+	// start watchdog goroutine (to alert of any deadlocks for debugging purposes)
+	go func(e *HeliaEngine) {
+		for {
+			if shutdownSignal {
+				shared.TeeLog("! Deadlock Check [goroutine] Halted!")
+				break
+			}
+
+			shared.TeeLog("* Deadlock Check Starting")
+
+			// iterate over systems
+			for _, r := range e.Universe.Regions {
+				for _, s := range r.Systems {
+					shared.TeeLog(fmt.Sprintf("* Testing [%v]", s.SystemName))
+
+					wgi := 500 // 5 second limit
+					done := false
+
+					go func(s *universe.SolarSystem) {
+						// test locks
+						s.TestLocks()
+						shared.TeeLog(fmt.Sprintf("* [%v] Passed", s.SystemName))
+
+						// small sleep between systems
+						time.Sleep(50 * time.Millisecond)
+
+						// mark done
+						done = true
+					}(s)
+
+					// wait for exit
+					for {
+						// short sleep
+						time.Sleep(10 * time.Millisecond)
+
+						// check for exit
+						if done {
+							break
+						}
+
+						// check for too much time passing
+						if wgi <= 0 {
+							shared.TeeLog("! Deadlock check failed - initiating shutdown")
+							shutdownSignal = true
+
+							break
+						}
+
+						// decrement counter
+						wgi--
+					}
+				}
+
+				// larger sleep between regions
+				time.Sleep(500 * time.Millisecond)
+			}
+
+			shared.TeeLog("* All systems passed deadlock check!")
+
+			// wait 30 minutes
+			time.Sleep(time.Minute * 30)
+		}
+	}(e)
 }
 
 // Wrapper so defer works as expected when updating a solar system
