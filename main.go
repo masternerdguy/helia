@@ -168,7 +168,7 @@ func main() {
 	// don't exit
 	for {
 		// don't peg cpu
-		time.Sleep(5 * time.Minute)
+		time.Sleep(30 * time.Minute)
 
 		// log goroutine count
 		shared.TeeLog(fmt.Sprintf("<TOTAL GOROUTINES> %v", runtime.NumGoroutine()))
