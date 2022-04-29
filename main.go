@@ -27,9 +27,6 @@ func main() {
 
 	/* BEGIN AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
 
-	// use one less core than available
-	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
-
 	// disable automatic garbage collection :activex: :roach party:
 	debug.SetGCPercent(-1)
 
@@ -55,7 +52,7 @@ func main() {
 
 		for {
 			// throttle rate
-			time.Sleep(60 * time.Millisecond)
+			time.Sleep(100 * time.Millisecond)
 
 			// get memory allocation
 			var m runtime.MemStats
