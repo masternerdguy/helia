@@ -213,6 +213,7 @@ type Ship struct {
 	Lock                   sync.Mutex
 }
 
+// Structure representing a percentage modifier applied to a ship for a limit number of ticks
 type TemporaryShipModifier struct {
 	Attribute      string
 	Percentage     float64
@@ -743,6 +744,7 @@ func (s *Ship) PeriodicUpdate() {
 	}
 }
 
+// Determines whether or not a ship is considered cloaked for a tick
 func (s *Ship) updateCloaking() {
 	// aggregate cloaking percentage
 	cloaked := false

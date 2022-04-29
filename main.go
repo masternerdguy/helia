@@ -25,11 +25,16 @@ func main() {
 		dbLogger,
 	)
 
+	/* BEGIN AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
+
 	// disable automatic garbage collection :activex: :roach party:
 	debug.SetGCPercent(-1)
 
 	// polling-based garbage collection
 	go func() {
+		// keep gc invocation on the same os thread (this dedicates a thread to garbage collection)
+		runtime.LockOSThread()
+
 		/*
 		 * This is a workaround to make Helia more cpu efficient when running as a docker container
 		 * within an Azure app service. Based on profiling, there are memory allocation issues -
@@ -77,6 +82,8 @@ func main() {
 			}
 		}
 	}()
+
+	/* END AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
 
 	// purge old logs
 	shared.TeeLog("Nuking logs from previous boots...")
@@ -160,7 +167,10 @@ func main() {
 
 	// don't exit
 	for {
+		// don't peg cpu
 		time.Sleep(5 * time.Minute)
+
+		// log goroutine count
 		shared.TeeLog(fmt.Sprintf("<TOTAL GOROUTINES> %v", runtime.NumGoroutine()))
 	}
 }
