@@ -2553,6 +2553,7 @@ func (s *Ship) doAutopilotFight() {
 			heatAdd := 0.0
 
 			for i, v := range s.Fitting.BRack {
+				// special check for shield boosters
 				if v.ItemTypeFamily == "shield_booster" {
 					// make sure enough shield has been lost for this to be worth it
 					shieldBoost, _ := v.ItemMeta.GetFloat64("shield_boost_amount")
@@ -2569,6 +2570,7 @@ func (s *Ship) doAutopilotFight() {
 				// get heat ratio
 				hr := (s.Heat + heatAdd) / maxHeat
 
+				// special check for engine overchargers
 				if v.ItemTypeFamily == "eng_oc" {
 					// do not activate if heat is too high
 					if hr > 0.65 {
