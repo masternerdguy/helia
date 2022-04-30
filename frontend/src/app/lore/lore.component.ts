@@ -3,6 +3,9 @@ import { IFactionLoreData } from './factions/iFactionLoreData';
 import { WanderersLoreData } from './factions/wanderers';
 import * as $ from 'jquery';
 import { InterstarLoreData } from './factions/interstar';
+import { OriginalsLoreData } from './factions/originals';
+import { KingdomLoreData } from './factions/kingdom';
+import { AccordLoreData } from './factions/accord';
 
 @Component({
   selector: 'app-lore',
@@ -11,6 +14,9 @@ import { InterstarLoreData } from './factions/interstar';
 })
 export class LoreComponent implements OnInit {
   factionLoreData: IFactionLoreData[] = [
+    new OriginalsLoreData(),
+    new KingdomLoreData(),
+    new AccordLoreData(),
     new InterstarLoreData(),
     new WanderersLoreData(),
   ];
