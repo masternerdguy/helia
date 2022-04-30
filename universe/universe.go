@@ -21,7 +21,7 @@ const SpaceDrag float64 = 0.025
 const MinTransientEdges = 5
 
 // Maximum transient jumphole pairs at startup
-const MaxTransientEdges = 25
+const MaxTransientEdges = 35
 
 // Structure representing the current game universe
 type Universe struct {
@@ -161,8 +161,8 @@ func (u *Universe) BuildTransientCelestials() {
 			SystemID:     sysA.ID,
 			OutSystemID:  sysB.ID,
 			JumpholeName: fmt.Sprintf("⚠ %v Jumphole", sysB.SystemName),
-			PosX:         float64(physics.RandInRange(-10000000, 10000000)),
-			PosY:         float64(physics.RandInRange(-10000000, 10000000)),
+			PosX:         float64(physics.RandInRange(-2500000, 2500000)),
+			PosY:         float64(physics.RandInRange(-2500000, 2500000)),
 			Texture:      "Jumphole-Transient",
 			Radius:       float64(physics.RandInRange(50, 400)),
 			Mass:         float64(physics.RandInRange(1000, 10000)),
@@ -178,8 +178,8 @@ func (u *Universe) BuildTransientCelestials() {
 			SystemID:     sysB.ID,
 			OutSystemID:  sysA.ID,
 			JumpholeName: fmt.Sprintf("⚠ %v Jumphole", sysA.SystemName),
-			PosX:         float64(physics.RandInRange(-10000000, 10000000)),
-			PosY:         float64(physics.RandInRange(-10000000, 10000000)),
+			PosX:         float64(physics.RandInRange(-2500000, 2500000)),
+			PosY:         float64(physics.RandInRange(-2500000, 2500000)),
 			Texture:      "Jumphole-Transient",
 			Radius:       float64(physics.RandInRange(50, 400)),
 			Mass:         float64(physics.RandInRange(1000, 10000)),
