@@ -27,6 +27,7 @@ const MaxTransientEdges = 35
 type Universe struct {
 	Regions       map[string]*Region
 	Factions      map[string]*Faction
+	AllSystems    []*SolarSystem
 	MapData       MapData
 	CachedMapData string // cached MapData to avoid overhead of extracting and stringifying over and over again
 }
@@ -204,24 +205,22 @@ func (u *Universe) BuildTransientCelestials() {
 // Finds the ship with the specified ID in the running game simulation
 func (u *Universe) FindShip(shipID uuid.UUID, noLockSystemID *uuid.UUID) *Ship {
 	// iterate over all systems in all regions
-	for _, r := range u.Regions {
-		for _, s := range r.Systems {
-			// do not lock if system is exempted
-			var lock = true
+	for _, s := range u.AllSystems {
+		// do not lock if system is exempted
+		var lock = true
 
-			if noLockSystemID != nil {
-				lock = s.ID != *noLockSystemID
-			}
+		if noLockSystemID != nil {
+			lock = s.ID != *noLockSystemID
+		}
 
-			// get raw pointers to ships in system
-			ships := s.MirrorShipMap(lock)
+		// get raw pointers to ships in system
+		ships := s.MirrorShipMap(lock)
 
-			// look for ship in system
-			sh := ships[shipID.String()]
+		// look for ship in system
+		sh := ships[shipID.String()]
 
-			if sh != nil {
-				return sh
-			}
+		if sh != nil {
+			return sh
 		}
 	}
 
@@ -233,24 +232,22 @@ func (u *Universe) FindShipsByUserID(userID uuid.UUID, noLockSystemID *uuid.UUID
 	o := make([]*Ship, 0)
 
 	// iterate over all systems in all regions
-	for _, r := range u.Regions {
-		for _, s := range r.Systems {
-			// do lock not if system is exempted
-			var lock = true
+	for _, s := range u.AllSystems {
+		// do lock not if system is exempted
+		var lock = true
 
-			if noLockSystemID != nil {
-				lock = s.ID != *noLockSystemID
-			}
+		if noLockSystemID != nil {
+			lock = s.ID != *noLockSystemID
+		}
 
-			// get raw pointers to ships in system
-			ships := s.MirrorShipMap(lock)
+		// get raw pointers to ships in system
+		ships := s.MirrorShipMap(lock)
 
-			// look for ships in system owned by this user
-			for _, u := range ships {
-				if u.UserID == userID {
-					// store reference
-					o = append(o, u)
-				}
+		// look for ships in system owned by this user
+		for _, u := range ships {
+			if u.UserID == userID {
+				// store reference
+				o = append(o, u)
 			}
 		}
 	}
@@ -261,25 +258,23 @@ func (u *Universe) FindShipsByUserID(userID uuid.UUID, noLockSystemID *uuid.UUID
 // Finds the ship currently being flown by the specified player in the running game simulation
 func (u *Universe) FindCurrentPlayerShip(userID uuid.UUID, noLockSystemID *uuid.UUID) *Ship {
 	// iterate over all systems in all regions
-	for _, r := range u.Regions {
-		for _, s := range r.Systems {
-			// do not lock if system is exempted
-			var lock = true
+	for _, s := range u.AllSystems {
+		// do not lock if system is exempted
+		var lock = true
 
-			if noLockSystemID != nil {
-				lock = s.ID != *noLockSystemID
-			}
+		if noLockSystemID != nil {
+			lock = s.ID != *noLockSystemID
+		}
 
-			// get raw pointers to ships in system
-			ships := s.MirrorShipMap(lock)
+		// get raw pointers to ships in system
+		ships := s.MirrorShipMap(lock)
 
-			// look for ship in system
-			for _, shx := range ships {
-				if shx != nil {
-					// id and flown check
-					if shx.BeingFlownByPlayer && shx.UserID == userID {
-						return shx
-					}
+		// look for ship in system
+		for _, shx := range ships {
+			if shx != nil {
+				// id and flown check
+				if shx.BeingFlownByPlayer && shx.UserID == userID {
+					return shx
 				}
 			}
 		}
@@ -291,28 +286,26 @@ func (u *Universe) FindCurrentPlayerShip(userID uuid.UUID, noLockSystemID *uuid.
 // Finds the client of a currently connected player
 func (u *Universe) FindCurrentPlayerClient(userID uuid.UUID, noLockSystemID *uuid.UUID) *shared.GameClient {
 	// iterate over all systems in all regions
-	for _, r := range u.Regions {
-		for _, s := range r.Systems {
-			// do not lock if system is exempted
-			var lock = true
+	for _, s := range u.AllSystems {
+		// do not lock if system is exempted
+		var lock = true
 
-			if noLockSystemID != nil {
-				lock = s.ID != *noLockSystemID
-			}
+		if noLockSystemID != nil {
+			lock = s.ID != *noLockSystemID
+		}
 
-			// get raw pointers to clients in system
-			clients := s.MirrorClientMap(lock)
+		// get raw pointers to clients in system
+		clients := s.MirrorClientMap(lock)
 
-			// look for client in system
-			for _, cx := range clients {
-				if cx != nil {
-					// id check
-					cID := *cx.UID
+		// look for client in system
+		for _, cx := range clients {
+			if cx != nil {
+				// id check
+				cID := *cx.UID
 
-					if cID == userID {
-						// match
-						return cx
-					}
+				if cID == userID {
+					// match
+					return cx
 				}
 			}
 		}
@@ -324,24 +317,22 @@ func (u *Universe) FindCurrentPlayerClient(userID uuid.UUID, noLockSystemID *uui
 // Finds the station with the specified ID in the running game simulation
 func (u *Universe) FindStation(stationID uuid.UUID, noLockSystemID *uuid.UUID) *Station {
 	// iterate over all systems in all regions
-	for _, r := range u.Regions {
-		for _, s := range r.Systems {
-			// do not if system is exempted
-			var lock = true
+	for _, s := range u.AllSystems {
+		// do not if system is exempted
+		var lock = true
 
-			if noLockSystemID != nil {
-				lock = s.ID != *noLockSystemID
-			}
+		if noLockSystemID != nil {
+			lock = s.ID != *noLockSystemID
+		}
 
-			// get raw pointers to ships in system
-			stations := s.MirrorStationMap(lock)
+		// get raw pointers to ships in system
+		stations := s.MirrorStationMap(lock)
 
-			// look for station in system
-			sh := stations[stationID.String()]
+		// look for station in system
+		sh := stations[stationID.String()]
 
-			if sh != nil {
-				return sh
-			}
+		if sh != nil {
+			return sh
 		}
 	}
 
@@ -351,18 +342,16 @@ func (u *Universe) FindStation(stationID uuid.UUID, noLockSystemID *uuid.UUID) *
 // writes a global update to all clients on separate goroutines (per system)
 func (u *Universe) SendGlobalMessage(msg *models.GameMessage) {
 	// iterate over all systems in all regions
-	for _, r := range u.Regions {
-		for _, s := range r.Systems {
-			go func(s *SolarSystem) {
-				// obtain lock
-				s.Lock.Lock()
-				defer s.Lock.Unlock()
+	for _, s := range u.AllSystems {
+		go func(s *SolarSystem) {
+			// obtain lock
+			s.Lock.Lock()
+			defer s.Lock.Unlock()
 
-				// send messages to clients
-				for _, c := range s.clients {
-					c.WriteMessage(msg)
-				}
-			}(s)
-		}
+			// send messages to clients
+			for _, c := range s.clients {
+				c.WriteMessage(msg)
+			}
+		}(s)
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"helia/sql"
 	"helia/universe"
 	"os"
+	"runtime"
 	"runtime/debug"
 	"runtime/pprof"
 	"strings"
@@ -79,12 +80,47 @@ func (e *HeliaEngine) Initialize() *HeliaEngine {
 // Start a goroutine for each region
 func (e *HeliaEngine) Start() {
 	// log progress
-	shared.TeeLog("Starting region goroutines...")
+	shared.TeeLog("Starting cluster goroutines...")
 
-	// iterate over each region
+	// get core count
+	cores := runtime.NumCPU()
+
+	// aggregate systems into a master slice
+	e.Universe.AllSystems = make([]*universe.SolarSystem, 0)
+
 	for _, r := range e.Universe.Regions {
-		go func(r *universe.Region) {
-			// set up time keeping variables for region
+		for _, s := range r.Systems {
+			e.Universe.AllSystems = append(e.Universe.AllSystems, s)
+		}
+	}
+
+	// create slices for cluster groups
+	clusterGroups := make([][]*universe.SolarSystem, 0)
+
+	for x := 0; x < cores; x++ {
+		clusterGroups = append(clusterGroups, make([]*universe.SolarSystem, 0))
+	}
+
+	// assign systems to cluster groups (one per core)
+	coreCounter := 0
+
+	for _, s := range e.Universe.AllSystems {
+		// bound core counter
+		if coreCounter >= cores {
+			coreCounter = 0
+		}
+
+		// assign system to cluster
+		clusterGroups[coreCounter] = append(clusterGroups[coreCounter], s)
+
+		// increment core counter
+		coreCounter++
+	}
+
+	// start cluster group goroutines
+	for x, cg := range clusterGroups {
+		go func(x int, cg []*universe.SolarSystem) {
+			// set up time keeping variables for cluster group
 			var tpf int = 0
 			lastFrame := makeTimestamp()
 
@@ -94,7 +130,7 @@ func (e *HeliaEngine) Start() {
 				if shutdownSignal {
 					// pass to systems
 					defer func() {
-						for _, s := range r.Systems {
+						for _, s := range cg {
 							s.HandleShutdownSignal()
 						}
 					}()
@@ -106,8 +142,8 @@ func (e *HeliaEngine) Start() {
 				// sleep for residual tick duration
 				time.Sleep(time.Duration(universe.Heartbeat-tpf) * time.Millisecond)
 
-				// process each system in the region
-				for _, s := range r.Systems {
+				// process each system in the cluster group
+				for _, s := range cg {
 					// call periodic update with a wrapper function so defer works properly
 					wrapSystemPeriodicUpdate(s, e)
 				}
@@ -124,8 +160,8 @@ func (e *HeliaEngine) Start() {
 			}
 
 			// detect routine exit
-			shared.TeeLog(fmt.Sprintf("Region %s has halted.", r.RegionName))
-		}(r)
+			shared.TeeLog(fmt.Sprintf("Cluster group %d has halted.", x))
+		}(x, cg)
 	}
 
 	// log progress
@@ -141,50 +177,45 @@ func (e *HeliaEngine) Start() {
 
 			shared.TeeLog("* Deadlock Check Starting")
 
-			// iterate over systems
-			for _, r := range e.Universe.Regions {
-				for _, s := range r.Systems {
-					wgi := 500 // 5 second limit
-					done := false
+			// iterate over all systems in all regions
+			for _, s := range e.Universe.AllSystems {
+				wgi := 500 // 5 second limit
+				done := false
 
-					go func(s *universe.SolarSystem) {
-						// test locks
-						s.TestLocks()
+				go func(s *universe.SolarSystem) {
+					// test locks
+					s.TestLocks()
 
-						// small sleep between systems
-						time.Sleep(50 * time.Millisecond)
+					// small sleep between systems
+					time.Sleep(50 * time.Millisecond)
 
-						// mark done
-						done = true
-					}(s)
+					// mark done
+					done = true
+				}(s)
 
-					// wait for exit
-					for {
-						// short sleep
-						time.Sleep(10 * time.Millisecond)
+				// wait for exit
+				for {
+					// short sleep
+					time.Sleep(50 * time.Millisecond)
 
-						// check for exit
-						if done {
-							break
-						}
-
-						// check for too much time passing
-						if wgi <= 0 {
-							shared.TeeLog(
-								fmt.Sprintf("! Deadlock check failed for %s - initiating shutdown", s.SystemName),
-							)
-
-							shutdownSignal = true
-							break
-						}
-
-						// decrement counter
-						wgi--
+					// check for exit
+					if done {
+						break
 					}
-				}
 
-				// larger sleep between regions
-				time.Sleep(500 * time.Millisecond)
+					// check for too much time passing
+					if wgi <= 0 {
+						shared.TeeLog(
+							fmt.Sprintf("! Deadlock check failed for %s - initiating shutdown", s.SystemName),
+						)
+
+						shutdownSignal = true
+						break
+					}
+
+					// decrement counter
+					wgi--
+				}
 			}
 
 			shared.TeeLog("* All systems passed deadlock check!")
