@@ -2569,6 +2569,13 @@ func (s *Ship) doAutopilotFight() {
 				// get heat ratio
 				hr := (s.Heat + heatAdd) / maxHeat
 
+				if v.ItemTypeFamily == "eng_oc" {
+					// do not activate if heat is too high
+					if hr > 65 {
+						continue
+					}
+				}
+
 				// determine whether to activate
 				roll := physics.RandInRange(0, 100)
 				hit := int(hr * 100)
