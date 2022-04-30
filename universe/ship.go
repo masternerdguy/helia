@@ -2560,6 +2560,8 @@ func (s *Ship) doAutopilotFight() {
 					maxShield := s.GetRealMaxShield()
 
 					if s.Shield+shieldBoost >= 0.75*maxShield {
+						// deactivate and continue
+						v.WillRepeat = false
 						continue
 					}
 				}
