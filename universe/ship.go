@@ -2571,7 +2571,7 @@ func (s *Ship) doAutopilotFight() {
 
 				if v.ItemTypeFamily == "eng_oc" {
 					// do not activate if heat is too high
-					if hr > 65 {
+					if hr > 0.65 {
 						continue
 					}
 				}
