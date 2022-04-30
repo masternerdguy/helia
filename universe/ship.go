@@ -2574,6 +2574,8 @@ func (s *Ship) doAutopilotFight() {
 				if v.ItemTypeFamily == "eng_oc" {
 					// do not activate if heat is too high
 					if hr > 0.5 {
+						// deactivate and continue
+						v.WillRepeat = false
 						continue
 					}
 				}
