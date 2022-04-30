@@ -7,7 +7,7 @@ export class AccordLoreData implements IFactionLoreData {
 
   constructor() {
     this.factionName = 'Ozouka Accord';
-    this.factionTicker = '[KoA]';
+    this.factionTicker = '[OZA]';
     this.factionDescription = atob(this.rawDescription()).trim();
   }
 
