@@ -10,6 +10,8 @@ import { CoalitionLoreData } from './factions/coalition';
 import { FederationLoreData } from './factions/federation';
 import { AlvacaLoreData } from './factions/alvaca';
 import { SanctuaryLoreData } from './factions/sanctuary';
+import { BadLoreData } from './factions/bad';
+import { FlyLoreData } from './factions/fly';
 
 @Component({
   selector: 'app-lore',
@@ -25,6 +27,8 @@ export class LoreComponent implements OnInit {
     new FederationLoreData(),
     new AlvacaLoreData(),
     new InterstarLoreData(),
+    new BadLoreData(),
+    new FlyLoreData(),
     new SanctuaryLoreData(),
     new WanderersLoreData(),
   ];
