@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-var profileCpu = false
+var profileCpu = true
 
 func main() {
 	// configure global tee logging
