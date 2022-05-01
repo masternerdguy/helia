@@ -82,8 +82,12 @@ func (e *HeliaEngine) Start() {
 	// log progress
 	shared.TeeLog("Starting cluster goroutines...")
 
-	// get core count
-	cores := runtime.NumCPU()
+	// get core count minus one
+	cores := runtime.NumCPU() - 1
+
+	if cores <= 0 {
+		cores = 1
+	}
 
 	// aggregate systems into a master slice
 	e.Universe.AllSystems = make([]*universe.SolarSystem, 0)
