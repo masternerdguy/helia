@@ -1348,11 +1348,16 @@ func (s *SolarSystem) processClientEventQueues() {
 				}
 
 				// store message
-				s.newSystemChatMessages = append(s.newSystemChatMessages, models.ServerSystemChatBody{
+				cmm := models.ServerSystemChatBody{
 					SenderID:   sh.UserID,
 					SenderName: sh.CharacterName,
 					Message:    data.Message,
-				})
+				}
+
+				s.newSystemChatMessages = append(s.newSystemChatMessages, cmm)
+
+				// log message
+				shared.TeeLog(fmt.Sprintf("[CHAT MESSAGE] %v", cmm))
 
 				// update timestamp
 				c.LastChatPostedAt = time.Now()
