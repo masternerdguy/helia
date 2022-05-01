@@ -228,6 +228,71 @@ func (e *HeliaEngine) Start() {
 			time.Sleep(time.Minute * 30)
 		}
 	}(e)
+
+	// automatic scheduled restart goroutine
+	go func(e *HeliaEngine) {
+		needsReboot := false
+
+		for {
+			if shutdownSignal || needsReboot {
+				shared.TeeLog("! Automatic restart check [goroutine] Halted!")
+				break
+			}
+
+			// get UTC time
+			utcNow := time.Now().UTC()
+
+			if utcNow.Minute() == 0 {
+				// check for morning reboot (8am EDT)
+				if utcNow.Hour() == 11 {
+					needsReboot = true
+				} else if utcNow.Hour() == 19 { // check for afternoon reboot (4pm EDT)
+					needsReboot = true
+				} else if utcNow.Hour() == 3 { // check for midnight reboot (midnight EDT)
+					needsReboot = true
+				}
+
+				// handle reboot if needed
+				if needsReboot {
+					// log reboot scheduled
+					shared.TeeLog("Automatic scheduled reboot will occur soon!")
+
+					// message explaining situation to players
+					sm := "During the open alpha period, Helia will reboot 3 times a day at 8 hour intervals. " +
+						"This is to help keep things running smoothly during this phase of development. " +
+						"A reboot will occur in ~10 minutes - please ensure you have gotten to a safe place " +
+						"before then. The server is expected to take ~30 minutes to reboot. As the project " +
+						"matures, these reboots will become less frequent."
+
+					// send message to connected clients informing them of shutdown
+					b, _ := json.Marshal(models.ServerPushInfoMessage{
+						Message: sm,
+					})
+
+					msg := models.GameMessage{
+						MessageType: models.SharedMessageRegistry.PushInfo,
+						MessageBody: string(b),
+					}
+
+					e.Universe.SendGlobalMessage(&msg)
+
+					// schedule reboot
+					go func() {
+						// wait 10 minutes
+						time.Sleep(10 * time.Minute)
+
+						// do reboot (containers are automatically restarted on Azure)
+						e.Shutdown()
+					}()
+				}
+			}
+
+			// don't peg cpu
+			time.Sleep(500 * time.Millisecond)
+		}
+	}(e)
+
+	shared.TeeLog("Automatic scheduled restart goroutine started!")
 }
 
 // Wrapper so defer works as expected when updating a solar system
