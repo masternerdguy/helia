@@ -4,9 +4,11 @@ import { SignupComponent } from './auth/signup/signup.component';
 import { LoginComponent } from './auth/login/login.component';
 import { HomeComponent } from './home/home.component';
 import { LoreComponent } from './lore/lore.component';
+import { UnifiedPolicyComponent } from './unified-policy/unified-policy.component';
 
 const routes: Routes = [
   { path: 'lore', component: LoreComponent },
+  { path: 'policy', component: UnifiedPolicyComponent },
   { path: 'auth/signup', component: SignupComponent },
   { path: 'auth/signin', component: LoginComponent },
   { path: '', component: HomeComponent },

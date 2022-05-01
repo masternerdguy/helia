@@ -9,6 +9,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './auth/login/login.component';
 import { HomeComponent } from './home/home.component';
 import { LoreComponent } from './lore/lore.component';
+import { UnifiedPolicyComponent } from './unified-policy/unified-policy.component';
 
 @NgModule({
   declarations: [
@@ -17,6 +18,7 @@ import { LoreComponent } from './lore/lore.component';
     LoginComponent,
     HomeComponent,
     LoreComponent,
+    UnifiedPolicyComponent
   ],
   imports: [BrowserModule, AppRoutingModule, HttpClientModule],
   providers: [],
