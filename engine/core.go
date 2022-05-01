@@ -242,13 +242,15 @@ func (e *HeliaEngine) Start() {
 			// get UTC time
 			utcNow := time.Now().UTC()
 
+			shared.TeeLog(fmt.Sprintf(">> %v:%v", utcNow.Hour(), utcNow.Minute()))
+
 			if utcNow.Minute() == 0 {
 				// check for morning reboot (8am EDT)
-				if utcNow.Hour() == 11 {
+				if utcNow.Hour() == 12 {
 					needsReboot = true
-				} else if utcNow.Hour() == 19 { // check for afternoon reboot (4pm EDT)
+				} else if utcNow.Hour() == 20 { // check for afternoon reboot (4pm EDT)
 					needsReboot = true
-				} else if utcNow.Hour() == 3 { // check for midnight reboot (midnight EDT)
+				} else if utcNow.Hour() == 4 { // check for midnight reboot (midnight EDT)
 					needsReboot = true
 				}
 
