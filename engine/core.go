@@ -274,16 +274,19 @@ func (e *HeliaEngine) Start() {
 						MessageBody: string(b),
 					}
 
-					e.Universe.SendGlobalMessage(&msg)
+					go func(e *HeliaEngine) {
+						e.Universe.SendGlobalMessage(&msg)
+					}(e)
 
 					// schedule reboot
-					go func() {
+					go func(e *HeliaEngine) {
 						// wait 10 minutes
 						time.Sleep(10 * time.Minute)
 
 						// do reboot (containers are automatically restarted on Azure)
+						shared.TeeLog("Automatic scheduled reboot is happening!")
 						e.Shutdown()
-					}()
+					}(e)
 				}
 			}
 
