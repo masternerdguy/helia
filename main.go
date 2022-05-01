@@ -66,8 +66,8 @@ func main() {
 				// increment gc run counter
 				gcRuns++
 
-				// invoke garbage collection and release extra pages to os
-				debug.FreeOSMemory()
+				// invoke garbage collection
+				runtime.GC()
 
 				if gcRuns > 100 {
 					// log memory usage
