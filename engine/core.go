@@ -169,65 +169,7 @@ func (e *HeliaEngine) Start() {
 	}
 
 	// log progress
-	shared.TeeLog("Region goroutines started!")
-
-	// start watchdog goroutine (to alert of any deadlocks for debugging purposes)
-	go func(e *HeliaEngine) {
-		for {
-			if shutdownSignal {
-				shared.TeeLog("! Deadlock Check [goroutine] Halted!")
-				break
-			}
-
-			shared.TeeLog("* Deadlock Check Starting")
-
-			// iterate over all systems in all regions
-			for _, s := range e.Universe.AllSystems {
-				wgi := 500 // 5 second limit
-				done := false
-
-				go func(s *universe.SolarSystem) {
-					// test locks
-					s.TestLocks()
-
-					// small sleep between systems
-					time.Sleep(50 * time.Millisecond)
-
-					// mark done
-					done = true
-				}(s)
-
-				// wait for exit
-				for {
-					// short sleep
-					time.Sleep(50 * time.Millisecond)
-
-					// check for exit
-					if done {
-						break
-					}
-
-					// check for too much time passing
-					if wgi <= 0 {
-						shared.TeeLog(
-							fmt.Sprintf("! Deadlock check failed for %s - initiating shutdown", s.SystemName),
-						)
-
-						shutdownSignal = true
-						break
-					}
-
-					// decrement counter
-					wgi--
-				}
-			}
-
-			shared.TeeLog("* All systems passed deadlock check!")
-
-			// wait 30 minutes
-			time.Sleep(time.Minute * 30)
-		}
-	}(e)
+	shared.TeeLog("Cluster goroutines started!")
 
 	// automatic scheduled restart goroutine
 	go func(e *HeliaEngine) {
