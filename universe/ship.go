@@ -4717,23 +4717,15 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 		// store target details
 		tgtDummy = tgt.ToPhysicsDummy()
 		tgtI = tgt
-	} else if *m.TargetType == tgtReg.Station {
-		// find station
-		tgt, f := m.shipMountedOn.CurrentSystem.stations[m.TargetID.String()]
+	} else if *m.TargetType == tgtReg.Asteroid {
+		// verify this can mine
+		canMineOre, _ := m.ItemTypeMeta.GetBool("can_mine_ore")
+		canMineIce, _ := m.ItemTypeMeta.GetBool("can_mine_ice")
 
-		if !f {
-			// target doesn't exist - can't activate
-			m.TargetID = nil
-			m.TargetType = nil
-			m.WillRepeat = false
-
+		if !canMineOre && !canMineIce {
 			return false
 		}
 
-		// store target details
-		tgtDummy = tgt.ToPhysicsDummy()
-		tgtI = tgt
-	} else if *m.TargetType == tgtReg.Asteroid {
 		// find asteroid
 		tgt, f := m.shipMountedOn.CurrentSystem.asteroids[m.TargetID.String()]
 
@@ -5037,21 +5029,6 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 	if *m.TargetType == tgtReg.Ship {
 		// find ship
 		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
-
-		if !f {
-			// target doesn't exist - can't activate
-			m.TargetID = nil
-			m.TargetType = nil
-			m.WillRepeat = false
-
-			return false
-		}
-
-		// store target details
-		tgtDummy = tgt.ToPhysicsDummy()
-	} else if *m.TargetType == tgtReg.Station {
-		// find station
-		tgt, f := m.shipMountedOn.CurrentSystem.stations[m.TargetID.String()]
 
 		if !f {
 			// target doesn't exist - can't activate
