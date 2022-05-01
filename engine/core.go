@@ -82,8 +82,8 @@ func (e *HeliaEngine) Start() {
 	// log progress
 	shared.TeeLog("Starting cluster goroutines...")
 
-	// get core count minus one
-	cores := runtime.NumCPU() - 1
+	// get core count
+	cores := runtime.NumCPU()
 
 	if cores <= 0 {
 		cores = 1
