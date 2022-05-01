@@ -291,7 +291,7 @@ func (e *HeliaEngine) Start() {
 			}
 
 			// don't peg cpu
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(250 * time.Millisecond)
 		}
 	}(e)
 
