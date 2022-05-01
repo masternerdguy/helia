@@ -1357,7 +1357,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				s.newSystemChatMessages = append(s.newSystemChatMessages, cmm)
 
 				// log message
-				shared.TeeLog(fmt.Sprintf("[CHAT MESSAGE] %v", cmm))
+				shared.TeeLog(fmt.Sprintf("[CHAT MESSAGE <%v>] %v", s.SystemName, cmm))
 
 				// update timestamp
 				c.LastChatPostedAt = time.Now()
