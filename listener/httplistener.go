@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/mail"
 	"runtime/pprof"
+	"strings"
 )
 
 // Listener for handling and dispatching incoming http requests
@@ -74,6 +75,10 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "parsemodel: "+err.Error(), 500)
 		return
 	}
+
+	// trim strings
+	m.CharacterName = strings.Trim(m.CharacterName, " ")
+	m.EmailAddress = strings.Trim(m.EmailAddress, " ")
 
 	// validation
 	if len(m.CharacterName) == 0 {
