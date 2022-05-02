@@ -130,8 +130,11 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// get user's ip
+	ip := ReadUserIP(r)
+
 	// create user
-	u, err := userSvc.NewUser(m.CharacterName, m.Password, startID, ec.ID, start.FactionID, m.EmailAddress, r.RemoteAddr)
+	u, err := userSvc.NewUser(m.CharacterName, m.Password, startID, ec.ID, start.FactionID, m.EmailAddress, ip)
 
 	if err != nil {
 		http.Error(w, "createuser: "+err.Error(), 500)
@@ -233,8 +236,11 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 			res.Success = false
 			res.Message = err.Error()
 		} else {
+			// get user's ip
+			ip := ReadUserIP(r)
+
 			// create session
-			s, err := sessionSvc.NewSession(user.ID, r.RemoteAddr)
+			s, err := sessionSvc.NewSession(user.ID, ip)
 
 			if err != nil {
 				res.Success = false
@@ -296,4 +302,18 @@ func isValidEmailAddress(e string) (string, bool) {
 	}
 
 	return addr.Address, true
+}
+
+func ReadUserIP(r *http.Request) string {
+	IPAddress := r.Header.Get("X-Real-Ip")
+
+	if IPAddress == "" {
+		IPAddress = r.Header.Get("X-Forwarded-For")
+	}
+
+	if IPAddress == "" {
+		IPAddress = r.RemoteAddr
+	}
+
+	return IPAddress
 }
