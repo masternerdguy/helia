@@ -171,7 +171,7 @@ export class Ship extends WSShip {
     // for interpolation
     this.tps = now - this.lastSeen;
     const tpsR = Math.max(this.tps / 40, 0.5);
-    const tpsA = (tpsR * 2);
+    const tpsA = tpsR * 2;
     const tpsB = tpsA + 1;
 
     this.deltaX = sh.x - this.lastWsX;

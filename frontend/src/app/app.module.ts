@@ -18,7 +18,7 @@ import { UnifiedPolicyComponent } from './unified-policy/unified-policy.componen
     LoginComponent,
     HomeComponent,
     LoreComponent,
-    UnifiedPolicyComponent
+    UnifiedPolicyComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, HttpClientModule],
   providers: [],

@@ -1322,7 +1322,7 @@ function clientRender() {
     if (sh.id == engineSack.player.currentShip.id) {
       engineSack.camera.x = sh.x;
       engineSack.camera.y = sh.y;
-      
+
       break;
     }
   }
