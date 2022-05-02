@@ -567,12 +567,24 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 				// mark as clean
 				mi.CoreDirty = false
+
+				// for good measure
+				mi.CoreWait = -999
 			}
 		}(mi, sol)
 	}
 
-	// clear new sell orders
-	sol.NewSellOrders = make([]*universe.SellOrder, 0)
+	// clear handled new sell orders
+	nso := make([]*universe.SellOrder, 0)
+
+	for _, mi := range sol.NewSellOrders {
+		if mi.CoreWait >= -1 {
+			// keep sell order
+			nso = append(nso, mi)
+		}
+	}
+
+	sol.NewSellOrders = nso
 
 	// iterate over bought sell orders
 	for _, mi := range sol.BoughtSellOrders {
