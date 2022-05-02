@@ -83,7 +83,7 @@ func main() {
 	/* END AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
 
 	// purge old logs
-	shared.TeeLog("Nuking logs from previous boots...")
+	shared.TeeLog("Removing logs older than 48 hours...")
 	err := sql.GetLogService().NukeLogs()
 
 	if err != nil {

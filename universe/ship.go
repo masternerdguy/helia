@@ -3515,25 +3515,27 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 		s.CurrentSystem.NewShipTickets = append(s.CurrentSystem.NewShipTickets, &r)
 	}
 
-	// log buy to console
-	bm := 0
+	// log buy to console if player
+	if !s.IsNPC {
+		bm := 0
 
-	if s.BehaviourMode != nil {
-		bm = *s.BehaviourMode
+		if s.BehaviourMode != nil {
+			bm = *s.BehaviourMode
+		}
+
+		shared.TeeLog(
+			fmt.Sprintf(
+				"[%v] %v (%v::%v) bought %v %v from %v (silo)",
+				s.CurrentSystem.SystemName,
+				s.CharacterName,
+				s.Texture,
+				bm,
+				quantity,
+				output.ItemTypeName,
+				s.DockedAtStation.StationName,
+			),
+		)
 	}
-
-	shared.TeeLog(
-		fmt.Sprintf(
-			"[%v] %v (%v::%v) bought %v %v from %v (silo)",
-			s.CurrentSystem.SystemName,
-			s.CharacterName,
-			s.Texture,
-			bm,
-			quantity,
-			output.ItemTypeName,
-			s.DockedAtStation.StationName,
-		),
-	)
 
 	// success
 	return nil
@@ -3642,25 +3644,27 @@ func (s *Ship) SellItemToSilo(siloID uuid.UUID, itemId uuid.UUID, quantity int, 
 	// save item
 	s.CurrentSystem.ChangedQuantityItems = append(s.CurrentSystem.ChangedQuantityItems, item)
 
-	// log sell to console
-	bm := 0
+	// log sell to console if player
+	if !s.IsNPC {
+		bm := 0
 
-	if s.BehaviourMode != nil {
-		bm = *s.BehaviourMode
+		if s.BehaviourMode != nil {
+			bm = *s.BehaviourMode
+		}
+
+		shared.TeeLog(
+			fmt.Sprintf(
+				"[%v] %v (%v::%v) sold %v %v to %v (silo)",
+				s.CurrentSystem.SystemName,
+				s.CharacterName,
+				s.Texture,
+				bm,
+				quantity,
+				item.ItemTypeName,
+				s.DockedAtStation.StationName,
+			),
+		)
 	}
-
-	shared.TeeLog(
-		fmt.Sprintf(
-			"[%v] %v (%v::%v) sold %v %v to %v (silo)",
-			s.CurrentSystem.SystemName,
-			s.CharacterName,
-			s.Texture,
-			bm,
-			quantity,
-			item.ItemTypeName,
-			s.DockedAtStation.StationName,
-		),
-	)
 
 	// success
 	return nil
@@ -3816,25 +3820,27 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 		s.CurrentSystem.MovedItems = append(s.CurrentSystem.MovedItems, order.Item)
 	}
 
-	// log buy to console
-	bm := 0
+	// log buy to console if player
+	if !s.IsNPC {
+		bm := 0
 
-	if s.BehaviourMode != nil {
-		bm = *s.BehaviourMode
+		if s.BehaviourMode != nil {
+			bm = *s.BehaviourMode
+		}
+
+		shared.TeeLog(
+			fmt.Sprintf(
+				"[%v] %v (%v::%v) bought %v %v at %v (order)",
+				s.CurrentSystem.SystemName,
+				s.CharacterName,
+				s.Texture,
+				bm,
+				order.Item.Quantity,
+				order.Item.ItemTypeName,
+				s.DockedAtStation.StationName,
+			),
+		)
 	}
-
-	shared.TeeLog(
-		fmt.Sprintf(
-			"[%v] %v (%v::%v) bought %v %v at %v (order)",
-			s.CurrentSystem.SystemName,
-			s.CharacterName,
-			s.Texture,
-			bm,
-			order.Item.Quantity,
-			order.Item.ItemTypeName,
-			s.DockedAtStation.StationName,
-		),
-	)
 
 	// success
 	return nil
@@ -3950,23 +3956,25 @@ func (s *Ship) SellSelfAsOrder(price float64, lock bool) error {
 	// escalate to core for saving in db
 	s.CurrentSystem.NewSellOrders = append(s.CurrentSystem.NewSellOrders, &newOrder)
 
-	// log listing to console
-	bm := 0
+	// log listing to console if player
+	if !s.IsNPC {
+		bm := 0
 
-	if s.BehaviourMode != nil {
-		bm = *s.BehaviourMode
+		if s.BehaviourMode != nil {
+			bm = *s.BehaviourMode
+		}
+
+		shared.TeeLog(
+			fmt.Sprintf(
+				"[%v] %v (%v::%v) listed itself for sale at %v (order)",
+				s.CurrentSystem.SystemName,
+				s.CharacterName,
+				s.Texture,
+				bm,
+				s.DockedAtStation.StationName,
+			),
+		)
 	}
-
-	shared.TeeLog(
-		fmt.Sprintf(
-			"[%v] %v (%v::%v) listed itself for sale at %v (order)",
-			s.CurrentSystem.SystemName,
-			s.CharacterName,
-			s.Texture,
-			bm,
-			s.DockedAtStation.StationName,
-		),
-	)
 
 	// success
 	return nil
@@ -4056,25 +4064,27 @@ func (s *Ship) SellItemAsOrder(id uuid.UUID, price float64, lock bool) error {
 	// escalate to core for saving in db
 	s.CurrentSystem.NewSellOrders = append(s.CurrentSystem.NewSellOrders, &newOrder)
 
-	// log listing to console
-	bm := 0
+	// log listing to console if player
+	if !s.IsNPC {
+		bm := 0
 
-	if s.BehaviourMode != nil {
-		bm = *s.BehaviourMode
+		if s.BehaviourMode != nil {
+			bm = *s.BehaviourMode
+		}
+
+		shared.TeeLog(
+			fmt.Sprintf(
+				"[%v] %v (%v::%v) listed %v %v at %v (order)",
+				s.CurrentSystem.SystemName,
+				s.CharacterName,
+				s.Texture,
+				bm,
+				newOrder.Item.Quantity,
+				newOrder.Item.ItemTypeName,
+				s.DockedAtStation.StationName,
+			),
+		)
 	}
-
-	shared.TeeLog(
-		fmt.Sprintf(
-			"[%v] %v (%v::%v) listed %v %v at %v (order)",
-			s.CurrentSystem.SystemName,
-			s.CharacterName,
-			s.Texture,
-			bm,
-			newOrder.Item.Quantity,
-			newOrder.Item.ItemTypeName,
-			s.DockedAtStation.StationName,
-		),
-	)
 
 	// success
 	return nil
@@ -4952,25 +4962,27 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 					m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, &newItem)
 				}
 
-				// log mine to console
-				bm := 0
+				// log mine to console if player
+				if m.shipMountedOn.IsNPC {
+					bm := 0
 
-				if m.shipMountedOn.BehaviourMode != nil {
-					bm = *m.shipMountedOn.BehaviourMode
+					if m.shipMountedOn.BehaviourMode != nil {
+						bm = *m.shipMountedOn.BehaviourMode
+					}
+
+					shared.TeeLog(
+						fmt.Sprintf(
+							"[%v] %v (%v::%v) mined %v %v from %v",
+							m.shipMountedOn.CurrentSystem.SystemName,
+							m.shipMountedOn.CharacterName,
+							m.shipMountedOn.Texture,
+							bm,
+							q,
+							c.ItemTypeName,
+							c.Name,
+						),
+					)
 				}
-
-				shared.TeeLog(
-					fmt.Sprintf(
-						"[%v] %v (%v::%v) mined %v %v from %v",
-						m.shipMountedOn.CurrentSystem.SystemName,
-						m.shipMountedOn.CharacterName,
-						m.shipMountedOn.Texture,
-						bm,
-						q,
-						c.ItemTypeName,
-						c.Name,
-					),
-				)
 			} else {
 				return false
 			}
@@ -5568,25 +5580,27 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 					m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, &newItem)
 				}
 
-				// log mine to console
-				bm := 0
+				// log mine to console if player
+				if !m.shipMountedOn.IsNPC {
+					bm := 0
 
-				if m.shipMountedOn.BehaviourMode != nil {
-					bm = *m.shipMountedOn.BehaviourMode
+					if m.shipMountedOn.BehaviourMode != nil {
+						bm = *m.shipMountedOn.BehaviourMode
+					}
+
+					shared.TeeLog(
+						fmt.Sprintf(
+							"[%v] %v (%v::%v) mined %v %v from %v",
+							m.shipMountedOn.CurrentSystem.SystemName,
+							m.shipMountedOn.CharacterName,
+							m.shipMountedOn.Texture,
+							bm,
+							q,
+							c.ItemTypeName,
+							c.Name,
+						),
+					)
 				}
-
-				shared.TeeLog(
-					fmt.Sprintf(
-						"[%v] %v (%v::%v) mined %v %v from %v",
-						m.shipMountedOn.CurrentSystem.SystemName,
-						m.shipMountedOn.CharacterName,
-						m.shipMountedOn.Texture,
-						bm,
-						q,
-						c.ItemTypeName,
-						c.Name,
-					),
-				)
 			} else {
 				return false
 			}
