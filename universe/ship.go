@@ -4963,7 +4963,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 				}
 
 				// log mine to console if player
-				if m.shipMountedOn.IsNPC {
+				if !m.shipMountedOn.IsNPC {
 					bm := 0
 
 					if m.shipMountedOn.BehaviourMode != nil {
