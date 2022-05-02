@@ -69,7 +69,7 @@ func main() {
 				// invoke garbage collection
 				runtime.GC()
 
-				if gcRuns > 100 {
+				if gcRuns > 1000 {
 					// log memory usage
 					shared.TeeLog(fmt.Sprintf("<MEMORY COMMITED> %v [%v gc runs since last log]", commitedMb, gcRuns))
 
