@@ -126,7 +126,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create user
-	u, err := userSvc.NewUser(m.CharacterName, m.Password, startID, ec.ID, start.FactionID, m.EmailAddress)
+	u, err := userSvc.NewUser(m.CharacterName, m.Password, startID, ec.ID, start.FactionID, m.EmailAddress, r.RemoteAddr)
 
 	if err != nil {
 		http.Error(w, "createuser: "+err.Error(), 500)
@@ -229,7 +229,7 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 			res.Message = err.Error()
 		} else {
 			// create session
-			s, err := sessionSvc.NewSession(user.ID)
+			s, err := sessionSvc.NewSession(user.ID, r.RemoteAddr)
 
 			if err != nil {
 				res.Success = false

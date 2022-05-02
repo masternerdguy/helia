@@ -17,12 +17,13 @@ func GetSessionService() SessionService {
 
 // Structure representing a row in the sessions table
 type Session struct {
-	ID     uuid.UUID
-	UserID uuid.UUID
+	ID       uuid.UUID
+	UserID   uuid.UUID
+	RemoteIP string
 }
 
 // Creates a new session
-func (s SessionService) NewSession(userid uuid.UUID) (*Session, error) {
+func (s SessionService) NewSession(userid uuid.UUID, remoteIP string) (*Session, error) {
 	// get db handle
 	db, err := connect()
 
@@ -36,12 +37,12 @@ func (s SessionService) NewSession(userid uuid.UUID) (*Session, error) {
 
 	// insert Session
 	sql := `
-				INSERT INTO sessions(id, userid)
-				VALUES ($1, $2);
+				INSERT INTO sessions(id, userid, remoteip)
+				VALUES ($1, $2, $3);
 		   `
 
 	sid := uuid.New()
-	q, err := db.Query(sql, sid, userid)
+	q, err := db.Query(sql, sid, userid, remoteIP)
 
 	if err != nil {
 		return nil, err

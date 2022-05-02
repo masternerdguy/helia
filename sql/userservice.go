@@ -163,6 +163,7 @@ func (s UserService) NewUser(
 	escrowContainerID uuid.UUID,
 	factionID uuid.UUID,
 	emailAddress string,
+	registeredIP string,
 ) (*User, error) {
 	// get db handle
 	db, err := connect()
@@ -180,14 +181,14 @@ func (s UserService) NewUser(
 
 	// insert user
 	sql := `
-				INSERT INTO public.users(id, charactername, hashpass, registered, banned, startid, escrow_containerid, current_factionid, emailaddress)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+				INSERT INTO public.users(id, charactername, hashpass, registered, banned, startid, escrow_containerid, current_factionid, emailaddress, registeredip)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
 			`
 
 	uid := uuid.New()
 	createdAt := time.Now()
 
-	q, err := db.Query(sql, uid, u, *hp, createdAt, 0, startID, escrowContainerID, factionID, emailAddress)
+	q, err := db.Query(sql, uid, u, *hp, createdAt, 0, startID, escrowContainerID, factionID, emailAddress, registeredIP)
 
 	if err != nil {
 		return nil, err
