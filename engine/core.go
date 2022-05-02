@@ -578,7 +578,7 @@ func handleEscalations(sol *universe.SolarSystem) {
 	nso := make([]*universe.SellOrder, 0)
 
 	for _, mi := range sol.NewSellOrders {
-		if mi.CoreWait >= -1 {
+		if mi.CoreWait > -1 {
 			// keep sell order
 			nso = append(nso, mi)
 		}
