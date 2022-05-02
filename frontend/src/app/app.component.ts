@@ -9,5 +9,18 @@ import * as $ from 'jquery';
 export class AppComponent {
   title = 'Project Helia';
 
-  public ngOnInit() {}
+  public ngOnInit() {
+    $(function () {
+      $('.menu-item').on('click', function () {
+        const e = $(this);
+        const href = e.attr('href');
+
+        window.location.href = href;
+      });
+
+      $('#header-branding').on('click', function () {
+        window.location.href = '/';
+      });
+    });
+  }
 }
