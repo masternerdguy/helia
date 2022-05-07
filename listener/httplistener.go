@@ -20,6 +20,7 @@ type HTTPListener struct {
 	Configuration *listenerConfig
 }
 
+// Loads the listener configuration and initializes the listener
 func (l *HTTPListener) Initialize() {
 	// load listener configuration
 	config, err := loadConfiguration()
@@ -31,14 +32,22 @@ func (l *HTTPListener) Initialize() {
 	l.Configuration = &config
 }
 
+// Sets the CORS policy (currently all, needs securing)
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
 
+// Returns the port the game engine is configured to listen on
 func (l *HTTPListener) GetPort() int {
 	return l.Configuration.Port
 }
 
+// Whether or not to use Azure workarounds due to the Basic App Service
+func (l *HTTPListener) UseAzureHacks() bool {
+	return l.Configuration.AzureHacks
+}
+
+// Responds to HTTP pings
 func (l *HTTPListener) HandlePing(w http.ResponseWriter, r *http.Request) {
 	// enable cors
 	enableCors(&w)
@@ -131,7 +140,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get user's ip
-	ip := ReadUserIP(r)
+	ip := readUserIP(r)
 
 	// create user
 	u, err := userSvc.NewUser(m.CharacterName, m.Password, startID, ec.ID, start.FactionID, m.EmailAddress, ip)
@@ -237,7 +246,7 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 			res.Message = err.Error()
 		} else {
 			// get user's ip
-			ip := ReadUserIP(r)
+			ip := readUserIP(r)
 
 			// create session
 			s, err := sessionSvc.NewSession(user.ID, ip)
@@ -294,6 +303,7 @@ func (l *HTTPListener) HandleAcceptCert(w http.ResponseWriter, r *http.Request) 
 	fmt.Fprintln(w, "you've accepted the high quality, self-signed, certificate - woohoo!")
 }
 
+// Determines whether a given string is a valid email address
 func isValidEmailAddress(e string) (string, bool) {
 	addr, err := mail.ParseAddress(e)
 
@@ -304,7 +314,8 @@ func isValidEmailAddress(e string) (string, bool) {
 	return addr.Address, true
 }
 
-func ReadUserIP(r *http.Request) string {
+// Determines a user's real ip to as best as possible from within a container
+func readUserIP(r *http.Request) string {
 	IPAddress := r.Header.Get("X-Real-Ip")
 
 	if IPAddress == "" {
