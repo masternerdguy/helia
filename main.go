@@ -70,7 +70,7 @@ func main() {
 
 	// check whether to use Azure hacks
 	if httpListener.UseAzureHacks() {
-		shared.TeeLog("Enabling Azure Hacks!!! :activex: :roach party:")
+		shared.TeeLog("Enabling Azure Hacks!!!")
 
 		/* BEGIN AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
 
