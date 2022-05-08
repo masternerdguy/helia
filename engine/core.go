@@ -149,6 +149,7 @@ func (e *HeliaEngine) Start() {
 
 					// check if at a logging point
 					if now.Minute() == 30 && now.Second() == 30 {
+						// write log
 						shared.TeeLog(
 							fmt.Sprintf("Excessive Residual for Cluster Group %v at minute 30: %vms / %v", x, tpf, universe.Heartbeat),
 						)
