@@ -605,8 +605,10 @@ func (s *Ship) PeriodicUpdate() {
 		return
 	}
 
-	// update cloaking
-	s.updateCloaking()
+	// update cloaking (safe to do every few ticks)
+	if s.CurrentSystem.tickCounter%6 == 0 {
+		s.updateCloaking()
+	}
 
 	// update energy
 	s.updateEnergy()
@@ -640,7 +642,7 @@ func (s *Ship) PeriodicUpdate() {
 		}
 
 		// determine whether to recalculate real drag
-		rc := s.CurrentSystem.tickCounter%4 == 0
+		rc := s.CurrentSystem.tickCounter%8 == 0
 
 		// calculate felt drag
 		drag := s.GetRealSpaceDrag(rc)
@@ -2169,7 +2171,7 @@ func (s *Ship) doAutopilotManualNav() {
 	s.forwardThrust(s.AutopilotManualNav.Magnitude)
 
 	// determine whether to recalculate real drag
-	rc := s.CurrentSystem.tickCounter%4 == 0
+	rc := s.CurrentSystem.tickCounter%8 == 0
 
 	// decrease magnitude (this is to allow this to expire and require another move order from the player)
 	s.AutopilotManualNav.Magnitude -= s.AutopilotManualNav.Magnitude * s.GetRealSpaceDrag(rc)
@@ -2789,7 +2791,7 @@ func (s *Ship) flyToPoint(tX float64, tY float64, hold float64, caution float64)
 	turnMag := s.facePoint(tX, tY)
 
 	// determine whether to recalculate real accel + drag
-	rc := s.CurrentSystem.tickCounter%4 == 0
+	rc := s.CurrentSystem.tickCounter%8 == 0
 
 	// determine whether to thrust forward and by how much
 	scale := ((s.GetRealAccel(rc) * (caution / s.GetRealSpaceDrag(rc))) / 0.175)
@@ -2872,7 +2874,7 @@ func (s *Ship) forwardThrust(scale float64) {
 	}
 
 	// determine whether to recalculate real accel + drag
-	rc := s.CurrentSystem.tickCounter%4 == 0
+	rc := s.CurrentSystem.tickCounter%8 == 0
 
 	// calculate burn
 	burn := s.GetRealAccel(rc) * scale

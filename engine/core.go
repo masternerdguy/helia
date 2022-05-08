@@ -128,6 +128,9 @@ func (e *HeliaEngine) Start() {
 			var tpf int = 0
 			lastFrame := makeTimestamp()
 
+			// set up tracking of terribly excessive residuals
+			var rerx int = 0
+
 			// game loop
 			for {
 				// check for shutdown signal
@@ -143,17 +146,8 @@ func (e *HeliaEngine) Start() {
 					break
 				}
 
-				// check if tpf needs to be logged
-				if tpf > universe.Heartbeat {
-					now := time.Now()
-
-					// check if at a logging point
-					if now.Minute() == 30 {
-						shared.TeeLog(
-							fmt.Sprintf("Excessive Residual for Cluster Group %v at minute 30: %vms / %v", x, tpf, universe.Heartbeat),
-						)
-					}
-				}
+				// check for excessive residual in last frame
+				tpf, lastFrame, rerx = checkAndHandleResidual(tpf, x, rerx, lastFrame, e)
 
 				// sleep for residual tick duration
 				time.Sleep(time.Duration(universe.Heartbeat-tpf) * time.Millisecond)
@@ -250,6 +244,79 @@ func (e *HeliaEngine) Start() {
 	}(e)
 
 	shared.TeeLog("Automatic scheduled restart goroutine started!")
+}
+
+// Helper function to detect, log, and act on excessive cluster group residuals
+func checkAndHandleResidual(tpf int, x int, rerx int, lastFrame int64, e *HeliaEngine) (int, int64, int) {
+	if tpf > universe.Heartbeat {
+		now := time.Now()
+
+		// check if at a logging point
+		if now.Minute() == 30 && now.Second() == 30 {
+			// write log
+			shared.TeeLog(
+				fmt.Sprintf("Excessive Residual for Cluster Group %v at minute 30: %vms / %v", x, tpf, universe.Heartbeat),
+			)
+
+			// determine how bad it is
+			exr := tpf / universe.Heartbeat
+
+			if exr >= 10 {
+				// increment counter
+				rerx++
+
+				// log egrogious excess
+				shared.TeeLog(
+					fmt.Sprintf("Cluster group %v - strike %v @ %v", x, rerx, tpf),
+				)
+
+				// short sleep
+				time.Sleep(1 * time.Second)
+
+				// residual reset
+				lastFrame = makeTimestamp()
+				tpf = universe.Heartbeat
+
+				// handle excessive residual shutdown
+				if rerx > 3 {
+					// initiate shutdown
+					shared.TeeLog(
+						fmt.Sprintf("! Cluster group %v had %v terrible resisidual checks - rebooting to restore performance.", x, rerx),
+					)
+
+					// message explaining situation to players
+					sm := "A cluster group is experiencing extreme performance degredation, affecting the entire system. " +
+						"An emergency reboot will occur in 10 minutes!"
+
+					// send message to connected clients informing them of shutdown
+					b, _ := json.Marshal(models.ServerPushInfoMessage{
+						Message: sm,
+					})
+
+					msg := models.GameMessage{
+						MessageType: models.SharedMessageRegistry.PushInfo,
+						MessageBody: string(b),
+					}
+
+					go func(e *HeliaEngine) {
+						e.Universe.SendGlobalMessage(&msg)
+					}(e)
+
+					// schedule reboot
+					go func(e *HeliaEngine) {
+						// wait 10 minutes
+						time.Sleep(10 * time.Minute)
+
+						// do reboot (containers are automatically restarted on Azure)
+						shared.TeeLog("Unscheduled emergency reboot is happening!")
+						e.Shutdown()
+					}(e)
+				}
+			}
+		}
+	}
+
+	return tpf, lastFrame, rerx
 }
 
 // Wrapper so defer works as expected when updating a solar system
@@ -1728,4 +1795,8 @@ func notifyClientOfWorkshopFee(c *shared.GameClient) {
 
 	infoMsg := strings.Join(lns, "")
 	c.WriteInfoMessage(infoMsg)
+}
+
+func checkExcessiveTpf() {
+
 }
