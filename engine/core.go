@@ -265,6 +265,11 @@ func checkAndHandleResidual(tpf int, x int, reallyExcessiveResiduals int, lastFr
 				// increment counter
 				reallyExcessiveResiduals++
 
+				// log egrogious excess
+				shared.TeeLog(
+					fmt.Sprintf("Cluster group %v - strike %v @ %v", x, reallyExcessiveResiduals, tpf),
+				)
+
 				// short sleep
 				time.Sleep(1 * time.Second)
 
