@@ -760,7 +760,7 @@ func (s *Ship) updateCloaking() {
 	if cloakPercentage >= 1 {
 		// ship is cloaked
 		cloaked = true
-	} else {
+	} else if cloakPercentage > 0 {
 		// ship is intermittently cloaked
 		r := rand.Float64()
 
