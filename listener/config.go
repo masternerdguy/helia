@@ -9,6 +9,7 @@ import (
 type listenerConfig struct {
 	ShutdownToken string `json:"shutdownToken"`
 	Port          int    `json:"port"`
+	AzureHacks    bool   `json:"azureHacks"`
 }
 
 func loadConfiguration() (listenerConfig, error) {

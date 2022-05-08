@@ -25,63 +25,6 @@ func main() {
 		dbLogger,
 	)
 
-	/* BEGIN AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
-
-	// disable automatic garbage collection :activex: :roach party:
-	debug.SetGCPercent(-1)
-
-	// polling-based garbage collection
-	go func() {
-		/*
-		 * This is a workaround to make Helia more cpu efficient when running as a docker container
-		 * within an Azure app service. Based on profiling, there are memory allocation issues -
-		 * most likely due to heavy iteration over maps. These are a big deal to fix, and I don't
-		 * have time right now, so this will act as a bandaid fix until then. Helia actually uses
-		 * very little memory, so we can defer running the garbage collector significantly until
-		 * traffic gets high enough to overwhelm this hack. Telemetry is logged to help keep an
-		 * eye on this known future problem. The long term solution is to convert frequently
-		 * iterated maps to slices, which has implications for other things like searching them.
-		 *
-		 * Note that these garbage collection issues don't occur on any other system that I've
-		 * tested, which really shows how weak Azure app services actually are - the other systems
-		 * are fast enough that this simply doesn't become a problem and go can manage its own
-		 * garbage collection timing like its designed to.
-		 */
-
-		gcRuns := 0
-
-		for {
-			// throttle rate
-			time.Sleep(50 * time.Millisecond)
-
-			// get memory allocation
-			var m runtime.MemStats
-			runtime.ReadMemStats(&m)
-
-			// convert to megabytes
-			commitedMb := 0.000001 * float64(m.Alloc)
-
-			// disgusting... :hug: :party parrot:
-			if commitedMb > 4096 {
-				// increment gc run counter
-				gcRuns++
-
-				// invoke garbage collection
-				runtime.GC()
-
-				if gcRuns > 1000 {
-					// log memory usage
-					shared.TeeLog(fmt.Sprintf("<MEMORY COMMITED> %v [%v gc runs since last log]", commitedMb, gcRuns))
-
-					// reset counter
-					gcRuns = 0
-				}
-			}
-		}
-	}()
-
-	/* END AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
-
 	// purge old logs
 	shared.TeeLog("Removing logs older than 48 hours...")
 	err := sql.GetLogService().NukeLogs()
@@ -124,6 +67,68 @@ func main() {
 
 		http.ListenAndServe(fmt.Sprintf(":%v", httpListener.GetPort()), nil)
 	}()
+
+	// check whether to use Azure hacks
+	if httpListener.UseAzureHacks() {
+		shared.TeeLog("Enabling Azure Hacks!!!")
+
+		/* BEGIN AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
+
+		// disable automatic garbage collection :activex: :roach party:
+		debug.SetGCPercent(-1)
+
+		// polling-based garbage collection
+		go func() {
+			/*
+			 * This is a workaround to make Helia more cpu efficient when running as a docker container
+			 * within an Azure app service. Based on profiling, there are memory allocation issues -
+			 * most likely due to heavy iteration over maps. These are a big deal to fix, and I don't
+			 * have time right now, so this will act as a bandaid fix until then. Helia actually uses
+			 * very little memory, so we can defer running the garbage collector significantly until
+			 * traffic gets high enough to overwhelm this hack. Telemetry is logged to help keep an
+			 * eye on this known future problem. The long term solution is to convert frequently
+			 * iterated maps to slices, which has implications for other things like searching them.
+			 *
+			 * Note that these garbage collection issues don't occur on any other system that I've
+			 * tested, which really shows how weak Azure app services actually are - the other systems
+			 * are fast enough that this simply doesn't become a problem and go can manage its own
+			 * garbage collection timing like its designed to.
+			 */
+
+			gcRuns := 0
+
+			for {
+				// throttle rate
+				time.Sleep(50 * time.Millisecond)
+
+				// get memory allocation
+				var m runtime.MemStats
+				runtime.ReadMemStats(&m)
+
+				// convert to megabytes
+				commitedMb := 0.000001 * float64(m.Alloc)
+
+				// disgusting... :hug: :party parrot:
+				if commitedMb > 4096 {
+					// increment gc run counter
+					gcRuns++
+
+					// invoke garbage collection
+					runtime.GC()
+
+					if gcRuns > 1000 {
+						// log memory usage
+						shared.TeeLog(fmt.Sprintf("<MEMORY COMMITED> %v [%v gc runs since last log]", commitedMb, gcRuns))
+
+						// reset counter
+						gcRuns = 0
+					}
+				}
+			}
+		}()
+
+		/* END AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
+	}
 
 	// run daily downtime jobs
 	shared.TeeLog("Running downtime jobs...")

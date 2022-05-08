@@ -635,7 +635,7 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			Theta:     currShip.Theta,
 			VelX:      currShip.VelX,
 			VelY:      currShip.VelY,
-			Accel:     currShip.GetRealAccel(),
+			Accel:     currShip.GetRealAccel(false),
 			Mass:      currShip.GetRealMass(),
 			Radius:    currShip.TemplateData.Radius,
 			Turn:      currShip.GetRealTurn(),

@@ -143,6 +143,18 @@ func (e *HeliaEngine) Start() {
 					break
 				}
 
+				// check if tpf needs to be logged
+				if tpf > universe.Heartbeat {
+					now := time.Now()
+
+					// check if at a logging point
+					if now.Minute() == 30 {
+						shared.TeeLog(
+							fmt.Sprintf("Excessive Residual for Cluster Group %v at minute 30: %vms / %v", x, tpf, universe.Heartbeat),
+						)
+					}
+				}
+
 				// sleep for residual tick duration
 				time.Sleep(time.Duration(universe.Heartbeat-tpf) * time.Millisecond)
 
