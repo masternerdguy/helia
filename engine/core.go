@@ -129,7 +129,7 @@ func (e *HeliaEngine) Start() {
 			lastFrame := makeTimestamp()
 
 			// set up tracking of terribly excessive residuals
-			var reallyExcessiveResiduals int = 0
+			var rerx int = 0
 
 			// game loop
 			for {
@@ -147,7 +147,7 @@ func (e *HeliaEngine) Start() {
 				}
 
 				// check for excessive residual in last frame
-				tpf, lastFrame, reallyExcessiveResiduals = checkAndHandleResidual(tpf, x, reallyExcessiveResiduals, lastFrame, e)
+				tpf, lastFrame, rerx = checkAndHandleResidual(tpf, x, rerx, lastFrame, e)
 
 				// sleep for residual tick duration
 				time.Sleep(time.Duration(universe.Heartbeat-tpf) * time.Millisecond)
@@ -247,7 +247,7 @@ func (e *HeliaEngine) Start() {
 }
 
 // Helper function to detect, log, and act on excessive cluster group residuals
-func checkAndHandleResidual(tpf int, x int, reallyExcessiveResiduals int, lastFrame int64, e *HeliaEngine) (int, int64, int) {
+func checkAndHandleResidual(tpf int, x int, rerx int, lastFrame int64, e *HeliaEngine) (int, int64, int) {
 	if tpf > universe.Heartbeat {
 		now := time.Now()
 
@@ -263,11 +263,11 @@ func checkAndHandleResidual(tpf int, x int, reallyExcessiveResiduals int, lastFr
 
 			if exr >= 10 {
 				// increment counter
-				reallyExcessiveResiduals++
+				rerx++
 
 				// log egrogious excess
 				shared.TeeLog(
-					fmt.Sprintf("Cluster group %v - strike %v @ %v", x, reallyExcessiveResiduals, tpf),
+					fmt.Sprintf("Cluster group %v - strike %v @ %v", x, rerx, tpf),
 				)
 
 				// short sleep
@@ -278,10 +278,10 @@ func checkAndHandleResidual(tpf int, x int, reallyExcessiveResiduals int, lastFr
 				tpf = universe.Heartbeat
 
 				// handle excessive residual shutdown
-				if reallyExcessiveResiduals > 3 {
+				if rerx > 3 {
 					// initiate shutdown
 					shared.TeeLog(
-						fmt.Sprintf("! Cluster group %v had %v terrible resisidual checks - rebooting to restore performance.", x, reallyExcessiveResiduals),
+						fmt.Sprintf("! Cluster group %v had %v terrible resisidual checks - rebooting to restore performance.", x, rerx),
 					)
 
 					// message explaining situation to players
@@ -316,7 +316,7 @@ func checkAndHandleResidual(tpf int, x int, reallyExcessiveResiduals int, lastFr
 		}
 	}
 
-	return tpf, lastFrame, reallyExcessiveResiduals
+	return tpf, lastFrame, rerx
 }
 
 // Wrapper so defer works as expected when updating a solar system
