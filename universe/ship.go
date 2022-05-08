@@ -197,6 +197,9 @@ type Ship struct {
 	DockedAtStation        *Station
 	CargoBay               *Container
 	FittingBay             *Container
+	CachedHeatSink         float64 // cache of output from GetRealHeatSink
+	CachedRealAccel        float64 // cache of output from GetRealAccel
+	CachedRealSpaceDrag    float64 // cache of output from GetRealSpaceDrag
 	EscrowContainerID      *uuid.UUID
 	BeingFlownByPlayer     bool
 	ReputationSheet        *shared.PlayerReputationSheet
@@ -597,6 +600,11 @@ func (s *Ship) PeriodicUpdate() {
 		s.removeZeroQuantityItemsFromCargo()
 	}
 
+	// null check
+	if s.CurrentSystem == nil {
+		return
+	}
+
 	// update cloaking
 	s.updateCloaking()
 
@@ -631,8 +639,11 @@ func (s *Ship) PeriodicUpdate() {
 			s.Theta += 360
 		}
 
+		// determine whether to recalculate real drag
+		rc := s.CurrentSystem.tickCounter%4 == 0
+
 		// calculate felt drag
-		drag := s.GetRealSpaceDrag()
+		drag := s.GetRealSpaceDrag(rc)
 
 		dampX := drag * s.VelX
 		dampY := drag * s.VelY
@@ -904,8 +915,11 @@ func (s *Ship) updateHeat() {
 	}
 
 	if !s.IsCloaked {
+		// determine whether to recalculate heat sink amount
+		rc := s.CurrentSystem.tickCounter%12 == 0
+
 		// dissipate heat taking efficiency modifier into account
-		s.Heat -= ((s.GetRealHeatSink() / 1000) * Heartbeat) * u
+		s.Heat -= ((s.GetRealHeatSink(rc) / 1000) * Heartbeat) * u
 	}
 
 	// clamp heat
@@ -1136,7 +1150,12 @@ func (s *Ship) ReMaxStatsForSpawn() {
 }
 
 // Returns the real acceleration capability of a ship after modifiers
-func (s *Ship) GetRealAccel() float64 {
+func (s *Ship) GetRealAccel(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedRealAccel
+	}
+
 	// temporary modifier percentage accumulator
 	tpm := 1.0
 
@@ -1152,12 +1171,20 @@ func (s *Ship) GetRealAccel() float64 {
 		tpm = 0
 	}
 
-	// return true acceleration
-	return s.TemplateData.BaseAccel * s.FlightExperienceModifier * tpm
+	// calculate and cache real accel
+	s.CachedRealAccel = s.TemplateData.BaseAccel * s.FlightExperienceModifier * tpm
+
+	// return result
+	return s.CachedRealAccel
 }
 
 // Returns the real drag felt by a ship after modifiers
-func (s *Ship) GetRealSpaceDrag() float64 {
+func (s *Ship) GetRealSpaceDrag(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedRealSpaceDrag
+	}
+
 	// temporary modifier percentage accumulator
 	tpm := 1.0
 
@@ -1173,8 +1200,11 @@ func (s *Ship) GetRealSpaceDrag() float64 {
 		tpm = 0
 	}
 
-	// return true drag
-	return SpaceDrag * tpm
+	// calculate and cache true drag
+	s.CachedRealSpaceDrag = SpaceDrag * tpm
+
+	// return result
+	return s.CachedRealSpaceDrag
 }
 
 // Calculates the experience percentage bonus to apply to some basic stats
@@ -1287,7 +1317,12 @@ func (s *Ship) GetRealMaxHeat() float64 {
 }
 
 // Returns the real heat dissipation rate of the ship after modifiers
-func (s *Ship) GetRealHeatSink() float64 {
+func (s *Ship) GetRealHeatSink(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedHeatSink
+	}
+
 	// get base heat sink
 	a := s.TemplateData.BaseHeatSink * s.FlightExperienceModifier
 
@@ -1316,7 +1351,11 @@ func (s *Ship) GetRealHeatSink() float64 {
 		tpm = 0
 	}
 
-	return a * tpm
+	// calculate and cache final heat sink
+	s.CachedHeatSink = a * tpm
+
+	// return result
+	return s.CachedHeatSink
 }
 
 // Returns the real max fuel of the ship after modifiers
@@ -2129,8 +2168,11 @@ func (s *Ship) doAutopilotManualNav() {
 	// thrust forward
 	s.forwardThrust(s.AutopilotManualNav.Magnitude)
 
+	// determine whether to recalculate real drag
+	rc := s.CurrentSystem.tickCounter%4 == 0
+
 	// decrease magnitude (this is to allow this to expire and require another move order from the player)
-	s.AutopilotManualNav.Magnitude -= s.AutopilotManualNav.Magnitude * s.GetRealSpaceDrag()
+	s.AutopilotManualNav.Magnitude -= s.AutopilotManualNav.Magnitude * s.GetRealSpaceDrag(rc)
 
 	// stop when magnitude is low
 	if s.AutopilotManualNav.Magnitude < 0.0001 {
@@ -2746,8 +2788,11 @@ func (s *Ship) flyToPoint(tX float64, tY float64, hold float64, caution float64)
 	// face towards target
 	turnMag := s.facePoint(tX, tY)
 
+	// determine whether to recalculate real accel + drag
+	rc := s.CurrentSystem.tickCounter%4 == 0
+
 	// determine whether to thrust forward and by how much
-	scale := ((s.GetRealAccel() * (caution / s.GetRealSpaceDrag())) / 0.175)
+	scale := ((s.GetRealAccel(rc) * (caution / s.GetRealSpaceDrag(rc))) / 0.175)
 	d := (physics.Distance(s.ToPhysicsDummy(), physics.Dummy{PosX: tX, PosY: tY}) - hold)
 
 	if turnMag < 1 {
@@ -2826,11 +2871,14 @@ func (s *Ship) forwardThrust(scale float64) {
 		scale = 0
 	}
 
+	// determine whether to recalculate real accel + drag
+	rc := s.CurrentSystem.tickCounter%4 == 0
+
 	// calculate burn
-	burn := s.GetRealAccel() * scale
+	burn := s.GetRealAccel(rc) * scale
 
 	// account for additional drag effects
-	drag := s.GetRealSpaceDrag()
+	drag := s.GetRealSpaceDrag(rc)
 	dragRatio := SpaceDrag / drag
 
 	// accelerate along theta using thrust proportional to bounded magnitude
