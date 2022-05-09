@@ -278,7 +278,7 @@ func checkAndHandleResidual(tpf int, x int, rerx int, lastFrame int64, e *HeliaE
 				tpf = universe.Heartbeat
 
 				// handle excessive residual shutdown
-				if rerx > 3 {
+				if rerx >= 3 {
 					// initiate shutdown
 					shared.TeeLog(
 						fmt.Sprintf("! Cluster group %v had %v terrible resisidual checks - rebooting to restore performance.", x, rerx),

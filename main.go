@@ -99,7 +99,7 @@ func main() {
 
 			for {
 				// throttle rate
-				time.Sleep(200 * time.Millisecond)
+				time.Sleep(80 * time.Millisecond)
 
 				// get memory allocation
 				var m runtime.MemStats
@@ -109,7 +109,7 @@ func main() {
 				commitedMb := 0.000001 * float64(m.Alloc)
 
 				// disgusting... :hug: :party parrot:
-				if commitedMb > 5120 {
+				if commitedMb > 1024 {
 					// increment gc run counter
 					gcRuns++
 
