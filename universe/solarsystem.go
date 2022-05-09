@@ -2727,7 +2727,17 @@ func (s *SolarSystem) sendClientUpdates() {
 	gu.NewPointEffects = append(gu.NewPointEffects, s.pushPointEffects...)
 
 	// serialize global update
-	b, _ := json.Marshal(&gu)
+	b, err := json.Marshal(&gu)
+
+	if err != nil {
+		// log failure
+		shared.TeeLog(
+			fmt.Sprintf("[%v] Error serializing global update %v", err, s.SystemName),
+		)
+
+		// return
+		return
+	}
 
 	msg := models.GameMessage{
 		MessageType: msgRegistry.GlobalUpdate,

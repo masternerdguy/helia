@@ -755,6 +755,56 @@ func (s *Ship) PeriodicUpdate() {
 			s.doDockedAutopilot()
 		}
 	}
+
+	// fix any NaN weirdness
+	s.fixLocalNaNs()
+}
+
+// Helper function to reset any strange NaN values to zero
+func (s *Ship) fixLocalNaNs() {
+	if math.IsNaN(s.PosX) {
+		s.PosX = 0
+	}
+
+	if math.IsNaN(s.PosY) {
+		s.PosY = 0
+	}
+
+	if math.IsNaN(s.VelX) {
+		s.VelX = 0
+	}
+
+	if math.IsNaN(s.VelY) {
+		s.VelY = 0
+	}
+
+	if math.IsNaN(s.Shield) {
+		s.Shield = 0
+	}
+
+	if math.IsNaN(s.Armor) {
+		s.Armor = 0
+	}
+
+	if math.IsNaN(s.Hull) {
+		s.Hull = 0
+	}
+
+	if math.IsNaN(s.Fuel) {
+		s.Fuel = 0
+	}
+
+	if math.IsNaN(s.Heat) {
+		s.Heat = 0
+	}
+
+	if math.IsNaN(s.Energy) {
+		s.Energy = 0
+	}
+
+	if math.IsNaN(s.Theta) {
+		s.Theta = 0
+	}
 }
 
 // Determines whether or not a ship is considered cloaked for a tick
