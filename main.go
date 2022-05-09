@@ -109,7 +109,7 @@ func main() {
 				commitedMb := 0.000001 * float64(m.Alloc)
 
 				// disgusting... :hug: :party parrot:
-				if commitedMb > 5120 {
+				if commitedMb > 1024 {
 					// increment gc run counter
 					gcRuns++
 
