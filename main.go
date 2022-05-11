@@ -18,7 +18,7 @@ import (
 
 var profileCpu = true
 var profileHeap = true
-var gcPercent = 500
+var gcPercent = 1000
 
 func main() {
 	// configure global tee logging
@@ -135,7 +135,7 @@ func main() {
 				runtime.ReadMemStats(&m)
 
 				// convert to megabytes
-				commitedMb := 0.000001 * float64(m.Alloc)
+				commitedMb := 0.000001 * float64(m.HeapAlloc)
 
 				if commitedMb > 5120 {
 					// emergency shutdown
