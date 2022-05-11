@@ -17,6 +17,7 @@ import (
 )
 
 var profileCpu = true
+var profileHeap = true
 
 func main() {
 	// configure global tee logging
@@ -52,6 +53,15 @@ func main() {
 		}
 	}
 
+	if profileHeap {
+		shared.TeeLog("Enabling shutdown heap profiling...")
+		shared.HeapProfileFile, err = os.Create("heap.prof")
+
+		if err != nil {
+			log.Fatal("could not create heap profile: ", err)
+		}
+	}
+
 	// brief sleep
 	time.Sleep(100 * time.Millisecond)
 
@@ -74,32 +84,16 @@ func main() {
 
 		/* BEGIN AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
 
-		// disable automatic garbage collection :activex: :roach party:
-		debug.SetGCPercent(-1)
+		// adjust automatic garbage collection :activex: :roach party:
+		debug.SetGCPercent(1000)
 
-		// polling-based garbage collection
+		// emergency garbage collection routine
 		go func() {
-			/*
-			 * This is a workaround to make Helia more cpu efficient when running as a docker container
-			 * within an Azure app service. Based on profiling, there are memory allocation issues -
-			 * most likely due to heavy iteration over maps. These are a big deal to fix, and I don't
-			 * have time right now, so this will act as a bandaid fix until then. Helia actually uses
-			 * very little memory, so we can defer running the garbage collector significantly until
-			 * traffic gets high enough to overwhelm this hack. Telemetry is logged to help keep an
-			 * eye on this known future problem. The long term solution is to convert frequently
-			 * iterated maps to slices, which has implications for other things like searching them.
-			 *
-			 * Note that these garbage collection issues don't occur on any other system that I've
-			 * tested, which really shows how weak Azure app services actually are - the other systems
-			 * are fast enough that this simply doesn't become a problem and go can manage its own
-			 * garbage collection timing like its designed to.
-			 */
-
-			gcRuns := 0
+			var skips int = 0
 
 			for {
 				// throttle rate
-				time.Sleep(80 * time.Millisecond)
+				time.Sleep(5 * time.Second)
 
 				// get memory allocation
 				var m runtime.MemStats
@@ -109,20 +103,19 @@ func main() {
 				commitedMb := 0.000001 * float64(m.Alloc)
 
 				// disgusting... :hug: :party parrot:
-				if commitedMb > 1024 {
-					// increment gc run counter
-					gcRuns++
+				if commitedMb > 6144 {
+					// invoke garbage collection and return memory to OS
+					debug.FreeOSMemory()
 
-					// invoke garbage collection
-					runtime.GC()
+					// log
+					shared.TeeLog(
+						fmt.Sprintf("Aggressive GC performed at %vMB after %v skips", commitedMb, skips),
+					)
 
-					if gcRuns > 1000 {
-						// log memory usage
-						shared.TeeLog(fmt.Sprintf("<MEMORY COMMITED> %v [%v gc runs since last log]", commitedMb, gcRuns))
-
-						// reset counter
-						gcRuns = 0
-					}
+					// reset counter
+					skips = 0
+				} else {
+					skips++
 				}
 			}
 		}()

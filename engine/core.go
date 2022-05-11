@@ -128,9 +128,6 @@ func (e *HeliaEngine) Start() {
 			var tpf int = 0
 			lastFrame := makeTimestamp()
 
-			// set up tracking of terribly excessive residuals
-			var rerx int = 0
-
 			// game loop
 			for {
 				// check for shutdown signal
@@ -145,9 +142,6 @@ func (e *HeliaEngine) Start() {
 					// exit routine
 					break
 				}
-
-				// check for excessive residual in last frame
-				tpf, lastFrame, rerx = checkAndHandleResidual(tpf, x, rerx, lastFrame, e)
 
 				// sleep for residual tick duration
 				time.Sleep(time.Duration(universe.Heartbeat-tpf) * time.Millisecond)
@@ -246,79 +240,6 @@ func (e *HeliaEngine) Start() {
 	shared.TeeLog("Automatic scheduled restart goroutine started!")
 }
 
-// Helper function to detect, log, and act on excessive cluster group residuals
-func checkAndHandleResidual(tpf int, x int, rerx int, lastFrame int64, e *HeliaEngine) (int, int64, int) {
-	if tpf > universe.Heartbeat {
-		now := time.Now()
-
-		// check if at a logging point
-		if now.Minute() == 30 && now.Second() == 30 {
-			// write log
-			shared.TeeLog(
-				fmt.Sprintf("Excessive Residual for Cluster Group %v at minute 30: %vms / %v", x, tpf, universe.Heartbeat),
-			)
-
-			// determine how bad it is
-			exr := tpf / universe.Heartbeat
-
-			if exr >= 10 {
-				// increment counter
-				rerx++
-
-				// log egrogious excess
-				shared.TeeLog(
-					fmt.Sprintf("Cluster group %v - strike %v @ %v", x, rerx, tpf),
-				)
-
-				// short sleep
-				time.Sleep(1 * time.Second)
-
-				// residual reset
-				lastFrame = makeTimestamp()
-				tpf = universe.Heartbeat
-
-				// handle excessive residual shutdown
-				if rerx >= 3 {
-					// initiate shutdown
-					shared.TeeLog(
-						fmt.Sprintf("! Cluster group %v had %v terrible resisidual checks - rebooting to restore performance.", x, rerx),
-					)
-
-					// message explaining situation to players
-					sm := "A cluster group is experiencing extreme performance degredation, affecting the entire system. " +
-						"An emergency reboot will occur in 10 minutes!"
-
-					// send message to connected clients informing them of shutdown
-					b, _ := json.Marshal(models.ServerPushInfoMessage{
-						Message: sm,
-					})
-
-					msg := models.GameMessage{
-						MessageType: models.SharedMessageRegistry.PushInfo,
-						MessageBody: string(b),
-					}
-
-					go func(e *HeliaEngine) {
-						e.Universe.SendGlobalMessage(&msg)
-					}(e)
-
-					// schedule reboot
-					go func(e *HeliaEngine) {
-						// wait 10 minutes
-						time.Sleep(10 * time.Minute)
-
-						// do reboot (containers are automatically restarted on Azure)
-						shared.TeeLog("Unscheduled emergency reboot is happening!")
-						e.Shutdown()
-					}(e)
-				}
-			}
-		}
-	}
-
-	return tpf, lastFrame, rerx
-}
-
 // Wrapper so defer works as expected when updating a solar system
 func wrapSystemPeriodicUpdate(sol *universe.SolarSystem, e *HeliaEngine) {
 	// handle panics caused by solar system
@@ -362,6 +283,15 @@ func (e *HeliaEngine) Shutdown() {
 	// log progress
 	shared.TeeLog("! Server shutdown initiated")
 
+	// dump heap profile before saving
+	if shared.HeapProfileFile != nil {
+		// write data
+		pprof.WriteHeapProfile(shared.HeapProfileFile)
+
+		// flush to disk
+		shared.HeapProfileFile.Close()
+	}
+
 	// shut down simulation
 	shared.TeeLog("Stopping simulation...")
 	shutdownSignal = true
@@ -384,13 +314,17 @@ func (e *HeliaEngine) Shutdown() {
 		shared.CpuProfileFile.Close()
 	}
 
-	// upload executable and cpu profile
+	// load executable and cpu/heap profiles
 	cpuProf, f := shared.ReadFileBytes("cpu.prof")
 	heliaEx, g := shared.ReadFileBytes("main")
+	heapProf, h := shared.ReadFileBytes("heap.prof")
 
+	// make timestamp
+	ts := makeTimestamp()
+	exeUploaded := false
+
+	// upload profiling files
 	if f && g && bssReady {
-		// make timestamp
-		ts := makeTimestamp()
 
 		// profile
 		shared.TeeLog("Uploading cpu profile...")
@@ -402,14 +336,44 @@ func (e *HeliaEngine) Shutdown() {
 			shared.TeeLog(fmt.Sprintf("Profile uploaded: %v", v))
 		}
 
-		// executable
-		shared.TeeLog("Uploading executable...")
-		v, err = bss.UploadBytesToBlob(*heliaEx, fmt.Sprintf("%v-helia", ts), "application/octet-stream")
+		if !exeUploaded {
+			// executable
+			shared.TeeLog("Uploading executable...")
+			v, err = bss.UploadBytesToBlob(*heliaEx, fmt.Sprintf("%v-helia", ts), "application/octet-stream")
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("Error uploading executable: %v", err))
+			} else {
+				shared.TeeLog(fmt.Sprintf("Executable uploaded: %v", v))
+			}
+
+			exeUploaded = true
+		}
+	}
+
+	if h && g && bssReady {
+		// profile
+		shared.TeeLog("Uploading heap profile...")
+		v, err := bss.UploadBytesToBlob(*heapProf, fmt.Sprintf("%v-heap.prof", ts), "application/octet-stream")
 
 		if err != nil {
-			shared.TeeLog(fmt.Sprintf("Error uploading executable: %v", err))
+			shared.TeeLog(fmt.Sprintf("Error uploading heap profile: %v", err))
 		} else {
-			shared.TeeLog(fmt.Sprintf("Executable uploaded: %v", v))
+			shared.TeeLog(fmt.Sprintf("Profile uploaded: %v", v))
+		}
+
+		if !exeUploaded {
+			// executable
+			shared.TeeLog("Uploading executable...")
+			v, err = bss.UploadBytesToBlob(*heliaEx, fmt.Sprintf("%v-helia", ts), "application/octet-stream")
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("Error uploading executable: %v", err))
+			} else {
+				shared.TeeLog(fmt.Sprintf("Executable uploaded: %v", v))
+			}
+
+			exeUploaded = true
 		}
 	}
 
