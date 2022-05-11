@@ -18,6 +18,7 @@ import (
 
 var profileCpu = true
 var profileHeap = true
+var gcPercent = 500
 
 func main() {
 	// configure global tee logging
@@ -78,51 +79,6 @@ func main() {
 		http.ListenAndServe(fmt.Sprintf(":%v", httpListener.GetPort()), nil)
 	}()
 
-	// check whether to use Azure hacks
-	if httpListener.UseAzureHacks() {
-		shared.TeeLog("Enabling Azure Hacks!!!")
-
-		/* BEGIN AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
-
-		// adjust automatic garbage collection :activex: :roach party:
-		debug.SetGCPercent(500)
-
-		// emergency garbage collection routine
-		go func() {
-			var skips int = 0
-
-			for {
-				// throttle rate
-				time.Sleep(50 * time.Millisecond)
-
-				// get memory allocation
-				var m runtime.MemStats
-				runtime.ReadMemStats(&m)
-
-				// convert to megabytes
-				commitedMb := 0.000001 * float64(m.Alloc)
-
-				// disgusting... :hug: :party parrot:
-				if commitedMb > 5120 {
-					// invoke garbage collection and return memory to OS
-					debug.FreeOSMemory()
-
-					// log
-					shared.TeeLog(
-						fmt.Sprintf("Aggressive GC performed at %vMB after %v skips", commitedMb, skips),
-					)
-
-					// reset counter
-					skips = 0
-				} else {
-					skips++
-				}
-			}
-		}()
-
-		/* END AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
-	}
-
 	// run daily downtime jobs
 	shared.TeeLog("Running downtime jobs...")
 	downtimeRunner := engine.DownTimeRunner{}
@@ -156,6 +112,62 @@ func main() {
 
 	// give the user a chance to accept the self signed cert
 	http.HandleFunc("/dev/accept-cert", httpListener.HandleAcceptCert)
+
+	// check whether to use Azure hacks
+	if httpListener.UseAzureHacks() {
+		shared.TeeLog("Enabling Azure Hacks!!!")
+
+		/* BEGIN AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
+
+		// adjust automatic garbage collection :activex: :roach party:
+		debug.SetGCPercent(gcPercent)
+
+		// emergency garbage collection routine
+		go func() {
+			var skips int = 0
+
+			for {
+				// throttle rate
+				time.Sleep(50 * time.Millisecond)
+
+				// get memory allocation
+				var m runtime.MemStats
+				runtime.ReadMemStats(&m)
+
+				// convert to megabytes
+				commitedMb := 0.000001 * float64(m.Alloc)
+
+				if commitedMb > 6144 {
+					// emergency shutdown
+					shared.TeeLog(
+						"Emergency shutdown due to high memory usage!",
+					)
+
+					engine.Shutdown()
+				}
+
+				// disgusting... :hug: :party parrot:
+				if commitedMb > 5120 {
+					// invoke garbage collection and return memory to OS
+					debug.SetGCPercent(-1)
+					debug.FreeOSMemory()
+					debug.SetGCPercent(gcPercent)
+
+					// log
+					shared.TeeLog(
+						fmt.Sprintf("Aggressive GC performed at %vMB after %v skips", commitedMb, skips),
+					)
+
+					// reset counter
+					skips = 0
+				} else {
+					skips++
+				}
+			}
+		}()
+
+		/* END AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
+	}
 
 	// up and running!
 	shared.TeeLog("Helia is running!")
