@@ -386,6 +386,7 @@ func (e *HeliaEngine) Shutdown() {
 	}()
 }
 
+// Helper function to handle escalations from a solar system
 func handleEscalations(sol *universe.SolarSystem) {
 	// obtain lock
 	sol.Lock.Lock()
