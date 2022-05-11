@@ -137,7 +137,7 @@ func main() {
 				// convert to megabytes
 				commitedMb := 0.000001 * float64(m.Alloc)
 
-				if commitedMb > 6144 {
+				if commitedMb > 5120 {
 					// emergency shutdown
 					shared.TeeLog(
 						"Emergency shutdown due to high memory usage!",
@@ -147,7 +147,7 @@ func main() {
 				}
 
 				// disgusting... :hug: :party parrot:
-				if commitedMb > 5120 {
+				if commitedMb > 2048 {
 					// invoke garbage collection and return memory to OS
 					debug.SetGCPercent(-1)
 					debug.FreeOSMemory()
