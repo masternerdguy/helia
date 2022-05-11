@@ -85,7 +85,7 @@ func main() {
 		/* BEGIN AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
 
 		// adjust automatic garbage collection :activex: :roach party:
-		debug.SetGCPercent(1000)
+		debug.SetGCPercent(500)
 
 		// emergency garbage collection routine
 		go func() {
@@ -93,7 +93,7 @@ func main() {
 
 			for {
 				// throttle rate
-				time.Sleep(5 * time.Second)
+				time.Sleep(50 * time.Millisecond)
 
 				// get memory allocation
 				var m runtime.MemStats
@@ -103,7 +103,7 @@ func main() {
 				commitedMb := 0.000001 * float64(m.Alloc)
 
 				// disgusting... :hug: :party parrot:
-				if commitedMb > 6144 {
+				if commitedMb > 5120 {
 					// invoke garbage collection and return memory to OS
 					debug.FreeOSMemory()
 
