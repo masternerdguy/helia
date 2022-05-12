@@ -42,11 +42,6 @@ func (l *HTTPListener) GetPort() int {
 	return l.Configuration.Port
 }
 
-// Whether or not to use Azure workarounds due to the Basic App Service
-func (l *HTTPListener) UseAzureHacks() bool {
-	return l.Configuration.AzureHacks
-}
-
 // Responds to HTTP pings
 func (l *HTTPListener) HandlePing(w http.ResponseWriter, r *http.Request) {
 	// enable cors

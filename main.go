@@ -10,15 +10,14 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"runtime"
 	"runtime/debug"
 	"runtime/pprof"
 	"time"
 )
 
-var profileCpu = true
-var profileHeap = true
-var gcPercent = 500
+const profileCpu = true
+const profileHeap = true
+const gcPercent = 500
 
 func main() {
 	// configure global tee logging
@@ -113,78 +112,13 @@ func main() {
 	// give the user a chance to accept the self signed cert
 	http.HandleFunc("/dev/accept-cert", httpListener.HandleAcceptCert)
 
-	// check whether to use Azure hacks
-	if httpListener.UseAzureHacks() {
-		shared.TeeLog("Enabling Azure Hacks!!!")
-
-		/* BEGIN AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
-
-		// adjust automatic garbage collection :activex: :roach party:
-		debug.SetGCPercent(gcPercent)
-
-		// emergency garbage collection routine
-		go func() {
-			var skips int = 0
-
-			for {
-				// throttle rate
-				time.Sleep(50 * time.Millisecond)
-
-				// get system memory allocation
-				var m runtime.MemStats
-				runtime.ReadMemStats(&m)
-
-				// convert to megabytes
-				commitedMb := 0.000001 * float64(m.Sys)
-
-				if commitedMb > 5632 {
-					// emergency shutdown
-					shared.TeeLog(
-						"Emergency shutdown due to high memory usage!",
-					)
-
-					engine.Shutdown()
-				}
-
-				// disgusting... :hug: :party parrot:
-				if commitedMb > 4096 {
-					// disable automatic gc
-					debug.SetGCPercent(-1)
-					time.Sleep(time.Microsecond * 5)
-
-					// invoke garbage collection and return memory to OS
-					debug.FreeOSMemory()
-
-					// restore gc settings
-					debug.SetGCPercent(gcPercent)
-					time.Sleep(time.Microsecond * 5)
-
-					// log
-					shared.TeeLog(
-						fmt.Sprintf("Aggressive GC performed at %vMB after %v skips", commitedMb, skips),
-					)
-
-					// reset counter
-					skips = 0
-				} else {
-					skips++
-				}
-			}
-		}()
-
-		/* END AZURE APP SERVICE PERFORMANCE WORKAROUNDS */
-	}
-
 	// up and running!
 	shared.TeeLog("Helia is running!")
 
 	// don't exit
 	for {
 		// don't peg cpu
-		time.Sleep(15 * time.Minute)
-
-		// log goroutine count
-		shared.TeeLog(fmt.Sprintf("<TOTAL GOROUTINES> %v", runtime.NumGoroutine()))
+		time.Sleep(1 * time.Minute)
 
 		// disable automatic gc
 		debug.SetGCPercent(-1)
@@ -196,11 +130,6 @@ func main() {
 		// restore gc settings
 		debug.SetGCPercent(gcPercent)
 		time.Sleep(time.Microsecond * 5)
-
-		// log
-		shared.TeeLog(
-			fmt.Sprintf("Aggressive GC performed at 15th minute"),
-		)
 	}
 }
 

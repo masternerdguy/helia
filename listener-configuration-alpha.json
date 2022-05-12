@@ -1,5 +1,4 @@
 {
     "shutdownToken": "2555f823-455c-4a05-8849-9957814add62",
-    "port": 8000,
-    "azureHacks": true
+    "port": 8000
 }
