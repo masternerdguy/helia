@@ -549,6 +549,22 @@ func (s *Ship) PeriodicUpdate() {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
+	// perform guaranteed updates
+	s.alwaysPeriodicUpdate()
+
+	// check if docked or undocked at a station (docking with other objects not yet supported)
+	if s.DockedAtStationID == nil {
+		s.undockedPeriodicUpdate()
+	} else {
+		s.dockedPeriodicUpdate()
+	}
+
+	// fix any NaN weirdness
+	s.fixLocalNaNs()
+}
+
+// Perform periodic update steps that will always happen
+func (s *Ship) alwaysPeriodicUpdate() {
 	// update experience modifier
 	if s.ExperienceSheet != nil {
 		s.FlightExperienceModifier = s.GetExperienceModifier()
@@ -621,143 +637,143 @@ func (s *Ship) PeriodicUpdate() {
 
 	// run behaviour routine if applicable
 	s.behave()
+}
 
-	// check if docked or undocked at a station (docking with other objects not yet supported)
-	if s.DockedAtStationID == nil {
-		/* Is Undocked */
-		s.IsDocked = false
+// Perform periodic update steps that will only happen if undocked
+func (s *Ship) undockedPeriodicUpdate() {
+	/* Is Undocked */
+	s.IsDocked = false
 
-		// check autopilot
-		s.doUndockedAutopilot()
+	// check autopilot
+	s.doUndockedAutopilot()
 
-		// update position
-		s.PosX += s.VelX
-		s.PosY += s.VelY
+	// update position
+	s.PosX += s.VelX
+	s.PosY += s.VelY
 
-		// clamp theta
-		if s.Theta > 360 {
-			s.Theta -= 360
-		} else if s.Theta < 0 {
-			s.Theta += 360
-		}
+	// clamp theta
+	if s.Theta > 360 {
+		s.Theta -= 360
+	} else if s.Theta < 0 {
+		s.Theta += 360
+	}
 
-		// determine whether to recalculate real drag
-		rc := s.CurrentSystem.tickCounter%8 == 0
+	// determine whether to recalculate real drag
+	rc := s.CurrentSystem.tickCounter%8 == 0
 
-		// calculate felt drag
-		drag := s.GetRealSpaceDrag(rc)
+	// calculate felt drag
+	drag := s.GetRealSpaceDrag(rc)
 
-		dampX := drag * s.VelX
-		dampY := drag * s.VelY
+	dampX := drag * s.VelX
+	dampY := drag * s.VelY
 
-		// apply dampening
-		if math.Abs(dampX*(1+Epsilon)) >= math.Abs(s.VelX) {
-			s.VelX = 0
-		} else {
-			s.VelX -= dampX
-		}
-
-		if math.Abs(dampY*(1+Epsilon)) >= math.Abs(s.VelY) {
-			s.VelY = 0
-		} else {
-			s.VelY -= dampY
-		}
-
-		// update modules
-		for i := range s.Fitting.ARack {
-			s.Fitting.ARack[i].shipMountedOn = s
-			s.Fitting.ARack[i].Rack = "A"
-			s.Fitting.ARack[i].PeriodicUpdate()
-		}
-
-		for i := range s.Fitting.BRack {
-			s.Fitting.BRack[i].shipMountedOn = s
-			s.Fitting.BRack[i].Rack = "B"
-			s.Fitting.BRack[i].PeriodicUpdate()
-		}
-
-		for i := range s.Fitting.CRack {
-			s.Fitting.CRack[i].shipMountedOn = s
-			s.Fitting.CRack[i].Rack = "C"
-			s.Fitting.CRack[i].PeriodicUpdate()
-		}
-	} else {
-		/* Is Docked */
-		s.IsDocked = true
-
-		// validate station pointer
-		if s.DockedAtStation == nil {
-			// find station
-			station := s.CurrentSystem.stations[s.DockedAtStationID.String()]
-
-			// we aren't really docked i guess
-			if station == nil {
-				s.DockedAtStationID = nil
-			} else {
-				s.DockedAtStation = station
-			}
-		}
-
-		// disarm self destruct
-		s.DestructArmed = false
-
-		// make sure ship is still linked into frozen modules
-		for i := range s.Fitting.ARack {
-			s.Fitting.ARack[i].shipMountedOn = s
-			s.Fitting.ARack[i].Rack = "A"
-		}
-
-		for i := range s.Fitting.BRack {
-			s.Fitting.BRack[i].shipMountedOn = s
-			s.Fitting.BRack[i].Rack = "B"
-		}
-
-		for i := range s.Fitting.CRack {
-			s.Fitting.CRack[i].shipMountedOn = s
-			s.Fitting.CRack[i].Rack = "C"
-		}
-
-		// clamp to station
+	// apply dampening
+	if math.Abs(dampX*(1+Epsilon)) >= math.Abs(s.VelX) {
 		s.VelX = 0
+	} else {
+		s.VelX -= dampX
+	}
+
+	if math.Abs(dampY*(1+Epsilon)) >= math.Abs(s.VelY) {
 		s.VelY = 0
-		s.PosX = s.DockedAtStation.PosX
-		s.PosY = s.DockedAtStation.PosY
+	} else {
+		s.VelY -= dampY
+	}
 
-		// handle station workshop / warehouse
-		if !s.TemplateData.CanUndock {
-			/*
-			 * these are a special type of ship that allows a player to store and work with a large volume of items
-			 * in a station for a fee. this fee is deducted from the warehouse "ship"'s wallet and can run into the
-			 * negative. in order to re-board this ship to work with or retrieve the items, any defecit must be
-			 * settled with a cash transfer.
-			 *
-			 * the hourly fee is gradually assessed every tick.
-			 *
-			 * if there is nothing in in the warehouse's cargo bay, no fee is assesed.
-			 */
+	// update modules
+	for i := range s.Fitting.ARack {
+		s.Fitting.ARack[i].shipMountedOn = s
+		s.Fitting.ARack[i].Rack = "A"
+		s.Fitting.ARack[i].PeriodicUpdate()
+	}
 
-			// get total volume stored
-			warehousedVolume := s.TotalCargoBayVolumeUsed(false)
+	for i := range s.Fitting.BRack {
+		s.Fitting.BRack[i].shipMountedOn = s
+		s.Fitting.BRack[i].Rack = "B"
+		s.Fitting.BRack[i].PeriodicUpdate()
+	}
 
-			// get cost per hour per unit
-			baseHourlyCost := WarehouseCostPerHour
+	for i := range s.Fitting.CRack {
+		s.Fitting.CRack[i].shipMountedOn = s
+		s.Fitting.CRack[i].Rack = "C"
+		s.Fitting.CRack[i].PeriodicUpdate()
+	}
+}
 
-			// get fee to assess this tick
-			costPerHour := warehousedVolume * baseHourlyCost
-			secondsPerTick := float64(Heartbeat) / 1000.0
+// Perform periodic update steps that will only happen if docked
+func (s *Ship) dockedPeriodicUpdate() {
+	/* Is Docked */
+	s.IsDocked = true
 
-			costPerTick := (secondsPerTick * costPerHour) / 3600
+	// validate station pointer
+	if s.DockedAtStation == nil {
+		// find station
+		station := s.CurrentSystem.stations[s.DockedAtStationID.String()]
 
-			// deduct from wallet
-			s.Wallet -= costPerTick
+		// we aren't really docked i guess
+		if station == nil {
+			s.DockedAtStationID = nil
 		} else {
-			// check autopilot
-			s.doDockedAutopilot()
+			s.DockedAtStation = station
 		}
 	}
 
-	// fix any NaN weirdness
-	s.fixLocalNaNs()
+	// disarm self destruct
+	s.DestructArmed = false
+
+	// make sure ship is still linked into frozen modules
+	for i := range s.Fitting.ARack {
+		s.Fitting.ARack[i].shipMountedOn = s
+		s.Fitting.ARack[i].Rack = "A"
+	}
+
+	for i := range s.Fitting.BRack {
+		s.Fitting.BRack[i].shipMountedOn = s
+		s.Fitting.BRack[i].Rack = "B"
+	}
+
+	for i := range s.Fitting.CRack {
+		s.Fitting.CRack[i].shipMountedOn = s
+		s.Fitting.CRack[i].Rack = "C"
+	}
+
+	// clamp to station
+	s.VelX = 0
+	s.VelY = 0
+	s.PosX = s.DockedAtStation.PosX
+	s.PosY = s.DockedAtStation.PosY
+
+	// handle station workshop / warehouse
+	if !s.TemplateData.CanUndock {
+		/*
+		 * these are a special type of ship that allows a player to store and work with a large volume of items
+		 * in a station for a fee. this fee is deducted from the warehouse "ship"'s wallet and can run into the
+		 * negative. in order to re-board this ship to work with or retrieve the items, any defecit must be
+		 * settled with a cash transfer.
+		 *
+		 * the hourly fee is gradually assessed every tick.
+		 *
+		 * if there is nothing in in the warehouse's cargo bay, no fee is assesed.
+		 */
+
+		// get total volume stored
+		warehousedVolume := s.TotalCargoBayVolumeUsed(false)
+
+		// get cost per hour per unit
+		baseHourlyCost := WarehouseCostPerHour
+
+		// get fee to assess this tick
+		costPerHour := warehousedVolume * baseHourlyCost
+		secondsPerTick := float64(Heartbeat) / 1000.0
+
+		costPerTick := (secondsPerTick * costPerHour) / 3600
+
+		// deduct from wallet
+		s.Wallet -= costPerTick
+	} else {
+		// check autopilot
+		s.doDockedAutopilot()
+	}
 }
 
 // Helper function to reset any strange NaN values to zero
