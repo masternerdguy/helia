@@ -18,7 +18,7 @@ import (
 
 var profileCpu = true
 var profileHeap = true
-var gcPercent = 1000
+var gcPercent = 500
 
 func main() {
 	// configure global tee logging
@@ -130,14 +130,14 @@ func main() {
 				// throttle rate
 				time.Sleep(50 * time.Millisecond)
 
-				// get memory allocation
+				// get system memory allocation
 				var m runtime.MemStats
 				runtime.ReadMemStats(&m)
 
 				// convert to megabytes
-				commitedMb := 0.000001 * float64(m.HeapAlloc)
+				commitedMb := 0.000001 * float64(m.Sys)
 
-				if commitedMb > 5120 {
+				if commitedMb > 5632 {
 					// emergency shutdown
 					shared.TeeLog(
 						"Emergency shutdown due to high memory usage!",
@@ -147,11 +147,17 @@ func main() {
 				}
 
 				// disgusting... :hug: :party parrot:
-				if commitedMb > 2048 {
-					// invoke garbage collection and return memory to OS
+				if commitedMb > 4096 {
+					// disable automatic gc
 					debug.SetGCPercent(-1)
+					time.Sleep(time.Microsecond * 5)
+
+					// invoke garbage collection and return memory to OS
 					debug.FreeOSMemory()
+
+					// restore gc settings
 					debug.SetGCPercent(gcPercent)
+					time.Sleep(time.Microsecond * 5)
 
 					// log
 					shared.TeeLog(
@@ -175,10 +181,26 @@ func main() {
 	// don't exit
 	for {
 		// don't peg cpu
-		time.Sleep(30 * time.Minute)
+		time.Sleep(15 * time.Minute)
 
 		// log goroutine count
 		shared.TeeLog(fmt.Sprintf("<TOTAL GOROUTINES> %v", runtime.NumGoroutine()))
+
+		// disable automatic gc
+		debug.SetGCPercent(-1)
+		time.Sleep(time.Microsecond * 5)
+
+		// invoke garbage collection and return memory to OS
+		debug.FreeOSMemory()
+
+		// restore gc settings
+		debug.SetGCPercent(gcPercent)
+		time.Sleep(time.Microsecond * 5)
+
+		// log
+		shared.TeeLog(
+			fmt.Sprintf("Aggressive GC performed at 15th minute"),
+		)
 	}
 }
 
