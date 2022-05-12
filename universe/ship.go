@@ -593,23 +593,25 @@ func (s *Ship) alwaysPeriodicUpdate() {
 		}
 	}
 
-	// handle temporary modifiers
-	keptTemporaryModifiers := make([]TemporaryShipModifier, len(s.TemporaryModifiers))
+	if len(s.TemporaryModifiers) > 0 {
+		// handle temporary modifiers
+		keptTemporaryModifiers := make([]TemporaryShipModifier, 0)
 
-	for _, e := range s.TemporaryModifiers {
-		// eliminate if expired
-		if e.RemainingTicks <= 0 {
-			continue
+		for _, e := range s.TemporaryModifiers {
+			// eliminate if expired
+			if e.RemainingTicks <= 0 {
+				continue
+			}
+
+			// tick down
+			e.RemainingTicks--
+
+			// store
+			keptTemporaryModifiers = append(keptTemporaryModifiers, e)
 		}
 
-		// tick down
-		e.RemainingTicks--
-
-		// store
-		keptTemporaryModifiers = append(keptTemporaryModifiers, e)
+		s.TemporaryModifiers = keptTemporaryModifiers
 	}
-
-	s.TemporaryModifiers = keptTemporaryModifiers
 
 	// remove zero-quantity items from cargo bay
 	if s.CurrentSystem != nil && s.CurrentSystem.tickCounter%50 == 0 {
