@@ -615,7 +615,9 @@ func (s *Ship) alwaysPeriodicUpdate() {
 
 	// remove zero-quantity items from cargo bay
 	if s.CurrentSystem != nil && s.CurrentSystem.tickCounter%50 == 0 {
-		s.removeZeroQuantityItemsFromCargo()
+		if len(s.CargoBay.Items) > 0 {
+			s.removeZeroQuantityItemsFromCargo()
+		}
 	}
 
 	// null check
