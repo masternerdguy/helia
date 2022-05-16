@@ -198,7 +198,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 		itemType, err := itemTypeSvc.GetItemTypeByID(l.ItemTypeID)
 
 		if err != nil {
-			return nil, err
+			return u, err
 		}
 
 		// create item for slot
