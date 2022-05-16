@@ -112,6 +112,21 @@ func main() {
 	// give the user a chance to accept the self signed cert
 	http.HandleFunc("/dev/accept-cert", httpListener.HandleAcceptCert)
 
+	// handle panics that are otherwise unhandled
+	defer func() {
+		if r := recover(); r != nil {
+			// log error for inspection
+			shared.TeeLog(fmt.Sprintf("main panicked: %v", r))
+
+			// include stack trace
+			shared.TeeLog(fmt.Sprintf("stacktrace from panic: \n" + string(debug.Stack())))
+
+			// emergency shutdown
+			shared.TeeLog("! Emergency shutdown initiated due to main panic!")
+			engine.Shutdown()
+		}
+	}()
+
 	// up and running!
 	shared.TeeLog("Helia is running!")
 

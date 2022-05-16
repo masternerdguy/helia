@@ -3,6 +3,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"helia/shared"
 	"helia/sql"
 	"time"
 
@@ -198,6 +199,10 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 		itemType, err := itemTypeSvc.GetItemTypeByID(l.ItemTypeID)
 
 		if err != nil {
+			shared.TeeLog(
+				fmt.Sprintf("error finding item type [a rack]: %v::%v", err, l.ItemTypeID),
+			)
+
 			return u, err
 		}
 
@@ -240,6 +245,10 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 		itemType, err := itemTypeSvc.GetItemTypeByID(l.ItemTypeID)
 
 		if err != nil {
+			shared.TeeLog(
+				fmt.Sprintf("error finding item type [b rack]: %v::%v", err, l.ItemTypeID),
+			)
+
 			return nil, err
 		}
 
@@ -282,6 +291,10 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 		itemType, err := itemTypeSvc.GetItemTypeByID(l.ItemTypeID)
 
 		if err != nil {
+			shared.TeeLog(
+				fmt.Sprintf("error finding item type [c rack]: %v::%v", err, l.ItemTypeID),
+			)
+
 			return nil, err
 		}
 
