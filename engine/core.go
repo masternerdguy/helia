@@ -271,6 +271,10 @@ func (e *HeliaEngine) Shutdown() {
 		return
 	}
 
+	// shut down simulation
+	shared.TeeLog("Stopping simulation...")
+	shutdownSignal = true
+
 	// get blob storage service
 	bss, err := shared.LoadBlobStorageConfiguration()
 	bssReady := true
@@ -291,10 +295,6 @@ func (e *HeliaEngine) Shutdown() {
 		// flush to disk
 		shared.HeapProfileFile.Close()
 	}
-
-	// shut down simulation
-	shared.TeeLog("Stopping simulation...")
-	shutdownSignal = true
 
 	// wait for 30 seconds to give everything a chance to exit
 	time.Sleep(30 * time.Second)
