@@ -113,6 +113,7 @@ func main() {
 	http.HandleFunc("/dev/accept-cert", httpListener.HandleAcceptCert)
 
 	// handle panics that are otherwise unhandled
+	shared.TeeLog("Handling main panics...")
 	defer func() {
 		if r := recover(); r != nil {
 			// log error for inspection

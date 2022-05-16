@@ -261,7 +261,7 @@ func wrapSystemPeriodicUpdate(sol *universe.SolarSystem, e *HeliaEngine) {
 	sol.PeriodicUpdate()
 
 	// handle escalations from system
-	handleEscalations(sol)
+	handleEscalations(sol, e)
 }
 
 // Saves the current state of the simulation and halts
@@ -386,8 +386,23 @@ func (e *HeliaEngine) Shutdown() {
 	}()
 }
 
+// Helper function to handle panics caused by escalation goroutines
+func escalationRecover(sol *universe.SolarSystem, e *HeliaEngine) {
+	if r := recover(); r != nil {
+		// log error for inspection
+		shared.TeeLog(fmt.Sprintf("solar system [escalation] %v panicked: %v", sol.SystemName, r))
+
+		// include stack trace
+		shared.TeeLog(fmt.Sprintf("stacktrace from panic: \n" + string(debug.Stack())))
+
+		// emergency shutdown
+		shared.TeeLog("! Emergency shutdown initiated due to solar system [escalation] panic!")
+		e.Shutdown()
+	}
+}
+
 // Helper function to handle escalations from a solar system
-func handleEscalations(sol *universe.SolarSystem) {
+func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 	// obtain lock
 	sol.Lock.Lock()
 	defer sol.Lock.Unlock()
@@ -396,6 +411,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, mi := range sol.MovedItems {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// lock item
 			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
@@ -423,6 +441,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, mi := range sol.PackagedItems {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// lock item
 			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
@@ -450,6 +471,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, mi := range sol.UnpackagedItems {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// lock item
 			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
@@ -477,6 +501,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, mi := range sol.ChangedQuantityItems {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// lock item
 			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
@@ -508,6 +535,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// lock item
 			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
@@ -532,6 +562,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, mi := range sol.NewItems {
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// lock item
 			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
@@ -587,6 +620,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 		// handle escalation on another goroutine
 		go func(mi *universe.SellOrder, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// lock sell order
 			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
@@ -634,6 +670,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, mi := range sol.BoughtSellOrders {
 		// handle escalation on another goroutine
 		go func(mi *universe.SellOrder, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// lock sell order
 			mi.Lock.Lock()
 			defer mi.Lock.Unlock()
@@ -658,6 +697,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, ds := range sol.DeadShips {
 		// handle escalation on another goroutine
 		go func(ds *universe.Ship, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// remove ship from system
 			sol.RemoveShip(ds, true)
 
@@ -735,6 +777,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, rs := range sol.NPCNeedRespawn {
 		// handle escalation on another goroutine
 		go func(rs *universe.Ship, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// find their starting conditions
 			user, err := userSvc.GetUserByID(rs.UserID)
 
@@ -830,6 +875,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, rs := range sol.PlayerNeedRespawn {
 		// handle escalation on another goroutine
 		go func(rs *shared.GameClient, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// remove client from system
 			sol.RemoveClient(rs, true)
 
@@ -950,6 +998,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, rs := range sol.NewShipTickets {
 		// handle escalation on another goroutine
 		go func(rs *universe.NewShipTicket, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// create new ship for player
 			ps, err := CreateShipForPlayer(
 				rs.UserID,
@@ -991,6 +1042,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, rs := range sol.ShipSwitches {
 		// handle escalation on another goroutine
 		go func(rs *universe.ShipSwitch, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// update currently flown ship in database
 			err := userSvc.SetCurrentShipID(*rs.Client.UID, &rs.Target.ID)
 
@@ -1027,6 +1081,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, rs := range sol.SetNoLoad {
 		// handle escalation on another goroutine
 		go func(rs *universe.ShipNoLoadSet, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// update flag in database
 			err := shipSvc.SetNoLoad(rs.ID, rs.Flag)
 
@@ -1044,6 +1101,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, rs := range sol.UsedShipPurchases {
 		// handle escalation on another goroutine
 		go func(rs *universe.UsedShipPurchase, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// update owner in database
 			err := shipSvc.SetOwner(rs.ShipID, rs.UserID)
 
@@ -1097,6 +1157,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 	for _, rs := range sol.ShipRenames {
 		// handle escalation on another goroutine
 		go func(rs *universe.ShipRename, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// update name in database
 			err := shipSvc.Rename(rs.ShipID, rs.Name)
 
@@ -1118,6 +1181,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 		// handle escalation on another goroutine
 		go func(rs *shared.GameClient) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// get runs
 			runs := getSchematicRunsByUser(*rs.UID)
 
@@ -1197,6 +1263,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 		// handle escalation on another goroutine
 		go func(rs *universe.NewSchematicRunTicket, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// obtain locks
 			rs.Client.Lock.Lock()
 			defer rs.Client.Lock.Unlock()
@@ -1252,6 +1321,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 		// handle escalation on another goroutine
 		go func(mi *universe.NewFactionTicket, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// obtain lock on game client
 			mi.Client.Lock.Lock()
 			defer mi.Client.Lock.Unlock()
@@ -1421,6 +1493,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 		// handle escalation on another goroutine
 		go func(mi *universe.LeaveFactionTicket, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// obtain lock on game client
 			mi.Client.Lock.Lock()
 			defer mi.Client.Lock.Unlock()
@@ -1498,6 +1573,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 		// handle escalation on another goroutine
 		go func(mi *universe.JoinFactionTicket, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// null check
 			if mi.OwnerClient == nil {
 				shared.TeeLog(fmt.Sprintf("No owner client attached to join request: %v", mi))
@@ -1585,6 +1663,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 		// handle escalation on another goroutine
 		go func(rs *universe.ViewMembersTicket) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// null check
 			if rs.OwnerClient == nil {
 				return
@@ -1634,6 +1715,9 @@ func handleEscalations(sol *universe.SolarSystem) {
 
 		// handle escalation on another goroutine
 		go func(mi *universe.KickMemberTicket, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
 			// null check
 			if mi.OwnerClient == nil {
 				shared.TeeLog(fmt.Sprintf("No owner client attached to kick request: %v", mi))
