@@ -66,6 +66,26 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicHullLaser();
     } else if (b.gfxEffect === 'basic_general_laser') {
       this.vfxData = repo.basicGeneralLaser();
+    } else if (b.gfxEffect === 'extra_large_energy_siphon') {
+      this.vfxData = repo.xlUtilitySiphon();
+    } else if (b.gfxEffect === 'extra_large_shield_booster') {
+      this.vfxData = repo.xlShieldBooster();
+    } else if (b.gfxEffect === 'extra_large_shield_laser') {
+      this.vfxData = repo.xlShieldLaser();
+    } else if (b.gfxEffect === 'extra_large_hull_laser') {
+      this.vfxData = repo.xlHullLaser();
+    } else if (b.gfxEffect === 'extra_large_ore_harvester') {
+      this.vfxData = repo.xlOreHarvester();
+    } else if (b.gfxEffect === 'extra_large_ice_harvester') {
+      this.vfxData = repo.xlIceHarvester();
+    } else if (b.gfxEffect === 'extra_large_ice_miner') {
+      this.vfxData = repo.xlIceMiner();
+    } else if (b.gfxEffect === 'extra_large_aether_dragger') {
+      this.vfxData = repo.xlAetherDragger();
+    } else if (b.gfxEffect === 'extra_large_general_laser') {
+      this.vfxData = repo.xlGeneralLaser();
+    } else if (b.gfxEffect === 'extra_large_laser_tool') {
+      this.vfxData = repo.xlLaserTool();
     }
 
     this.maxLifeTime = this.vfxData?.duration ?? 0;

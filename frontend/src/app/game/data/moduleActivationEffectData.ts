@@ -19,6 +19,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  xlLaserTool(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 2400,
+      color: 'red',
+      filter: 'blur(4.9px)', // "feather"
+      thickness: 2.7,
+    };
+  }
+
   basicShieldLaser(): ModuleActivationEffectData {
     return {
       type: 'laser',
@@ -26,6 +36,16 @@ export class ModuleActivationEffectRepository {
       color: 'limegreen',
       filter: 'blur(1px)', // "feather"
       thickness: 0.4,
+    };
+  }
+
+  xlShieldLaser(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 2590,
+      color: 'limegreen',
+      filter: 'blur(6px)', // "feather"
+      thickness: 3.5,
     };
   }
 
@@ -39,6 +59,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  xlHullLaser(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 2818,
+      color: 'goldenrod',
+      filter: 'blur(7px)', // "feather"
+      thickness: 4.5,
+    };
+  }
+
   basicGeneralLaser(): ModuleActivationEffectData {
     return {
       type: 'laser',
@@ -46,6 +76,16 @@ export class ModuleActivationEffectRepository {
       color: 'wheat',
       filter: 'blur(1px)', // "feather"
       thickness: 0.5,
+    };
+  }
+
+  xlGeneralLaser(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 2650,
+      color: 'wheat',
+      filter: 'blur(4.2px)', // "feather"
+      thickness: 3.5,
     };
   }
 
@@ -69,6 +109,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  xlIceMiner(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 2260,
+      color: 'blue',
+      filter: 'blur(11.3px)', // "feather"
+      thickness: 3.7,
+    };
+  }
+
   basicIceHarvester(): ModuleActivationEffectData {
     return {
       type: 'laser',
@@ -79,6 +129,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  xlIceHarvester(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 3250,
+      color: 'darkblue',
+      filter: 'blur(17.2px)', // "feather"
+      thickness: 7.2,
+    };
+  }
+
   basicOreHarvester(): ModuleActivationEffectData {
     return {
       type: 'laser',
@@ -86,6 +146,16 @@ export class ModuleActivationEffectRepository {
       color: 'darkred',
       filter: 'blur(2px)', // "feather"
       thickness: 0.95,
+    };
+  }
+
+  xlOreHarvester(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 3975,
+      color: 'darkred',
+      filter: 'blur(11.3px)', // "feather"
+      thickness: 5.25,
     };
   }
 
@@ -119,6 +189,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  xlShieldBooster(): ModuleActivationEffectData {
+    return {
+      type: 'bubble_shield_boost',
+      duration: 725,
+      color: '#A1FA61',
+      filter: 'blur(25px)', // "feather"
+      thickness: 15,
+    };
+  }
+
   basicAetherDragger(): ModuleActivationEffectData {
     return {
       type: 'aether_drag',
@@ -126,6 +206,16 @@ export class ModuleActivationEffectRepository {
       color: '#dbf4ff',
       filter: 'blur(5px)', // "feather"
       thickness: 3,
+    };
+  }
+
+  xlAetherDragger(): ModuleActivationEffectData {
+    return {
+      type: 'aether_drag',
+      duration: 350000,
+      color: '#dbf4ff',
+      filter: 'blur(21px)', // "feather"
+      thickness: 15,
     };
   }
 
@@ -156,6 +246,16 @@ export class ModuleActivationEffectRepository {
       color: 'orange',
       filter: 'blur(9.28px)', // "feather"
       thickness: 1.2,
+    };
+  }
+
+  xlUtilitySiphon(): ModuleActivationEffectData {
+    return {
+      type: 'siphon',
+      duration: 2397,
+      color: 'orange',
+      filter: 'blur(45.16px)', // "feather"
+      thickness: 15.3,
     };
   }
 }
