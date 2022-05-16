@@ -66,25 +66,25 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicHullLaser();
     } else if (b.gfxEffect === 'basic_general_laser') {
       this.vfxData = repo.basicGeneralLaser();
-    } else if (b.gfxEffect === 'extra_large_energy_siphon') {
+    } else if (b.gfxEffect === 'xl_energy_siphon') {
       this.vfxData = repo.xlUtilitySiphon();
-    } else if (b.gfxEffect === 'extra_large_shield_booster') {
+    } else if (b.gfxEffect === 'xl_shield_booster') {
       this.vfxData = repo.xlShieldBooster();
-    } else if (b.gfxEffect === 'extra_large_shield_laser') {
+    } else if (b.gfxEffect === 'xl_shield_laser') {
       this.vfxData = repo.xlShieldLaser();
-    } else if (b.gfxEffect === 'extra_large_hull_laser') {
+    } else if (b.gfxEffect === 'xl_hull_laser') {
       this.vfxData = repo.xlHullLaser();
-    } else if (b.gfxEffect === 'extra_large_ore_harvester') {
+    } else if (b.gfxEffect === 'xl_ore_harvester') {
       this.vfxData = repo.xlOreHarvester();
-    } else if (b.gfxEffect === 'extra_large_ice_harvester') {
+    } else if (b.gfxEffect === 'xl_ice_harvester') {
       this.vfxData = repo.xlIceHarvester();
-    } else if (b.gfxEffect === 'extra_large_ice_miner') {
+    } else if (b.gfxEffect === 'xl_ice_miner') {
       this.vfxData = repo.xlIceMiner();
-    } else if (b.gfxEffect === 'extra_large_aether_dragger') {
+    } else if (b.gfxEffect === 'xl_aether_dragger') {
       this.vfxData = repo.xlAetherDragger();
-    } else if (b.gfxEffect === 'extra_large_general_laser') {
+    } else if (b.gfxEffect === 'xl_general_laser') {
       this.vfxData = repo.xlGeneralLaser();
-    } else if (b.gfxEffect === 'extra_large_laser_tool') {
+    } else if (b.gfxEffect === 'xl_laser_tool') {
       this.vfxData = repo.xlLaserTool();
     }
 
