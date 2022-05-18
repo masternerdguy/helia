@@ -18,3 +18,30 @@ CREATE OR REPLACE VIEW public.vw_modules_needsschematics
 ALTER TABLE public.vw_modules_needsschematics
     OWNER TO heliaagent;
 
+
+-- View: public.vw_itemtypes_industrial
+
+-- DROP VIEW public.vw_itemtypes_industrial;
+
+CREATE OR REPLACE VIEW public.vw_itemtypes_industrial
+ AS
+ SELECT q.id,
+    q.family,
+    q.name,
+    q.volume,
+    q.minprice,
+    q.maxprice,
+    q.silosize
+   FROM ( SELECT itemtypes.id,
+            itemtypes.family,
+            itemtypes.name,
+            (itemtypes.meta ->> 'volume'::text)::numeric AS volume,
+            ((itemtypes.meta -> 'industrialmarket'::text) ->> 'minprice'::text)::numeric AS minprice,
+            ((itemtypes.meta -> 'industrialmarket'::text) ->> 'maxprice'::text)::numeric AS maxprice,
+            ((itemtypes.meta -> 'industrialmarket'::text) ->> 'silosize'::text)::numeric AS silosize
+           FROM itemtypes) q
+  WHERE q.minprice IS NOT NULL AND q.maxprice IS NOT NULL AND q.volume IS NOT NULL AND q.silosize IS NOT NULL;
+
+ALTER TABLE public.vw_itemtypes_industrial
+    OWNER TO heliaagent;
+
