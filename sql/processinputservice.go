@@ -95,3 +95,31 @@ func (s ProcessInputService) GetProcessInputsByProcess(processID uuid.UUID) ([]P
 
 	return processinputs, err
 }
+
+// Used by worldfiller to create process inputs
+func (s ProcessInputService) NewProcessInputForWorldFiller(e ProcessInput) (*ProcessInput, error) {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// insert
+	sql := `
+				INSERT INTO public.processinputs(
+					id, itemtypeid, quantity, meta, processid)
+				VALUES ($1, $2, $3, $4, $5);
+			`
+
+	q, err := db.Query(sql, e.ID, e.ItemTypeID, e.Quantity, e.Meta, e.ProcessID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer q.Close()
+
+	// return pointer to inserted model
+	return &e, nil
+}

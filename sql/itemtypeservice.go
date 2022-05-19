@@ -23,6 +23,25 @@ type ItemType struct {
 	Meta   Meta `json:"meta"`
 }
 
+// Structure representing a row from the vw_itemtypes_industrial view
+type VwItemTypeIndustrial struct {
+	ID       uuid.UUID
+	Family   string
+	Name     string
+	MinPrice float64
+	MaxPrice float64
+	Volume   float64
+	SiloSize float64
+}
+
+// Structure representing a row from the vw_modules_needsschematics view
+type VwModuleNeedSchematic struct {
+	ID     uuid.UUID
+	Family string
+	Name   string
+	Meta   Meta `json:"meta"`
+}
+
 // Finds and returns an ItemType by its id
 func (s ItemTypeService) GetItemTypeByID(ItemTypeID uuid.UUID) (*ItemType, error) {
 	// get db handle
@@ -52,4 +71,110 @@ func (s ItemTypeService) GetItemTypeByID(ItemTypeID uuid.UUID) (*ItemType, error
 	default:
 		return nil, err
 	}
+}
+
+// Retrieves all item types with industrial view
+func (s ItemTypeService) GetVwItemTypeIndustrials() ([]VwItemTypeIndustrial, error) {
+	vws := make([]VwItemTypeIndustrial, 0)
+
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// load item types
+	sql :=
+		`
+			SELECT id, family, name, volume, minprice, maxprice, silosize
+			FROM public.vw_itemtypes_industrial;
+		`
+
+	rows, err := db.Query(sql)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		i := VwItemTypeIndustrial{}
+
+		// scan into structure
+		rows.Scan(&i.ID, &i.Family, &i.Name, &i.Volume, &i.MinPrice, &i.MaxPrice, &i.SiloSize)
+
+		// append to slice
+		vws = append(vws, i)
+	}
+
+	return vws, err
+}
+
+// Retrieves all module item types in need of schematics
+func (s ItemTypeService) GetVwModuleNeedSchematics() ([]VwModuleNeedSchematic, error) {
+	vws := make([]VwModuleNeedSchematic, 0)
+
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// load item types
+	sql :=
+		`
+			SELECT id, family, name, meta
+			FROM public.vw_modules_needsschematics;
+		`
+
+	rows, err := db.Query(sql)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		i := VwModuleNeedSchematic{}
+
+		// scan into structure
+		rows.Scan(&i.ID, &i.Family, &i.Name, &i.Meta)
+
+		// append to slice
+		vws = append(vws, i)
+	}
+
+	return vws, err
+}
+
+// Used to save generated item types in worldfiller
+func (s ItemTypeService) NewItemTypeForWorldFiller(e ItemType) (*ItemType, error) {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// insert
+	sql := `
+				INSERT INTO public.itemtypes(
+					id, family, name, meta)
+				VALUES ($1, $2, $3, $4);
+			`
+
+	q, err := db.Query(sql, e.ID, e.Family, e.Name, e.Meta)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer q.Close()
+
+	// return pointer to inserted model
+	return &e, nil
 }

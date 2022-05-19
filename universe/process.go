@@ -153,10 +153,10 @@ type ProcessOutput struct {
 
 // Structure representing the standardized metadata for item types on the industrial market
 type IndustrialMetadata struct {
-	MinPrice  int
-	MaxPrice  int
-	SiloSize  int
-	ProcessID *uuid.UUID
+	MinPrice  int        `json:"minprice"`
+	MaxPrice  int        `json:"maxprice"`
+	SiloSize  int        `json:"silosize"`
+	ProcessID *uuid.UUID `json:"process_id"`
 }
 
 // Fetches industrial market limits from item type metadata
