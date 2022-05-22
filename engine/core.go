@@ -185,10 +185,8 @@ func (e *HeliaEngine) Start() {
 			utcNow := time.Now().UTC()
 
 			if utcNow.Minute() == 0 {
-				// check for morning reboot (8am EDT)
-				if utcNow.Hour() == 12 {
-					needsReboot = true
-				} else if utcNow.Hour() == 20 { // check for afternoon reboot (4pm EDT)
+				// check for afternoon reboot (noon EDT)
+				if utcNow.Hour() == 16 {
 					needsReboot = true
 				} else if utcNow.Hour() == 4 { // check for midnight reboot (midnight EDT)
 					needsReboot = true
@@ -200,7 +198,7 @@ func (e *HeliaEngine) Start() {
 					shared.TeeLog("Automatic scheduled reboot will occur soon!")
 
 					// message explaining situation to players
-					sm := "During the open alpha period, Helia will reboot 3 times a day at 8 hour intervals. " +
+					sm := "During the open alpha period, Helia will reboot twice a day at 12 hour intervals. " +
 						"This is to help keep things running smoothly during this phase of development. " +
 						"A reboot will occur in ~10 minutes - please ensure you have gotten to a safe place " +
 						"before then. The server is expected to take ~30 minutes to reboot. As the project " +
