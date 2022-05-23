@@ -1,3 +1,5 @@
+drop view if exists vw_flattenactionreportsbyparty;
+
 -- View: public.vw_actionreports_involvedpartyids
 
 -- DROP VIEW public.vw_actionreports_involvedpartyids;
