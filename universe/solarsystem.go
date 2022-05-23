@@ -2373,20 +2373,23 @@ func (s *SolarSystem) updateMissiles() {
 	for _, k := range dropMissiles {
 		// get missile and backing module
 		mA := s.missiles[k]
-		m := mA.Module
 
-		// drop explosion for missile
-		expEffect, _ := m.ItemMeta.GetString("missile_explosion_effect")
-		expRad, _ := m.ItemMeta.GetFloat64("missile_explosion_radius")
+		if mA != nil && mA.Module != nil {
+			m := mA.Module
 
-		exp := models.GlobalPushPointEffectBody{
-			GfxEffect: expEffect,
-			PosX:      mA.PosX,
-			PosY:      mA.PosY,
-			Radius:    expRad,
+			// drop explosion for missile
+			expEffect, _ := m.ItemMeta.GetString("missile_explosion_effect")
+			expRad, _ := m.ItemMeta.GetFloat64("missile_explosion_radius")
+
+			exp := models.GlobalPushPointEffectBody{
+				GfxEffect: expEffect,
+				PosX:      mA.PosX,
+				PosY:      mA.PosY,
+				Radius:    expRad,
+			}
+
+			s.pushPointEffects = append(s.pushPointEffects, exp)
 		}
-
-		s.pushPointEffects = append(s.pushPointEffects, exp)
 
 		// remove from map
 		delete(s.missiles, k)
