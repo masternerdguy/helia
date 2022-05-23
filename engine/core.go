@@ -1841,6 +1841,34 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 	// clear kick member requests
 	sol.KickMembers = make([]*universe.KickMemberTicket, 0)
+
+	// iterate over view action report page requests
+	for id := range sol.ActionReportPages {
+		// capture reference
+		mi := sol.ActionReportPages[id]
+
+		// handle escalation on another goroutine
+		go func(mi *shared.ViewActionReportPageTicket, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
+			// null check
+			if mi.Client == nil {
+				shared.TeeLog(fmt.Sprintf("No client attached to action report request: %v", mi))
+				return
+			}
+
+			/*// send confirmation message to owner
+			go func(c *shared.GameClient) {
+				if c != nil {
+					c.WriteInfoMessage("kick success!")
+				}
+			}(mi.OwnerClient)*/
+		}(mi, sol)
+	}
+
+	// clear action report page requests
+	sol.ActionReportPages = make([]*shared.ViewActionReportPageTicket, 0)
 }
 
 func notifyClientOfWorkshopFee(c *shared.GameClient) {

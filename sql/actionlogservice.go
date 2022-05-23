@@ -223,7 +223,7 @@ type KillLogInvolvedParty struct {
 	UserID        uuid.UUID `json:"userID"`
 	FactionID     uuid.UUID `json:"factionID"`
 	CharacterName string    `json:"characterName"`
-	FactionName   string    `json:"factionNane"`
+	FactionName   string    `json:"factionName"`
 	IsNPC         bool      `json:"isNPC"`
 	LastAggressed time.Time `json:"lastAggressed"`
 	// aggressor ship info
