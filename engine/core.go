@@ -527,9 +527,8 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 	// iterate over changed meta items
 	for id := range sol.ChangedMetaItems {
-		// capture reference and remove from map
+		// capture reference
 		mi := sol.ChangedMetaItems[id]
-		delete(sol.ChangedMetaItems, id)
 
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
@@ -555,6 +554,9 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			}
 		}(mi, sol)
 	}
+
+	// clear changed meta items
+	sol.ChangedMetaItems = make([]*universe.Item, 0)
 
 	// iterate over new items
 	for _, mi := range sol.NewItems {
@@ -1173,9 +1175,8 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 	// iterate over clients in need of a schematic runs update
 	for id := range sol.SchematicRunViews {
-		// capture reference and remove from map
+		// capture reference
 		rs := sol.SchematicRunViews[id]
-		delete(sol.SchematicRunViews, id)
 
 		// handle escalation on another goroutine
 		go func(rs *shared.GameClient) {
@@ -1253,11 +1254,13 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 		}(rs)
 	}
 
+	// clear schematic run views
+	sol.SchematicRunViews = make([]*shared.GameClient, 0)
+
 	// iterate over newly invoked schematics
 	for id := range sol.NewSchematicRuns {
-		// capture reference and remove from map
+		// capture reference
 		rs := sol.NewSchematicRuns[id]
-		delete(sol.NewSchematicRuns, id)
 
 		// handle escalation on another goroutine
 		go func(rs *universe.NewSchematicRunTicket, sol *universe.SolarSystem) {
@@ -1311,11 +1314,13 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 		}(rs, sol)
 	}
 
+	// clear new schematic runs
+	sol.NewSchematicRuns = make([]*universe.NewSchematicRunTicket, 0)
+
 	// iterate over new faction requests
 	for id := range sol.NewFactions {
-		// capture reference and remove from map
+		// capture reference
 		mi := sol.NewFactions[id]
-		delete(sol.NewFactions, id)
 
 		// handle escalation on another goroutine
 		go func(mi *universe.NewFactionTicket, sol *universe.SolarSystem) {
@@ -1483,11 +1488,13 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 		}(mi, sol)
 	}
 
+	// clear new faction requests
+	sol.NewFactions = make([]*universe.NewFactionTicket, 0)
+
 	// iterate over leave faction requests
 	for id := range sol.LeaveFactions {
-		// capture reference and remove from map
+		// capture reference
 		mi := sol.LeaveFactions[id]
-		delete(sol.LeaveFactions, id)
 
 		// handle escalation on another goroutine
 		go func(mi *universe.LeaveFactionTicket, sol *universe.SolarSystem) {
@@ -1563,11 +1570,13 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 		}(mi, sol)
 	}
 
+	// clear leave faction requests
+	sol.LeaveFactions = make([]*universe.LeaveFactionTicket, 0)
+
 	// iterate over join faction requests
 	for id := range sol.JoinFactions {
-		// capture reference and remove from map
+		// capture reference
 		mi := sol.JoinFactions[id]
-		delete(sol.JoinFactions, id)
 
 		// handle escalation on another goroutine
 		go func(mi *universe.JoinFactionTicket, sol *universe.SolarSystem) {
@@ -1653,11 +1662,13 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 		}(mi, sol)
 	}
 
+	// clear join faction requests
+	sol.JoinFactions = make([]*universe.JoinFactionTicket, 0)
+
 	// iterate over clients in need of a faction member list
 	for id := range sol.ViewMembers {
-		// capture reference and remove from map
+		// capture reference
 		rs := sol.ViewMembers[id]
-		delete(sol.ViewMembers, id)
 
 		// handle escalation on another goroutine
 		go func(rs *universe.ViewMembersTicket) {
@@ -1705,11 +1716,13 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 		}(rs)
 	}
 
+	// clear view members
+	sol.ViewMembers = make([]*universe.ViewMembersTicket, 0)
+
 	// iterate over kick member requests
 	for id := range sol.KickMembers {
-		// capture reference and remove from map
+		// capture reference
 		mi := sol.KickMembers[id]
-		delete(sol.KickMembers, id)
 
 		// handle escalation on another goroutine
 		go func(mi *universe.KickMemberTicket, sol *universe.SolarSystem) {
@@ -1825,6 +1838,9 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			}(mi.OwnerClient)
 		}(mi, sol)
 	}
+
+	// clear kick member requests
+	sol.KickMembers = make([]*universe.KickMemberTicket, 0)
 }
 
 func notifyClientOfWorkshopFee(c *shared.GameClient) {

@@ -40,30 +40,30 @@ type SolarSystem struct {
 	newSystemChatMessages []models.ServerSystemChatBody
 	globalAckToken        int // counter for number of ticks this system has gone through since server start (daily restart is assumed)
 	Lock                  sync.Mutex
-	// event escalations to engine core (todo - turn all of these into slices)
-	PlayerNeedRespawn    []*shared.GameClient              // clients in need of a respawn by core
-	NPCNeedRespawn       []*Ship                           // NPCs in need of a respawn by core
-	DeadShips            []*Ship                           // dead ships in need of cleanup by core
-	MovedItems           []*Item                           // items moved to a new container in need of saving by core
-	PackagedItems        []*Item                           // items packaged in need of saving by core
-	UnpackagedItems      []*Item                           // items unpackaged in need of saving by core
-	ChangedQuantityItems []*Item                           // stacks of items that have changed quantity and need saving by core
-	NewItems             []*Item                           // stacks of items that are newly created and need to be saved by core
-	NewSellOrders        []*SellOrder                      // new sell orders in need of saving by core
-	BoughtSellOrders     []*SellOrder                      // sell orders that have been fulfilled in need of saving by core
-	NewShipTickets       []*NewShipTicket                  // newly purchased/delivered ships that need to be generated and saved by core
-	ShipSwitches         []*ShipSwitch                     // approved requests to switch a client to another ship in need of saving by core
-	SetNoLoad            []*ShipNoLoadSet                  // updates to the no load flag in need of saving by core
-	UsedShipPurchases    []*UsedShipPurchase               // purchased used ships that need to be hooked in and saved by core
-	ShipRenames          []*ShipRename                     // renamed ships that need to be saved by core
-	SchematicRunViews    map[string]*shared.GameClient     // requests for a schematic run summary
-	NewSchematicRuns     map[string]*NewSchematicRunTicket // newly invoked schematics that need to be started
-	NewFactions          map[string]*NewFactionTicket      // partially approved requests to create a new faction and automatically join it
-	LeaveFactions        map[string]*LeaveFactionTicket    // approved requests to leave a faction and rejoin the starter faction
-	JoinFactions         map[string]*JoinFactionTicket     // partially approved requests to join a player into a player faction
-	ViewMembers          map[string]*ViewMembersTicket     // approved requests to view player faction member list
-	KickMembers          map[string]*KickMemberTicket      // partially approved requests to kick a member from a player faction
-	ChangedMetaItems     map[string]*Item                  // items with changed metadata in need of saving
+	// event escalations to engine core
+	PlayerNeedRespawn    []*shared.GameClient     // clients in need of a respawn by core
+	NPCNeedRespawn       []*Ship                  // NPCs in need of a respawn by core
+	DeadShips            []*Ship                  // dead ships in need of cleanup by core
+	MovedItems           []*Item                  // items moved to a new container in need of saving by core
+	PackagedItems        []*Item                  // items packaged in need of saving by core
+	UnpackagedItems      []*Item                  // items unpackaged in need of saving by core
+	ChangedQuantityItems []*Item                  // stacks of items that have changed quantity and need saving by core
+	NewItems             []*Item                  // stacks of items that are newly created and need to be saved by core
+	NewSellOrders        []*SellOrder             // new sell orders in need of saving by core
+	BoughtSellOrders     []*SellOrder             // sell orders that have been fulfilled in need of saving by core
+	NewShipTickets       []*NewShipTicket         // newly purchased/delivered ships that need to be generated and saved by core
+	ShipSwitches         []*ShipSwitch            // approved requests to switch a client to another ship in need of saving by core
+	SetNoLoad            []*ShipNoLoadSet         // updates to the no load flag in need of saving by core
+	UsedShipPurchases    []*UsedShipPurchase      // purchased used ships that need to be hooked in and saved by core
+	ShipRenames          []*ShipRename            // renamed ships that need to be saved by core
+	SchematicRunViews    []*shared.GameClient     // requests for a schematic run summary
+	NewSchematicRuns     []*NewSchematicRunTicket // newly invoked schematics that need to be started
+	NewFactions          []*NewFactionTicket      // partially approved requests to create a new faction and automatically join it
+	LeaveFactions        []*LeaveFactionTicket    // approved requests to leave a faction and rejoin the starter faction
+	JoinFactions         []*JoinFactionTicket     // partially approved requests to join a player into a player faction
+	ViewMembers          []*ViewMembersTicket     // approved requests to view player faction member list
+	KickMembers          []*KickMemberTicket      // partially approved requests to kick a member from a player faction
+	ChangedMetaItems     []*Item                  // items with changed metadata in need of saving
 }
 
 // Initializes internal aspects of SolarSystem
@@ -97,14 +97,14 @@ func (s *SolarSystem) Initialize() {
 	s.SetNoLoad = make([]*ShipNoLoadSet, 0)
 	s.UsedShipPurchases = make([]*UsedShipPurchase, 0)
 	s.ShipRenames = make([]*ShipRename, 0)
-	s.SchematicRunViews = make(map[string]*shared.GameClient)
-	s.NewSchematicRuns = make(map[string]*NewSchematicRunTicket)
-	s.NewFactions = make(map[string]*NewFactionTicket)
-	s.LeaveFactions = make(map[string]*LeaveFactionTicket)
-	s.JoinFactions = make(map[string]*JoinFactionTicket)
-	s.ViewMembers = make(map[string]*ViewMembersTicket)
-	s.KickMembers = make(map[string]*KickMemberTicket)
-	s.ChangedMetaItems = make(map[string]*Item)
+	s.SchematicRunViews = make([]*shared.GameClient, 0)
+	s.NewSchematicRuns = make([]*NewSchematicRunTicket, 0)
+	s.NewFactions = make([]*NewFactionTicket, 0)
+	s.LeaveFactions = make([]*LeaveFactionTicket, 0)
+	s.JoinFactions = make([]*JoinFactionTicket, 0)
+	s.ViewMembers = make([]*ViewMembersTicket, 0)
+	s.KickMembers = make([]*KickMemberTicket, 0)
+	s.ChangedMetaItems = make([]*Item, 0)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -1463,7 +1463,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// data := evt.Body.(models.ClientViewSchematicRunsBody)
 
 				// escalate to core
-				s.SchematicRunViews[c.UID.String()] = c
+				s.SchematicRunViews = append(s.SchematicRunViews, c)
 			}
 		} else if evt.Type == msgRegistry.RunSchematic {
 			if sh != nil {
@@ -1574,7 +1574,7 @@ func (s *SolarSystem) processClientEventQueues() {
 						SchematicItem: item,
 					}
 
-					s.NewSchematicRuns[item.ID.String()] = &t
+					s.NewSchematicRuns = append(s.NewSchematicRuns, &t)
 					item.SchematicInUse = true
 				}
 			}
@@ -1637,7 +1637,7 @@ func (s *SolarSystem) processClientEventQueues() {
 						HomeStationID: *sh.DockedAtStationID,
 					}
 
-					s.NewFactions[c.UID.String()] = &t
+					s.NewFactions = append(s.NewFactions, &t)
 				}
 			}
 		} else if evt.Type == msgRegistry.LeaveFaction {
@@ -1666,7 +1666,7 @@ func (s *SolarSystem) processClientEventQueues() {
 						Client: c,
 					}
 
-					s.LeaveFactions[c.UID.String()] = &t
+					s.LeaveFactions = append(s.LeaveFactions, &t)
 				}
 			}
 		} else if evt.Type == msgRegistry.ApplyToFaction {
@@ -1822,11 +1822,11 @@ func (s *SolarSystem) processClientEventQueues() {
 			}
 
 			// escalate to core for final approval and handling
-			s.JoinFactions[cID.String()] = &JoinFactionTicket{
+			s.JoinFactions = append(s.JoinFactions, &JoinFactionTicket{
 				UserID:      data.UserID,
 				FactionID:   sh.FactionID,
 				OwnerClient: c,
-			}
+			})
 
 			// remove application on separate goroutine
 			go func(f *Faction, userID uuid.UUID) {
@@ -1903,10 +1903,10 @@ func (s *SolarSystem) processClientEventQueues() {
 			}
 
 			// escalate to core
-			s.ViewMembers[oID.String()] = &ViewMembersTicket{
+			s.ViewMembers = append(s.ViewMembers, &ViewMembersTicket{
 				FactionID:   sh.FactionID,
 				OwnerClient: c,
-			}
+			})
 		} else if evt.Type == msgRegistry.KickMember {
 			// extract data
 			data := evt.Body.(models.ClientKickMemberBody)
@@ -1942,11 +1942,11 @@ func (s *SolarSystem) processClientEventQueues() {
 			}
 
 			// escalate to core for final validation and handling
-			s.KickMembers[cID.String()] = &KickMemberTicket{
+			s.KickMembers = append(s.KickMembers, &KickMemberTicket{
 				UserID:      data.UserID,
 				FactionID:   sh.FactionID,
 				OwnerClient: c,
-			}
+			})
 		} else if evt.Type == msgRegistry.UseModKit {
 			if sh != nil {
 				// extract data
@@ -2111,7 +2111,7 @@ func (s *SolarSystem) processClientEventQueues() {
 
 					// save module
 					module.CoreDirty = true
-					s.ChangedMetaItems[module.ID.String()] = module
+					s.ChangedMetaItems = append(s.ChangedMetaItems, module)
 				}
 			}
 		} else if evt.Type == msgRegistry.ViewActionReportsPage {

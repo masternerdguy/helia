@@ -303,7 +303,7 @@ export function clientStart(
   engineSack.windowManager.manageWindow(engineSack.systemChatWindow, '⋉');
   engineSack.windowManager.manageWindow(engineSack.experienceSheetWindow, '✇');
   engineSack.windowManager.manageWindow(engineSack.schematicRunsWindow, '⨻');
-  // engineSack.windowManager.manageWindow(engineSack.actionReportsWindow, 'ⓚ');
+  engineSack.windowManager.manageWindow(engineSack.actionReportsWindow, 'ⓚ');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
