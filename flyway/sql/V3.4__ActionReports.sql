@@ -20,3 +20,33 @@ CREATE OR REPLACE VIEW public.vw_actionreports_involvedpartyids
 ALTER TABLE public.vw_actionreports_involvedpartyids
     OWNER TO heliaagent;
 
+-- View: public.vw_actionreports_summary
+
+-- DROP VIEW public.vw_actionreports_summary;
+
+CREATE OR REPLACE VIEW public.vw_actionreports_summary
+ AS
+ SELECT (((ar.actionreport ->> 'header'::text)::jsonb) ->> 'isNPC'::text)::boolean AS victim_isnpc,
+    ((ar.actionreport ->> 'header'::text)::jsonb) ->> 'victimName'::text AS victim_name,
+    ((ar.actionreport ->> 'header'::text)::jsonb) ->> 'victimShipTemplateName'::text AS victim_shiptemplatename,
+    ((ar.actionreport ->> 'header'::text)::jsonb) ->> 'victimFactionName'::text AS victim_factionname,
+    ((ar.actionreport ->> 'header'::text)::jsonb) ->> 'solarSystemName'::text AS solarsystemname,
+    ((ar.actionreport ->> 'header'::text)::jsonb) ->> 'regionName'::text AS regionname,
+    jsonb_array_length(jsonb_path_query_array((ar.actionreport ->> 'involvedParties'::text)::jsonb, '$."userID"'::jsonpath)) AS parties,
+    ar."timestamp",
+    r.userid AS search_userid
+   FROM ( SELECT q.id,
+            q.userid
+           FROM ( SELECT vwa.id,
+                    TRIM(BOTH '""'::text FROM vwa.partyid)::uuid AS userid
+                   FROM vw_actionreports_involvedpartyids vwa
+                UNION
+                 SELECT actionreports.id,
+                    TRIM(BOTH '""'::text FROM ((actionreports.actionreport ->> 'header'::text)::jsonb) ->> 'victimID'::text)::uuid AS userid
+                   FROM actionreports) q
+          GROUP BY q.id, q.userid) r
+     JOIN actionreports ar ON r.id = ar.id;
+
+ALTER TABLE public.vw_actionreports_summary
+    OWNER TO heliaagent;
+
