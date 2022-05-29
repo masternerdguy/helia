@@ -797,7 +797,7 @@ function handleInfoMessageFromServer(d: GameMessage) {
   // parse body
   const msg = JSON.parse(d.body) as ServerInfoMessage;
 
-  // move push error window to top
+  // move push info window to top
   engineSack.windows = [
     engineSack.pushInfoWindow,
     ...engineSack.windows.filter((item) => item !== engineSack.pushInfoWindow),
@@ -1649,6 +1649,17 @@ function handleWindowResize() {
   engineSack.player.currentSystem.backplateValid = false;
 }
 
-function copyToClipboard(s: string) {
+function copyToClipboard(s: string, msg: string) {
+  // copy text to clipboard
   ClipboardJS.copy(s);
+
+  // move push info window to top
+  engineSack.windows = [
+    engineSack.pushInfoWindow,
+    ...engineSack.windows.filter((item) => item !== engineSack.pushInfoWindow),
+  ];
+
+  // show the push info window
+  engineSack.pushInfoWindow.setText(msg);
+  engineSack.pushInfoWindow.setHidden(false);
 }
