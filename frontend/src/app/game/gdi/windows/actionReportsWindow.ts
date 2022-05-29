@@ -1,7 +1,10 @@
 import { heliaDateFromString, printHeliaDate } from '../../engineMath';
-import { Player } from '../../engineModels/player';
 import { WsService } from '../../ws.service';
-import { ClientViewActionReportsPage, ServerActionReportsPage, ServerActionReportSummary } from '../../wsModels/bodies/viewActionReportsPage';
+import {
+  ClientViewActionReportsPage,
+  ServerActionReportsPage,
+  ServerActionReportSummary,
+} from '../../wsModels/bodies/viewActionReportsPage';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { FontSize } from '../base/gdiStyle';
 import { GDIWindow } from '../base/gdiWindow';
@@ -13,7 +16,6 @@ export class ActionReportsWindow extends GDIWindow {
 
   private pageData: ServerActionReportsPage;
   private wsSvc: WsService;
-  private player: Player;
   private page: number;
   private pageSize: number;
 
@@ -54,7 +56,19 @@ export class ActionReportsWindow extends GDIWindow {
     this.reportView.setY(0);
 
     this.reportView.setFont(FontSize.normal);
-    this.reportView.setOnClick(() => {});
+    this.reportView.setOnClick((r) => {
+      const row = r as ActionReportWindowRow;
+
+      if (row.summary) {
+        // todo
+      } else {
+        if (row.listString() == `==> Next Page`) {
+          this.page++;
+        } else if (row.listString() == `<== Previous Page`) {
+          this.page--;
+        }
+      }
+    });
 
     // request updates on show
     this.setOnShow(() => {
@@ -82,21 +96,33 @@ export class ActionReportsWindow extends GDIWindow {
         const idx = this.reportView.getSelectedIndex();
 
         // header
-        rows.push(
-          makeTextRow(`== Page ${this.pageData.page + 1} ==`)
-        );
+        rows.push(makeTextRow(`---- Page ${this.pageData.page + 1} ----`));
 
         if (this.pageData.page != this.page) {
-          rows.push(
-            makeTextRow(`Loading page ${this.page + 1}...`)
-          );
+          rows.push(makeTextRow(`Loading page ${this.page + 1}...`));
         } else {
           // spacer
           rows.push(makeSpacerRow());
 
-          // summary rows
-          for (const r of this.pageData.logs) {
-            rows.push(makeReportRow(r));
+          // navigation
+          if (this.pageData.logs.length > 0) {
+            rows.push(makeTextRow(`==> Next Page`));
+          }
+
+          if (this.page > 0) {
+            rows.push(makeTextRow(`<== Previous Page`));
+          }
+
+          // spacer
+          rows.push(makeSpacerRow());
+
+          if (this.pageData.logs.length == 0) {
+            rows.push(makeTextRow(`Nothing to display.`));
+          } else {
+            // summary rows
+            for (const r of this.pageData.logs) {
+              rows.push(makeReportRow(r));
+            }
           }
         }
 
@@ -110,10 +136,6 @@ export class ActionReportsWindow extends GDIWindow {
 
   setWsService(wsSvc: WsService) {
     this.wsSvc = wsSvc;
-  }
-
-  setPlayer(player: Player) {
-    this.player = player;
   }
 
   setPageData(page: ServerActionReportsPage) {
@@ -137,14 +159,16 @@ function makeReportRow(s: ServerActionReportSummary): ActionReportWindowRow {
     summary: s,
     actions: ['Copy'],
     listString: () => {
-      return ` ${fixedString(s.victim, 16)}` +
-             ` ${fixedString(s.ship, 16)}` +
-             ` ${fixedString("[" + s.ticker + "]", 5)}` +
-             ` ${fixedString(quantity(s.parties), 8)}` +
-             ` ${fixedString(s.systemName, 16)}` +
-             ` ${printHeliaDate(heliaDateFromString(s.timestamp))}`;
-    }
-  }
+      return (
+        ` ${fixedString(s.victim, 16)}` +
+        ` ${fixedString(s.ship, 16)}` +
+        ` ${fixedString('[' + s.ticker + ']', 5)}` +
+        ` ${fixedString(quantity(s.parties), 8)}` +
+        ` ${fixedString(s.systemName, 16)}` +
+        ` ${printHeliaDate(heliaDateFromString(s.timestamp))}`
+      );
+    },
+  };
 }
 
 function makeTextRow(s: string): ActionReportWindowRow {
@@ -153,8 +177,8 @@ function makeTextRow(s: string): ActionReportWindowRow {
     actions: [],
     listString: () => {
       return `${s}`;
-    }
-  }
+    },
+  };
 }
 
 function makeSpacerRow(): ActionReportWindowRow {
@@ -163,8 +187,8 @@ function makeSpacerRow(): ActionReportWindowRow {
     actions: [],
     listString: () => {
       return ``;
-    }
-  }
+    },
+  };
 }
 
 function fixedString(str: string, width: number): string {

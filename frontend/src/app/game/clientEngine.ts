@@ -937,7 +937,6 @@ function handleCurrentShipUpdate(d: GameMessage) {
 
   // update action reports window
   engineSack.actionReportsWindow.setWsService(engineSack.wsSvc);
-  engineSack.actionReportsWindow.setPlayer(engineSack.player);
 }
 
 function handleFactionUpdate(d: GameMessage) {
@@ -1033,7 +1032,7 @@ function handleActionReportsPage(d: GameMessage) {
   }
 
   // update action reports window
-  engineSack.actionReportsWindow.setPageData(msg)
+  engineSack.actionReportsWindow.setPageData(msg);
 }
 
 // clears the screen

@@ -13,7 +13,7 @@ export class ServerActionReportSummary {
   id: string;
   victim: string;
   ship: string;
-  ticker: string
+  ticker: string;
   timestamp: string;
   systemName: string;
   regionName: string;
