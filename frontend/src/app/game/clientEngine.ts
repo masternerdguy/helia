@@ -1032,8 +1032,6 @@ function handleActionReportsPage(d: GameMessage) {
     msg.logs = [];
   }
 
-  console.log(msg);
-
   // update action reports window
   engineSack.actionReportsWindow.setPageData(msg)
 }

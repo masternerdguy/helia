@@ -940,10 +940,11 @@ type ServerActionReportSummary struct {
 	ID                     uuid.UUID `json:"id"`
 	VictimName             string    `json:"victim"`
 	VictimShipTemplateName string    `json:"ship"`
-	VictimFactionName      string    `json:"victimFaction"`
+	VictimTicker           string    `json:"ticker"`
 	Timestamp              time.Time `json:"timestamp"`
 	SystemName             string    `json:"systemName"`
 	RegionName             string    `json:"regionName"`
+	Parties                int       `json:"parties"`
 }
 
 // Structure represening a copy-pastable report of the death of a ship

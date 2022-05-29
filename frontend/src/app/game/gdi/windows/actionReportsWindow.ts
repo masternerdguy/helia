@@ -1,6 +1,7 @@
+import { heliaDateFromString, printHeliaDate } from '../../engineMath';
 import { Player } from '../../engineModels/player';
 import { WsService } from '../../ws.service';
-import { ClientViewActionReportsPage, ServerActionReportsPage } from '../../wsModels/bodies/viewActionReportsPage';
+import { ClientViewActionReportsPage, ServerActionReportsPage, ServerActionReportSummary } from '../../wsModels/bodies/viewActionReportsPage';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { FontSize } from '../base/gdiStyle';
 import { GDIWindow } from '../base/gdiWindow';
@@ -18,7 +19,7 @@ export class ActionReportsWindow extends GDIWindow {
 
   initialize() {
     // set dimensions
-    this.setWidth(800);
+    this.setWidth(850);
     this.setHeight(400);
 
     // initialize
@@ -35,7 +36,7 @@ export class ActionReportsWindow extends GDIWindow {
     this.actionView.setHeight(400);
     this.actionView.initialize();
 
-    this.actionView.setX(700);
+    this.actionView.setX(750);
     this.actionView.setY(0);
 
     this.actionView.setFont(FontSize.normal);
@@ -45,7 +46,7 @@ export class ActionReportsWindow extends GDIWindow {
     });
 
     // setup info view
-    this.reportView.setWidth(700);
+    this.reportView.setWidth(750);
     this.reportView.setHeight(400);
     this.reportView.initialize();
 
@@ -73,7 +74,38 @@ export class ActionReportsWindow extends GDIWindow {
   }
 
   periodicUpdate() {
-    //
+    if (!this.isHidden()) {
+      if (this.pageData) {
+        // set up for redraw
+        const rows: ActionReportWindowRow[] = [];
+        const scroll = this.reportView.getScroll();
+        const idx = this.reportView.getSelectedIndex();
+
+        // header
+        rows.push(
+          makeTextRow(`== Page ${this.pageData.page + 1} ==`)
+        );
+
+        if (this.pageData.page != this.page) {
+          rows.push(
+            makeTextRow(`Loading page ${this.page + 1}...`)
+          );
+        } else {
+          // spacer
+          rows.push(makeSpacerRow());
+
+          // summary rows
+          for (const r of this.pageData.logs) {
+            rows.push(makeReportRow(r));
+          }
+        }
+
+        // update view
+        this.reportView.setItems(rows);
+        this.reportView.setScroll(scroll);
+        this.reportView.setSelectedIndex(idx);
+      }
+    }
   }
 
   setWsService(wsSvc: WsService) {
@@ -98,4 +130,73 @@ export class ActionReportsWindow extends GDIWindow {
       this.wsSvc.sendMessage(MessageTypes.ViewActionReportsPage, b);
     }, 200);
   }
+}
+
+function makeReportRow(s: ServerActionReportSummary): ActionReportWindowRow {
+  return {
+    summary: s,
+    actions: ['Copy'],
+    listString: () => {
+      return ` ${fixedString(s.victim, 16)}` +
+             ` ${fixedString(s.ship, 16)}` +
+             ` ${fixedString("[" + s.ticker + "]", 5)}` +
+             ` ${fixedString(quantity(s.parties), 8)}` +
+             ` ${fixedString(s.systemName, 16)}` +
+             ` ${printHeliaDate(heliaDateFromString(s.timestamp))}`;
+    }
+  }
+}
+
+function makeTextRow(s: string): ActionReportWindowRow {
+  return {
+    summary: undefined,
+    actions: [],
+    listString: () => {
+      return `${s}`;
+    }
+  }
+}
+
+function makeSpacerRow(): ActionReportWindowRow {
+  return {
+    summary: undefined,
+    actions: [],
+    listString: () => {
+      return ``;
+    }
+  }
+}
+
+function fixedString(str: string, width: number): string {
+  if (str === undefined || str == null) {
+    return ''.padEnd(width);
+  }
+
+  return str.substr(0, width).padEnd(width);
+}
+
+function quantity(d: number): string {
+  let o = `${d}`;
+
+  // include metric prefix if needed
+  if (d >= 1000000000000000) {
+    o = `${(d / 1000000000000000).toFixed(2)}P`;
+  } else if (d >= 1000000000000) {
+    o = `${(d / 1000000000000).toFixed(2)}T`;
+  } else if (d >= 1000000000) {
+    o = `${(d / 1000000000).toFixed(2)}G`;
+  } else if (d >= 1000000) {
+    o = `${(d / 1000000).toFixed(2)}M`;
+  } else if (d >= 1000) {
+    o = `${(d / 1000).toFixed(2)}k`;
+  }
+
+  return o;
+}
+
+class ActionReportWindowRow {
+  summary: ServerActionReportSummary;
+  actions: string[];
+
+  listString: () => string;
 }

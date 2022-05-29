@@ -1876,10 +1876,11 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 					ID:                     v.ID,
 					VictimName:             v.VictimName,
 					VictimShipTemplateName: v.VictimShipTemplateName,
-					VictimFactionName:      v.VictimFactionName,
+					VictimTicker:           v.VictimTicker,
 					Timestamp:              v.Timestamp,
 					SystemName:             v.SolarSystemName,
 					RegionName:             v.RegionName,
+					Parties:                v.Parties,
 				})
 			}
 

@@ -32,7 +32,7 @@ type ActionReportSummary struct {
 	VictimIsNPC            bool
 	VictimName             string
 	VictimShipTemplateName string
-	VictimFactionName      string
+	VictimTicker           string
 	SolarSystemName        string
 	RegionName             string
 	Parties                int
@@ -141,7 +141,7 @@ func (s ActionReportService) GetActionReportSummariesByUserID(userID uuid.UUID, 
 	// load action reports
 	sql := `
 				SELECT 
-					victim_isnpc, victim_name, victim_shiptemplatename, victim_factionname, 
+					victim_isnpc, victim_name, victim_shiptemplatename, victim_ticker, 
 					solarsystemname, regionname, parties, "timestamp", search_userid, id
 				FROM public.vw_actionreports_summary
 				WHERE search_userid = $1
@@ -164,7 +164,7 @@ func (s ActionReportService) GetActionReportSummariesByUserID(userID uuid.UUID, 
 		// scan into report structure
 		rows.Scan(
 			&r.VictimIsNPC, &r.VictimName, &r.VictimShipTemplateName,
-			&r.VictimFactionName, &r.SolarSystemName, &r.RegionName,
+			&r.VictimTicker, &r.SolarSystemName, &r.RegionName,
 			&r.Parties, &r.Timestamp, &r.SearchUserID, &r.ID,
 		)
 

@@ -13,8 +13,9 @@ export class ServerActionReportSummary {
   id: string;
   victim: string;
   ship: string;
-  victimFaction: string
+  ticker: string
   timestamp: string;
   systemName: string;
-  regionName: string; 
+  regionName: string;
+  parties: number;
 }
