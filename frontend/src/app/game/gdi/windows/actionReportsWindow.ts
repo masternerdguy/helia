@@ -1,6 +1,6 @@
 import { Player } from '../../engineModels/player';
 import { WsService } from '../../ws.service';
-import { ClientViewActionReportsPage } from '../../wsModels/bodies/viewActionReportsPage';
+import { ClientViewActionReportsPage, ServerActionReportsPage } from '../../wsModels/bodies/viewActionReportsPage';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { FontSize } from '../base/gdiStyle';
 import { GDIWindow } from '../base/gdiWindow';
@@ -10,6 +10,7 @@ export class ActionReportsWindow extends GDIWindow {
   private actionView: GDIList = new GDIList();
   private reportView: GDIList = new GDIList();
 
+  private pageData: ServerActionReportsPage;
   private wsSvc: WsService;
   private player: Player;
   private page: number;
@@ -81,6 +82,10 @@ export class ActionReportsWindow extends GDIWindow {
 
   setPlayer(player: Player) {
     this.player = player;
+  }
+
+  setPageData(page: ServerActionReportsPage) {
+    this.pageData = page;
   }
 
   private refreshPage() {

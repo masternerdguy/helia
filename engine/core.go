@@ -1858,12 +1858,42 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				return
 			}
 
-			/*// send confirmation message to owner
-			go func(c *shared.GameClient) {
-				if c != nil {
-					c.WriteInfoMessage("kick success!")
-				}
-			}(mi.OwnerClient)*/
+			// pull report summaries
+			summaries, err := actionReportSvc.GetActionReportSummariesByUserID(*mi.Client.UID, mi.Page*mi.Take, mi.Take)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("Error retrieving action report summary page: %v", err))
+				return
+			}
+
+			// map for transmission
+			page := models.ServerActionReportsPage{
+				Page: mi.Page,
+			}
+
+			for _, v := range summaries {
+				page.Logs = append(page.Logs, models.ServerActionReportSummary{
+					ID:                     v.ID,
+					VictimName:             v.VictimName,
+					VictimShipTemplateName: v.VictimShipTemplateName,
+					VictimFactionName:      v.VictimFactionName,
+					Timestamp:              v.Timestamp,
+					SystemName:             v.SolarSystemName,
+					RegionName:             v.RegionName,
+				})
+			}
+
+			// send message to client containing page
+			b, _ := json.Marshal(page)
+
+			msg := models.GameMessage{
+				MessageType: models.SharedMessageRegistry.ActionReportsPage,
+				MessageBody: string(b),
+			}
+
+			go func() {
+				mi.Client.WriteMessage(&msg)
+			}()
 		}(mi, sol)
 	}
 

@@ -937,11 +937,13 @@ type ServerActionReportDetail struct {
 
 // Structure containing a low-overhead action report row
 type ServerActionReportSummary struct {
-	ID         uuid.UUID `json:"id"`
-	VictimName string    `json:"victim"`
-	VictimShip string    `json:"ship"`
-	Timestamp  string    `json:"timestamp"`
-	SystemName string    `json:"systemName"`
+	ID                     uuid.UUID `json:"id"`
+	VictimName             string    `json:"victim"`
+	VictimShipTemplateName string    `json:"ship"`
+	VictimFactionName      string    `json:"victimFaction"`
+	Timestamp              time.Time `json:"timestamp"`
+	SystemName             string    `json:"systemName"`
+	RegionName             string    `json:"regionName"`
 }
 
 // Structure represening a copy-pastable report of the death of a ship

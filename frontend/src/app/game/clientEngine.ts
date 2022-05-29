@@ -59,6 +59,7 @@ import { Wreck } from './engineModels/wreck';
 import { ServerApplicationsUpdate } from './wsModels/bodies/applicationsUpdate';
 import { ServerMembersUpdate } from './wsModels/bodies/membersUpdate';
 import { ActionReportsWindow } from './gdi/windows/actionReportsWindow';
+import { ServerActionReportsPage } from './wsModels/bodies/viewActionReportsPage';
 
 class EngineSack {
   constructor() {}
@@ -366,6 +367,8 @@ export function clientStart(
       handleApplicationsUpdate(d);
     } else if (d.type == MessageTypes.MembersUpdate) {
       handleMembersUpdate(d);
+    } else if (d.type == MessageTypes.ActionReportsPage) {
+      handleActionReportsPage(d);
     }
   });
 }
@@ -1018,6 +1021,21 @@ function handleMembersUpdate(d: GameMessage) {
 
   // update reputation sheet window
   engineSack.reputationSheetWindow.syncMembers(msg);
+}
+
+function handleActionReportsPage(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerActionReportsPage;
+
+  // fix missing lists
+  if (!msg.logs) {
+    msg.logs = [];
+  }
+
+  console.log(msg);
+
+  // update action reports window
+  engineSack.actionReportsWindow.setPageData(msg)
 }
 
 // clears the screen
