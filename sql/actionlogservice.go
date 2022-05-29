@@ -35,7 +35,7 @@ type ActionReportSummary struct {
 	VictimFactionName      string
 	SolarSystemName        string
 	RegionName             string
-	Parties                *Meta
+	Parties                int
 	Timestamp              time.Time
 	SearchUserID           uuid.UUID
 }
