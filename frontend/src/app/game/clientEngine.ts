@@ -60,6 +60,7 @@ import { ServerApplicationsUpdate } from './wsModels/bodies/applicationsUpdate';
 import { ServerMembersUpdate } from './wsModels/bodies/membersUpdate';
 import { ActionReportsWindow } from './gdi/windows/actionReportsWindow';
 import { ServerActionReportsPage } from './wsModels/bodies/viewActionReportsPage';
+import * as ClipboardJS from 'clipboard';
 
 class EngineSack {
   constructor() {}
@@ -1646,4 +1647,8 @@ function handleWindowResize() {
 
   // mark backplate as dirty
   engineSack.player.currentSystem.backplateValid = false;
+}
+
+function copyToClipboard(s: string) {
+  ClipboardJS.copy(s);
 }
