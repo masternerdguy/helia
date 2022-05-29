@@ -34,7 +34,8 @@ CREATE OR REPLACE VIEW public.vw_actionreports_summary
     ((ar.actionreport ->> 'header'::text)::jsonb) ->> 'regionName'::text AS regionname,
     jsonb_array_length(jsonb_path_query_array((ar.actionreport ->> 'involvedParties'::text)::jsonb, '$."userID"'::jsonpath)) AS parties,
     ar."timestamp",
-    r.userid AS search_userid
+    r.userid AS search_userid,
+    ar.id
    FROM ( SELECT q.id,
             q.userid
            FROM ( SELECT vwa.id,
