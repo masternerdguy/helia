@@ -32,7 +32,7 @@ type ActionReportSummary struct {
 	VictimIsNPC            bool
 	VictimName             string
 	VictimShipTemplateName string
-	VictimTicker           string
+	VictimTicker           *string
 	SolarSystemName        string
 	RegionName             string
 	Parties                int

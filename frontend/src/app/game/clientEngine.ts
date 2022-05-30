@@ -1032,6 +1032,13 @@ function handleActionReportsPage(d: GameMessage) {
     msg.logs = [];
   }
 
+  // fix null tickers
+  for (const t of msg.logs) {
+    if (!t.ticker) {
+      t.ticker = '';
+    } 
+  }
+
   // update action reports window
   engineSack.actionReportsWindow.setPageData(msg);
 }

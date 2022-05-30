@@ -940,7 +940,7 @@ type ServerActionReportSummary struct {
 	ID                     uuid.UUID `json:"id"`
 	VictimName             string    `json:"victim"`
 	VictimShipTemplateName string    `json:"ship"`
-	VictimTicker           string    `json:"ticker"`
+	VictimTicker           *string   `json:"ticker"`
 	Timestamp              time.Time `json:"timestamp"`
 	SystemName             string    `json:"systemName"`
 	RegionName             string    `json:"regionName"`
