@@ -46,7 +46,7 @@ export class Station extends WSStation {
     if (this.isTargeted) {
       ctx.strokeStyle = 'yellow';
     } else {
-      ctx.strokeStyle = 'white';
+      ctx.strokeStyle = this.getStandingColor();
     }
 
     ctx.stroke();
@@ -100,11 +100,11 @@ export class Station extends WSStation {
     }
   
     if (rep.standingValue <= -6) {
-      return 'orange';
+      return 'orangered';
     }
   
     if (rep.standingValue < -1.999) {
-      return 'yellow';
+      return 'darkorange';
     }
   
     return 'antiquewhite';

@@ -1118,7 +1118,12 @@ function clientLoop() {
   periodicUpdate();
 
   // render
-  clientRender();
+  try {
+    clientRender();
+  } catch(error) {
+    console.log("caught error in client render");
+    console.log(error);
+  }
 
   // check if connection has been lost
   if (engineSack.wsSvc.isStale() && !engineSack.reloading) {

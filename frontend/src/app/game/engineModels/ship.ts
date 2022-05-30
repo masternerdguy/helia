@@ -110,7 +110,7 @@ export class Ship extends WSShip {
     } else if (this.isPlayer) {
       ctx.strokeStyle = 'magenta';
     } else {
-      ctx.strokeStyle = 'white';
+      ctx.strokeStyle = this.getStandingColor();
     }
 
     ctx.stroke();
@@ -366,11 +366,11 @@ export class Ship extends WSShip {
     }
   
     if (rep.standingValue <= -6) {
-      return 'orange';
+      return 'orangered';
     }
   
     if (rep.standingValue < -1.999) {
-      return 'yellow';
+      return 'darkorange';
     }
   
     return 'antiquewhite';
