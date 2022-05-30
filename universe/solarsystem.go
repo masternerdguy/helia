@@ -3686,6 +3686,20 @@ func (s *SolarSystem) handleDevHax(q string, c *shared.GameClient) {
 
 		// all done!
 		return
+	} else if verb == "wallet" {
+		// parse noun
+		wallet, err := strconv.ParseInt(noun, 10, 32)
+
+		if err != nil {
+			c.WriteErrorMessage("noun is not an integer.")
+			return
+		}
+
+		// set wallet
+		sh.Wallet = float64(wallet)
+
+		// all done!
+		return
 	}
 
 	// fallback

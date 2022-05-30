@@ -83,3 +83,9 @@ syntax:  /devhax yankall [bots|humans|users]
 example: /devhax yankall users
 
 Pulls *ALL* undocked ships of a given controller type to your current system. Bots will yank only NPCs, humans will yank only human players, and users will yank everyone. This may lead to users being in unexpected places upon system restart, and is also very rude!
+
+## wallet
+syntax:  /devhax wallet [integer]
+example: /devhax wallet 9000
+
+Sets your current ship's wallet to the provided value.
