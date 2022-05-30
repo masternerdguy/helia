@@ -64,7 +64,7 @@ Various cheats are provided that can be used to more easily test helia or just g
 syntax:  /devhax teleport [systemname]
 example: /devhax teleport C-5
 
-Transports you to the system who's name is provided. You must be undocked to use this command.
+Transports you to the system who's name is provided. You must be undocked to use this command. This may lead to you being in an unexpected place upon a system restart.
 
 ## cargo
 syntax:  /devhax cargo [quantity]~~[itemtypename]
@@ -82,4 +82,4 @@ Restores your ship's shield, fuel, etc, to their maximum values.
 syntax:  /devhax yankall [bots|humans|users]
 example: /devhax yankall users
 
-Pulls *ALL* undocked ships of a given controller type to your current system. Bots will yank only NPCs, humans will yank only human players, and users will yank everyone.
+Pulls *ALL* undocked ships of a given controller type to your current system. Bots will yank only NPCs, humans will yank only human players, and users will yank everyone. This may lead to users being in unexpected places upon system restart, and is also very rude!
