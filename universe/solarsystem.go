@@ -41,30 +41,31 @@ type SolarSystem struct {
 	globalAckToken        int // counter for number of ticks this system has gone through since server start (daily restart is assumed)
 	Lock                  sync.Mutex
 	// event escalations to engine core
-	PlayerNeedRespawn    []*shared.GameClient                 // clients in need of a respawn by core
-	NPCNeedRespawn       []*Ship                              // NPCs in need of a respawn by core
-	DeadShips            []*Ship                              // dead ships in need of cleanup by core
-	MovedItems           []*Item                              // items moved to a new container in need of saving by core
-	PackagedItems        []*Item                              // items packaged in need of saving by core
-	UnpackagedItems      []*Item                              // items unpackaged in need of saving by core
-	ChangedQuantityItems []*Item                              // stacks of items that have changed quantity and need saving by core
-	NewItems             []*Item                              // stacks of items that are newly created and need to be saved by core
-	NewSellOrders        []*SellOrder                         // new sell orders in need of saving by core
-	BoughtSellOrders     []*SellOrder                         // sell orders that have been fulfilled in need of saving by core
-	NewShipTickets       []*NewShipTicket                     // newly purchased/delivered ships that need to be generated and saved by core
-	ShipSwitches         []*ShipSwitch                        // approved requests to switch a client to another ship in need of saving by core
-	SetNoLoad            []*ShipNoLoadSet                     // updates to the no load flag in need of saving by core
-	UsedShipPurchases    []*UsedShipPurchase                  // purchased used ships that need to be hooked in and saved by core
-	ShipRenames          []*ShipRename                        // renamed ships that need to be saved by core
-	SchematicRunViews    []*shared.GameClient                 // requests for a schematic run summary
-	NewSchematicRuns     []*NewSchematicRunTicket             // newly invoked schematics that need to be started
-	NewFactions          []*NewFactionTicket                  // partially approved requests to create a new faction and automatically join it
-	LeaveFactions        []*LeaveFactionTicket                // approved requests to leave a faction and rejoin the starter faction
-	JoinFactions         []*JoinFactionTicket                 // partially approved requests to join a player into a player faction
-	ViewMembers          []*ViewMembersTicket                 // approved requests to view player faction member list
-	KickMembers          []*KickMemberTicket                  // partially approved requests to kick a member from a player faction
-	ChangedMetaItems     []*Item                              // items with changed metadata in need of saving
-	ActionReportPages    []*shared.ViewActionReportPageTicket // requests for an action report summary page
+	PlayerNeedRespawn    []*shared.GameClient                   // clients in need of a respawn by core
+	NPCNeedRespawn       []*Ship                                // NPCs in need of a respawn by core
+	DeadShips            []*Ship                                // dead ships in need of cleanup by core
+	MovedItems           []*Item                                // items moved to a new container in need of saving by core
+	PackagedItems        []*Item                                // items packaged in need of saving by core
+	UnpackagedItems      []*Item                                // items unpackaged in need of saving by core
+	ChangedQuantityItems []*Item                                // stacks of items that have changed quantity and need saving by core
+	NewItems             []*Item                                // stacks of items that are newly created and need to be saved by core
+	NewSellOrders        []*SellOrder                           // new sell orders in need of saving by core
+	BoughtSellOrders     []*SellOrder                           // sell orders that have been fulfilled in need of saving by core
+	NewShipTickets       []*NewShipTicket                       // newly purchased/delivered ships that need to be generated and saved by core
+	ShipSwitches         []*ShipSwitch                          // approved requests to switch a client to another ship in need of saving by core
+	SetNoLoad            []*ShipNoLoadSet                       // updates to the no load flag in need of saving by core
+	UsedShipPurchases    []*UsedShipPurchase                    // purchased used ships that need to be hooked in and saved by core
+	ShipRenames          []*ShipRename                          // renamed ships that need to be saved by core
+	SchematicRunViews    []*shared.GameClient                   // requests for a schematic run summary
+	NewSchematicRuns     []*NewSchematicRunTicket               // newly invoked schematics that need to be started
+	NewFactions          []*NewFactionTicket                    // partially approved requests to create a new faction and automatically join it
+	LeaveFactions        []*LeaveFactionTicket                  // approved requests to leave a faction and rejoin the starter faction
+	JoinFactions         []*JoinFactionTicket                   // partially approved requests to join a player into a player faction
+	ViewMembers          []*ViewMembersTicket                   // approved requests to view player faction member list
+	KickMembers          []*KickMemberTicket                    // partially approved requests to kick a member from a player faction
+	ChangedMetaItems     []*Item                                // items with changed metadata in need of saving
+	ActionReportPages    []*shared.ViewActionReportPageTicket   // requests for an action report summary page
+	ActionReportDetails  []*shared.ViewActionReportDetailTicket // requests for an action report
 }
 
 // Initializes internal aspects of SolarSystem
@@ -106,6 +107,8 @@ func (s *SolarSystem) Initialize() {
 	s.ViewMembers = make([]*ViewMembersTicket, 0)
 	s.KickMembers = make([]*KickMemberTicket, 0)
 	s.ChangedMetaItems = make([]*Item, 0)
+	s.ActionReportPages = make([]*shared.ViewActionReportPageTicket, 0)
+	s.ActionReportDetails = make([]*shared.ViewActionReportDetailTicket, 0)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -2141,6 +2144,17 @@ func (s *SolarSystem) processClientEventQueues() {
 					Client: c,
 					Page:   data.Page,
 					Take:   data.Count,
+				})
+			}
+		} else if evt.Type == msgRegistry.ViewActionReportDetail {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientViewActionReportDetailBody)
+
+				// escalate to core
+				s.ActionReportDetails = append(s.ActionReportDetails, &shared.ViewActionReportDetailTicket{
+					Client: c,
+					KillID: data.KillID,
 				})
 			}
 		}

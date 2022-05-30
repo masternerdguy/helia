@@ -1900,6 +1900,78 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 	// clear action report page requests
 	sol.ActionReportPages = make([]*shared.ViewActionReportPageTicket, 0)
+
+	// iterate over view action report detail requests
+	for id := range sol.ActionReportDetails {
+		// capture reference
+		mi := sol.ActionReportDetails[id]
+
+		// handle escalation on another goroutine
+		go func(mi *shared.ViewActionReportDetailTicket, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
+			// null check
+			if mi.Client == nil {
+				shared.TeeLog(fmt.Sprintf("No client attached to action report detail request: %v", mi))
+				return
+			}
+
+			// pull report
+			report, err := actionReportSvc.GetActionReportByID(mi.KillID)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("Error retrieving action report details: %v", err))
+				return
+			}
+
+			// map for transmission
+			log := models.ServerActionReportDetail{
+				ID: report.ID,
+				ServerKillLog: models.ServerKillLog{
+					Wallet: report.Report.Wallet,
+				},
+			}
+
+			// map header
+			log.ServerKillLog.Header.VictimID = report.Report.Header.VictimID
+			log.ServerKillLog.Header.VictimName = report.Report.Header.VictimName
+			log.ServerKillLog.Header.VictimFactionID = report.Report.Header.VictimFactionID
+			log.ServerKillLog.Header.VictimFactionName = report.Report.Header.VictimFactionName
+			log.ServerKillLog.Header.VictimShipTemplateID = report.Report.Header.VictimShipTemplateID
+			log.ServerKillLog.Header.VictimShipTemplateName = report.Report.Header.VictimShipTemplateName
+			log.ServerKillLog.Header.VictimShipID = report.Report.Header.VictimShipID
+			log.ServerKillLog.Header.VictimShipName = report.Report.Header.VictimShipName
+			log.ServerKillLog.Header.Timestamp = report.Report.Header.Timestamp
+			log.ServerKillLog.Header.SolarSystemID = report.Report.Header.SolarSystemID
+			log.ServerKillLog.Header.SolarSystemName = report.Report.Header.SolarSystemName
+			log.ServerKillLog.Header.RegionID = report.Report.Header.RegionID
+			log.ServerKillLog.Header.RegionName = report.Report.Header.RegionName
+			log.ServerKillLog.Header.HoldingFactionID = report.Report.Header.HoldingFactionID
+			log.ServerKillLog.Header.HoldingFactionName = report.Report.Header.HoldingFactionName
+			log.ServerKillLog.Header.InvolvedParties = report.Report.Header.InvolvedParties
+			log.ServerKillLog.Header.IsNPC = report.Report.Header.IsNPC
+			log.ServerKillLog.Header.PosX = report.Report.Header.PosX
+			log.ServerKillLog.Header.PosY = report.Report.Header.PosY
+
+			// map fitting
+
+			// send message to client containing report
+			b, _ := json.Marshal(log)
+
+			msg := models.GameMessage{
+				MessageType: models.SharedMessageRegistry.ActionReportDetail,
+				MessageBody: string(b),
+			}
+
+			go func() {
+				mi.Client.WriteMessage(&msg)
+			}()
+		}(mi, sol)
+	}
+
+	// clear action report detail requests
+	sol.ActionReportDetails = make([]*shared.ViewActionReportDetailTicket, 0)
 }
 
 func notifyClientOfWorkshopFee(c *shared.GameClient) {
@@ -1917,8 +1989,4 @@ func notifyClientOfWorkshopFee(c *shared.GameClient) {
 
 	infoMsg := strings.Join(lns, "")
 	c.WriteInfoMessage(infoMsg)
-}
-
-func checkExcessiveTpf() {
-
 }

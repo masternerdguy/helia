@@ -48,3 +48,9 @@ type ViewActionReportPageTicket struct {
 	Page   int
 	Take   int
 }
+
+// Structure representing a validated request to view a full action report
+type ViewActionReportDetailTicket struct {
+	Client *GameClient
+	KillID uuid.UUID
+}

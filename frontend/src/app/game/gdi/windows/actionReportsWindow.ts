@@ -1,5 +1,6 @@
 import { heliaDateFromString, printHeliaDate } from '../../engineMath';
 import { WsService } from '../../ws.service';
+import { ClientViewActionReportDetail } from '../../wsModels/bodies/viewActionReportDetail';
 import {
   ClientViewActionReportsPage,
   ServerActionReportsPage,
@@ -45,7 +46,12 @@ export class ActionReportsWindow extends GDIWindow {
       const row = r as ActionReportWindowRow;
 
       if (row.summary) {
-        // todo
+        // request details
+        const b = new ClientViewActionReportDetail();
+        b.sid = this.wsSvc.sid;
+        b.killId = row.summary.id;
+  
+        this.wsSvc.sendMessage(MessageTypes.ViewActionReportDetail, b);
       } else {
         if (row.listString() == `==> Next Page`) {
           this.page++;
