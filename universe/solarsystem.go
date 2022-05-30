@@ -3533,10 +3533,10 @@ func (s *SolarSystem) handleDevHax(q string, c *shared.GameClient) {
 	verb := arr[0]
 
 	// recombine remainder for noun
-	noun := ""
+	noun := arr[1]
 
 	for i, p := range arr {
-		if i < 1 {
+		if i < 2 {
 			continue
 		}
 
