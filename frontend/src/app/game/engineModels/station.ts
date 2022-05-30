@@ -1,7 +1,10 @@
 import { Camera } from './camera';
 import { WSStation } from '../wsModels/entities/wsStation';
 import { Faction } from './faction';
-import { GetFactionCacheEntry, GetPlayerFactionRelationshipCacheEntry } from '../wsModels/shared';
+import {
+  GetFactionCacheEntry,
+  GetPlayerFactionRelationshipCacheEntry,
+} from '../wsModels/shared';
 
 export class Station extends WSStation {
   texture2d: HTMLImageElement;
@@ -78,11 +81,11 @@ export class Station extends WSStation {
 
   getStandingColor() {
     const rep = GetPlayerFactionRelationshipCacheEntry(this.factionId);
-  
+
     if (!rep) {
       return 'antiquewhite';
     }
-  
+
     if (rep.isMember) {
       if (rep.openlyHostile) {
         return 'firebrick';
@@ -90,23 +93,23 @@ export class Station extends WSStation {
         return 'lightgreen';
       }
     }
-  
+
     if (rep.standingValue >= 6) {
       return 'royalblue';
     }
-  
+
     if (rep.standingValue > 1.999) {
       return 'skyblue';
     }
-  
+
     if (rep.standingValue <= -6) {
       return 'orangered';
     }
-  
+
     if (rep.standingValue < -1.999) {
       return 'darkorange';
     }
-  
+
     return 'antiquewhite';
   }
 }

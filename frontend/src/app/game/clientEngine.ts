@@ -1120,8 +1120,8 @@ function clientLoop() {
   // render
   try {
     clientRender();
-  } catch(error) {
-    console.log("caught error in client render");
+  } catch (error) {
+    console.log('caught error in client render');
     console.log(error);
   }
 
