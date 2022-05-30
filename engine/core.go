@@ -1955,6 +1955,90 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			log.ServerKillLog.Header.PosY = report.Report.Header.PosY
 
 			// map fitting
+			for _, s := range report.Report.Fitting.ARack {
+				log.ServerKillLog.Fitting.ARack = append(log.ServerKillLog.Fitting.ARack, models.ServerKillLogSlot{
+					ItemID:              s.ItemID,
+					ItemTypeID:          s.ItemTypeID,
+					ItemFamilyID:        s.ItemFamilyID,
+					ItemTypeName:        s.ItemTypeName,
+					ItemFamilyName:      s.ItemFamilyName,
+					IsModified:          s.IsModified,
+					CustomizationFactor: s.CustomizationFactor,
+				})
+			}
+
+			for _, s := range report.Report.Fitting.BRack {
+				log.ServerKillLog.Fitting.BRack = append(log.ServerKillLog.Fitting.BRack, models.ServerKillLogSlot{
+					ItemID:              s.ItemID,
+					ItemTypeID:          s.ItemTypeID,
+					ItemFamilyID:        s.ItemFamilyID,
+					ItemTypeName:        s.ItemTypeName,
+					ItemFamilyName:      s.ItemFamilyName,
+					IsModified:          s.IsModified,
+					CustomizationFactor: s.CustomizationFactor,
+				})
+			}
+
+			for _, s := range report.Report.Fitting.CRack {
+				log.ServerKillLog.Fitting.CRack = append(log.ServerKillLog.Fitting.CRack, models.ServerKillLogSlot{
+					ItemID:              s.ItemID,
+					ItemTypeID:          s.ItemTypeID,
+					ItemFamilyID:        s.ItemFamilyID,
+					ItemTypeName:        s.ItemTypeName,
+					ItemFamilyName:      s.ItemFamilyName,
+					IsModified:          s.IsModified,
+					CustomizationFactor: s.CustomizationFactor,
+				})
+			}
+
+			// map cargo
+			for _, s := range report.Report.Cargo {
+				log.ServerKillLog.Cargo = append(log.ServerKillLog.Cargo, models.ServerKillLogCargoItem{
+					ItemID:         s.ItemID,
+					ItemTypeID:     s.ItemTypeID,
+					ItemFamilyID:   s.ItemFamilyID,
+					ItemTypeName:   s.ItemTypeName,
+					ItemFamilyName: s.ItemFamilyName,
+					Quantity:       s.Quantity,
+					IsPackaged:     s.IsPackaged,
+				})
+			}
+
+			// map involved parties
+			/*// Structure representing any combat between two ships
+			type KillLogInvolvedParty struct {
+				// aggressor info
+				UserID        uuid.UUID `json:"userID"`
+				FactionID     uuid.UUID `json:"factionID"`
+				CharacterName string    `json:"characterName"`
+				FactionName   string    `json:"factionName"`
+				IsNPC         bool      `json:"isNPC"`
+				LastAggressed time.Time `json:"lastAggressed"`
+				// aggressor ship info
+				ShipID           uuid.UUID `json:"shipID"`
+				ShipName         string    `json:"shipName"`
+				ShipTemplateID   uuid.UUID `json:"shipTemplateID"`
+				ShipTemplateName string    `json:"shipTemplateName"`
+				// location info
+				LastSolarSystemID   uuid.UUID `json:"lastSolarSystemID"`
+				LastSolarSystemName string    `json:"lastSolarSystemName"`
+				LastRegionID        uuid.UUID `json:"lastRegionID"`
+				LastRegionName      string    `json:"lastRegionName"`
+				LastPosX            float64   `json:"lastPosX"`
+				LastPosY            float64   `json:"lastPosY"`
+				// weapons used against victim
+				WeaponUse map[string]*KillLogWeaponUse `json:"weaponUse"`
+			}
+
+			type KillLogWeaponUse struct {
+				ItemID          uuid.UUID `json:"itemID"`
+				ItemTypeID      uuid.UUID `json:"itemTypeID"`
+				ItemFamilyID    string    `json:"itemFamilyID"`
+				ItemFamilyName  string    `json:"itemFamilyName"`
+				ItemTypeName    string    `json:"itemTypeName"`
+				LastUsed        time.Time `json:"lastUsed"`
+				DamageInflicted float64   `json:"damageInflicted"`
+			}*/
 
 			// send message to client containing report
 			b, _ := json.Marshal(log)
