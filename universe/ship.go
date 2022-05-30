@@ -6176,6 +6176,9 @@ func (m *FittedSlot) activateAsFuelLoader() bool {
 	maxVolume, _ := m.ItemMeta.GetFloat64("max_fuel_volume")
 	leakage, _ := m.ItemTypeMeta.GetFloat64("leakage")
 
+	// apply usage experience modifier
+	maxVolume *= m.usageExperienceModifier
+
 	// locate a stack of pellets below the given unit volume
 	for _, i := range m.shipMountedOn.CargoBay.Items {
 		// safety checks
