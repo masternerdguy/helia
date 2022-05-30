@@ -11,7 +11,6 @@ import { GDIWindow } from '../base/gdiWindow';
 import { GDIList } from '../components/gdiList';
 
 export class ActionReportsWindow extends GDIWindow {
-  private actionView: GDIList = new GDIList();
   private reportView: GDIList = new GDIList();
 
   private pageData: ServerActionReportsPage;
@@ -33,22 +32,8 @@ export class ActionReportsWindow extends GDIWindow {
     this.page = 0;
     this.pageSize = 30;
 
-    // setup action view
-    this.actionView.setWidth(100);
-    this.actionView.setHeight(400);
-    this.actionView.initialize();
-
-    this.actionView.setX(750);
-    this.actionView.setY(0);
-
-    this.actionView.setFont(FontSize.normal);
-    this.actionView.setOnClick((r) => {
-      // get action
-      const a = r.listString();
-    });
-
     // setup info view
-    this.reportView.setWidth(750);
+    this.reportView.setWidth(850);
     this.reportView.setHeight(400);
     this.reportView.initialize();
 
@@ -84,7 +69,6 @@ export class ActionReportsWindow extends GDIWindow {
 
     // pack
     this.addComponent(this.reportView);
-    this.addComponent(this.actionView);
   }
 
   periodicUpdate() {
@@ -157,7 +141,6 @@ export class ActionReportsWindow extends GDIWindow {
 function makeReportRow(s: ServerActionReportSummary): ActionReportWindowRow {
   return {
     summary: s,
-    actions: ['Copy'],
     listString: () => {
       return (
         ` ${fixedString(s.victim, 16)}` +
@@ -165,6 +148,7 @@ function makeReportRow(s: ServerActionReportSummary): ActionReportWindowRow {
         ` ${s.ticker.length > 0 ? fixedString('[' + s.ticker + ']', 5) : fixedString('', 5)}` +
         ` ${fixedString(quantity(s.parties), 8)}` +
         ` ${fixedString(s.systemName, 16)}` +
+        ` ${fixedString(s.regionName, 16)}` +
         ` ${printHeliaDate(heliaDateFromString(s.timestamp))}`
       );
     },
@@ -174,7 +158,6 @@ function makeReportRow(s: ServerActionReportSummary): ActionReportWindowRow {
 function makeTextRow(s: string): ActionReportWindowRow {
   return {
     summary: undefined,
-    actions: [],
     listString: () => {
       return `${s}`;
     },
@@ -184,7 +167,6 @@ function makeTextRow(s: string): ActionReportWindowRow {
 function makeSpacerRow(): ActionReportWindowRow {
   return {
     summary: undefined,
-    actions: [],
     listString: () => {
       return ``;
     },
@@ -220,7 +202,6 @@ function quantity(d: number): string {
 
 class ActionReportWindowRow {
   summary: ServerActionReportSummary;
-  actions: string[];
 
   listString: () => string;
 }
