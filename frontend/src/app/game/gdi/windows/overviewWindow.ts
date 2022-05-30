@@ -3,6 +3,7 @@ import { GDIList } from '../components/gdiList';
 import { FontSize } from '../base/gdiStyle';
 import { Player, TargetType } from '../../engineModels/player';
 import { GDITabPane } from '../components/gdiTabPane';
+import { Ship } from '../../engineModels/ship';
 
 export class OverviewWindow extends GDIWindow {
   tabs = new GDITabPane();
@@ -129,7 +130,7 @@ export class OverviewWindow extends GDIWindow {
     );
 
     const sortedShips = player.currentSystem.ships.sort((a, b) =>
-      (a.ownerName ?? '').localeCompare(b.ownerName ?? '')
+      compareShipString(a).localeCompare(compareShipString(b))
     );
 
     const sortedWrecks = player.currentSystem.wrecks.sort((a, b) =>
@@ -417,4 +418,8 @@ function fixedString(str: string, width: number): string {
   }
 
   return str?.substr(0, width)?.padEnd(width);
+}
+
+function compareShipString(s: Ship): string {
+  return `${s.faction?.ticker}||::||${s.texture}||>>||${s.ownerName}`;
 }

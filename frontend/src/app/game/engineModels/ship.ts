@@ -38,6 +38,10 @@ export class Ship extends WSShip {
     this.deltaTail = [];
     this.lastSeen = Date.now();
 
+    if (this.factionId) {
+      this.faction = GetFactionCacheEntry(this.factionId);
+    }
+
     if (ws.accel) {
       this.accel = ws.accel;
     }
@@ -310,7 +314,11 @@ export class Ship extends WSShip {
   }
 
   getFaction(): Faction {
-    return GetFactionCacheEntry(this.factionId);
+    // update cache
+    this.faction = GetFactionCacheEntry(this.factionId);
+
+    // return cache entry
+    return this.faction;
   }
 
   getHardpointPosition(hpPos: number[]): [number, number] {
