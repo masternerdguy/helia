@@ -1578,6 +1578,9 @@ function handleMouseMove(x: number, y: number) {
 
       // only allow one window to drag at a time
       return;
+    } else {
+      // pass event to window
+      w.handleMouseMove(x, y);
     }
   }
 

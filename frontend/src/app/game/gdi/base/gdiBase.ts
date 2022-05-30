@@ -1,6 +1,5 @@
 import { GDIComponent } from './gdiComponent';
 import { GDIRectangle } from './gdiRectangle';
-import { GDIStyle } from './gdiStyle';
 
 export class GDIBase implements GDIComponent {
   private x: number;
@@ -60,6 +59,10 @@ export class GDIBase implements GDIComponent {
       this.getHeight()
     );
     return rect.containsPoint(x, y);
+  }
+
+  handleMouseMove(x: number, y: number) {
+    //
   }
 
   handleClick(x: number, y: number) {

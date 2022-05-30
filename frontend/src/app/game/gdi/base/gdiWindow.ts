@@ -160,11 +160,31 @@ export class GDIWindow extends GDIBase {
       return;
     }
 
-    // find the component that is being scrolled on within this window
+    // find the component that is being clicked on within this window
     for (const c of this.components) {
       if (c.containsPoint(rX, rY)) {
         // send click event
         c.handleClick(rX, rY);
+        break;
+      }
+    }
+  }
+
+  handleMouseMove(x: number, y: number) {
+    // make sure this is a relevant move
+    if (!this.containsPoint(x, y)) {
+      return;
+    }
+
+    // adjust input to be relative to window origin
+    const rX = x - this.getX();
+    const rY = y - (this.getY() + GDIStyle.windowHandleHeight);
+
+    // find the component that is being moved on within this window
+    for (const c of this.components) {
+      if (c.containsPoint(rX, rY)) {
+        // send move event
+        c.handleMouseMove(rX, rY);
         break;
       }
     }

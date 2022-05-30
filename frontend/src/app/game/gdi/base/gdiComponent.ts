@@ -15,6 +15,7 @@ export interface GDIComponent {
   render(): ImageBitmap;
 
   containsPoint(x: number, y: number): boolean;
+  handleMouseMove(x: number, y: number);
   handleClick(x: number, y: number);
   handleScroll(x: number, y: number, d: number);
   handleKeyDown(x: number, y: number, key: string);
