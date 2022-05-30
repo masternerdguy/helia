@@ -1038,7 +1038,7 @@ function handleActionReportsPage(d: GameMessage) {
   for (const t of msg.logs) {
     if (!t.ticker) {
       t.ticker = '';
-    } 
+    }
   }
 
   // update action reports window

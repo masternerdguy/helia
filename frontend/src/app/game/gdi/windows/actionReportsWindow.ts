@@ -50,7 +50,7 @@ export class ActionReportsWindow extends GDIWindow {
         const b = new ClientViewActionReportDetail();
         b.sid = this.wsSvc.sid;
         b.killId = row.summary.id;
-  
+
         this.wsSvc.sendMessage(MessageTypes.ViewActionReportDetail, b);
       } else {
         if (row.listString() == `==> Next Page`) {
@@ -151,7 +151,11 @@ function makeReportRow(s: ServerActionReportSummary): ActionReportWindowRow {
       return (
         ` ${fixedString(s.victim, 16)}` +
         ` ${fixedString(s.ship, 16)}` +
-        ` ${s.ticker.length > 0 ? fixedString('[' + s.ticker + ']', 5) : fixedString('', 5)}` +
+        ` ${
+          s.ticker.length > 0
+            ? fixedString('[' + s.ticker + ']', 5)
+            : fixedString('', 5)
+        }` +
         ` ${fixedString(quantity(s.parties), 8)}` +
         ` ${fixedString(s.systemName, 16)}` +
         ` ${fixedString(s.regionName, 16)}` +
