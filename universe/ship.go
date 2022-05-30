@@ -415,7 +415,8 @@ func getModuleFamily(itemFamilyID string) string {
 	} else if itemFamilyID == "shield_booster" ||
 		itemFamilyID == "armor_plate" {
 		modFamily = "tank"
-	} else if itemFamilyID == "fuel_tank" {
+	} else if itemFamilyID == "fuel_tank" ||
+		itemFamilyID == "fuel_loader" {
 		modFamily = "fuel"
 	} else if itemFamilyID == "eng_oc" {
 		modFamily = "engine"
@@ -4301,6 +4302,14 @@ func (s *Ship) StackItemInCargo(id uuid.UUID, lock bool) error {
 		} else {
 			// see if we can merge into this stack
 			if o.IsPackaged && o.ItemTypeID == item.ItemTypeID && !o.CoreDirty && !item.CoreDirty {
+				// verify we won't overflow
+				var testQ int64 = 0
+				testQ += int64(o.Quantity) + int64(item.Quantity)
+
+				if testQ > math.MaxInt32 {
+					continue
+				}
+
 				// merge stacks
 				q := item.Quantity
 

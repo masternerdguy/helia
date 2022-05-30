@@ -43,7 +43,7 @@ type VwModuleNeedSchematic struct {
 }
 
 // Finds and returns an ItemType by its id
-func (s ItemTypeService) GetItemTypeByID(ItemTypeID uuid.UUID) (*ItemType, error) {
+func (s ItemTypeService) GetItemTypeByID(itemTypeID uuid.UUID) (*ItemType, error) {
 	// get db handle
 	db, err := connect()
 
@@ -61,7 +61,38 @@ func (s ItemTypeService) GetItemTypeByID(ItemTypeID uuid.UUID) (*ItemType, error
 			WHERE id = $1
 		`
 
-	row := db.QueryRow(sqlStatement, ItemTypeID)
+	row := db.QueryRow(sqlStatement, itemTypeID)
+
+	switch err := row.Scan(&ItemType.ID, &ItemType.Family, &ItemType.Name, &ItemType.Meta); err {
+	case sql.ErrNoRows:
+		return nil, errors.New("itemType not found")
+	case nil:
+		return &ItemType, nil
+	default:
+		return nil, err
+	}
+}
+
+// Finds and returns an ItemType by its name
+func (s ItemTypeService) GetItemTypeByName(name string) (*ItemType, error) {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// find ItemType with this id
+	ItemType := ItemType{}
+
+	sqlStatement :=
+		`
+			SELECT id, family, name, meta
+			FROM public.ItemTypes
+			WHERE name = $1
+		`
+
+	row := db.QueryRow(sqlStatement, name)
 
 	switch err := row.Scan(&ItemType.ID, &ItemType.Family, &ItemType.Name, &ItemType.Meta); err {
 	case sql.ErrNoRows:

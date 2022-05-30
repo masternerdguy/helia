@@ -1067,6 +1067,7 @@ function checkIfModule(m: WSContainerItem) {
     m.itemFamilyID === 'missile_launcher' ||
     m.itemFamilyID === 'shield_booster' ||
     m.itemFamilyID === 'fuel_tank' ||
+    m.itemFamilyID === 'fuel_loader' ||
     m.itemFamilyID === 'armor_plate' ||
     m.itemFamilyID === 'eng_oc' ||
     m.itemFamilyID === 'active_sink' ||

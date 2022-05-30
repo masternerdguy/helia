@@ -26,6 +26,7 @@ var itemSvc = sql.GetItemService()
 var schematicRunSvc = sql.GetSchematicRunService()
 var factionSvc = sql.GetFactionService()
 var actionReportSvc = sql.GetActionReportService()
+var itemTypeSvc = sql.GetItemTypeService()
 
 // Will cause all region goroutines to stop when true
 var shutdownSignal = false
@@ -608,6 +609,82 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 	// clear new items
 	sol.NewItems = make([]*universe.Item, 0)
+
+	// iterate over new items for devhax
+	for _, mi := range sol.NewItemsDevHax {
+		// handle escalation on another goroutine
+		go func(mi *universe.NewItemFromNameTicketDevHax, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
+			// find item type by name
+			itemType, err := itemTypeSvc.GetItemTypeByName(mi.ItemTypeName)
+
+			if err != nil || itemType == nil || itemType.Family == "ship" {
+				shared.TeeLog(fmt.Sprintf("Unable to find non-ship item type [devhax] %v: %v", mi.ItemTypeName, err))
+			} else {
+				// target container
+				tc := mi.Container
+
+				// create item
+				mi := &universe.Item{
+					ItemTypeID:    itemType.ID,
+					Meta:          universe.Meta(itemType.Meta),
+					Created:       time.Now(),
+					CreatedReason: "[devhax] :party parrot:",
+					CreatedBy:     &mi.UserID,
+					ContainerID:   mi.ContainerID,
+					Quantity:      mi.Quantity,
+					IsPackaged:    true,
+					ItemTypeName:  mi.ItemTypeName,
+				}
+
+				// save new item to db
+				id, err := newItem(mi)
+
+				// error check
+				if err != nil || id == nil {
+					shared.TeeLog(fmt.Sprintf("Unable to save new item [devhax] %v: %v", mi.ID, err))
+				} else {
+					// store corrected id from db insert
+					mi.ID = *id
+
+					// load new item
+					ni, err := itemSvc.GetItemByID(*id)
+
+					if err != nil || id == nil {
+						shared.TeeLog(fmt.Sprintf("Unable to load new item [devhax] %v: %v", mi.ID, err))
+					} else {
+						fi, err := LoadItem(ni)
+
+						if err != nil || id == nil {
+							shared.TeeLog(fmt.Sprintf("Unable to integrate new item [devhax] %v: %v", mi.ID, err))
+						} else {
+							// copy loaded values
+							mi.Meta = fi.Meta
+							mi.ItemTypeMeta = fi.ItemTypeMeta
+							mi.ItemTypeName = fi.ItemTypeName
+							mi.ItemFamilyID = fi.ItemFamilyID
+							mi.ItemFamilyName = fi.ItemFamilyName
+							mi.Process = fi.Process
+
+							// store in container
+							tc.Lock.Lock()
+							defer tc.Lock.Unlock()
+
+							tc.Items = append(tc.Items, mi)
+
+							// mark as clean
+							mi.CoreDirty = false
+						}
+					}
+				}
+			}
+		}(mi, sol)
+	}
+
+	// clear new items from devhax
+	sol.NewItemsDevHax = make([]*universe.NewItemFromNameTicketDevHax, 0)
 
 	// iterate over new sell orders
 	for _, mi := range sol.NewSellOrders {

@@ -29,6 +29,15 @@ type Item struct {
 	SchematicInUse bool
 }
 
+// Structure representing a request to create a new item by item type name, used for devhax only
+type NewItemFromNameTicketDevHax struct {
+	ItemTypeName string
+	Quantity     int
+	Container    *Container
+	ContainerID  uuid.UUID
+	UserID       uuid.UUID
+}
+
 // List of module attributes that can be percentage mutated by mod kits
 var MutableModuleAttributes = [...]string{
 	"range",
@@ -53,6 +62,8 @@ var MutableModuleAttributes = [...]string{
 	"energy_regen_max_add",
 	"heat_sink_add",
 	"fuel_max_add",
+	"max_fuel_volume",
+	"leakage",
 }
 
 // Helper function to determine whether or not a given item meta attribute can be mutated by a mod kit

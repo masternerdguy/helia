@@ -230,7 +230,7 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	// log dev login attempts
 	if user.IsDev {
-		shared.TeeLog(fmt.Sprintf("A developer is trying to log in! %v", user.EmailAddress))
+		shared.TeeLog(fmt.Sprintf("A developer is trying to log in! %v", *user.EmailAddress))
 	}
 
 	if err != nil {

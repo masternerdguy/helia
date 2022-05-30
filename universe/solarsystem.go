@@ -8,6 +8,7 @@ import (
 	"helia/shared"
 	"math"
 	"math/rand"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -67,6 +68,7 @@ type SolarSystem struct {
 	ChangedMetaItems     []*Item                                // items with changed metadata in need of saving
 	ActionReportPages    []*shared.ViewActionReportPageTicket   // requests for an action report summary page
 	ActionReportDetails  []*shared.ViewActionReportDetailTicket // requests for an action report
+	NewItemsDevHax       []*NewItemFromNameTicketDevHax         // requests to create an item for devhax
 }
 
 // Initializes internal aspects of SolarSystem
@@ -110,6 +112,7 @@ func (s *SolarSystem) Initialize() {
 	s.ChangedMetaItems = make([]*Item, 0)
 	s.ActionReportPages = make([]*shared.ViewActionReportPageTicket, 0)
 	s.ActionReportDetails = make([]*shared.ViewActionReportDetailTicket, 0)
+	s.NewItemsDevHax = make([]*NewItemFromNameTicketDevHax, 0)
 
 	// initialize slices
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -3571,12 +3574,46 @@ func (s *SolarSystem) handleDevHax(q string, c *shared.GameClient) {
 		// it didn't work :(
 		c.WriteErrorMessage("target system not found.")
 		return
+	} else if verb == "cargo" {
+		// parse noun
+		arr := strings.Split(noun, "~~")
+
+		if len(arr) != 2 {
+			c.WriteErrorMessage("malformed noun.")
+			return
+		}
+
+		// get quantity
+		quantity, err := strconv.ParseInt(arr[0], 10, 32)
+
+		if err != nil {
+			c.WriteErrorMessage("quantity is not an integer.")
+			return
+		}
+
+		if quantity <= 0 {
+			c.WriteErrorMessage("quantity must be > 0.")
+			return
+		}
+
+		// escalate to core
+		s.NewItemsDevHax = append(s.NewItemsDevHax, &NewItemFromNameTicketDevHax{
+			ItemTypeName: arr[1],
+			Quantity:     int(quantity),
+			ContainerID:  sh.CargoBayContainerID,
+			Container:    sh.CargoBay,
+			UserID:       *c.UID,
+		})
+
+		// all done!
+		return
 	}
 
 	// fallback
 	c.WriteErrorMessage("unknown verb.")
 }
 
+// Helper function to copy module info for an update message
 func copyModuleInfo(v FittedSlot) models.ServerModuleStatusBody {
 	module := models.ServerModuleStatusBody{}
 
