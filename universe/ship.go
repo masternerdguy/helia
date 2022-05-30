@@ -4808,6 +4808,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsSalvager()
 			} else if m.ItemTypeFamily == "utility_veil" {
 				canActivate = m.activateAsUtilityVeil()
+			} else if m.ItemTypeFamily == "fuel_loader" {
+				canActivate = m.activateAsFuelLoader()
 			}
 
 			if canActivate {
@@ -6167,6 +6169,59 @@ func (m *FittedSlot) activateAsUtilityVeil() bool {
 
 	// module activates!
 	return true
+}
+
+func (m *FittedSlot) activateAsFuelLoader() bool {
+	// get max pellet volume
+	maxVolume, _ := m.ItemMeta.GetFloat64("max_fuel_volume")
+
+	// locate a stack of pellets below the given unit volume
+	for _, i := range m.shipMountedOn.CargoBay.Items {
+		// safety checks
+		if !i.IsPackaged {
+			continue
+		}
+
+		if i.Quantity <= 0 {
+			continue
+		}
+
+		if i.CoreDirty {
+			continue
+		}
+
+		// check family
+		if i.ItemFamilyID != "fuel" {
+			continue
+		}
+
+		// check volume
+		iv, _ := i.ItemTypeMeta.GetFloat64("volume")
+
+		if iv <= maxVolume {
+			// decrement quantity
+			i.Quantity--
+
+			// escalate to core for saving
+			m.shipMountedOn.CurrentSystem.ChangedQuantityItems = append(m.shipMountedOn.CurrentSystem.ChangedQuantityItems, i)
+
+			// get fuel amount
+			bf, _ := i.ItemTypeMeta.GetFloat64("fuelconversion")
+
+			// apply leakage
+			leakage, _ := i.ItemTypeMeta.GetFloat64("leakage")
+			af := bf * (1 - leakage)
+
+			// add fuel to tank
+			m.shipMountedOn.Fuel += af
+
+			// module activates!
+			return true
+		}
+	}
+
+	// module doesn't activate
+	return false
 }
 
 // Reusable helper function to determine tracking ratio between a module and a target
