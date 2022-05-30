@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"helia/engine"
 	"helia/physics"
 	"helia/shared"
 	"helia/sql"
@@ -27,7 +26,7 @@ func main() {
 		printLogger,
 	)
 
-	// load universe from database
+	/*// load universe from database
 	shared.TeeLog("Loading universe from database...")
 	universe, err := engine.LoadUniverse()
 
@@ -35,25 +34,25 @@ func main() {
 		panic(err)
 	}
 
-	shared.TeeLog("Loaded universe!")
+	shared.TeeLog("Loaded universe!")*/
 
 	/*
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	var toInject = [...]string{
+	/*var toInject = [...]string{
 		"03471e7f-9265-4e3c-acb7-8c7c56d67801",
-	}
+	}*/
 
 	// dropAsteroids(universe)
 	//dropSanctuaryStations(universe)
 
-	for i, e := range toInject {
+	/*for i, e := range toInject {
 		log.Println(fmt.Sprintf("injecting process %v", e))
 		injectProcess(universe, e, i)
-	}
+	}*/
 
-	//stubModuleSchematicsAndProcesses()
+	stubModuleSchematicsAndProcesses()
 }
 
 /* Parameters for asteroid generation */
