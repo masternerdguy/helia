@@ -177,10 +177,6 @@ func updateRunningSchematics() {
 										// escalate order save request to core
 										s.NewItems = append(s.NewItems, &newItem)
 
-										// obtain lock on cargo bay
-										sh.CargoBay.Lock.Lock()
-										defer sh.CargoBay.Lock.Unlock()
-
 										// place item in cargo bay
 										sh.CargoBay.Items = append(sh.CargoBay.Items, &newItem)
 									} else {
