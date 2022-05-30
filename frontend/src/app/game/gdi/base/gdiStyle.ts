@@ -44,6 +44,7 @@ export class GDIStyle {
   static listBorderColor = 'white';
   static listFillColor = '#00091a';
   static listScrollColor = 'white';
+  static listScrollDragColor = '#0099ff';
   static listTextColor = 'white';
   static listSelectedColor = '#0099ff';
   static listBorderSize = 2;

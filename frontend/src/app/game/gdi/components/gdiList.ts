@@ -108,7 +108,12 @@ export class GDIList extends GDIBase {
     this.ctx.fillStyle = this.overrideFillColor ?? GDIStyle.listFillColor;
     this.ctx.fillRect(this.getWidth() - sw, 0, sw, this.getHeight());
 
-    this.ctx.fillStyle = GDIStyle.listScrollColor;
+    if (this.scrollBarDragging) {
+      this.ctx.fillStyle = GDIStyle.listScrollDragColor;
+    } else {
+      this.ctx.fillStyle = GDIStyle.listScrollColor;
+    }
+
     if (stop >= this.items.length) {
       this.ctx.fillRect(this.getWidth() - sw, 0, sw, this.getHeight());
     } else {
