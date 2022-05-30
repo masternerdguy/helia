@@ -6172,8 +6172,9 @@ func (m *FittedSlot) activateAsUtilityVeil() bool {
 }
 
 func (m *FittedSlot) activateAsFuelLoader() bool {
-	// get max pellet volume
+	// get max pellet volume and leakage
 	maxVolume, _ := m.ItemMeta.GetFloat64("max_fuel_volume")
+	leakage, _ := m.ItemTypeMeta.GetFloat64("leakage")
 
 	// locate a stack of pellets below the given unit volume
 	for _, i := range m.shipMountedOn.CargoBay.Items {
@@ -6209,7 +6210,6 @@ func (m *FittedSlot) activateAsFuelLoader() bool {
 			bf, _ := i.ItemTypeMeta.GetFloat64("fuelconversion")
 
 			// apply leakage
-			leakage, _ := i.ItemTypeMeta.GetFloat64("leakage")
 			af := bf * (1 - leakage)
 
 			// add fuel to tank
