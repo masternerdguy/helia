@@ -1355,14 +1355,12 @@ func (s *SolarSystem) processClientEventQueues() {
 					continue
 				}
 
-				// store message
+				// build message
 				cmm := models.ServerSystemChatBody{
 					SenderID:   sh.UserID,
 					SenderName: sh.CharacterName,
 					Message:    data.Message,
 				}
-
-				s.newSystemChatMessages = append(s.newSystemChatMessages, cmm)
 
 				// log message
 				shared.TeeLog(fmt.Sprintf("[CHAT MESSAGE <%v>] %v", s.SystemName, cmm))
@@ -1370,7 +1368,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// update timestamp
 				c.LastChatPostedAt = time.Now()
 
-				// handle dev hax
+				// check for dev hax
 				if strings.Index(cmm.Message, "/devhax ") == 0 {
 					if c.IsDev {
 						go func(q string, qc *shared.GameClient) {
@@ -1379,6 +1377,9 @@ func (s *SolarSystem) processClientEventQueues() {
 					} else {
 						c.WriteErrorMessage("only a developer would use a command like this.")
 					}
+				} else {
+					// broadcast message
+					s.newSystemChatMessages = append(s.newSystemChatMessages, cmm)
 				}
 			}
 		} else if evt.Type == msgRegistry.TransferItem {
