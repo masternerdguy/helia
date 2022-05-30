@@ -370,6 +370,8 @@ export function clientStart(
       handleMembersUpdate(d);
     } else if (d.type == MessageTypes.ActionReportsPage) {
       handleActionReportsPage(d);
+    } else if (d.type == MessageTypes.ActionReportDetail) {
+      handleActionReportDetails(d);
     }
   });
 }
@@ -1041,6 +1043,17 @@ function handleActionReportsPage(d: GameMessage) {
 
   // update action reports window
   engineSack.actionReportsWindow.setPageData(msg);
+}
+
+function handleActionReportDetails(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body);
+
+  // export as pretty json
+  const pretty = JSON.stringify(msg, null, 2);
+
+  // copy to clipboard
+  copyToClipboard(pretty, 'action report data copied to clipboard');
 }
 
 // clears the screen
