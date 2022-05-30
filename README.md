@@ -77,3 +77,9 @@ syntax:  /devhax remax all
 example: /devhax remax all
 
 Restores your ship's shield, fuel, etc, to their maximum values.
+
+## yankall
+syntax:  /devhax yankall [bots|humans|users]
+example: /devhax yankall users
+
+Pulls *ALL* undocked ships of a given controller type to your current system. Bots will yank only NPCs, humans will yank only human players, and users will yank everyone.
