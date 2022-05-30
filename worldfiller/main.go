@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"helia/engine"
 	"helia/physics"
 	"helia/shared"
 	"helia/sql"
@@ -26,7 +27,7 @@ func main() {
 		printLogger,
 	)
 
-	/*// load universe from database
+	// load universe from database
 	shared.TeeLog("Loading universe from database...")
 	universe, err := engine.LoadUniverse()
 
@@ -34,23 +35,30 @@ func main() {
 		panic(err)
 	}
 
-	shared.TeeLog("Loaded universe!")*/
+	shared.TeeLog("Loaded universe!")
 
 	/*
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	/*var toInject = [...]string{
-		"03471e7f-9265-4e3c-acb7-8c7c56d67801",
-	}*/
+	var toInject = [...]string{
+		"23cef584-f3aa-47dc-b11a-87b4debaec80",
+		"e1bbb4ab-9178-4b7d-b0f8-9365449d1fd6",
+		"3533818e-3a3b-41dd-af00-78d800c5921f",
+		"6db24bfb-92ae-4156-a120-5887137c3d3b",
+		"fd1bc6f0-59e5-4aad-9d64-13a48b86b74f",
+		"0c3df30f-7ff0-4a1d-8f3d-b86f76f3c30a",
+		"0693c405-8a08-4728-8f80-c649fccbbcab",
+		"ebb77519-cb29-4acd-ab17-5dded28b6adc",
+	}
 
 	// dropAsteroids(universe)
 	//dropSanctuaryStations(universe)
 
-	/*for i, e := range toInject {
+	for i, e := range toInject {
 		log.Println(fmt.Sprintf("injecting process %v", e))
 		injectProcess(universe, e, i)
-	}*/
+	}
 
 	stubModuleSchematicsAndProcesses()
 }
@@ -640,7 +648,7 @@ func stubModuleSchematicsAndProcesses() {
 
 func injectProcess(u *universe.Universe, pid string, offset int) {
 	pID, err := uuid.Parse(pid)
-	prob := 20
+	prob := 4
 
 	stationProcessSvc := sql.GetStationProcessService()
 
@@ -649,22 +657,23 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 
 	var textures = [...]string{
-		"~~~~~~~~~~~~~~",
+		"sanctuary-",
+		"alvaca-",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 1218835 + int64(offset))
+			rand.Seed(int64(calculateSystemSeed(s)) - 32627798 + int64(offset))
 
-			if r.ID.ID()%2 != 0 {
+			/*if r.ID.ID()%2 != 0 {
 				continue
 			}
 
 			if s.ID.ID()%5 != 0 {
 				continue
-			}
+			}*/
 
 			stations := s.CopyStations(true)
 
