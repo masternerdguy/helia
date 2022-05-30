@@ -509,6 +509,9 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		// store escrow container
 		client.EscrowContainerID = u.EscrowContainerID
 
+		// store developer status
+		client.IsDev = u.IsDev
+
 		// lookup current ship in memory
 		currShip := l.Engine.Universe.FindShip(*u.CurrentShipID, nil)
 

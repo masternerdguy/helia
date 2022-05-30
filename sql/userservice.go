@@ -37,6 +37,8 @@ type User struct {
 	// for special NPC "users"
 	IsNPC         bool
 	BehaviourMode *int
+	// for devs
+	IsDev bool
 }
 
 type PlayerExperienceSheet struct {
@@ -331,7 +333,7 @@ func (s UserService) GetUserByLogin(emailaddress string, pwd string) (*User, err
 	user := User{}
 
 	sqlStatement := `SELECT id, charactername, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid, reputationsheet,
-							isnpc, behaviourmode, emailaddress, experiencesheet
+							isnpc, behaviourmode, emailaddress, experiencesheet, isdev
 					 FROM users
 					 WHERE emailaddress=$1 AND hashpass=$2`
 
@@ -339,7 +341,7 @@ func (s UserService) GetUserByLogin(emailaddress string, pwd string) (*User, err
 
 	switch err := row.Scan(&user.ID, &user.CharacterName, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
 		&user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet, &user.IsNPC, &user.BehaviourMode, &user.EmailAddress,
-		&user.ExperienceSheet); err {
+		&user.ExperienceSheet, &user.IsDev); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:
@@ -362,7 +364,7 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 	user := User{}
 
 	sqlStatement := `SELECT id, charactername, hashpass, registered, banned, current_shipid, startid, escrow_containerid, current_factionid, reputationsheet,
-							isnpc, behaviourmode, emailaddress, experiencesheet
+							isnpc, behaviourmode, emailaddress, experiencesheet, isdev
 					 FROM users
 					 WHERE id=$1`
 
@@ -370,7 +372,7 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 
 	switch err := row.Scan(&user.ID, &user.CharacterName, &user.Hashpass, &user.Registered, &user.Banned, &user.CurrentShipID,
 		&user.StartID, &user.EscrowContainerID, &user.CurrentFactionID, &user.ReputationSheet, &user.IsNPC, &user.BehaviourMode,
-		&user.EmailAddress, &user.ExperienceSheet); err {
+		&user.EmailAddress, &user.ExperienceSheet, &user.IsDev); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:
@@ -393,7 +395,7 @@ func (s UserService) GetUsersByFactionID(factionID uuid.UUID) ([]User, error) {
 
 	// load users
 	sql := `SELECT id, charactername, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid, reputationsheet,
-				   isnpc, behaviourmode, emailaddress, experiencesheet, startid
+				   isnpc, behaviourmode, emailaddress, experiencesheet, startid, isdev
 			FROM users
 			WHERE current_factionid=$1`
 
@@ -411,7 +413,7 @@ func (s UserService) GetUsersByFactionID(factionID uuid.UUID) ([]User, error) {
 		// scan into user structure
 		rows.Scan(&s.ID, &s.CharacterName, &s.Hashpass, &s.Registered, &s.Banned, &s.CurrentShipID,
 			&s.EscrowContainerID, &s.CurrentFactionID, &s.ReputationSheet, &s.IsNPC, &s.BehaviourMode, &s.EmailAddress,
-			&s.ExperienceSheet, &s.StartID)
+			&s.ExperienceSheet, &s.StartID, &s.IsDev)
 
 		// append to user slice
 		users = append(users, s)

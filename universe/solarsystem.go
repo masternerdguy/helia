@@ -8,6 +8,7 @@ import (
 	"helia/shared"
 	"math"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
@@ -1365,6 +1366,17 @@ func (s *SolarSystem) processClientEventQueues() {
 
 				// update timestamp
 				c.LastChatPostedAt = time.Now()
+
+				// handle dev hax
+				if strings.Index(cmm.Message, "/devhax ") == 0 {
+					if c.IsDev {
+						go func(q string, qc *shared.GameClient) {
+							s.handleDevHax(q, qc)
+						}(cmm.Message, c)
+					} else {
+						c.WriteErrorMessage("only a developer would use a command like this.")
+					}
+				}
 			}
 		} else if evt.Type == msgRegistry.TransferItem {
 			if sh != nil {
@@ -3491,6 +3503,78 @@ func (s *SolarSystem) TestLocks() {
 		e.Lock.Lock()
 		defer e.Lock.Unlock()
 	}
+}
+
+// Processes a devhax command and applies the result
+func (s *SolarSystem) handleDevHax(q string, c *shared.GameClient) {
+	// obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	// find current ship
+	sh := s.ships[c.CurrentShipID.String()]
+
+	if sh == nil {
+		c.WriteErrorMessage("you don't seem to actually be there.")
+		return
+	}
+
+	// remove trigger
+	q = strings.TrimLeft(q, "/devhax ")
+
+	// split into verb and noun
+	arr := strings.Split(q, " ")
+
+	if len(arr) < 2 {
+		c.WriteErrorMessage("input requirement insufficient.")
+		return
+	}
+
+	verb := arr[0]
+
+	// recombine remainder for noun
+	noun := ""
+
+	for i, p := range arr {
+		if i < 1 {
+			continue
+		}
+
+		noun = fmt.Sprintf("%v %v", noun, p)
+	}
+
+	// select command
+	if verb == "teleport" {
+		// make sure dev's ship is undocked
+		if sh.IsDocked {
+			c.WriteErrorMessage("you must be undocked to teleport.")
+			return
+		}
+
+		// find system by name
+		for _, ts := range s.Universe.AllSystems {
+			if ts.SystemName == noun {
+				go func() {
+					// move dev to system
+					s.RemoveClient(c, true)
+					s.RemoveShip(sh, true)
+
+					ts.AddClient(c, true)
+					ts.AddShip(sh, true)
+				}()
+
+				// all done!
+				return
+			}
+		}
+
+		// it didn't work :(
+		c.WriteErrorMessage("target system not found.")
+		return
+	}
+
+	// fallback
+	c.WriteErrorMessage("unknown verb.")
 }
 
 func copyModuleInfo(v FittedSlot) models.ServerModuleStatusBody {
