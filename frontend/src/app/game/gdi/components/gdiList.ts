@@ -150,9 +150,23 @@ export class GDIList extends GDIBase {
     const rX = x - this.getX();
     const rY = y - this.getY();
 
-    console.log({
-      rX, rY
-    })
+    if (this.scrollBarDragging) {
+      // check for leaving scroll area
+      if (rX < this.getWidth() - GDIStyle.listScrollWidth) {
+        // stop scrolling
+        this.scrollBarDragging = false;
+      } else {
+        // offset
+        const oY = (this.lastScrollBarScale * this.getHeight()) / 2;
+
+        // determine new scroll position
+        const gP = (rY - oY) / this.getHeight();
+        const nsI = Math.round(gP * this.items.length);
+
+        // update scroll position
+        this.setScroll(nsI);
+      }
+    }
   }
 
   handleClick(x: number, y: number) {
