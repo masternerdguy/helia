@@ -2005,40 +2005,41 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			}
 
 			// map involved parties
-			/*// Structure representing any combat between two ships
-			type KillLogInvolvedParty struct {
-				// aggressor info
-				UserID        uuid.UUID `json:"userID"`
-				FactionID     uuid.UUID `json:"factionID"`
-				CharacterName string    `json:"characterName"`
-				FactionName   string    `json:"factionName"`
-				IsNPC         bool      `json:"isNPC"`
-				LastAggressed time.Time `json:"lastAggressed"`
-				// aggressor ship info
-				ShipID           uuid.UUID `json:"shipID"`
-				ShipName         string    `json:"shipName"`
-				ShipTemplateID   uuid.UUID `json:"shipTemplateID"`
-				ShipTemplateName string    `json:"shipTemplateName"`
-				// location info
-				LastSolarSystemID   uuid.UUID `json:"lastSolarSystemID"`
-				LastSolarSystemName string    `json:"lastSolarSystemName"`
-				LastRegionID        uuid.UUID `json:"lastRegionID"`
-				LastRegionName      string    `json:"lastRegionName"`
-				LastPosX            float64   `json:"lastPosX"`
-				LastPosY            float64   `json:"lastPosY"`
-				// weapons used against victim
-				WeaponUse map[string]*KillLogWeaponUse `json:"weaponUse"`
-			}
+			for _, p := range report.Report.InvolvedParties {
+				q := models.ServerKillLogInvolvedParty{
+					UserID:              p.UserID,
+					FactionID:           p.FactionID,
+					CharacterName:       p.CharacterName,
+					FactionName:         p.FactionName,
+					IsNPC:               p.IsNPC,
+					LastAggressed:       p.LastAggressed,
+					ShipID:              p.ShipID,
+					ShipName:            p.ShipName,
+					ShipTemplateID:      p.ShipTemplateID,
+					ShipTemplateName:    p.ShipTemplateName,
+					LastSolarSystemID:   p.LastSolarSystemID,
+					LastSolarSystemName: p.LastSolarSystemName,
+					LastRegionID:        p.LastRegionID,
+					LastRegionName:      p.LastRegionName,
+					LastPosX:            p.LastPosX,
+					LastPosY:            p.LastPosY,
+					WeaponUse:           make(map[string]*models.ServerKillLogWeaponUse),
+				}
 
-			type KillLogWeaponUse struct {
-				ItemID          uuid.UUID `json:"itemID"`
-				ItemTypeID      uuid.UUID `json:"itemTypeID"`
-				ItemFamilyID    string    `json:"itemFamilyID"`
-				ItemFamilyName  string    `json:"itemFamilyName"`
-				ItemTypeName    string    `json:"itemTypeName"`
-				LastUsed        time.Time `json:"lastUsed"`
-				DamageInflicted float64   `json:"damageInflicted"`
-			}*/
+				for k, x := range p.WeaponUse {
+					q.WeaponUse[k] = &models.ServerKillLogWeaponUse{
+						ItemID:          x.ItemID,
+						ItemTypeID:      x.ItemTypeID,
+						ItemFamilyID:    x.ItemFamilyID,
+						ItemFamilyName:  x.ItemFamilyName,
+						ItemTypeName:    x.ItemTypeName,
+						LastUsed:        x.LastUsed,
+						DamageInflicted: x.DamageInflicted,
+					}
+				}
+
+				log.ServerKillLog.InvolvedParties = append(log.ServerKillLog.InvolvedParties, q)
+			}
 
 			// send message to client containing report
 			b, _ := json.Marshal(log)
