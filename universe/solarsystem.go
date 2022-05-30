@@ -3619,6 +3619,73 @@ func (s *SolarSystem) handleDevHax(q string, c *shared.GameClient) {
 			c.WriteErrorMessage("unknown noun.")
 			return
 		}
+	} else if verb == "yankall" {
+		// verify noun
+		if noun != "bots" && noun != "humans" && noun != "users" {
+			c.WriteErrorMessage("unknown noun.")
+			return
+		}
+
+		// set flags
+		yankBots := false
+		yankHumans := false
+
+		if noun == "users" {
+			yankBots = true
+			yankHumans = true
+		} else if noun == "bots" {
+			yankBots = true
+		} else if noun == "humans" {
+			yankHumans = true
+		}
+
+		// stash target system
+		targetSys := sh.CurrentSystem
+
+		// iterate over all ships in all systems
+		go func(u *Universe) {
+			for _, s := range u.AllSystems {
+				go func(s *SolarSystem) {
+					// obtain lock
+					s.Lock.Lock()
+					defer s.Lock.Unlock()
+
+					for _, v := range s.ships {
+						// don't yank docked ships - its too dangerous
+						if !v.IsDocked {
+							if v.IsNPC && yankBots {
+								// defer yank
+								go func(v *Ship) {
+									s.RemoveShip(v, true)
+									targetSys.AddShip(v, true)
+								}(v)
+							} else if !v.IsNPC && yankHumans {
+								// find client
+								for _, c := range s.clients {
+									uid := *c.UID
+
+									if uid == v.UserID {
+										// defer yank
+										go func(v *Ship, c *shared.GameClient) {
+											s.RemoveShip(v, true)
+											s.RemoveClient(c, true)
+											targetSys.AddShip(v, true)
+											targetSys.AddClient(c, true)
+										}(v, c)
+
+										// stop search
+										break
+									}
+								}
+							}
+						}
+					}
+				}(s)
+			}
+		}(s.Universe)
+
+		// all done!
+		return
 	}
 
 	// fallback
