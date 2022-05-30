@@ -3608,11 +3608,16 @@ func (s *SolarSystem) handleDevHax(q string, c *shared.GameClient) {
 		// all done!
 		return
 	} else if verb == "remax" {
-		// remax ship
-		sh.ReMaxStatsForSpawn()
+		if noun == "all" {
+			// remax ship
+			sh.ReMaxStatsForSpawn()
 
-		// all done!
-		return
+			// all done!
+			return
+		} else {
+			c.WriteErrorMessage("unknown noun.")
+			return
+		}
 	}
 
 	// fallback

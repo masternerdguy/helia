@@ -56,3 +56,24 @@ Helia is designed for all players to play within the same world and server - any
 * Save and Shutdown: http://localhost:8000/api/shutdown?key=shutdownToken
 
 The shutdown token is in `listener-configuration.json`. Note that ports and protocols (http vs https) will differ between environments.
+
+# Devhax
+Various cheats are provided that can be used to more easily test helia or just generally show off to plebs. These are executed using the system chat window. Only a user who's record in the users table has isdev set to true can run these commands. Note that these are HACKS, and things may not respond totally as expected in all cases!
+
+## teleport
+syntax:  /devhax teleport [systemname]
+example: /devhax teleport C-5
+
+Transports you to the system who's name is provided. You must be undocked to use this command.
+
+## cargo
+syntax:  /devhax cargo [quantity]~~[itemtypename]
+example: /devhax cargo 200~~Basic Armor Plate
+
+Creates a new stack of a given size of a given item type in your cargo bay. Completely ignores volume constraints!
+
+## remax
+syntax:  /devhax remax all
+example: /devhax remax all
+
+Restores your ship's shield, fuel, etc, to their maximum values.
