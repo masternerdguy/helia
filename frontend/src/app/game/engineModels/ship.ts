@@ -1,5 +1,5 @@
 import { WSShip } from '../wsModels/entities/wsShip';
-import { GetFactionCacheEntry } from '../wsModels/shared';
+import { GetFactionCacheEntry, GetPlayerFactionRelationshipCacheEntry } from '../wsModels/shared';
 import { Camera } from './camera';
 import { Faction } from './faction';
 
@@ -340,6 +340,40 @@ export class Ship extends WSShip {
 
     // return hp position on screen
     return [hx, hy];
+  }
+
+  getStandingColor() {
+    const rep = GetPlayerFactionRelationshipCacheEntry(this.factionId);
+  
+    if (!rep) {
+      return 'antiquewhite';
+    }
+  
+    if (rep.isMember) {
+      if (rep.openlyHostile) {
+        return 'firebrick';
+      } else {
+        return 'lightgreen';
+      }
+    }
+  
+    if (rep.standingValue >= 6) {
+      return 'royalblue';
+    }
+  
+    if (rep.standingValue > 1.999) {
+      return 'skyblue';
+    }
+  
+    if (rep.standingValue <= -6) {
+      return 'orange';
+    }
+  
+    if (rep.standingValue < -1.999) {
+      return 'yellow';
+    }
+  
+    return 'antiquewhite';
   }
 }
 

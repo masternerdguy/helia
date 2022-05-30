@@ -92,10 +92,19 @@ export class GDIList extends GDIBase {
         t = JSON.stringify(item);
       }
 
-      // render text
+      // default text color
       this.ctx.fillStyle = this.overrideTextColor ?? GDIStyle.listTextColor;
       this.ctx.strokeStyle = this.overrideTextColor ?? GDIStyle.listTextColor;
 
+      // check for specified color for row
+      if (item.listColor) {
+        const ic: string = item.listColor();
+
+        this.ctx.fillStyle = ic;
+        this.ctx.strokeStyle = ic;
+      }
+
+      // render text
       this.ctx.fillText(t, bx, px * (r + 1) + bx);
 
       // iterate row counter

@@ -1,9 +1,10 @@
 import { GDIWindow } from '../base/gdiWindow';
 import { GDIList } from '../components/gdiList';
-import { FontSize } from '../base/gdiStyle';
+import { FontSize, GDIStyle } from '../base/gdiStyle';
 import { Player, TargetType } from '../../engineModels/player';
 import { GDITabPane } from '../components/gdiTabPane';
 import { Ship } from '../../engineModels/ship';
+import { GetPlayerFactionRelationshipCacheEntry } from '../../wsModels/shared';
 
 export class OverviewWindow extends GDIWindow {
   tabs = new GDITabPane();
@@ -155,6 +156,7 @@ export class OverviewWindow extends GDIWindow {
             32
           )} ${fixedString(od, 8)}`;
         },
+        listColor: () => GDIStyle.listTextColor,
       });
     }
 
@@ -176,6 +178,7 @@ export class OverviewWindow extends GDIWindow {
             32
           )} ${fixedString(od, 8)}`;
         },
+        listColor: () => GDIStyle.listTextColor,
       });
     }
 
@@ -199,6 +202,7 @@ export class OverviewWindow extends GDIWindow {
             6
           )}${fixedString(i.stationName, 26)} ${fixedString(od, 8)}`;
         },
+        listColor: () => i.getStandingColor(),
       };
 
       objects.push(d);
@@ -233,6 +237,7 @@ export class OverviewWindow extends GDIWindow {
             7
           )} ${fixedString(od, 8)}`;
         },
+        listColor: () => i.getStandingColor(),
       };
 
       objects.push(d);
@@ -257,6 +262,7 @@ export class OverviewWindow extends GDIWindow {
             32
           )} ${fixedString(od, 8)}`;
         },
+        listColor: () => GDIStyle.listTextColor,
       };
 
       objects.push(d);
@@ -281,6 +287,7 @@ export class OverviewWindow extends GDIWindow {
             32
           )} ${fixedString(od, 8)}`;
         },
+        listColor: () => GDIStyle.listTextColor,
       };
 
       objects.push(d);
@@ -304,6 +311,7 @@ export class OverviewWindow extends GDIWindow {
             32
           )} ${fixedString(od, 8)}`;
         },
+        listColor: () => GDIStyle.listTextColor,
       };
 
       objects.push(d);
@@ -384,6 +392,7 @@ class OverviewRow {
   object: any;
   type: TargetType;
   listString: () => string;
+  listColor: () => string;
 }
 
 function overviewDistance(
