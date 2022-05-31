@@ -21,6 +21,7 @@ type GameClient struct {
 	Lock      sync.Mutex
 	Joined    bool
 	HasStatic bool
+	IsDev     bool
 
 	// standing to be kept in sync with flown ship(s)
 	ReputationSheet PlayerReputationSheet

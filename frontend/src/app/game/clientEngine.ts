@@ -59,6 +59,8 @@ import { Wreck } from './engineModels/wreck';
 import { ServerApplicationsUpdate } from './wsModels/bodies/applicationsUpdate';
 import { ServerMembersUpdate } from './wsModels/bodies/membersUpdate';
 import { ActionReportsWindow } from './gdi/windows/actionReportsWindow';
+import { ServerActionReportsPage } from './wsModels/bodies/viewActionReportsPage';
+import * as ClipboardJS from 'clipboard';
 
 class EngineSack {
   constructor() {}
@@ -303,7 +305,7 @@ export function clientStart(
   engineSack.windowManager.manageWindow(engineSack.systemChatWindow, '⋉');
   engineSack.windowManager.manageWindow(engineSack.experienceSheetWindow, '✇');
   engineSack.windowManager.manageWindow(engineSack.schematicRunsWindow, '⨻');
-  // engineSack.windowManager.manageWindow(engineSack.actionReportsWindow, 'ⓚ');
+  engineSack.windowManager.manageWindow(engineSack.actionReportsWindow, 'ⓚ');
 
   // cache windows for simpler updating and rendering
   engineSack.windows = [
@@ -366,6 +368,10 @@ export function clientStart(
       handleApplicationsUpdate(d);
     } else if (d.type == MessageTypes.MembersUpdate) {
       handleMembersUpdate(d);
+    } else if (d.type == MessageTypes.ActionReportsPage) {
+      handleActionReportsPage(d);
+    } else if (d.type == MessageTypes.ActionReportDetail) {
+      handleActionReportDetails(d);
     }
   });
 }
@@ -793,7 +799,7 @@ function handleInfoMessageFromServer(d: GameMessage) {
   // parse body
   const msg = JSON.parse(d.body) as ServerInfoMessage;
 
-  // move push error window to top
+  // move push info window to top
   engineSack.windows = [
     engineSack.pushInfoWindow,
     ...engineSack.windows.filter((item) => item !== engineSack.pushInfoWindow),
@@ -934,7 +940,6 @@ function handleCurrentShipUpdate(d: GameMessage) {
 
   // update action reports window
   engineSack.actionReportsWindow.setWsService(engineSack.wsSvc);
-  engineSack.actionReportsWindow.setPlayer(engineSack.player);
 }
 
 function handleFactionUpdate(d: GameMessage) {
@@ -1020,6 +1025,37 @@ function handleMembersUpdate(d: GameMessage) {
   engineSack.reputationSheetWindow.syncMembers(msg);
 }
 
+function handleActionReportsPage(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerActionReportsPage;
+
+  // fix missing lists
+  if (!msg.logs) {
+    msg.logs = [];
+  }
+
+  // fix null tickers
+  for (const t of msg.logs) {
+    if (!t.ticker) {
+      t.ticker = '';
+    }
+  }
+
+  // update action reports window
+  engineSack.actionReportsWindow.setPageData(msg);
+}
+
+function handleActionReportDetails(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body);
+
+  // export as pretty json
+  const pretty = JSON.stringify(msg, null, 2);
+
+  // copy to clipboard
+  copyToClipboard(pretty, 'action report data copied to clipboard');
+}
+
 // clears the screen
 function gfxBlank() {
   engineSack.ctx.fillStyle = 'pink';
@@ -1082,7 +1118,12 @@ function clientLoop() {
   periodicUpdate();
 
   // render
-  clientRender();
+  try {
+    clientRender();
+  } catch (error) {
+    console.log('caught error in client render');
+    console.log(error);
+  }
 
   // check if connection has been lost
   if (engineSack.wsSvc.isStale() && !engineSack.reloading) {
@@ -1542,6 +1583,9 @@ function handleMouseMove(x: number, y: number) {
 
       // only allow one window to drag at a time
       return;
+    } else {
+      // pass event to window
+      w.handleMouseMove(x, y);
     }
   }
 
@@ -1631,4 +1675,19 @@ function handleWindowResize() {
 
   // mark backplate as dirty
   engineSack.player.currentSystem.backplateValid = false;
+}
+
+function copyToClipboard(s: string, msg: string) {
+  // copy text to clipboard
+  ClipboardJS.copy(s);
+
+  // move push info window to top
+  engineSack.windows = [
+    engineSack.pushInfoWindow,
+    ...engineSack.windows.filter((item) => item !== engineSack.pushInfoWindow),
+  ];
+
+  // show the push info window
+  engineSack.pushInfoWindow.setText(msg);
+  engineSack.pushInfoWindow.setHidden(false);
 }

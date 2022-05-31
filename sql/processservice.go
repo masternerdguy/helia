@@ -91,3 +91,31 @@ func (s ProcessService) GetProcessByID(processID uuid.UUID) (*Process, error) {
 		return nil, err
 	}
 }
+
+// Used to save generated processes in worldfiller
+func (s ProcessService) NewProcessForWorldFiller(e Process) (*Process, error) {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// insert
+	sql := `
+				INSERT INTO public.processes(
+					id, name, meta, "time")
+				VALUES ($1, $2, $3, $4);
+			`
+
+	q, err := db.Query(sql, e.ID, e.Name, e.Meta, e.Time)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer q.Close()
+
+	// return pointer to inserted model
+	return &e, nil
+}

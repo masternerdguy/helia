@@ -77,6 +77,24 @@ export class GDITabPane extends GDIBase {
     return this.canvas.transferToImageBitmap();
   }
 
+  handleMouseMove(x: number, y: number) {
+    // make sure this is a relevant move
+    if (!this.containsPoint(x, y)) {
+      return;
+    }
+
+    // adjust input to be relative to tab
+    const rX = x;
+    const rY = y - GDIStyle.tabHandleHeight;
+
+    // send event to selected tab
+    const t = this.tabs.get(this.selectedTab);
+
+    if (t) {
+      t.handleMouseMove(rX, rY);
+    }
+  }
+
   handleClick(x: number, y: number) {
     // make sure this is a relevant click
     if (!this.containsPoint(x, y)) {
@@ -206,6 +224,22 @@ class Tab extends GDIBase {
   public components: GDIComponent[] = [];
   private canvas: OffscreenCanvas;
   private ctx: any;
+
+  handleMouseMove(x: number, y: number) {
+    // make sure this is a relevant move
+    if (!this.containsPoint(x, y + GDIStyle.tabHandleHeight)) {
+      return;
+    }
+
+    // find the component that is being moved on within this tab
+    for (const c of this.components) {
+      if (c.containsPoint(x, y)) {
+        // send move event
+        c.handleMouseMove(x, y);
+        break;
+      }
+    }
+  }
 
   handleClick(x: number, y: number) {
     // make sure this is a relevant click

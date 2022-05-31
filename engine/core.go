@@ -26,6 +26,7 @@ var itemSvc = sql.GetItemService()
 var schematicRunSvc = sql.GetSchematicRunService()
 var factionSvc = sql.GetFactionService()
 var actionReportSvc = sql.GetActionReportService()
+var itemTypeSvc = sql.GetItemTypeService()
 
 // Will cause all region goroutines to stop when true
 var shutdownSignal = false
@@ -527,9 +528,8 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 	// iterate over changed meta items
 	for id := range sol.ChangedMetaItems {
-		// capture reference and remove from map
+		// capture reference
 		mi := sol.ChangedMetaItems[id]
-		delete(sol.ChangedMetaItems, id)
 
 		// handle escalation on another goroutine
 		go func(mi *universe.Item, sol *universe.SolarSystem) {
@@ -555,6 +555,9 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			}
 		}(mi, sol)
 	}
+
+	// clear changed meta items
+	sol.ChangedMetaItems = make([]*universe.Item, 0)
 
 	// iterate over new items
 	for _, mi := range sol.NewItems {
@@ -606,6 +609,82 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 	// clear new items
 	sol.NewItems = make([]*universe.Item, 0)
+
+	// iterate over new items for devhax
+	for _, mi := range sol.NewItemsDevHax {
+		// handle escalation on another goroutine
+		go func(mi *universe.NewItemFromNameTicketDevHax, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
+			// find item type by name
+			itemType, err := itemTypeSvc.GetItemTypeByName(mi.ItemTypeName)
+
+			if err != nil || itemType == nil || itemType.Family == "ship" {
+				shared.TeeLog(fmt.Sprintf("Unable to find non-ship item type [devhax] %v: %v", mi.ItemTypeName, err))
+			} else {
+				// target container
+				tc := mi.Container
+
+				// create item
+				mi := &universe.Item{
+					ItemTypeID:    itemType.ID,
+					Meta:          universe.Meta(itemType.Meta),
+					Created:       time.Now(),
+					CreatedReason: "[devhax] :party parrot:",
+					CreatedBy:     &mi.UserID,
+					ContainerID:   mi.ContainerID,
+					Quantity:      mi.Quantity,
+					IsPackaged:    true,
+					ItemTypeName:  mi.ItemTypeName,
+				}
+
+				// save new item to db
+				id, err := newItem(mi)
+
+				// error check
+				if err != nil || id == nil {
+					shared.TeeLog(fmt.Sprintf("Unable to save new item [devhax] %v: %v", mi.ID, err))
+				} else {
+					// store corrected id from db insert
+					mi.ID = *id
+
+					// load new item
+					ni, err := itemSvc.GetItemByID(*id)
+
+					if err != nil || id == nil {
+						shared.TeeLog(fmt.Sprintf("Unable to load new item [devhax] %v: %v", mi.ID, err))
+					} else {
+						fi, err := LoadItem(ni)
+
+						if err != nil || id == nil {
+							shared.TeeLog(fmt.Sprintf("Unable to integrate new item [devhax] %v: %v", mi.ID, err))
+						} else {
+							// copy loaded values
+							mi.Meta = fi.Meta
+							mi.ItemTypeMeta = fi.ItemTypeMeta
+							mi.ItemTypeName = fi.ItemTypeName
+							mi.ItemFamilyID = fi.ItemFamilyID
+							mi.ItemFamilyName = fi.ItemFamilyName
+							mi.Process = fi.Process
+
+							// store in container
+							tc.Lock.Lock()
+							defer tc.Lock.Unlock()
+
+							tc.Items = append(tc.Items, mi)
+
+							// mark as clean
+							mi.CoreDirty = false
+						}
+					}
+				}
+			}
+		}(mi, sol)
+	}
+
+	// clear new items from devhax
+	sol.NewItemsDevHax = make([]*universe.NewItemFromNameTicketDevHax, 0)
 
 	// iterate over new sell orders
 	for _, mi := range sol.NewSellOrders {
@@ -1173,9 +1252,8 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 	// iterate over clients in need of a schematic runs update
 	for id := range sol.SchematicRunViews {
-		// capture reference and remove from map
+		// capture reference
 		rs := sol.SchematicRunViews[id]
-		delete(sol.SchematicRunViews, id)
 
 		// handle escalation on another goroutine
 		go func(rs *shared.GameClient) {
@@ -1253,11 +1331,13 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 		}(rs)
 	}
 
+	// clear schematic run views
+	sol.SchematicRunViews = make([]*shared.GameClient, 0)
+
 	// iterate over newly invoked schematics
 	for id := range sol.NewSchematicRuns {
-		// capture reference and remove from map
+		// capture reference
 		rs := sol.NewSchematicRuns[id]
-		delete(sol.NewSchematicRuns, id)
 
 		// handle escalation on another goroutine
 		go func(rs *universe.NewSchematicRunTicket, sol *universe.SolarSystem) {
@@ -1311,11 +1391,13 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 		}(rs, sol)
 	}
 
+	// clear new schematic runs
+	sol.NewSchematicRuns = make([]*universe.NewSchematicRunTicket, 0)
+
 	// iterate over new faction requests
 	for id := range sol.NewFactions {
-		// capture reference and remove from map
+		// capture reference
 		mi := sol.NewFactions[id]
-		delete(sol.NewFactions, id)
 
 		// handle escalation on another goroutine
 		go func(mi *universe.NewFactionTicket, sol *universe.SolarSystem) {
@@ -1483,11 +1565,13 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 		}(mi, sol)
 	}
 
+	// clear new faction requests
+	sol.NewFactions = make([]*universe.NewFactionTicket, 0)
+
 	// iterate over leave faction requests
 	for id := range sol.LeaveFactions {
-		// capture reference and remove from map
+		// capture reference
 		mi := sol.LeaveFactions[id]
-		delete(sol.LeaveFactions, id)
 
 		// handle escalation on another goroutine
 		go func(mi *universe.LeaveFactionTicket, sol *universe.SolarSystem) {
@@ -1563,11 +1647,13 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 		}(mi, sol)
 	}
 
+	// clear leave faction requests
+	sol.LeaveFactions = make([]*universe.LeaveFactionTicket, 0)
+
 	// iterate over join faction requests
 	for id := range sol.JoinFactions {
-		// capture reference and remove from map
+		// capture reference
 		mi := sol.JoinFactions[id]
-		delete(sol.JoinFactions, id)
 
 		// handle escalation on another goroutine
 		go func(mi *universe.JoinFactionTicket, sol *universe.SolarSystem) {
@@ -1653,11 +1739,13 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 		}(mi, sol)
 	}
 
+	// clear join faction requests
+	sol.JoinFactions = make([]*universe.JoinFactionTicket, 0)
+
 	// iterate over clients in need of a faction member list
 	for id := range sol.ViewMembers {
-		// capture reference and remove from map
+		// capture reference
 		rs := sol.ViewMembers[id]
-		delete(sol.ViewMembers, id)
 
 		// handle escalation on another goroutine
 		go func(rs *universe.ViewMembersTicket) {
@@ -1705,11 +1793,13 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 		}(rs)
 	}
 
+	// clear view members
+	sol.ViewMembers = make([]*universe.ViewMembersTicket, 0)
+
 	// iterate over kick member requests
 	for id := range sol.KickMembers {
-		// capture reference and remove from map
+		// capture reference
 		mi := sol.KickMembers[id]
-		delete(sol.KickMembers, id)
 
 		// handle escalation on another goroutine
 		go func(mi *universe.KickMemberTicket, sol *universe.SolarSystem) {
@@ -1825,6 +1915,225 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			}(mi.OwnerClient)
 		}(mi, sol)
 	}
+
+	// clear kick member requests
+	sol.KickMembers = make([]*universe.KickMemberTicket, 0)
+
+	// iterate over view action report page requests
+	for id := range sol.ActionReportPages {
+		// capture reference
+		mi := sol.ActionReportPages[id]
+
+		// handle escalation on another goroutine
+		go func(mi *shared.ViewActionReportPageTicket, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
+			// null check
+			if mi.Client == nil {
+				shared.TeeLog(fmt.Sprintf("No client attached to action report request: %v", mi))
+				return
+			}
+
+			// pull report summaries
+			summaries, err := actionReportSvc.GetActionReportSummariesByUserID(*mi.Client.UID, mi.Page*mi.Take, mi.Take)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("Error retrieving action report summary page: %v", err))
+				return
+			}
+
+			// map for transmission
+			page := models.ServerActionReportsPage{
+				Page: mi.Page,
+			}
+
+			for _, v := range summaries {
+				page.Logs = append(page.Logs, models.ServerActionReportSummary{
+					ID:                     v.ID,
+					VictimName:             v.VictimName,
+					VictimShipTemplateName: v.VictimShipTemplateName,
+					VictimTicker:           v.VictimTicker,
+					Timestamp:              v.Timestamp,
+					SystemName:             v.SolarSystemName,
+					RegionName:             v.RegionName,
+					Parties:                v.Parties,
+				})
+			}
+
+			// send message to client containing page
+			b, _ := json.Marshal(page)
+
+			msg := models.GameMessage{
+				MessageType: models.SharedMessageRegistry.ActionReportsPage,
+				MessageBody: string(b),
+			}
+
+			go func() {
+				mi.Client.WriteMessage(&msg)
+			}()
+		}(mi, sol)
+	}
+
+	// clear action report page requests
+	sol.ActionReportPages = make([]*shared.ViewActionReportPageTicket, 0)
+
+	// iterate over view action report detail requests
+	for id := range sol.ActionReportDetails {
+		// capture reference
+		mi := sol.ActionReportDetails[id]
+
+		// handle escalation on another goroutine
+		go func(mi *shared.ViewActionReportDetailTicket, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
+			// null check
+			if mi.Client == nil {
+				shared.TeeLog(fmt.Sprintf("No client attached to action report detail request: %v", mi))
+				return
+			}
+
+			// pull report
+			report, err := actionReportSvc.GetActionReportByID(mi.KillID)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("Error retrieving action report details: %v", err))
+				return
+			}
+
+			// map for transmission
+			log := models.ServerActionReportDetail{
+				ID: report.ID,
+				ServerKillLog: models.ServerKillLog{
+					Wallet: report.Report.Wallet,
+				},
+			}
+
+			// map header
+			log.ServerKillLog.Header.VictimID = report.Report.Header.VictimID
+			log.ServerKillLog.Header.VictimName = report.Report.Header.VictimName
+			log.ServerKillLog.Header.VictimFactionID = report.Report.Header.VictimFactionID
+			log.ServerKillLog.Header.VictimFactionName = report.Report.Header.VictimFactionName
+			log.ServerKillLog.Header.VictimShipTemplateID = report.Report.Header.VictimShipTemplateID
+			log.ServerKillLog.Header.VictimShipTemplateName = report.Report.Header.VictimShipTemplateName
+			log.ServerKillLog.Header.VictimShipID = report.Report.Header.VictimShipID
+			log.ServerKillLog.Header.VictimShipName = report.Report.Header.VictimShipName
+			log.ServerKillLog.Header.Timestamp = report.Report.Header.Timestamp
+			log.ServerKillLog.Header.SolarSystemID = report.Report.Header.SolarSystemID
+			log.ServerKillLog.Header.SolarSystemName = report.Report.Header.SolarSystemName
+			log.ServerKillLog.Header.RegionID = report.Report.Header.RegionID
+			log.ServerKillLog.Header.RegionName = report.Report.Header.RegionName
+			log.ServerKillLog.Header.HoldingFactionID = report.Report.Header.HoldingFactionID
+			log.ServerKillLog.Header.HoldingFactionName = report.Report.Header.HoldingFactionName
+			log.ServerKillLog.Header.InvolvedParties = report.Report.Header.InvolvedParties
+			log.ServerKillLog.Header.IsNPC = report.Report.Header.IsNPC
+			log.ServerKillLog.Header.PosX = report.Report.Header.PosX
+			log.ServerKillLog.Header.PosY = report.Report.Header.PosY
+
+			// map fitting
+			for _, s := range report.Report.Fitting.ARack {
+				log.ServerKillLog.Fitting.ARack = append(log.ServerKillLog.Fitting.ARack, models.ServerKillLogSlot{
+					ItemID:              s.ItemID,
+					ItemTypeID:          s.ItemTypeID,
+					ItemFamilyID:        s.ItemFamilyID,
+					ItemTypeName:        s.ItemTypeName,
+					ItemFamilyName:      s.ItemFamilyName,
+					IsModified:          s.IsModified,
+					CustomizationFactor: s.CustomizationFactor,
+				})
+			}
+
+			for _, s := range report.Report.Fitting.BRack {
+				log.ServerKillLog.Fitting.BRack = append(log.ServerKillLog.Fitting.BRack, models.ServerKillLogSlot{
+					ItemID:              s.ItemID,
+					ItemTypeID:          s.ItemTypeID,
+					ItemFamilyID:        s.ItemFamilyID,
+					ItemTypeName:        s.ItemTypeName,
+					ItemFamilyName:      s.ItemFamilyName,
+					IsModified:          s.IsModified,
+					CustomizationFactor: s.CustomizationFactor,
+				})
+			}
+
+			for _, s := range report.Report.Fitting.CRack {
+				log.ServerKillLog.Fitting.CRack = append(log.ServerKillLog.Fitting.CRack, models.ServerKillLogSlot{
+					ItemID:              s.ItemID,
+					ItemTypeID:          s.ItemTypeID,
+					ItemFamilyID:        s.ItemFamilyID,
+					ItemTypeName:        s.ItemTypeName,
+					ItemFamilyName:      s.ItemFamilyName,
+					IsModified:          s.IsModified,
+					CustomizationFactor: s.CustomizationFactor,
+				})
+			}
+
+			// map cargo
+			for _, s := range report.Report.Cargo {
+				log.ServerKillLog.Cargo = append(log.ServerKillLog.Cargo, models.ServerKillLogCargoItem{
+					ItemID:         s.ItemID,
+					ItemTypeID:     s.ItemTypeID,
+					ItemFamilyID:   s.ItemFamilyID,
+					ItemTypeName:   s.ItemTypeName,
+					ItemFamilyName: s.ItemFamilyName,
+					Quantity:       s.Quantity,
+					IsPackaged:     s.IsPackaged,
+				})
+			}
+
+			// map involved parties
+			for _, p := range report.Report.InvolvedParties {
+				q := models.ServerKillLogInvolvedParty{
+					UserID:              p.UserID,
+					FactionID:           p.FactionID,
+					CharacterName:       p.CharacterName,
+					FactionName:         p.FactionName,
+					IsNPC:               p.IsNPC,
+					LastAggressed:       p.LastAggressed,
+					ShipID:              p.ShipID,
+					ShipName:            p.ShipName,
+					ShipTemplateID:      p.ShipTemplateID,
+					ShipTemplateName:    p.ShipTemplateName,
+					LastSolarSystemID:   p.LastSolarSystemID,
+					LastSolarSystemName: p.LastSolarSystemName,
+					LastRegionID:        p.LastRegionID,
+					LastRegionName:      p.LastRegionName,
+					LastPosX:            p.LastPosX,
+					LastPosY:            p.LastPosY,
+					WeaponUse:           make(map[string]*models.ServerKillLogWeaponUse),
+				}
+
+				for k, x := range p.WeaponUse {
+					q.WeaponUse[k] = &models.ServerKillLogWeaponUse{
+						ItemID:          x.ItemID,
+						ItemTypeID:      x.ItemTypeID,
+						ItemFamilyID:    x.ItemFamilyID,
+						ItemFamilyName:  x.ItemFamilyName,
+						ItemTypeName:    x.ItemTypeName,
+						LastUsed:        x.LastUsed,
+						DamageInflicted: x.DamageInflicted,
+					}
+				}
+
+				log.ServerKillLog.InvolvedParties = append(log.ServerKillLog.InvolvedParties, q)
+			}
+
+			// send message to client containing report
+			b, _ := json.Marshal(log)
+
+			msg := models.GameMessage{
+				MessageType: models.SharedMessageRegistry.ActionReportDetail,
+				MessageBody: string(b),
+			}
+
+			go func() {
+				mi.Client.WriteMessage(&msg)
+			}()
+		}(mi, sol)
+	}
+
+	// clear action report detail requests
+	sol.ActionReportDetails = make([]*shared.ViewActionReportDetailTicket, 0)
 }
 
 func notifyClientOfWorkshopFee(c *shared.GameClient) {
@@ -1842,8 +2151,4 @@ func notifyClientOfWorkshopFee(c *shared.GameClient) {
 
 	infoMsg := strings.Join(lns, "")
 	c.WriteInfoMessage(infoMsg)
-}
-
-func checkExcessiveTpf() {
-
 }

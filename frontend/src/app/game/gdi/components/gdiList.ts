@@ -18,10 +18,15 @@ export class GDIList extends GDIBase {
   private overrideTextColor: string;
   private overrideBorderColor: string;
 
+  private lastScrollBarScale: number;
+  private lastScrollBarPercent: number;
+  private scrollBarDragging: boolean;
+
   initialize() {
     // initialize offscreen canvas
     this.canvas = new OffscreenCanvas(this.getWidth(), this.getHeight());
     this.ctx = this.canvas.getContext('2d');
+    this.scrollBarDragging = false;
   }
 
   periodicUpdate() {
@@ -87,10 +92,19 @@ export class GDIList extends GDIBase {
         t = JSON.stringify(item);
       }
 
-      // render text
+      // default text color
       this.ctx.fillStyle = this.overrideTextColor ?? GDIStyle.listTextColor;
       this.ctx.strokeStyle = this.overrideTextColor ?? GDIStyle.listTextColor;
 
+      // check for specified color for row
+      if (item.listColor) {
+        const ic: string = item.listColor();
+
+        this.ctx.fillStyle = ic;
+        this.ctx.strokeStyle = ic;
+      }
+
+      // render text
       this.ctx.fillText(t, bx, px * (r + 1) + bx);
 
       // iterate row counter
@@ -103,12 +117,20 @@ export class GDIList extends GDIBase {
     this.ctx.fillStyle = this.overrideFillColor ?? GDIStyle.listFillColor;
     this.ctx.fillRect(this.getWidth() - sw, 0, sw, this.getHeight());
 
-    this.ctx.fillStyle = GDIStyle.listScrollColor;
+    if (this.scrollBarDragging) {
+      this.ctx.fillStyle = GDIStyle.listScrollDragColor;
+    } else {
+      this.ctx.fillStyle = GDIStyle.listScrollColor;
+    }
+
     if (stop >= this.items.length) {
       this.ctx.fillRect(this.getWidth() - sw, 0, sw, this.getHeight());
     } else {
       const scale = stop / this.items.length;
       const percent = this.scroll / this.items.length;
+
+      this.lastScrollBarScale = scale;
+      this.lastScrollBarPercent = percent;
 
       this.ctx.fillRect(
         this.getWidth() - sw,
@@ -130,6 +152,37 @@ export class GDIList extends GDIBase {
     return this.canvas.transferToImageBitmap();
   }
 
+  handleMouseMove(x: number, y: number) {
+    // make sure this is a real move
+    if (!this.containsPoint(x, y)) {
+      return;
+    }
+
+    this.boundCheck();
+
+    // adjust input to be relative to control origin
+    const rX = x - this.getX();
+    const rY = y - this.getY();
+
+    if (this.scrollBarDragging) {
+      // check for leaving scroll area
+      if (rX < this.getWidth() - GDIStyle.listScrollWidth) {
+        // stop scrolling
+        this.scrollBarDragging = false;
+      } else {
+        // offset
+        const oY = (this.lastScrollBarScale * this.getHeight()) / 2;
+
+        // determine new scroll position
+        const gP = (rY - oY) / this.getHeight();
+        const nsI = Math.round(gP * this.items.length);
+
+        // update scroll position
+        this.setScroll(nsI);
+      }
+    }
+  }
+
   handleClick(x: number, y: number) {
     // make sure this is a real click
     if (!this.containsPoint(x, y)) {
@@ -148,32 +201,45 @@ export class GDIList extends GDIBase {
     // border offset
     const bx = GDIStyle.listBorderSize + 3;
 
-    // find item being clicked on
-    let r = 0;
-    const stop = Math.round((this.getHeight() - bx) / px);
+    // check for scroll bar click
+    if (rX >= this.getWidth() - GDIStyle.listScrollWidth) {
+      // determine scroll bar handle bounds
+      const saY = this.lastScrollBarPercent * this.getHeight();
+      const sbY = this.lastScrollBarScale * this.getHeight() + 2;
 
-    for (let i = this.scroll; i < this.scroll + stop; i++) {
-      // exit if out of bounds
-      if (i >= this.items.length) {
-        break;
+      // check if cursor within bounds
+      if (rY >= saY && rY <= saY + sbY) {
+        // toggle scrolling
+        this.scrollBarDragging = !this.scrollBarDragging;
       }
+    } else {
+      // find item being clicked on
+      let r = 0;
+      const stop = Math.round((this.getHeight() - bx) / px);
 
-      // test for click
-      const itemRect = new GDIRectangle(
-        bx,
-        px * r + bx,
-        this.getWidth() - GDIStyle.listScrollWidth,
-        px
-      );
-      const item = this.items[i];
+      for (let i = this.scroll; i < this.scroll + stop; i++) {
+        // exit if out of bounds
+        if (i >= this.items.length) {
+          break;
+        }
 
-      if (itemRect.containsPoint(rX, rY)) {
-        this.selectedRow = i;
-        this.onClick(item);
-        break;
+        // test for click
+        const itemRect = new GDIRectangle(
+          bx,
+          px * r + bx,
+          this.getWidth() - GDIStyle.listScrollWidth,
+          px
+        );
+        const item = this.items[i];
+
+        if (itemRect.containsPoint(rX, rY)) {
+          this.selectedRow = i;
+          this.onClick(item);
+          break;
+        }
+
+        r++;
       }
-
-      r++;
     }
   }
 

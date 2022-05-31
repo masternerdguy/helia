@@ -14,9 +14,7 @@ import { ClientSplitItem } from '../../wsModels/bodies/splitItem';
 import { ClientStackItem } from '../../wsModels/bodies/stackItem';
 import { ClientTrashItem } from '../../wsModels/bodies/trashItem';
 import { ClientUnpackageItem } from '../../wsModels/bodies/unpackageItem';
-import { heliaDateFromString, printHeliaDate } from '../../engineMath';
 import { ClientViewIndustrialOrders } from '../../wsModels/bodies/viewIndustrialOrders';
-import { ServerIndustrialOrdersUpdate } from '../../wsModels/bodies/industrialOrdersUpdate';
 import {
   WSIndustrialOrdersUpdate,
   WSIndustrialSilo,
@@ -465,7 +463,12 @@ export class IndustrialMarketWindow extends GDIWindow {
     const cargo: ShipViewRow[] = [];
 
     if (this.player.currentCargoView) {
-      for (const ci of this.player.currentCargoView.items) {
+      for (const ci of this.player.currentCargoView.items.sort((a, b) =>
+        `${a.itemTypeName}::${a.quantity}::${a.id}` >
+        `${b.itemTypeName}::${b.quantity}::${b.id}`
+          ? 1
+          : -1
+      )) {
         const r = buildCargoRowFromContainerItem(
           ci,
           this.isDocked,
@@ -492,9 +495,11 @@ export class IndustrialMarketWindow extends GDIWindow {
 
     // push to view
     const i = this.cargoView.getSelectedIndex();
+    const s = this.cargoView.getScroll();
 
     this.cargoView.setItems(rows);
     this.cargoView.setSelectedIndex(i);
+    this.cargoView.setScroll(s);
 
     if (this.industrialOrdersTree && this.depthStack) {
       try {

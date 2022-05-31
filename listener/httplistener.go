@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"helia/engine"
 	"helia/listener/models"
+	"helia/shared"
 	"helia/sql"
 	"io/ioutil"
 	"net/http"
@@ -227,6 +228,11 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// log dev login attempts
+	if user.IsDev {
+		shared.TeeLog(fmt.Sprintf("A developer is trying to log in! %v", *user.EmailAddress))
+	}
+
 	if err != nil {
 		res.Success = false
 		res.Message = err.Error()
@@ -255,6 +261,13 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 				res.Success = true
 			}
 		}
+	}
+
+	// log result
+	if res.Success {
+		shared.TeeLog(fmt.Sprintf("Login success: %v | %v >> %v", m.EmailAddress, readUserIP(r), res.SessionID))
+	} else {
+		shared.TeeLog(fmt.Sprintf("Login failed: %v | %v", m.EmailAddress, readUserIP(r)))
 	}
 
 	// return result

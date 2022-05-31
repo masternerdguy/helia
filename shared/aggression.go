@@ -41,3 +41,16 @@ type AggressionLogWeaponUse struct {
 	LastUsed        time.Time
 	DamageInflicted float64
 }
+
+// Structure representing a validated request to view an action report summary page
+type ViewActionReportPageTicket struct {
+	Client *GameClient
+	Page   int
+	Take   int
+}
+
+// Structure representing a validated request to view a full action report
+type ViewActionReportDetailTicket struct {
+	Client *GameClient
+	KillID uuid.UUID
+}

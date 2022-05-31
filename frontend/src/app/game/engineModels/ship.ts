@@ -1,5 +1,8 @@
 import { WSShip } from '../wsModels/entities/wsShip';
-import { GetFactionCacheEntry } from '../wsModels/shared';
+import {
+  GetFactionCacheEntry,
+  GetPlayerFactionRelationshipCacheEntry,
+} from '../wsModels/shared';
 import { Camera } from './camera';
 import { Faction } from './faction';
 
@@ -37,6 +40,10 @@ export class Ship extends WSShip {
     this.factionId = ws.factionId;
     this.deltaTail = [];
     this.lastSeen = Date.now();
+
+    if (this.factionId) {
+      this.faction = GetFactionCacheEntry(this.factionId);
+    }
 
     if (ws.accel) {
       this.accel = ws.accel;
@@ -106,7 +113,7 @@ export class Ship extends WSShip {
     } else if (this.isPlayer) {
       ctx.strokeStyle = 'magenta';
     } else {
-      ctx.strokeStyle = 'white';
+      ctx.strokeStyle = this.getStandingColor();
     }
 
     ctx.stroke();
@@ -310,7 +317,11 @@ export class Ship extends WSShip {
   }
 
   getFaction(): Faction {
-    return GetFactionCacheEntry(this.factionId);
+    // update cache
+    this.faction = GetFactionCacheEntry(this.factionId);
+
+    // return cache entry
+    return this.faction;
   }
 
   getHardpointPosition(hpPos: number[]): [number, number] {
@@ -332,6 +343,40 @@ export class Ship extends WSShip {
 
     // return hp position on screen
     return [hx, hy];
+  }
+
+  getStandingColor() {
+    const rep = GetPlayerFactionRelationshipCacheEntry(this.factionId);
+
+    if (!rep) {
+      return 'antiquewhite';
+    }
+
+    if (rep.isMember) {
+      if (rep.openlyHostile) {
+        return 'firebrick';
+      } else {
+        return 'lightgreen';
+      }
+    }
+
+    if (rep.standingValue >= 6) {
+      return 'royalblue';
+    }
+
+    if (rep.standingValue > 1.999) {
+      return 'skyblue';
+    }
+
+    if (rep.standingValue <= -6) {
+      return 'orangered';
+    }
+
+    if (rep.standingValue < -1.999) {
+      return 'darkorange';
+    }
+
+    return 'antiquewhite';
   }
 }
 

@@ -27,7 +27,7 @@ func main() {
 	)
 
 	// purge old logs
-	shared.TeeLog("Removing logs older than 48 hours...")
+	shared.TeeLog("Removing logs older than 7 days...")
 	err := sql.GetLogService().NukeLogs()
 
 	if err != nil {

@@ -26,6 +26,20 @@ type ActionReport struct {
 	InvolvedParties Meta
 }
 
+// Structure representing a row in the ActionReports table
+type ActionReportSummary struct {
+	ID                     uuid.UUID
+	VictimIsNPC            bool
+	VictimName             string
+	VictimShipTemplateName string
+	VictimTicker           *string
+	SolarSystemName        string
+	RegionName             string
+	Parties                int
+	Timestamp              time.Time
+	SearchUserID           uuid.UUID
+}
+
 // Structure representing involved parties in an action report
 type InvolvedPartiesMeta struct {
 	InvolvedUserIDs []uuid.UUID
@@ -114,8 +128,8 @@ func (s ActionReportService) NewActionReport(e ActionReport) (*ActionReport, err
 }
 
 // Retrieves all action reports involving a given user from the database
-func (s ActionReportService) GetActionReportsByUserID(userID uuid.UUID, skip int, take int) ([]ActionReport, error) {
-	reports := make([]ActionReport, 0)
+func (s ActionReportService) GetActionReportSummariesByUserID(userID uuid.UUID, skip int, take int) ([]ActionReportSummary, error) {
+	reports := make([]ActionReportSummary, 0)
 
 	// get db handle
 	db, err := connect()
@@ -126,12 +140,14 @@ func (s ActionReportService) GetActionReportsByUserID(userID uuid.UUID, skip int
 
 	// load action reports
 	sql := `
-				select id, "timestamp", actionreport, involvedparties from vw_flattenactionreportsbyparty
-				where party like '%$1%'
-				group by id, "timestamp", actionreport, involvedparties
-				order by "timestamp" desc
-				offset $2
-				limit $3
+				SELECT 
+					victim_isnpc, victim_name, victim_shiptemplatename, victim_ticker, 
+					solarsystemname, regionname, parties, "timestamp", search_userid, id
+				FROM public.vw_actionreports_summary
+				WHERE search_userid = $1
+				ORDER BY "timestamp" desc
+				OFFSET $2
+				LIMIT $3;
 			`
 
 	rows, err := db.Query(sql, userID, skip, take)
@@ -143,10 +159,14 @@ func (s ActionReportService) GetActionReportsByUserID(userID uuid.UUID, skip int
 	defer rows.Close()
 
 	for rows.Next() {
-		r := ActionReport{}
+		r := ActionReportSummary{}
 
 		// scan into report structure
-		rows.Scan(&r.ID, &r.Timestamp, &r.Report, &r.InvolvedParties)
+		rows.Scan(
+			&r.VictimIsNPC, &r.VictimName, &r.VictimShipTemplateName,
+			&r.VictimTicker, &r.SolarSystemName, &r.RegionName,
+			&r.Parties, &r.Timestamp, &r.SearchUserID, &r.ID,
+		)
 
 		// append to report slice
 		reports = append(reports, r)
@@ -223,7 +243,7 @@ type KillLogInvolvedParty struct {
 	UserID        uuid.UUID `json:"userID"`
 	FactionID     uuid.UUID `json:"factionID"`
 	CharacterName string    `json:"characterName"`
-	FactionName   string    `json:"factionNane"`
+	FactionName   string    `json:"factionName"`
 	IsNPC         bool      `json:"isNPC"`
 	LastAggressed time.Time `json:"lastAggressed"`
 	// aggressor ship info

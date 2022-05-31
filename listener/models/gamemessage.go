@@ -937,11 +937,14 @@ type ServerActionReportDetail struct {
 
 // Structure containing a low-overhead action report row
 type ServerActionReportSummary struct {
-	ID         uuid.UUID `json:"id"`
-	VictimName string    `json:"victim"`
-	VictimShip string    `json:"ship"`
-	Timestamp  string    `json:"timestamp"`
-	SystemName string    `json:"systemName"`
+	ID                     uuid.UUID `json:"id"`
+	VictimName             string    `json:"victim"`
+	VictimShipTemplateName string    `json:"ship"`
+	VictimTicker           *string   `json:"ticker"`
+	Timestamp              time.Time `json:"timestamp"`
+	SystemName             string    `json:"systemName"`
+	RegionName             string    `json:"regionName"`
+	Parties                int       `json:"parties"`
 }
 
 // Structure represening a copy-pastable report of the death of a ship
@@ -982,7 +985,7 @@ type ServerKillLogInvolvedParty struct {
 	UserID        uuid.UUID `json:"userID"`
 	FactionID     uuid.UUID `json:"factionID"`
 	CharacterName string    `json:"characterName"`
-	FactionName   string    `json:"factionNane"`
+	FactionName   string    `json:"factionName"`
 	IsNPC         bool      `json:"isNPC"`
 	LastAggressed time.Time `json:"lastAggressed"`
 	// aggressor ship info

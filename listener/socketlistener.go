@@ -455,6 +455,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientViewActionReportsPage(&client, &b)
+		} else if m.MessageType == msgRegistry.ViewActionReportDetail {
+			// decode body as ClientViewActionReportDetailBody
+			b := models.ClientViewActionReportDetailBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientViewActionReportDetail(&client, &b)
 		}
 	}
 }
@@ -501,6 +508,9 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 
 		// store escrow container
 		client.EscrowContainerID = u.EscrowContainerID
+
+		// store developer status
+		client.IsDev = u.IsDev
 
 		// lookup current ship in memory
 		currShip := l.Engine.Universe.FindShip(*u.CurrentShipID, nil)
@@ -1840,6 +1850,29 @@ func (l *SocketListener) handleClientViewActionReportsPage(client *shared.GameCl
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.ViewActionReportsPage, false)
+	}
+}
+
+func (l *SocketListener) handleClientViewActionReportDetail(client *shared.GameClient, body *models.ClientViewActionReportDetailBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		shared.TeeLog(fmt.Sprintf("handleClientViewActionReportDetail: unexpected id: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.SharedMessageRegistry
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.ViewActionReportDetail, false)
 	}
 }
 

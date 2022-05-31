@@ -41,9 +41,26 @@ func main() {
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
+	var toInject = [...]string{
+		"23cef584-f3aa-47dc-b11a-87b4debaec80",
+		"e1bbb4ab-9178-4b7d-b0f8-9365449d1fd6",
+		"3533818e-3a3b-41dd-af00-78d800c5921f",
+		"6db24bfb-92ae-4156-a120-5887137c3d3b",
+		"fd1bc6f0-59e5-4aad-9d64-13a48b86b74f",
+		"0c3df30f-7ff0-4a1d-8f3d-b86f76f3c30a",
+		"0693c405-8a08-4728-8f80-c649fccbbcab",
+		"ebb77519-cb29-4acd-ab17-5dded28b6adc",
+	}
+
 	// dropAsteroids(universe)
 	//dropSanctuaryStations(universe)
-	injectProcess(universe)
+
+	for i, e := range toInject {
+		log.Println(fmt.Sprintf("injecting process %v", e))
+		injectProcess(universe, e, i)
+	}
+
+	stubModuleSchematicsAndProcesses()
 }
 
 /* Parameters for asteroid generation */
@@ -189,9 +206,449 @@ func calculateSystemSeed(s *universe.SolarSystem) int {
 	return seed
 }
 
-func injectProcess(u *universe.Universe) {
-	pID, err := uuid.Parse("d9dad489-e2fc-4ecf-94ea-363a5fe14a69")
-	prob := 30
+type schematicStubWorldmaker struct {
+	// item type
+	ItemType sql.VwItemTypeIndustrial
+	// fair process (item type, used by schematic)
+	FairProcess sql.Process
+	FairInputs  []sql.ProcessInput
+	FairOutputs []sql.ProcessOutput
+	// sink process (item type)
+	SinkProcess       sql.Process
+	ItemTypeSinkInput sql.ProcessInput
+	// new schematic item type
+	NewSchematic sql.ItemType
+	// schematic item faucet
+	SchematicFaucetProcess       sql.Process
+	SchematicFaucetProcessOutput sql.ProcessOutput
+	// schematic item sink
+	SchematicSinkProcess      sql.Process
+	SchematicSinkProcessInput sql.ProcessInput
+}
+
+func stubModuleSchematicsAndProcesses() {
+	rand.Seed(time.Now().Unix())
+	generated := make([]schematicStubWorldmaker, 0)
+
+	// get services
+	itemTypeSvc := sql.GetItemTypeService()
+	processSvc := sql.GetProcessService()
+	processInputSvc := sql.GetProcessInputService()
+	processOutputSvc := sql.GetProcessOutputService()
+
+	// load item type views
+	needSchematics, _ := itemTypeSvc.GetVwModuleNeedSchematics()
+	industrials, _ := itemTypeSvc.GetVwItemTypeIndustrials()
+
+	// group industrials
+	ores := make([]sql.VwItemTypeIndustrial, 0)
+	ices := make([]sql.VwItemTypeIndustrial, 0)
+	wastes := make([]sql.VwItemTypeIndustrial, 0)
+	repairKits := make([]sql.VwItemTypeIndustrial, 0)
+
+	var smallPowerCell sql.VwItemTypeIndustrial
+	var smallDepletedPowerCell sql.VwItemTypeIndustrial
+	var testite sql.VwItemTypeIndustrial
+
+	for _, i := range industrials {
+		if i.Family == "ore" && i.Name != "Betro" {
+			if i.Name == "Testite" {
+				testite = i
+			} else {
+				ores = append(ores, i)
+			}
+		}
+
+		if i.Family == "ice" {
+			ices = append(ices, i)
+		}
+
+		if i.Family == "trade_good" && strings.Contains(i.Name, "Waste") {
+			wastes = append(wastes, i)
+		}
+
+		if i.Family == "repair_kit" {
+			repairKits = append(repairKits, i)
+		}
+
+		if i.Family == "power_cell" {
+			// todo: deal with more than one of these in the future
+			smallPowerCell = i
+		}
+
+		if i.Family == "depleted_cell" {
+			// todo: deal with more than one of these in the future
+			smallDepletedPowerCell = i
+		}
+	}
+
+	// iterate over item types to stub for
+	for _, i := range needSchematics {
+		var industrial *sql.VwItemTypeIndustrial
+		var fairProcess = sql.Process{
+			ID:   uuid.New(),
+			Name: fmt.Sprintf("Make %v", i.Name),
+			Meta: sql.Meta{},
+		}
+
+		var fairInputs = make(map[string]int)
+		var fairOutputs = make(map[string]int)
+
+		var fairInputsSql = make([]sql.ProcessInput, 0)
+		var fairOutputsSql = make([]sql.ProcessOutput, 0)
+
+		// get industrial data for item type
+		for _, j := range industrials {
+			if j.ID == i.ID {
+				industrial = &j
+				break
+			}
+		}
+
+		// skip dev stuff
+		if industrial.Name == "Le Banhammer" {
+			continue
+		}
+
+		// select ores
+		inputMaterials := ores
+
+		rand.Shuffle(len(inputMaterials), func(i, j int) {
+			q := inputMaterials[i]
+			r := inputMaterials[j]
+
+			inputMaterials[i] = r
+			inputMaterials[j] = q
+		})
+
+		inputMaterials = inputMaterials[:physics.RandInRange(3, 9)]
+		inputMaterials = append(inputMaterials, testite)
+
+		// select any additional materials (excluding power cells)
+		if industrial.Volume >= 100 {
+			roll := physics.RandInRange(0, 100)
+
+			if roll <= 4 {
+				inputMaterials = append(inputMaterials, ices[physics.RandInRange(0, len(ices))])
+			}
+
+			roll = physics.RandInRange(0, 100)
+
+			if roll <= 7 {
+				inputMaterials = append(inputMaterials, repairKits[physics.RandInRange(0, len(repairKits))])
+			}
+
+			roll = physics.RandInRange(0, 100)
+
+			if roll <= 10 {
+				inputMaterials = append(inputMaterials, wastes[physics.RandInRange(0, len(wastes))])
+			}
+		}
+
+		// determine energy cost : material cost ratio
+		costRatio := rand.Float64()
+
+		if costRatio < 0.2 {
+			costRatio = 0.2
+		}
+
+		if costRatio > 0.6 {
+			costRatio = 0.6
+		}
+
+		// determine quantities
+		ceil := int(industrial.SiloSize) / 10
+
+		if ceil <= 1 {
+			ceil = 10
+		}
+
+		outputQuantity := physics.RandInRange(1, ceil)
+
+		if outputQuantity > 10 {
+			rem := outputQuantity % 5
+			outputQuantity -= rem
+		}
+
+		jobTime := physics.RandInRange(1, (int(industrial.Volume)+1)*outputQuantity*2)
+		outputVolume := outputQuantity * int(industrial.Volume)
+		fairProcess.Time = jobTime
+
+		// determine costs
+		energyCost := ((costRatio * industrial.MinPrice) * 0.9) * float64(outputQuantity)
+		materialCost := (((1 - costRatio) * industrial.MinPrice) * 0.9) * float64(outputQuantity)
+
+		// add input/output for energy cost
+		cellsUsed := 0
+
+		for {
+			cellsUsed++
+
+			if smallPowerCell.MaxPrice*float64(cellsUsed) >= energyCost {
+				break
+			}
+		}
+
+		fairInputs[smallPowerCell.Name] = cellsUsed
+		fairOutputs[smallDepletedPowerCell.Name] = cellsUsed
+		fairOutputs[industrial.Name] = outputQuantity
+
+		// determine material input quantities
+		matMap := make(map[string]sql.VwItemTypeIndustrial)
+
+		for _, e := range inputMaterials {
+			matMap[e.Name] = e
+			fairInputs[e.Name] = 0
+		}
+
+		resets := 0
+
+		for {
+			cost := 0.0
+			volume := 0.0
+
+			for i, v := range fairInputs {
+				if i == smallPowerCell.Name {
+					continue
+				}
+
+				// roll dice
+				roll := physics.RandInRange(1, 100)
+
+				if roll > 75 || i == "Testite" {
+					// increment quantity
+					fairInputs[i] = v + 1
+					v = fairInputs[i]
+				}
+
+				// accumulate
+				cost += matMap[i].MaxPrice * float64(v)
+				volume += matMap[i].Volume * float64(v)
+			}
+
+			if cost >= materialCost*1.1 || volume >= float64(outputVolume)*10 {
+				// reset
+				for i := range fairInputs {
+					if i == smallPowerCell.Name {
+						continue
+					}
+
+					fairInputs[i] = 0
+				}
+
+				resets++
+			} else {
+				if cost > materialCost && volume > float64(outputVolume)*0.5 {
+					// all done!
+					break
+				}
+			}
+
+			if resets > 100 {
+				log.Println(fmt.Sprintf("Skipping %v - not solvable with input materials given.", industrial.Name))
+				break
+			}
+		}
+
+		if resets > 100 {
+			continue
+		}
+
+		// build io for fair process
+		for k, v := range fairInputs {
+			if v <= 0 {
+				continue
+			}
+
+			for _, l := range industrials {
+				if l.Name == k {
+					fairInputsSql = append(fairInputsSql, sql.ProcessInput{
+						ID:         uuid.New(),
+						ItemTypeID: l.ID,
+						Quantity:   v,
+						Meta:       sql.Meta{},
+						ProcessID:  fairProcess.ID,
+					})
+
+					break
+				}
+			}
+		}
+
+		for k, v := range fairOutputs {
+			if v <= 0 {
+				continue
+			}
+
+			for _, l := range industrials {
+				if l.Name == k {
+					fairOutputsSql = append(fairOutputsSql, sql.ProcessOutput{
+						ID:         uuid.New(),
+						ItemTypeID: l.ID,
+						Quantity:   v,
+						Meta:       sql.Meta{},
+						ProcessID:  fairProcess.ID,
+					})
+
+					break
+				}
+			}
+		}
+
+		// make sink process
+		sinkProcess := sql.Process{
+			ID:   uuid.New(),
+			Name: fmt.Sprintf("%v Sink [wm]", industrial.Name),
+			Time: physics.RandInRange(fairProcess.Time/2, fairProcess.Time*2),
+			Meta: sql.Meta{},
+		}
+
+		sinkInput := sql.ProcessInput{
+			ID:         uuid.New(),
+			ItemTypeID: industrial.ID,
+			Quantity:   physics.RandInRange(outputQuantity/2, outputQuantity*2),
+			Meta:       sql.Meta{},
+			ProcessID:  sinkProcess.ID,
+		}
+
+		// new schematic item type
+		newSchematic := sql.ItemType{
+			ID:     uuid.New(),
+			Family: "schematic",
+			Name:   fmt.Sprintf("%v Schematic", industrial.Name),
+			Meta:   sql.Meta{},
+		}
+
+		maxSP := physics.RandInRange(int(energyCost)/2, int(materialCost)*2)
+		minSP := physics.RandInRange(maxSP/8, maxSP/2)
+
+		meta := universe.IndustrialMetadata{
+			SiloSize:  100,
+			MaxPrice:  maxSP,
+			MinPrice:  minSP,
+			ProcessID: &fairProcess.ID,
+		}
+
+		newSchematic.Meta["industrialmarket"] = meta
+
+		// make schematic faucet process
+		schematicFaucet := sql.Process{
+			ID:   uuid.New(),
+			Name: fmt.Sprintf("%v Faucet [wm]", newSchematic.Name),
+			Time: physics.RandInRange(fairProcess.Time*2, fairProcess.Time*8),
+			Meta: sql.Meta{},
+		}
+
+		schematicFaucetOutput := sql.ProcessOutput{
+			ID:         uuid.New(),
+			ItemTypeID: newSchematic.ID,
+			Quantity:   physics.RandInRange(1, 10),
+			Meta:       sql.Meta{},
+			ProcessID:  schematicFaucet.ID,
+		}
+
+		// make schematic sink process
+		schematicSink := sql.Process{
+			ID:   uuid.New(),
+			Name: fmt.Sprintf("%v Sink [wm]", newSchematic.Name),
+			Time: physics.RandInRange(fairProcess.Time*2, fairProcess.Time*8),
+			Meta: sql.Meta{},
+		}
+
+		schematicSinkInput := sql.ProcessInput{
+			ID:         uuid.New(),
+			ItemTypeID: newSchematic.ID,
+			Quantity:   physics.RandInRange(1, 10),
+			Meta:       sql.Meta{},
+			ProcessID:  schematicSink.ID,
+		}
+
+		// store for saving
+		generated = append(generated, schematicStubWorldmaker{
+			ItemType:                     *industrial,
+			FairProcess:                  fairProcess,
+			FairInputs:                   fairInputsSql,
+			FairOutputs:                  fairOutputsSql,
+			SinkProcess:                  sinkProcess,
+			ItemTypeSinkInput:            sinkInput,
+			NewSchematic:                 newSchematic,
+			SchematicFaucetProcess:       schematicFaucet,
+			SchematicFaucetProcessOutput: schematicFaucetOutput,
+			SchematicSinkProcess:         schematicSink,
+			SchematicSinkProcessInput:    schematicSinkInput,
+		})
+
+		// success :)
+		log.Println(fmt.Sprintf(":) %v", industrial.Name))
+	}
+
+	// save everything
+	for _, e := range generated {
+		// save processes
+		o, err := processSvc.NewProcessForWorldFiller(e.FairProcess)
+
+		if o == nil || err != nil {
+			panic(fmt.Sprintf("error saving process: %v | %v", o, err))
+		}
+
+		o, err = processSvc.NewProcessForWorldFiller(e.SinkProcess)
+
+		if o == nil || err != nil {
+			panic(fmt.Sprintf("error saving process: %v | %v", o, err))
+		}
+
+		o, err = processSvc.NewProcessForWorldFiller(e.SchematicFaucetProcess)
+
+		if o == nil || err != nil {
+			panic(fmt.Sprintf("error saving process: %v | %v", o, err))
+		}
+
+		o, err = processSvc.NewProcessForWorldFiller(e.SchematicSinkProcess)
+
+		if o == nil || err != nil {
+			panic(fmt.Sprintf("error saving process: %v | %v", o, err))
+		}
+
+		// save schematic item type
+		s, err := itemTypeSvc.NewItemTypeForWorldFiller(e.NewSchematic)
+
+		if s == nil || err != nil {
+			panic(fmt.Sprintf("error saving schematic: %v | %v", o, err))
+		}
+
+		// coalesce inputs and outputs
+		allInputs := make([]sql.ProcessInput, 0)
+		allOuts := make([]sql.ProcessOutput, 0)
+
+		allInputs = append(allInputs, e.SchematicSinkProcessInput)
+		allInputs = append(allInputs, e.ItemTypeSinkInput)
+		allInputs = append(allInputs, e.FairInputs...)
+
+		allOuts = append(allOuts, e.SchematicFaucetProcessOutput)
+		allOuts = append(allOuts, e.FairOutputs...)
+
+		// save inputs and outputs
+		for _, x := range allInputs {
+			b, err := processInputSvc.NewProcessInputForWorldFiller(x)
+
+			if b == nil || err != nil {
+				panic(fmt.Sprintf("error saving input: %v | %v", b, err))
+			}
+		}
+
+		for _, x := range allOuts {
+			b, err := processOutputSvc.NewProcessOutputForWorldFiller(x)
+
+			if b == nil || err != nil {
+				panic(fmt.Sprintf("error saving output: %v | %v", b, err))
+			}
+		}
+	}
+}
+
+func injectProcess(u *universe.Universe, pid string, offset int) {
+	pID, err := uuid.Parse(pid)
+	prob := 4
 
 	stationProcessSvc := sql.GetStationProcessService()
 
@@ -200,20 +657,21 @@ func injectProcess(u *universe.Universe) {
 	}
 
 	var textures = [...]string{
-		"interstar-",
+		"sanctuary-",
+		"alvaca-",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 8427)
+			rand.Seed(int64(calculateSystemSeed(s)) - 32627798 + int64(offset))
 
-			/*if r.ID.ID()%3 != 0 {
+			/*if r.ID.ID()%2 != 0 {
 				continue
 			}
 
-			if s.ID.ID()%2 != 0 {
+			if s.ID.ID()%5 != 0 {
 				continue
 			}*/
 
@@ -221,7 +679,7 @@ func injectProcess(u *universe.Universe) {
 
 			for _, st := range stations {
 				for _, t := range textures {
-					if strings.Contains(st.Texture, t) {
+					if !strings.Contains(st.Texture, t) {
 						roll := physics.RandInRange(0, 100)
 
 						if roll <= prob {
