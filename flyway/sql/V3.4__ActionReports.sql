@@ -11,7 +11,8 @@ CREATE OR REPLACE VIEW public.vw_actionreports_involvedpartyids
     jsonb_array_elements(r.ids_arr)::text AS partyid
    FROM ( SELECT q.id,
             jsonb_array_length(q.parties) AS length,
-            jsonb_path_query_array(q.parties, '$."userID"'::jsonpath) AS ids_arr
+            ( SELECT jsonb_agg(t.j ->> 'userID'::text) AS jsonb_agg
+                   FROM jsonb_array_elements(q.parties) t(j)) AS ids_arr
            FROM ( SELECT actionreports.id,
                     (actionreports.actionreport ->> 'involvedParties'::text)::jsonb AS parties
                    FROM actionreports) q) r
@@ -26,7 +27,7 @@ ALTER TABLE public.vw_actionreports_involvedpartyids
 
 CREATE OR REPLACE VIEW public.vw_actionreports_summary
  AS
- SELECT s.victim_isnpc,
+  SELECT s.victim_isnpc,
     s.victim_name,
     s.victim_shiptemplatename,
     f.ticker AS victim_ticker,
@@ -42,18 +43,19 @@ CREATE OR REPLACE VIEW public.vw_actionreports_summary
             (((ar.actionreport ->> 'header'::text)::jsonb) ->> 'victimFactionID'::text)::uuid AS victim_factionid,
             ((ar.actionreport ->> 'header'::text)::jsonb) ->> 'solarSystemName'::text AS solarsystemname,
             ((ar.actionreport ->> 'header'::text)::jsonb) ->> 'regionName'::text AS regionname,
-            jsonb_array_length(jsonb_path_query_array((ar.actionreport ->> 'involvedParties'::text)::jsonb, '$."userID"'::jsonpath)) AS parties,
+            ( SELECT jsonb_agg(t.j ->> 'userID'::text) AS jsonb_agg
+                   FROM jsonb_array_elements((ar.actionreport ->> 'involvedParties'::text)::jsonb) t(j)) AS parties,
             ar."timestamp",
             r.userid AS search_userid,
             ar.id
            FROM ( SELECT q.id,
                     q.userid
                    FROM ( SELECT vwa.id,
-                            TRIM(BOTH '""'::text FROM vwa.partyid)::uuid AS userid
+                            btrim(vwa.partyid, '""'::text)::uuid AS userid
                            FROM vw_actionreports_involvedpartyids vwa
                         UNION
                          SELECT actionreports.id,
-                            TRIM(BOTH '""'::text FROM ((actionreports.actionreport ->> 'header'::text)::jsonb) ->> 'victimID'::text)::uuid AS userid
+                            btrim(((actionreports.actionreport ->> 'header'::text)::jsonb) ->> 'victimID'::text, '""'::text)::uuid AS userid
                            FROM actionreports) q
                   GROUP BY q.id, q.userid) r
              JOIN actionreports ar ON r.id = ar.id) s
@@ -61,4 +63,3 @@ CREATE OR REPLACE VIEW public.vw_actionreports_summary
 
 ALTER TABLE public.vw_actionreports_summary
     OWNER TO heliaagent;
-
