@@ -6,7 +6,7 @@ CREATE OR REPLACE VIEW public.vw_actionreports_summary
     f.ticker AS victim_ticker,
     s.solarsystemname,
     s.regionname,
-    jsonb_array_length(ids_arr) as parties,
+    COALESCE(jsonb_array_length(ids_arr), 0) as parties,
     s."timestamp",
     s.search_userid,
     s.id
