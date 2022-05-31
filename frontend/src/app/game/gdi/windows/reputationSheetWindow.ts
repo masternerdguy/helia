@@ -1066,6 +1066,13 @@ export class ReputationSheetWindow extends GDIWindow {
         });
       }
 
+      // spacer
+      factionRows.push({
+        faction: null,
+        actions: [],
+        listString: () => '',
+      });
+
       // update faction list
       const sp = this.factionList.getScroll();
       const si = this.factionList.getSelectedIndex();
