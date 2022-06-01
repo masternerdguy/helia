@@ -27,10 +27,10 @@ const MaxTransientEdges = 35
 type Universe struct {
 	Regions       map[string]*Region
 	Factions      map[string]*Faction
+	FactionsLock  shared.TaggedMutex // lock for Factions field
 	AllSystems    []*SolarSystem
 	MapData       MapData
-	CachedMapData string       // cached MapData to avoid overhead of extracting and stringifying over and over again
-	FactionsLock  sync.RWMutex // lock for Factions field
+	CachedMapData string // cached MapData to avoid overhead of extracting and stringifying over and over again
 }
 
 // Structure representing a region in a starmap

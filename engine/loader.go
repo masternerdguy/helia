@@ -1489,8 +1489,8 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 	}
 
 	// obtain factions read lock
-	u.FactionsLock.RLock()
-	u.FactionsLock.RUnlock()
+	u.FactionsLock.Lock()
+	defer u.FactionsLock.Unlock()
 
 	// load and inject reputation sheet
 	repSheet := LoadReputationSheet(owner)
