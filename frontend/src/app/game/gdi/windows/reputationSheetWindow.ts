@@ -621,7 +621,7 @@ export class ReputationSheetWindow extends GDIWindow {
   private packReputationTab() {
     // faction list
     this.factionList.setWidth(300);
-    this.factionList.setHeight(200 + GDIStyle.tabHandleHeight);
+    this.factionList.setHeight(200);
     this.factionList.initialize();
 
     this.factionList.setX(0);
@@ -649,7 +649,7 @@ export class ReputationSheetWindow extends GDIWindow {
 
     // action list
     this.actionList.setWidth(100);
-    this.actionList.setHeight(200 + GDIStyle.tabHandleHeight);
+    this.actionList.setHeight(200);
     this.actionList.initialize();
 
     this.actionList.setX(300);
@@ -674,7 +674,7 @@ export class ReputationSheetWindow extends GDIWindow {
 
     // info list
     this.infoList.setWidth(400);
-    this.infoList.setHeight(220 - GDIStyle.tabHandleHeight);
+    this.infoList.setHeight(200);
     this.infoList.initialize();
 
     this.infoList.setX(0);
@@ -1065,6 +1065,13 @@ export class ReputationSheetWindow extends GDIWindow {
           listString: () => factionListRowString(playerRel, f),
         });
       }
+
+      // spacer
+      factionRows.push({
+        faction: null,
+        actions: [],
+        listString: () => '',
+      });
 
       // update faction list
       const sp = this.factionList.getScroll();

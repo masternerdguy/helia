@@ -923,6 +923,10 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			es.IsNPC = true
 			es.BeingFlownByPlayer = false
 
+			// obtain factions read lock
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
+
 			// link NPC's faction into ship
 			es.FactionID = u.CurrentFactionID
 			es.Faction = sol.Universe.Factions[u.CurrentFactionID.String()]
@@ -965,6 +969,10 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - no starting conditions!", rs.UID))
 				return
 			}
+
+			// obtain factions read lock
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
 
 			// check if their home station is overriden by faction membership
 			ur, err := userSvc.GetUserByID(*rs.UID)
@@ -1404,12 +1412,16 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			// handle escalation failure
 			defer escalationRecover(sol, e)
 
+			// obtain lock on solar system
+			sol.Lock.Lock()
+			defer sol.Lock.Unlock()
+
 			// obtain lock on game client
 			mi.Client.Lock.Lock()
 			defer mi.Client.Lock.Unlock()
 
 			// obtain lock on ship attached to client
-			sh := sol.Universe.FindShip(mi.Client.CurrentShipID, nil)
+			sh := sol.Universe.FindShip(mi.Client.CurrentShipID, &sol.ID)
 
 			// null check
 			if sh == nil {
@@ -1488,6 +1500,10 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				// exit
 				return
 			}
+
+			// obtain factions write lock
+			sol.Universe.FactionsLock.Lock()
+			defer sol.Universe.FactionsLock.Unlock()
 
 			// load faction into universe
 			uf := FactionFromSQL(f)
@@ -1578,12 +1594,16 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			// handle escalation failure
 			defer escalationRecover(sol, e)
 
+			// obtain lock on solar system
+			sol.Lock.Lock()
+			defer sol.Lock.Unlock()
+
 			// obtain lock on game client
 			mi.Client.Lock.Lock()
 			defer mi.Client.Lock.Unlock()
 
 			// obtain lock on ship attached to client
-			sh := sol.Universe.FindShip(mi.Client.CurrentShipID, nil)
+			sh := sol.Universe.FindShip(mi.Client.CurrentShipID, &sol.ID)
 
 			// null check
 			if sh == nil {
@@ -1633,6 +1653,10 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				return
 			}
 
+			// obtain factions read lock
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
+
 			// get faction from cache
 			uf := sol.Universe.Factions[fID.String()]
 
@@ -1666,6 +1690,14 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				return
 			}
 
+			// obtain lock on solar system
+			sol.Lock.Lock()
+			defer sol.Lock.Unlock()
+
+			// obtain factions read lock
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
+
 			// try to find the target faction
 			faction := sol.Universe.Factions[mi.FactionID.String()]
 
@@ -1675,7 +1707,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			}
 
 			// try to find applicant's game client
-			appClient := sol.Universe.FindCurrentPlayerClient(mi.UserID, nil)
+			appClient := sol.Universe.FindCurrentPlayerClient(mi.UserID, &sol.ID)
 
 			if appClient != nil {
 				// obtain lock on applicant's game client
@@ -1684,7 +1716,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			}
 
 			// try to find applicant's ship
-			appShip := sol.Universe.FindCurrentPlayerShip(mi.UserID, nil)
+			appShip := sol.Universe.FindCurrentPlayerShip(mi.UserID, &sol.ID)
 
 			// null check
 			if appShip == nil {
@@ -1757,6 +1789,14 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				return
 			}
 
+			// obtain lock on solar system
+			sol.Lock.Lock()
+			defer sol.Lock.Unlock()
+
+			// obtain factions read lock
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
+
 			// get members
 			members, err := userSvc.GetUsersByFactionID(rs.FactionID)
 
@@ -1812,6 +1852,14 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				return
 			}
 
+			// obtain lock on solar system
+			sol.Lock.Lock()
+			defer sol.Lock.Unlock()
+
+			// obtain factions read lock
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
+
 			// try to find the source faction
 			kickingFaction := sol.Universe.Factions[mi.FactionID.String()]
 
@@ -1821,7 +1869,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			}
 
 			// try to find the kickee's game client
-			kickeeClient := sol.Universe.FindCurrentPlayerClient(mi.UserID, nil)
+			kickeeClient := sol.Universe.FindCurrentPlayerClient(mi.UserID, &sol.ID)
 
 			if kickeeClient != nil {
 				// obtain lock on kickee's game client
@@ -1830,7 +1878,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			}
 
 			// try to find kickee's ship
-			kickeeShip := sol.Universe.FindCurrentPlayerShip(mi.UserID, nil)
+			kickeeShip := sol.Universe.FindCurrentPlayerShip(mi.UserID, &sol.ID)
 
 			// null check
 			if kickeeShip == nil {

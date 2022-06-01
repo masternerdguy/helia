@@ -147,7 +147,9 @@ func (s *SolarSystem) PeriodicUpdate() {
 	}
 
 	// process player current ship event queues
-	s.processClientEventQueues()
+	if len(s.clients) > 0 {
+		s.processClientEventQueues()
+	}
 
 	// update ships (both player + npc)
 	s.updateShips()
@@ -232,6 +234,14 @@ func (s *SolarSystem) processClientEventQueues() {
 
 		// associate escrow container id
 		sh.EscrowContainerID = &c.EscrowContainerID
+
+		// log interesting events (for post-crash / freeze investigation)
+		if evt.Type != msgRegistry.GlobalAck &&
+			evt.Type != msgRegistry.NavClick {
+			shared.TeeLog(
+				fmt.Sprintf("[%v] e>> [%v] :: [%v] w/{%v}", s.SystemName, sh.CharacterName, evt.Type, evt.Body),
+			)
+		}
 
 		// process event
 		if evt.Type == msgRegistry.GlobalAck {

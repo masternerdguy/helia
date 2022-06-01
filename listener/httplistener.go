@@ -216,8 +216,8 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	res := models.APILoginResponseModel{}
 	user, err := userSvc.GetUserByLogin(m.EmailAddress, m.Password)
 
-	// verify not an NPC account
 	if err == nil {
+		// verify not an NPC account
 		if user.IsNPC {
 			err = errors.New("logins not allowed for NPC accounts")
 		}
@@ -226,11 +226,11 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		if user.Banned {
 			err = errors.New("you have been banned")
 		}
-	}
 
-	// log dev login attempts
-	if user.IsDev {
-		shared.TeeLog(fmt.Sprintf("A developer is trying to log in! %v", *user.EmailAddress))
+		// log dev login attempts
+		if user.IsDev {
+			shared.TeeLog(fmt.Sprintf("A developer is trying to log in! %v", *user.EmailAddress))
+		}
 	}
 
 	if err != nil {
