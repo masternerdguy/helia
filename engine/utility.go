@@ -107,6 +107,15 @@ func CreateShipForPlayer(ownerID uuid.UUID, templateID uuid.UUID, stationID uuid
 		FlightExperienceModifier: 1,
 	}
 
+	// tuncate ship name if needed
+	if len(t.ShipName) > 32 {
+		shared.TeeLog(
+			fmt.Sprintf("! Truncating ship name for %v", u.ID),
+		)
+
+		t.ShipName = t.ShipName[0:31]
+	}
+
 	newShip, err := shipSvc.NewShip(t)
 
 	if err != nil {
