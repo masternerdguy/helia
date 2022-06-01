@@ -1917,10 +1917,6 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				return
 			}
 
-			// obtain factions read lock
-			sol.Universe.FactionsLock.RLock()
-			defer sol.Universe.FactionsLock.RUnlock()
-
 			// get faction from cache
 			uf := sol.Universe.Factions[sfID.String()]
 
