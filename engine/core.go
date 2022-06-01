@@ -923,6 +923,10 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			es.IsNPC = true
 			es.BeingFlownByPlayer = false
 
+			// obtain factions read lock
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
+
 			// link NPC's faction into ship
 			es.FactionID = u.CurrentFactionID
 			es.Faction = sol.Universe.Factions[u.CurrentFactionID.String()]
@@ -965,6 +969,10 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - no starting conditions!", rs.UID))
 				return
 			}
+
+			// obtain factions read lock
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
 
 			// check if their home station is overriden by faction membership
 			ur, err := userSvc.GetUserByID(*rs.UID)
@@ -1489,6 +1497,10 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				return
 			}
 
+			// obtain factions write lock
+			sol.Universe.FactionsLock.Lock()
+			defer sol.Universe.FactionsLock.Unlock()
+
 			// load faction into universe
 			uf := FactionFromSQL(f)
 			sol.Universe.Factions[uf.ID.String()] = uf
@@ -1633,6 +1645,10 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				return
 			}
 
+			// obtain factions read lock
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
+
 			// get faction from cache
 			uf := sol.Universe.Factions[fID.String()]
 
@@ -1665,6 +1681,10 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				shared.TeeLog(fmt.Sprintf("No owner client attached to join request: %v", mi))
 				return
 			}
+
+			// obtain factions read lock
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
 
 			// try to find the target faction
 			faction := sol.Universe.Factions[mi.FactionID.String()]
@@ -1812,6 +1832,10 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				return
 			}
 
+			// obtain factions read lock
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
+
 			// try to find the source faction
 			kickingFaction := sol.Universe.Factions[mi.FactionID.String()]
 
@@ -1892,6 +1916,10 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				shared.TeeLog(fmt.Sprintf("Unable to kick member to starter faction %v: %v", mi, err))
 				return
 			}
+
+			// obtain factions read lock
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
 
 			// get faction from cache
 			uf := sol.Universe.Factions[sfID.String()]

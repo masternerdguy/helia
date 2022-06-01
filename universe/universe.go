@@ -30,6 +30,7 @@ type Universe struct {
 	AllSystems    []*SolarSystem
 	MapData       MapData
 	CachedMapData string // cached MapData to avoid overhead of extracting and stringifying over and over again
+	FactionsLock  sync.RWMutex
 }
 
 // Structure representing a region in a starmap

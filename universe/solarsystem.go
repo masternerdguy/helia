@@ -1715,6 +1715,10 @@ func (s *SolarSystem) processClientEventQueues() {
 					continue
 				}
 
+				// obtain factions read lock
+				s.Universe.FactionsLock.RLock()
+				defer s.Universe.FactionsLock.RUnlock()
+
 				// get faction being applied to
 				f := s.Universe.Factions[data.FactionID.String()]
 

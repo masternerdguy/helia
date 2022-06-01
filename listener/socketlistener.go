@@ -512,6 +512,10 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 		// store developer status
 		client.IsDev = u.IsDev
 
+		// obtain factions read lock
+		l.Engine.Universe.FactionsLock.RLock()
+		defer l.Engine.Universe.FactionsLock.RUnlock()
+
 		// lookup current ship in memory
 		currShip := l.Engine.Universe.FindShip(*u.CurrentShipID, nil)
 
