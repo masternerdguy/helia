@@ -179,8 +179,8 @@ func (s *SolarSystem) PeriodicUpdate() {
 // processes the next message from each client in the system, should only be called from PeriodicUpdate
 func (s *SolarSystem) processClientEventQueues() {
 	// obtain factions read lock
-	s.Universe.FactionsLock.Lock()
-	defer s.Universe.FactionsLock.Unlock()
+	s.Universe.FactionsLock.RLock()
+	defer s.Universe.FactionsLock.RUnlock()
 
 	// get message registry
 	msgRegistry := models.SharedMessageRegistry

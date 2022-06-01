@@ -924,8 +924,8 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			es.BeingFlownByPlayer = false
 
 			// obtain factions read lock
-			sol.Universe.FactionsLock.Lock()
-			defer sol.Universe.FactionsLock.Unlock()
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
 
 			// link NPC's faction into ship
 			es.FactionID = u.CurrentFactionID
@@ -971,8 +971,8 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			}
 
 			// obtain factions read lock
-			sol.Universe.FactionsLock.Lock()
-			defer sol.Universe.FactionsLock.Unlock()
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
 
 			// check if their home station is overriden by faction membership
 			ur, err := userSvc.GetUserByID(*rs.UID)
@@ -1654,8 +1654,8 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			}
 
 			// obtain factions read lock
-			sol.Universe.FactionsLock.Lock()
-			defer sol.Universe.FactionsLock.Unlock()
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
 
 			// get faction from cache
 			uf := sol.Universe.Factions[fID.String()]
@@ -1695,8 +1695,8 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			defer sol.Lock.Unlock()
 
 			// obtain factions read lock
-			sol.Universe.FactionsLock.Lock()
-			defer sol.Universe.FactionsLock.Unlock()
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
 
 			// try to find the target faction
 			faction := sol.Universe.Factions[mi.FactionID.String()]
@@ -1853,8 +1853,8 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			defer sol.Lock.Unlock()
 
 			// obtain factions read lock
-			sol.Universe.FactionsLock.Lock()
-			defer sol.Universe.FactionsLock.Unlock()
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
 
 			// try to find the source faction
 			kickingFaction := sol.Universe.Factions[mi.FactionID.String()]
