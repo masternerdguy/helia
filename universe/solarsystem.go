@@ -176,6 +176,10 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 // processes the next message from each client in the system, should only be called from PeriodicUpdate
 func (s *SolarSystem) processClientEventQueues() {
+	// obtain factions read lock
+	s.Universe.FactionsLock.RLock()
+	defer s.Universe.FactionsLock.RUnlock()
+
 	// get message registry
 	msgRegistry := models.SharedMessageRegistry
 
@@ -1714,10 +1718,6 @@ func (s *SolarSystem) processClientEventQueues() {
 					c.WriteErrorMessage("you must be in an NPC faction to apply to join a faction")
 					continue
 				}
-
-				// obtain factions read lock
-				s.Universe.FactionsLock.RLock()
-				defer s.Universe.FactionsLock.RUnlock()
 
 				// get faction being applied to
 				f := s.Universe.Factions[data.FactionID.String()]
