@@ -1793,6 +1793,10 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			sol.Lock.Lock()
 			defer sol.Lock.Unlock()
 
+			// obtain factions read lock
+			sol.Universe.FactionsLock.RLock()
+			defer sol.Universe.FactionsLock.RUnlock()
+
 			// get members
 			members, err := userSvc.GetUsersByFactionID(rs.FactionID)
 
