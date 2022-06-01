@@ -113,7 +113,7 @@ func CreateShipForPlayer(ownerID uuid.UUID, templateID uuid.UUID, stationID uuid
 			fmt.Sprintf("! Truncating ship name for %v", u.ID),
 		)
 
-		t.ShipName = t.ShipName[0:31]
+		t.ShipName = t.ShipName[0:32]
 	}
 
 	newShip, err := shipSvc.NewShip(t)
@@ -356,6 +356,15 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 		TrashContainerID:         tb.ID,
 		Wallet:                   start.Wallet,
 		FlightExperienceModifier: 1,
+	}
+
+	// tuncate ship name if needed
+	if len(t.ShipName) > 32 {
+		shared.TeeLog(
+			fmt.Sprintf("! Truncating ship name for %v", u.ID),
+		)
+
+		t.ShipName = t.ShipName[0:32]
 	}
 
 	starterShip, err := shipSvc.NewShip(t)
