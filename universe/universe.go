@@ -29,8 +29,8 @@ type Universe struct {
 	Factions      map[string]*Faction
 	AllSystems    []*SolarSystem
 	MapData       MapData
-	CachedMapData string // cached MapData to avoid overhead of extracting and stringifying over and over again
-	FactionsLock  sync.RWMutex
+	CachedMapData string       // cached MapData to avoid overhead of extracting and stringifying over and over again
+	FactionsLock  sync.RWMutex // lock for Factions field
 }
 
 // Structure representing a region in a starmap
