@@ -21,6 +21,7 @@ func LoadUniverse() (*universe.Universe, error) {
 	planetSvc := sql.GetPlanetService()
 	stationSvc := sql.GetStationService()
 	stationProcessSvc := sql.GetStationProcessService()
+	processSvc := sql.GetProcessService()
 	jumpholeSvc := sql.GetJumpholeService()
 	asteroidSvc := sql.GetAsteroidService()
 	itemTypeSvc := sql.GetItemTypeService()
@@ -29,6 +30,47 @@ func LoadUniverse() (*universe.Universe, error) {
 	itemSvc := sql.GetItemService()
 	factionSvc := sql.GetFactionService()
 	schematicRunSvc := sql.GetSchematicRunService()
+
+	// preload station processes
+	allStationProcesses, err := stationProcessSvc.GetAllStationProcesses()
+
+	if err != nil {
+		return nil, err
+	}
+
+	stationProcessCache := make(map[string][]sql.StationProcess)
+
+	for _, asp := range allStationProcesses {
+		k := asp.StationID.String()
+
+		// check if key exists
+		v := stationProcessCache[k]
+
+		if v == nil {
+			// initialize entry
+			stationProcessCache[k] = make([]sql.StationProcess, 0)
+			v = stationProcessCache[k]
+		}
+
+		// append to entry
+		v = append(v, asp)
+
+		// update cache
+		stationProcessCache[k] = v
+	}
+
+	// preload processes
+	allProcesses, err := processSvc.GetAllProcesses()
+
+	if err != nil {
+		return nil, err
+	}
+
+	processCache := make(map[string]sql.Process)
+
+	for _, ap := range allProcesses {
+		processCache[ap.ID.String()] = ap
+	}
 
 	// empty universe to fill
 	u := universe.Universe{}
@@ -277,17 +319,18 @@ func LoadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, currStation := range stations {
-				// load station processes
-				sqlProcesses, err := stationProcessSvc.GetStationProcessesByStation(currStation.ID)
+				// get station processes for this station from cache
+				sqlProcesses := stationProcessCache[currStation.ID.String()]
 
-				if err != nil {
-					return nil, err
-				}
-
+				// process collected station processes
 				processes := make(map[string]*universe.StationProcess)
 
 				for _, sp := range sqlProcesses {
-					spx, err := LoadStationProcess(&sp)
+					// get process for this station process
+					spc := processCache[sp.ProcessID.String()]
+
+					// finish loading station process
+					spx, err := LoadStationProcess(&sp, &spc)
 
 					if err != nil {
 						return nil, err
@@ -1267,16 +1310,8 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 }
 
 // Takes a SQL Station Process and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
-func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error) {
-	procesSvc := sql.GetProcessService()
-
+func LoadStationProcess(sp *sql.StationProcess, sqlP *sql.Process) (*universe.StationProcess, error) {
 	// load process
-	sqlP, err := procesSvc.GetProcessByID(sp.ProcessID)
-
-	if err != nil {
-		return nil, err
-	}
-
 	process, err := LoadProcess(sqlP)
 
 	if err != nil {
