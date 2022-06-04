@@ -42,6 +42,44 @@ type VwModuleNeedSchematic struct {
 	Meta   Meta `json:"meta"`
 }
 
+// Retrieves all item types from the database
+func (s ItemTypeService) GetAllItemTypes() ([]ItemType, error) {
+	o := make([]ItemType, 0)
+
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// load item types
+	sql := `
+				SELECT id, family, name, meta
+				FROM public.ItemTypes;
+			`
+
+	rows, err := db.Query(sql)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		i := ItemType{}
+
+		// scan into item type structure
+		rows.Scan(&i.ID, &i.Family, &i.Name, &i.Meta)
+
+		// append to output slice
+		o = append(o, i)
+	}
+
+	return o, err
+}
+
 // Finds and returns an ItemType by its id
 func (s ItemTypeService) GetItemTypeByID(itemTypeID uuid.UUID) (*ItemType, error) {
 	// get db handle
@@ -51,8 +89,8 @@ func (s ItemTypeService) GetItemTypeByID(itemTypeID uuid.UUID) (*ItemType, error
 		return nil, err
 	}
 
-	// find ItemType with this id
-	ItemType := ItemType{}
+	// find item type with this id
+	i := ItemType{}
 
 	sqlStatement :=
 		`
@@ -63,11 +101,11 @@ func (s ItemTypeService) GetItemTypeByID(itemTypeID uuid.UUID) (*ItemType, error
 
 	row := db.QueryRow(sqlStatement, itemTypeID)
 
-	switch err := row.Scan(&ItemType.ID, &ItemType.Family, &ItemType.Name, &ItemType.Meta); err {
+	switch err := row.Scan(&i.ID, &i.Family, &i.Name, &i.Meta); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("itemType not found")
 	case nil:
-		return &ItemType, nil
+		return &i, nil
 	default:
 		return nil, err
 	}

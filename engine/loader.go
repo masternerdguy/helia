@@ -11,6 +11,11 @@ import (
 	"github.com/google/uuid"
 )
 
+// Caches to reduce trips to database
+var stationProcessCache = make(map[string][]sql.StationProcess)
+var processCache = make(map[string]sql.Process)
+var itemTypeCache = make(map[string]sql.ItemType)
+
 // Loads the state of the universe from the database
 func LoadUniverse() (*universe.Universe, error) {
 	// preload station processes
@@ -19,8 +24,6 @@ func LoadUniverse() (*universe.Universe, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	stationProcessCache := make(map[string][]sql.StationProcess)
 
 	for _, asp := range allStationProcesses {
 		k := asp.StationID.String()
@@ -48,10 +51,19 @@ func LoadUniverse() (*universe.Universe, error) {
 		return nil, err
 	}
 
-	processCache := make(map[string]sql.Process)
-
 	for _, ap := range allProcesses {
 		processCache[ap.ID.String()] = ap
+	}
+
+	// preload item types
+	allItemTypes, err := itemTypeSvc.GetAllItemTypes()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, ap := range allItemTypes {
+		itemTypeCache[ap.ID.String()] = ap
 	}
 
 	// empty universe to fill
@@ -228,11 +240,7 @@ func LoadUniverse() (*universe.Universe, error) {
 
 			for _, p := range asteroids {
 				// get ore item type
-				oi, err := itemTypeSvc.GetItemTypeByID(p.ItemTypeID)
-
-				if err != nil {
-					return nil, err
-				}
+				oi := itemTypeCache[p.ItemTypeID.String()]
 
 				// get ore item family
 				of, err := itemFamilySvc.GetItemFamilyByID(oi.Family)
@@ -743,11 +751,7 @@ func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
 	}
 
 	// load item type data
-	itemType, err := itemTypeSvc.GetItemTypeByID(item.ItemTypeID)
-
-	if err != nil {
-		return nil, err
-	}
+	itemType := itemTypeCache[item.ItemTypeID.String()]
 
 	// load item family data
 	itemFamily, err := itemFamilySvc.GetItemFamilyByID(itemType.Family)
@@ -1095,11 +1099,7 @@ func LoadItem(i *sql.Item) (*universe.Item, error) {
 	}
 
 	// load item type
-	it, err := itemTypeSvc.GetItemTypeByID(ei.ItemTypeID)
-
-	if err != nil {
-		return nil, err
-	}
+	it := itemTypeCache[ei.ItemTypeID.String()]
 
 	// include item type data
 	ei.ItemTypeName = it.Name
@@ -1206,12 +1206,7 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 	i := make(map[string]universe.ProcessInput)
 	for _, e := range inputs {
 		// get item type and family
-		itemType, err := itemTypeSvc.GetItemTypeByID(e.ItemTypeID)
-
-		if err != nil {
-			return nil, err
-		}
-
+		itemType := itemTypeCache[e.ItemTypeID.String()]
 		itemFamily, err := itemFamilySvc.GetItemFamilyByID(itemType.Family)
 
 		if err != nil {
@@ -1235,12 +1230,7 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 	o := make(map[string]universe.ProcessOutput)
 	for _, e := range outputs {
 		// get item type and family
-		itemType, err := itemTypeSvc.GetItemTypeByID(e.ItemTypeID)
-
-		if err != nil {
-			return nil, err
-		}
-
+		itemType := itemTypeCache[e.ItemTypeID.String()]
 		itemFamily, err := itemFamilySvc.GetItemFamilyByID(itemType.Family)
 
 		if err != nil {
