@@ -11,13 +11,17 @@ import (
 	"github.com/google/uuid"
 )
 
-// Caches to reduce trips to database
-var stationProcessCache = make(map[string][]sql.StationProcess)
+// caches to reduce trips to database
 var processCache = make(map[string]sql.Process)
+var processInputCache = make(map[string][]sql.ProcessInput)
+var processOutputCache = make(map[string][]sql.ProcessOutput)
 var itemTypeCache = make(map[string]sql.ItemType)
 
 // Loads the state of the universe from the database
 func LoadUniverse() (*universe.Universe, error) {
+	// caches that need to be garbage collected once loading is complete
+	stationProcessCache := make(map[string][]sql.StationProcess)
+
 	// preload station processes
 	allStationProcesses, err := stationProcessSvc.GetAllStationProcesses()
 
@@ -64,6 +68,58 @@ func LoadUniverse() (*universe.Universe, error) {
 
 	for _, ap := range allItemTypes {
 		itemTypeCache[ap.ID.String()] = ap
+	}
+
+	// preload process inputs
+	allProcessInputs, err := processInputSvc.GetAllProcessInputs()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, asp := range allProcessInputs {
+		k := asp.ProcessID.String()
+
+		// check if key exists
+		v := processInputCache[k]
+
+		if v == nil {
+			// initialize entry
+			processInputCache[k] = make([]sql.ProcessInput, 0)
+			v = processInputCache[k]
+		}
+
+		// append to entry
+		v = append(v, asp)
+
+		// update cache
+		processInputCache[k] = v
+	}
+
+	// preload process outputs
+	allProcessOutputs, err := processOutputSvc.GetAllProcessOutputs()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, asp := range allProcessOutputs {
+		k := asp.ProcessID.String()
+
+		// check if key exists
+		v := processOutputCache[k]
+
+		if v == nil {
+			// initialize entry
+			processOutputCache[k] = make([]sql.ProcessOutput, 0)
+			v = processOutputCache[k]
+		}
+
+		// append to entry
+		v = append(v, asp)
+
+		// update cache
+		processOutputCache[k] = v
 	}
 
 	// empty universe to fill
@@ -1182,18 +1238,10 @@ func LoadContainer(c *sql.Container) (*universe.Container, error) {
 // Takes a SQL Process and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
 func LoadProcess(p *sql.Process) (*universe.Process, error) {
 	// get inputs
-	inputs, err := processInputSvc.GetProcessInputsByProcess(p.ID)
-
-	if err != nil {
-		return nil, err
-	}
+	inputs := processInputCache[p.ID.String()]
 
 	// get outputs
-	outputs, err := processOutputSvc.GetProcessOutputsByProcess(p.ID)
-
-	if err != nil {
-		return nil, err
-	}
+	outputs := processOutputCache[p.ID.String()]
 
 	// build in-memory process
 	process := universe.Process{
