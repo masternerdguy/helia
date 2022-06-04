@@ -16,6 +16,7 @@ var processCache = make(map[string]sql.Process)
 var processInputCache = make(map[string][]sql.ProcessInput)
 var processOutputCache = make(map[string][]sql.ProcessOutput)
 var itemTypeCache = make(map[string]sql.ItemType)
+var itemFamilyCache = make(map[string]sql.ItemFamily)
 
 // Loads the state of the universe from the database
 func LoadUniverse() (*universe.Universe, error) {
@@ -120,6 +121,17 @@ func LoadUniverse() (*universe.Universe, error) {
 
 		// update cache
 		processOutputCache[k] = v
+	}
+
+	// preload item families
+	allItemFamilies, err := itemFamilySvc.GetAllItemFamilies()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, ap := range allItemFamilies {
+		itemFamilyCache[ap.ID] = ap
 	}
 
 	// empty universe to fill
@@ -299,11 +311,7 @@ func LoadUniverse() (*universe.Universe, error) {
 				oi := itemTypeCache[p.ItemTypeID.String()]
 
 				// get ore item family
-				of, err := itemFamilySvc.GetItemFamilyByID(oi.Family)
-
-				if err != nil {
-					return nil, err
-				}
+				of := itemFamilyCache[oi.Family]
 
 				// build asteroid
 				asteroid := universe.Asteroid{
@@ -810,11 +818,7 @@ func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
 	itemType := itemTypeCache[item.ItemTypeID.String()]
 
 	// load item family data
-	itemFamily, err := itemFamilySvc.GetItemFamilyByID(itemType.Family)
-
-	if err != nil {
-		return nil, err
-	}
+	itemFamily := itemFamilyCache[itemType.Family]
 
 	// store on slot
 	slot.ItemMeta = MetaFromSQL(&item.Meta)
@@ -1163,11 +1167,7 @@ func LoadItem(i *sql.Item) (*universe.Item, error) {
 	ei.ItemTypeMeta = MetaFromSQL(&it.Meta)
 
 	// load item family
-	fm, err := itemFamilySvc.GetItemFamilyByID(it.Family)
-
-	if err != nil {
-		return nil, err
-	}
+	fm := itemFamilyCache[it.Family]
 
 	// include item family data
 	ei.ItemFamilyName = fm.FriendlyName
@@ -1255,11 +1255,7 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 	for _, e := range inputs {
 		// get item type and family
 		itemType := itemTypeCache[e.ItemTypeID.String()]
-		itemFamily, err := itemFamilySvc.GetItemFamilyByID(itemType.Family)
-
-		if err != nil {
-			return nil, err
-		}
+		itemFamily := itemFamilyCache[itemType.Family]
 
 		// build model
 		i[itemType.ID.String()] = universe.ProcessInput{
@@ -1279,11 +1275,7 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 	for _, e := range outputs {
 		// get item type and family
 		itemType := itemTypeCache[e.ItemTypeID.String()]
-		itemFamily, err := itemFamilySvc.GetItemFamilyByID(itemType.Family)
-
-		if err != nil {
-			return nil, err
-		}
+		itemFamily := itemFamilyCache[itemType.Family]
 
 		// build model
 		o[itemType.ID.String()] = universe.ProcessOutput{
