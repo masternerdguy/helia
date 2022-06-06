@@ -11,24 +11,128 @@ import (
 	"github.com/google/uuid"
 )
 
+// caches to reduce trips to database
+var processCache = make(map[string]sql.Process)
+var processInputCache = make(map[string][]sql.ProcessInput)
+var processOutputCache = make(map[string][]sql.ProcessOutput)
+var itemTypeCache = make(map[string]sql.ItemType)
+var itemFamilyCache = make(map[string]sql.ItemFamily)
+
 // Loads the state of the universe from the database
 func LoadUniverse() (*universe.Universe, error) {
-	// get services
-	regionSvc := sql.GetRegionService()
-	systemSvc := sql.GetSolarSystemService()
-	shipSvc := sql.GetShipService()
-	starSvc := sql.GetStarService()
-	planetSvc := sql.GetPlanetService()
-	stationSvc := sql.GetStationService()
-	stationProcessSvc := sql.GetStationProcessService()
-	jumpholeSvc := sql.GetJumpholeService()
-	asteroidSvc := sql.GetAsteroidService()
-	itemTypeSvc := sql.GetItemTypeService()
-	itemFamilySvc := sql.GetItemFamilyService()
-	sellOrderSvc := sql.GetSellOrderService()
-	itemSvc := sql.GetItemService()
-	factionSvc := sql.GetFactionService()
-	schematicRunSvc := sql.GetSchematicRunService()
+	// caches that need to be garbage collected once loading is complete
+	stationProcessCache := make(map[string][]sql.StationProcess)
+
+	// preload station processes
+	allStationProcesses, err := stationProcessSvc.GetAllStationProcesses()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, asp := range allStationProcesses {
+		k := asp.StationID.String()
+
+		// check if key exists
+		v := stationProcessCache[k]
+
+		if v == nil {
+			// initialize entry
+			stationProcessCache[k] = make([]sql.StationProcess, 0)
+			v = stationProcessCache[k]
+		}
+
+		// append to entry
+		v = append(v, asp)
+
+		// update cache
+		stationProcessCache[k] = v
+	}
+
+	// preload processes
+	allProcesses, err := processSvc.GetAllProcesses()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, ap := range allProcesses {
+		processCache[ap.ID.String()] = ap
+	}
+
+	// preload item types
+	allItemTypes, err := itemTypeSvc.GetAllItemTypes()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, ap := range allItemTypes {
+		itemTypeCache[ap.ID.String()] = ap
+	}
+
+	// preload process inputs
+	allProcessInputs, err := processInputSvc.GetAllProcessInputs()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, asp := range allProcessInputs {
+		k := asp.ProcessID.String()
+
+		// check if key exists
+		v := processInputCache[k]
+
+		if v == nil {
+			// initialize entry
+			processInputCache[k] = make([]sql.ProcessInput, 0)
+			v = processInputCache[k]
+		}
+
+		// append to entry
+		v = append(v, asp)
+
+		// update cache
+		processInputCache[k] = v
+	}
+
+	// preload process outputs
+	allProcessOutputs, err := processOutputSvc.GetAllProcessOutputs()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, asp := range allProcessOutputs {
+		k := asp.ProcessID.String()
+
+		// check if key exists
+		v := processOutputCache[k]
+
+		if v == nil {
+			// initialize entry
+			processOutputCache[k] = make([]sql.ProcessOutput, 0)
+			v = processOutputCache[k]
+		}
+
+		// append to entry
+		v = append(v, asp)
+
+		// update cache
+		processOutputCache[k] = v
+	}
+
+	// preload item families
+	allItemFamilies, err := itemFamilySvc.GetAllItemFamilies()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, ap := range allItemFamilies {
+		itemFamilyCache[ap.ID] = ap
+	}
 
 	// empty universe to fill
 	u := universe.Universe{}
@@ -204,18 +308,10 @@ func LoadUniverse() (*universe.Universe, error) {
 
 			for _, p := range asteroids {
 				// get ore item type
-				oi, err := itemTypeSvc.GetItemTypeByID(p.ItemTypeID)
-
-				if err != nil {
-					return nil, err
-				}
+				oi := itemTypeCache[p.ItemTypeID.String()]
 
 				// get ore item family
-				of, err := itemFamilySvc.GetItemFamilyByID(oi.Family)
-
-				if err != nil {
-					return nil, err
-				}
+				of := itemFamilyCache[oi.Family]
 
 				// build asteroid
 				asteroid := universe.Asteroid{
@@ -277,17 +373,18 @@ func LoadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, currStation := range stations {
-				// load station processes
-				sqlProcesses, err := stationProcessSvc.GetStationProcessesByStation(currStation.ID)
+				// get station processes for this station from cache
+				sqlProcesses := stationProcessCache[currStation.ID.String()]
 
-				if err != nil {
-					return nil, err
-				}
-
+				// process collected station processes
 				processes := make(map[string]*universe.StationProcess)
 
 				for _, sp := range sqlProcesses {
-					spx, err := LoadStationProcess(&sp)
+					// get process for this station process
+					spc := processCache[sp.ProcessID.String()]
+
+					// finish loading station process
+					spx, err := LoadStationProcess(&sp, &spc)
 
 					if err != nil {
 						return nil, err
@@ -412,10 +509,6 @@ func LoadUniverse() (*universe.Universe, error) {
 
 // Saves the current state of dynamic entities in the simulation to the database
 func saveUniverse(u *universe.Universe) {
-	// get services
-	stationSvc := sql.GetStationService()
-	stationProcessSvc := sql.GetStationProcessService()
-
 	// iterate over systems
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
@@ -501,9 +594,6 @@ func saveUniverse(u *universe.Universe) {
 			}
 		}
 	}
-
-	// save schematic runs
-	schematicRunSvc := sql.GetSchematicRunService()
 
 	for _, sre := range schematicRunMap {
 		for _, sr := range sre {
@@ -696,11 +786,6 @@ func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
 	emptyUUID := uuid.UUID{}
 	defaultUUID := emptyUUID.String()
 
-	// get services
-	itemSvc := sql.GetItemService()
-	itemTypeSvc := sql.GetItemTypeService()
-	itemFamilySvc := sql.GetItemFamilyService()
-
 	// set up empty slot
 	slot := universe.FittedSlot{}
 
@@ -730,18 +815,10 @@ func FittedSlotFromSQL(value *sql.FittedSlot) (*universe.FittedSlot, error) {
 	}
 
 	// load item type data
-	itemType, err := itemTypeSvc.GetItemTypeByID(item.ItemTypeID)
-
-	if err != nil {
-		return nil, err
-	}
+	itemType := itemTypeCache[item.ItemTypeID.String()]
 
 	// load item family data
-	itemFamily, err := itemFamilySvc.GetItemFamilyByID(itemType.Family)
-
-	if err != nil {
-		return nil, err
-	}
+	itemFamily := itemFamilyCache[itemType.Family]
 
 	// store on slot
 	slot.ItemMeta = MetaFromSQL(&item.Meta)
@@ -1073,9 +1150,6 @@ func SQLFromItem(value *universe.Item) *sql.Item {
 
 // Loads an item with some type and family data for use in the simulation.
 func LoadItem(i *sql.Item) (*universe.Item, error) {
-	itemTypeSvc := sql.GetItemTypeService()
-	itemFamilySvc := sql.GetItemFamilyService()
-
 	// load base item
 	ei := ItemFromSQL(i)
 
@@ -1085,11 +1159,7 @@ func LoadItem(i *sql.Item) (*universe.Item, error) {
 	}
 
 	// load item type
-	it, err := itemTypeSvc.GetItemTypeByID(ei.ItemTypeID)
-
-	if err != nil {
-		return nil, err
-	}
+	it := itemTypeCache[ei.ItemTypeID.String()]
 
 	// include item type data
 	ei.ItemTypeName = it.Name
@@ -1097,18 +1167,12 @@ func LoadItem(i *sql.Item) (*universe.Item, error) {
 	ei.ItemTypeMeta = MetaFromSQL(&it.Meta)
 
 	// load item family
-	fm, err := itemFamilySvc.GetItemFamilyByID(it.Family)
-
-	if err != nil {
-		return nil, err
-	}
+	fm := itemFamilyCache[it.Family]
 
 	// include item family data
 	ei.ItemFamilyName = fm.FriendlyName
 
 	if ei.ItemFamilyID == "schematic" {
-		processSvc := sql.GetProcessService()
-
 		// load associated process from metadata
 		l, f := ei.ItemTypeMeta.GetMap("industrialmarket")
 
@@ -1144,8 +1208,6 @@ func LoadContainer(c *sql.Container) (*universe.Container, error) {
 	container := ContainerFromSQL(c)
 
 	// load items
-	itemSvc := sql.GetItemService()
-
 	s, err := itemSvc.GetItemsByContainer(container.ID)
 
 	if err != nil {
@@ -1175,24 +1237,11 @@ func LoadContainer(c *sql.Container) (*universe.Container, error) {
 
 // Takes a SQL Process and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
 func LoadProcess(p *sql.Process) (*universe.Process, error) {
-	inputSvc := sql.GetProcessInputService()
-	outputSvc := sql.GetProcessOutputService()
-	itemTypeSvc := sql.GetItemTypeService()
-	itemFamilySvc := sql.GetItemFamilyService()
-
 	// get inputs
-	inputs, err := inputSvc.GetProcessInputsByProcess(p.ID)
-
-	if err != nil {
-		return nil, err
-	}
+	inputs := processInputCache[p.ID.String()]
 
 	// get outputs
-	outputs, err := outputSvc.GetProcessOutputsByProcess(p.ID)
-
-	if err != nil {
-		return nil, err
-	}
+	outputs := processOutputCache[p.ID.String()]
 
 	// build in-memory process
 	process := universe.Process{
@@ -1205,17 +1254,8 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 	i := make(map[string]universe.ProcessInput)
 	for _, e := range inputs {
 		// get item type and family
-		itemType, err := itemTypeSvc.GetItemTypeByID(e.ItemTypeID)
-
-		if err != nil {
-			return nil, err
-		}
-
-		itemFamily, err := itemFamilySvc.GetItemFamilyByID(itemType.Family)
-
-		if err != nil {
-			return nil, err
-		}
+		itemType := itemTypeCache[e.ItemTypeID.String()]
+		itemFamily := itemFamilyCache[itemType.Family]
 
 		// build model
 		i[itemType.ID.String()] = universe.ProcessInput{
@@ -1234,17 +1274,8 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 	o := make(map[string]universe.ProcessOutput)
 	for _, e := range outputs {
 		// get item type and family
-		itemType, err := itemTypeSvc.GetItemTypeByID(e.ItemTypeID)
-
-		if err != nil {
-			return nil, err
-		}
-
-		itemFamily, err := itemFamilySvc.GetItemFamilyByID(itemType.Family)
-
-		if err != nil {
-			return nil, err
-		}
+		itemType := itemTypeCache[e.ItemTypeID.String()]
+		itemFamily := itemFamilyCache[itemType.Family]
 
 		// build model
 		o[itemType.ID.String()] = universe.ProcessOutput{
@@ -1267,16 +1298,8 @@ func LoadProcess(p *sql.Process) (*universe.Process, error) {
 }
 
 // Takes a SQL Station Process and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
-func LoadStationProcess(sp *sql.StationProcess) (*universe.StationProcess, error) {
-	procesSvc := sql.GetProcessService()
-
+func LoadStationProcess(sp *sql.StationProcess, sqlP *sql.Process) (*universe.StationProcess, error) {
 	// load process
-	sqlP, err := procesSvc.GetProcessByID(sp.ProcessID)
-
-	if err != nil {
-		return nil, err
-	}
-
 	process, err := LoadProcess(sqlP)
 
 	if err != nil {
@@ -1370,12 +1393,8 @@ func LoadExperienceSheet(u *sql.User) *shared.PlayerExperienceSheet {
 
 // Takes a SQL Ship and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
 func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
-	shipTmpSvc := sql.GetShipTemplateService()
-	userSvc := sql.GetUserService()
-	containerSvc := sql.GetContainerService()
-
 	// get template
-	temp, err := shipTmpSvc.GetShipTemplateByID(sh.ShipTemplateID)
+	temp, err := shipTemplateSvc.GetShipTemplateByID(sh.ShipTemplateID)
 
 	if err != nil {
 		return nil, err
@@ -1712,9 +1731,6 @@ func generateKillLog(ship *universe.Ship) *sql.KillLog {
 
 // Updates a ship in the database
 func saveShip(ship *universe.Ship) error {
-	// get ship service
-	shipSvc := sql.GetShipService()
-
 	// obtain lock on copy
 	ship.Lock.Lock()
 	defer ship.Lock.Unlock()
@@ -1761,38 +1777,31 @@ func saveShip(ship *universe.Ship) error {
 
 // Moves an item to a different container in the database
 func saveItemLocation(itemID uuid.UUID, containerID uuid.UUID) error {
-	itemSvc := sql.GetItemService()
 	return itemSvc.SetContainerID(itemID, containerID)
 }
 
 // Marks an item as packaged in the database
 func packageItem(itemID uuid.UUID) error {
-	itemSvc := sql.GetItemService()
 	return itemSvc.PackageItem(itemID)
 }
 
 // Marks an item as unpackaged in the database
 func unpackageItem(itemID uuid.UUID, meta universe.Meta) error {
-	itemSvc := sql.GetItemService()
 	return itemSvc.UnpackageItem(itemID, SQLFromMeta(&meta))
 }
 
 // Changes the quantity of an item stack in the database
 func changeQuantity(itemID uuid.UUID, quantity int) error {
-	itemSvc := sql.GetItemService()
 	return itemSvc.ChangeQuantity(itemID, quantity)
 }
 
 // Changes the metadata of an item in the database
 func changeMeta(itemID uuid.UUID, meta universe.Meta) error {
-	itemSvc := sql.GetItemService()
 	return itemSvc.ChangeMeta(itemID, sql.Meta(meta))
 }
 
 // Saves a new item to the database
 func newItem(item *universe.Item) (*uuid.UUID, error) {
-	itemSvc := sql.GetItemService()
-
 	// convert to sql type
 	sql := SQLFromItem(item)
 
@@ -1812,8 +1821,6 @@ func newItem(item *universe.Item) (*uuid.UUID, error) {
 
 // Saves a new sell order to the database
 func newSellOrder(sellOrder *universe.SellOrder) (*uuid.UUID, error) {
-	sellOrderSvc := sql.GetSellOrderService()
-
 	// convert to sql type
 	sql := SQLFromSellOrder(sellOrder)
 
@@ -1833,8 +1840,6 @@ func newSellOrder(sellOrder *universe.SellOrder) (*uuid.UUID, error) {
 
 // Saves a new sell order to the database
 func markSellOrderAsBought(sellOrder *universe.SellOrder) error {
-	sellOrderSvc := sql.GetSellOrderService()
-
 	// convert to sql type
 	sql := SQLFromSellOrder(sellOrder)
 
