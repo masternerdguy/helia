@@ -69,6 +69,7 @@ type SolarSystem struct {
 	ActionReportPages    []*shared.ViewActionReportPageTicket   // requests for an action report summary page
 	ActionReportDetails  []*shared.ViewActionReportDetailTicket // requests for an action report
 	NewItemsDevHax       []*NewItemFromNameTicketDevHax         // requests to create an item for devhax
+	NewShipsDevHax       []*NewShipFromNameTicketDevHax         // requests to create a ship for devhax
 }
 
 // Initializes internal aspects of SolarSystem
@@ -113,8 +114,7 @@ func (s *SolarSystem) Initialize() {
 	s.ActionReportPages = make([]*shared.ViewActionReportPageTicket, 0)
 	s.ActionReportDetails = make([]*shared.ViewActionReportDetailTicket, 0)
 	s.NewItemsDevHax = make([]*NewItemFromNameTicketDevHax, 0)
-
-	// initialize slices
+	s.NewShipsDevHax = make([]*NewShipFromNameTicketDevHax, 0)
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
 	s.pushPointEffects = make([]models.GlobalPushPointEffectBody, 0)
 }
@@ -3708,6 +3708,23 @@ func (s *SolarSystem) handleDevHax(q string, c *shared.GameClient) {
 
 		// set wallet
 		sh.Wallet = float64(wallet)
+
+		// all done!
+		return
+	} else if verb == "ship" {
+		// check if docked
+		if !sh.IsDocked {
+			c.WriteErrorMessage("you must be docked.")
+			return
+		}
+
+		// escalate to core
+		s.NewShipsDevHax = append(s.NewShipsDevHax, &NewShipFromNameTicketDevHax{
+			ItemTypeName: noun,
+			Quantity:     1,
+			StationID:    *sh.DockedAtStationID,
+			UserID:       *c.UID,
+		})
 
 		// all done!
 		return

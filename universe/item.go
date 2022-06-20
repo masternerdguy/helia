@@ -38,6 +38,14 @@ type NewItemFromNameTicketDevHax struct {
 	UserID       uuid.UUID
 }
 
+// Structure representing a request to create a new ship by item type name, used for devhax only
+type NewShipFromNameTicketDevHax struct {
+	ItemTypeName string
+	Quantity     int
+	StationID    uuid.UUID
+	UserID       uuid.UUID
+}
+
 // List of module attributes that can be percentage mutated by mod kits
 var MutableModuleAttributes = [...]string{
 	"range",
