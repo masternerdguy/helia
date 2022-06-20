@@ -66,6 +66,32 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicHullLaser();
     } else if (b.gfxEffect === 'basic_general_laser') {
       this.vfxData = repo.basicGeneralLaser();
+    } else if (b.gfxEffect === 'small_laser_tool') {
+      this.vfxData = repo.smallLaserTool();
+    } else if (b.gfxEffect === 'small_gauss_rifle') {
+      this.vfxData = repo.smallGaussRifle();
+    } else if (b.gfxEffect === 'small_ice_miner') {
+      this.vfxData = repo.smallIceMiner();
+    } else if (b.gfxEffect === 'small_shield_booster') {
+      this.vfxData = repo.smallShieldBooster();
+    } else if (b.gfxEffect === 'small_auto-5_cannon') {
+      this.vfxData = repo.smallAuto5Cannon();
+    } else if (b.gfxEffect === 'small_aether_dragger') {
+      this.vfxData = repo.smallAetherDragger();
+    } else if (b.gfxEffect === 'small_ice_harvester') {
+      this.vfxData = repo.smallIceHarvester();
+    } else if (b.gfxEffect === 'small_ore_harvester') {
+      this.vfxData = repo.smallOreHarvester();
+    } else if (b.gfxEffect === 'small_energy_siphon') {
+      this.vfxData = repo.smallUtilitySiphon();
+    } else if (b.gfxEffect === 'small_salvager') {
+      this.vfxData = repo.smallSalvager();
+    } else if (b.gfxEffect === 'small_shield_laser') {
+      this.vfxData = repo.smallShieldLaser();
+    } else if (b.gfxEffect === 'small_hull_laser') {
+      this.vfxData = repo.smallHullLaser();
+    } else if (b.gfxEffect === 'small_general_laser') {
+      this.vfxData = repo.smallGeneralLaser();
     } else if (b.gfxEffect === 'xl_energy_siphon') {
       this.vfxData = repo.xlUtilitySiphon();
     } else if (b.gfxEffect === 'xl_shield_booster') {
