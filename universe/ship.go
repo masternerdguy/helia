@@ -6344,8 +6344,8 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 		}
 	}
 
-	// module doesn't activate
-	return false
+	// module activates
+	return true
 }
 
 // Reusable helper function to determine tracking ratio between a module and a target
