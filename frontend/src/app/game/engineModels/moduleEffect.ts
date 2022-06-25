@@ -120,6 +120,9 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.smallAetherField();
     } else if (b.gfxEffect === 'small_add_kinetic') {
       this.vfxData = repo.smallKineticField();
+    } else {
+      // log broken effect
+      console.log(`gfx effect not found: ${b.gfxEffect}`);
     }
 
     this.maxLifeTime = this.vfxData?.duration ?? 0;
