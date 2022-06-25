@@ -6276,7 +6276,7 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 		}
 
 		// check range
-		dA := ts.ToPhysicsDummy()
+		dA := m.shipMountedOn.ToPhysicsDummy()
 		dB := ts.ToPhysicsDummy()
 
 		tR := physics.Distance(dA, dB)
