@@ -6232,6 +6232,23 @@ func (m *FittedSlot) activateAsFuelLoader() bool {
 }
 
 func (m *FittedSlot) activateAsAreaDenialDevice() bool {
+	// include visual effect if present
+	activationPGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		tgtReg := models.SharedTargetTypeRegistry
+
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationPGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
 	// get damage values
 	shieldDmg, _ := m.ItemMeta.GetFloat64("shield_damage")
 	armorDmg, _ := m.ItemMeta.GetFloat64("armor_damage")
