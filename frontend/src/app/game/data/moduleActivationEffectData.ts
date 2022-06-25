@@ -389,6 +389,46 @@ export class ModuleActivationEffectRepository {
       thickness: 15.3,
     };
   }
+
+  smallNegativeField(): ModuleActivationEffectData {
+    return {
+      type: 'add',
+      duration: 1492,
+      color: 'orange',
+      filter: 'blur(125px)', // "feather"
+      thickness: 35,
+    };
+  }
+
+  smallThermalField(): ModuleActivationEffectData {
+    return {
+      type: 'add',
+      duration: 1678,
+      color: '#BA4A00',
+      filter: 'blur(135px)', // "feather"
+      thickness: 29,
+    };
+  }
+
+  smallAetherField(): ModuleActivationEffectData {
+    return {
+      type: 'add',
+      duration: 1845,
+      color: '#dbf4ff',
+      filter: 'blur(295px)', // "feather"
+      thickness: 29,
+    };
+  }
+
+  smallKineticField(): ModuleActivationEffectData {
+    return {
+      type: 'add',
+      duration: 1845,
+      color: 'white',
+      filter: 'blur(93px)', // "feather"
+      thickness: 18,
+    };
+  }
 }
 
 export class ModuleActivationEffectData {

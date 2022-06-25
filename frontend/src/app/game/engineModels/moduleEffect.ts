@@ -112,6 +112,14 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.xlGeneralLaser();
     } else if (b.gfxEffect === 'xl_laser_tool') {
       this.vfxData = repo.xlLaserTool();
+    } else if (b.gfxEffect === 'small_add_negative') {
+      this.vfxData = repo.smallNegativeField();
+    } else if (b.gfxEffect === 'small_add_thermal') {
+      this.vfxData = repo.smallThermalField();
+    } else if (b.gfxEffect === 'small_add_aether') {
+      this.vfxData = repo.smallAetherField();
+    } else if (b.gfxEffect === 'small_add_kinetic') {
+      this.vfxData = repo.smallKineticField();
     }
 
     this.maxLifeTime = this.vfxData?.duration ?? 0;
@@ -216,6 +224,8 @@ export class ModuleEffect extends WsPushModuleEffect {
         this.renderAsSiphonEffect(camera, ctx);
       } else if (this.vfxData.type === 'salvager') {
         this.renderAsSalvagerEffect(camera, ctx);
+      } else if (this.vfxData.type === 'add') {
+        this.renderAsAreaDenialDeviceEffect(camera, ctx);
       }
     }
   }
@@ -399,6 +409,47 @@ export class ModuleEffect extends WsPushModuleEffect {
     const er = Math.max(0, sr * (this.lifeElapsed / this.maxLifeTime));
 
     // draw boost
+    ctx.beginPath();
+    ctx.arc(sx, sy, er, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    // restore filter
+    ctx.filter = oldFilter;
+  }
+
+  private renderAsAreaDenialDeviceEffect(camera: Camera, ctx: any) {
+    // get start coordinates
+    const src = getTargetCoordinatesAndRadius(
+      this.objStart,
+      this.objStartType,
+      this.objStartHPOffset
+    );
+
+    // project to screen
+    const sx = camera.projectX(src[0]);
+    const sy = camera.projectY(src[1]);
+    const sr = camera.projectR(src[2]);
+    const bt = camera.projectR(this.vfxData.thickness);
+
+    // backup filter
+    const oldFilter = ctx.filter;
+
+    // style boost
+    ctx.strokeStyle = this.vfxData.color;
+    if (this.vfxData.filter) {
+      ctx.filter = this.vfxData.filter;
+      ctx.lineWidth = bt;
+    }
+
+    // use elapsed lifetime ratio to expand radius
+    const er = Math.max(0, sr * (this.lifeElapsed / this.maxLifeTime));
+
+    // fill interior
+    ctx.beginPath();
+    ctx.arc(sx, sy, er, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // draw outer ring
     ctx.beginPath();
     ctx.arc(sx, sy, er, 0, 2 * Math.PI);
     ctx.stroke();
