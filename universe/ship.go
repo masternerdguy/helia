@@ -432,6 +432,8 @@ func getModuleFamily(itemFamilyID string) string {
 		modFamily = "utility"
 	} else if itemFamilyID == "utility_cloak" {
 		modFamily = "utility"
+	} else if itemFamilyID == "add" {
+		modFamily = "utility"
 	} else if itemFamilyID == "utility_veil" {
 		modFamily = "utility"
 	} else if itemFamilyID == "battery_pack" {
@@ -4810,6 +4812,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsUtilityVeil()
 			} else if m.ItemTypeFamily == "fuel_loader" {
 				canActivate = m.activateAsFuelLoader()
+			} else if m.ItemTypeFamily == "add" {
+				canActivate = m.activateAsAreaDenialDevice()
 			}
 
 			if canActivate {
@@ -6222,6 +6226,42 @@ func (m *FittedSlot) activateAsFuelLoader() bool {
 			return true
 		}
 	}
+
+	// module doesn't activate
+	return false
+}
+
+func (m *FittedSlot) activateAsAreaDenialDevice() bool {
+	// get damage values
+	shieldDmg, _ := m.ItemMeta.GetFloat64("shield_damage")
+	armorDmg, _ := m.ItemMeta.GetFloat64("armor_damage")
+	hullDmg, _ := m.ItemMeta.GetFloat64("hull_damage")
+
+	// get range value
+	rge, _ := m.ItemMeta.GetFloat64("range")
+
+	// get falloff style
+	falloff, _ := m.ItemMeta.GetString("falloff")
+
+	// get drag multiplier
+	dMul, _ := m.ItemMeta.GetFloat64("drag_multiplier")
+
+	// get heat damage
+	hDmg, _ := m.ItemMeta.GetFloat64("heat_damage")
+
+	// get missile destruction change
+	mDest, _ := m.ItemMeta.GetFloat64("missile_destruction_chance")
+
+	// get energy siphon amount
+	eSiph, _ := m.ItemMeta.GetFloat64("energy_siphon_amount")
+
+	// apply usage experience modifiers
+	shieldDmg *= m.usageExperienceModifier
+	armorDmg *= m.usageExperienceModifier
+	hullDmg *= m.usageExperienceModifier
+	dMul *= m.usageExperienceModifier
+	hDmg *= m.usageExperienceModifier
+	eSiph *= m.usageExperienceModifier
 
 	// module doesn't activate
 	return false
