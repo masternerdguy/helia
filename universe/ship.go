@@ -6241,7 +6241,7 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 	rge, _ := m.ItemMeta.GetFloat64("range")
 
 	// get falloff style
-	falloff, _ := m.ItemMeta.GetString("falloff")
+	falloff, ff := m.ItemMeta.GetString("falloff")
 
 	// get drag multiplier
 	dMul, _ := m.ItemMeta.GetFloat64("drag_multiplier")
@@ -6250,7 +6250,7 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 	hDmg, _ := m.ItemMeta.GetFloat64("heat_damage")
 
 	// get missile destruction change
-	mDest, _ := m.ItemMeta.GetFloat64("missile_destruction_chance")
+	//mDest, _ := m.ItemMeta.GetFloat64("missile_destruction_chance")
 
 	// get energy siphon amount
 	eSiph, _ := m.ItemMeta.GetFloat64("energy_siphon_amount")
@@ -6262,6 +6262,87 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 	dMul *= m.usageExperienceModifier
 	hDmg *= m.usageExperienceModifier
 	eSiph *= m.usageExperienceModifier
+
+	// iterate over ships in the system
+	for _, ts := range m.shipMountedOn.CurrentSystem.ships {
+		// don't affect firing ship
+		if ts.ID == m.shipMountedOn.ID {
+			continue
+		}
+
+		// check range
+		dA := ts.ToPhysicsDummy()
+		dB := ts.ToPhysicsDummy()
+
+		tR := physics.Distance(dA, dB)
+
+		if tR < rge {
+			// determine falloff amount
+			rangeRatio := 1.0 // default to 100%
+
+			if ff {
+				// adjust based on falloff style
+				if falloff == "linear" {
+					// proportion of the distance to target over max range (closer is higher)
+					rangeRatio = 1 - (tR / rge)
+				} else if falloff == "reverse_linear" {
+					// proportion of the distance to target over max range (further is higher)
+					rangeRatio = (tR / rge)
+
+					if tR > rge {
+						rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+					}
+				}
+			}
+
+			// deal damage
+			ts.DealDamage(
+				shieldDmg*rangeRatio,
+				armorDmg*rangeRatio,
+				hullDmg*rangeRatio,
+				m.shipMountedOn.ReputationSheet,
+				m,
+			)
+
+			// apply siphon
+			actualSiphon := ts.SiphonEnergy(
+				eSiph*rangeRatio,
+				m.shipMountedOn.ReputationSheet,
+				m,
+			)
+
+			// add to energy
+			m.shipMountedOn.Energy += actualSiphon
+
+			// any excess becomes heat
+			maxEnergy := m.shipMountedOn.GetRealMaxEnergy()
+			excess := m.shipMountedOn.Energy - maxEnergy
+
+			if excess > 0 {
+				// apply heat
+				m.shipMountedOn.Heat += excess
+
+				// clamp energy
+				m.shipMountedOn.Energy = maxEnergy
+			}
+
+			// calculate drag effect duration in ticks
+			cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
+			dT := (cooldown * 1000) / Heartbeat
+
+			// add temporary modifier to target
+			modifier := TemporaryShipModifier{
+				Attribute:      "drag",
+				Percentage:     dMul * rangeRatio,
+				RemainingTicks: int(dT),
+			}
+
+			ts.TemporaryModifiers = append(ts.TemporaryModifiers, modifier)
+
+			// apply heat damage
+			ts.Heat += hDmg * rangeRatio
+		}
+	}
 
 	// module doesn't activate
 	return false
