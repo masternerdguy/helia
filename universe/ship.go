@@ -6270,6 +6270,11 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 			continue
 		}
 
+		// skip if docked
+		if ts.IsDocked {
+			continue
+		}
+
 		// check range
 		dA := ts.ToPhysicsDummy()
 		dB := ts.ToPhysicsDummy()
