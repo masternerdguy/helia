@@ -6266,8 +6266,8 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 	// get heat damage
 	hDmg, _ := m.ItemMeta.GetFloat64("heat_damage")
 
-	// get missile destruction change
-	//mDest, _ := m.ItemMeta.GetFloat64("missile_destruction_chance")
+	// get missile destruction chance
+	mDest, _ := m.ItemMeta.GetFloat64("missile_destruction_chance")
 
 	// get energy siphon amount
 	eSiph, _ := m.ItemMeta.GetFloat64("energy_siphon_amount")
@@ -6279,6 +6279,49 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 	dMul *= m.usageExperienceModifier
 	hDmg *= m.usageExperienceModifier
 	eSiph *= m.usageExperienceModifier
+
+	// iterate over missiles in the system
+	for _, ts := range m.shipMountedOn.CurrentSystem.missiles {
+		// check range
+		dA := m.shipMountedOn.ToPhysicsDummy()
+		dB := ts.ToPhysicsDummy()
+
+		tR := physics.Distance(dA, dB)
+
+		if tR < rge {
+			// determine falloff amount
+			rangeRatio := 1.0 // default to 100%
+
+			if ff {
+				// adjust based on falloff style
+				if falloff == "linear" {
+					// proportion of the distance to target over max range (closer is higher)
+					rangeRatio = 1 - (tR / rge)
+				} else if falloff == "reverse_linear" {
+					// proportion of the distance to target over max range (further is higher)
+					rangeRatio = (tR / rge)
+
+					if tR > rge {
+						rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+					}
+				}
+			}
+
+			// get intrinsic failure chance of missile
+			ft := 1.0 - ts.FaultTolerance
+
+			// determine total failure chance
+			fc := (mDest * rangeRatio) + ft
+
+			// roll
+			or := rand.Float64()
+
+			if or < fc {
+				// destroy missile
+				ts.TicksRemaining = 0
+			}
+		}
+	}
 
 	// iterate over ships in the system
 	for _, ts := range m.shipMountedOn.CurrentSystem.ships {
