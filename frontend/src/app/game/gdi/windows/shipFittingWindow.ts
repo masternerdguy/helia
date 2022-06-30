@@ -1081,7 +1081,7 @@ function checkIfModule(m: WSContainerItem) {
     m.itemFamilyID === 'cargo_expander' ||
     m.itemFamilyID === 'salvager' ||
     m.itemFamilyID === 'heat_sink' ||
-    m.itemFamilyID === 'add'
+    m.itemFamilyID === 'utility_add'
   );
 }
 

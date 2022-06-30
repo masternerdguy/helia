@@ -392,7 +392,7 @@ export class ModuleActivationEffectRepository {
 
   smallNegativeField(): ModuleActivationEffectData {
     return {
-      type: 'add',
+      type: 'utility_add',
       duration: 1492,
       color: 'orange',
       filter: 'blur(125px)', // "feather"
@@ -402,7 +402,7 @@ export class ModuleActivationEffectRepository {
 
   smallThermalField(): ModuleActivationEffectData {
     return {
-      type: 'add',
+      type: 'utility_add',
       duration: 1678,
       color: '#BA4A00',
       filter: 'blur(135px)', // "feather"
@@ -412,7 +412,7 @@ export class ModuleActivationEffectRepository {
 
   smallAetherField(): ModuleActivationEffectData {
     return {
-      type: 'add',
+      type: 'utility_add',
       duration: 1845,
       color: '#dbf4ff',
       filter: 'blur(295px)', // "feather"
@@ -422,7 +422,7 @@ export class ModuleActivationEffectRepository {
 
   smallKineticField(): ModuleActivationEffectData {
     return {
-      type: 'add',
+      type: 'utility_add',
       duration: 1845,
       color: 'white',
       filter: 'blur(93px)', // "feather"

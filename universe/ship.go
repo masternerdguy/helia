@@ -432,7 +432,7 @@ func getModuleFamily(itemFamilyID string) string {
 		modFamily = "utility"
 	} else if itemFamilyID == "utility_cloak" {
 		modFamily = "utility"
-	} else if itemFamilyID == "add" {
+	} else if itemFamilyID == "utility_add" {
 		modFamily = "utility"
 	} else if itemFamilyID == "utility_veil" {
 		modFamily = "utility"
@@ -4812,7 +4812,7 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsUtilityVeil()
 			} else if m.ItemTypeFamily == "fuel_loader" {
 				canActivate = m.activateAsFuelLoader()
-			} else if m.ItemTypeFamily == "add" {
+			} else if m.ItemTypeFamily == "utility_add" {
 				canActivate = m.activateAsAreaDenialDevice()
 			}
 

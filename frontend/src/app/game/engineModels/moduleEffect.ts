@@ -227,7 +227,7 @@ export class ModuleEffect extends WsPushModuleEffect {
         this.renderAsSiphonEffect(camera, ctx);
       } else if (this.vfxData.type === 'salvager') {
         this.renderAsSalvagerEffect(camera, ctx);
-      } else if (this.vfxData.type === 'add') {
+      } else if (this.vfxData.type === 'utility_add') {
         this.renderAsAreaDenialDeviceEffect(camera, ctx);
       }
     }
