@@ -6307,19 +6307,21 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 				}
 			}
 
-			// determine max velocity reduction
-			fv := (1.0 - rangeRatio) / dMul
+			if dMul > 0 {
+				// determine max velocity reduction
+				fv := (1.0 - rangeRatio) / dMul
 
-			if fv > 1 {
-				fv = 1
+				if fv > 1 {
+					fv = 1
+				}
+
+				if fv < 0 {
+					fv = 0
+				}
+
+				// reduce max missile velocity
+				ts.MaxVelocity *= fv
 			}
-
-			if fv < 0 {
-				fv = 0
-			}
-
-			// reduce max missile velocity
-			ts.MaxVelocity *= fv
 
 			// get intrinsic failure chance of missile
 			ft := 1.0 - ts.FaultTolerance
