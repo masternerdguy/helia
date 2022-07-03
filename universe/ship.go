@@ -6323,18 +6323,20 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 				ts.MaxVelocity *= fv
 			}
 
-			// get intrinsic failure chance of missile
-			ft := 1.0 - ts.FaultTolerance
+			if mDest > 0 {
+				// get intrinsic failure chance of missile
+				ft := 1.0 - ts.FaultTolerance
 
-			// determine total failure chance
-			fc := (mDest * rangeRatio) + ft
+				// determine total failure chance
+				fc := (mDest * rangeRatio) + ft
 
-			// roll
-			or := rand.Float64()
+				// roll
+				or := rand.Float64()
 
-			if or < fc {
-				// destroy missile
-				ts.TicksRemaining = 0
+				if or < fc {
+					// destroy missile
+					ts.TicksRemaining = 0
+				}
 			}
 		}
 	}
