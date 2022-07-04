@@ -72,6 +72,8 @@ var MutableModuleAttributes = [...]string{
 	"fuel_max_add",
 	"max_fuel_volume",
 	"leakage",
+	"heat_damage",
+	"missile_destruction_chance",
 }
 
 // Helper function to determine whether or not a given item meta attribute can be mutated by a mod kit
