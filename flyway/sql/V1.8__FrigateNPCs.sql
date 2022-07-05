@@ -157,7 +157,7 @@ INSERT INTO public.items (id, itemtypeid, meta, created, createdby, createdreaso
 
 --    fix current ship ids
 update public.users set current_shipid = '3a48b214-7a3f-4d06-87b2-b3e8eb4c376c' where id = '7f150ec8-9246-41f9-a483-4f017a154575';
-update public.users set current_shipid = '245fe385-7faf-4ecd-bdfb-7ca8ce34383f' where id = '0cb18760-17c1-40d4-949c-27aac1d680cc';
+update public.users set current_shipid = 'ae6981ed-24bd-4fb5-af39-d0dcfc87cc75' where id = '0cb18760-17c1-40d4-949c-27aac1d680cc';
 update public.users set current_shipid = '245fe385-7faf-4ecd-bdfb-7ca8ce34383f' where id = 'd75b8035-fcfe-40c9-add8-bd520e77a8c6';
 update public.users set current_shipid = '0f624347-5304-41f2-831a-6bd6140c27a6' where id = '3119eaa7-418f-46e2-8d15-68ea964aaa2d';
 update public.users set current_shipid = '79ba968e-3f9a-4a01-922a-ed8163d0cada' where id = 'f1d9887a-6f00-4cab-b12d-06e5f5c86bf9';
