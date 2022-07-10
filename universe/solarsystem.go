@@ -2290,6 +2290,11 @@ func (s *SolarSystem) processClientEventQueues() {
 
 				// iterate over players
 				for _, cx := range s.clients {
+					// skip if same player
+					if cx.UID == c.UID {
+						continue
+					}
+
 					// find ship
 					sx := s.ships[cx.CurrentShipID.String()]
 
