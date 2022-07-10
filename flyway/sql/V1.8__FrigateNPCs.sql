@@ -168,7 +168,7 @@ update public.users set current_shipid = '0665164e-c8d1-4c4c-a038-ba0a9450f4f6' 
 -- accord npcs
 
 --   containers
-INTO public.containers (id, meta, created) VALUES ('e04ec190-e3ce-4282-94c4-b218088d615d', '{}', '2022-07-10 13:51:05.519832-04');
+INSERT INTO public.containers (id, meta, created) VALUES ('e04ec190-e3ce-4282-94c4-b218088d615d', '{}', '2022-07-10 13:51:05.519832-04');
 INSERT INTO public.containers (id, meta, created) VALUES ('31607d07-1cdd-4524-a2d0-f7b3508ff066', '{}', '2022-07-10 13:51:05.523785-04');
 INSERT INTO public.containers (id, meta, created) VALUES ('fba4d970-a306-402a-a267-83ad14e8fc81', '{}', '2022-07-10 13:51:05.52543-04');
 INSERT INTO public.containers (id, meta, created) VALUES ('ffe72727-ef84-4e22-bb62-fbbdafd04548', '{}', '2022-07-10 13:51:05.526809-04');
