@@ -214,7 +214,7 @@ export class ShipFittingWindow extends GDIWindow {
         this.refreshDockedUsers();
 
         // set up callback
-        this.modalPropertyView.setOnClick((h) => {
+        this.modalUsersView.setOnClick((h) => {
           // get selected item
           const i: ShipViewRow = this.shipView.getSelectedItem();
 
