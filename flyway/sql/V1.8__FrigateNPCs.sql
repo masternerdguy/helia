@@ -476,3 +476,15 @@ update public.users set current_shipid = '9cf0bede-c3e7-4eda-9e93-bf8c2bbaf231'	
 update public.users set current_shipid = '6acf1eed-1643-43f0-95e9-46b300b97799'	where id = 'e462c3a8-fbdf-45a8-a678-87f036204fd5';
 update public.users set current_shipid = '003a5c28-ac6d-4a3a-b837-e050f1dc1adf'	where id = '80bfbd51-3e8b-431e-aaef-a54995b15735';
 update public.users set current_shipid = '60ecbfbe-1185-416d-9149-c3b43bc734c2'	where id = '00cd9457-85ed-47db-af52-30a025546711';
+
+-- coalition npcs
+
+--   containers
+
+--   users
+
+--   ships
+
+--   items
+
+--   fix current ship ids
