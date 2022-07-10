@@ -860,10 +860,16 @@ export class ShipFittingWindow extends GDIWindow {
         }
       }
 
+      // sort list
+      const sortedRows = rows
+          .sort(
+            (a, b) => a.listString().localeCompare(b.listString())
+          );
+
       // update docked users modal list
       const pIDX = this.modalPropertyView.getScroll();
 
-      this.modalUsersView.setItems(rows);
+      this.modalUsersView.setItems(sortedRows);
       this.modalUsersView.setScroll(pIDX);
     }
   }
