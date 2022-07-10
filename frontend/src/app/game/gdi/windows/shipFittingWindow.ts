@@ -1168,6 +1168,9 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
       }
     }
 
+    // spacer
+    actions.push('');
+
     actions.push('Transfer');
     actions.push('Give');
 
