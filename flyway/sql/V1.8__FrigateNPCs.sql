@@ -155,7 +155,7 @@ INSERT INTO public.items (id, itemtypeid, meta, created, createdby, createdreaso
 INSERT INTO public.items (id, itemtypeid, meta, created, createdby, createdreason, containerid, quantity, ispackaged) VALUES ('2a8a81dc-eeb2-4369-9b39-25e4e6c77b90', 'a3ff4095-2511-412f-89df-abe7b8516192', '{"hp": 72, "rack": "c", "volume": 25, "heat_sink_add": 25, "industrialmarket": {"maxprice": 1660, "minprice": 995, "silosize": 1000}}', '2022-07-04 22:49:59.015841-04', '3119eaa7-418f-46e2-8d15-68ea964aaa2d', 'Module for new noob ship for player', 'aa9f5ae4-a942-421e-926e-b977e6b5fcfc', 1, false);
 INSERT INTO public.items (id, itemtypeid, meta, created, createdby, createdreason, containerid, quantity, ispackaged) VALUES ('0b157393-0ed6-42f0-bac8-ab7be8483d50', '0d0d134c-2b7d-4888-839a-d043d6aedca6', '{"hp": 30, "rack": "c", "volume": 22, "fuel_max_add": 850, "industrialmarket": {"maxprice": 712, "minprice": 314, "silosize": 1000}}', '2022-07-04 22:49:59.017166-04', '3119eaa7-418f-46e2-8d15-68ea964aaa2d', 'Module for new noob ship for player', 'aa9f5ae4-a942-421e-926e-b977e6b5fcfc', 1, false);
 
---    fix current ship ids
+--   fix current ship ids
 update public.users set current_shipid = '3a48b214-7a3f-4d06-87b2-b3e8eb4c376c' where id = '7f150ec8-9246-41f9-a483-4f017a154575';
 update public.users set current_shipid = 'ae6981ed-24bd-4fb5-af39-d0dcfc87cc75' where id = '0cb18760-17c1-40d4-949c-27aac1d680cc';
 update public.users set current_shipid = '245fe385-7faf-4ecd-bdfb-7ca8ce34383f' where id = 'd75b8035-fcfe-40c9-add8-bd520e77a8c6';
@@ -164,3 +164,15 @@ update public.users set current_shipid = '79ba968e-3f9a-4a01-922a-ed8163d0cada' 
 update public.users set current_shipid = '27cae1bd-d621-4eb4-9c99-a71bf89e2fb6' where id = 'f5d6177c-dd55-4636-b3bb-3f6069d60334';
 update public.users set current_shipid = 'ca498c11-fdf5-465a-8d30-ee6967a19af1' where id = 'a392c2cf-db80-4788-a362-bb3ef8bb719d';
 update public.users set current_shipid = '0665164e-c8d1-4c4c-a038-ba0a9450f4f6' where id = '7ef4858b-604c-4e85-9b25-5a43ee9407e7';
+
+-- accord npcs
+
+--   containers
+
+--   users
+
+--   ships
+
+--   items
+
+--   fix current ship ids
