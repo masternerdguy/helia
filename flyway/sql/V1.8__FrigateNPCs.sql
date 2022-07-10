@@ -320,3 +320,15 @@ update public.users set current_shipid = '840853de-726c-4ebe-a535-d1aa15bccd65'	
 update public.users set current_shipid = '2c737244-ea5e-41f3-b9b9-7b904b237fc7'	where id = '8d074735-8171-482e-94dd-303b975e3bef';
 update public.users set current_shipid = '190fe8d3-c4f1-4b92-b8db-b55f975abc2d'	where id = 'cb31a370-add8-4ad7-9490-27472933a6c6';
 update public.users set current_shipid = 'cea67bf6-84dd-4ce1-a4d7-2bf2123dad78'	where id = 'd9635812-8eaf-4a0f-af63-6cdd0940fb6d';
+
+-- federation npcs
+
+--   containers
+
+--   users
+
+--   ships
+
+--   items
+
+--   fix current ship ids
