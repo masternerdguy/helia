@@ -78,6 +78,9 @@ type MessageRegistry struct {
 	ActionReportsPage      int
 	ViewActionReportDetail int
 	ActionReportDetail     int
+	GiveItem               int
+	ViewDockedUsers        int
+	DockedUsersUpdate      int
 }
 
 // Registry of target types
@@ -160,6 +163,9 @@ func NewMessageRegistry() *MessageRegistry {
 		ActionReportsPage:      61,
 		ViewActionReportDetail: 62,
 		ActionReportDetail:     63,
+		GiveItem:               64,
+		ViewDockedUsers:        65,
+		DockedUsersUpdate:      66,
 	}
 }
 
@@ -1042,4 +1048,21 @@ type ServerKillLogCargoItem struct {
 	ItemFamilyName string    `json:"itemFamilyName"`
 	Quantity       int       `json:"quantity"`
 	IsPackaged     bool      `json:"isPackaged"`
+}
+
+// Body containing a request to give an item in the current ship's cargo hold to another player
+type ClientGiveItemBody struct {
+	SessionID  uuid.UUID `json:"sid"`
+	ItemID     uuid.UUID `json:"itemID"`
+	ReceiverID uuid.UUID `json:"receiverID"`
+}
+
+// Body containing a request for a list of players docked at the same station
+type ClientViewDockedUsersBody struct {
+	SessionID uuid.UUID `json:"sid"`
+}
+
+// Response to a request for a list of players docked at the same station
+type ServerDockedUsersUpdateBody struct {
+	Users map[string]uuid.UUID `json:"users"`
 }

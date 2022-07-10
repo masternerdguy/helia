@@ -28,6 +28,9 @@ import { ClientTransferItem } from '../../wsModels/bodies/transferItem';
 import { ClientViewProperty } from '../../wsModels/bodies/viewProperty';
 import { ClientRunSchematic } from '../../wsModels/bodies/runSchematic';
 import { ClientUseModKit } from '../../wsModels/bodies/useModKit';
+import { ClientViewDockedUsers } from '../../wsModels/bodies/viewDockedUsers';
+import { ClientGiveItem } from '../../wsModels/bodies/giveItem';
+import { ServerDockedUsersUpdate } from '../../wsModels/bodies/dockedUsersUpdate';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -40,6 +43,7 @@ export class ShipFittingWindow extends GDIWindow {
   private modalInput: GDIInput = new GDIInput();
   private modalPropertyView: GDIList = new GDIList();
   private modalModulesInCargoView: GDIList = new GDIList();
+  private modalUsersView: GDIList = new GDIList();
 
   // bars
   private cargoBayUsed: GDIBar = new GDIBar();
@@ -205,6 +209,39 @@ export class ShipFittingWindow extends GDIWindow {
 
         // show modal list
         this.showModalPropertyList();
+      }else if (a === 'Give') {
+        // request docked player list
+        this.refreshDockedUsers();
+
+        // set up callback
+        this.modalPropertyView.setOnClick((h) => {
+          // get selected item
+          const i: ShipViewRow = this.shipView.getSelectedItem();
+
+          // get selected user id
+          const userId = (h as DockedUserViewRow).userId;
+
+          // hide users modal
+          this.hideModalUsersList();
+
+          // send give request
+          const tiMsg: ClientGiveItem = {
+            sid: this.wsSvc.sid,
+            itemID: (i.object as WSContainerItem).id,
+            receiverID: userId,
+          };
+
+          this.wsSvc.sendMessage(MessageTypes.GiveItem, tiMsg);
+
+          // request cargo bay refresh
+          this.refreshCargoBay();
+
+          // reset views
+          this.resetViews();
+        });
+
+        // show modal list
+        this.showModalUsersList();
       } else if (a === 'Mod Module') {
         // set up callback
         this.modalModulesInCargoView.setOnClick((h) => {
@@ -452,6 +489,19 @@ export class ShipFittingWindow extends GDIWindow {
     this.modalModulesInCargoView.setFont(FontSize.normal);
     this.modalModulesInCargoView.setOnClick(() => {});
 
+    this.modalUsersView.setWidth(400);
+    this.modalUsersView.setHeight(300);
+    this.modalUsersView.initialize();
+    this.modalUsersView.setX(
+      this.getWidth() / 2 - this.modalUsersView.getWidth() / 2
+    );
+    this.modalUsersView.setY(
+      this.getHeight() / 2 - this.modalUsersView.getHeight() / 2
+    );
+
+    this.modalUsersView.setFont(FontSize.normal);
+    this.modalUsersView.setOnClick(() => {});
+
     // pack
     this.addComponent(this.shipView);
     this.addComponent(this.infoView);
@@ -466,6 +516,7 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.cargoBayUsed);
     this.removeComponent(this.modalPropertyView);
     this.removeComponent(this.modalModulesInCargoView);
+    this.removeComponent(this.modalUsersView);
     this.addComponent(this.modalOverlay);
     this.addComponent(this.modalInput);
   }
@@ -477,6 +528,7 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.cargoBayUsed);
     this.removeComponent(this.modalInput);
     this.removeComponent(this.modalModulesInCargoView);
+    this.removeComponent(this.modalUsersView);
     this.addComponent(this.modalOverlay);
     this.addComponent(this.modalPropertyView);
   }
@@ -488,8 +540,21 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.cargoBayUsed);
     this.removeComponent(this.modalInput);
     this.removeComponent(this.modalPropertyView);
+    this.removeComponent(this.modalUsersView);
     this.addComponent(this.modalOverlay);
     this.addComponent(this.modalModulesInCargoView);
+  }
+
+  private showModalUsersList() {
+    this.removeComponent(this.shipView);
+    this.removeComponent(this.infoView);
+    this.removeComponent(this.actionView);
+    this.removeComponent(this.cargoBayUsed);
+    this.removeComponent(this.modalInput);
+    this.removeComponent(this.modalPropertyView);
+    this.removeComponent(this.modalModulesInCargoView);
+    this.addComponent(this.modalOverlay);
+    this.addComponent(this.modalUsersView);
   }
 
   private hideModalInput() {
@@ -501,6 +566,7 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.modalOverlay);
     this.removeComponent(this.modalInput);
     this.removeComponent(this.modalModulesInCargoView);
+    this.removeComponent(this.modalUsersView);
   }
 
   private hideModalPropertyList() {
@@ -512,6 +578,7 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.modalOverlay);
     this.removeComponent(this.modalInput);
     this.removeComponent(this.modalModulesInCargoView);
+    this.removeComponent(this.modalUsersView);
   }
 
   private hideModalModulesInCargoList() {
@@ -523,7 +590,21 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.modalOverlay);
     this.removeComponent(this.modalInput);
     this.removeComponent(this.modalModulesInCargoView);
+    this.removeComponent(this.modalUsersView);
   }
+
+  private hideModalUsersList() {
+    this.addComponent(this.shipView);
+    this.addComponent(this.infoView);
+    this.addComponent(this.actionView);
+    this.addComponent(this.cargoBayUsed);
+    this.removeComponent(this.modalPropertyView);
+    this.removeComponent(this.modalOverlay);
+    this.removeComponent(this.modalInput);
+    this.removeComponent(this.modalModulesInCargoView);
+    this.removeComponent(this.modalUsersView);
+  }
+
 
   private refreshCargoBay() {
     setTimeout(() => {
@@ -540,6 +621,15 @@ export class ShipFittingWindow extends GDIWindow {
       b.sid = this.wsSvc.sid;
 
       this.wsSvc.sendMessage(MessageTypes.ViewProperty, b);
+    }, 200);
+  }
+
+  private refreshDockedUsers() {
+    setTimeout(() => {
+      const b = new ClientViewDockedUsers();
+      b.sid = this.wsSvc.sid;
+
+      this.wsSvc.sendMessage(MessageTypes.ViewDockedUsers, b);
     }, 200);
   }
 
@@ -753,10 +843,39 @@ export class ShipFittingWindow extends GDIWindow {
       this.modalPropertyView.setScroll(pIDX);
     }
   }
+
+  syncDockedUsers(cache: ServerDockedUsersUpdate) {
+    if (this.player.currentShip.dockedAtStationID) {
+      const rows: DockedUserViewRow[] = [];
+
+      // extract from update message
+      for (const userName in cache.users) {
+        if (Object.prototype.hasOwnProperty.call(cache.users, userName)) {
+          const id = cache.users[userName];
+
+          rows.push({
+            userId: id as string,
+            listString: () => `${userName}`
+          })
+        }
+      }
+
+      // update docked users modal list
+      const pIDX = this.modalPropertyView.getScroll();
+
+      this.modalUsersView.setItems(rows);
+      this.modalUsersView.setScroll(pIDX);
+    }
+  }
 }
 
 class FittingPropertyRow {
   ship: ServerPropertyShipCacheEntry;
+  listString: () => string;
+}
+
+class DockedUserViewRow {
+  userId: string;
   listString: () => string;
 }
 
@@ -1050,6 +1169,7 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
     }
 
     actions.push('Transfer');
+    actions.push('Give');
 
     // spacer
     actions.push('');

@@ -61,6 +61,7 @@ import { ServerMembersUpdate } from './wsModels/bodies/membersUpdate';
 import { ActionReportsWindow } from './gdi/windows/actionReportsWindow';
 import { ServerActionReportsPage } from './wsModels/bodies/viewActionReportsPage';
 import * as ClipboardJS from 'clipboard';
+import { ServerDockedUsersUpdate } from './wsModels/bodies/dockedUsersUpdate';
 
 class EngineSack {
   constructor() {}
@@ -372,6 +373,8 @@ export function clientStart(
       handleActionReportsPage(d);
     } else if (d.type == MessageTypes.ActionReportDetail) {
       handleActionReportDetails(d);
+    } else if (d.type == MessageTypes.DockedUsersUpdate) {
+      handleDockedUsersUpdate(d);
     }
   });
 }
@@ -967,6 +970,14 @@ function handlePropertyUpdate(d: GameMessage) {
 
   // update ship fitting and cargo window
   engineSack.shipFittingWindow.syncProperty(msg);
+}
+
+function handleDockedUsersUpdate(d: GameMessage) {
+  // parse body
+  const msg = JSON.parse(d.body) as ServerDockedUsersUpdate;
+
+  // update ship fitting and cargo window
+  engineSack.shipFittingWindow.syncDockedUsers(msg);
 }
 
 function handleExperienceUpdate(d: GameMessage) {
