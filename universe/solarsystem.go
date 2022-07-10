@@ -2183,6 +2183,136 @@ func (s *SolarSystem) processClientEventQueues() {
 					KillID: data.KillID,
 				})
 			}
+		} else if evt.Type == msgRegistry.GiveItem {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientGiveItemBody)
+
+				// find item in source
+				item := sh.FindItemInCargo(data.ItemID)
+
+				// make sure we found something
+				if item == nil {
+					// do nothing
+					continue
+				} else {
+					// find receiver
+					cx := s.clients[data.ReceiverID.String()]
+
+					if cx == nil {
+						c.WriteErrorMessage("unable to find receiving client")
+						continue
+					}
+
+					receiver := s.ships[cx.CurrentShipID.String()]
+
+					if receiver == nil {
+						// do nothing
+						continue
+					} else {
+						// verify both ships are docked at the same station
+						if sh.DockedAtStationID == nil || receiver.DockedAtStationID == nil {
+							c.WriteErrorMessage("both ships must be docked at the same station to transfer an item")
+							continue
+						}
+
+						if *sh.DockedAtStationID != *receiver.DockedAtStationID {
+							c.WriteErrorMessage("both ships must be docked at the same station to transfer an item")
+							continue
+						}
+
+						// verify ships are owned by different players
+						if sh.UserID == receiver.UserID {
+							c.WriteErrorMessage("destination not available for item transfer")
+							continue
+						}
+
+						// make sure this isn't the same ship
+						if sh.ID == receiver.ID {
+							c.WriteErrorMessage("item already there")
+							continue
+						}
+
+						// make sure receiver isn't an npc
+						if receiver.IsNPC {
+							c.WriteErrorMessage("items may only be transferred to players")
+							continue
+						}
+
+						// make sure receiver isn't in debt
+						if receiver.Wallet < 0 {
+							c.WriteErrorMessage("you cannot transfer items to a ship in debt with the station manager")
+							continue
+						}
+
+						// pull item from source ship
+						item, err := sh.RemoveItemFromCargo(data.ItemID, false)
+
+						if item == nil || err != nil {
+							c.WriteErrorMessage("unable to complete transfer")
+							continue
+						}
+
+						// push item to receiver ship
+						err = receiver.PutItemInCargo(item, false)
+
+						if err != nil {
+							// put item back in source ship
+							sh.PutItemInCargo(item, false)
+
+							// write error to client
+							c.WriteErrorMessage("unable to complete transfer")
+							continue
+						}
+
+						// escalate to core for saving
+						item.ContainerID = receiver.CargoBayContainerID
+						item.CoreDirty = true
+						s.MovedItems = append(s.MovedItems, item)
+					}
+				}
+			}
+		} else if evt.Type == msgRegistry.ViewDockedUsers {
+			if sh != nil {
+				// extract data
+				//data := evt.Body.(models.ClientViewDockedUsersBody)
+
+				// verify docked
+				if !sh.IsDocked {
+					c.WriteErrorMessage("you must be docked to retrieve this list")
+					continue
+				}
+
+				// stub response
+				msg := models.ServerDockedUsersUpdateBody{
+					Users: make(map[string]uuid.UUID),
+				}
+
+				// iterate over players
+				for _, cx := range s.clients {
+					// find ship
+					sx := s.ships[cx.CurrentShipID.String()]
+
+					if sx != nil {
+						// check if docked at same station
+						if sx.IsDocked && *sx.DockedAtStationID == *sh.DockedAtStationID {
+							// include in response
+							msg.Users[cx.ReputationSheet.CharacterName] = *cx.UID
+						}
+					}
+				}
+
+				// package message
+				b, _ := json.Marshal(&msg)
+
+				cu := models.GameMessage{
+					MessageType: msgRegistry.DockedUsersUpdate,
+					MessageBody: string(b),
+				}
+
+				// write response to client
+				c.WriteMessage(&cu)
+			}
 		}
 	}
 }

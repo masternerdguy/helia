@@ -462,6 +462,20 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientViewActionReportDetail(&client, &b)
+		} else if m.MessageType == msgRegistry.GiveItem {
+			// decode body as ClientGiveItemBody
+			b := models.ClientGiveItemBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientGiveItem(&client, &b)
+		} else if m.MessageType == msgRegistry.ViewDockedUsers {
+			// decode body as ClientViewDockedUsersBody
+			b := models.ClientViewDockedUsersBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientViewDockedUsers(&client, &b)
 		}
 	}
 }
@@ -1877,6 +1891,52 @@ func (l *SocketListener) handleClientViewActionReportDetail(client *shared.GameC
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.ViewActionReportDetail, false)
+	}
+}
+
+func (l *SocketListener) handleClientGiveItem(client *shared.GameClient, body *models.ClientGiveItemBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		shared.TeeLog(fmt.Sprintf("handleClientGiveItem: unexpected id: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.SharedMessageRegistry
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.GiveItem, true)
+	}
+}
+
+func (l *SocketListener) handleClientViewDockedUsers(client *shared.GameClient, body *models.ClientViewDockedUsersBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		shared.TeeLog(fmt.Sprintf("handleClientViewDockedUsers: unexpected id: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.SharedMessageRegistry
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.ViewDockedUsers, false)
 	}
 }
 
