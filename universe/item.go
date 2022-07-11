@@ -38,6 +38,14 @@ type NewItemFromNameTicketDevHax struct {
 	UserID       uuid.UUID
 }
 
+// Structure representing a request to create a new ship by item type name, used for devhax only
+type NewShipFromNameTicketDevHax struct {
+	ItemTypeName string
+	Quantity     int
+	StationID    uuid.UUID
+	UserID       uuid.UUID
+}
+
 // List of module attributes that can be percentage mutated by mod kits
 var MutableModuleAttributes = [...]string{
 	"range",
@@ -64,6 +72,8 @@ var MutableModuleAttributes = [...]string{
 	"fuel_max_add",
 	"max_fuel_volume",
 	"leakage",
+	"heat_damage",
+	"missile_destruction_chance",
 }
 
 // Helper function to determine whether or not a given item meta attribute can be mutated by a mod kit

@@ -701,6 +701,51 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 	// clear new items from devhax
 	sol.NewItemsDevHax = make([]*universe.NewItemFromNameTicketDevHax, 0)
 
+	// iterate over new ships for devhax
+	for _, rs := range sol.NewShipsDevHax {
+		// handle escalation on another goroutine
+		go func(rs *universe.NewShipFromNameTicketDevHax, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
+			// find item type by name
+			itemType, err := itemTypeSvc.GetItemTypeByName(rs.ItemTypeName)
+
+			if err != nil || itemType == nil || itemType.Family != "ship" {
+				shared.TeeLog(fmt.Sprintf("Unable to find ship item type [devhax] %v: %v", rs.ItemTypeName, err))
+			} else {
+				tStr, _ := universe.Meta(itemType.Meta).GetString("shiptemplateid")
+
+				// create new ship for player
+				ps, err := CreateShipForPlayer(
+					rs.UserID,
+					uuid.MustParse(tStr),
+					rs.StationID,
+					sol.ID,
+				)
+
+				if err != nil || ps == nil {
+					shared.TeeLog(fmt.Sprintf("! Unable to complete ship purchase for %v - failure saving (%v)!", rs.UserID, err))
+					return
+				}
+
+				// load into universe
+				es, err := LoadShip(ps, sol.Universe)
+
+				if err != nil || es == nil {
+					shared.TeeLog(fmt.Sprintf("! Unable to complete ship purchase for %v - failure loading (%v)!", rs.UserID, err))
+					return
+				}
+
+				// put ship in system
+				sol.AddShip(es, true)
+			}
+		}(rs, sol)
+	}
+
+	// clear devhax new ships
+	sol.NewShipsDevHax = make([]*universe.NewShipFromNameTicketDevHax, 0)
+
 	// iterate over new sell orders
 	for _, mi := range sol.NewSellOrders {
 		// make sure we have waited long enough

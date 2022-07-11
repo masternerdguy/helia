@@ -66,6 +66,32 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicHullLaser();
     } else if (b.gfxEffect === 'basic_general_laser') {
       this.vfxData = repo.basicGeneralLaser();
+    } else if (b.gfxEffect === 'small_laser_tool') {
+      this.vfxData = repo.smallLaserTool();
+    } else if (b.gfxEffect === 'small_gauss_rifle') {
+      this.vfxData = repo.smallGaussRifle();
+    } else if (b.gfxEffect === 'small_ice_miner') {
+      this.vfxData = repo.smallIceMiner();
+    } else if (b.gfxEffect === 'small_shield_booster') {
+      this.vfxData = repo.smallShieldBooster();
+    } else if (b.gfxEffect === 'small_auto-5_cannon') {
+      this.vfxData = repo.smallAuto5Cannon();
+    } else if (b.gfxEffect === 'small_aether_dragger') {
+      this.vfxData = repo.smallAetherDragger();
+    } else if (b.gfxEffect === 'small_ice_harvester') {
+      this.vfxData = repo.smallIceHarvester();
+    } else if (b.gfxEffect === 'small_ore_harvester') {
+      this.vfxData = repo.smallOreHarvester();
+    } else if (b.gfxEffect === 'small_energy_siphon') {
+      this.vfxData = repo.smallUtilitySiphon();
+    } else if (b.gfxEffect === 'small_salvager') {
+      this.vfxData = repo.smallSalvager();
+    } else if (b.gfxEffect === 'small_shield_laser') {
+      this.vfxData = repo.smallShieldLaser();
+    } else if (b.gfxEffect === 'small_hull_laser') {
+      this.vfxData = repo.smallHullLaser();
+    } else if (b.gfxEffect === 'small_general_laser') {
+      this.vfxData = repo.smallGeneralLaser();
     } else if (b.gfxEffect === 'xl_energy_siphon') {
       this.vfxData = repo.xlUtilitySiphon();
     } else if (b.gfxEffect === 'xl_shield_booster') {
@@ -86,6 +112,17 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.xlGeneralLaser();
     } else if (b.gfxEffect === 'xl_laser_tool') {
       this.vfxData = repo.xlLaserTool();
+    } else if (b.gfxEffect === 'small_add_negative') {
+      this.vfxData = repo.smallNegativeField();
+    } else if (b.gfxEffect === 'small_add_thermal') {
+      this.vfxData = repo.smallThermalField();
+    } else if (b.gfxEffect === 'small_add_aether') {
+      this.vfxData = repo.smallAetherField();
+    } else if (b.gfxEffect === 'small_add_kinetic') {
+      this.vfxData = repo.smallKineticField();
+    } else {
+      // log broken effect
+      console.log(`gfx effect not found: ${b.gfxEffect}`);
     }
 
     this.maxLifeTime = this.vfxData?.duration ?? 0;
@@ -190,6 +227,8 @@ export class ModuleEffect extends WsPushModuleEffect {
         this.renderAsSiphonEffect(camera, ctx);
       } else if (this.vfxData.type === 'salvager') {
         this.renderAsSalvagerEffect(camera, ctx);
+      } else if (this.vfxData.type === 'utility_add') {
+        this.renderAsAreaDenialDeviceEffect(camera, ctx);
       }
     }
   }
@@ -373,6 +412,47 @@ export class ModuleEffect extends WsPushModuleEffect {
     const er = Math.max(0, sr * (this.lifeElapsed / this.maxLifeTime));
 
     // draw boost
+    ctx.beginPath();
+    ctx.arc(sx, sy, er, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    // restore filter
+    ctx.filter = oldFilter;
+  }
+
+  private renderAsAreaDenialDeviceEffect(camera: Camera, ctx: any) {
+    // get start coordinates
+    const src = getTargetCoordinatesAndRadius(
+      this.objStart,
+      this.objStartType,
+      this.objStartHPOffset
+    );
+
+    // project to screen
+    const sx = camera.projectX(src[0]);
+    const sy = camera.projectY(src[1]);
+    const sr = camera.projectR(src[2]);
+    const bt = camera.projectR(this.vfxData.thickness);
+
+    // backup filter
+    const oldFilter = ctx.filter;
+
+    // style boost
+    ctx.strokeStyle = this.vfxData.color;
+    if (this.vfxData.filter) {
+      ctx.filter = this.vfxData.filter;
+      ctx.lineWidth = bt;
+    }
+
+    // use elapsed lifetime ratio to expand radius
+    const er = Math.max(0, sr * (this.lifeElapsed / this.maxLifeTime));
+
+    // fill interior
+    ctx.beginPath();
+    ctx.arc(sx, sy, er, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // draw outer ring
     ctx.beginPath();
     ctx.arc(sx, sy, er, 0, 2 * Math.PI);
     ctx.stroke();

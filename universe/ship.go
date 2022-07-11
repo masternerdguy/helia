@@ -432,6 +432,8 @@ func getModuleFamily(itemFamilyID string) string {
 		modFamily = "utility"
 	} else if itemFamilyID == "utility_cloak" {
 		modFamily = "utility"
+	} else if itemFamilyID == "utility_add" {
+		modFamily = "utility"
 	} else if itemFamilyID == "utility_veil" {
 		modFamily = "utility"
 	} else if itemFamilyID == "battery_pack" {
@@ -4810,6 +4812,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsUtilityVeil()
 			} else if m.ItemTypeFamily == "fuel_loader" {
 				canActivate = m.activateAsFuelLoader()
+			} else if m.ItemTypeFamily == "utility_add" {
+				canActivate = m.activateAsAreaDenialDevice()
 			}
 
 			if canActivate {
@@ -6225,6 +6229,206 @@ func (m *FittedSlot) activateAsFuelLoader() bool {
 
 	// module doesn't activate
 	return false
+}
+
+func (m *FittedSlot) activateAsAreaDenialDevice() bool {
+	// include visual effect if present
+	activationPGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		tgtReg := models.SharedTargetTypeRegistry
+
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationPGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
+	// get damage values
+	shieldDmg, _ := m.ItemMeta.GetFloat64("shield_damage")
+	armorDmg, _ := m.ItemMeta.GetFloat64("armor_damage")
+	hullDmg, _ := m.ItemMeta.GetFloat64("hull_damage")
+
+	// get range value
+	rge, _ := m.ItemMeta.GetFloat64("range")
+
+	// get falloff style
+	falloff, ff := m.ItemMeta.GetString("falloff")
+
+	// get drag multiplier
+	dMul, _ := m.ItemMeta.GetFloat64("drag_multiplier")
+
+	// get heat damage
+	hDmg, _ := m.ItemMeta.GetFloat64("heat_damage")
+
+	// get missile destruction chance
+	mDest, _ := m.ItemMeta.GetFloat64("missile_destruction_chance")
+
+	// get energy siphon amount
+	eSiph, _ := m.ItemMeta.GetFloat64("energy_siphon_amount")
+
+	// apply usage experience modifiers
+	shieldDmg *= m.usageExperienceModifier
+	armorDmg *= m.usageExperienceModifier
+	hullDmg *= m.usageExperienceModifier
+	dMul *= m.usageExperienceModifier
+	hDmg *= m.usageExperienceModifier
+	eSiph *= m.usageExperienceModifier
+
+	// iterate over missiles in the system
+	for _, ts := range m.shipMountedOn.CurrentSystem.missiles {
+		// check range
+		dA := m.shipMountedOn.ToPhysicsDummy()
+		dB := ts.ToPhysicsDummy()
+
+		tR := physics.Distance(dA, dB)
+
+		if tR < rge {
+			// determine falloff amount
+			rangeRatio := 1.0 // default to 100%
+
+			if ff {
+				// adjust based on falloff style
+				if falloff == "linear" {
+					// proportion of the distance to target over max range (closer is higher)
+					rangeRatio = 1 - (tR / rge)
+				} else if falloff == "reverse_linear" {
+					// proportion of the distance to target over max range (further is higher)
+					rangeRatio = (tR / rge)
+
+					if tR > rge {
+						rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+					}
+				}
+			}
+
+			if dMul > 0 {
+				// determine max velocity reduction
+				fv := (1.0 - rangeRatio) / dMul
+
+				if fv > 1 {
+					fv = 1
+				}
+
+				if fv < 0 {
+					fv = 0
+				}
+
+				// reduce max missile velocity
+				ts.MaxVelocity *= fv
+			}
+
+			if mDest > 0 {
+				// get intrinsic failure chance of missile
+				ft := 1.0 - ts.FaultTolerance
+
+				// determine total failure chance
+				fc := (mDest * rangeRatio) + ft
+
+				// roll
+				or := rand.Float64()
+
+				if or < fc {
+					// destroy missile
+					ts.TicksRemaining = 0
+				}
+			}
+		}
+	}
+
+	// iterate over ships in the system
+	for _, ts := range m.shipMountedOn.CurrentSystem.ships {
+		// don't affect firing ship
+		if ts.ID == m.shipMountedOn.ID {
+			continue
+		}
+
+		// skip if docked
+		if ts.IsDocked {
+			continue
+		}
+
+		// check range
+		dA := m.shipMountedOn.ToPhysicsDummy()
+		dB := ts.ToPhysicsDummy()
+
+		tR := physics.Distance(dA, dB)
+
+		if tR < rge {
+			// determine falloff amount
+			rangeRatio := 1.0 // default to 100%
+
+			if ff {
+				// adjust based on falloff style
+				if falloff == "linear" {
+					// proportion of the distance to target over max range (closer is higher)
+					rangeRatio = 1 - (tR / rge)
+				} else if falloff == "reverse_linear" {
+					// proportion of the distance to target over max range (further is higher)
+					rangeRatio = (tR / rge)
+
+					if tR > rge {
+						rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+					}
+				}
+			}
+
+			// deal damage
+			ts.DealDamage(
+				shieldDmg*rangeRatio,
+				armorDmg*rangeRatio,
+				hullDmg*rangeRatio,
+				m.shipMountedOn.ReputationSheet,
+				m,
+			)
+
+			// apply siphon
+			actualSiphon := ts.SiphonEnergy(
+				eSiph*rangeRatio,
+				m.shipMountedOn.ReputationSheet,
+				m,
+			)
+
+			// add to energy
+			m.shipMountedOn.Energy += actualSiphon
+
+			// any excess becomes heat
+			maxEnergy := m.shipMountedOn.GetRealMaxEnergy()
+			excess := m.shipMountedOn.Energy - maxEnergy
+
+			if excess > 0 {
+				// apply heat
+				m.shipMountedOn.Heat += excess
+
+				// clamp energy
+				m.shipMountedOn.Energy = maxEnergy
+			}
+
+			// calculate drag effect duration in ticks
+			cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
+			dT := (cooldown * 1000) / Heartbeat
+
+			// add temporary modifier to target
+			modifier := TemporaryShipModifier{
+				Attribute:      "drag",
+				Percentage:     dMul * rangeRatio,
+				RemainingTicks: int(dT),
+			}
+
+			ts.TemporaryModifiers = append(ts.TemporaryModifiers, modifier)
+
+			// apply heat damage
+			ts.Heat += hDmg * rangeRatio
+		}
+	}
+
+	// module activates
+	return true
 }
 
 // Reusable helper function to determine tracking ratio between a module and a target

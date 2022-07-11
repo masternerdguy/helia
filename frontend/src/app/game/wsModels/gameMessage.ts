@@ -70,4 +70,7 @@ export enum MessageTypes {
   ActionReportsPage = 61,
   ViewActionReportDetail = 62,
   ActionReportDetail = 63,
+  GiveItem = 64,
+  ViewDockedUsers = 65,
+  DockedUsersUpdate = 66,
 }

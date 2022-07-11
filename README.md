@@ -89,3 +89,9 @@ syntax:  /devhax wallet [integer]
 example: /devhax wallet 9000
 
 Sets your current ship's wallet to the provided value.
+
+## ship
+syntax:  /devhax ship [itemtypename]
+example: /devhax ship Robin
+
+Creates a new ship of a given type at the station you are currently docked at. Ignores limits on maximum parked ships at the same station!
