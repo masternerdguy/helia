@@ -209,7 +209,7 @@ export class ShipFittingWindow extends GDIWindow {
 
         // show modal list
         this.showModalPropertyList();
-      }else if (a === 'Give') {
+      } else if (a === 'Give') {
         // request docked player list
         this.refreshDockedUsers();
 
@@ -605,7 +605,6 @@ export class ShipFittingWindow extends GDIWindow {
     this.removeComponent(this.modalUsersView);
   }
 
-
   private refreshCargoBay() {
     setTimeout(() => {
       const b = new ClientViewCargoBay();
@@ -855,16 +854,15 @@ export class ShipFittingWindow extends GDIWindow {
 
           rows.push({
             userId: id as string,
-            listString: () => `${userName}`
-          })
+            listString: () => `${userName}`,
+          });
         }
       }
 
       // sort list
-      const sortedRows = rows
-          .sort(
-            (a, b) => a.listString().localeCompare(b.listString())
-          );
+      const sortedRows = rows.sort((a, b) =>
+        a.listString().localeCompare(b.listString())
+      );
 
       // update docked users modal list
       const pIDX = this.modalPropertyView.getScroll();

@@ -329,7 +329,6 @@ export class ModuleActivationEffectRepository {
     };
   }
 
-
   smallSalvager(): ModuleActivationEffectData {
     return {
       type: 'salvager',
