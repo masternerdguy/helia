@@ -213,6 +213,7 @@ type Ship struct {
 	aiIncompatibleOreFault bool                                     // true when mining autopilot failed due to incompatible ore (for patch miners)
 	aiNoOrePulledFault     bool                                     // true when mining autopilot failed due to pulling no ore (for patch miners)
 	WreckReady             bool                                     // true when a dead ship has been saved to the db and the wreck can be looted
+	InLimbo                bool                                     // true when ship is being migrated between systems
 	Lock                   sync.Mutex
 }
 
