@@ -2670,7 +2670,7 @@ func (s *SolarSystem) shipCollisionTesting() {
 			// get distance between ship and source jumphole
 			d := physics.Distance(dummyA, dummyB)
 
-			// get horizon
+			// get source horizon
 			jH := ((sA.TemplateData.Radius + jB.Radius) * 0.75)
 
 			// check for deep radius intersection
@@ -2681,6 +2681,9 @@ func (s *SolarSystem) shipCollisionTesting() {
 
 				// mark as in limbo
 				sA.InLimbo = true
+
+				// get target horizon
+				jH := ((sA.TemplateData.Radius + jB.OutJumphole.Radius) * 0.75)
 
 				// get out hole physics dummy
 				dummyB := jB.OutJumphole.ToPhysicsDummy()
