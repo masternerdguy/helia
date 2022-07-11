@@ -6,7 +6,6 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"math"
 	"math/rand"
 	"strconv"
@@ -2675,17 +2674,13 @@ func (s *SolarSystem) shipCollisionTesting() {
 
 			// check for deep radius intersection
 			if d <= jH {
-				if !sA.IsNPC {
-					log.Println(fmt.Sprintf("%v | %v | %v", jB.JumpholeName, jH, d))
-				}
-
 				// mark as in limbo
 				sA.InLimbo = true
 
 				// get target horizon
 				jH := ((sA.TemplateData.Radius + jB.OutJumphole.Radius) * 0.75)
 
-				// get out hole physics dummy
+				// get target jumphole physics dummy
 				dummyB := jB.OutJumphole.ToPhysicsDummy()
 
 				// center ship on target jumphole
@@ -2750,10 +2745,6 @@ func (s *SolarSystem) shipCollisionTesting() {
 					defer sA.Lock.Unlock()
 
 					// no longer in limbo
-					if !sA.IsNPC {
-						log.Println("no limbo")
-					}
-
 					sA.InLimbo = false
 				}(sA, jB, c)
 
