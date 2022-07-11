@@ -2725,8 +2725,8 @@ func (s *SolarSystem) shipCollisionTesting() {
 							// move player to destination system
 							c.CurrentSystemID = jB.OutSystemID
 
-							jB.OutSystem.AddClient(c, true)
 							s.RemoveClient(c, true)
+							jB.OutSystem.AddClient(c, true)
 						}
 					}
 
