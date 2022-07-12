@@ -47,8 +47,8 @@
             "vendorChunk": true,
             "extractLicenses": false,
             "buildOptimizer": true,
-            "sourceMap": true,
-            "optimization": true,
+            "sourceMap": false,
+            "optimization": false,
             "namedChunks": true,
             "customWebpackConfig": {
               "path": "./custom-webpack.config.js"

@@ -2321,9 +2321,13 @@ func (s *SolarSystem) processClientEventQueues() {
 func (s *SolarSystem) updateShips() {
 	// update ships
 	for _, e := range s.ships {
-		// check if dead
+		// skip if in limbo
+		if e.InLimbo {
+			continue
+		}
+
+		// skip if dead
 		if e.Destroyed {
-			// skip
 			continue
 		}
 
@@ -2591,6 +2595,11 @@ func (s *SolarSystem) updateMissiles() {
 func (s *SolarSystem) shipCollisionTesting() {
 	// ship collission testing
 	for _, sA := range s.ships {
+		// skip ships in limbo
+		if sA.InLimbo {
+			continue
+		}
+
 		// skip dead ships
 		if sA.Destroyed || sA.DestroyedAt != nil {
 			continue
@@ -2648,57 +2657,95 @@ func (s *SolarSystem) shipCollisionTesting() {
 
 		// with jumpholes
 		for _, jB := range s.jumpholes {
+			// skip if in limbo
+			if sA.InLimbo {
+				continue
+			}
+
 			// get physics dummies
 			dummyA := sA.ToPhysicsDummy()
 			dummyB := jB.ToPhysicsDummy()
 
-			// get distance between ship and jumphole
+			// get distance between ship and source jumphole
 			d := physics.Distance(dummyA, dummyB)
 
+			// get source horizon
+			jH := ((sA.TemplateData.Radius + jB.Radius) * 0.75)
+
 			// check for deep radius intersection
-			if d <= ((sA.TemplateData.Radius + jB.Radius) * 0.75) {
+			if d <= jH {
+				// mark as in limbo
+				sA.InLimbo = true
+
+				// get target horizon
+				jH := ((sA.TemplateData.Radius + jB.OutJumphole.Radius) * 0.75)
+
+				// get target jumphole physics dummy
+				dummyB := jB.OutJumphole.ToPhysicsDummy()
+
+				// center ship on target jumphole
+				sA.PosX = dummyB.PosX
+				sA.PosY = dummyB.PosY
+
+				// place ship on the opposite side of target jumphole
+				for {
+					// zero velocity edge case
+					if math.Abs(sA.VelX) < 0.01 {
+						sA.VelX = 0.01
+					}
+
+					if math.Abs(sA.VelY) < 0.01 {
+						sA.VelY = 0.01
+					}
+
+					// add velocity
+					sA.PosX += sA.VelX
+					sA.PosY += sA.VelY
+
+					// get ship physics dummy
+					dummyA := sA.ToPhysicsDummy()
+
+					// get distance between ship and target jumphole
+					d := physics.Distance(dummyA, dummyB)
+
+					// verify escape
+					if d > jH {
+						break
+					}
+				}
+
 				// find client
 				c := s.clients[sA.UserID.String()]
 
-				// perform move at end of update cycle
-				defer func(gsA *Ship, gjB *Jumphole, gc *shared.GameClient) {
-					if gc != nil {
+				// perform move on a separate goroutine
+				go func(sA *Ship, jB *Jumphole, c *shared.GameClient) {
+					if c != nil {
 						// check if this was the current ship of a player
-						if gsA.ID == gc.CurrentShipID {
+						if sA.ID == c.CurrentShipID {
 							// move player to destination system
-							gc.CurrentSystemID = gjB.OutSystemID
+							c.CurrentSystemID = jB.OutSystemID
 
-							// defer to avoid deadlocking either system
-							defer func(s *SolarSystem) {
-								go func(s *SolarSystem) {
-									defer gjB.OutSystem.AddClient(gc, true)
-									defer s.RemoveClient(gc, true)
-								}(s)
-							}(s)
+							s.RemoveClient(c, true)
+							jB.OutSystem.AddClient(c, true)
 						}
 					}
 
 					// kill ship autopilot
-					defer gsA.CmdAbort(false)
-
-					// place ship on the opposite side of the hole
-					riX := gjB.PosX - gsA.PosX
-					riY := gjB.PosY - gsA.PosY
-
-					gsA.PosX = (gjB.OutJumphole.PosX + (riX * 1.25))
-					gsA.PosY = (gjB.OutJumphole.PosY + (riY * 1.25))
+					sA.CmdAbort(true)
 
 					// in the destination system
-					gsA.SystemID = gjB.OutSystemID
+					sA.SystemID = jB.OutSystemID
 
-					// perform move operation
-					defer func(s *SolarSystem) {
-						go func(s *SolarSystem) {
-							defer gjB.OutSystem.AddShip(gsA, true)
-						}(s)
-					}(s)
+					// move ship to target system
+					s.RemoveShip(sA, true)
+					jB.OutSystem.AddShip(sA, true)
 
-					defer s.RemoveShip(gsA, false)
+					// obtain lock on ship
+					sA.Lock.Lock()
+					defer sA.Lock.Unlock()
+
+					// no longer in limbo
+					sA.InLimbo = false
 				}(sA, jB, c)
 
 				break
