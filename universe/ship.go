@@ -445,6 +445,8 @@ func getModuleFamily(itemFamilyID string) string {
 		modFamily = "cargo"
 	} else if itemFamilyID == "salvager" {
 		modFamily = "utility"
+	} else if itemFamilyID == "ewar_cycle" {
+		modFamily = "ewar"
 	}
 
 	return modFamily
@@ -4815,6 +4817,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsFuelLoader()
 			} else if m.ItemTypeFamily == "utility_add" {
 				canActivate = m.activateAsAreaDenialDevice()
+			} else if m.ItemTypeFamily == "ewar_cycle" {
+				canActivate = m.activateAsCycleDisruptor()
 			}
 
 			if canActivate {
@@ -6430,6 +6434,187 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 
 	// module activates
 	return true
+}
+
+func (m *FittedSlot) activateAsCycleDisruptor() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.SharedTargetTypeRegistry
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtI interface{}
+
+	if *m.TargetType == tgtReg.Ship {
+		// find ship
+		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtI = tgt
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+	}
+
+	// get signal flux
+	sigFlux, _ := m.ItemMeta.GetFloat64("signal_flux")
+	signalGain, _ := m.ItemMeta.GetFloat64("signal_gain")
+
+	// iterate over target modules
+	if *m.TargetType == tgtReg.Ship {
+		c := tgtI.(*Ship)
+
+		for r := 0; r < 2; r++ {
+			var rk []FittedSlot
+
+			// get rack for iteration
+			if r == 0 {
+				rk = c.Fitting.ARack
+			} else if r == 1 {
+				rk = c.Fitting.BRack
+			}
+
+			// iterate over slots
+			for ix := range rk {
+				// get target module
+				tm := rk[ix]
+
+				// skip if not cycling
+				if !tm.IsCycling {
+					continue
+				}
+
+				// get target numbers
+				dC, dA := rollCycleDisruptor(tm, sigFlux, int(signalGain))
+
+				// apply experience modifiers
+				dC *= m.usageExperienceModifier
+				dA *= int(m.usageExperienceModifier)
+
+				// roll for disruption
+				roll := rand.Float64()
+
+				if roll <= dC {
+					// apply effect to cycle progress
+					aP := dA * 100
+					tm.cooldownProgress = (tm.cooldownProgress * (100 - aP)) / 100
+
+					// store update to module
+					if r == 0 {
+						c.Fitting.ARack[ix] = tm
+					} else if r == 1 {
+						c.Fitting.BRack[ix] = tm
+					}
+				}
+			}
+		}
+
+		// todo: disrupt cycles
+
+		// update aggression tables
+		c.updateAggressionTables(
+			0,
+			0,
+			0,
+			m.shipMountedOn.ReputationSheet,
+			m,
+		)
+	}
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+			ObjEndID:     m.TargetID,
+			ObjEndType:   m.TargetType,
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
+	// module activates!
+	return true
+}
+
+// Reusable helper function to determine cycle disruptor chance and amount respectively
+func rollCycleDisruptor(tgt FittedSlot, sigFlux float64, sigGain int) (float64, int) {
+	// get target module v
+	v, _ := tgt.ItemTypeMeta.GetFloat64("volume")
+	v += Epsilon
+
+	/*
+		<chance of disruption> = [signal flux] / [tgt module volume]
+								 (centered at the slot size of a the ship tier mounting the module)
+	*/
+
+	// calculate disruption chance
+	dC := sigFlux / v
+
+	// get cycle progress
+	c, _ := tgt.ItemMeta.GetFloat64("cooldown")
+	c += Epsilon
+
+	p := float64(tgt.cooldownProgress) / c
+
+	/*
+		<disruption amount> = [(<cycle progress>^sin(<cycle progress>/<signal gain>)) mod <signal gain>] / <signal gain>
+							  (centered at ~25, does not scale with ship tier slot size)
+	*/
+
+	// calculate disruption amount
+	q := p / float64(sigGain)
+	r := math.Pow(p, math.Sin(q))
+
+	dA := (int(r) % sigGain) / sigGain
+
+	// return results
+	return dC, dA
 }
 
 // Reusable helper function to determine tracking ratio between a module and a target

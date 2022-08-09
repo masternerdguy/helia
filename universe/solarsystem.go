@@ -172,8 +172,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	// increment tick counter
 	s.tickCounter++
-
-	return
 }
 
 // processes the next message from each client in the system, should only be called from PeriodicUpdate
@@ -674,34 +672,6 @@ func (s *SolarSystem) processClientEventQueues() {
 					if err != nil {
 						// send error message to client
 						c.WriteErrorMessage(err.Error())
-					}
-				}
-			}
-		} else if evt.Type == msgRegistry.DeactivateModule {
-			if sh != nil {
-				// extract data
-				data := evt.Body.(models.ClientDeactivateModuleBody)
-
-				// skip if rack c (passive modules)
-				if data.Rack == "C" {
-					continue
-				} else {
-					// find module
-					mod := sh.FindModule(data.ItemID, data.Rack)
-
-					// make sure we found something
-					if mod == nil {
-						// do nothing
-						continue
-					} else {
-						if mod.WillRepeat {
-							// set repeat to false
-							mod.WillRepeat = false
-
-							// clear target
-							mod.TargetID = nil
-							mod.TargetType = nil
-						}
 					}
 				}
 			}
