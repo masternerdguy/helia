@@ -6536,8 +6536,7 @@ func (m *FittedSlot) activateAsCycleDisruptor() bool {
 
 				if roll <= dC {
 					// apply effect to cycle progress
-					aP := dA * 100
-					tm.cooldownProgress -= int(float64(tm.cooldownProgress) * (1 - aP))
+					tm.cooldownProgress -= int(float64(tm.cooldownProgress) * (1 - dA))
 
 					// store update to module
 					if r == 0 {
