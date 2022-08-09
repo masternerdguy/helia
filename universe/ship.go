@@ -6549,8 +6549,6 @@ func (m *FittedSlot) activateAsCycleDisruptor() bool {
 			}
 		}
 
-		// todo: disrupt cycles
-
 		// update aggression tables
 		c.updateAggressionTables(
 			0,
