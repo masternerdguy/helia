@@ -6557,23 +6557,23 @@ func (m *FittedSlot) activateAsCycleDisruptor() bool {
 			m.shipMountedOn.ReputationSheet,
 			m,
 		)
-	}
 
-	// include visual effect if present
-	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+		// include visual effect if present
+		activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
 
-	if found {
-		// build effect trigger
-		gfxEffect := models.GlobalPushModuleEffectBody{
-			GfxEffect:    activationGfxEffect,
-			ObjStartID:   m.shipMountedOn.ID,
-			ObjStartType: tgtReg.Ship,
-			ObjEndID:     m.TargetID,
-			ObjEndType:   m.TargetType,
+		if found {
+			// build effect trigger
+			gfxEffect := models.GlobalPushModuleEffectBody{
+				GfxEffect:    activationGfxEffect,
+				ObjStartID:   m.shipMountedOn.ID,
+				ObjStartType: tgtReg.Ship,
+				ObjEndID:     m.TargetID,
+				ObjEndType:   m.TargetType,
+			}
+
+			// push to solar system list for next update
+			m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
 		}
-
-		// push to solar system list for next update
-		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
 	}
 
 	// module activates!
