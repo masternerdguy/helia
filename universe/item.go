@@ -74,6 +74,8 @@ var MutableModuleAttributes = [...]string{
 	"leakage",
 	"heat_damage",
 	"missile_destruction_chance",
+	"signal_flux",
+	"signal_gain",
 }
 
 // Helper function to determine whether or not a given item meta attribute can be mutated by a mod kit
