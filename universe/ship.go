@@ -6525,11 +6525,11 @@ func (m *FittedSlot) activateAsCycleDisruptor() bool {
 				}
 
 				// get target numbers
-				dC, dA := rollCycleDisruptor(tm, sigFlux, int(signalGain))
+				dC, dA := rollCycleDisruptor(tm, sigFlux, signalGain)
 
 				// apply experience modifiers
 				dC *= m.usageExperienceModifier
-				dA *= int(m.usageExperienceModifier)
+				dA *= m.usageExperienceModifier
 
 				// roll for disruption
 				roll := rand.Float64()
@@ -6537,7 +6537,7 @@ func (m *FittedSlot) activateAsCycleDisruptor() bool {
 				if roll <= dC {
 					// apply effect to cycle progress
 					aP := dA * 100
-					tm.cooldownProgress = (tm.cooldownProgress * (100 - aP)) / 100
+					tm.cooldownProgress -= int(float64(tm.cooldownProgress) * (1 - aP))
 
 					// store update to module
 					if r == 0 {
@@ -6581,7 +6581,7 @@ func (m *FittedSlot) activateAsCycleDisruptor() bool {
 }
 
 // Reusable helper function to determine cycle disruptor chance and amount respectively
-func rollCycleDisruptor(tgt FittedSlot, sigFlux float64, sigGain int) (float64, int) {
+func rollCycleDisruptor(tgt FittedSlot, sigFlux float64, sigGain float64) (float64, float64) {
 	// get target module v
 	v, _ := tgt.ItemTypeMeta.GetFloat64("volume")
 	v += Epsilon
@@ -6609,7 +6609,7 @@ func rollCycleDisruptor(tgt FittedSlot, sigFlux float64, sigGain int) (float64, 
 	q := p / float64(sigGain)
 	r := math.Pow(p, math.Sin(q))
 
-	dA := (int(r) % sigGain) / sigGain
+	dA := float64(int(r)%int(sigGain)) / sigGain
 
 	// return results
 	return dC, dA
