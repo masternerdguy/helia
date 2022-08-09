@@ -6604,7 +6604,7 @@ func rollCycleDisruptor(tgt FittedSlot, sigFlux float64, sigGain float64) (float
 	*/
 
 	// calculate disruption amount
-	q := p / float64(sigGain)
+	q := p / sigGain
 	r := math.Pow(p, math.Sin(q))
 
 	dA := float64(int(r)%int(sigGain)) / sigGain
