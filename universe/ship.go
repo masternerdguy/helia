@@ -6529,7 +6529,6 @@ func (m *FittedSlot) activateAsCycleDisruptor() bool {
 
 				// apply experience modifiers
 				dC *= m.usageExperienceModifier
-				dA *= m.usageExperienceModifier
 
 				// roll for disruption
 				roll := rand.Float64()
