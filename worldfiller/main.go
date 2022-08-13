@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"helia/engine"
 	"helia/physics"
 	"helia/shared"
 	"helia/sql"
@@ -27,31 +28,35 @@ func main() {
 	)
 
 	// load universe from database
-	/*shared.TeeLog("Loading universe from database...")
+	shared.TeeLog("Loading universe from database...")
 	universe, err := engine.LoadUniverse()
 
 	if err != nil {
 		panic(err)
 	}
 
-	shared.TeeLog("Loaded universe!")*/
+	shared.TeeLog("Loaded universe!")
 
 	/*
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	/*var toInject = [...]string{
-	}*/
+	var toInject = [...]string{
+		"3768279c-849f-4c96-a447-9d4bf4865271",
+		"826f1b25-38d2-4837-b336-f410425bf41c",
+		"9eefa1d3-1203-4fc8-b09a-3e4c967965a5",
+		"aad35b80-16ac-432d-bf4d-02950f37f3a0",
+	}
 
 	// dropAsteroids(universe)
 	//dropSanctuaryStations(universe)
 
-	/*for i, e := range toInject {
-		log.Println(fmt.Sprintf("injecting process %v", e))
+	for i, e := range toInject {
+		log.Printf("injecting process %v", e)
 		injectProcess(universe, e, i)
-	}*/
+	}
 
-	stubModuleSchematicsAndProcesses()
+	//stubModuleSchematicsAndProcesses()
 }
 
 /* Parameters for asteroid generation */
@@ -639,7 +644,7 @@ func stubModuleSchematicsAndProcesses() {
 
 func injectProcess(u *universe.Universe, pid string, offset int) {
 	pID, err := uuid.Parse(pid)
-	prob := 2
+	prob := 5
 
 	stationProcessSvc := sql.GetStationProcessService()
 
@@ -648,14 +653,15 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 
 	var textures = [...]string{
-		"sanctuary-",
+		"kingdom-5",
+		"kingdom-7",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 77827798 + int64(offset))
+			rand.Seed(int64(calculateSystemSeed(s)) - 7782798 + int64(offset))
 
 			/*if r.ID.ID()%2 != 0 {
 				continue
@@ -669,7 +675,7 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 
 			for _, st := range stations {
 				for _, t := range textures {
-					if !strings.Contains(st.Texture, t) {
+					if strings.Contains(st.Texture, t) {
 						roll := physics.RandInRange(0, 100)
 
 						if roll <= prob {
