@@ -6567,8 +6567,6 @@ func (m *FittedSlot) activateAsCycleDisruptor() bool {
 					dp := int(float64(tm.cooldownProgress) * dA)
 					tm.cooldownProgress -= dp
 
-					shared.TeeLog(fmt.Sprintf("dC: %v | dA: %v | roll: %v | dp: %v | r: %v", dC, dA, roll, dp, r))
-
 					// store update to module
 					if r == 0 {
 						c.Fitting.ARack[ix] = tm
