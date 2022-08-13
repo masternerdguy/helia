@@ -6476,6 +6476,10 @@ func (m *FittedSlot) activateAsCycleDisruptor() bool {
 		return false
 	}
 
+	// get falloff style
+	falloff, ff := m.ItemMeta.GetString("falloff")
+	rangeRatio := 1.0 // default to 100%
+
 	// check for max range
 	modRange, found := m.ItemMeta.GetFloat64("range")
 	var d float64 = 0
@@ -6494,7 +6498,26 @@ func (m *FittedSlot) activateAsCycleDisruptor() bool {
 
 			return false
 		}
+
+		// account for falloff if present
+		if ff {
+			// adjust based on falloff style
+			if falloff == "linear" {
+				// proportion of the distance to target over max range (closer is higher)
+				rangeRatio = 1 - (d / modRange)
+			} else if falloff == "reverse_linear" {
+				// proportion of the distance to target over max range (further is higher)
+				rangeRatio = (d / modRange)
+
+				if d > modRange {
+					rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+				}
+			}
+		}
 	}
+
+	// calculate tracking ratio
+	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
 
 	// get signal flux
 	sigFlux, _ := m.ItemMeta.GetFloat64("signal_flux")
@@ -6529,6 +6552,12 @@ func (m *FittedSlot) activateAsCycleDisruptor() bool {
 
 				// apply experience modifiers
 				dC *= m.usageExperienceModifier
+
+				// apply tracking
+				dC *= trackingRatio
+
+				// apply falloff
+				dA *= rangeRatio
 
 				// roll for disruption
 				roll := rand.Float64()
