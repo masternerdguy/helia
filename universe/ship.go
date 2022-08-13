@@ -6564,8 +6564,10 @@ func (m *FittedSlot) activateAsCycleDisruptor() bool {
 
 				if roll <= dC {
 					// apply effect to cycle progress
-					dp := int(float64(tm.cooldownProgress) * (1 - dA))
+					dp := int(float64(tm.cooldownProgress) * dA)
 					tm.cooldownProgress -= dp
+
+					shared.TeeLog(fmt.Sprintf("dC: %v | dA: %v | roll: %v | dp: %v | r: %v", dC, dA, roll, dp, r))
 
 					// store update to module
 					if r == 0 {
