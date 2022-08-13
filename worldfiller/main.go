@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"helia/engine"
 	"helia/physics"
 	"helia/shared"
 	"helia/sql"
@@ -28,123 +27,31 @@ func main() {
 	)
 
 	// load universe from database
-	shared.TeeLog("Loading universe from database...")
+	/*shared.TeeLog("Loading universe from database...")
 	universe, err := engine.LoadUniverse()
 
 	if err != nil {
 		panic(err)
 	}
 
-	shared.TeeLog("Loaded universe!")
+	shared.TeeLog("Loaded universe!")*/
 
 	/*
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	var toInject = [...]string{
-		"12e06c35-b923-4bf2-aaba-dad99fc26590",
-		"8f350754-ec8c-4e37-a4e5-533fb1f8277e",
-		"c6bc07e1-2046-4ab1-8d95-a2d5fa332926",
-		"074b046f-e370-4e90-aeb9-fd41457cee3f",
-		"1f346e6e-73d4-4bfb-8426-e9364fe4e08d",
-		"304c2832-0b80-47f3-841d-b0cae8826a8c",
-		"6a8a7182-80e6-4f1a-ae98-92c508c5f365",
-		"c8252cdd-e60c-4cd3-b495-ec5cf210557a",
-		"55966cd5-be70-4194-a517-dfe9d7a8459c",
-		"d4736eb1-58bf-4c65-99f5-90633ef43f46",
-		"038232ea-16b7-4eb3-b986-64fb2c46c709",
-		"8182725b-80e0-4e8c-aa0e-9136a6251e3e",
-		"ec68716d-3bf7-4a0a-a3a5-65c08c041ebf",
-		"2359bca1-7b69-48fc-8d5b-08a6ce59285e",
-		"6e32da1d-08c4-4fbc-a663-dc65d233e341",
-		"e416386c-454f-40d2-9b7a-952a32b6e1f8",
-		"40bd3a83-29fd-4023-9639-0ffb36ece96d",
-		"1604836e-90f8-47d4-b79d-1e08bdfba14a",
-		"55f54ac7-21f7-4254-b600-0fdb1cf2036b",
-		"0d614b36-cdc7-44e2-838f-729e3cbc2378",
-		"12e5ceab-576d-4b4b-9ad8-b51e71dce382",
-		"4e664f94-fe79-4b87-974b-8fc180638a88",
-		"a31fd51c-0995-4509-a2da-aef736b48b11",
-		"27c5458b-c98f-43c7-b5d6-276beac6213f",
-		"746c4d74-91bf-492a-a7b1-cc65c343c60b",
-		"07a05681-5d39-4511-807e-82db23ce70f2",
-		"e3d355a3-c196-41e5-94cf-3721f90458c5",
-		"0ee6bad6-2b82-4ec4-b198-7617c1775757",
-		"3e211832-700e-45ee-9124-0027d6b69ffd",
-		"811426fe-9bfe-4c56-977e-83bbc18d6080",
-		"aee56ad6-1fd8-49e2-9f55-70d83003865d",
-		"53f3768f-5a67-41b4-9497-323a3a0f63cd",
-		"ae1afc9e-836c-4367-ac7c-be7d7cf0af48",
-		"18508b43-4725-4039-82c5-c66b74101460",
-		"1a5b8edd-fc12-4e64-87ae-1220413e6396",
-		"325d3ad6-0bbd-4580-b005-15afc973cbf3",
-		"50e009e0-bc39-4c91-9f99-e73a47b271a9",
-		"b99c0a57-3064-4cd7-94df-18e797b081b6",
-		"29ca9f66-74e3-4346-a1ef-e3e68bae07fe",
-		"31ced1da-e9e0-468a-bd9e-6ced19e8382e",
-		"1595481f-9694-470f-a84d-f9ecbc927944",
-		"c63e529d-5510-4cee-83f8-076628a3959b",
-		"29bc69e4-f345-4239-8308-d772962bd7b0",
-		"ec4cf466-0ae4-4c15-928a-c86c3b4aa980",
-		"e1e3c650-d96d-4b42-913e-9daa83820f09",
-		"4f135209-37bd-4c86-a617-2a3dae5b674d",
-		"6e387a5b-7ea5-42b7-a627-d56f04c8c793",
-		"a8877298-d73f-4834-8ce5-1445d22ea57e",
-		"2d70e6d4-3b73-4097-b58c-cb9008c08472",
-		"0fbe3b3f-521e-46b2-a3a8-f5da81e17b9b",
-		"594dbb18-b3dd-42a4-a078-901ba186cebd",
-		"1a93c4ad-0a23-4d7b-a0d5-669da314b172",
-		"1c650dc6-8f45-482b-a147-9d64b5409195",
-		"6a28d823-3dd7-48ba-a771-870de93ae35f",
-		"38bf6fb8-6a8d-4e53-b59f-8c6c5f90ff72",
-		"ddb7a683-a49b-466c-93b3-4bfa98bba048",
-		"35e9f7e8-c7c9-4ffd-a7c7-bd86f8439cd3",
-		"d9204dc9-c782-46a0-938f-577c2f86868f",
-		"0a878648-f8b8-46bd-90cc-70547ea478a0",
-		"35b283d2-7e02-47b5-94e6-f8c98171ecc4",
-		"d16039b4-4cb1-4b81-bd60-42e2e1f18ff8",
-		"2eec6d15-f208-4548-af2a-a4694a3eca3b",
-		"cf5c76f7-2a3d-4b19-953e-2ace0a4b5566",
-		"84840cc0-ccf1-4e89-8796-87fa121fb687",
-		"a04883cd-b740-45aa-84af-1f4838ba2cd4",
-		"0cec1e99-e42d-4e79-97af-4bc228b9e91e",
-		"1e7d3a3e-4dc1-40fd-8c17-a5bf53cd4255",
-		"c1447d5b-f47a-4ee5-a0ba-f44ce4c4fb8d",
-		"d93b6035-449f-4491-bf2e-a638880b311b",
-		"e2e66ed4-6c62-4f89-bd3e-1064f4f91c08",
-		"6f0718ad-7404-4e91-b389-9bd5620a98f8",
-		"271b8be9-9f1b-44e6-b8f6-03943ac2def1",
-		"befb8ef0-291b-4a12-bff4-b688c40880b2",
-		"9e72f786-57f1-4a3f-851a-e0b0d0037ae3",
-		"4678141e-37db-4281-af05-a1e2ed27a5ab",
-		"f819fbd4-fc9a-48e1-9627-274793fa7905",
-		"a0c87142-0d9d-4e6a-b1eb-4dd3b8b4bf24",
-		"ed859b0a-432b-4e2a-a6bc-6a50c27cb944",
-		"b86043e6-7716-4bb1-9041-79839697a930",
-		"1b30aa7d-4fbb-4caf-8254-b09c2d2d1445",
-		"4d8e04fc-d935-40a9-b324-8066be7744c5",
-		"a76064ea-2ff5-4a53-9bc0-1b3e4dbe1819",
-		"64f15ac7-063e-490f-99c7-ac1e82c8b50c",
-		"f550e887-b382-452b-8fc3-a1de38544bc7",
-		"20c2f530-dab9-4d05-b20f-ac98ff5d79ff",
-		"dd9eca8d-6cbc-4960-96ed-5878a4f92efe",
-		"d2c629db-95f4-48a0-b255-0ed0d5ac801f",
-		"a34a0243-89d0-4167-a02f-e683eaf85e43",
-		"d019d663-db16-4e6f-959f-87780d4cbc53",
-		"6cc051bb-393c-4a5c-a089-13cabd3c0b07",
-		"4e7ca073-c5e1-4ede-b19f-b42081fd7122",
-		"0fa14c7c-3518-4be8-9a3a-9ebee24e434d",
-	}
+	/*var toInject = [...]string{
+	}*/
 
 	// dropAsteroids(universe)
 	//dropSanctuaryStations(universe)
 
-	for i, e := range toInject {
+	/*for i, e := range toInject {
 		log.Println(fmt.Sprintf("injecting process %v", e))
 		injectProcess(universe, e, i)
-	}
+	}*/
 
-	//stubModuleSchematicsAndProcesses()
+	stubModuleSchematicsAndProcesses()
 }
 
 /* Parameters for asteroid generation */
