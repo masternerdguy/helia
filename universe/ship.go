@@ -217,10 +217,11 @@ type Ship struct {
 	Lock                   sync.Mutex
 }
 
-// Structure representing a percentage modifier applied to a ship for a limit number of ticks
+// Structure representing a percentage or raw modifier applied to a ship for a limit number of ticks
 type TemporaryShipModifier struct {
 	Attribute      string
-	Percentage     float64
+	Percentage     float64 // if set, raw should be unset
+	Raw            float64 // if set, percentage should be unset
 	RemainingTicks int
 }
 
@@ -446,6 +447,8 @@ func getModuleFamily(itemFamilyID string) string {
 	} else if itemFamilyID == "salvager" {
 		modFamily = "utility"
 	} else if itemFamilyID == "ewar_cycle" {
+		modFamily = "ewar"
+	} else if itemFamilyID == "ewar_fcj" {
 		modFamily = "ewar"
 	}
 
@@ -4819,6 +4822,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsAreaDenialDevice()
 			} else if m.ItemTypeFamily == "ewar_cycle" {
 				canActivate = m.activateAsCycleDisruptor()
+			} else if m.ItemTypeFamily == "ewar_fcj" {
+				canActivate = m.activateAsFireControlJammer()
 			}
 
 			if canActivate {
@@ -6602,6 +6607,155 @@ func (m *FittedSlot) activateAsCycleDisruptor() bool {
 			// push to solar system list for next update
 			m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
 		}
+	}
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsFireControlJammer() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.SharedTargetTypeRegistry
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtS *Ship
+
+	if *m.TargetType == tgtReg.Ship {
+		// find ship
+		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtS = tgt
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// get falloff style
+	falloff, ff := m.ItemMeta.GetString("falloff")
+	rangeRatio := 1.0 // default to 100%
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+
+		// account for falloff if present
+		if ff {
+			// adjust based on falloff style
+			if falloff == "linear" {
+				// proportion of the distance to target over max range (closer is higher)
+				rangeRatio = 1 - (d / modRange)
+			} else if falloff == "reverse_linear" {
+				// proportion of the distance to target over max range (further is higher)
+				rangeRatio = (d / modRange)
+
+				if d > modRange {
+					rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+				}
+			}
+		}
+	}
+
+	// calculate tracking ratio
+	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
+
+	// get drift
+	guidDrift, _ := m.ItemMeta.GetFloat64("guidance_drift")
+	trackDrift, _ := m.ItemMeta.GetFloat64("tracking_drift")
+
+	// apply falloff
+	guidDrift *= rangeRatio
+	trackDrift *= rangeRatio
+
+	// apply tracking
+	guidDrift *= trackingRatio
+	trackDrift *= trackingRatio
+
+	// apply experience modifier
+	trackDrift *= m.GetExperienceModifier()
+	guidDrift *= m.GetExperienceModifier()
+
+	// calculate effect duration in ticks
+	cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
+	dT := (cooldown * 1000) / Heartbeat
+
+	// add temporary modifiers to target
+	guidMod := TemporaryShipModifier{
+		Attribute:      "guidance_drift",
+		Raw:            guidDrift,
+		RemainingTicks: int(dT),
+	}
+
+	trackMod := TemporaryShipModifier{
+		Attribute:      "tracking_drift",
+		Raw:            trackDrift,
+		RemainingTicks: int(dT),
+	}
+
+	tgtS.TemporaryModifiers = append(tgtS.TemporaryModifiers, guidMod)
+	tgtS.TemporaryModifiers = append(tgtS.TemporaryModifiers, trackMod)
+
+	// update aggression tables
+	tgtS.updateAggressionTables(
+		0,
+		0,
+		0,
+		m.shipMountedOn.ReputationSheet,
+		m,
+	)
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+			ObjEndID:     m.TargetID,
+			ObjEndType:   m.TargetType,
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
 	}
 
 	// module activates!
