@@ -5294,8 +5294,8 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 		}
 
 		// apply factor
-		faultTolerance *= sFac
-		flightTime *= sFac
+		faultTolerance *= 1.0 - sFac
+		flightTime *= 1.0 - sFac
 	}
 
 	// apply usage experience modifiers
