@@ -6,15 +6,22 @@ INSERT INTO public.itemfamilies (id, friendlyname, meta) VALUES ('ewar_d_mask', 
 
 -- item types (modules)
 INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('5c40d8ec-a269-4ae5-912f-1678b6c202a5', 'ewar_cycle', 'Basic Cycle Disruptor', '{"hp": 3, "rack": "b", "range": 7250, "volume": 5, "falloff": "reverse_linear", "cooldown": 37.5, "tracking": 325, "signal_flux": 10, "signal_gain": 25, "needs_target": true, "activation_heat": 6.5, "industrialmarket": {"maxprice": 8212, "minprice": 6798, "silosize": 500}, "activation_energy": 17}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('614434d0-eae6-4e41-bd02-9cac795b22c5', 'ewar_fcj', 'Basic Fire Control Jammer', '{"hp": 5, "rack": "b", "range": 5645, "volume": 4, "falloff": "linear", "cooldown": 32.3, "tracking": 267, "needs_target": true, "guidance_drift": 7.5, "tracking_drift": 15, "activation_heat": 6.5, "industrialmarket": {"maxprice": 4877, "minprice": 2119, "silosize": 500}, "activation_energy": 12}');
 
 -- item types (schematics)
 INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('34b6e8ab-cba8-4fe9-81b6-429ef997a01f', 'schematic', 'Basic Cycle Disruptor Schematic', '{"industrialmarket": {"maxprice": 38068, "minprice": 13660, "silosize": 100, "process_id": "3768279c-849f-4c96-a447-9d4bf4865271"}}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('32acc0b3-5941-4536-ac6a-3721b7fc0c55', 'schematic', 'Basic Fire Control Jammer Schematic', '{"industrialmarket": {"maxprice": 42564, "minprice": 10228, "silosize": 100, "process_id": "6db05608-bd73-4bc7-a2b0-1fb4c7531307"}}');
 
 -- processes
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('3768279c-849f-4c96-a447-9d4bf4865271', 'Make Basic Cycle Disruptor', '{}', 105);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('826f1b25-38d2-4837-b336-f410425bf41c', 'Basic Cycle Disruptor Sink [wm]', '{}', 200);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('9eefa1d3-1203-4fc8-b09a-3e4c967965a5', 'Basic Cycle Disruptor Schematic Faucet [wm]', '{}', 819);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('aad35b80-16ac-432d-bf4d-02950f37f3a0', 'Basic Cycle Disruptor Schematic Sink [wm]', '{}', 300);
+
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('6db05608-bd73-4bc7-a2b0-1fb4c7531307', 'Make Basic Fire Control Jammer', '{}', 124);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('8863ada9-26b8-4fc4-8cc7-b2b904bf6272', 'Basic Fire Control Jammer Sink [wm]', '{}', 90);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('e747ec63-3856-4fd1-8d4b-9eb8779f02e9', 'Basic Fire Control Jammer Schematic Faucet [wm]', '{}', 705);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('2fc8eca7-d513-45e4-808c-8d6cb21d8553', 'Basic Fire Control Jammer Schematic Sink [wm]', '{}', 687);
 
 -- process inputs
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('41ba2a8f-b483-4c60-8080-ccddf2add06b', '34b6e8ab-cba8-4fe9-81b6-429ef997a01f', 1, '{}', 'aad35b80-16ac-432d-bf4d-02950f37f3a0');
