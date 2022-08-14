@@ -5288,7 +5288,7 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 			sFac = 0
 		}
 
-		// clam to 100%
+		// clamp to 100%
 		if sFac > 1 {
 			sFac = 1
 		}
