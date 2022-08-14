@@ -5263,6 +5263,41 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 	flightTime, _ := m.ItemMeta.GetFloat64("flight_time")
 	maxVelocity := (modRange / flightTime)
 
+	// accumulate guidance drift
+	rawDrift := 0.0
+
+	for _, mo := range m.shipMountedOn.TemporaryModifiers {
+		if mo.Attribute == "guidance_drift" {
+			rawDrift += mo.Raw
+		}
+	}
+
+	// apply guidance drift
+	if rawDrift > 0 {
+		// scale for tolerence
+		sDrift := rawDrift / 100.0
+
+		// get tolerance ratio
+		tRat := sDrift / faultTolerance
+
+		// get scale factor from tolerance ratio
+		sFac := (rawDrift * tRat) / 100.0
+
+		// clamp to 0%
+		if sFac < 0 {
+			sFac = 0
+		}
+
+		// clam tp 100%
+		if sFac > 1 {
+			sFac = 1
+		}
+
+		// apply factor
+		faultTolerance *= sFac
+		flightTime *= sFac
+	}
+
 	// apply usage experience modifiers
 	flightTime *= m.usageExperienceModifier
 	maxVelocity *= m.usageExperienceModifier
