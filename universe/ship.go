@@ -450,6 +450,10 @@ func getModuleFamily(itemFamilyID string) string {
 		modFamily = "ewar"
 	} else if itemFamilyID == "ewar_fcj" {
 		modFamily = "ewar"
+	} else if itemFamilyID == "ewar_r_mask" {
+		modFamily = "ewar"
+	} else if itemFamilyID == "ewar_d_mask" {
+		modFamily = "ewar"
 	}
 
 	return modFamily
@@ -1330,7 +1334,19 @@ func (s *Ship) GetRealMaxShield() float64 {
 
 // Returns the real shield regen rate after modifiers
 func (s *Ship) GetRealShieldRegen() float64 {
-	return s.TemplateData.BaseShieldRegen * s.FlightExperienceModifier
+	// get base shield regen
+	a := s.TemplateData.BaseShieldRegen * s.FlightExperienceModifier
+
+	// apply temporary modifiers
+	for _, e := range s.TemporaryModifiers {
+		// regeneration mask (does not accumulate)
+		if e.Attribute == "regeneration_mask" {
+			a *= (1.0 - e.Percentage)
+		}
+	}
+
+	// return shield regen
+	return a
 }
 
 // Returns the real max armor of the ship after modifiers
@@ -1389,6 +1405,14 @@ func (s *Ship) GetRealEnergyRegen() float64 {
 		}
 	}
 
+	// apply temporary modifiers
+	for _, e := range s.TemporaryModifiers {
+		// regeneration mask (does not accumulate)
+		if e.Attribute == "regeneration_mask" {
+			a *= (1.0 - e.Percentage)
+		}
+	}
+
 	return a
 }
 
@@ -1422,8 +1446,14 @@ func (s *Ship) GetRealHeatSink(recalculate bool) float64 {
 
 	// apply temporary modifiers
 	for _, e := range s.TemporaryModifiers {
+		// heat sink
 		if e.Attribute == "heat_sink" {
 			tpm += e.Percentage
+		}
+
+		// dissipation mask (does not accumulate)
+		if e.Attribute == "dissipation_mask" {
+			a *= (1.0 - e.Percentage)
 		}
 	}
 
@@ -4824,6 +4854,10 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsCycleDisruptor()
 			} else if m.ItemTypeFamily == "ewar_fcj" {
 				canActivate = m.activateAsFireControlJammer()
+			} else if m.ItemTypeFamily == "ewar_r_mask" {
+				canActivate = m.activateAsRegenerationMask()
+			} else if m.ItemTypeFamily == "ewar_d_mask" {
+				canActivate = m.activateAsDissipationMask()
 			}
 
 			if canActivate {
@@ -6769,6 +6803,308 @@ func (m *FittedSlot) activateAsFireControlJammer() bool {
 
 	tgtS.TemporaryModifiers = append(tgtS.TemporaryModifiers, guidMod)
 	tgtS.TemporaryModifiers = append(tgtS.TemporaryModifiers, trackMod)
+
+	// update aggression tables
+	tgtS.updateAggressionTables(
+		0,
+		0,
+		0,
+		m.shipMountedOn.ReputationSheet,
+		m,
+	)
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+			ObjEndID:     m.TargetID,
+			ObjEndType:   m.TargetType,
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsRegenerationMask() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.SharedTargetTypeRegistry
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtS *Ship
+
+	if *m.TargetType == tgtReg.Ship {
+		// find ship
+		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtS = tgt
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// get falloff style
+	falloff, ff := m.ItemMeta.GetString("falloff")
+	rangeRatio := 1.0 // default to 100%
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+
+		// account for falloff if present
+		if ff {
+			// adjust based on falloff style
+			if falloff == "linear" {
+				// proportion of the distance to target over max range (closer is higher)
+				rangeRatio = 1 - (d / modRange)
+			} else if falloff == "reverse_linear" {
+				// proportion of the distance to target over max range (further is higher)
+				rangeRatio = (d / modRange)
+
+				if d > modRange {
+					rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+				}
+			}
+		}
+	}
+
+	// calculate tracking ratio
+	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
+
+	// get mask radius
+	maskRad, _ := m.ItemMeta.GetFloat64("mask_radius")
+
+	// apply usage experience modifier
+	maskRad *= m.GetExperienceModifier()
+
+	// apply falloff
+	maskRad *= rangeRatio
+
+	// apply tracking
+	maskRad *= trackingRatio
+
+	// calculate mask percentage
+	maskP := maskRad / tgtS.TemplateData.Radius
+
+	// clamp to 0%
+	if maskP < 0 {
+		maskP = 0
+	}
+
+	// clamp to 100%
+	if maskP > 1 {
+		maskP = 1
+	}
+
+	// calculate effect duration in ticks
+	cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
+	dT := (cooldown * 1000) / Heartbeat
+
+	// add temporary modifiers to target
+	maskMod := TemporaryShipModifier{
+		Attribute:      "regeneration_mask",
+		Percentage:     maskP,
+		RemainingTicks: int(dT),
+	}
+
+	tgtS.TemporaryModifiers = append(tgtS.TemporaryModifiers, maskMod)
+
+	// update aggression tables
+	tgtS.updateAggressionTables(
+		0,
+		0,
+		0,
+		m.shipMountedOn.ReputationSheet,
+		m,
+	)
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+			ObjEndID:     m.TargetID,
+			ObjEndType:   m.TargetType,
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsDissipationMask() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.SharedTargetTypeRegistry
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtS *Ship
+
+	if *m.TargetType == tgtReg.Ship {
+		// find ship
+		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtS = tgt
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// get falloff style
+	falloff, ff := m.ItemMeta.GetString("falloff")
+	rangeRatio := 1.0 // default to 100%
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+
+		// account for falloff if present
+		if ff {
+			// adjust based on falloff style
+			if falloff == "linear" {
+				// proportion of the distance to target over max range (closer is higher)
+				rangeRatio = 1 - (d / modRange)
+			} else if falloff == "reverse_linear" {
+				// proportion of the distance to target over max range (further is higher)
+				rangeRatio = (d / modRange)
+
+				if d > modRange {
+					rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+				}
+			}
+		}
+	}
+
+	// calculate tracking ratio
+	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
+
+	// get mask radius
+	maskRad, _ := m.ItemMeta.GetFloat64("mask_radius")
+
+	// apply usage experience modifier
+	maskRad *= m.GetExperienceModifier()
+
+	// apply falloff
+	maskRad *= rangeRatio
+
+	// apply tracking
+	maskRad *= trackingRatio
+
+	// calculate mask percentage
+	maskP := maskRad / tgtS.TemplateData.Radius
+
+	// clamp to 0%
+	if maskP < 0 {
+		maskP = 0
+	}
+
+	// clamp to 100%
+	if maskP > 1 {
+		maskP = 1
+	}
+
+	// calculate effect duration in ticks
+	cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
+	dT := (cooldown * 1000) / Heartbeat
+
+	// add temporary modifiers to target
+	maskMod := TemporaryShipModifier{
+		Attribute:      "dissipation_mask",
+		Percentage:     maskP,
+		RemainingTicks: int(dT),
+	}
+
+	tgtS.TemporaryModifiers = append(tgtS.TemporaryModifiers, maskMod)
 
 	// update aggression tables
 	tgtS.updateAggressionTables(
