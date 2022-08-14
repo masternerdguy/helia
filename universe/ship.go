@@ -3,7 +3,6 @@ package universe
 import (
 	"errors"
 	"fmt"
-	"log"
 	"math"
 	"math/rand"
 	"sync"
@@ -5300,8 +5299,6 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 		// apply factor
 		faultTolerance *= cFac
 		flightTime *= cFac
-
-		log.Printf("%v | %v | %v", cFac, sDrift, tRat)
 	}
 
 	// apply usage experience modifiers
