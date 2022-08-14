@@ -6696,6 +6696,10 @@ func (m *FittedSlot) activateAsFireControlJammer() bool {
 	// calculate tracking ratio
 	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
 
+	// apply usage experience modifier
+	trackingRatio *= m.GetExperienceModifier()
+	rangeRatio *= m.GetExperienceModifier()
+
 	// get drift
 	guidDrift, _ := m.ItemMeta.GetFloat64("guidance_drift")
 	trackDrift, _ := m.ItemMeta.GetFloat64("tracking_drift")
@@ -6707,10 +6711,6 @@ func (m *FittedSlot) activateAsFireControlJammer() bool {
 	// apply tracking
 	guidDrift *= trackingRatio
 	trackDrift *= trackingRatio
-
-	// apply experience modifier
-	trackDrift *= m.GetExperienceModifier()
-	guidDrift *= m.GetExperienceModifier()
 
 	// calculate effect duration in ticks
 	cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
@@ -6821,6 +6821,28 @@ func (m *FittedSlot) calculateTrackingRatioWithTarget(tgtDummy physics.Dummy) fl
 
 	if w > 0 {
 		trackingRatio = tracking / w
+	}
+
+	// accumulate tracking drift modifiers
+	rawDrift := 0.0
+
+	for _, mo := range m.shipMountedOn.TemporaryModifiers {
+		if mo.Attribute == "tracking_drift" {
+			rawDrift += mo.Raw
+		}
+	}
+
+	if rawDrift > 0 {
+		// get drift percentage
+		driftP := rawDrift / tracking
+
+		// decrement from tracking ratio
+		trackingRatio -= driftP
+	}
+
+	// clamp tracking to 0%
+	if trackingRatio < 0 {
+		trackingRatio = 0
 	}
 
 	// clamp tracking to 100%
