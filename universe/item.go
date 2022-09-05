@@ -78,6 +78,7 @@ var MutableModuleAttributes = [...]string{
 	"signal_gain",
 	"guidance_drift",
 	"tracking_drift",
+	"mask_radius",
 }
 
 // Helper function to determine whether or not a given item meta attribute can be mutated by a mod kit
