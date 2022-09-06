@@ -120,7 +120,11 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.smallAetherField();
     } else if (b.gfxEffect === 'small_add_kinetic') {
       this.vfxData = repo.smallKineticField();
-    } else {
+    } else if (b.gfxEffect === 'basic_regen_mask') {
+      this.vfxData = repo.basicRegenMask();
+    } else if (b.gfxEffect === 'basic_dissip_mask') {
+      this.vfxData = repo.basicDissipMask();
+    }  else {
       // log broken effect
       console.log(`gfx effect not found: ${b.gfxEffect}`);
     }
@@ -229,6 +233,8 @@ export class ModuleEffect extends WsPushModuleEffect {
         this.renderAsSalvagerEffect(camera, ctx);
       } else if (this.vfxData.type === 'utility_add') {
         this.renderAsAreaDenialDeviceEffect(camera, ctx);
+      } else if (this.vfxData.type === 'ewar_mask') {
+        this.renderAsEwarMaskEffect(camera, ctx);
       }
     }
   }
@@ -637,6 +643,42 @@ export class ModuleEffect extends WsPushModuleEffect {
       // revert filter
       ctx.filter = oldFilter;
     }
+  }
+
+  private renderAsEwarMaskEffect(camera: Camera, ctx: any) {
+    // get target coordinates
+    const src = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
+
+    // project to screen
+    const sx = camera.projectX(src[0]);
+    const sy = camera.projectY(src[1]);
+    const sr = camera.projectR(src[2]);
+    const bt = camera.projectR(this.vfxData.thickness);
+
+    // backup filter
+    const oldFilter = ctx.filter;
+
+    // style
+    ctx.strokeStyle = this.vfxData.color;
+    ctx.fillStyle = this.vfxData.color;
+
+    if (this.vfxData.filter) {
+      ctx.filter = this.vfxData.filter;
+      ctx.lineWidth = bt;
+    }
+
+    // use elapsed lifetime ratio to contract radius
+    const er = Math.max(0, sr * (1 - this.lifeElapsed / this.maxLifeTime));
+
+    // draw mask field
+    ctx.beginPath();
+    ctx.arc(sx, sy, er, 0, 2 * Math.PI);
+
+    ctx.fill();
+    ctx.stroke();
+
+    // restore filter
+    ctx.filter = oldFilter;
   }
 }
 

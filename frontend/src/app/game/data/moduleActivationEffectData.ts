@@ -428,6 +428,26 @@ export class ModuleActivationEffectRepository {
       thickness: 18,
     };
   }
+
+  basicRegenMask(): ModuleActivationEffectData {
+    return {
+      type: 'ewar_mask',
+      duration: 10000,
+      color: '#e0e0eb',
+      filter: 'blur(7px)', // "feather"
+      thickness: 4,
+    };
+  }
+
+  basicDissipMask(): ModuleActivationEffectData {
+    return {
+      type: 'ewar_mask',
+      duration: 10000,
+      color: '#e6ccb3',
+      filter: 'blur(6.5px)', // "feather"
+      thickness: 3.5,
+    };
+  }
 }
 
 export class ModuleActivationEffectData {

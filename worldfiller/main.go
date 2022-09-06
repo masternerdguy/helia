@@ -42,10 +42,10 @@ func main() {
 	 */
 
 	var toInject = [...]string{
-		"6db05608-bd73-4bc7-a2b0-1fb4c7531307",
-		"8863ada9-26b8-4fc4-8cc7-b2b904bf6272",
-		"e747ec63-3856-4fd1-8d4b-9eb8779f02e9",
-		"2fc8eca7-d513-45e4-808c-8d6cb21d8553",
+		"ea20caa5-1d32-40b7-8cdb-4948815c55a6",
+		"f96c31f6-77e0-410e-8380-3fab636b3404",
+		"59a906a9-5159-4f40-8335-0a6a36ec087c",
+		"dcfdae71-052f-4adb-a8c4-4162ff65fa94",
 	}
 
 	// dropAsteroids(universe)
@@ -653,15 +653,15 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 
 	var textures = [...]string{
-		"federation-1",
-		"federation-3",
+		"accord-5",
+		"accord-1",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 772798 + int64(offset))
+			rand.Seed(int64(calculateSystemSeed(s)) - 77279852 + int64(offset))
 
 			/*if r.ID.ID()%2 != 0 {
 				continue
