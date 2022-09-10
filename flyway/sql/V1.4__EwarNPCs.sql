@@ -113,3 +113,4 @@
     INSERT INTO public.items (id, itemtypeid, meta, created, createdby, createdreason, containerid, quantity, ispackaged) VALUES ('bbc10246-79a7-453d-bc82-27be64be308f', '993bc7c8-fb2a-423f-8000-39c7fb6be743', '{"hp": 8, "rack": "c", "volume": 6, "energy_max_add": 62, "industrialmarket": {"maxprice": 1237, "minprice": 904, "silosize": 1000}}', '2022-09-10 18:51:25.98872-04', '53e464b9-89ba-4967-8374-aba09b3eeead', 'Module for new noob ship for player', '15b70d9c-efeb-4004-89c4-89f4decc8764', 1, false);
 
     -- fix current ship ids
+
