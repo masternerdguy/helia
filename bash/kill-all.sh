@@ -6,4 +6,6 @@ sleep 5
 
 killall serve-all.sh
 killall 'npm start'
+killall ng
+killall main
 
