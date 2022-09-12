@@ -42,6 +42,14 @@ type VwModuleNeedSchematic struct {
 	Meta   Meta `json:"meta"`
 }
 
+// Structure representing a row from the vw_ships_needsschematics view
+type VwShipNeedSchematic struct {
+	ID     uuid.UUID
+	Family string
+	Name   string
+	Meta   Meta `json:"meta"`
+}
+
 // Retrieves all item types from the database
 func (s ItemTypeService) GetAllItemTypes() ([]ItemType, error) {
 	o := make([]ItemType, 0)
@@ -209,6 +217,45 @@ func (s ItemTypeService) GetVwModuleNeedSchematics() ([]VwModuleNeedSchematic, e
 
 	for rows.Next() {
 		i := VwModuleNeedSchematic{}
+
+		// scan into structure
+		rows.Scan(&i.ID, &i.Family, &i.Name, &i.Meta)
+
+		// append to slice
+		vws = append(vws, i)
+	}
+
+	return vws, err
+}
+
+// Retrieves all ship item types in need of schematics
+func (s ItemTypeService) GetVwShipNeedSchematics() ([]VwShipNeedSchematic, error) {
+	vws := make([]VwShipNeedSchematic, 0)
+
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// load item types
+	sql :=
+		`
+			SELECT id, family, name, meta
+			FROM public.vw_ships_needsschematics;
+		`
+
+	rows, err := db.Query(sql)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		i := VwShipNeedSchematic{}
 
 		// scan into structure
 		rows.Scan(&i.ID, &i.Family, &i.Name, &i.Meta)
