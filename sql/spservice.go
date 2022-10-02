@@ -40,7 +40,7 @@ func (s SPService) QuarantineActionReports() error {
 		return err
 	}
 
-	// run cleanup procedure
+	// run quarantine procedure
 	sql := `call public.sp_quarantineactionreports();`
 
 	q, err := db.Query(sql)
