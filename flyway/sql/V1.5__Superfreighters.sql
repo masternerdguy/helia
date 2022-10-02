@@ -41,3 +41,6 @@ INSERT INTO public.processes (id, name, meta, "time") VALUES ('35ea1aa3-6c0f-461
 
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('1300caaf-be3e-4456-acf2-e227ef5e36e5', '3935523b-3e38-485b-935f-e790758ce36b', 10, '{}', '35ea1aa3-6c0f-461a-aab3-f03530f83ce8');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('273c84f6-4fd8-481d-bfea-0039f68b684d', '54c29ce8-67c7-46c7-8c02-c737eed3143c', 10, '{}', '35ea1aa3-6c0f-461a-aab3-f03530f83ce8');
+
+-- 3 PJ pellet
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('c6cfba75-2cb5-47f5-9806-a92c4909c2ef', 'fuel', '3 PJ Pellet', '{"hp": 1, "volume": 200, "fuelconversion": 55000, "industrialmarket": {"maxprice": 50000, "minprice": 10000, "silosize": 85000}}');
