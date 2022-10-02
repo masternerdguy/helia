@@ -62,6 +62,13 @@ func (d *DownTimeRunner) RunDownTimeTasks() {
 		panic(err)
 	}
 
+	// quarantine npc-only action reports
+	err = d.executeSPQuarantineActionReports()
+
+	if err != nil {
+		panic(err)
+	}
+
 	// average player faction standings from members
 	err = d.averagePlayerFactionStandings()
 
@@ -77,6 +84,12 @@ func (d *DownTimeRunner) RunDownTimeTasks() {
 func (d *DownTimeRunner) executeSPCleanup() error {
 	shared.TeeLog("  - executeSPCleanup()")
 	return d.spSvc.Cleanup()
+}
+
+// Runs the sp_quarantineactionreports stored procedure to purge old / orphaned records
+func (d *DownTimeRunner) executeSPQuarantineActionReports() error {
+	shared.TeeLog("  - executeSPQuarantineActionReports()")
+	return d.spSvc.QuarantineActionReports()
 }
 
 // Recalculates the aggregate standings value for player custom factions based on the reputation sheets of their members
