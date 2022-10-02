@@ -49,7 +49,7 @@ INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('c6cfba75-2cb5-47f
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('916c852e-525d-4eeb-8781-32bb42179874', '3 TJ Quick Charge 1 GWH Cell', '{}', 700);
 
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('7f84a485-a4ff-4570-b233-1a30a5ea0733', '3935523b-3e38-485b-935f-e790758ce36b', 27, '{}', '916c852e-525d-4eeb-8781-32bb42179874');
-INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('653a77e5-cc40-4ed9-a941-20c29b4d7cdc', '6cfba75-2cb5-47f5-9806-a92c4909c2ef', 5400, '{}', '916c852e-525d-4eeb-8781-32bb42179874');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('653a77e5-cc40-4ed9-a941-20c29b4d7cdc', 'c6cfba75-2cb5-47f5-9806-a92c4909c2ef', 5400, '{}', '916c852e-525d-4eeb-8781-32bb42179874');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('d9d066cf-dfe1-4aaf-9c2c-cc8fcff196a5', '56617d30-6c30-425c-84bf-2484ae8c1156', 700, '{}', '916c852e-525d-4eeb-8781-32bb42179874');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('c521d4b3-911f-4dfd-86fa-3f2a00d221d4', '54c29ce8-67c7-46c7-8c02-c737eed3143c', 24, '{}', '916c852e-525d-4eeb-8781-32bb42179874');
 
