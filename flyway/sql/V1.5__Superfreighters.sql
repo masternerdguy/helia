@@ -32,3 +32,7 @@ CREATE OR REPLACE VIEW public.vw_ships_needsschematics
 ALTER TABLE public.vw_ships_needsschematics
     OWNER TO heliaagent;
 
+-- giga sized power cells
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('54c29ce8-67c7-46c7-8c02-c737eed3143c', 'power_cell', '1 GWH Cell', '{"hp": 1, "volume": 4250, "industrialmarket": {"maxprice": 17000000, "minprice": 1275000, "silosize": 50000}}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('3935523b-3e38-485b-935f-e790758ce36b', 'depleted_cell', 'Depleted 1 GWH Cell', '{"hp": 1, "volume": 4250, "industrialmarket": {"maxprice": 850000, "minprice": 255000, "silosize": 50000}}');
+
