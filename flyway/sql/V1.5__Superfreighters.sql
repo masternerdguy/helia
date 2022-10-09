@@ -147,3 +147,19 @@ INSERT INTO public.processes (id, name, meta, "time") VALUES ('33e856f1-f9b8-4f1
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('c22daabb-fbe6-40a9-b5f7-dfc10caba543', 'ce047922-0ac5-49da-be61-79b0f7508e16', 1, '{}', 'df87682f-725e-4a01-a09b-40dd9d81d5b2');
 
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('a86ccad8-6d43-4699-8f59-bd06674a23f0', 'ce047922-0ac5-49da-be61-79b0f7508e16', 1, '{}', '33e856f1-f9b8-4f18-aa4d-a133d7ea66b2');
+
+-- giga patch kit
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('897a3ede-d682-4e1e-bbf9-4605dee60597', 'repair_kit', 'XL Nanite Patch Kit', '{"hp": 1, "volume": 467, "hullconversion": 50000, "armorconversion": 250000, "industrialmarket": {"maxprice": 190000, "minprice": 60000, "silosize": 80000}}');
+
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('3da96cfb-6288-4ac4-8324-cc400a278092', 'Make XL Nanite Patch Kit', '{}', 91200);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('0be9e154-b8d9-4a48-b7f1-4412452351a6', 'Move XL Nanite Patch Kit', '{}', 3278);
+
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('f981639f-1150-4aa6-8b17-de8577f4f836', 'dd522f03-2f52-4e82-b2f8-d7e0029cb82f', 1600000, '{}', '3da96cfb-6288-4ac4-8324-cc400a278092');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('208abb4b-29df-4124-974a-adc8dc166faf', '1d0d344b-ef28-43c8-a7a6-3275936b2dea', 50000, '{}', '3da96cfb-6288-4ac4-8324-cc400a278092');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('cb2bd69f-58c5-4aa1-972d-283c36197efb', '7dcd5138-d7e0-419f-867a-6f0f23b99b5b', 6000, '{}', '3da96cfb-6288-4ac4-8324-cc400a278092');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('eeb726ad-8b04-492e-8e5d-e7b98c590449', '24800206-2c58-45b0-8238-81974d0ebb3b', 20000, '{}', '3da96cfb-6288-4ac4-8324-cc400a278092');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('41262701-f16d-4585-9eeb-1efbcb2ae35b', '897a3ede-d682-4e1e-bbf9-4605dee60597', 350, '{}', '0be9e154-b8d9-4a48-b7f1-4412452351a6');
+
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('d6ced9a6-52ef-4d6c-9cab-2024b2bbaf71', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 20000, '{}', '3da96cfb-6288-4ac4-8324-cc400a278092');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('16e3a66a-0aba-454b-8596-f6cb1fa59a0a', '897a3ede-d682-4e1e-bbf9-4605dee60597', 350, '{}', '0be9e154-b8d9-4a48-b7f1-4412452351a6');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('3578c3ab-d755-4103-a8a1-c9984462f3bb', '897a3ede-d682-4e1e-bbf9-4605dee60597', 75, '{}', '3da96cfb-6288-4ac4-8324-cc400a278092');
