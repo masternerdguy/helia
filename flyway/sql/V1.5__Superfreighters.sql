@@ -109,3 +109,25 @@ INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VA
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('1b04331c-bffe-4a11-ac2d-e0449d53fbfb', 'Move 3 PJ Pellet', '{}', 6226);
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('84d2763a-6e08-42a4-bfe9-2d3066620ec5', 'c6cfba75-2cb5-47f5-9806-a92c4909c2ef', 7, '{}', '1b04331c-bffe-4a11-ac2d-e0449d53fbfb');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('74c5ed71-7aef-4c8b-ad74-ed92b96e0ced', 'c6cfba75-2cb5-47f5-9806-a92c4909c2ef', 7, '{}', '1b04331c-bffe-4a11-ac2d-e0449d53fbfb');
+
+-- charge 10 kWH from 1 GWH
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('6cacaecf-b358-4008-a9ca-66510a64c646', 'Charge 10 kWH from 1 GWH', '{}', 1450);
+
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('a5bb2f26-5be2-42ef-b3bb-f80038a8452e', '3935523b-3e38-485b-935f-e790758ce36b', 1, '{}', '6cacaecf-b358-4008-a9ca-66510a64c646');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('71af0ae2-e1f3-4c3e-83ef-ec3bbfafd8cc', '24800206-2c58-45b0-8238-81974d0ebb3b', 1000000, '{}', '6cacaecf-b358-4008-a9ca-66510a64c646');
+
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('6335d7d3-d3bb-4a9e-ba50-a9c5361e4b5c', '54c29ce8-67c7-46c7-8c02-c737eed3143c', 1, '{}', '6cacaecf-b358-4008-a9ca-66510a64c646');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('3ad35763-91cb-42ae-a8af-135e733998a9', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 1000000, '{}', '6cacaecf-b358-4008-a9ca-66510a64c646');
+
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('0b646850-e787-4572-adb0-a4dbfa804d85', 'schematic', '1 GWH to 10 kWH Conversion', '{"volume": 1, "industrialmarket": {"maxprice": 134729, "minprice": 62585, "silosize": 100, "process_id": "6cacaecf-b358-4008-a9ca-66510a64c646"}}');
+
+-- charge 1 GWH from 10 kWH
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('567aacc9-f86f-42aa-8f66-f0cf647a92f6', 'Charge 1 GWH from 10 kWH', '{}', 4219);
+
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('f40f2da9-bb94-48cb-808f-32b48a2a6cbc', '3935523b-3e38-485b-935f-e790758ce36b', 1, '{}', '567aacc9-f86f-42aa-8f66-f0cf647a92f6');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('948042b8-7b00-41c5-a6b1-706c65037c33', '24800206-2c58-45b0-8238-81974d0ebb3b', 1000000, '{}', '567aacc9-f86f-42aa-8f66-f0cf647a92f6');
+
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('6f72c5d3-72f4-43f2-9105-ce34cb8140a5', '54c29ce8-67c7-46c7-8c02-c737eed3143c', 1, '{}', '567aacc9-f86f-42aa-8f66-f0cf647a92f6');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('75bb6035-8ccf-4ecc-81ba-0992fac2e6af', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 1000000, '{}', '567aacc9-f86f-42aa-8f66-f0cf647a92f6');
+
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('ce047922-0ac5-49da-be61-79b0f7508e16', 'schematic', '10 kWH to 1 GWH Conversion', '{"volume": 1, "industrialmarket": {"maxprice": 217803, "minprice": 120112, "silosize": 100, "process_id": "567aacc9-f86f-42aa-8f66-f0cf647a92f6"}}');
