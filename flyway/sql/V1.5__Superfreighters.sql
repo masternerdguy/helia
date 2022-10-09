@@ -73,3 +73,10 @@ INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VAL
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('bed04b99-1380-4a0c-b25a-fb1eef8cc4cc', '54c29ce8-67c7-46c7-8c02-c737eed3143c', 1, '{}', '45d9d2d4-8076-4a67-9168-ddf6ade545fe');
 
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('f81379d4-d4cd-40d0-87ae-4fe42de99f09', '3935523b-3e38-485b-935f-e790758ce36b', 3, '{}', '45d9d2d4-8076-4a67-9168-ddf6ade545fe');
+
+-- fair make 3 PJ pellet
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('1dedc612-65bf-4fc5-9238-25374bd43e59', 'Make 3 PJ Pellet', '{}', 8350);
+
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('256b102f-8e1a-44dd-a0c1-ca278bac7c51', 'da619e43-4832-42b8-ad03-5eb42441a403', 23883, '{}', '1dedc612-65bf-4fc5-9238-25374bd43e59');
+
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('92668de8-bbea-47a4-b55b-2c6e24714ec4', 'c6cfba75-2cb5-47f5-9806-a92c4909c2ef', 100, '{}', '1dedc612-65bf-4fc5-9238-25374bd43e59');
