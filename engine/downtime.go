@@ -168,7 +168,13 @@ func (d *DownTimeRunner) averagePlayerFactionStandings() error {
 			be := v
 
 			// merge average
-			cv := *repAcc[k]
+			cx := repAcc[k]
+			cv := 0.0
+
+			if cx != nil {
+				cv = *cx
+			}
+
 			be.StandingValue = cv
 
 			// update hostility flags
