@@ -131,3 +131,19 @@ INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VA
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('75bb6035-8ccf-4ecc-81ba-0992fac2e6af', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 1000000, '{}', '567aacc9-f86f-42aa-8f66-f0cf647a92f6');
 
 INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('ce047922-0ac5-49da-be61-79b0f7508e16', 'schematic', '10 kWH to 1 GWH Conversion', '{"volume": 1, "industrialmarket": {"maxprice": 217803, "minprice": 120112, "silosize": 100, "process_id": "567aacc9-f86f-42aa-8f66-f0cf647a92f6"}}');
+
+-- charge 10 kWH from 1 GWH | faucet and sink
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('c4798ab5-29ba-43ce-b6be-05199f09a4c7', 'Charge 10 kWH from 1 GWH Sink', '{}', 42109);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('8f0b3eb8-20fa-4e7e-a507-c260b8f29e2d', 'Charge 10 kWH from 1 GWH Faucet', '{}', 41789);
+
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('1073c5e5-da88-4f21-a820-a3dc8afaaaab', '0b646850-e787-4572-adb0-a4dbfa804d85', 1, '{}', 'c4798ab5-29ba-43ce-b6be-05199f09a4c7');
+
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('0868aa9b-681d-4f89-9ac8-8b704a2c7968', '0b646850-e787-4572-adb0-a4dbfa804d85', 1, '{}', '8f0b3eb8-20fa-4e7e-a507-c260b8f29e2d');
+
+-- charge 1 GWH from 10 kWH | faucet and sink
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('df87682f-725e-4a01-a09b-40dd9d81d5b2', 'Charge 1 GWH from 10 kWH Sink', '{}', 31857);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('33e856f1-f9b8-4f18-aa4d-a133d7ea66b2', 'Charge 1 GWH from 10 kWH Faucet', '{}', 32609);
+
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('1073c5e5-da88-4f21-a820-a3dc8afaaaab', 'ce047922-0ac5-49da-be61-79b0f7508e16', 1, '{}', 'df87682f-725e-4a01-a09b-40dd9d81d5b2');
+
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('0868aa9b-681d-4f89-9ac8-8b704a2c7968', 'ce047922-0ac5-49da-be61-79b0f7508e16', 1, '{}', '33e856f1-f9b8-4f18-aa4d-a133d7ea66b2');
