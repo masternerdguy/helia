@@ -144,6 +144,6 @@ INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VA
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('df87682f-725e-4a01-a09b-40dd9d81d5b2', 'Charge 1 GWH from 10 kWH Sink', '{}', 31857);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('33e856f1-f9b8-4f18-aa4d-a133d7ea66b2', 'Charge 1 GWH from 10 kWH Faucet', '{}', 32609);
 
-INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('1073c5e5-da88-4f21-a820-a3dc8afaaaab', 'ce047922-0ac5-49da-be61-79b0f7508e16', 1, '{}', 'df87682f-725e-4a01-a09b-40dd9d81d5b2');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('c22daabb-fbe6-40a9-b5f7-dfc10caba543', 'ce047922-0ac5-49da-be61-79b0f7508e16', 1, '{}', 'df87682f-725e-4a01-a09b-40dd9d81d5b2');
 
-INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('0868aa9b-681d-4f89-9ac8-8b704a2c7968', 'ce047922-0ac5-49da-be61-79b0f7508e16', 1, '{}', '33e856f1-f9b8-4f18-aa4d-a133d7ea66b2');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('a86ccad8-6d43-4699-8f59-bd06674a23f0', 'ce047922-0ac5-49da-be61-79b0f7508e16', 1, '{}', '33e856f1-f9b8-4f18-aa4d-a133d7ea66b2');
