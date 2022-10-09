@@ -80,3 +80,14 @@ INSERT INTO public.processes (id, name, meta, "time") VALUES ('1dedc612-65bf-4fc
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('256b102f-8e1a-44dd-a0c1-ca278bac7c51', 'da619e43-4832-42b8-ad03-5eb42441a403', 23883, '{}', '1dedc612-65bf-4fc5-9238-25374bd43e59');
 
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('92668de8-bbea-47a4-b55b-2c6e24714ec4', 'c6cfba75-2cb5-47f5-9806-a92c4909c2ef', 100, '{}', '1dedc612-65bf-4fc5-9238-25374bd43e59');
+
+-- fair cell schematic
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('682e5b2f-7940-43c6-a6fc-8be58604a947', 'schematic', '1 GWH Cell Schematic', '{"volume": 1, "industrialmarket": {"maxprice": 4150000, "minprice": 2952000, "silosize": 100, "process_id": "45d9d2d4-8076-4a67-9168-ddf6ade545fe"}}');
+
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('053554d1-a94c-4c46-a1ca-79106cc23db4', '1 GWH Schematic Sink', '{}', 16739);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('5db46b9e-d5e6-4e2d-b8f7-a5341311f897', '1 GWH Schematic Faucet', '{}', 22911);
+
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('696d7aa9-ee65-469f-8972-ab69765a978c', '682e5b2f-7940-43c6-a6fc-8be58604a947', 1, '{}', '053554d1-a94c-4c46-a1ca-79106cc23db4');
+
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('14277f26-e685-4163-8737-c8520614d1b8', '682e5b2f-7940-43c6-a6fc-8be58604a947', 1, '{}', '5db46b9e-d5e6-4e2d-b8f7-a5341311f897');
+
