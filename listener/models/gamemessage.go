@@ -620,6 +620,7 @@ type ClientBuySellOrderBody struct {
 
 // Body containing information about an industrial process silo at a station
 type ServerIndustrialSiloBody struct {
+	ID               string `json:"id"`
 	StationID        string `json:"stationId"`
 	StationProcessID string `json:"stationProcessId"`
 	ItemTypeID       string `json:"itemTypeID"`

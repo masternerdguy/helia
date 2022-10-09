@@ -778,6 +778,7 @@ func (s *SolarSystem) processClientEventQueues() {
 						t := p.Process.Inputs[k]
 
 						vw.InSilos = append(vw.InSilos, models.ServerIndustrialSiloBody{
+							ID:               t.ID.String(),
 							StationID:        p.StationID.String(),
 							StationProcessID: p.ID.String(),
 							ItemTypeID:       t.ItemTypeID.String(),
@@ -797,6 +798,7 @@ func (s *SolarSystem) processClientEventQueues() {
 						t := p.Process.Outputs[k]
 
 						vw.OutSilos = append(vw.OutSilos, models.ServerIndustrialSiloBody{
+							ID:               t.ID.String(),
 							StationID:        p.StationID.String(),
 							StationProcessID: p.ID.String(),
 							ItemTypeID:       t.ItemTypeID.String(),

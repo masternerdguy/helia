@@ -211,7 +211,7 @@ export class IndustrialMarketWindow extends GDIWindow {
         const top = this.depthStack[this.depthStack.length - 1];
         const arr = top.split('|');
 
-        if (arr.length === 2) {
+        if (arr.length === 3) {
           const siloId = arr[0];
           const typeId = arr[1];
 
@@ -254,7 +254,7 @@ export class IndustrialMarketWindow extends GDIWindow {
         const top = this.depthStack[this.depthStack.length - 1];
         const arr = top.split('|');
 
-        if (arr.length === 2) {
+        if (arr.length === 3) {
           const siloId = arr[0];
 
           // get selected item
@@ -718,7 +718,7 @@ export class IndustrialMarketWindow extends GDIWindow {
 
       // store order
       rawTree[o.itemFamilyID].types[o.itemTypeID].orders[
-        `${o.stationProcessId}|${o.itemTypeID}`
+        `${o.stationProcessId}|${o.itemTypeID}|${o.id}`
       ] = o;
     }
 
@@ -903,7 +903,7 @@ function getCargoRowActions(
         const top = depthStack[depthStack.length - 1];
         const arr = top.split('|');
 
-        if (arr.length === 2) {
+        if (arr.length === 3) {
           const typeId = arr[1];
 
           if (typeId === m.itemTypeID) {
@@ -1010,7 +1010,7 @@ function buildOrderViewDetailRow(
   const r: OrderViewRow = {
     object: order,
     actions: actions,
-    next: `${order.stationProcessId}|${order.itemTypeID}`,
+    next: `${order.stationProcessId}|${order.itemTypeID}|${order.id}`,
     listString: () => {
       return `${cargoString} ${fixedString(
         order.price.toString() + ' CBN',
