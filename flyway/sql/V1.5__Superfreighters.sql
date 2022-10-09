@@ -53,3 +53,7 @@ INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VAL
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('d9d066cf-dfe1-4aaf-9c2c-cc8fcff196a5', '56617d30-6c30-425c-84bf-2484ae8c1156', 700, '{}', '916c852e-525d-4eeb-8781-32bb42179874');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('c521d4b3-911f-4dfd-86fa-3f2a00d221d4', '54c29ce8-67c7-46c7-8c02-c737eed3143c', 24, '{}', '916c852e-525d-4eeb-8781-32bb42179874');
 
+-- assembly yard faucet
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('355afc0a-2469-4752-9239-bb776524a34b', 'Station Assembly Yard Faucet', '{}', 604800);
+
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('37b34fb1-4481-43b6-a8f9-c8439fcc8a70', 'd2cd985d-a2fe-4491-8b89-a68f18c6350c', 1, '{}', '355afc0a-2469-4752-9239-bb776524a34b');
