@@ -131,3 +131,4 @@ INSERT INTO public.stationprocesses (id, universe_stationid, processid, progress
 INSERT INTO public.stationprocesses (id, universe_stationid, processid, progress, installed, internalstate, meta) VALUES ('6d14219f-790f-4365-93cb-c07d07742111', 'e662c7b8-ea4c-407d-a466-1a84c3e7a674', '8cf78edf-2b7a-4727-8d7a-0d0d6ecf379f', 0, false, '{"inputs": null, "outputs": null, "isRunning": false}', 'null');
 INSERT INTO public.stationprocesses (id, universe_stationid, processid, progress, installed, internalstate, meta) VALUES ('74401913-ba0a-4903-ac96-1d6caf84acdb', 'ec90ada4-69d5-4ba0-99b1-a6db5cca5d13', '8cf78edf-2b7a-4727-8d7a-0d0d6ecf379f', 0, false, '{"inputs": null, "outputs": null, "isRunning": false}', 'null');
 
+-- fair make 1 GWH cell

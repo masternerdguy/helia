@@ -64,3 +64,12 @@ INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VA
 
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('8cf78edf-2b7a-4727-8d7a-0d0d6ecf379f', 'Fetch Faucet', '{}', 97648);
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('b86dee5f-d268-4aa2-8053-12f06952a735', 'a5404d21-ef22-45c6-855e-2de0d53ac851', 1, '{}', '8cf78edf-2b7a-4727-8d7a-0d0d6ecf379f');
+
+-- fair make 1 GWH cell
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('45d9d2d4-8076-4a67-9168-ddf6ade545fe', 'Make 1 GWH Cell', '{}', 23892);
+
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('f713696a-d4c4-4e4c-a55c-ec2ad56388a0', 'dd522f03-2f52-4e82-b2f8-d7e0029cb82f', 1000, '{}', '45d9d2d4-8076-4a67-9168-ddf6ade545fe');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('c42bed15-e6c7-4870-bbf5-fcced62de28e', '1d0d344b-ef28-43c8-a7a6-3275936b2dea', 5225, '{}', '45d9d2d4-8076-4a67-9168-ddf6ade545fe');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('bed04b99-1380-4a0c-b25a-fb1eef8cc4cc', '54c29ce8-67c7-46c7-8c02-c737eed3143c', 1, '{}', '45d9d2d4-8076-4a67-9168-ddf6ade545fe');
+
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('f81379d4-d4cd-40d0-87ae-4fe42de99f09', '3935523b-3e38-485b-935f-e790758ce36b', 3, '{}', '45d9d2d4-8076-4a67-9168-ddf6ade545fe');
