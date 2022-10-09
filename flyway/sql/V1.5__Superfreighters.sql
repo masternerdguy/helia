@@ -84,10 +84,19 @@ INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VA
 -- fair cell schematic
 INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('682e5b2f-7940-43c6-a6fc-8be58604a947', 'schematic', '1 GWH Cell Schematic', '{"volume": 1, "industrialmarket": {"maxprice": 4150000, "minprice": 2952000, "silosize": 100, "process_id": "45d9d2d4-8076-4a67-9168-ddf6ade545fe"}}');
 
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('053554d1-a94c-4c46-a1ca-79106cc23db4', '1 GWH Schematic Sink', '{}', 16739);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('5db46b9e-d5e6-4e2d-b8f7-a5341311f897', '1 GWH Schematic Faucet', '{}', 22911);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('053554d1-a94c-4c46-a1ca-79106cc23db4', '1 GWH Schematic Sink', '{}', 26739);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('5db46b9e-d5e6-4e2d-b8f7-a5341311f897', '1 GWH Schematic Faucet', '{}', 12911);
 
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('696d7aa9-ee65-469f-8972-ab69765a978c', '682e5b2f-7940-43c6-a6fc-8be58604a947', 1, '{}', '053554d1-a94c-4c46-a1ca-79106cc23db4');
 
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('14277f26-e685-4163-8737-c8520614d1b8', '682e5b2f-7940-43c6-a6fc-8be58604a947', 1, '{}', '5db46b9e-d5e6-4e2d-b8f7-a5341311f897');
 
+-- fair pellet schematic
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('ff4095cd-9cad-4ad4-9b0e-1cb1836d694e', 'schematic', '3 PJ Pellet Schematic', '{"volume": 1, "industrialmarket": {"maxprice": 7590000, "minprice": 4290000, "silosize": 100, "process_id": "1dedc612-65bf-4fc5-9238-25374bd43e59"}}');
+
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('526931d1-680f-4279-b85b-0967b9a292f1', '3 PJ Pellet Schematic Sink', '{}', 23742);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('b3d19718-c3bd-4f5b-96ae-25355e3f9b7d', '3 PJ Pellet Schematic Faucet', '{}', 11850);
+
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('a831e2af-5ce6-4f1f-9b7c-2acceb00c718', 'ff4095cd-9cad-4ad4-9b0e-1cb1836d694e', 1, '{}', '526931d1-680f-4279-b85b-0967b9a292f1');
+
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('c5a45f5d-3482-494d-8277-cf9991ef32fa', 'ff4095cd-9cad-4ad4-9b0e-1cb1836d694e', 1, '{}', 'b3d19718-c3bd-4f5b-96ae-25355e3f9b7d');
