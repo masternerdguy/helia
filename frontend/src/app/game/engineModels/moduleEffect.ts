@@ -124,7 +124,7 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicRegenMask();
     } else if (b.gfxEffect === 'basic_dissip_mask') {
       this.vfxData = repo.basicDissipMask();
-    }  else {
+    } else {
       // log broken effect
       console.log(`gfx effect not found: ${b.gfxEffect}`);
     }
