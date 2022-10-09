@@ -54,6 +54,13 @@ INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VAL
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('c521d4b3-911f-4dfd-86fa-3f2a00d221d4', '54c29ce8-67c7-46c7-8c02-c737eed3143c', 24, '{}', '916c852e-525d-4eeb-8781-32bb42179874');
 
 -- assembly yard faucet
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('355afc0a-2469-4752-9239-bb776524a34b', 'Station Assembly Yard Faucet', '{}', 604800);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('355afc0a-2469-4752-9239-bb776524a34b', 'Station Assembly Yard Faucet', '{}', 1274219);
 
-INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('37b34fb1-4481-43b6-a8f9-c8439fcc8a70', 'd2cd985d-a2fe-4491-8b89-a68f18c6350c', 1, '{}', '355afc0a-2469-4752-9239-bb776524a34b');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('ca305269-791e-40cb-b992-409a2ae5b2cc', 'd2cd985d-a2fe-4491-8b89-a68f18c6350c', 1, '{}', '355afc0a-2469-4752-9239-bb776524a34b');
+
+-- super freighter faucets (faction ships, no schematics)
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('95f9515c-e439-4d61-b0df-f90860318e25', 'Zebra Faucet', '{}', 112713);
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('20917b7f-0d23-4c45-94a6-a68518e3309f', 'a17c43ba-25ec-4236-b0a2-d0d433e75097', 1, '{}', '95f9515c-e439-4d61-b0df-f90860318e25');
+
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('8cf78edf-2b7a-4727-8d7a-0d0d6ecf379f', 'Fetch Faucet', '{}', 97648);
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('b86dee5f-d268-4aa2-8053-12f06952a735', 'a5404d21-ef22-45c6-855e-2de0d53ac851', 1, '{}', '8cf78edf-2b7a-4727-8d7a-0d0d6ecf379f');
