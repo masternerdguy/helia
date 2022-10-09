@@ -167,8 +167,8 @@ INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VA
 -- giga patch kit schematic w/fuacet + sink
 INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('e3c0f5aa-5f61-49cd-a90c-f01d664898bb', 'schematic', 'XL Nanite Patch Kit Schematic', '{"volume": 1, "industrialmarket": {"maxprice": 8932485, "minprice": 3371992, "silosize": 100, "process_id": "3da96cfb-6288-4ac4-8324-cc400a278092"}}');
 
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('21eb50c8-f3ec-41ea-b686-e381a296d5c8', 'XL Nanite Patch Kit Sink', '{}', 22414);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('597517a0-232f-41bb-9924-6eb55476afe2', 'XL Nanite Patch Kit Faucet', '{}', 16399);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('21eb50c8-f3ec-41ea-b686-e381a296d5c8', 'XL Nanite Patch Kit Schematic Sink', '{}', 22414);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('597517a0-232f-41bb-9924-6eb55476afe2', 'XL Nanite Patch Kit Schematic Faucet', '{}', 16399);
 
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('bc07f3a7-6073-4458-a142-4479b504c137', 'e3c0f5aa-5f61-49cd-a90c-f01d664898bb', 1, '{}', '21eb50c8-f3ec-41ea-b686-e381a296d5c8');
 
