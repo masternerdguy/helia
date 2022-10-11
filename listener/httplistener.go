@@ -8,7 +8,7 @@ import (
 	"helia/listener/models"
 	"helia/shared"
 	"helia/sql"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/mail"
 	"runtime/pprof"
@@ -64,7 +64,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	factionSvc := sql.GetFactionService()
 
 	// read body
-	b, err := ioutil.ReadAll(r.Body)
+	b, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
 	if err != nil {
@@ -195,7 +195,7 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	sessionSvc := sql.GetSessionService()
 
 	// read body
-	b, err := ioutil.ReadAll(r.Body)
+	b, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
 	if err != nil {
