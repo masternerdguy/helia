@@ -232,8 +232,8 @@ INSERT INTO public.starts (id, name, shiptemplateid, shipfitting, created, avail
     INSERT INTO public.items (id, itemtypeid, meta, created, createdby, createdreason, containerid, quantity, ispackaged) VALUES ('b5528316-9f4d-49e4-9f06-9a330c7cd4ea', '824b0caa-c9f7-491e-84b4-8a6beb86638e', '{"hp": 80, "rack": "c", "volume": 225, "industrialmarket": {"maxprice": 23856, "minprice": 19681, "silosize": 200}, "energy_regen_max_add": 260}', '2022-10-10 21:44:15.408625-04', 'c7a2913f-708d-4d66-9b78-954c068ca8d1', 'Module for new noob ship for player', 'ec4c3118-d7f8-46e7-ad42-c48ef6bb19bb', 1, false);
 
     -- fix current ship ids
-    update users set current_shipid = "3a826abb-762d-4da4-8508-597b0ae0b22a" where id = "c7a2913f-708d-4d66-9b78-954c068ca8d1";
-    update users set current_shipid = "2dad2892-9008-458b-bc22-554599467b6e" where id = "9f04b1a0-01f0-41bf-beac-2a16d8494924";
-    update users set current_shipid = "bb48c997-7813-40d2-b296-86c94c75452f" where id = "9dedc6b1-9ac1-46b5-8d95-a27d0e6b5e7f";
-    update users set current_shipid = "ebc2685a-4aaa-4147-a1c9-d291b97e724c" where id = "42ec12e5-9211-4388-a680-8f9c582bd5b2";
-    update users set current_shipid = "bd602fdb-094f-4ee6-b9f8-3731a6eba0b1" where id = "682ec516-feb1-44ce-8bd6-97d55f34af22";
+    update users set current_shipid = '3a826abb-762d-4da4-8508-597b0ae0b22a' where id = 'c7a2913f-708d-4d66-9b78-954c068ca8d1';
+    update users set current_shipid = '2dad2892-9008-458b-bc22-554599467b6e' where id = '9f04b1a0-01f0-41bf-beac-2a16d8494924';
+    update users set current_shipid = 'bb48c997-7813-40d2-b296-86c94c75452f' where id = '9dedc6b1-9ac1-46b5-8d95-a27d0e6b5e7f';
+    update users set current_shipid = 'ebc2685a-4aaa-4147-a1c9-d291b97e724c' where id = '42ec12e5-9211-4388-a680-8f9c582bd5b2';
+    update users set current_shipid = 'bd602fdb-094f-4ee6-b9f8-3731a6eba0b1' where id = '682ec516-feb1-44ce-8bd6-97d55f34af22';
