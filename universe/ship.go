@@ -3320,6 +3320,9 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 		s.Armor += armorMaxAdd
 	}
 
+	// recalculate max armor
+	s.GetRealMaxArmor(true)
+
 	// success!
 	return nil
 }
