@@ -202,6 +202,7 @@ type Ship struct {
 	CachedRealAccel        float64 // cache of output from GetRealAccel
 	CachedRealSpaceDrag    float64 // cache of output from GetRealSpaceDrag
 	CachedMaxFuel          float64 // cache of output from GetRealMaxFuel
+	CachedMaxEnergy        float64 // cache of output from GetRealMaxEnergy
 	EscrowContainerID      *uuid.UUID
 	BeingFlownByPlayer     bool
 	ReputationSheet        *shared.PlayerReputationSheet
@@ -876,7 +877,10 @@ func (s *Ship) updateCloaking() {
 
 // Updates the ship's energy level for a tick
 func (s *Ship) updateEnergy() {
-	maxEnergy := s.GetRealMaxEnergy()
+	// determine whether to update max energy
+	re := s.CurrentSystem.tickCounter%34 == 0
+
+	maxEnergy := s.GetRealMaxEnergy(re)
 
 	// calculate scaler for energy regen based on current energy percentage
 	x := math.Abs(s.Energy / maxEnergy)
@@ -1242,7 +1246,7 @@ func (s *Ship) ReMaxStatsForSpawn() {
 		s.Armor = s.GetRealMaxArmor()
 		s.Hull = s.GetRealMaxHull()
 		s.Fuel = s.GetRealMaxFuel(true)
-		s.Energy = s.GetRealMaxEnergy()
+		s.Energy = s.GetRealMaxEnergy(true)
 		s.ReMaxDirty = false
 	}
 }
@@ -1386,7 +1390,12 @@ func (s *Ship) GetRealMaxHull() float64 {
 }
 
 // Returns the real max energy of the ship after modifiers
-func (s *Ship) GetRealMaxEnergy() float64 {
+func (s *Ship) GetRealMaxEnergy(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedMaxFuel
+	}
+
 	// get base max energy
 	a := s.TemplateData.BaseEnergy * s.FlightExperienceModifier
 
@@ -1400,7 +1409,11 @@ func (s *Ship) GetRealMaxEnergy() float64 {
 		}
 	}
 
-	return a
+	// store result in cache
+	s.CachedMaxEnergy = a
+
+	// return result
+	return s.CachedMaxEnergy
 }
 
 // Returns the real energy regeneration rate of the ship after modifiers
@@ -6014,7 +6027,7 @@ func (m *FittedSlot) activateAsUtilitySiphon() bool {
 		m.shipMountedOn.Energy += actualSiphon
 
 		// any excess becomes heat
-		maxEnergy := m.shipMountedOn.GetRealMaxEnergy()
+		maxEnergy := m.shipMountedOn.GetRealMaxEnergy(false)
 		excess := m.shipMountedOn.Energy - maxEnergy
 
 		if excess > 0 {
@@ -6523,7 +6536,7 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 			m.shipMountedOn.Energy += actualSiphon
 
 			// any excess becomes heat
-			maxEnergy := m.shipMountedOn.GetRealMaxEnergy()
+			maxEnergy := m.shipMountedOn.GetRealMaxEnergy(false)
 			excess := m.shipMountedOn.Energy - maxEnergy
 
 			if excess > 0 {
