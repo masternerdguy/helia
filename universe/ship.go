@@ -203,6 +203,7 @@ type Ship struct {
 	CachedRealSpaceDrag    float64 // cache of output from GetRealSpaceDrag
 	CachedMaxFuel          float64 // cache of output from GetRealMaxFuel
 	CachedMaxEnergy        float64 // cache of output from GetRealMaxEnergy
+	CachedMaxShield        float64 // cache of output from GetRealMaxShield
 	EscrowContainerID      *uuid.UUID
 	BeingFlownByPlayer     bool
 	ReputationSheet        *shared.PlayerReputationSheet
@@ -877,9 +878,10 @@ func (s *Ship) updateCloaking() {
 
 // Updates the ship's energy level for a tick
 func (s *Ship) updateEnergy() {
-	// determine whether to update max energy
+	// determine whether to recalculate max energy
 	re := s.CurrentSystem.tickCounter%14 == 0
 
+	// get max energy
 	maxEnergy := s.GetRealMaxEnergy(re)
 
 	// calculate scaler for energy regen based on current energy percentage
@@ -932,8 +934,11 @@ func (s *Ship) updateEnergy() {
 
 // Updates the ship's shield level for a tick
 func (s *Ship) updateShield() {
+	// determine whether to recalculate max shield
+	rs := s.CurrentSystem.tickCounter%15 == 0
+
 	// get max shield
-	max := s.GetRealMaxShield()
+	max := s.GetRealMaxShield(rs)
 
 	// calculate scaler for shield regen based on current shield percentage
 	x := math.Abs(s.Shield / max)
@@ -1242,7 +1247,7 @@ func (s *Ship) ApplyPhysicsDummy(dummy physics.Dummy) {
 // Resets some stats to their maximum (for use when spawning a new ship)
 func (s *Ship) ReMaxStatsForSpawn() {
 	if s.ReMaxDirty {
-		s.Shield = s.GetRealMaxShield()
+		s.Shield = s.GetRealMaxShield(true)
 		s.Armor = s.GetRealMaxArmor()
 		s.Hull = s.GetRealMaxHull()
 		s.Fuel = s.GetRealMaxFuel(true)
@@ -1345,8 +1350,20 @@ func (s *Ship) GetRealMass() float64 {
 }
 
 // Returns the real max shield of the ship after modifiers
-func (s *Ship) GetRealMaxShield() float64 {
-	return s.TemplateData.BaseShield * s.FlightExperienceModifier
+func (s *Ship) GetRealMaxShield(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedMaxShield
+	}
+
+	// calculate max shield
+	a := s.TemplateData.BaseShield * s.FlightExperienceModifier
+
+	// store in cache
+	s.CachedMaxShield = a
+
+	// return result
+	return s.CachedMaxShield
 }
 
 // Returns the real shield regen rate after modifiers
@@ -1657,7 +1674,7 @@ func (s *Ship) DealDamage(
 	}
 
 	// determine shield percentage
-	shieldP := s.Shield / s.GetRealMaxShield()
+	shieldP := s.Shield / s.GetRealMaxShield(false)
 
 	// apply armor damage if shields below 25% scaling for remaining shields
 	if shieldP < 0.25 {
@@ -1778,7 +1795,7 @@ func (s *Ship) behave() {
 
 	if s.BehaviourMode != nil {
 		// get aggressive if under threat
-		ms := s.GetRealMaxShield()
+		ms := s.GetRealMaxShield(false)
 		sr := s.Shield / ms
 
 		if sr < 0.75 {
@@ -2766,7 +2783,7 @@ func (s *Ship) doAutopilotFight() {
 				if v.ItemTypeFamily == "shield_booster" {
 					// make sure enough shield has been lost for this to be worth it
 					shieldBoost, _ := v.ItemMeta.GetFloat64("shield_boost_amount")
-					maxShield := s.GetRealMaxShield()
+					maxShield := s.GetRealMaxShield(false)
 
 					if s.Shield+shieldBoost >= 0.75*maxShield {
 						// deactivate and continue
@@ -4539,7 +4556,7 @@ func (s *Ship) SelfDestruct(lock bool) error {
 	}
 
 	// blow it up
-	s.DealDamage(s.GetRealMaxShield()+1, s.GetRealMaxArmor()+1, s.GetRealMaxHull()+1, nil, nil)
+	s.DealDamage(s.GetRealMaxShield(false)+1, s.GetRealMaxArmor()+1, s.GetRealMaxHull()+1, nil, nil)
 
 	return nil
 }
