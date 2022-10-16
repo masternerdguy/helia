@@ -214,7 +214,6 @@ type CurrentShipInfo struct {
 	// secret caches that should not be globally known
 	CachedHeatSink      float64 `json:"cHeatSink"`
 	CachedMaxHeat       float64 `json:"cMaxHeat"`
-	CachedRealAccel     float64 `json:"cRealAccel"`
 	CachedRealSpaceDrag float64 `json:"cRealDrag"`
 	CachedMaxFuel       float64 `json:"cMaxFuel"`
 	CachedMaxEnergy     float64 `json:"cMaxEnergy"`
@@ -222,6 +221,7 @@ type CurrentShipInfo struct {
 	CachedMaxArmor      float64 `json:"cMaxArmor"`
 	CachedMaxHull       float64 `json:"cMaxHull"`
 	CachedEnergyRegen   float64 `json:"cEnergyRegen"`
+	CachedShieldRegen   float64 `json:"cShieldRegen"`
 }
 
 // Structure for passing non-secret information about a ship

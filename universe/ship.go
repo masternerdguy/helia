@@ -207,6 +207,7 @@ type Ship struct {
 	CachedMaxArmor         float64 // cache of output from GetRealMaxArmor
 	CachedMaxHull          float64 // cache of output from GetRealMaxHull
 	CachedEnergyRegen      float64 // cache of output from GetRealEnergyRegen
+	CachedShieldRegen      float64 // cache of output from GetRealShieldRegen
 	EscrowContainerID      *uuid.UUID
 	BeingFlownByPlayer     bool
 	ReputationSheet        *shared.PlayerReputationSheet
@@ -950,8 +951,11 @@ func (s *Ship) updateShield() {
 	x := math.Abs(s.Shield / max)
 	u := math.Pow(ShipMinShieldRegenPercent, 1.0-x)
 
+	// determine whether to recalculate shield regen
+	rme := s.CurrentSystem.tickCounter%11 == 0
+
 	// get shield regen amount for tick taking shield percentage scaling into account
-	tickRegen := ((s.GetRealShieldRegen() / 1000) * Heartbeat) * u
+	tickRegen := ((s.GetRealShieldRegen(rme) / 1000) * Heartbeat) * u
 
 	if s.Shield < (max - tickRegen) {
 		// calculate shield regen energy use
@@ -1383,7 +1387,12 @@ func (s *Ship) GetRealMaxShield(recalculate bool) float64 {
 }
 
 // Returns the real shield regen rate after modifiers
-func (s *Ship) GetRealShieldRegen() float64 {
+func (s *Ship) GetRealShieldRegen(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedShieldRegen
+	}
+
 	// get base shield regen
 	a := s.TemplateData.BaseShieldRegen * s.FlightExperienceModifier
 
@@ -1395,8 +1404,11 @@ func (s *Ship) GetRealShieldRegen() float64 {
 		}
 	}
 
-	// return shield regen
-	return a
+	// store in cache
+	s.CachedShieldRegen = a
+
+	// return result
+	return s.CachedShieldRegen
 }
 
 // Returns the real max armor of the ship after modifiers
@@ -7484,4 +7496,5 @@ func recalcAllStatCaches(s *Ship) {
 	s.GetRealMaxArmor(true)
 	s.GetRealMaxHull(true)
 	s.GetRealEnergyRegen(true)
+	s.GetRealShieldRegen(true)
 }

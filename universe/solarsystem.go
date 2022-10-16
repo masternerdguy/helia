@@ -3122,7 +3122,6 @@ func (s *SolarSystem) sendClientUpdates() {
 					// secret caches
 					CachedHeatSink:      d.CachedHeatSink,
 					CachedMaxHeat:       d.CachedMaxHeat,
-					CachedRealAccel:     d.CachedRealAccel,
 					CachedRealSpaceDrag: d.CachedRealSpaceDrag,
 					CachedMaxFuel:       d.CachedMaxFuel,
 					CachedMaxEnergy:     d.CachedMaxEnergy,
@@ -3130,6 +3129,7 @@ func (s *SolarSystem) sendClientUpdates() {
 					CachedMaxArmor:      d.CachedMaxArmor,
 					CachedMaxHull:       d.CachedMaxHull,
 					CachedEnergyRegen:   d.CachedEnergyRegen,
+					CachedShieldRegen:   d.CachedShieldRegen,
 				},
 			}
 

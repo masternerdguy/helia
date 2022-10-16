@@ -88,6 +88,46 @@ export class Ship extends WSShip {
     if (ws.wallet) {
       this.wallet = Math.round(ws.wallet);
     }
+
+    if (ws.cHeatSink) {
+      this.cHeatSink = parseFloat(ws.cHeatSink.toFixed(2));
+    }
+
+    if (ws.cMaxHeat) {
+      this.cMaxHeat = parseFloat(ws.cMaxHeat.toFixed(2));
+    }
+
+    if (ws.cRealDrag) {
+      this.cRealDrag = parseFloat(ws.cRealDrag.toFixed(2));
+    }
+
+    if (ws.cMaxFuel) {
+      this.cMaxFuel = parseFloat(ws.cMaxFuel.toFixed(2));
+    }
+
+    if (ws.cMaxEnergy) {
+      this.cMaxEnergy = parseFloat(ws.cMaxEnergy.toFixed(2));
+    }
+
+    if (ws.cMaxShield) {
+      this.cMaxShield = parseFloat(ws.cMaxShield.toFixed(2));
+    }
+
+    if (ws.cMaxArmor) {
+      this.cMaxArmor = parseFloat(ws.cMaxArmor.toFixed(2));
+    }
+
+    if (ws.cMaxHull) {
+      this.cMaxHull = parseFloat(ws.cMaxHull.toFixed(2));
+    }
+
+    if (ws.cEnergyRegen) {
+      this.cEnergyRegen = parseFloat(ws.cEnergyRegen.toFixed(2));
+    }
+
+    if (ws.cShieldRegen) {
+      this.cShieldRegen = parseFloat(ws.cShieldRegen.toFixed(2));
+    }
   }
 
   render(ctx: any, camera: Camera) {

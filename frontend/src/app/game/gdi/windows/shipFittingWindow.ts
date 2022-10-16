@@ -781,6 +781,116 @@ export class ShipFittingWindow extends GDIWindow {
 
     rows.push(buildShipViewRowSpacer());
 
+    // layout selected stats
+    rows.push(buildShipViewRowText('Performance'));
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Heat Capacity',
+          `${this.player.currentShip.cMaxHeat}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString('Heat Sink', `${this.player.currentShip.cHeatSink}`)
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Acceleration',
+          `${parseFloat(this.player.currentShip.accel.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Turning',
+          `${parseFloat(this.player.currentShip.turn.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Aether Drag',
+          `${this.player.currentShip.cRealDrag}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Fuel Capacity',
+          `${this.player.currentShip.cMaxFuel}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Energy Capacity',
+          `${this.player.currentShip.cEnergyRegen}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Energy Output',
+          `${this.player.currentShip.cMaxEnergy}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Shield Capacity',
+          `${this.player.currentShip.cMaxShield}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Shield Output',
+          `${this.player.currentShip.cShieldRegen}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Armor Strength',
+          `${this.player.currentShip.cMaxArmor}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Hull Strength',
+          `${this.player.currentShip.cMaxHull}`
+        )
+      )
+    );
+
+    rows.push(buildShipViewRowSpacer());
+
     if (!docked) {
       // layout danger zone
       rows.push(buildShipViewRowText('Danger Zone'));
