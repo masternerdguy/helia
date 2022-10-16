@@ -201,6 +201,7 @@ type Ship struct {
 	CachedMaxHeat          float64 // cache of output from GetRealMaxHeat
 	CachedRealAccel        float64 // cache of output from GetRealAccel
 	CachedRealSpaceDrag    float64 // cache of output from GetRealSpaceDrag
+	CachedMaxFuel          float64 // cache of output from GetRealMaxFuel
 	EscrowContainerID      *uuid.UUID
 	BeingFlownByPlayer     bool
 	ReputationSheet        *shared.PlayerReputationSheet
@@ -607,7 +608,7 @@ func (s *Ship) alwaysPeriodicUpdate() {
 	if s.IsNPC {
 		if s.Fuel <= 0 {
 			// infinite fuel via refill at 0
-			s.Fuel = s.GetRealMaxFuel()
+			s.Fuel = s.GetRealMaxFuel(false)
 		}
 	}
 
@@ -914,8 +915,12 @@ func (s *Ship) updateEnergy() {
 		s.Fuel = 0
 	}
 
-	maxFuel := s.GetRealMaxFuel()
+	// determine whether to recalculate max fuel
+	rf := s.CurrentSystem.tickCounter%34 == 0
 
+	maxFuel := s.GetRealMaxFuel(rf)
+
+	// clamp fuel
 	if s.Fuel > maxFuel {
 		s.Fuel = maxFuel
 	}
@@ -1236,7 +1241,7 @@ func (s *Ship) ReMaxStatsForSpawn() {
 		s.Shield = s.GetRealMaxShield()
 		s.Armor = s.GetRealMaxArmor()
 		s.Hull = s.GetRealMaxHull()
-		s.Fuel = s.GetRealMaxFuel()
+		s.Fuel = s.GetRealMaxFuel(true)
 		s.Energy = s.GetRealMaxEnergy()
 		s.ReMaxDirty = false
 	}
@@ -1499,7 +1504,12 @@ func (s *Ship) GetRealHeatSink(recalculate bool) float64 {
 }
 
 // Returns the real max fuel of the ship after modifiers
-func (s *Ship) GetRealMaxFuel() float64 {
+func (s *Ship) GetRealMaxFuel(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedMaxFuel
+	}
+
 	// get base max fuel
 	f := s.TemplateData.BaseFuel * s.FlightExperienceModifier
 
@@ -1513,7 +1523,11 @@ func (s *Ship) GetRealMaxFuel() float64 {
 		}
 	}
 
-	return f
+	// cache final max fuel
+	s.CachedMaxFuel = f
+
+	// return result
+	return s.CachedMaxFuel
 }
 
 // Returns the real max cargo bay volume of the ship after modifiers
