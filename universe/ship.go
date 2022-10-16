@@ -1284,7 +1284,7 @@ func (s *Ship) ReMaxStatsForSpawn() {
 		s.ReMaxDirty = false
 
 		// recalculate cached stats
-		recalcAllStatCaches(s)
+		RecalcAllStatCaches(s)
 	}
 }
 
@@ -3401,7 +3401,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	}
 
 	// recalculate cached stats
-	recalcAllStatCaches(s)
+	RecalcAllStatCaches(s)
 
 	// success!
 	return nil
@@ -3480,7 +3480,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	s.FittingBay.Items = newFB
 
 	// recalculate cached stats
-	recalcAllStatCaches(s)
+	RecalcAllStatCaches(s)
 
 	// success!
 	return nil
@@ -7521,7 +7521,7 @@ func (s *Ship) updateAggressionTables(
 }
 
 // Helper function to recalculate all stat caches
-func recalcAllStatCaches(s *Ship) {
+func RecalcAllStatCaches(s *Ship) {
 	s.GetRealHeatSink(true)
 	s.GetRealMaxHeat(true)
 	s.GetRealAccel(true)
