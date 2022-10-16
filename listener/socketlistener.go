@@ -667,14 +667,25 @@ func (l *SocketListener) handleClientJoin(client *shared.GameClient, body *model
 			Mass:      currShip.GetRealMass(),
 			Radius:    currShip.TemplateData.Radius,
 			Turn:      currShip.GetRealTurn(),
-			ShieldP:   (currShip.Shield / currShip.GetRealMaxShield()) * 100,
-			ArmorP:    (currShip.Armor / currShip.GetRealMaxArmor()) * 100,
-			HullP:     (currShip.Hull / currShip.GetRealMaxHull()) * 100,
+			ShieldP:   (currShip.Shield / currShip.GetRealMaxShield(true)) * 100,
+			ArmorP:    (currShip.Armor / currShip.GetRealMaxArmor(true)) * 100,
+			HullP:     (currShip.Hull / currShip.GetRealMaxHull(true)) * 100,
 			FactionID: u.CurrentFactionID,
 			// secret stuff
-			EnergyP: (currShip.Energy / currShip.GetRealMaxEnergy()) * 100,
-			HeatP:   (currShip.Heat / currShip.GetRealMaxHeat()) * 100,
-			FuelP:   (currShip.Fuel / currShip.GetRealMaxFuel()) * 100,
+			EnergyP: (currShip.Energy / currShip.GetRealMaxEnergy(true)) * 100,
+			HeatP:   (currShip.Heat / currShip.GetRealMaxHeat(true)) * 100,
+			FuelP:   (currShip.Fuel / currShip.GetRealMaxFuel(true)) * 100,
+			// secret caches
+			CachedHeatSink:      currShip.CachedHeatSink,
+			CachedMaxHeat:       currShip.CachedMaxHeat,
+			CachedRealSpaceDrag: currShip.CachedRealSpaceDrag,
+			CachedMaxFuel:       currShip.CachedMaxFuel,
+			CachedMaxEnergy:     currShip.CachedMaxEnergy,
+			CachedMaxShield:     currShip.CachedMaxShield,
+			CachedMaxArmor:      currShip.CachedMaxArmor,
+			CachedMaxHull:       currShip.CachedMaxHull,
+			CachedEnergyRegen:   currShip.CachedEnergyRegen,
+			CachedShieldRegen:   currShip.CachedShieldRegen,
 		}
 
 		w.CurrentShipInfo = shipInfo
