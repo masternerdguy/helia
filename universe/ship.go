@@ -657,6 +657,12 @@ func (s *Ship) alwaysPeriodicUpdate() {
 		s.updateCloaking()
 	}
 
+	// determine whether to recalculate cargo capacity
+	rcc := s.CurrentSystem.tickCounter%22 == 0
+
+	// chance to update cargo capacity
+	s.GetRealCargoBayVolume(rcc)
+
 	// update energy
 	s.updateEnergy()
 
@@ -1269,12 +1275,16 @@ func (s *Ship) ApplyPhysicsDummy(dummy physics.Dummy) {
 // Resets some stats to their maximum (for use when spawning a new ship)
 func (s *Ship) ReMaxStatsForSpawn() {
 	if s.ReMaxDirty {
+		// remax selected stats
 		s.Shield = s.GetRealMaxShield(true)
 		s.Armor = s.GetRealMaxArmor(true)
 		s.Hull = s.GetRealMaxHull(true)
 		s.Fuel = s.GetRealMaxFuel(true)
 		s.Energy = s.GetRealMaxEnergy(true)
 		s.ReMaxDirty = false
+
+		// recalculate cached stats
+		recalcAllStatCaches(s)
 	}
 }
 
