@@ -3340,7 +3340,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 	}
 
 	// recalculate maxes
-	recalcAllMaxes(s)
+	recalcAllStatCaches(s)
 
 	// success!
 	return nil
@@ -3419,7 +3419,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	s.FittingBay.Items = newFB
 
 	// recalculate maxes
-	recalcAllMaxes(s)
+	recalcAllStatCaches(s)
 
 	// success!
 	return nil
@@ -7459,7 +7459,8 @@ func (s *Ship) updateAggressionTables(
 	}
 }
 
-func recalcAllMaxes(s *Ship) {
+// helper function to recalculate all stat caches
+func recalcAllStatCaches(s *Ship) {
 	s.GetRealHeatSink(true)
 	s.GetRealMaxHeat(true)
 	s.GetRealAccel(true)
