@@ -206,6 +206,7 @@ type Ship struct {
 	CachedMaxShield        float64 // cache of output from GetRealMaxShield
 	CachedMaxArmor         float64 // cache of output from GetRealMaxArmor
 	CachedMaxHull          float64 // cache of output from GetRealMaxHull
+	CachedEnergyRegen      float64 // cache of output from GetRealEnergyRegen
 	EscrowContainerID      *uuid.UUID
 	BeingFlownByPlayer     bool
 	ReputationSheet        *shared.PlayerReputationSheet
@@ -890,8 +891,11 @@ func (s *Ship) updateEnergy() {
 	x := math.Abs(s.Energy / maxEnergy)
 	u := math.Pow(ShipMinEnergyRegenPercent, x)
 
+	// determine whether to recalculate energy regen
+	rme := s.CurrentSystem.tickCounter%11 == 0
+
 	// get energy regen amount for tick taking energy percentage scaling into account
-	tickRegen := ((s.GetRealEnergyRegen() / 1000) * Heartbeat) * u
+	tickRegen := ((s.GetRealEnergyRegen(rme) / 1000) * Heartbeat) * u
 
 	if s.Energy < (maxEnergy - tickRegen) {
 		// regenerate energy
@@ -1467,7 +1471,12 @@ func (s *Ship) GetRealMaxEnergy(recalculate bool) float64 {
 }
 
 // Returns the real energy regeneration rate of the ship after modifiers
-func (s *Ship) GetRealEnergyRegen() float64 {
+func (s *Ship) GetRealEnergyRegen(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedEnergyRegen
+	}
+
 	// get base energy regen
 	a := s.TemplateData.BaseEnergyRegen * s.FlightExperienceModifier
 
@@ -1489,7 +1498,11 @@ func (s *Ship) GetRealEnergyRegen() float64 {
 		}
 	}
 
-	return a
+	// store in cache
+	s.CachedEnergyRegen = a
+
+	// return result
+	return s.CachedEnergyRegen
 }
 
 // Returns the real max heat of the ship after modifiers
@@ -3339,7 +3352,7 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 		s.Armor += armorMaxAdd
 	}
 
-	// recalculate maxes
+	// recalculate cached stats
 	recalcAllStatCaches(s)
 
 	// success!
@@ -3418,7 +3431,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 
 	s.FittingBay.Items = newFB
 
-	// recalculate maxes
+	// recalculate cached stats
 	recalcAllStatCaches(s)
 
 	// success!
@@ -7459,7 +7472,7 @@ func (s *Ship) updateAggressionTables(
 	}
 }
 
-// helper function to recalculate all stat caches
+// Helper function to recalculate all stat caches
 func recalcAllStatCaches(s *Ship) {
 	s.GetRealHeatSink(true)
 	s.GetRealMaxHeat(true)
@@ -7470,4 +7483,5 @@ func recalcAllStatCaches(s *Ship) {
 	s.GetRealMaxShield(true)
 	s.GetRealMaxArmor(true)
 	s.GetRealMaxHull(true)
+	s.GetRealEnergyRegen(true)
 }
