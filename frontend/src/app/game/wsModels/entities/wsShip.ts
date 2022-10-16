@@ -36,6 +36,7 @@ export class WSShip {
   cMaxHull: number;
   cEnergyRegen: number;
   cShieldRegen: number;
+  cCargoBayVolume: number;
 }
 
 export class WSFitting {

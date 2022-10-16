@@ -128,6 +128,10 @@ export class Ship extends WSShip {
     if (ws.cShieldRegen) {
       this.cShieldRegen = ws.cShieldRegen;
     }
+
+    if (ws.cCargoBayVolume) {
+      this.cCargoBayVolume = ws.cCargoBayVolume;
+    }
   }
 
   render(ctx: any, camera: Camera) {

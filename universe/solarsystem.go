@@ -337,7 +337,7 @@ func (s *SolarSystem) processClientEventQueues() {
 
 				// make sure cargo isn't overloaded
 				usedBay := sh.TotalCargoBayVolumeUsed(false)
-				maxBay := sh.GetRealCargoBayVolume()
+				maxBay := sh.GetRealCargoBayVolume(true)
 
 				if usedBay > maxBay {
 					c.WriteErrorMessage("cargo bay overloaded")
@@ -1552,7 +1552,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 
 					bayUsed := sh.TotalCargoBayVolumeUsed(false)
-					bayMax := sh.GetRealCargoBayVolume()
+					bayMax := sh.GetRealCargoBayVolume(true)
 
 					if bayUsed+outputSize > bayMax {
 						c.WriteErrorMessage("insufficient space to store outputs")
@@ -3117,19 +3117,22 @@ func (s *SolarSystem) sendClientUpdates() {
 					FuelP:             ((d.Fuel / d.GetRealMaxFuel(false)) * 100) + Epsilon,
 					FitStatus:         fs,
 					DockedAtStationID: d.DockedAtStationID,
-					CargoP:            ((d.TotalCargoBayVolumeUsed(false) / d.GetRealCargoBayVolume()) * 100) + Epsilon,
+					CargoP:            ((d.TotalCargoBayVolumeUsed(false) / d.GetRealCargoBayVolume(false)) * 100) + Epsilon,
 					Wallet:            d.Wallet,
 					// secret caches
-					CachedHeatSink:      d.CachedHeatSink,
-					CachedMaxHeat:       d.CachedMaxHeat,
-					CachedRealSpaceDrag: d.CachedRealSpaceDrag,
-					CachedMaxFuel:       d.CachedMaxFuel,
-					CachedMaxEnergy:     d.CachedMaxEnergy,
-					CachedMaxShield:     d.CachedMaxShield,
-					CachedMaxArmor:      d.CachedMaxArmor,
-					CachedMaxHull:       d.CachedMaxHull,
-					CachedEnergyRegen:   d.CachedEnergyRegen,
-					CachedShieldRegen:   d.CachedShieldRegen,
+					Accel:                d.GetRealAccel(false),
+					Turn:                 d.GetRealTurn(false),
+					CachedHeatSink:       d.GetRealHeatSink(false),
+					CachedMaxHeat:        d.GetRealMaxHeat(false),
+					CachedRealSpaceDrag:  d.GetRealSpaceDrag(false),
+					CachedMaxFuel:        d.GetRealMaxFuel(false),
+					CachedMaxEnergy:      d.GetRealMaxEnergy(false),
+					CachedMaxShield:      d.GetRealMaxShield(false),
+					CachedMaxArmor:       d.GetRealMaxArmor(false),
+					CachedMaxHull:        d.GetRealMaxHull(false),
+					CachedEnergyRegen:    d.GetRealEnergyRegen(false),
+					CachedShieldRegen:    d.GetRealShieldRegen(false),
+					CachedCargoBayVolume: d.GetRealCargoBayVolume(false),
 				},
 			}
 

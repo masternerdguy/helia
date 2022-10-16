@@ -212,16 +212,17 @@ type CurrentShipInfo struct {
 	CargoP            float64                 `json:"cargoP"`
 	Wallet            float64                 `json:"wallet"`
 	// secret caches that should not be globally known
-	CachedHeatSink      float64 `json:"cHeatSink"`
-	CachedMaxHeat       float64 `json:"cMaxHeat"`
-	CachedRealSpaceDrag float64 `json:"cRealDrag"`
-	CachedMaxFuel       float64 `json:"cMaxFuel"`
-	CachedMaxEnergy     float64 `json:"cMaxEnergy"`
-	CachedMaxShield     float64 `json:"cMaxShield"`
-	CachedMaxArmor      float64 `json:"cMaxArmor"`
-	CachedMaxHull       float64 `json:"cMaxHull"`
-	CachedEnergyRegen   float64 `json:"cEnergyRegen"`
-	CachedShieldRegen   float64 `json:"cShieldRegen"`
+	CachedHeatSink       float64 `json:"cHeatSink"`
+	CachedMaxHeat        float64 `json:"cMaxHeat"`
+	CachedRealSpaceDrag  float64 `json:"cRealDrag"`
+	CachedMaxFuel        float64 `json:"cMaxFuel"`
+	CachedMaxEnergy      float64 `json:"cMaxEnergy"`
+	CachedMaxShield      float64 `json:"cMaxShield"`
+	CachedMaxArmor       float64 `json:"cMaxArmor"`
+	CachedMaxHull        float64 `json:"cMaxHull"`
+	CachedEnergyRegen    float64 `json:"cEnergyRegen"`
+	CachedShieldRegen    float64 `json:"cShieldRegen"`
+	CachedCargoBayVolume float64 `json:"cCargoBayVolume"`
 }
 
 // Structure for passing non-secret information about a ship

@@ -788,14 +788,17 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Heat Capacity',
-          `${parseFloat(this.player.currentShip.cMaxHeat.toFixed(2))}`
+          `${parseFloat(this.player.currentShip.cMaxHeat?.toFixed(2))}`
         )
       )
     );
 
     rows.push(
       buildShipViewRowText(
-        infoKeyValueString('Heat Sink', `${this.player.currentShip.cHeatSink}`)
+        infoKeyValueString(
+          'Heat Sink',
+          `${parseFloat(this.player.currentShip.cHeatSink?.toFixed(2))}`
+        )
       )
     );
 
@@ -803,7 +806,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Acceleration',
-          `${parseFloat(this.player.currentShip.accel.toFixed(2))}`
+          `${parseFloat(this.player.currentShip.accel?.toFixed(2))}`
         )
       )
     );
@@ -812,7 +815,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Turning',
-          `${parseFloat(this.player.currentShip.turn.toFixed(2))}`
+          `${parseFloat(this.player.currentShip.turn?.toFixed(2))}`
         )
       )
     );
@@ -821,7 +824,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Aether Drag',
-          `${parseFloat(this.player.currentShip.cRealDrag.toFixed(2))}`
+          `${parseFloat(this.player.currentShip.cRealDrag?.toFixed(2))}`
         )
       )
     );
@@ -830,7 +833,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Fuel Capacity',
-          `${parseFloat(this.player.currentShip.cMaxFuel.toFixed(2))}`
+          `${parseFloat(this.player.currentShip.cMaxFuel?.toFixed(2))}`
         )
       )
     );
@@ -839,7 +842,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Energy Capacity',
-          `${parseFloat(this.player.currentShip.cEnergyRegen.toFixed(2))}`
+          `${parseFloat(this.player.currentShip.cMaxEnergy?.toFixed(2))}`
         )
       )
     );
@@ -848,7 +851,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Energy Output',
-          `${parseFloat(this.player.currentShip.cMaxEnergy.toFixed(2))}`
+          `${parseFloat(this.player.currentShip.cEnergyRegen?.toFixed(2))}`
         )
       )
     );
@@ -857,7 +860,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Shield Capacity',
-          `${parseFloat(this.player.currentShip.cMaxShield.toFixed(2))}`
+          `${parseFloat(this.player.currentShip.cMaxShield?.toFixed(2))}`
         )
       )
     );
@@ -866,7 +869,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Shield Output',
-          `${parseFloat(this.player.currentShip.cShieldRegen.toFixed(2))}`
+          `${parseFloat(this.player.currentShip.cShieldRegen?.toFixed(2))}`
         )
       )
     );
@@ -875,7 +878,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Armor Strength',
-          `${parseFloat(this.player.currentShip.cMaxArmor.toFixed(2))}`
+          `${parseFloat(this.player.currentShip.cMaxArmor?.toFixed(2))}`
         )
       )
     );
@@ -884,7 +887,16 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Hull Strength',
-          `${parseFloat(this.player.currentShip.cMaxHull.toFixed(2))}`
+          `${parseFloat(this.player.currentShip.cMaxHull?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Cargo Capacity',
+          `${parseFloat(this.player.currentShip.cCargoBayVolume?.toFixed(2))}`
         )
       )
     );

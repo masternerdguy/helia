@@ -200,6 +200,7 @@ type Ship struct {
 	CachedHeatSink         float64 // cache of output from GetRealHeatSink
 	CachedMaxHeat          float64 // cache of output from GetRealMaxHeat
 	CachedRealAccel        float64 // cache of output from GetRealAccel
+	CachedRealTurn         float64 // cache of output from GetRealTurn
 	CachedRealSpaceDrag    float64 // cache of output from GetRealSpaceDrag
 	CachedMaxFuel          float64 // cache of output from GetRealMaxFuel
 	CachedMaxEnergy        float64 // cache of output from GetRealMaxEnergy
@@ -208,6 +209,7 @@ type Ship struct {
 	CachedMaxHull          float64 // cache of output from GetRealMaxHull
 	CachedEnergyRegen      float64 // cache of output from GetRealEnergyRegen
 	CachedShieldRegen      float64 // cache of output from GetRealShieldRegen
+	CachedCargoBayVolume   float64 // cache of output from GetRealCargoBayVolume
 	EscrowContainerID      *uuid.UUID
 	BeingFlownByPlayer     bool
 	ReputationSheet        *shared.PlayerReputationSheet
@@ -1181,7 +1183,7 @@ func (s *Ship) CmdUndock(lock bool) {
 
 	// make sure cargo isn't overloaded
 	usedBay := s.TotalCargoBayVolumeUsed(lock)
-	maxBay := s.GetRealCargoBayVolume()
+	maxBay := s.GetRealCargoBayVolume(true)
 
 	if usedBay > maxBay {
 		return
@@ -1360,8 +1362,20 @@ func (s *Ship) GetExperienceModifier() float64 {
 }
 
 // Returns the real turning capability of a ship after modifiers
-func (s *Ship) GetRealTurn() float64 {
-	return s.TemplateData.BaseTurn * s.FlightExperienceModifier
+func (s *Ship) GetRealTurn(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedRealTurn
+	}
+
+	// calculate real turning
+	a := s.TemplateData.BaseTurn * s.FlightExperienceModifier
+
+	// store in cache
+	s.CachedRealTurn = a
+
+	// return result
+	return s.CachedRealTurn
 }
 
 // Returns the real mass of a ship after modifiers
@@ -1619,7 +1633,12 @@ func (s *Ship) GetRealMaxFuel(recalculate bool) float64 {
 }
 
 // Returns the real max cargo bay volume of the ship after modifiers
-func (s *Ship) GetRealCargoBayVolume() float64 {
+func (s *Ship) GetRealCargoBayVolume(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedCargoBayVolume
+	}
+
 	// get base cargo volume
 	cv := s.TemplateData.BaseCargoBayVolume * s.FlightExperienceModifier
 
@@ -1642,7 +1661,11 @@ func (s *Ship) GetRealCargoBayVolume() float64 {
 		}
 	}
 
-	return cv
+	// store result in cache
+	s.CachedCargoBayVolume = cv
+
+	// return result
+	return s.CachedCargoBayVolume
 }
 
 // Returns the total amount of cargo bay space currently in use
@@ -2103,7 +2126,7 @@ func (s *Ship) behaviourPatchTrade() {
 				toTrash := make([]*Item, 0)
 
 				// verify sufficient volume is being used to warrant trashing
-				cv := s.GetRealCargoBayVolume()
+				cv := s.GetRealCargoBayVolume(false)
 				cu := s.TotalCargoBayVolumeUsed(false)
 
 				if cu/cv > 0.75 {
@@ -2243,7 +2266,7 @@ func (s *Ship) behaviourPatchMine() {
 			}
 		} else {
 			// check if cargo bay is almost full (>80%)
-			max := s.GetRealCargoBayVolume()
+			max := s.GetRealCargoBayVolume(false)
 			used := s.TotalCargoBayVolumeUsed(false)
 
 			if used/max > 0.8 {
@@ -2402,9 +2425,9 @@ func (s *Ship) doAutopilotManualNav() {
 
 	// apply turn with ship limits
 	if a > 0 {
-		s.rotate(turnMag / s.GetRealTurn())
+		s.rotate(turnMag / s.GetRealTurn(false))
 	} else if a < 0 {
-		s.rotate(turnMag / -s.GetRealTurn())
+		s.rotate(turnMag / -s.GetRealTurn(false))
 	}
 
 	// thrust forward
@@ -3011,7 +3034,7 @@ func (s *Ship) doAutopilotMine() {
 			}
 		} else if s.CurrentSystem.tickCounter%37 == 0 {
 			// check if cargo bay is almost full (>80%)
-			max := s.GetRealCargoBayVolume()
+			max := s.GetRealCargoBayVolume(false)
 			used := s.TotalCargoBayVolumeUsed(false)
 
 			if used/max > 0.8 {
@@ -3030,8 +3053,11 @@ func (s *Ship) flyToPoint(tX float64, tY float64, hold float64, caution float64)
 	// face towards target
 	turnMag := s.facePoint(tX, tY)
 
-	// determine whether to recalculate real accel + drag
+	// determine whether to recalculate real accel + drag + turning
 	rc := s.CurrentSystem.tickCounter%8 == 0
+
+	// chance to recalculate turning
+	s.GetRealTurn(rc)
 
 	// determine whether to thrust forward and by how much
 	scale := ((s.GetRealAccel(rc) * (caution / s.GetRealSpaceDrag(rc))) / 0.175)
@@ -3060,9 +3086,9 @@ func (s *Ship) facePoint(tX float64, tY float64) float64 {
 
 	// apply turn with ship limits
 	if a > 0 {
-		s.rotate(turnMag / s.GetRealTurn())
+		s.rotate(turnMag / s.GetRealTurn(false))
 	} else if a < 0 {
-		s.rotate(turnMag / -s.GetRealTurn())
+		s.rotate(turnMag / -s.GetRealTurn(false))
 	}
 
 	return turnMag
@@ -3085,7 +3111,7 @@ func (s *Ship) rotate(scale float64) {
 	}
 
 	// calculate burn
-	burn := s.GetRealTurn() * scale
+	burn := s.GetRealTurn(false) * scale
 
 	// turn
 	s.Theta += burn
@@ -3395,7 +3421,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	v, _ := m.ItemMeta.GetFloat64("volume")
 
 	// make sure there is sufficient space in the cargo bay
-	if s.TotalCargoBayVolumeUsed(lock)+v > s.GetRealCargoBayVolume() {
+	if s.TotalCargoBayVolumeUsed(lock)+v > s.GetRealCargoBayVolume(true) {
 		return errors.New("insufficient room in cargo bay to unfit module")
 	}
 
@@ -3429,7 +3455,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 			newFB = append(newFB, o)
 		} else {
 			// move to cargo bay if there is still room
-			if s.TotalCargoBayVolumeUsed(lock)+v <= s.GetRealCargoBayVolume() {
+			if s.TotalCargoBayVolumeUsed(lock)+v <= s.GetRealCargoBayVolume(true) {
 				m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, o)
 				o.ContainerID = m.shipMountedOn.CargoBayContainerID
 
@@ -3545,7 +3571,7 @@ func (s *Ship) PutItemInCargo(item *Item, lock bool) error {
 
 	// make sure there is enough space
 	used := s.TotalCargoBayVolumeUsed(lock)
-	max := s.GetRealCargoBayVolume()
+	max := s.GetRealCargoBayVolume(true)
 
 	tV := 0.0
 
@@ -3718,7 +3744,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 	if !isShip {
 		// verify sufficient cargo capacity
 		usedBay := s.TotalCargoBayVolumeUsed(lock)
-		maxBay := s.GetRealCargoBayVolume()
+		maxBay := s.GetRealCargoBayVolume(true)
 
 		if usedBay+orderVolume > maxBay {
 			return errors.New("insufficient cargo space available")
@@ -4042,7 +4068,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 
 		// verify sufficient cargo capacity
 		usedBay := s.TotalCargoBayVolumeUsed(lock)
-		maxBay := s.GetRealCargoBayVolume()
+		maxBay := s.GetRealCargoBayVolume(true)
 
 		if usedBay+orderVolume > maxBay {
 			return errors.New("insufficient cargo space available")
@@ -5213,7 +5239,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 			unitVol, _ := c.ItemTypeMeta.GetFloat64("volume")
 
 			// get available space in cargo hold
-			free := m.shipMountedOn.GetRealCargoBayVolume() - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
+			free := m.shipMountedOn.GetRealCargoBayVolume(false) - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
 
 			// calculate effective ore / ice volume pulled
 			pulled := miningVolume * c.Yield * rangeRatio
@@ -5869,7 +5895,7 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 			unitVol, _ := c.ItemTypeMeta.GetFloat64("volume")
 
 			// get available space in cargo hold
-			free := m.shipMountedOn.GetRealCargoBayVolume() - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
+			free := m.shipMountedOn.GetRealCargoBayVolume(false) - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
 
 			// calculate effective ore / ice volume pulled
 			pulled := miningVolume * c.Yield * rangeRatio * trackingRatio
@@ -6309,7 +6335,7 @@ func (m *FittedSlot) activateAsSalvager() bool {
 
 		if i != nil {
 			// success! try to add to cargo bay
-			cv := m.shipMountedOn.GetRealCargoBayVolume()
+			cv := m.shipMountedOn.GetRealCargoBayVolume(false)
 			cu := m.shipMountedOn.TotalCargoBayVolumeUsed(false)
 
 			if cu+sv <= cv {
@@ -7489,6 +7515,7 @@ func recalcAllStatCaches(s *Ship) {
 	s.GetRealHeatSink(true)
 	s.GetRealMaxHeat(true)
 	s.GetRealAccel(true)
+	s.GetRealTurn(true)
 	s.GetRealSpaceDrag(true)
 	s.GetRealMaxFuel(true)
 	s.GetRealMaxEnergy(true)
@@ -7497,4 +7524,5 @@ func recalcAllStatCaches(s *Ship) {
 	s.GetRealMaxHull(true)
 	s.GetRealEnergyRegen(true)
 	s.GetRealShieldRegen(true)
+	s.GetRealCargoBayVolume(true)
 }
