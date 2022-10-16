@@ -94,7 +94,7 @@ export class Ship extends WSShip {
     }
 
     if (ws.cMaxHeat) {
-      this.cMaxHeat = ws.cMaxHeat
+      this.cMaxHeat = ws.cMaxHeat;
     }
 
     if (ws.cRealDrag) {
