@@ -878,7 +878,7 @@ func (s *Ship) updateCloaking() {
 // Updates the ship's energy level for a tick
 func (s *Ship) updateEnergy() {
 	// determine whether to update max energy
-	re := s.CurrentSystem.tickCounter%34 == 0
+	re := s.CurrentSystem.tickCounter%14 == 0
 
 	maxEnergy := s.GetRealMaxEnergy(re)
 
@@ -993,7 +993,7 @@ func (s *Ship) updateShield() {
 // Updates the ship's heat level for a tick
 func (s *Ship) updateHeat() {
 	// determine whether to recalculate heat cap amount
-	rhc := s.CurrentSystem.tickCounter%33 == 0
+	rhc := s.CurrentSystem.tickCounter%13 == 0
 
 	// get max heat
 	maxHeat := s.GetRealMaxHeat(rhc)
