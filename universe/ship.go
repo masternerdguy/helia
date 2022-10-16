@@ -204,6 +204,7 @@ type Ship struct {
 	CachedMaxFuel          float64 // cache of output from GetRealMaxFuel
 	CachedMaxEnergy        float64 // cache of output from GetRealMaxEnergy
 	CachedMaxShield        float64 // cache of output from GetRealMaxShield
+	CachedMaxArmor         float64 // cache of output from GetRealMaxArmor
 	EscrowContainerID      *uuid.UUID
 	BeingFlownByPlayer     bool
 	ReputationSheet        *shared.PlayerReputationSheet
@@ -977,7 +978,11 @@ func (s *Ship) updateShield() {
 		s.Armor = 0
 	}
 
-	maxArmor := s.GetRealMaxArmor()
+	// determine whether to recalculate max armor
+	ra := s.CurrentSystem.tickCounter%16 == 0
+
+	// get max armor
+	maxArmor := s.GetRealMaxArmor(ra)
 
 	if s.Armor > maxArmor {
 		s.Armor = maxArmor
@@ -1248,7 +1253,7 @@ func (s *Ship) ApplyPhysicsDummy(dummy physics.Dummy) {
 func (s *Ship) ReMaxStatsForSpawn() {
 	if s.ReMaxDirty {
 		s.Shield = s.GetRealMaxShield(true)
-		s.Armor = s.GetRealMaxArmor()
+		s.Armor = s.GetRealMaxArmor(true)
 		s.Hull = s.GetRealMaxHull()
 		s.Fuel = s.GetRealMaxFuel(true)
 		s.Energy = s.GetRealMaxEnergy(true)
@@ -1384,7 +1389,12 @@ func (s *Ship) GetRealShieldRegen() float64 {
 }
 
 // Returns the real max armor of the ship after modifiers
-func (s *Ship) GetRealMaxArmor() float64 {
+func (s *Ship) GetRealMaxArmor(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedMaxArmor
+	}
+
 	// get base max armor
 	a := s.TemplateData.BaseArmor * s.FlightExperienceModifier
 
@@ -1398,7 +1408,11 @@ func (s *Ship) GetRealMaxArmor() float64 {
 		}
 	}
 
-	return a
+	// store result in cache
+	s.CachedMaxArmor = a
+
+	// return result
+	return s.CachedMaxArmor
 }
 
 // Returns the real max hull of the ship after modifiers
@@ -1687,7 +1701,7 @@ func (s *Ship) DealDamage(
 	}
 
 	// determine armor percentage
-	armorP := s.Armor / s.GetRealMaxArmor()
+	armorP := s.Armor / s.GetRealMaxArmor(false)
 
 	// apply hull damage if armor below 25% scaling for remaining shield and armor
 	if armorP < 0.25 {
@@ -3345,7 +3359,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 
 	// if the module is in rack c, make sure the ship is fully repaired
 	if m.Rack == "C" {
-		if s.Armor < s.GetRealMaxArmor() || s.Hull < s.GetRealMaxHull() {
+		if s.Armor < s.GetRealMaxArmor(true) || s.Hull < s.GetRealMaxHull() {
 			return errors.New("armor and hull must be fully repaired before unfitting modules in rack c")
 		}
 	}
@@ -4556,7 +4570,7 @@ func (s *Ship) SelfDestruct(lock bool) error {
 	}
 
 	// blow it up
-	s.DealDamage(s.GetRealMaxShield(false)+1, s.GetRealMaxArmor()+1, s.GetRealMaxHull()+1, nil, nil)
+	s.DealDamage(s.GetRealMaxShield(false)+1, s.GetRealMaxArmor(false)+1, s.GetRealMaxHull()+1, nil, nil)
 
 	return nil
 }
@@ -4668,7 +4682,7 @@ func (s *Ship) ConsumeRepairKitFromCargo(itemID uuid.UUID, lock bool) error {
 	s.Hull += float64(hullFactor)
 
 	// limit health
-	maxArmor := s.GetRealMaxArmor()
+	maxArmor := s.GetRealMaxArmor(true)
 	maxHull := s.GetRealMaxHull()
 
 	if s.Armor > maxArmor {
