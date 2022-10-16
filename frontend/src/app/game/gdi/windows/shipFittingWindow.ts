@@ -788,7 +788,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Heat Capacity',
-          `${this.player.currentShip.cMaxHeat}`
+          `${parseFloat(this.player.currentShip.cMaxHeat.toFixed(2))}`
         )
       )
     );
@@ -821,7 +821,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Aether Drag',
-          `${this.player.currentShip.cRealDrag}`
+          `${parseFloat(this.player.currentShip.cRealDrag.toFixed(2))}`
         )
       )
     );
@@ -830,7 +830,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Fuel Capacity',
-          `${this.player.currentShip.cMaxFuel}`
+          `${parseFloat(this.player.currentShip.cMaxFuel.toFixed(2))}`
         )
       )
     );
@@ -839,7 +839,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Energy Capacity',
-          `${this.player.currentShip.cEnergyRegen}`
+          `${parseFloat(this.player.currentShip.cEnergyRegen.toFixed(2))}`
         )
       )
     );
@@ -848,7 +848,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Energy Output',
-          `${this.player.currentShip.cMaxEnergy}`
+          `${parseFloat(this.player.currentShip.cMaxEnergy.toFixed(2))}`
         )
       )
     );
@@ -857,7 +857,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Shield Capacity',
-          `${this.player.currentShip.cMaxShield}`
+          `${parseFloat(this.player.currentShip.cMaxShield.toFixed(2))}`
         )
       )
     );
@@ -866,7 +866,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Shield Output',
-          `${this.player.currentShip.cShieldRegen}`
+          `${parseFloat(this.player.currentShip.cShieldRegen.toFixed(2))}`
         )
       )
     );
@@ -875,7 +875,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Armor Strength',
-          `${this.player.currentShip.cMaxArmor}`
+          `${parseFloat(this.player.currentShip.cMaxArmor.toFixed(2))}`
         )
       )
     );
@@ -884,7 +884,7 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Hull Strength',
-          `${this.player.currentShip.cMaxHull}`
+          `${parseFloat(this.player.currentShip.cMaxHull.toFixed(2))}`
         )
       )
     );
