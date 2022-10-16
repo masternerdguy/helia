@@ -3320,8 +3320,12 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 		s.Armor += armorMaxAdd
 	}
 
-	// recalculate max armor
+	// recalculate maxes
 	s.GetRealMaxArmor(true)
+	s.GetRealMaxEnergy(true)
+	s.GetRealMaxEnergy(true)
+	s.GetRealMaxFuel(true)
+	s.GetRealMaxHeat(true)
 
 	// success!
 	return nil
@@ -3398,6 +3402,13 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	}
 
 	s.FittingBay.Items = newFB
+
+	// recalculate maxes
+	s.GetRealMaxArmor(true)
+	s.GetRealMaxEnergy(true)
+	s.GetRealMaxEnergy(true)
+	s.GetRealMaxFuel(true)
+	s.GetRealMaxHeat(true)
 
 	// success!
 	return nil
