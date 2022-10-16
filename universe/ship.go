@@ -454,6 +454,10 @@ func getModuleFamily(itemFamilyID string) string {
 		modFamily = "ewar"
 	} else if itemFamilyID == "ewar_d_mask" {
 		modFamily = "ewar"
+	} else if itemFamilyID == "therm_cap" {
+		modFamily = "heat"
+	} else if itemFamilyID == "burst_reactor" {
+		modFamily = "power"
 	}
 
 	return modFamily

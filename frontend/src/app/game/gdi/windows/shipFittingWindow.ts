@@ -1212,7 +1212,9 @@ function checkIfModule(m: WSContainerItem) {
     m.itemFamilyID === 'ewar_cycle' ||
     m.itemFamilyID === 'ewar_fcj' ||
     m.itemFamilyID === 'ewar_r_mask' ||
-    m.itemFamilyID === 'ewar_d_mask'
+    m.itemFamilyID === 'ewar_d_mask' ||
+    m.itemFamilyID === 'therm_cap' ||
+    m.itemFamilyID === 'burst_reactor'
   );
 }
 
