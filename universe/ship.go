@@ -198,6 +198,7 @@ type Ship struct {
 	CargoBay               *Container
 	FittingBay             *Container
 	CachedHeatSink         float64 // cache of output from GetRealHeatSink
+	CachedMaxHeat          float64 // cache of output from GetRealMaxHeat
 	CachedRealAccel        float64 // cache of output from GetRealAccel
 	CachedRealSpaceDrag    float64 // cache of output from GetRealSpaceDrag
 	EscrowContainerID      *uuid.UUID
@@ -982,8 +983,11 @@ func (s *Ship) updateShield() {
 
 // Updates the ship's heat level for a tick
 func (s *Ship) updateHeat() {
+	// determine whether to recalculate heat cap amount
+	rhc := s.CurrentSystem.tickCounter%33 == 0
+
 	// get max heat
-	maxHeat := s.GetRealMaxHeat()
+	maxHeat := s.GetRealMaxHeat(rhc)
 
 	// calculate dissipation efficiency modifier based on heat percentage
 	x := s.Heat / maxHeat
@@ -1421,8 +1425,29 @@ func (s *Ship) GetRealEnergyRegen() float64 {
 }
 
 // Returns the real max heat of the ship after modifiers
-func (s *Ship) GetRealMaxHeat() float64 {
-	return s.TemplateData.BaseHeatCap * s.FlightExperienceModifier
+func (s *Ship) GetRealMaxHeat(recalculate bool) float64 {
+	if !recalculate {
+		return s.CachedMaxHeat
+	}
+
+	// get base heat cap
+	a := s.TemplateData.BaseHeatCap * s.FlightExperienceModifier
+
+	// add bonuses from passive modules in rack c
+	for _, e := range s.Fitting.CRack {
+		heatCapAdd, s := e.ItemMeta.GetFloat64("heat_cap_max_add")
+
+		if s {
+			// include in real max
+			a += heatCapAdd
+		}
+	}
+
+	// calculate and cache final heat cap
+	s.CachedMaxHeat = a
+
+	// return result
+	return s.CachedMaxHeat
 }
 
 // Returns the real heat dissipation rate of the ship after modifiers
@@ -1756,7 +1781,7 @@ func (s *Ship) behave() {
 // wanders around the universe aimlessly
 func (s *Ship) behaviourWander() {
 	// pause if heat too high
-	maxHeat := s.GetRealMaxHeat()
+	maxHeat := s.GetRealMaxHeat(false)
 	heatLevel := s.Heat / maxHeat
 
 	if heatLevel > 0.95 {
@@ -1795,7 +1820,7 @@ func (s *Ship) behaviourPatrol() {
 	autoReg := SharedAutopilotRegistry
 
 	// get heat level
-	maxHeat := s.GetRealMaxHeat()
+	maxHeat := s.GetRealMaxHeat(false)
 	heatLevel := s.Heat / maxHeat
 
 	// don't worry about heat if actually fighting
@@ -1880,7 +1905,7 @@ func (s *Ship) behaviourPatrol() {
 // wanders around the universe randomly buying and selling things to patch the economy
 func (s *Ship) behaviourPatchTrade() {
 	// pause if heat too high
-	maxHeat := s.GetRealMaxHeat()
+	maxHeat := s.GetRealMaxHeat(false)
 	heatLevel := s.Heat / maxHeat
 
 	if heatLevel > 0.95 {
@@ -2017,7 +2042,7 @@ func (s *Ship) behaviourPatchTrade() {
 // wanders around the universe randomly mining and selling what it mined to patch the economy
 func (s *Ship) behaviourPatchMine() {
 	// pause if heat too high
-	maxHeat := s.GetRealMaxHeat()
+	maxHeat := s.GetRealMaxHeat(false)
 	heatLevel := s.Heat / maxHeat
 
 	if heatLevel > 0.95 {
@@ -2675,7 +2700,7 @@ func (s *Ship) doAutopilotFight() {
 
 		if s.CurrentSystem.tickCounter%45 == 0 {
 			// try to activate rack A modules
-			maxHeat := s.GetRealMaxHeat()
+			maxHeat := s.GetRealMaxHeat(false)
 			heatAdd := 0.0
 
 			for i, v := range s.Fitting.ARack {
@@ -2706,7 +2731,7 @@ func (s *Ship) doAutopilotFight() {
 			}
 		} else if s.CurrentSystem.tickCounter%37 == 0 {
 			// try to activate rack B modules
-			maxHeat := s.GetRealMaxHeat()
+			maxHeat := s.GetRealMaxHeat(false)
 			heatAdd := 0.0
 
 			for i, v := range s.Fitting.BRack {
@@ -2837,7 +2862,7 @@ func (s *Ship) doAutopilotMine() {
 
 		if s.CurrentSystem.tickCounter%45 == 0 {
 			// try to activate rack A mining modules
-			maxHeat := s.GetRealMaxHeat()
+			maxHeat := s.GetRealMaxHeat(false)
 			heatAdd := 0.0
 
 			for i, v := range s.Fitting.ARack {
@@ -5457,7 +5482,7 @@ func (m *FittedSlot) activateAsActiveRadiator() bool {
 	cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
 
 	// get ship heat capacity
-	mx := m.shipMountedOn.GetRealMaxHeat()
+	mx := m.shipMountedOn.GetRealMaxHeat(false)
 
 	// calculate heat sink amount
 	dA := (activationEnergy / mx) * 35
