@@ -904,7 +904,7 @@ export class ShipFittingWindow extends GDIWindow {
     rows.push(buildShipViewRowSpacer());
 
     // layout selected stats
-    rows.push(buildShipViewRowText('Vector'));
+    rows.push(buildShipViewRowText('Velocity'));
 
     const vel = overviewDistance(
       0,
@@ -913,7 +913,7 @@ export class ShipFittingWindow extends GDIWindow {
       this.player.currentShip.velY
     );
 
-    rows.push(buildShipViewRowText(infoKeyValueString('Velocity', `${vel}`)));
+    rows.push(buildShipViewRowText(infoKeyValueString('Speed', `${vel}`)));
 
     rows.push(
       buildShipViewRowText(
