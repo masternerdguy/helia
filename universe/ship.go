@@ -5031,6 +5031,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsRegenerationMask()
 			} else if m.ItemTypeFamily == "ewar_d_mask" {
 				canActivate = m.activateAsDissipationMask()
+			} else if m.ItemTypeFamily == "burst_reactor" {
+				canActivate = m.activateAsBurstReactor()
 			}
 
 			if canActivate {
@@ -7307,6 +7309,78 @@ func (m *FittedSlot) activateAsDissipationMask() bool {
 
 	// module activates!
 	return true
+}
+
+func (m *FittedSlot) activateAsBurstReactor() bool {
+	// get max pellet volume and leakage
+	maxVolume, _ := m.ItemMeta.GetFloat64("max_fuel_volume")
+	leakage, _ := m.ItemTypeMeta.GetFloat64("leakage")
+
+	// apply usage experience modifier
+	maxVolume *= m.usageExperienceModifier
+
+	// locate a stack of pellets below the given unit volume
+	for _, i := range m.shipMountedOn.CargoBay.Items {
+		// safety checks
+		if !i.IsPackaged {
+			continue
+		}
+
+		if i.Quantity <= 0 {
+			continue
+		}
+
+		if i.CoreDirty {
+			continue
+		}
+
+		// check family
+		if i.ItemFamilyID != "fuel" {
+			continue
+		}
+
+		// check volume
+		iv, _ := i.ItemTypeMeta.GetFloat64("volume")
+
+		if iv <= maxVolume {
+			// decrement quantity
+			i.Quantity--
+
+			// escalate to core for saving
+			m.shipMountedOn.CurrentSystem.ChangedQuantityItems = append(m.shipMountedOn.CurrentSystem.ChangedQuantityItems, i)
+
+			// get fuel amount
+			bf, _ := i.ItemTypeMeta.GetFloat64("fuelconversion")
+
+			// apply leakage
+			af := bf * (1 - leakage)
+
+			// apply energy
+			m.shipMountedOn.Energy += af
+
+			// get max energy
+			me := m.shipMountedOn.GetRealMaxEnergy(false)
+
+			// get excess for heat
+			eh := m.shipMountedOn.Energy - me
+
+			if eh > 0 {
+				// add heat
+				m.shipMountedOn.Heat += eh
+			}
+
+			// cap energy
+			if m.shipMountedOn.Energy > me {
+				m.shipMountedOn.Energy = me
+			}
+
+			// module activates!
+			return true
+		}
+	}
+
+	// module doesn't activate
+	return false
 }
 
 // Reusable helper function to determine cycle disruptor chance and amount respectively
