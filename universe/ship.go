@@ -1483,7 +1483,7 @@ func (s *Ship) GetRealMaxHull(recalculate bool) float64 {
 func (s *Ship) GetRealMaxEnergy(recalculate bool) float64 {
 	// return cache if no recalculation
 	if !recalculate {
-		return s.CachedMaxFuel
+		return s.CachedMaxEnergy
 	}
 
 	// get base max energy
