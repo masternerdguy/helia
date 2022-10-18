@@ -903,6 +903,40 @@ export class ShipFittingWindow extends GDIWindow {
 
     rows.push(buildShipViewRowSpacer());
 
+    // layout selected stats
+    rows.push(buildShipViewRowText('Vector'));
+
+    const vel = overviewDistance(
+      0,
+      0,
+      this.player.currentShip.velX,
+      this.player.currentShip.velY
+    );
+
+    rows.push(buildShipViewRowText(infoKeyValueString('Velocity', `${vel}`)));
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Angle',
+          `${parseFloat(this.player.currentShip.theta?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Position',
+          `<${parseFloat(
+            this.player.currentShip.x?.toFixed(2)
+          )}> by <${parseFloat(this.player.currentShip.y?.toFixed(2))}>`
+        )
+      )
+    );
+
+    rows.push(buildShipViewRowSpacer());
+
     if (!docked) {
       // layout danger zone
       rows.push(buildShipViewRowText('Danger Zone'));
@@ -1456,4 +1490,30 @@ function shortWallet(d: number): string {
 
 function getItemSortString(item: WSContainerItem): string {
   return `${item.itemFamilyName}::${item.itemTypeName}::${item.quantity}::${item.id}`;
+}
+
+function overviewDistance(
+  px: number,
+  py: number,
+  x: number,
+  y: number
+): string {
+  // get distance
+  const d = Math.round(Math.sqrt((px - x) * (px - x) + (py - y) * (py - y)));
+  let o = `${d}`;
+
+  // include metric prefix if needed
+  if (d >= 1000000000000000) {
+    o = `${(d / 1000000000000000).toFixed(2)}P`;
+  } else if (d >= 1000000000000) {
+    o = `${(d / 1000000000000).toFixed(2)}T`;
+  } else if (d >= 1000000000) {
+    o = `${(d / 1000000000).toFixed(2)}G`;
+  } else if (d >= 1000000) {
+    o = `${(d / 1000000).toFixed(2)}M`;
+  } else if (d >= 1000) {
+    o = `${(d / 1000).toFixed(2)}k`;
+  }
+
+  return o;
 }
