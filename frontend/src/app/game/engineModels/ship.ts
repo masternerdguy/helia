@@ -336,6 +336,50 @@ export class Ship extends WSShip {
     if (sh.factionId) {
       this.factionId = sh.factionId;
     }
+
+    if (sh.cHeatSink) {
+      this.cHeatSink = sh.cHeatSink;
+    }
+
+    if (sh.cMaxHeat) {
+      this.cMaxHeat = sh.cMaxHeat;
+    }
+
+    if (sh.cRealDrag) {
+      this.cRealDrag = sh.cRealDrag;
+    }
+
+    if (sh.cMaxFuel) {
+      this.cMaxFuel = sh.cMaxFuel;
+    }
+
+    if (sh.cMaxEnergy) {
+      this.cMaxEnergy = sh.cMaxEnergy;
+    }
+
+    if (sh.cMaxShield) {
+      this.cMaxShield = sh.cMaxShield;
+    }
+
+    if (sh.cMaxArmor) {
+      this.cMaxArmor = sh.cMaxArmor;
+    }
+
+    if (sh.cMaxHull) {
+      this.cMaxHull = sh.cMaxHull;
+    }
+
+    if (sh.cEnergyRegen) {
+      this.cEnergyRegen = sh.cEnergyRegen;
+    }
+
+    if (sh.cShieldRegen) {
+      this.cShieldRegen = sh.cShieldRegen;
+    }
+
+    if (sh.cCargoBayVolume) {
+      this.cCargoBayVolume = sh.cCargoBayVolume;
+    }
   }
 
   getAverageSyncDelta(): DeltaTailEntry {

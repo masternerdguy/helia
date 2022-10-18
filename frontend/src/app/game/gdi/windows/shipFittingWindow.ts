@@ -796,7 +796,7 @@ export class ShipFittingWindow extends GDIWindow {
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
-          'Heat Sink',
+          'Heat Dissipation',
           `${parseFloat(this.player.currentShip.cHeatSink?.toFixed(2))}`
         )
       )
