@@ -15,8 +15,9 @@
 }
 
 #header-branding {
+    overflow: hidden;
+    margin-top: -10px;
     margin-left: 10px;
-    margin-right: 5px;
     cursor: pointer;
 }
 
@@ -32,8 +33,15 @@
     border: 1px solid aquamarine;
     color: antiquewhite;
     position: relative;
-    top: -7px;
+    top: -3px;
     padding: 9px;
     border-radius: 10px;
     cursor: pointer;
+}
+
+.center-img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
 }
