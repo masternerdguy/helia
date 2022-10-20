@@ -275,6 +275,15 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Write(o)
 }
 
+// Password reset requests for existing users
+func (l *HTTPListener) HandleForgot(w http.ResponseWriter, r *http.Request) {
+	// enable cors
+	enableCors(&w)
+
+	// write pingback
+	fmt.Fprintf(w, "not yet implemented!")
+}
+
 // Shuts down the server after saving the game state
 func (l *HTTPListener) HandleShutdown(w http.ResponseWriter, r *http.Request) {
 	// enable cors
