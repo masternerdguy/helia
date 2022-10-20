@@ -904,7 +904,7 @@ export class ShipFittingWindow extends GDIWindow {
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
-          'Cloaking Output',
+          'Cloak Coverage',
           `${parseFloat(this.player.currentShip.sumCloak?.toFixed(2))}`
         )
       )
