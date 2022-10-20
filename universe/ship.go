@@ -659,6 +659,11 @@ func (s *Ship) alwaysPeriodicUpdate() {
 		s.updateCloaking()
 	}
 
+	// update veiling (safe to do every few ticks)
+	if s.CurrentSystem.tickCounter%7 == 0 {
+		s.updateVeiling()
+	}
+
 	// determine whether to recalculate cargo capacity
 	rcc := s.CurrentSystem.tickCounter%22 == 0
 
@@ -891,6 +896,30 @@ func (s *Ship) updateCloaking() {
 	}
 
 	s.IsCloaked = cloaked
+}
+
+// Determines veil damage absorption for a tick
+func (s *Ship) updateVeiling() {
+	// check for active omni hardeners
+	genericHardening := 0.0
+
+	for _, x := range s.TemporaryModifiers {
+		if x.RemainingTicks > 0 && x.Attribute == "veil" {
+			genericHardening += x.Percentage
+		}
+	}
+
+	// clamp active omni hardening
+	if genericHardening > 0.99 {
+		genericHardening = 0.99
+	}
+
+	if genericHardening < 0 {
+		genericHardening = 0
+	}
+
+	// store factor
+	s.SumVeiling = genericHardening
 }
 
 // Updates the ship's energy level for a tick
@@ -1738,26 +1767,8 @@ func (s *Ship) DealDamage(
 		attackerModule,
 	)
 
-	// check for active omni hardeners
-	genericHardening := 0.0
-
-	for _, x := range s.TemporaryModifiers {
-		if x.RemainingTicks > 0 && x.Attribute == "veil" {
-			genericHardening += x.Percentage
-		}
-	}
-
-	// clamp active omni hardening
-	if genericHardening > 0.99 {
-		genericHardening = 0.99
-	}
-
-	if genericHardening < 0 {
-		genericHardening = 0
-	}
-
-	// store hardening sum
-	s.SumVeiling = genericHardening
+	// get generic hardening (veiling)
+	genericHardening := s.SumVeiling
 
 	// apply active omni hardeners
 	shieldDmg *= 1.0 - genericHardening
