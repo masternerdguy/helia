@@ -88,6 +88,50 @@ export class Ship extends WSShip {
     if (ws.wallet) {
       this.wallet = Math.round(ws.wallet);
     }
+
+    if (ws.cHeatSink) {
+      this.cHeatSink = ws.cHeatSink;
+    }
+
+    if (ws.cMaxHeat) {
+      this.cMaxHeat = ws.cMaxHeat;
+    }
+
+    if (ws.cRealDrag) {
+      this.cRealDrag = ws.cRealDrag;
+    }
+
+    if (ws.cMaxFuel) {
+      this.cMaxFuel = ws.cMaxFuel;
+    }
+
+    if (ws.cMaxEnergy) {
+      this.cMaxEnergy = ws.cMaxEnergy;
+    }
+
+    if (ws.cMaxShield) {
+      this.cMaxShield = ws.cMaxShield;
+    }
+
+    if (ws.cMaxArmor) {
+      this.cMaxArmor = ws.cMaxArmor;
+    }
+
+    if (ws.cMaxHull) {
+      this.cMaxHull = ws.cMaxHull;
+    }
+
+    if (ws.cEnergyRegen) {
+      this.cEnergyRegen = ws.cEnergyRegen;
+    }
+
+    if (ws.cShieldRegen) {
+      this.cShieldRegen = ws.cShieldRegen;
+    }
+
+    if (ws.cCargoBayVolume) {
+      this.cCargoBayVolume = ws.cCargoBayVolume;
+    }
   }
 
   render(ctx: any, camera: Camera) {
@@ -291,6 +335,50 @@ export class Ship extends WSShip {
 
     if (sh.factionId) {
       this.factionId = sh.factionId;
+    }
+
+    if (sh.cHeatSink) {
+      this.cHeatSink = sh.cHeatSink;
+    }
+
+    if (sh.cMaxHeat) {
+      this.cMaxHeat = sh.cMaxHeat;
+    }
+
+    if (sh.cRealDrag) {
+      this.cRealDrag = sh.cRealDrag;
+    }
+
+    if (sh.cMaxFuel) {
+      this.cMaxFuel = sh.cMaxFuel;
+    }
+
+    if (sh.cMaxEnergy) {
+      this.cMaxEnergy = sh.cMaxEnergy;
+    }
+
+    if (sh.cMaxShield) {
+      this.cMaxShield = sh.cMaxShield;
+    }
+
+    if (sh.cMaxArmor) {
+      this.cMaxArmor = sh.cMaxArmor;
+    }
+
+    if (sh.cMaxHull) {
+      this.cMaxHull = sh.cMaxHull;
+    }
+
+    if (sh.cEnergyRegen) {
+      this.cEnergyRegen = sh.cEnergyRegen;
+    }
+
+    if (sh.cShieldRegen) {
+      this.cShieldRegen = sh.cShieldRegen;
+    }
+
+    if (sh.cCargoBayVolume) {
+      this.cCargoBayVolume = sh.cCargoBayVolume;
     }
   }
 

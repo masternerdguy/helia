@@ -1543,6 +1543,9 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 	// hook cargo bay schematics into running jobs
 	hookSchematics(sp)
 
+	// calculate initial stat caches
+	universe.RecalcAllStatCaches(sp)
+
 	// return pointer to ship
 	return sp, nil
 }

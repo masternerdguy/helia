@@ -781,6 +781,162 @@ export class ShipFittingWindow extends GDIWindow {
 
     rows.push(buildShipViewRowSpacer());
 
+    // layout selected stats
+    rows.push(buildShipViewRowText('Performance'));
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Heat Capacity',
+          `${parseFloat(this.player.currentShip.cMaxHeat?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Heat Dissipation',
+          `${parseFloat(this.player.currentShip.cHeatSink?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Acceleration',
+          `${parseFloat(this.player.currentShip.accel?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Turning',
+          `${parseFloat(this.player.currentShip.turn?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Aether Drag',
+          `${parseFloat(this.player.currentShip.cRealDrag?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Fuel Capacity',
+          `${parseFloat(this.player.currentShip.cMaxFuel?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Energy Capacity',
+          `${parseFloat(this.player.currentShip.cMaxEnergy?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Energy Output',
+          `${parseFloat(this.player.currentShip.cEnergyRegen?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Shield Capacity',
+          `${parseFloat(this.player.currentShip.cMaxShield?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Shield Output',
+          `${parseFloat(this.player.currentShip.cShieldRegen?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Armor Strength',
+          `${parseFloat(this.player.currentShip.cMaxArmor?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Hull Strength',
+          `${parseFloat(this.player.currentShip.cMaxHull?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Cargo Capacity',
+          `${parseFloat(this.player.currentShip.cCargoBayVolume?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(buildShipViewRowSpacer());
+
+    // layout selected stats
+    rows.push(buildShipViewRowText('Velocity'));
+
+    const vel = overviewDistance(
+      0,
+      0,
+      this.player.currentShip.velX,
+      this.player.currentShip.velY
+    );
+
+    rows.push(buildShipViewRowText(infoKeyValueString('Speed', `${vel}`)));
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Angle',
+          `${parseFloat(this.player.currentShip.theta?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Position',
+          `<${parseFloat(
+            this.player.currentShip.x?.toFixed(2)
+          )}> by <${parseFloat(this.player.currentShip.y?.toFixed(2))}>`
+        )
+      )
+    );
+
+    rows.push(buildShipViewRowSpacer());
+
     if (!docked) {
       // layout danger zone
       rows.push(buildShipViewRowText('Danger Zone'));
@@ -1208,7 +1364,13 @@ function checkIfModule(m: WSContainerItem) {
     m.itemFamilyID === 'cargo_expander' ||
     m.itemFamilyID === 'salvager' ||
     m.itemFamilyID === 'heat_sink' ||
-    m.itemFamilyID === 'utility_add'
+    m.itemFamilyID === 'utility_add' ||
+    m.itemFamilyID === 'ewar_cycle' ||
+    m.itemFamilyID === 'ewar_fcj' ||
+    m.itemFamilyID === 'ewar_r_mask' ||
+    m.itemFamilyID === 'ewar_d_mask' ||
+    m.itemFamilyID === 'therm_cap' ||
+    m.itemFamilyID === 'burst_reactor'
   );
 }
 
@@ -1328,4 +1490,30 @@ function shortWallet(d: number): string {
 
 function getItemSortString(item: WSContainerItem): string {
   return `${item.itemFamilyName}::${item.itemTypeName}::${item.quantity}::${item.id}`;
+}
+
+function overviewDistance(
+  px: number,
+  py: number,
+  x: number,
+  y: number
+): string {
+  // get distance
+  const d = Math.round(Math.sqrt((px - x) * (px - x) + (py - y) * (py - y)));
+  let o = `${d}`;
+
+  // include metric prefix if needed
+  if (d >= 1000000000000000) {
+    o = `${(d / 1000000000000000).toFixed(2)}P`;
+  } else if (d >= 1000000000000) {
+    o = `${(d / 1000000000000).toFixed(2)}T`;
+  } else if (d >= 1000000000) {
+    o = `${(d / 1000000000).toFixed(2)}G`;
+  } else if (d >= 1000000) {
+    o = `${(d / 1000000).toFixed(2)}M`;
+  } else if (d >= 1000) {
+    o = `${(d / 1000).toFixed(2)}k`;
+  }
+
+  return o;
 }

@@ -4,6 +4,7 @@ export class WSIndustrialOrdersUpdate {
 }
 
 export class WSIndustrialSilo {
+  id: string;
   stationId: string;
   stationProcessId: string;
   itemTypeID: string;

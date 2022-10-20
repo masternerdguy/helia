@@ -26,6 +26,17 @@ export class WSShip {
   dockedAtStationID: string;
   cargoP: number;
   wallet: number;
+  cHeatSink: number;
+  cMaxHeat: number;
+  cRealDrag: number;
+  cMaxFuel: number;
+  cMaxEnergy: number;
+  cMaxShield: number;
+  cMaxArmor: number;
+  cMaxHull: number;
+  cEnergyRegen: number;
+  cShieldRegen: number;
+  cCargoBayVolume: number;
 }
 
 export class WSFitting {

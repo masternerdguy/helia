@@ -172,8 +172,6 @@ func (s *SolarSystem) PeriodicUpdate() {
 
 	// increment tick counter
 	s.tickCounter++
-
-	return
 }
 
 // processes the next message from each client in the system, should only be called from PeriodicUpdate
@@ -339,7 +337,7 @@ func (s *SolarSystem) processClientEventQueues() {
 
 				// make sure cargo isn't overloaded
 				usedBay := sh.TotalCargoBayVolumeUsed(false)
-				maxBay := sh.GetRealCargoBayVolume()
+				maxBay := sh.GetRealCargoBayVolume(true)
 
 				if usedBay > maxBay {
 					c.WriteErrorMessage("cargo bay overloaded")
@@ -677,34 +675,6 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 				}
 			}
-		} else if evt.Type == msgRegistry.DeactivateModule {
-			if sh != nil {
-				// extract data
-				data := evt.Body.(models.ClientDeactivateModuleBody)
-
-				// skip if rack c (passive modules)
-				if data.Rack == "C" {
-					continue
-				} else {
-					// find module
-					mod := sh.FindModule(data.ItemID, data.Rack)
-
-					// make sure we found something
-					if mod == nil {
-						// do nothing
-						continue
-					} else {
-						if mod.WillRepeat {
-							// set repeat to false
-							mod.WillRepeat = false
-
-							// clear target
-							mod.TargetID = nil
-							mod.TargetType = nil
-						}
-					}
-				}
-			}
 		} else if evt.Type == msgRegistry.ViewOpenSellOrders {
 			if sh != nil {
 				// extract data (currently nothing to process)
@@ -808,6 +778,7 @@ func (s *SolarSystem) processClientEventQueues() {
 						t := p.Process.Inputs[k]
 
 						vw.InSilos = append(vw.InSilos, models.ServerIndustrialSiloBody{
+							ID:               t.ID.String(),
 							StationID:        p.StationID.String(),
 							StationProcessID: p.ID.String(),
 							ItemTypeID:       t.ItemTypeID.String(),
@@ -827,6 +798,7 @@ func (s *SolarSystem) processClientEventQueues() {
 						t := p.Process.Outputs[k]
 
 						vw.OutSilos = append(vw.OutSilos, models.ServerIndustrialSiloBody{
+							ID:               t.ID.String(),
 							StationID:        p.StationID.String(),
 							StationProcessID: p.ID.String(),
 							ItemTypeID:       t.ItemTypeID.String(),
@@ -1580,7 +1552,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 
 					bayUsed := sh.TotalCargoBayVolumeUsed(false)
-					bayMax := sh.GetRealCargoBayVolume()
+					bayMax := sh.GetRealCargoBayVolume(true)
 
 					if bayUsed+outputSize > bayMax {
 						c.WriteErrorMessage("insufficient space to store outputs")
@@ -2831,9 +2803,9 @@ func (s *SolarSystem) sendClientUpdates() {
 			VelY:          d.VelY,
 			Mass:          d.GetRealMass(),
 			Radius:        d.TemplateData.Radius,
-			ShieldP:       ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
-			ArmorP:        ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
-			HullP:         ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
+			ShieldP:       ((d.Shield / d.GetRealMaxShield(false)) * 100) + Epsilon,
+			ArmorP:        ((d.Armor / d.GetRealMaxArmor(false)) * 100) + Epsilon,
+			HullP:         ((d.Hull / d.GetRealMaxHull(false)) * 100) + Epsilon,
 			FactionID:     d.FactionID,
 		})
 	}
@@ -3135,18 +3107,32 @@ func (s *SolarSystem) sendClientUpdates() {
 					VelY:      d.VelY,
 					Mass:      d.GetRealMass(),
 					Radius:    d.TemplateData.Radius,
-					ShieldP:   ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
-					ArmorP:    ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
-					HullP:     ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
+					ShieldP:   ((d.Shield / d.GetRealMaxShield(false)) * 100) + Epsilon,
+					ArmorP:    ((d.Armor / d.GetRealMaxArmor(false)) * 100) + Epsilon,
+					HullP:     ((d.Hull / d.GetRealMaxHull(false)) * 100) + Epsilon,
 					FactionID: d.FactionID,
 					// secret stuff
-					EnergyP:           ((d.Energy / d.GetRealMaxEnergy()) * 100) + Epsilon,
-					HeatP:             ((d.Heat / d.GetRealMaxHeat()) * 100) + Epsilon,
-					FuelP:             ((d.Fuel / d.GetRealMaxFuel()) * 100) + Epsilon,
+					EnergyP:           ((d.Energy / d.GetRealMaxEnergy(false)) * 100) + Epsilon,
+					HeatP:             ((d.Heat / d.GetRealMaxHeat(false)) * 100) + Epsilon,
+					FuelP:             ((d.Fuel / d.GetRealMaxFuel(false)) * 100) + Epsilon,
 					FitStatus:         fs,
 					DockedAtStationID: d.DockedAtStationID,
-					CargoP:            ((d.TotalCargoBayVolumeUsed(false) / d.GetRealCargoBayVolume()) * 100) + Epsilon,
+					CargoP:            ((d.TotalCargoBayVolumeUsed(false) / d.GetRealCargoBayVolume(false)) * 100) + Epsilon,
 					Wallet:            d.Wallet,
+					// secret caches
+					Accel:                d.GetRealAccel(false),
+					Turn:                 d.GetRealTurn(false),
+					CachedHeatSink:       d.GetRealHeatSink(false),
+					CachedMaxHeat:        d.GetRealMaxHeat(false),
+					CachedRealSpaceDrag:  d.GetRealSpaceDrag(false),
+					CachedMaxFuel:        d.GetRealMaxFuel(false),
+					CachedMaxEnergy:      d.GetRealMaxEnergy(false),
+					CachedMaxShield:      d.GetRealMaxShield(false),
+					CachedMaxArmor:       d.GetRealMaxArmor(false),
+					CachedMaxHull:        d.GetRealMaxHull(false),
+					CachedEnergyRegen:    d.GetRealEnergyRegen(false),
+					CachedShieldRegen:    d.GetRealShieldRegen(false),
+					CachedCargoBayVolume: d.GetRealCargoBayVolume(false),
 				},
 			}
 

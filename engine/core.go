@@ -204,8 +204,6 @@ func (e *HeliaEngine) Start() {
 				// check for afternoon reboot (noon EDT)
 				if utcNow.Hour() == 16 {
 					needsReboot = true
-				} else if utcNow.Hour() == 4 { // check for midnight reboot (midnight EDT)
-					needsReboot = true
 				}
 
 				// handle reboot if needed
@@ -214,11 +212,9 @@ func (e *HeliaEngine) Start() {
 					shared.TeeLog("Automatic scheduled reboot will occur soon!")
 
 					// message explaining situation to players
-					sm := "During the open alpha period, Helia will reboot twice a day at 12 hour intervals. " +
-						"This is to help keep things running smoothly during this phase of development. " +
+					sm := "Helia reboots once a day at noon EDT for scheduled maintainence." +
 						"A reboot will occur in ~10 minutes - please ensure you have gotten to a safe place " +
-						"before then. The server is expected to take ~30 minutes to reboot. As the project " +
-						"matures, these reboots will become less frequent."
+						"before then. The server is expected to take ~30 minutes to reboot."
 
 					// send message to connected clients informing them of shutdown
 					b, _ := json.Marshal(models.ServerPushInfoMessage{

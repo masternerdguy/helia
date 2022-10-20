@@ -1,0 +1,9 @@
+.easter-egg-version {
+    display: none;
+    width: 0;
+    height: 0;
+    color: transparent;
+    background-color: transparent;
+    font-size: 0;
+    font-weight: 0;
+}

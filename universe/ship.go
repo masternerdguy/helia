@@ -198,8 +198,18 @@ type Ship struct {
 	CargoBay               *Container
 	FittingBay             *Container
 	CachedHeatSink         float64 // cache of output from GetRealHeatSink
+	CachedMaxHeat          float64 // cache of output from GetRealMaxHeat
 	CachedRealAccel        float64 // cache of output from GetRealAccel
+	CachedRealTurn         float64 // cache of output from GetRealTurn
 	CachedRealSpaceDrag    float64 // cache of output from GetRealSpaceDrag
+	CachedMaxFuel          float64 // cache of output from GetRealMaxFuel
+	CachedMaxEnergy        float64 // cache of output from GetRealMaxEnergy
+	CachedMaxShield        float64 // cache of output from GetRealMaxShield
+	CachedMaxArmor         float64 // cache of output from GetRealMaxArmor
+	CachedMaxHull          float64 // cache of output from GetRealMaxHull
+	CachedEnergyRegen      float64 // cache of output from GetRealEnergyRegen
+	CachedShieldRegen      float64 // cache of output from GetRealShieldRegen
+	CachedCargoBayVolume   float64 // cache of output from GetRealCargoBayVolume
 	EscrowContainerID      *uuid.UUID
 	BeingFlownByPlayer     bool
 	ReputationSheet        *shared.PlayerReputationSheet
@@ -217,10 +227,11 @@ type Ship struct {
 	Lock                   sync.Mutex
 }
 
-// Structure representing a percentage modifier applied to a ship for a limit number of ticks
+// Structure representing a percentage or raw modifier applied to a ship for a limit number of ticks
 type TemporaryShipModifier struct {
 	Attribute      string
-	Percentage     float64
+	Percentage     float64 // if set, raw should be unset
+	Raw            float64 // if set, percentage should be unset
 	RemainingTicks int
 }
 
@@ -445,6 +456,18 @@ func getModuleFamily(itemFamilyID string) string {
 		modFamily = "cargo"
 	} else if itemFamilyID == "salvager" {
 		modFamily = "utility"
+	} else if itemFamilyID == "ewar_cycle" {
+		modFamily = "ewar"
+	} else if itemFamilyID == "ewar_fcj" {
+		modFamily = "ewar"
+	} else if itemFamilyID == "ewar_r_mask" {
+		modFamily = "ewar"
+	} else if itemFamilyID == "ewar_d_mask" {
+		modFamily = "ewar"
+	} else if itemFamilyID == "therm_cap" {
+		modFamily = "heat"
+	} else if itemFamilyID == "burst_reactor" {
+		modFamily = "power"
 	}
 
 	return modFamily
@@ -593,7 +616,7 @@ func (s *Ship) alwaysPeriodicUpdate() {
 	if s.IsNPC {
 		if s.Fuel <= 0 {
 			// infinite fuel via refill at 0
-			s.Fuel = s.GetRealMaxFuel()
+			s.Fuel = s.GetRealMaxFuel(false)
 		}
 	}
 
@@ -633,6 +656,12 @@ func (s *Ship) alwaysPeriodicUpdate() {
 	if s.CurrentSystem.tickCounter%6 == 0 {
 		s.updateCloaking()
 	}
+
+	// determine whether to recalculate cargo capacity
+	rcc := s.CurrentSystem.tickCounter%22 == 0
+
+	// chance to update cargo capacity
+	s.GetRealCargoBayVolume(rcc)
 
 	// update energy
 	s.updateEnergy()
@@ -861,14 +890,21 @@ func (s *Ship) updateCloaking() {
 
 // Updates the ship's energy level for a tick
 func (s *Ship) updateEnergy() {
-	maxEnergy := s.GetRealMaxEnergy()
+	// determine whether to recalculate max energy
+	re := s.CurrentSystem.tickCounter%14 == 0
+
+	// get max energy
+	maxEnergy := s.GetRealMaxEnergy(re)
 
 	// calculate scaler for energy regen based on current energy percentage
 	x := math.Abs(s.Energy / maxEnergy)
 	u := math.Pow(ShipMinEnergyRegenPercent, x)
 
+	// determine whether to recalculate energy regen
+	rme := s.CurrentSystem.tickCounter%11 == 0
+
 	// get energy regen amount for tick taking energy percentage scaling into account
-	tickRegen := ((s.GetRealEnergyRegen() / 1000) * Heartbeat) * u
+	tickRegen := ((s.GetRealEnergyRegen(rme) / 1000) * Heartbeat) * u
 
 	if s.Energy < (maxEnergy - tickRegen) {
 		// regenerate energy
@@ -900,8 +936,12 @@ func (s *Ship) updateEnergy() {
 		s.Fuel = 0
 	}
 
-	maxFuel := s.GetRealMaxFuel()
+	// determine whether to recalculate max fuel
+	rf := s.CurrentSystem.tickCounter%34 == 0
 
+	maxFuel := s.GetRealMaxFuel(rf)
+
+	// clamp fuel
 	if s.Fuel > maxFuel {
 		s.Fuel = maxFuel
 	}
@@ -909,15 +949,21 @@ func (s *Ship) updateEnergy() {
 
 // Updates the ship's shield level for a tick
 func (s *Ship) updateShield() {
+	// determine whether to recalculate max shield
+	rs := s.CurrentSystem.tickCounter%15 == 0
+
 	// get max shield
-	max := s.GetRealMaxShield()
+	max := s.GetRealMaxShield(rs)
 
 	// calculate scaler for shield regen based on current shield percentage
 	x := math.Abs(s.Shield / max)
 	u := math.Pow(ShipMinShieldRegenPercent, 1.0-x)
 
+	// determine whether to recalculate shield regen
+	rme := s.CurrentSystem.tickCounter%11 == 0
+
 	// get shield regen amount for tick taking shield percentage scaling into account
-	tickRegen := ((s.GetRealShieldRegen() / 1000) * Heartbeat) * u
+	tickRegen := ((s.GetRealShieldRegen(rme) / 1000) * Heartbeat) * u
 
 	if s.Shield < (max - tickRegen) {
 		// calculate shield regen energy use
@@ -949,8 +995,13 @@ func (s *Ship) updateShield() {
 		s.Armor = 0
 	}
 
-	maxArmor := s.GetRealMaxArmor()
+	// determine whether to recalculate max armor
+	ra := s.CurrentSystem.tickCounter%16 == 0
 
+	// get max armor
+	maxArmor := s.GetRealMaxArmor(ra)
+
+	// clamp armor
 	if s.Armor > maxArmor {
 		s.Armor = maxArmor
 	}
@@ -960,8 +1011,13 @@ func (s *Ship) updateShield() {
 		s.Hull = 0
 	}
 
-	maxHull := s.GetRealMaxHull()
+	// determine whether to recalculate max hull
+	rh := s.CurrentSystem.tickCounter%17 == 0
 
+	// get max hull
+	maxHull := s.GetRealMaxHull(rh)
+
+	// clamp hull
 	if s.Hull > maxHull {
 		s.Hull = maxHull
 	}
@@ -969,8 +1025,11 @@ func (s *Ship) updateShield() {
 
 // Updates the ship's heat level for a tick
 func (s *Ship) updateHeat() {
+	// determine whether to recalculate heat cap amount
+	rhc := s.CurrentSystem.tickCounter%13 == 0
+
 	// get max heat
-	maxHeat := s.GetRealMaxHeat()
+	maxHeat := s.GetRealMaxHeat(rhc)
 
 	// calculate dissipation efficiency modifier based on heat percentage
 	x := s.Heat / maxHeat
@@ -1130,7 +1189,7 @@ func (s *Ship) CmdUndock(lock bool) {
 
 	// make sure cargo isn't overloaded
 	usedBay := s.TotalCargoBayVolumeUsed(lock)
-	maxBay := s.GetRealCargoBayVolume()
+	maxBay := s.GetRealCargoBayVolume(true)
 
 	if usedBay > maxBay {
 		return
@@ -1216,12 +1275,16 @@ func (s *Ship) ApplyPhysicsDummy(dummy physics.Dummy) {
 // Resets some stats to their maximum (for use when spawning a new ship)
 func (s *Ship) ReMaxStatsForSpawn() {
 	if s.ReMaxDirty {
-		s.Shield = s.GetRealMaxShield()
-		s.Armor = s.GetRealMaxArmor()
-		s.Hull = s.GetRealMaxHull()
-		s.Fuel = s.GetRealMaxFuel()
-		s.Energy = s.GetRealMaxEnergy()
+		// remax selected stats
+		s.Shield = s.GetRealMaxShield(true)
+		s.Armor = s.GetRealMaxArmor(true)
+		s.Hull = s.GetRealMaxHull(true)
+		s.Fuel = s.GetRealMaxFuel(true)
+		s.Energy = s.GetRealMaxEnergy(true)
 		s.ReMaxDirty = false
+
+		// recalculate cached stats
+		RecalcAllStatCaches(s)
 	}
 }
 
@@ -1309,8 +1372,20 @@ func (s *Ship) GetExperienceModifier() float64 {
 }
 
 // Returns the real turning capability of a ship after modifiers
-func (s *Ship) GetRealTurn() float64 {
-	return s.TemplateData.BaseTurn * s.FlightExperienceModifier
+func (s *Ship) GetRealTurn(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedRealTurn
+	}
+
+	// calculate real turning
+	a := s.TemplateData.BaseTurn * s.FlightExperienceModifier
+
+	// store in cache
+	s.CachedRealTurn = a
+
+	// return result
+	return s.CachedRealTurn
 }
 
 // Returns the real mass of a ship after modifiers
@@ -1319,17 +1394,54 @@ func (s *Ship) GetRealMass() float64 {
 }
 
 // Returns the real max shield of the ship after modifiers
-func (s *Ship) GetRealMaxShield() float64 {
-	return s.TemplateData.BaseShield * s.FlightExperienceModifier
+func (s *Ship) GetRealMaxShield(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedMaxShield
+	}
+
+	// calculate max shield
+	a := s.TemplateData.BaseShield * s.FlightExperienceModifier
+
+	// store in cache
+	s.CachedMaxShield = a
+
+	// return result
+	return s.CachedMaxShield
 }
 
 // Returns the real shield regen rate after modifiers
-func (s *Ship) GetRealShieldRegen() float64 {
-	return s.TemplateData.BaseShieldRegen * s.FlightExperienceModifier
+func (s *Ship) GetRealShieldRegen(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedShieldRegen
+	}
+
+	// get base shield regen
+	a := s.TemplateData.BaseShieldRegen * s.FlightExperienceModifier
+
+	// apply temporary modifiers
+	for _, e := range s.TemporaryModifiers {
+		// regeneration mask (does not accumulate)
+		if e.Attribute == "regeneration_mask" {
+			a *= (1.0 - e.Percentage)
+		}
+	}
+
+	// store in cache
+	s.CachedShieldRegen = a
+
+	// return result
+	return s.CachedShieldRegen
 }
 
 // Returns the real max armor of the ship after modifiers
-func (s *Ship) GetRealMaxArmor() float64 {
+func (s *Ship) GetRealMaxArmor(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedMaxArmor
+	}
+
 	// get base max armor
 	a := s.TemplateData.BaseArmor * s.FlightExperienceModifier
 
@@ -1343,16 +1455,37 @@ func (s *Ship) GetRealMaxArmor() float64 {
 		}
 	}
 
-	return a
+	// store result in cache
+	s.CachedMaxArmor = a
+
+	// return result
+	return s.CachedMaxArmor
 }
 
 // Returns the real max hull of the ship after modifiers
-func (s *Ship) GetRealMaxHull() float64 {
-	return s.TemplateData.BaseHull * s.FlightExperienceModifier
+func (s *Ship) GetRealMaxHull(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedMaxHull
+	}
+
+	// recalculate max hull
+	a := s.TemplateData.BaseHull * s.FlightExperienceModifier
+
+	// store result in cache
+	s.CachedMaxHull = a
+
+	// return result
+	return s.CachedMaxHull
 }
 
 // Returns the real max energy of the ship after modifiers
-func (s *Ship) GetRealMaxEnergy() float64 {
+func (s *Ship) GetRealMaxEnergy(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedMaxEnergy
+	}
+
 	// get base max energy
 	a := s.TemplateData.BaseEnergy * s.FlightExperienceModifier
 
@@ -1366,11 +1499,20 @@ func (s *Ship) GetRealMaxEnergy() float64 {
 		}
 	}
 
-	return a
+	// store result in cache
+	s.CachedMaxEnergy = a
+
+	// return result
+	return s.CachedMaxEnergy
 }
 
 // Returns the real energy regeneration rate of the ship after modifiers
-func (s *Ship) GetRealEnergyRegen() float64 {
+func (s *Ship) GetRealEnergyRegen(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedEnergyRegen
+	}
+
 	// get base energy regen
 	a := s.TemplateData.BaseEnergyRegen * s.FlightExperienceModifier
 
@@ -1384,12 +1526,45 @@ func (s *Ship) GetRealEnergyRegen() float64 {
 		}
 	}
 
-	return a
+	// apply temporary modifiers
+	for _, e := range s.TemporaryModifiers {
+		// regeneration mask (does not accumulate)
+		if e.Attribute == "regeneration_mask" {
+			a *= (1.0 - e.Percentage)
+		}
+	}
+
+	// store in cache
+	s.CachedEnergyRegen = a
+
+	// return result
+	return s.CachedEnergyRegen
 }
 
 // Returns the real max heat of the ship after modifiers
-func (s *Ship) GetRealMaxHeat() float64 {
-	return s.TemplateData.BaseHeatCap * s.FlightExperienceModifier
+func (s *Ship) GetRealMaxHeat(recalculate bool) float64 {
+	if !recalculate {
+		return s.CachedMaxHeat
+	}
+
+	// get base heat cap
+	a := s.TemplateData.BaseHeatCap * s.FlightExperienceModifier
+
+	// add bonuses from passive modules in rack c
+	for _, e := range s.Fitting.CRack {
+		heatCapAdd, s := e.ItemMeta.GetFloat64("heat_cap_max_add")
+
+		if s {
+			// include in real max
+			a += heatCapAdd
+		}
+	}
+
+	// calculate and cache final heat cap
+	s.CachedMaxHeat = a
+
+	// return result
+	return s.CachedMaxHeat
 }
 
 // Returns the real heat dissipation rate of the ship after modifiers
@@ -1417,8 +1592,14 @@ func (s *Ship) GetRealHeatSink(recalculate bool) float64 {
 
 	// apply temporary modifiers
 	for _, e := range s.TemporaryModifiers {
+		// heat sink
 		if e.Attribute == "heat_sink" {
 			tpm += e.Percentage
+		}
+
+		// dissipation mask (does not accumulate)
+		if e.Attribute == "dissipation_mask" {
+			a *= (1.0 - e.Percentage)
 		}
 	}
 
@@ -1435,7 +1616,12 @@ func (s *Ship) GetRealHeatSink(recalculate bool) float64 {
 }
 
 // Returns the real max fuel of the ship after modifiers
-func (s *Ship) GetRealMaxFuel() float64 {
+func (s *Ship) GetRealMaxFuel(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedMaxFuel
+	}
+
 	// get base max fuel
 	f := s.TemplateData.BaseFuel * s.FlightExperienceModifier
 
@@ -1449,11 +1635,20 @@ func (s *Ship) GetRealMaxFuel() float64 {
 		}
 	}
 
-	return f
+	// cache final max fuel
+	s.CachedMaxFuel = f
+
+	// return result
+	return s.CachedMaxFuel
 }
 
 // Returns the real max cargo bay volume of the ship after modifiers
-func (s *Ship) GetRealCargoBayVolume() float64 {
+func (s *Ship) GetRealCargoBayVolume(recalculate bool) float64 {
+	// return cache if no recalculation
+	if !recalculate {
+		return s.CachedCargoBayVolume
+	}
+
 	// get base cargo volume
 	cv := s.TemplateData.BaseCargoBayVolume * s.FlightExperienceModifier
 
@@ -1476,7 +1671,11 @@ func (s *Ship) GetRealCargoBayVolume() float64 {
 		}
 	}
 
-	return cv
+	// store result in cache
+	s.CachedCargoBayVolume = cv
+
+	// return result
+	return s.CachedCargoBayVolume
 }
 
 // Returns the total amount of cargo bay space currently in use
@@ -1566,7 +1765,7 @@ func (s *Ship) DealDamage(
 	}
 
 	// determine shield percentage
-	shieldP := s.Shield / s.GetRealMaxShield()
+	shieldP := s.Shield / s.GetRealMaxShield(false)
 
 	// apply armor damage if shields below 25% scaling for remaining shields
 	if shieldP < 0.25 {
@@ -1579,7 +1778,7 @@ func (s *Ship) DealDamage(
 	}
 
 	// determine armor percentage
-	armorP := s.Armor / s.GetRealMaxArmor()
+	armorP := s.Armor / s.GetRealMaxArmor(false)
 
 	// apply hull damage if armor below 25% scaling for remaining shield and armor
 	if armorP < 0.25 {
@@ -1687,7 +1886,7 @@ func (s *Ship) behave() {
 
 	if s.BehaviourMode != nil {
 		// get aggressive if under threat
-		ms := s.GetRealMaxShield()
+		ms := s.GetRealMaxShield(false)
 		sr := s.Shield / ms
 
 		if sr < 0.75 {
@@ -1717,7 +1916,7 @@ func (s *Ship) behave() {
 // wanders around the universe aimlessly
 func (s *Ship) behaviourWander() {
 	// pause if heat too high
-	maxHeat := s.GetRealMaxHeat()
+	maxHeat := s.GetRealMaxHeat(false)
 	heatLevel := s.Heat / maxHeat
 
 	if heatLevel > 0.95 {
@@ -1756,7 +1955,7 @@ func (s *Ship) behaviourPatrol() {
 	autoReg := SharedAutopilotRegistry
 
 	// get heat level
-	maxHeat := s.GetRealMaxHeat()
+	maxHeat := s.GetRealMaxHeat(false)
 	heatLevel := s.Heat / maxHeat
 
 	// don't worry about heat if actually fighting
@@ -1841,7 +2040,7 @@ func (s *Ship) behaviourPatrol() {
 // wanders around the universe randomly buying and selling things to patch the economy
 func (s *Ship) behaviourPatchTrade() {
 	// pause if heat too high
-	maxHeat := s.GetRealMaxHeat()
+	maxHeat := s.GetRealMaxHeat(false)
 	heatLevel := s.Heat / maxHeat
 
 	if heatLevel > 0.95 {
@@ -1937,7 +2136,7 @@ func (s *Ship) behaviourPatchTrade() {
 				toTrash := make([]*Item, 0)
 
 				// verify sufficient volume is being used to warrant trashing
-				cv := s.GetRealCargoBayVolume()
+				cv := s.GetRealCargoBayVolume(false)
 				cu := s.TotalCargoBayVolumeUsed(false)
 
 				if cu/cv > 0.75 {
@@ -1978,7 +2177,7 @@ func (s *Ship) behaviourPatchTrade() {
 // wanders around the universe randomly mining and selling what it mined to patch the economy
 func (s *Ship) behaviourPatchMine() {
 	// pause if heat too high
-	maxHeat := s.GetRealMaxHeat()
+	maxHeat := s.GetRealMaxHeat(false)
 	heatLevel := s.Heat / maxHeat
 
 	if heatLevel > 0.95 {
@@ -2077,7 +2276,7 @@ func (s *Ship) behaviourPatchMine() {
 			}
 		} else {
 			// check if cargo bay is almost full (>80%)
-			max := s.GetRealCargoBayVolume()
+			max := s.GetRealCargoBayVolume(false)
 			used := s.TotalCargoBayVolumeUsed(false)
 
 			if used/max > 0.8 {
@@ -2236,9 +2435,9 @@ func (s *Ship) doAutopilotManualNav() {
 
 	// apply turn with ship limits
 	if a > 0 {
-		s.rotate(turnMag / s.GetRealTurn())
+		s.rotate(turnMag / s.GetRealTurn(false))
 	} else if a < 0 {
-		s.rotate(turnMag / -s.GetRealTurn())
+		s.rotate(turnMag / -s.GetRealTurn(false))
 	}
 
 	// thrust forward
@@ -2636,7 +2835,7 @@ func (s *Ship) doAutopilotFight() {
 
 		if s.CurrentSystem.tickCounter%45 == 0 {
 			// try to activate rack A modules
-			maxHeat := s.GetRealMaxHeat()
+			maxHeat := s.GetRealMaxHeat(false)
 			heatAdd := 0.0
 
 			for i, v := range s.Fitting.ARack {
@@ -2667,7 +2866,7 @@ func (s *Ship) doAutopilotFight() {
 			}
 		} else if s.CurrentSystem.tickCounter%37 == 0 {
 			// try to activate rack B modules
-			maxHeat := s.GetRealMaxHeat()
+			maxHeat := s.GetRealMaxHeat(false)
 			heatAdd := 0.0
 
 			for i, v := range s.Fitting.BRack {
@@ -2675,7 +2874,7 @@ func (s *Ship) doAutopilotFight() {
 				if v.ItemTypeFamily == "shield_booster" {
 					// make sure enough shield has been lost for this to be worth it
 					shieldBoost, _ := v.ItemMeta.GetFloat64("shield_boost_amount")
-					maxShield := s.GetRealMaxShield()
+					maxShield := s.GetRealMaxShield(false)
 
 					if s.Shield+shieldBoost >= 0.75*maxShield {
 						// deactivate and continue
@@ -2798,7 +2997,7 @@ func (s *Ship) doAutopilotMine() {
 
 		if s.CurrentSystem.tickCounter%45 == 0 {
 			// try to activate rack A mining modules
-			maxHeat := s.GetRealMaxHeat()
+			maxHeat := s.GetRealMaxHeat(false)
 			heatAdd := 0.0
 
 			for i, v := range s.Fitting.ARack {
@@ -2845,7 +3044,7 @@ func (s *Ship) doAutopilotMine() {
 			}
 		} else if s.CurrentSystem.tickCounter%37 == 0 {
 			// check if cargo bay is almost full (>80%)
-			max := s.GetRealCargoBayVolume()
+			max := s.GetRealCargoBayVolume(false)
 			used := s.TotalCargoBayVolumeUsed(false)
 
 			if used/max > 0.8 {
@@ -2864,8 +3063,11 @@ func (s *Ship) flyToPoint(tX float64, tY float64, hold float64, caution float64)
 	// face towards target
 	turnMag := s.facePoint(tX, tY)
 
-	// determine whether to recalculate real accel + drag
+	// determine whether to recalculate real accel + drag + turning
 	rc := s.CurrentSystem.tickCounter%8 == 0
+
+	// chance to recalculate turning
+	s.GetRealTurn(rc)
 
 	// determine whether to thrust forward and by how much
 	scale := ((s.GetRealAccel(rc) * (caution / s.GetRealSpaceDrag(rc))) / 0.175)
@@ -2894,9 +3096,9 @@ func (s *Ship) facePoint(tX float64, tY float64) float64 {
 
 	// apply turn with ship limits
 	if a > 0 {
-		s.rotate(turnMag / s.GetRealTurn())
+		s.rotate(turnMag / s.GetRealTurn(false))
 	} else if a < 0 {
-		s.rotate(turnMag / -s.GetRealTurn())
+		s.rotate(turnMag / -s.GetRealTurn(false))
 	}
 
 	return turnMag
@@ -2919,7 +3121,7 @@ func (s *Ship) rotate(scale float64) {
 	}
 
 	// calculate burn
-	burn := s.GetRealTurn() * scale
+	burn := s.GetRealTurn(false) * scale
 
 	// turn
 	s.Theta += burn
@@ -3198,6 +3400,9 @@ func (s *Ship) FitModule(id uuid.UUID, lock bool) error {
 		s.Armor += armorMaxAdd
 	}
 
+	// recalculate cached stats
+	RecalcAllStatCaches(s)
+
 	// success!
 	return nil
 }
@@ -3226,7 +3431,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	v, _ := m.ItemMeta.GetFloat64("volume")
 
 	// make sure there is sufficient space in the cargo bay
-	if s.TotalCargoBayVolumeUsed(lock)+v > s.GetRealCargoBayVolume() {
+	if s.TotalCargoBayVolumeUsed(lock)+v > s.GetRealCargoBayVolume(true) {
 		return errors.New("insufficient room in cargo bay to unfit module")
 	}
 
@@ -3237,7 +3442,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 
 	// if the module is in rack c, make sure the ship is fully repaired
 	if m.Rack == "C" {
-		if s.Armor < s.GetRealMaxArmor() || s.Hull < s.GetRealMaxHull() {
+		if s.Armor < s.GetRealMaxArmor(true) || s.Hull < s.GetRealMaxHull(true) {
 			return errors.New("armor and hull must be fully repaired before unfitting modules in rack c")
 		}
 	}
@@ -3260,7 +3465,7 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 			newFB = append(newFB, o)
 		} else {
 			// move to cargo bay if there is still room
-			if s.TotalCargoBayVolumeUsed(lock)+v <= s.GetRealCargoBayVolume() {
+			if s.TotalCargoBayVolumeUsed(lock)+v <= s.GetRealCargoBayVolume(true) {
 				m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, o)
 				o.ContainerID = m.shipMountedOn.CargoBayContainerID
 
@@ -3273,6 +3478,9 @@ func (s *Ship) UnfitModule(m *FittedSlot, lock bool) error {
 	}
 
 	s.FittingBay.Items = newFB
+
+	// recalculate cached stats
+	RecalcAllStatCaches(s)
 
 	// success!
 	return nil
@@ -3373,7 +3581,7 @@ func (s *Ship) PutItemInCargo(item *Item, lock bool) error {
 
 	// make sure there is enough space
 	used := s.TotalCargoBayVolumeUsed(lock)
-	max := s.GetRealCargoBayVolume()
+	max := s.GetRealCargoBayVolume(true)
 
 	tV := 0.0
 
@@ -3546,7 +3754,7 @@ func (s *Ship) BuyItemFromSilo(siloID uuid.UUID, itemTypeID uuid.UUID, quantity 
 	if !isShip {
 		// verify sufficient cargo capacity
 		usedBay := s.TotalCargoBayVolumeUsed(lock)
-		maxBay := s.GetRealCargoBayVolume()
+		maxBay := s.GetRealCargoBayVolume(true)
 
 		if usedBay+orderVolume > maxBay {
 			return errors.New("insufficient cargo space available")
@@ -3870,7 +4078,7 @@ func (s *Ship) BuyItemFromOrder(id uuid.UUID, lock bool) error {
 
 		// verify sufficient cargo capacity
 		usedBay := s.TotalCargoBayVolumeUsed(lock)
-		maxBay := s.GetRealCargoBayVolume()
+		maxBay := s.GetRealCargoBayVolume(true)
 
 		if usedBay+orderVolume > maxBay {
 			return errors.New("insufficient cargo space available")
@@ -4448,7 +4656,7 @@ func (s *Ship) SelfDestruct(lock bool) error {
 	}
 
 	// blow it up
-	s.DealDamage(s.GetRealMaxShield()+1, s.GetRealMaxArmor()+1, s.GetRealMaxHull()+1, nil, nil)
+	s.DealDamage(s.GetRealMaxShield(false)+1, s.GetRealMaxArmor(false)+1, s.GetRealMaxHull(false)+1, nil, nil)
 
 	return nil
 }
@@ -4560,8 +4768,8 @@ func (s *Ship) ConsumeRepairKitFromCargo(itemID uuid.UUID, lock bool) error {
 	s.Hull += float64(hullFactor)
 
 	// limit health
-	maxArmor := s.GetRealMaxArmor()
-	maxHull := s.GetRealMaxHull()
+	maxArmor := s.GetRealMaxArmor(true)
+	maxHull := s.GetRealMaxHull(true)
 
 	if s.Armor > maxArmor {
 		s.Armor = maxArmor
@@ -4815,6 +5023,16 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsFuelLoader()
 			} else if m.ItemTypeFamily == "utility_add" {
 				canActivate = m.activateAsAreaDenialDevice()
+			} else if m.ItemTypeFamily == "ewar_cycle" {
+				canActivate = m.activateAsCycleDisruptor()
+			} else if m.ItemTypeFamily == "ewar_fcj" {
+				canActivate = m.activateAsFireControlJammer()
+			} else if m.ItemTypeFamily == "ewar_r_mask" {
+				canActivate = m.activateAsRegenerationMask()
+			} else if m.ItemTypeFamily == "ewar_d_mask" {
+				canActivate = m.activateAsDissipationMask()
+			} else if m.ItemTypeFamily == "burst_reactor" {
+				canActivate = m.activateAsBurstReactor()
 			}
 
 			if canActivate {
@@ -5033,7 +5251,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 			unitVol, _ := c.ItemTypeMeta.GetFloat64("volume")
 
 			// get available space in cargo hold
-			free := m.shipMountedOn.GetRealCargoBayVolume() - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
+			free := m.shipMountedOn.GetRealCargoBayVolume(false) - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
 
 			// calculate effective ore / ice volume pulled
 			pulled := miningVolume * c.Yield * rangeRatio
@@ -5254,6 +5472,44 @@ func (m *FittedSlot) activateAsMissileLauncher() bool {
 	flightTime, _ := m.ItemMeta.GetFloat64("flight_time")
 	maxVelocity := (modRange / flightTime)
 
+	// accumulate guidance drift
+	rawDrift := 0.0
+
+	for _, mo := range m.shipMountedOn.TemporaryModifiers {
+		if mo.Attribute == "guidance_drift" {
+			rawDrift += mo.Raw
+		}
+	}
+
+	// apply guidance drift
+	if rawDrift > 0 {
+		// scale for tolerence
+		sDrift := rawDrift / 100.0
+
+		// get tolerance ratio
+		tRat := sDrift / faultTolerance
+
+		// get scale factor from tolerance ratio
+		sFac := (rawDrift * tRat) / 100.0
+
+		// clamp to 0%
+		if sFac < 0 {
+			sFac = 0
+		}
+
+		// clamp to 100%
+		if sFac > 1 {
+			sFac = 1
+		}
+
+		// convert factor
+		cFac := 1.0 - sFac
+
+		// apply factor
+		faultTolerance *= cFac
+		flightTime *= cFac
+	}
+
 	// apply usage experience modifiers
 	flightTime *= m.usageExperienceModifier
 	maxVelocity *= m.usageExperienceModifier
@@ -5372,7 +5628,7 @@ func (m *FittedSlot) activateAsActiveRadiator() bool {
 	cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
 
 	// get ship heat capacity
-	mx := m.shipMountedOn.GetRealMaxHeat()
+	mx := m.shipMountedOn.GetRealMaxHeat(false)
 
 	// calculate heat sink amount
 	dA := (activationEnergy / mx) * 35
@@ -5651,7 +5907,7 @@ func (m *FittedSlot) activateAsUtilityMiner() bool {
 			unitVol, _ := c.ItemTypeMeta.GetFloat64("volume")
 
 			// get available space in cargo hold
-			free := m.shipMountedOn.GetRealCargoBayVolume() - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
+			free := m.shipMountedOn.GetRealCargoBayVolume(false) - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
 
 			// calculate effective ore / ice volume pulled
 			pulled := miningVolume * c.Yield * rangeRatio * trackingRatio
@@ -5890,7 +6146,7 @@ func (m *FittedSlot) activateAsUtilitySiphon() bool {
 		m.shipMountedOn.Energy += actualSiphon
 
 		// any excess becomes heat
-		maxEnergy := m.shipMountedOn.GetRealMaxEnergy()
+		maxEnergy := m.shipMountedOn.GetRealMaxEnergy(false)
 		excess := m.shipMountedOn.Energy - maxEnergy
 
 		if excess > 0 {
@@ -6091,7 +6347,7 @@ func (m *FittedSlot) activateAsSalvager() bool {
 
 		if i != nil {
 			// success! try to add to cargo bay
-			cv := m.shipMountedOn.GetRealCargoBayVolume()
+			cv := m.shipMountedOn.GetRealCargoBayVolume(false)
 			cu := m.shipMountedOn.TotalCargoBayVolumeUsed(false)
 
 			if cu+sv <= cv {
@@ -6399,7 +6655,7 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 			m.shipMountedOn.Energy += actualSiphon
 
 			// any excess becomes heat
-			maxEnergy := m.shipMountedOn.GetRealMaxEnergy()
+			maxEnergy := m.shipMountedOn.GetRealMaxEnergy(false)
 			excess := m.shipMountedOn.Energy - maxEnergy
 
 			if excess > 0 {
@@ -6432,6 +6688,736 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 	return true
 }
 
+func (m *FittedSlot) activateAsCycleDisruptor() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.SharedTargetTypeRegistry
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtI interface{}
+
+	if *m.TargetType == tgtReg.Ship {
+		// find ship
+		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtI = tgt
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// get falloff style
+	falloff, ff := m.ItemMeta.GetString("falloff")
+	rangeRatio := 1.0 // default to 100%
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+
+		// account for falloff if present
+		if ff {
+			// adjust based on falloff style
+			if falloff == "linear" {
+				// proportion of the distance to target over max range (closer is higher)
+				rangeRatio = 1 - (d / modRange)
+			} else if falloff == "reverse_linear" {
+				// proportion of the distance to target over max range (further is higher)
+				rangeRatio = (d / modRange)
+
+				if d > modRange {
+					rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+				}
+			}
+		}
+	}
+
+	// calculate tracking ratio
+	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
+
+	// get signal flux
+	sigFlux, _ := m.ItemMeta.GetFloat64("signal_flux")
+	signalGain, _ := m.ItemMeta.GetFloat64("signal_gain")
+
+	// iterate over target modules
+	if *m.TargetType == tgtReg.Ship {
+		c := tgtI.(*Ship)
+
+		for r := 0; r < 2; r++ {
+			var rk []FittedSlot
+
+			// get rack for iteration
+			if r == 0 {
+				rk = c.Fitting.ARack
+			} else if r == 1 {
+				rk = c.Fitting.BRack
+			}
+
+			// iterate over slots
+			for ix := range rk {
+				// get target module
+				tm := rk[ix]
+
+				// skip if not cycling
+				if !tm.IsCycling {
+					continue
+				}
+
+				// get target numbers
+				dC, dA := rollCycleDisruptor(tm, sigFlux, signalGain)
+
+				// apply experience modifiers
+				dC *= m.usageExperienceModifier
+
+				// apply tracking
+				dC *= trackingRatio
+
+				// apply falloff
+				dA *= rangeRatio
+
+				// roll for disruption
+				roll := rand.Float64()
+
+				if roll <= dC {
+					// apply effect to cycle progress
+					dp := int(float64(tm.cooldownProgress) * dA)
+					tm.cooldownProgress -= dp
+
+					// store update to module
+					if r == 0 {
+						c.Fitting.ARack[ix] = tm
+					} else if r == 1 {
+						c.Fitting.BRack[ix] = tm
+					}
+				}
+			}
+		}
+
+		// update aggression tables
+		c.updateAggressionTables(
+			0,
+			0,
+			0,
+			m.shipMountedOn.ReputationSheet,
+			m,
+		)
+
+		// include visual effect if present
+		activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+		if found {
+			// build effect trigger
+			gfxEffect := models.GlobalPushModuleEffectBody{
+				GfxEffect:    activationGfxEffect,
+				ObjStartID:   m.shipMountedOn.ID,
+				ObjStartType: tgtReg.Ship,
+				ObjEndID:     m.TargetID,
+				ObjEndType:   m.TargetType,
+			}
+
+			// push to solar system list for next update
+			m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+		}
+	}
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsFireControlJammer() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.SharedTargetTypeRegistry
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtS *Ship
+
+	if *m.TargetType == tgtReg.Ship {
+		// find ship
+		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtS = tgt
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// get falloff style
+	falloff, ff := m.ItemMeta.GetString("falloff")
+	rangeRatio := 1.0 // default to 100%
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+
+		// account for falloff if present
+		if ff {
+			// adjust based on falloff style
+			if falloff == "linear" {
+				// proportion of the distance to target over max range (closer is higher)
+				rangeRatio = 1 - (d / modRange)
+			} else if falloff == "reverse_linear" {
+				// proportion of the distance to target over max range (further is higher)
+				rangeRatio = (d / modRange)
+
+				if d > modRange {
+					rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+				}
+			}
+		}
+	}
+
+	// calculate tracking ratio
+	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
+
+	// apply usage experience modifier
+	trackingRatio *= m.GetExperienceModifier()
+	rangeRatio *= m.GetExperienceModifier()
+
+	// get drift
+	guidDrift, _ := m.ItemMeta.GetFloat64("guidance_drift")
+	trackDrift, _ := m.ItemMeta.GetFloat64("tracking_drift")
+
+	// apply falloff
+	guidDrift *= rangeRatio
+	trackDrift *= rangeRatio
+
+	// apply tracking
+	guidDrift *= trackingRatio
+	trackDrift *= trackingRatio
+
+	// calculate effect duration in ticks
+	cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
+	dT := (cooldown * 1000) / Heartbeat
+
+	// add temporary modifiers to target
+	guidMod := TemporaryShipModifier{
+		Attribute:      "guidance_drift",
+		Raw:            guidDrift,
+		RemainingTicks: int(dT),
+	}
+
+	trackMod := TemporaryShipModifier{
+		Attribute:      "tracking_drift",
+		Raw:            trackDrift,
+		RemainingTicks: int(dT),
+	}
+
+	tgtS.TemporaryModifiers = append(tgtS.TemporaryModifiers, guidMod)
+	tgtS.TemporaryModifiers = append(tgtS.TemporaryModifiers, trackMod)
+
+	// update aggression tables
+	tgtS.updateAggressionTables(
+		0,
+		0,
+		0,
+		m.shipMountedOn.ReputationSheet,
+		m,
+	)
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+			ObjEndID:     m.TargetID,
+			ObjEndType:   m.TargetType,
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsRegenerationMask() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.SharedTargetTypeRegistry
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtS *Ship
+
+	if *m.TargetType == tgtReg.Ship {
+		// find ship
+		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtS = tgt
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// get falloff style
+	falloff, ff := m.ItemMeta.GetString("falloff")
+	rangeRatio := 1.0 // default to 100%
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+
+		// account for falloff if present
+		if ff {
+			// adjust based on falloff style
+			if falloff == "linear" {
+				// proportion of the distance to target over max range (closer is higher)
+				rangeRatio = 1 - (d / modRange)
+			} else if falloff == "reverse_linear" {
+				// proportion of the distance to target over max range (further is higher)
+				rangeRatio = (d / modRange)
+
+				if d > modRange {
+					rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+				}
+			}
+		}
+	}
+
+	// calculate tracking ratio
+	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
+
+	// get mask radius
+	maskRad, _ := m.ItemMeta.GetFloat64("mask_radius")
+
+	// apply usage experience modifier
+	maskRad *= m.GetExperienceModifier()
+
+	// apply falloff
+	maskRad *= rangeRatio
+
+	// apply tracking
+	maskRad *= trackingRatio
+
+	// calculate mask percentage
+	maskP := maskRad / tgtS.TemplateData.Radius
+
+	// clamp to 0%
+	if maskP < 0 {
+		maskP = 0
+	}
+
+	// clamp to 100%
+	if maskP > 1 {
+		maskP = 1
+	}
+
+	// calculate effect duration in ticks
+	cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
+	dT := (cooldown * 1000) / Heartbeat
+
+	// add temporary modifiers to target
+	maskMod := TemporaryShipModifier{
+		Attribute:      "regeneration_mask",
+		Percentage:     maskP,
+		RemainingTicks: int(dT),
+	}
+
+	tgtS.TemporaryModifiers = append(tgtS.TemporaryModifiers, maskMod)
+
+	// update aggression tables
+	tgtS.updateAggressionTables(
+		0,
+		0,
+		0,
+		m.shipMountedOn.ReputationSheet,
+		m,
+	)
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+			ObjEndID:     m.TargetID,
+			ObjEndType:   m.TargetType,
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsDissipationMask() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.SharedTargetTypeRegistry
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtS *Ship
+
+	if *m.TargetType == tgtReg.Ship {
+		// find ship
+		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtS = tgt
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// get falloff style
+	falloff, ff := m.ItemMeta.GetString("falloff")
+	rangeRatio := 1.0 // default to 100%
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+
+		// account for falloff if present
+		if ff {
+			// adjust based on falloff style
+			if falloff == "linear" {
+				// proportion of the distance to target over max range (closer is higher)
+				rangeRatio = 1 - (d / modRange)
+			} else if falloff == "reverse_linear" {
+				// proportion of the distance to target over max range (further is higher)
+				rangeRatio = (d / modRange)
+
+				if d > modRange {
+					rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+				}
+			}
+		}
+	}
+
+	// calculate tracking ratio
+	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
+
+	// get mask radius
+	maskRad, _ := m.ItemMeta.GetFloat64("mask_radius")
+
+	// apply usage experience modifier
+	maskRad *= m.GetExperienceModifier()
+
+	// apply falloff
+	maskRad *= rangeRatio
+
+	// apply tracking
+	maskRad *= trackingRatio
+
+	// calculate mask percentage
+	maskP := maskRad / tgtS.TemplateData.Radius
+
+	// clamp to 0%
+	if maskP < 0 {
+		maskP = 0
+	}
+
+	// clamp to 100%
+	if maskP > 1 {
+		maskP = 1
+	}
+
+	// calculate effect duration in ticks
+	cooldown, _ := m.ItemMeta.GetFloat64("cooldown")
+	dT := (cooldown * 1000) / Heartbeat
+
+	// add temporary modifiers to target
+	maskMod := TemporaryShipModifier{
+		Attribute:      "dissipation_mask",
+		Percentage:     maskP,
+		RemainingTicks: int(dT),
+	}
+
+	tgtS.TemporaryModifiers = append(tgtS.TemporaryModifiers, maskMod)
+
+	// update aggression tables
+	tgtS.updateAggressionTables(
+		0,
+		0,
+		0,
+		m.shipMountedOn.ReputationSheet,
+		m,
+	)
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+			ObjEndID:     m.TargetID,
+			ObjEndType:   m.TargetType,
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsBurstReactor() bool {
+	// get max pellet volume and leakage
+	maxVolume, _ := m.ItemMeta.GetFloat64("max_fuel_volume")
+	leakage, _ := m.ItemTypeMeta.GetFloat64("leakage")
+
+	// apply usage experience modifier
+	maxVolume *= m.usageExperienceModifier
+
+	// locate a stack of pellets below the given unit volume
+	for _, i := range m.shipMountedOn.CargoBay.Items {
+		// safety checks
+		if !i.IsPackaged {
+			continue
+		}
+
+		if i.Quantity <= 0 {
+			continue
+		}
+
+		if i.CoreDirty {
+			continue
+		}
+
+		// check family
+		if i.ItemFamilyID != "fuel" {
+			continue
+		}
+
+		// check volume
+		iv, _ := i.ItemTypeMeta.GetFloat64("volume")
+
+		if iv <= maxVolume {
+			// decrement quantity
+			i.Quantity--
+
+			// escalate to core for saving
+			m.shipMountedOn.CurrentSystem.ChangedQuantityItems = append(m.shipMountedOn.CurrentSystem.ChangedQuantityItems, i)
+
+			// get fuel amount
+			bf, _ := i.ItemTypeMeta.GetFloat64("fuelconversion")
+
+			// apply leakage
+			af := bf * (1 - leakage)
+
+			// apply energy
+			m.shipMountedOn.Energy += af
+
+			// get max energy
+			me := m.shipMountedOn.GetRealMaxEnergy(false)
+
+			// get excess for heat
+			eh := m.shipMountedOn.Energy - me
+
+			if eh > 0 {
+				// add heat
+				m.shipMountedOn.Heat += eh
+			}
+
+			// cap energy
+			if m.shipMountedOn.Energy > me {
+				m.shipMountedOn.Energy = me
+			}
+
+			// module activates!
+			return true
+		}
+	}
+
+	// module doesn't activate
+	return false
+}
+
+// Reusable helper function to determine cycle disruptor chance and amount respectively
+func rollCycleDisruptor(tgt FittedSlot, sigFlux float64, sigGain float64) (float64, float64) {
+	// get target module v
+	v, _ := tgt.ItemTypeMeta.GetFloat64("volume")
+	v += Epsilon
+
+	/*
+		<chance of disruption> = [signal flux] / [tgt module volume]
+								 (centered at the slot size of a the ship tier mounting the module)
+	*/
+
+	// calculate disruption chance
+	dC := sigFlux / v
+
+	// get cycle progress
+	c, _ := tgt.ItemMeta.GetFloat64("cooldown")
+	c += Epsilon
+
+	p := float64(tgt.cooldownProgress) / c
+
+	/*
+		<disruption amount> = [(<cycle progress>^sin(<cycle progress>/<signal gain>)) mod <signal gain>] / <signal gain>
+							  (centered at ~25, does not scale with ship tier slot size)
+	*/
+
+	// calculate disruption amount
+	q := p / sigGain
+	r := math.Pow(p, math.Sin(q))
+
+	dA := float64(int(r)%int(sigGain)) / sigGain
+
+	// return results
+	return dC, dA
+}
+
 // Reusable helper function to determine tracking ratio between a module and a target
 func (m *FittedSlot) calculateTrackingRatioWithTarget(tgtDummy physics.Dummy) float64 {
 	// calculate distance
@@ -6456,6 +7442,28 @@ func (m *FittedSlot) calculateTrackingRatioWithTarget(tgtDummy physics.Dummy) fl
 
 	if w > 0 {
 		trackingRatio = tracking / w
+	}
+
+	// accumulate tracking drift modifiers
+	rawDrift := 0.0
+
+	for _, mo := range m.shipMountedOn.TemporaryModifiers {
+		if mo.Attribute == "tracking_drift" {
+			rawDrift += mo.Raw
+		}
+	}
+
+	if rawDrift > 0 {
+		// get drift percentage
+		driftP := rawDrift / tracking
+
+		// decrement from tracking ratio
+		trackingRatio -= driftP
+	}
+
+	// clamp tracking to 0%
+	if trackingRatio < 0 {
+		trackingRatio = 0
 	}
 
 	// clamp tracking to 100%
@@ -6584,4 +7592,21 @@ func (s *Ship) updateAggressionTables(
 		g.DamageInflicted += (shieldDmg + armorDmg + hullDmg)
 		g.LastUsed = time.Now()
 	}
+}
+
+// Helper function to recalculate all stat caches
+func RecalcAllStatCaches(s *Ship) {
+	s.GetRealHeatSink(true)
+	s.GetRealMaxHeat(true)
+	s.GetRealAccel(true)
+	s.GetRealTurn(true)
+	s.GetRealSpaceDrag(true)
+	s.GetRealMaxFuel(true)
+	s.GetRealMaxEnergy(true)
+	s.GetRealMaxShield(true)
+	s.GetRealMaxArmor(true)
+	s.GetRealMaxHull(true)
+	s.GetRealEnergyRegen(true)
+	s.GetRealShieldRegen(true)
+	s.GetRealCargoBayVolume(true)
 }
