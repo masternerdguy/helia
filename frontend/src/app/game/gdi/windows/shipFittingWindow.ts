@@ -913,7 +913,7 @@ export class ShipFittingWindow extends GDIWindow {
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
-          'Veiling Output',
+          'Veiling Factor',
           `${parseFloat(this.player.currentShip.sumVeil?.toFixed(2))}`
         )
       )
