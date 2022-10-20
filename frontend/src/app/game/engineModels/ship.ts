@@ -132,6 +132,14 @@ export class Ship extends WSShip {
     if (ws.cCargoBayVolume) {
       this.cCargoBayVolume = ws.cCargoBayVolume;
     }
+
+    if (ws.sumCloak) {
+      this.sumCloak = ws.sumCloak;
+    }
+
+    if (ws.sumVeil) {
+      this.sumVeil = ws.sumVeil;
+    }
   }
 
   render(ctx: any, camera: Camera) {
@@ -379,6 +387,14 @@ export class Ship extends WSShip {
 
     if (sh.cCargoBayVolume) {
       this.cCargoBayVolume = sh.cCargoBayVolume;
+    }
+
+    if (sh.sumCloak) {
+      this.sumCloak = sh.sumCloak;
+    }
+
+    if (sh.sumVeil) {
+      this.sumVeil = sh.sumVeil;
     }
   }
 

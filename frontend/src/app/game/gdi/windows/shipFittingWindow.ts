@@ -901,6 +901,24 @@ export class ShipFittingWindow extends GDIWindow {
       )
     );
 
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Cloaking Output',
+          `${parseFloat(this.player.currentShip.sumCloak?.toFixed(2))}`
+        )
+      )
+    );
+
+    rows.push(
+      buildShipViewRowText(
+        infoKeyValueString(
+          'Veiling Output',
+          `${parseFloat(this.player.currentShip.sumVeil?.toFixed(2))}`
+        )
+      )
+    );
+
     rows.push(buildShipViewRowSpacer());
 
     // layout selected stats

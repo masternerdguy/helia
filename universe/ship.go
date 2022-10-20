@@ -210,6 +210,8 @@ type Ship struct {
 	CachedEnergyRegen      float64 // cache of output from GetRealEnergyRegen
 	CachedShieldRegen      float64 // cache of output from GetRealShieldRegen
 	CachedCargoBayVolume   float64 // cache of output from GetRealCargoBayVolume
+	SumCloaking            float64 // cache of sum of cloaking power
+	SumVeiling             float64 // cache of sum of veiling power
 	EscrowContainerID      *uuid.UUID
 	BeingFlownByPlayer     bool
 	ReputationSheet        *shared.PlayerReputationSheet
@@ -871,6 +873,9 @@ func (s *Ship) updateCloaking() {
 			cloakPercentage += e.Percentage
 		}
 	}
+
+	// store cloak percentage sum
+	s.SumCloaking = cloakPercentage
 
 	// determine whether cloaked for tick
 	if cloakPercentage >= 1 {
@@ -1750,6 +1755,9 @@ func (s *Ship) DealDamage(
 	if genericHardening < 0 {
 		genericHardening = 0
 	}
+
+	// store hardening sum
+	s.SumVeiling = genericHardening
 
 	// apply active omni hardeners
 	shieldDmg *= 1.0 - genericHardening
@@ -7596,6 +7604,7 @@ func (s *Ship) updateAggressionTables(
 
 // Helper function to recalculate all stat caches
 func RecalcAllStatCaches(s *Ship) {
+	// recalculate caches
 	s.GetRealHeatSink(true)
 	s.GetRealMaxHeat(true)
 	s.GetRealAccel(true)
@@ -7609,4 +7618,8 @@ func RecalcAllStatCaches(s *Ship) {
 	s.GetRealEnergyRegen(true)
 	s.GetRealShieldRegen(true)
 	s.GetRealCargoBayVolume(true)
+
+	// zero sums
+	s.SumCloaking = 0
+	s.SumVeiling = 0
 }

@@ -3133,6 +3133,8 @@ func (s *SolarSystem) sendClientUpdates() {
 					CachedEnergyRegen:    d.GetRealEnergyRegen(false),
 					CachedShieldRegen:    d.GetRealShieldRegen(false),
 					CachedCargoBayVolume: d.GetRealCargoBayVolume(false),
+					SumCloaking:          d.SumCloaking,
+					SumVeiling:           d.SumVeiling,
 				},
 			}
 

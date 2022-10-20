@@ -223,6 +223,8 @@ type CurrentShipInfo struct {
 	CachedEnergyRegen    float64 `json:"cEnergyRegen"`
 	CachedShieldRegen    float64 `json:"cShieldRegen"`
 	CachedCargoBayVolume float64 `json:"cCargoBayVolume"`
+	SumCloaking          float64 `json:"sumCloak"`
+	SumVeiling           float64 `json:"sumVeil"`
 }
 
 // Structure for passing non-secret information about a ship
