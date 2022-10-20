@@ -5,12 +5,14 @@ import { LoginComponent } from './auth/login/login.component';
 import { HomeComponent } from './home/home.component';
 import { LoreComponent } from './lore/lore.component';
 import { UnifiedPolicyComponent } from './unified-policy/unified-policy.component';
+import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
 
 const routes: Routes = [
   { path: 'lore', component: LoreComponent },
   { path: 'policy', component: UnifiedPolicyComponent },
   { path: 'auth/signup', component: SignupComponent },
   { path: 'auth/signin', component: LoginComponent },
+  { path: 'auth/forgot', component: ForgotPasswordComponent },
   { path: '', component: HomeComponent },
 ];
 

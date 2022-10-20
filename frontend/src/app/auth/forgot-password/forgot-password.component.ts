@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AccountService } from '../account.service';
 import { WsService } from 'src/app/game/ws.service';
-import * as $ from 'jquery';
 
 @Component({
   selector: 'app-forgot-password',
@@ -17,4 +16,8 @@ export class ForgotPasswordComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {}
+
+  async submit() {
+    // todo
+  }
 }
