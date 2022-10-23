@@ -340,7 +340,9 @@ func (s UserService) SetPassword(uid uuid.UUID, token uuid.UUID, password string
 
 	// update user
 	sql := `
-				UPDATE public.users SET hashpass = $1, resettoken = null WHERE id = $2 and resettoken = $3;
+				UPDATE public.users 
+				SET hashpass = $1, resettoken = null 
+				WHERE id = $2 and resettoken = $3 and resettoken is not null;
 			`
 
 	q, err := db.Query(sql, hp, uid, token)
