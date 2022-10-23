@@ -39,8 +39,6 @@ type User struct {
 	BehaviourMode *int
 	// for devs
 	IsDev bool
-	// password reset
-	ResetToken *uuid.UUID
 }
 
 type PlayerExperienceSheet struct {
