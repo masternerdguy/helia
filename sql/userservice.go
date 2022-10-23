@@ -417,6 +417,34 @@ func (s UserService) GetUserByLogin(emailaddress string, pwd string) (*User, err
 	}
 }
 
+// Finds the id of the user with the supplied email address
+func (s UserService) GetUserIdByEmailAddress(emailaddress string) (*uuid.UUID, error) {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// retrieve user id for user with this email address
+	user := User{}
+
+	sqlStatement := `SELECT id
+					 FROM users
+					 WHERE emailaddress=$1 and emailaddress is not null`
+
+	row := db.QueryRow(sqlStatement, emailaddress)
+
+	switch err := row.Scan(&user.ID); err {
+	case sql.ErrNoRows:
+		return nil, errors.New("user does not exist")
+	case nil:
+		return &user.ID, nil
+	default:
+		return nil, err
+	}
+}
+
 // Finds a user by its id
 func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 	// get db handle

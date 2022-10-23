@@ -1,16 +1,16 @@
-package engine
+package shared
 
 import (
 	"fmt"
-	"helia/shared"
 	"os"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/sendgrid/sendgrid-go"
 )
 
 // Helper function to send an email
-func sendEmail(from string, to string, subject string, body string) *error {
+func SendEmail(from string, to string, subject string, body string) *error {
 	// set up sendgrid
 	request := sendgrid.GetRequest(os.Getenv("SENDGRID_API_KEY"), "/v3/mail/send", "https://api.sendgrid.com")
 	request.Method = "POST"
@@ -40,7 +40,7 @@ func sendEmail(from string, to string, subject string, body string) *error {
 				},
 				"content": [
 					{
-						"type": "text/plain",
+						"type": "text/html",
 						"value": "%v"
 					}
 				]
@@ -55,11 +55,28 @@ func sendEmail(from string, to string, subject string, body string) *error {
 	// check for error
 	if err != nil {
 		// log error
-		shared.TeeLog(
+		TeeLog(
 			fmt.Sprintf("Error sending email from %v to %v: %v", from, to, err.Error()),
 		)
 	}
 
 	// return error, if any
 	return &err
+}
+
+// Helper function to create the body of a password reset token email
+func FillPasswordResetTokenEmailBody(frontendDomain string, uid uuid.UUID, token uuid.UUID) string {
+	return fmt.Sprintf(
+		`
+		<div>
+			Click <a href='%v/#/auth/reset?u=%v&t=%v'>here</a> to reset your Project Helia account password.
+		</div>
+		<div>
+			If you did not request a password reset, please contact support at contact@projecthelia.com
+		</div>
+		`,
+		frontendDomain,
+		uid,
+		token,
+	)
 }

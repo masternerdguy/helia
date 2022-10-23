@@ -13,6 +13,8 @@ import (
 	"net/mail"
 	"runtime/pprof"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 // Listener for handling and dispatching incoming http requests
@@ -280,8 +282,84 @@ func (l *HTTPListener) HandleForgot(w http.ResponseWriter, r *http.Request) {
 	// enable cors
 	enableCors(&w)
 
-	// write pingback
-	fmt.Fprintf(w, "not yet implemented!")
+	// shared error message to hide details
+	const se = "unable to continue reset process"
+
+	// get services
+	userSvc := sql.GetUserService()
+
+	// get user's ip
+	ip := readUserIP(r)
+
+	// read body
+	b, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	if err != nil {
+		http.Error(w, se, 500)
+		return
+	}
+
+	// parse model
+	m := models.APIForgotModel{}
+	err = json.Unmarshal(b, &m)
+
+	if err != nil {
+		http.Error(w, se, 500)
+		return
+	}
+
+	// get user id for email address
+	res := models.APIForgotResponseModel{}
+	uid, err := userSvc.GetUserIdByEmailAddress(m.EmailAddress)
+
+	if err != nil || uid == nil {
+		http.Error(w, se, 500)
+		return
+	}
+
+	// get user
+	user, err := userSvc.GetUserByID(*uid)
+
+	if err != nil {
+		res.Success = false
+		res.Message = se
+	} else {
+		// log dev reset attempts
+		if user.IsDev {
+			shared.TeeLog(fmt.Sprintf("A developer is trying to request a password reset token! %v << %v", *user.EmailAddress, ip))
+		} else {
+			// log regular reset attempts
+			shared.TeeLog(fmt.Sprintf("A user is trying to request a password reset token: %v << %v", *user.EmailAddress, ip))
+		}
+
+		// generate reset token
+		token := uuid.New()
+
+		// save reset token
+		err := userSvc.SaveResetToken(user.ID, &token)
+
+		if err != nil {
+			res.Success = false
+			res.Message = se
+		} else {
+			// generate email body
+			b := shared.FillPasswordResetTokenEmailBody(r.Referer(), user.ID, token)
+
+			// send email
+			err := shared.SendEmail("contact@projecthelia.com", *user.EmailAddress, "Password Reset", b)
+			res.Success = err == nil
+		}
+	}
+
+	// log success
+	if res.Success {
+		shared.TeeLog(fmt.Sprintf("Reset token sent for %v << %v", m.EmailAddress, ip))
+	}
+
+	// return result
+	o, _ := json.Marshal(res)
+	w.Write(o)
 }
 
 // Shuts down the server after saving the game state
