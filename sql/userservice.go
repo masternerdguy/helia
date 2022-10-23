@@ -39,6 +39,8 @@ type User struct {
 	BehaviourMode *int
 	// for devs
 	IsDev bool
+	// password reset
+	ResetToken *uuid.UUID
 }
 
 type PlayerExperienceSheet struct {
@@ -278,6 +280,70 @@ func (s UserService) SaveReputationSheet(uid uuid.UUID, repsheet PlayerReputatio
 			`
 
 	q, err := db.Query(sql, repsheet, uid)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}
+
+// Sets resettoken on a user in the database
+func (s UserService) SaveResetToken(uid uuid.UUID, token *uuid.UUID) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update user
+	sql := `
+				UPDATE public.users SET resettoken = $1 WHERE id = $2;
+			`
+
+	q, err := db.Query(sql, token, uid)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}
+
+// Changes a password for a given user and token and then clears the token
+func (s UserService) SetPassword(uid uuid.UUID, token uuid.UUID, password string) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// get user
+	u, err := s.GetUserByID(uid)
+
+	if err != nil {
+		return err
+	}
+
+	// hash password
+	hp, err := s.Hashpass(*u.EmailAddress, password)
+
+	if err != nil {
+		return err
+	}
+
+	// update user
+	sql := `
+				UPDATE public.users SET hashpass = $1, resettoken = null WHERE id = $2 and resettoken = $3;
+			`
+
+	q, err := db.Query(sql, hp, uid, token)
 
 	if err != nil {
 		return err
