@@ -460,7 +460,7 @@ func (l *HTTPListener) HandleReset(w http.ResponseWriter, r *http.Request) {
 
 	// log success
 	if res.Success {
-		shared.TeeLog(fmt.Sprintf("Password reset for %v << %v", user.EmailAddress, ip))
+		shared.TeeLog(fmt.Sprintf("Password reset for %v << %v", *user.EmailAddress, ip))
 		res.Message = "You can now log in using your new password."
 	}
 
