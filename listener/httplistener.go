@@ -398,7 +398,10 @@ func (l *HTTPListener) HandleReset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get user id for email address
-	res := models.APIResetResponseModel{}
+	res := models.APIResetResponseModel{
+		Success: false,
+		Message: se,
+	}
 
 	// get user
 	user, err := userSvc.GetUserByID(m.UserID)
@@ -419,7 +422,10 @@ func (l *HTTPListener) HandleReset(w http.ResponseWriter, r *http.Request) {
 		// validate reset token
 		t, _ := userSvc.GetPasswordResetToken(m.UserID)
 
-		if t == nil || *t != m.Token {
+		// for empty uuid check
+		var emptyUUID uuid.UUID
+
+		if t == nil || *t == emptyUUID || *t != m.Token {
 			// validation failed
 			res.Success = false
 			res.Message = se
@@ -456,8 +462,6 @@ func (l *HTTPListener) HandleReset(w http.ResponseWriter, r *http.Request) {
 	if res.Success {
 		shared.TeeLog(fmt.Sprintf("Password reset for %v << %v", user.EmailAddress, ip))
 		res.Message = "You can now log in using your new password."
-	} else {
-		res.Message = se
 	}
 
 	// return result

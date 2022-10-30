@@ -325,17 +325,17 @@ func (s UserService) GetPasswordResetToken(uid uuid.UUID) (*uuid.UUID, error) {
 	// get reset token for this user id
 	sqlStatement := `SELECT resettoken
 					 FROM users
-					 WHERE id=$1`
+					 WHERE id=$1 and resettoken is not null`
 
 	row := db.QueryRow(sqlStatement, uid)
 
-	var token *uuid.UUID
+	var token uuid.UUID
 
-	switch err := row.Scan(token); err {
+	switch err := row.Scan(&token); err {
 	case sql.ErrNoRows:
 		return nil, errors.New("user does not exist or invalid credentials")
 	case nil:
-		return token, nil
+		return &token, nil
 	default:
 		return nil, err
 	}
