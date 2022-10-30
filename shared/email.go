@@ -81,10 +81,10 @@ func FillPasswordResetTokenEmailBody(frontendDomain string, uid uuid.UUID, token
 	b := fmt.Sprintf(
 		`
 		<div>
-			Click <a href='%v/#/auth/reset?u=%v&t=%v'>here</a> to reset your Project Helia account password.
+			Click <a href='%v#/auth/reset?u=%v&t=%v'>here</a> to reset your Project Helia account password.
 		</div>
 		<div>
-			If you did not request a password reset, please contact support at <span>contact@projecthelia.com</span>.
+			If you did not request a password reset, please contact support at <a href="mailto:contact@projecthelia.com">contact@projecthelia.com</a>.
 		</div>
 		`,
 		frontendDomain,
