@@ -313,7 +313,7 @@ func (s UserService) UpdateResetToken(uid uuid.UUID, token *uuid.UUID) error {
 	return nil
 }
 
-// Finds a user by its id
+// Retrieves the password reset token of a user
 func (s UserService) GetPasswordResetToken(uid uuid.UUID) (*uuid.UUID, error) {
 	// get db handle
 	db, err := connect()

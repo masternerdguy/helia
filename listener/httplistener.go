@@ -447,9 +447,6 @@ func (l *HTTPListener) HandleReset(w http.ResponseWriter, r *http.Request) {
 					res.Message = se
 				} else {
 					res.Success = true
-
-					// invalidate token
-					_ = userSvc.UpdateResetToken(m.UserID, nil)
 				}
 			}
 		}
