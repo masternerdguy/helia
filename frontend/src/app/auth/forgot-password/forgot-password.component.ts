@@ -11,13 +11,17 @@ export class ForgotPasswordComponent implements OnInit {
   @ViewChild('emailaddress') emailaddress: ElementRef;
 
   constructor(
-    private accountService: AccountService,
-    private wsService: WsService
+    private accountService: AccountService
   ) {}
 
   ngOnInit(): void {}
 
   async submit() {
-    // todo
+    // try to request reset
+    const s = await this.accountService.forgot({
+      emailaddress: this.emailaddress.nativeElement.value
+    });
+
+    console.log(s);
   }
 }

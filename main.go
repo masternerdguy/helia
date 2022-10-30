@@ -84,6 +84,10 @@ func main() {
 	downtimeRunner.Initialize()
 	downtimeRunner.RunDownTimeTasks()
 
+	// initialize shared configuration
+	shared.TeeLog("Initializing shared configuration...")
+	shared.InitializeConfiguration()
+
 	// initialize game engine
 	shared.TeeLog("Initializing engine...")
 	engine := engine.HeliaEngine{}

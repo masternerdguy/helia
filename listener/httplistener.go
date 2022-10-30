@@ -355,6 +355,9 @@ func (l *HTTPListener) HandleForgot(w http.ResponseWriter, r *http.Request) {
 	// log success
 	if res.Success {
 		shared.TeeLog(fmt.Sprintf("Reset token sent for %v << %v", m.EmailAddress, ip))
+		res.Message = "A link to reset your password has been emailed to you."
+	} else {
+		res.Message = "Something went wrong requesting a password reset."
 	}
 
 	// return result

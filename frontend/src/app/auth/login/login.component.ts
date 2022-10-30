@@ -38,6 +38,7 @@ export class LoginComponent implements OnInit {
         const layoutContainer = document.getElementsByClassName(
           'helia-game-top'
         )[0].parentNode.parentNode as any;
+        
         layoutContainer.removeAttribute('class');
 
         $('#site-header').remove();

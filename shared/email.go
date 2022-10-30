@@ -1,8 +1,9 @@
 package shared
 
 import (
+	"errors"
 	"fmt"
-	"os"
+	"log"
 	"strings"
 
 	"github.com/google/uuid"
@@ -12,7 +13,7 @@ import (
 // Helper function to send an email
 func SendEmail(from string, to string, subject string, body string) *error {
 	// set up sendgrid
-	request := sendgrid.GetRequest(os.Getenv("SENDGRID_API_KEY"), "/v3/mail/send", "https://api.sendgrid.com")
+	request := sendgrid.GetRequest(config.SendgridKey, "/v3/mail/send", "https://api.sendgrid.com")
 	request.Method = "POST"
 
 	// no double quotes allowed
@@ -50,7 +51,7 @@ func SendEmail(from string, to string, subject string, body string) *error {
 	)
 
 	// send email
-	_, err := sendgrid.API(request)
+	res, err := sendgrid.API(request)
 
 	// check for error
 	if err != nil {
@@ -58,6 +59,19 @@ func SendEmail(from string, to string, subject string, body string) *error {
 		TeeLog(
 			fmt.Sprintf("Error sending email from %v to %v: %v", from, to, err.Error()),
 		)
+	}
+
+	log.Printf("%v", res)
+
+	// check for error in response itself
+	if res.StatusCode != 200 {
+		// log error
+		TeeLog(
+			fmt.Sprintf("Error sending email [2] from %v to %v: %v {%v}", from, to, res.Body, res.StatusCode),
+		)
+
+		// store generic error
+		err = errors.New("unable to send email")
 	}
 
 	// return error, if any
