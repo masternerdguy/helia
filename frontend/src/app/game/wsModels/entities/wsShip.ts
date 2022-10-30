@@ -38,7 +38,7 @@ export class WSShip {
   cShieldRegen: number;
   cCargoBayVolume: number;
   sumCloak: number;
-	sumVeil: number;
+  sumVeil: number;
 }
 
 export class WSFitting {

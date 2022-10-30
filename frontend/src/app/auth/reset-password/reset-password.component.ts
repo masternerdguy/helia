@@ -23,8 +23,8 @@ export class ResetPasswordComponent implements OnInit {
     const s = await this.accountService.reset({
       password: this.password.nativeElement.value,
       confirmPassword: this.confirmpassword.nativeElement.value,
-      userId: this.router.snapshot.queryParamMap.get("u"),
-      token: this.router.snapshot.queryParamMap.get("t"),
+      userId: this.router.snapshot.queryParamMap.get('u'),
+      token: this.router.snapshot.queryParamMap.get('t'),
     });
 
     // show result
@@ -32,7 +32,7 @@ export class ResetPasswordComponent implements OnInit {
 
     // redirect to login on success
     if (s.success) {
-      window.location.href = "/#/auth/signin";
+      window.location.href = '/#/auth/signin';
     }
   }
 }
