@@ -4,6 +4,7 @@ import { RegisterModel } from './models/register';
 import { environment } from 'src/environments/environment';
 import { LoginModel, LoginResultModel } from './models/login';
 import { ForgotModel, ForgotResultModel } from './models/forgot';
+import { ResetModel, ResetResultModel } from './models/reset';
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +27,12 @@ export class AccountService {
   async forgot(a: ForgotModel): Promise<ForgotResultModel> {
     return this.http
       .post<any>(environment.apiUrl + 'forgot', JSON.stringify(a))
+      .toPromise();
+  }
+
+  async reset(a: ResetModel): Promise<ResetResultModel> {
+    return this.http
+      .post<any>(environment.apiUrl + 'reset', JSON.stringify(a))
       .toPromise();
   }
 }
