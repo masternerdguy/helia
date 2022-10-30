@@ -333,7 +333,7 @@ func (s UserService) GetPasswordResetToken(uid uuid.UUID) (*uuid.UUID, error) {
 
 	switch err := row.Scan(&token); err {
 	case sql.ErrNoRows:
-		return nil, errors.New("user does not exist or invalid credentials")
+		return nil, errors.New("user does not exist or does not have a reset token")
 	case nil:
 		return &token, nil
 	default:
