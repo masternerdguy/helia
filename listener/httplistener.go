@@ -176,7 +176,7 @@ func (l *HTTPListener) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// save initial reputation sheet
-	err = userSvc.SaveReputationSheet(u.ID, u.ReputationSheet)
+	err = userSvc.UpdateReputationSheet(u.ID, u.ReputationSheet)
 
 	if err != nil {
 		http.Error(w, "saveinitialrepsheet: "+err.Error(), 500)
@@ -277,7 +277,7 @@ func (l *HTTPListener) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Write(o)
 }
 
-// Password reset requests for existing users
+// Password reset requests for existing users (forgot stage)
 func (l *HTTPListener) HandleForgot(w http.ResponseWriter, r *http.Request) {
 	// enable cors
 	enableCors(&w)
@@ -337,7 +337,7 @@ func (l *HTTPListener) HandleForgot(w http.ResponseWriter, r *http.Request) {
 		token := uuid.New()
 
 		// save reset token
-		err := userSvc.SaveResetToken(user.ID, &token)
+		err := userSvc.UpdateResetToken(user.ID, &token)
 
 		if err != nil {
 			res.Success = false
@@ -356,6 +356,109 @@ func (l *HTTPListener) HandleForgot(w http.ResponseWriter, r *http.Request) {
 	if res.Success {
 		shared.TeeLog(fmt.Sprintf("Reset token sent for %v << %v", m.EmailAddress, ip))
 		res.Message = "A link to reset your password has been emailed to you."
+	} else {
+		res.Message = se
+	}
+
+	// return result
+	o, _ := json.Marshal(res)
+	w.Write(o)
+}
+
+// Password reset requests for existing users (reset stage)
+func (l *HTTPListener) HandleReset(w http.ResponseWriter, r *http.Request) {
+	// enable cors
+	enableCors(&w)
+
+	// shared error message to hide details
+	const se = "Something went wrong resetting your password."
+
+	// get services
+	userSvc := sql.GetUserService()
+
+	// get user's ip
+	ip := readUserIP(r)
+
+	// read body
+	b, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	if err != nil {
+		http.Error(w, se, 500)
+		return
+	}
+
+	// parse model
+	m := models.APIResetModel{}
+	err = json.Unmarshal(b, &m)
+
+	if err != nil {
+		http.Error(w, se, 500)
+		return
+	}
+
+	// get user id for email address
+	res := models.APIResetResponseModel{}
+
+	// get user
+	user, err := userSvc.GetUserByID(m.UserID)
+
+	if err != nil {
+		// not found
+		res.Success = false
+		res.Message = se
+	} else {
+		// log dev reset attempts
+		if user.IsDev {
+			shared.TeeLog(fmt.Sprintf("A developer is trying to reset their password! %v << %v", *user.EmailAddress, ip))
+		} else {
+			// log regular reset attempts
+			shared.TeeLog(fmt.Sprintf("A user is trying to reset their password: %v << %v", *user.EmailAddress, ip))
+		}
+
+		// validate reset token
+		t, _ := userSvc.GetPasswordResetToken(m.UserID)
+
+		if t == nil || *t != m.Token {
+			// validation failed
+			res.Success = false
+			res.Message = se
+		} else {
+			valid := true
+
+			// validate password
+			if len(m.Password) < 8 {
+				res.Message = "Password must be at least 8 characters."
+				valid = false
+			}
+
+			if m.Password != m.ConfirmPassword {
+				res.Message = "Passwords must match."
+				valid = false
+			}
+
+			if valid {
+				// do reset
+				err = userSvc.UpdatePassword(m.UserID, m.Token, m.Password)
+
+				if err != nil {
+					// reset failed
+					res.Success = false
+					res.Message = se
+				} else {
+					res.Success = true
+
+					// invalidate token
+					_ = userSvc.UpdateResetToken(m.UserID, nil)
+				}
+			}
+		}
+	}
+
+	// log success
+	if res.Success {
+		shared.TeeLog(fmt.Sprintf("Password reset for %v << %v", user.EmailAddress, ip))
+		res.Message = "You can now log in using your new password."
 	} else {
 		res.Message = se
 	}

@@ -214,7 +214,7 @@ func (s UserService) NewUser(
 }
 
 // Sets current_shipid on a user in the database
-func (s UserService) SetCurrentShipID(uid uuid.UUID, shipID *uuid.UUID) error {
+func (s UserService) UpdateCurrentShipID(uid uuid.UUID, shipID *uuid.UUID) error {
 	// get db handle
 	db, err := connect()
 
@@ -239,7 +239,7 @@ func (s UserService) SetCurrentShipID(uid uuid.UUID, shipID *uuid.UUID) error {
 }
 
 // Sets current_factionid on a user in the database
-func (s UserService) SetCurrentFactionID(uid uuid.UUID, factionID *uuid.UUID) error {
+func (s UserService) UpdateCurrentFactionID(uid uuid.UUID, factionID *uuid.UUID) error {
 	// get db handle
 	db, err := connect()
 
@@ -264,7 +264,7 @@ func (s UserService) SetCurrentFactionID(uid uuid.UUID, factionID *uuid.UUID) er
 }
 
 // Sets reputationsheet on a user in the database
-func (s UserService) SaveReputationSheet(uid uuid.UUID, repsheet PlayerReputationSheet) error {
+func (s UserService) UpdateReputationSheet(uid uuid.UUID, repsheet PlayerReputationSheet) error {
 	// get db handle
 	db, err := connect()
 
@@ -289,7 +289,7 @@ func (s UserService) SaveReputationSheet(uid uuid.UUID, repsheet PlayerReputatio
 }
 
 // Sets resettoken on a user in the database
-func (s UserService) SaveResetToken(uid uuid.UUID, token *uuid.UUID) error {
+func (s UserService) UpdateResetToken(uid uuid.UUID, token *uuid.UUID) error {
 	// get db handle
 	db, err := connect()
 
@@ -313,8 +313,36 @@ func (s UserService) SaveResetToken(uid uuid.UUID, token *uuid.UUID) error {
 	return nil
 }
 
+// Finds a user by its id
+func (s UserService) GetPasswordResetToken(uid uuid.UUID) (*uuid.UUID, error) {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// get reset token for this user id
+	sqlStatement := `SELECT resettoken
+					 FROM users
+					 WHERE id=$1`
+
+	row := db.QueryRow(sqlStatement, uid)
+
+	var token *uuid.UUID
+
+	switch err := row.Scan(token); err {
+	case sql.ErrNoRows:
+		return nil, errors.New("user does not exist or invalid credentials")
+	case nil:
+		return token, nil
+	default:
+		return nil, err
+	}
+}
+
 // Changes a password for a given user and token and then clears the token
-func (s UserService) SetPassword(uid uuid.UUID, token uuid.UUID, password string) error {
+func (s UserService) UpdatePassword(uid uuid.UUID, token uuid.UUID, password string) error {
 	// get db handle
 	db, err := connect()
 
@@ -340,7 +368,7 @@ func (s UserService) SetPassword(uid uuid.UUID, token uuid.UUID, password string
 	sql := `
 				UPDATE public.users 
 				SET hashpass = $1, resettoken = null 
-				WHERE id = $2 and resettoken = $3 and resettoken is not null;
+				WHERE id = $2 and resettoken = $3;
 			`
 
 	q, err := db.Query(sql, hp, uid, token)
@@ -355,7 +383,7 @@ func (s UserService) SetPassword(uid uuid.UUID, token uuid.UUID, password string
 }
 
 // Sets experiencesheet on a user in the database
-func (s UserService) SaveExperienceSheet(uid uuid.UUID, expsheet PlayerExperienceSheet) error {
+func (s UserService) UpdateExperienceSheet(uid uuid.UUID, expsheet PlayerExperienceSheet) error {
 	// get db handle
 	db, err := connect()
 
@@ -454,7 +482,7 @@ func (s UserService) GetUserByID(uid uuid.UUID) (*User, error) {
 		return nil, err
 	}
 
-	// check for user with these credentials
+	// check for user with this id
 	user := User{}
 
 	sqlStatement := `SELECT id, charactername, hashpass, registered, banned, current_shipid, startid, escrow_containerid, current_factionid, reputationsheet,

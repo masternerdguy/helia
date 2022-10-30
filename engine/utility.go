@@ -374,7 +374,7 @@ func CreateNoobShipForPlayer(start *sql.Start, uid uuid.UUID) (*sql.User, error)
 	}
 
 	// put user in starter ship
-	err = userSvc.SetCurrentShipID(u.ID, &starterShip.ID)
+	err = userSvc.UpdateCurrentShipID(u.ID, &starterShip.ID)
 	u.CurrentShipID = &starterShip.ID
 
 	if err != nil {

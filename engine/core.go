@@ -1187,7 +1187,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			defer escalationRecover(sol, e)
 
 			// update currently flown ship in database
-			err := userSvc.SetCurrentShipID(*rs.Client.UID, &rs.Target.ID)
+			err := userSvc.UpdateCurrentShipID(*rs.Client.UID, &rs.Target.ID)
 
 			if err != nil {
 				shared.TeeLog(fmt.Sprintf("! Unable to complete ship switch for %v - failure saving (%v)!", rs.Client.UID, err))
@@ -1566,7 +1566,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			sol.Universe.Factions[uf.ID.String()] = uf
 
 			// put founder in their new faction
-			err = userSvc.SetCurrentFactionID(*mi.Client.UID, &f.ID)
+			err = userSvc.UpdateCurrentFactionID(*mi.Client.UID, &f.ID)
 
 			// error check
 			if err != nil {
@@ -1693,7 +1693,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 			// put player in their starter faction
 			fID := start.FactionID
-			err = userSvc.SetCurrentFactionID(*mi.Client.UID, &fID)
+			err = userSvc.UpdateCurrentFactionID(*mi.Client.UID, &fID)
 
 			// error check
 			if err != nil {
@@ -1786,7 +1786,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 			// put player in the target faction
 			fID := faction.ID
-			err := userSvc.SetCurrentFactionID(mi.UserID, &fID)
+			err := userSvc.UpdateCurrentFactionID(mi.UserID, &fID)
 
 			// error check
 			if err != nil {
@@ -1989,7 +1989,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 			// put kickee in their starter faction
 			sfID := kickeeStart.FactionID
-			err = userSvc.SetCurrentFactionID(mi.UserID, &sfID)
+			err = userSvc.UpdateCurrentFactionID(mi.UserID, &sfID)
 
 			// error check
 			if err != nil {
