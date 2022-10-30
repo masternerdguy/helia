@@ -135,6 +135,7 @@ export class TargetInteractionWindow extends GDIWindow {
     this.addComponent(this.gotoBtn);
     this.addComponent(this.orbitBtn);
     this.addComponent(this.dockBtn);
+    this.addComponent(this.cameraLook);
 
     // setup shield bar
     this.tgtShieldBar.setWidth(110);
