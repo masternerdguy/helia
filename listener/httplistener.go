@@ -347,7 +347,7 @@ func (l *HTTPListener) HandleForgot(w http.ResponseWriter, r *http.Request) {
 			b := shared.FillPasswordResetTokenEmailBody(r.Referer(), user.ID, token)
 
 			// send email
-			err := shared.SendEmail("contact@projecthelia.com", *user.EmailAddress, "Password Reset", b)
+			err := shared.SendEmail(*user.EmailAddress, "Password Reset", b)
 			res.Success = err == nil
 		}
 	}
@@ -452,7 +452,19 @@ func (l *HTTPListener) HandleReset(w http.ResponseWriter, r *http.Request) {
 					res.Success = false
 					res.Message = se
 				} else {
+					// mark as success
 					res.Success = true
+
+					// send notification email
+					b := shared.FillPasswordResetSuccessEmailBody(ip)
+					err := shared.SendEmail(*user.EmailAddress, "Password Reset Success", b)
+
+					if err != nil {
+						// log failure to send email
+						shared.TeeLog(
+							fmt.Sprintf("Failed to send password reset success email for %v: %v", *user.EmailAddress, err),
+						)
+					}
 				}
 			}
 		}

@@ -21,6 +21,7 @@ func InitializeConfiguration() {
 
 type sharedConfig struct {
 	SendgridKey string `json:"sendgridKey"`
+	FromEmail   string `json:"fromEmail"`
 }
 
 func loadConfiguration() (sharedConfig, error) {

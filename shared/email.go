@@ -10,10 +10,13 @@ import (
 )
 
 // Helper function to send an email
-func SendEmail(from string, to string, subject string, body string) error {
+func SendEmail(to string, subject string, body string) error {
 	// set up sendgrid
 	request := sendgrid.GetRequest(config.SendgridKey, "/v3/mail/send", "https://api.sendgrid.com")
 	request.Method = "POST"
+
+	// get from email
+	from := config.FromEmail
 
 	// no double quotes allowed
 	to = strings.ReplaceAll(to, "\"", "")
@@ -80,16 +83,39 @@ func FillPasswordResetTokenEmailBody(frontendDomain string, uid uuid.UUID, token
 	// fill body
 	b := fmt.Sprintf(
 		`
-		<div>
-			Click <a href='%v#/auth/reset?u=%v&t=%v'>here</a> to reset your Project Helia account password.
-		</div>
-		<div>
-			If you did not request a password reset, please contact support at <a href="mailto:contact@projecthelia.com">contact@projecthelia.com</a>.
-		</div>
+			<div>
+				Click <a href='%v#/auth/reset?u=%v&t=%v'>here</a> to reset your Project Helia account password.
+			</div>
+			<div>
+				If you did not request a password reset, please contact support at <a href="mailto:contact@projecthelia.com">contact@projecthelia.com</a>.
+			</div>
 		`,
 		frontendDomain,
 		uid,
 		token,
+	)
+
+	// strip special characters
+	b = strings.ReplaceAll(b, "\t", "")
+	b = strings.ReplaceAll(b, "\n", "")
+
+	// return result
+	return b
+}
+
+// Helper function to create the body of a password reset success email
+func FillPasswordResetSuccessEmailBody(ip string) string {
+	// fill body
+	b := fmt.Sprintf(
+		`
+			<div>
+				Your password for Project Helia was reset from the IP address %v.
+			</div>
+			<div>
+				If you did not request a password reset, please contact support at <a href="mailto:contact@projecthelia.com">contact@projecthelia.com</a> immediately.
+			</div>
+		`,
+		ip,
 	)
 
 	// strip special characters
