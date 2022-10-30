@@ -6,6 +6,7 @@ import { HomeComponent } from './home/home.component';
 import { LoreComponent } from './lore/lore.component';
 import { UnifiedPolicyComponent } from './unified-policy/unified-policy.component';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 
 const routes: Routes = [
   { path: 'lore', component: LoreComponent },
@@ -13,6 +14,7 @@ const routes: Routes = [
   { path: 'auth/signup', component: SignupComponent },
   { path: 'auth/signin', component: LoginComponent },
   { path: 'auth/forgot', component: ForgotPasswordComponent },
+  { path: 'auth/reset', component: ResetPasswordComponent },
   { path: '', component: HomeComponent },
 ];
 

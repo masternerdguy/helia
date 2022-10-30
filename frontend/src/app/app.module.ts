@@ -11,6 +11,7 @@ import { HomeComponent } from './home/home.component';
 import { LoreComponent } from './lore/lore.component';
 import { UnifiedPolicyComponent } from './unified-policy/unified-policy.component';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 
 @NgModule({
   declarations: [
@@ -18,6 +19,7 @@ import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.
     SignupComponent,
     LoginComponent,
     ForgotPasswordComponent,
+    ResetPasswordComponent,
     HomeComponent,
     LoreComponent,
     UnifiedPolicyComponent,
