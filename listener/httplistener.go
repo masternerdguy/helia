@@ -425,7 +425,7 @@ func (l *HTTPListener) HandleReset(w http.ResponseWriter, r *http.Request) {
 		// for empty uuid check
 		var emptyUUID uuid.UUID
 
-		if t == nil || *t == emptyUUID || *t != m.Token {
+		if t == nil || *t == emptyUUID || *t != m.Token || m.Token == emptyUUID {
 			// validation failed
 			res.Success = false
 			res.Message = se
