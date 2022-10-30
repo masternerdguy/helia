@@ -19,11 +19,14 @@ export class TargetInteractionWindow extends GDIWindow {
   private gotoBtn = new GDIButton();
   private orbitBtn = new GDIButton();
   private dockBtn = new GDIButton();
+  private lookBtn = new GDIButton();
   private wsSvc: WsService;
 
   private tgtShieldBar = new GDIBar();
   private tgtArmorBar = new GDIBar();
   private tgtHullBar = new GDIBar();
+
+  private cameraLook: any;
 
   initialize() {
     // set dimensions
@@ -105,6 +108,27 @@ export class TargetInteractionWindow extends GDIWindow {
         b.sid = this.wsSvc.sid;
 
         this.wsSvc.sendMessage(MessageTypes.Undock, b);
+      }
+    });
+
+    // look button
+    this.lookBtn.setWidth(30);
+    this.lookBtn.setHeight(30);
+    this.lookBtn.initialize();
+
+    this.lookBtn.setX(110);
+    this.lookBtn.setY(5);
+
+    this.lookBtn.setFont(FontSize.giant);
+    this.lookBtn.setText('Ꙫ');
+
+    this.lookBtn.setOnClick((x, y) => {
+      if (!this.cameraLook) {
+        // reparent camera to selected target
+        this.cameraLook = this.target;
+      } else {
+        // reparent camera to player ship
+        this.cameraLook = this.host;
       }
     });
 
@@ -213,6 +237,10 @@ export class TargetInteractionWindow extends GDIWindow {
 
   setWsSvc(wsSvc: WsService) {
     this.wsSvc = wsSvc;
+  }
+
+  getCameraLook() {
+    return this.cameraLook;
   }
 
   private showHealthBarInfo(shieldP: number, armorP: number, hullP: number) {

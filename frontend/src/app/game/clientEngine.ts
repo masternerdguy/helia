@@ -1369,14 +1369,23 @@ function clientRender() {
   // alternate frame flag
   engineSack.alternateFrame = !engineSack.alternateFrame;
 
-  // center camera on player ship
-  for (const sh of engineSack.player.currentSystem.ships) {
-    if (sh.id == engineSack.player.currentShip.id) {
-      engineSack.camera.x = sh.x;
-      engineSack.camera.y = sh.y;
+  // get camera look from interaction window
+  const look = engineSack.targetInteractionWindow.getCameraLook()
 
-      break;
-    }
+  if(look) {
+    // center camera on look
+    engineSack.camera.x = look.x;
+    engineSack.camera.y = look.y;
+  } else {
+    // center camera on player ship
+    for (const sh of engineSack.player.currentSystem.ships) {
+      if (sh.id == engineSack.player.currentShip.id) {
+        engineSack.camera.x = sh.x;
+        engineSack.camera.y = sh.y;
+  
+        break;
+      }
+    }  
   }
 
   // blank screen
