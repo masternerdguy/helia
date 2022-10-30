@@ -3,7 +3,6 @@ package shared
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/google/uuid"
@@ -60,8 +59,6 @@ func SendEmail(from string, to string, subject string, body string) *error {
 			fmt.Sprintf("Error sending email from %v to %v: %v", from, to, err.Error()),
 		)
 	}
-
-	log.Printf("%v", res)
 
 	// check for error in response itself
 	if res.StatusCode != 200 {
