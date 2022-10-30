@@ -10,7 +10,7 @@ import (
 )
 
 // Helper function to send an email
-func SendEmail(from string, to string, subject string, body string) *error {
+func SendEmail(from string, to string, subject string, body string) error {
 	// set up sendgrid
 	request := sendgrid.GetRequest(config.SendgridKey, "/v3/mail/send", "https://api.sendgrid.com")
 	request.Method = "POST"
@@ -61,7 +61,7 @@ func SendEmail(from string, to string, subject string, body string) *error {
 	}
 
 	// check for error in response itself
-	if res.StatusCode != 200 {
+	if res.StatusCode != 200 && res.StatusCode != 202 {
 		// log error
 		TeeLog(
 			fmt.Sprintf("Error sending email [2] from %v to %v: %v {%v}", from, to, res.Body, res.StatusCode),
@@ -72,22 +72,30 @@ func SendEmail(from string, to string, subject string, body string) *error {
 	}
 
 	// return error, if any
-	return &err
+	return err
 }
 
 // Helper function to create the body of a password reset token email
 func FillPasswordResetTokenEmailBody(frontendDomain string, uid uuid.UUID, token uuid.UUID) string {
-	return fmt.Sprintf(
+	// fill body
+	b := fmt.Sprintf(
 		`
 		<div>
 			Click <a href='%v/#/auth/reset?u=%v&t=%v'>here</a> to reset your Project Helia account password.
 		</div>
 		<div>
-			If you did not request a password reset, please contact support at contact@projecthelia.com
+			If you did not request a password reset, please contact support at <span>contact@projecthelia.com</span>.
 		</div>
 		`,
 		frontendDomain,
 		uid,
 		token,
 	)
+
+	// strip special characters
+	b = strings.ReplaceAll(b, "\t", "")
+	b = strings.ReplaceAll(b, "\n", "")
+
+	// return result
+	return b
 }

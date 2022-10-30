@@ -283,7 +283,7 @@ func (l *HTTPListener) HandleForgot(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
 
 	// shared error message to hide details
-	const se = "unable to continue reset process"
+	const se = "Something went wrong requesting a password reset."
 
 	// get services
 	userSvc := sql.GetUserService()
@@ -357,7 +357,7 @@ func (l *HTTPListener) HandleForgot(w http.ResponseWriter, r *http.Request) {
 		shared.TeeLog(fmt.Sprintf("Reset token sent for %v << %v", m.EmailAddress, ip))
 		res.Message = "A link to reset your password has been emailed to you."
 	} else {
-		res.Message = "Something went wrong requesting a password reset."
+		res.Message = se
 	}
 
 	// return result

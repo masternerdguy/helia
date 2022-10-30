@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AccountService } from '../account.service';
-import { WsService } from 'src/app/game/ws.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -22,6 +21,12 @@ export class ForgotPasswordComponent implements OnInit {
       emailaddress: this.emailaddress.nativeElement.value
     });
 
-    console.log(s);
+    // show result
+    alert(s.message);
+
+    // return home on success
+    if (s.success) {
+      window.location.href = "/";
+    }
   }
 }
