@@ -210,6 +210,8 @@ type Ship struct {
 	CachedEnergyRegen      float64 // cache of output from GetRealEnergyRegen
 	CachedShieldRegen      float64 // cache of output from GetRealShieldRegen
 	CachedCargoBayVolume   float64 // cache of output from GetRealCargoBayVolume
+	SumCloaking            float64 // cache of sum of cloaking power
+	SumVeiling             float64 // cache of sum of veiling power
 	EscrowContainerID      *uuid.UUID
 	BeingFlownByPlayer     bool
 	ReputationSheet        *shared.PlayerReputationSheet
@@ -657,6 +659,11 @@ func (s *Ship) alwaysPeriodicUpdate() {
 		s.updateCloaking()
 	}
 
+	// update veiling (safe to do every few ticks)
+	if s.CurrentSystem.tickCounter%7 == 0 {
+		s.updateVeiling()
+	}
+
 	// determine whether to recalculate cargo capacity
 	rcc := s.CurrentSystem.tickCounter%22 == 0
 
@@ -872,6 +879,9 @@ func (s *Ship) updateCloaking() {
 		}
 	}
 
+	// store cloak percentage sum
+	s.SumCloaking = cloakPercentage
+
 	// determine whether cloaked for tick
 	if cloakPercentage >= 1 {
 		// ship is cloaked
@@ -886,6 +896,30 @@ func (s *Ship) updateCloaking() {
 	}
 
 	s.IsCloaked = cloaked
+}
+
+// Determines veil damage absorption for a tick
+func (s *Ship) updateVeiling() {
+	// check for active omni hardeners
+	genericHardening := 0.0
+
+	for _, x := range s.TemporaryModifiers {
+		if x.RemainingTicks > 0 && x.Attribute == "veil" {
+			genericHardening += x.Percentage
+		}
+	}
+
+	// clamp active omni hardening
+	if genericHardening > 0.99 {
+		genericHardening = 0.99
+	}
+
+	if genericHardening < 0 {
+		genericHardening = 0
+	}
+
+	// store factor
+	s.SumVeiling = genericHardening
 }
 
 // Updates the ship's energy level for a tick
@@ -1733,23 +1767,8 @@ func (s *Ship) DealDamage(
 		attackerModule,
 	)
 
-	// check for active omni hardeners
-	genericHardening := 0.0
-
-	for _, x := range s.TemporaryModifiers {
-		if x.RemainingTicks > 0 && x.Attribute == "veil" {
-			genericHardening += x.Percentage
-		}
-	}
-
-	// clamp active omni hardening
-	if genericHardening > 0.99 {
-		genericHardening = 0.99
-	}
-
-	if genericHardening < 0 {
-		genericHardening = 0
-	}
+	// get generic hardening (veiling)
+	genericHardening := s.SumVeiling
 
 	// apply active omni hardeners
 	shieldDmg *= 1.0 - genericHardening
@@ -7596,6 +7615,7 @@ func (s *Ship) updateAggressionTables(
 
 // Helper function to recalculate all stat caches
 func RecalcAllStatCaches(s *Ship) {
+	// recalculate caches
 	s.GetRealHeatSink(true)
 	s.GetRealMaxHeat(true)
 	s.GetRealAccel(true)
@@ -7609,4 +7629,8 @@ func RecalcAllStatCaches(s *Ship) {
 	s.GetRealEnergyRegen(true)
 	s.GetRealShieldRegen(true)
 	s.GetRealCargoBayVolume(true)
+
+	// zero sums
+	s.SumCloaking = 0
+	s.SumVeiling = 0
 }

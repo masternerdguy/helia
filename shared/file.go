@@ -1,7 +1,7 @@
 package shared
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 )
 
@@ -18,7 +18,7 @@ func ReadFileBytes(f string) (*[]byte, bool) {
 	defer fo.Close()
 
 	// read contents
-	data, err := ioutil.ReadAll(fo)
+	data, err := io.ReadAll(fo)
 
 	if err != nil {
 		return nil, false

@@ -84,6 +84,10 @@ func main() {
 	downtimeRunner.Initialize()
 	downtimeRunner.RunDownTimeTasks()
 
+	// initialize shared configuration
+	shared.TeeLog("Initializing shared configuration...")
+	shared.InitializeConfiguration()
+
 	// initialize game engine
 	shared.TeeLog("Initializing engine...")
 	engine := engine.HeliaEngine{}
@@ -107,6 +111,8 @@ func main() {
 	shared.TeeLog("Wiring up API HTTP handlers...")
 	http.HandleFunc("/api/register", httpListener.HandleRegister)
 	http.HandleFunc("/api/login", httpListener.HandleLogin)
+	http.HandleFunc("/api/forgot", httpListener.HandleForgot)
+	http.HandleFunc("/api/reset", httpListener.HandleReset)
 	http.HandleFunc("/api/shutdown", httpListener.HandleShutdown)
 
 	// give the user a chance to accept the self signed cert

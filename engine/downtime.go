@@ -250,7 +250,7 @@ func (d *DownTimeRunner) disbandLeaderlessPlayerFactions() error {
 				}
 
 				// assign them to their starter faction
-				err = d.userSvc.SetCurrentFactionID(m.ID, &start.FactionID)
+				err = d.userSvc.UpdateCurrentFactionID(m.ID, &start.FactionID)
 
 				if err != nil {
 					return err

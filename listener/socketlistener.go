@@ -82,7 +82,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		defer client.ReputationSheet.Lock.Unlock()
 
 		srs := engine.SQLFromPlayerReputationSheet(&client.ReputationSheet)
-		err := userSvc.SaveReputationSheet(*client.UID, srs)
+		err := userSvc.UpdateReputationSheet(*client.UID, srs)
 
 		if err != nil {
 			shared.TeeLog(fmt.Sprintf("! unable to save reputation sheet for %v on disconnect! %v", client.UID, err))
@@ -93,7 +93,7 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		defer client.ExperienceSheet.Lock.Unlock()
 
 		ers := engine.SQLFromPlayerExperienceSheet(&client.ExperienceSheet)
-		err = userSvc.SaveExperienceSheet(*client.UID, ers)
+		err = userSvc.UpdateExperienceSheet(*client.UID, ers)
 
 		if err != nil {
 			shared.TeeLog(fmt.Sprintf("! unable to save experience sheet for %v on disconnect! %v", client.UID, err))

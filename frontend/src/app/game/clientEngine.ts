@@ -484,6 +484,9 @@ function handleGlobalUpdate(d: GameMessage) {
     engineSack.overviewWindow.selectedItemID = undefined;
     engineSack.overviewWindow.selectedItemType = undefined;
     engineSack.targetInteractionWindow.setTarget(undefined, undefined);
+
+    // clear camera look
+    engineSack.targetInteractionWindow.setCameraLook(undefined, undefined);
   } else {
     // fix empty arrays in incoming data
     if (!msg.planets || msg.planets == null) {
@@ -1369,14 +1372,23 @@ function clientRender() {
   // alternate frame flag
   engineSack.alternateFrame = !engineSack.alternateFrame;
 
-  // center camera on player ship
-  for (const sh of engineSack.player.currentSystem.ships) {
-    if (sh.id == engineSack.player.currentShip.id) {
-      engineSack.camera.x = sh.x;
-      engineSack.camera.y = sh.y;
+  // get camera look from interaction window
+  const look = engineSack.targetInteractionWindow.getCameraLook()
 
-      break;
-    }
+  if(look[0]) {
+    // center camera on look
+    engineSack.camera.x = look[0].x;
+    engineSack.camera.y = look[0].y;
+  } else {
+    // center camera on player ship
+    for (const sh of engineSack.player.currentSystem.ships) {
+      if (sh.id == engineSack.player.currentShip.id) {
+        engineSack.camera.x = sh.x;
+        engineSack.camera.y = sh.y;
+  
+        break;
+      }
+    }  
   }
 
   // blank screen

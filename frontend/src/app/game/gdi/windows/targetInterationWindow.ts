@@ -19,11 +19,15 @@ export class TargetInteractionWindow extends GDIWindow {
   private gotoBtn = new GDIButton();
   private orbitBtn = new GDIButton();
   private dockBtn = new GDIButton();
+  private lookBtn = new GDIButton();
   private wsSvc: WsService;
 
   private tgtShieldBar = new GDIBar();
   private tgtArmorBar = new GDIBar();
   private tgtHullBar = new GDIBar();
+
+  private cameraLook: any;
+  private cameraLookType: TargetType;
 
   initialize() {
     // set dimensions
@@ -108,9 +112,33 @@ export class TargetInteractionWindow extends GDIWindow {
       }
     });
 
+    // look button
+    this.lookBtn.setWidth(30);
+    this.lookBtn.setHeight(30);
+    this.lookBtn.initialize();
+
+    this.lookBtn.setX(110);
+    this.lookBtn.setY(5);
+
+    this.lookBtn.setFont(FontSize.giant);
+    this.lookBtn.setText('☆');
+
+    this.lookBtn.setOnClick((x, y) => {
+      if (!this.cameraLook) {
+        // reparent camera to selected target
+        this.cameraLook = this.target;
+        this.cameraLookType = this.targetType;
+      } else {
+        // reparent camera to player ship
+        this.cameraLook = undefined;
+        this.cameraLookType = undefined;
+      }
+    });
+
     this.addComponent(this.gotoBtn);
     this.addComponent(this.orbitBtn);
     this.addComponent(this.dockBtn);
+    this.addComponent(this.lookBtn);
 
     // setup shield bar
     this.tgtShieldBar.setWidth(110);
@@ -157,10 +185,19 @@ export class TargetInteractionWindow extends GDIWindow {
   }
 
   periodicUpdate() {
+    // check for host ship
     if (!this.host) {
       return;
     }
 
+    // update look button based on look state
+    if (this.cameraLook) {
+      this.lookBtn.setText('☇');
+    } else {
+      this.lookBtn.setText('☌');
+    }
+
+    // check dock state
     if (!this.host.dockedAtStationID) {
       // player is in space
       if (this.target !== undefined) {
@@ -213,6 +250,15 @@ export class TargetInteractionWindow extends GDIWindow {
 
   setWsSvc(wsSvc: WsService) {
     this.wsSvc = wsSvc;
+  }
+
+  getCameraLook(): [any, TargetType] {
+    return [this.cameraLook, this.cameraLookType];
+  }
+
+  setCameraLook(target: any, targetType: TargetType) {
+    this.cameraLook = target;
+    this.targetType = targetType;
   }
 
   private showHealthBarInfo(shieldP: number, armorP: number, hullP: number) {

@@ -11,8 +11,8 @@
     <div style="background: maroon; color: wheat;">
         <p style="font-weight: 300; font-size: 12px;">
             Helia is designed to work with Chromium-based browsers such as Chrome, Opera, and modern Edge. You may experience issues using
-            non Chromium-based browsers. Scheduled restarts occur at noon and midnight EDT. The server takes ~30 minutes to 
-            restart - if you can't log in now, try again later. As the project matures, these restarts will become less frequent.
+            non Chromium-based browsers. Scheduled restarts occur at noon EDT. The server takes ~30 minutes to restart - if you can't log 
+            in now, try again later.
         </p>
     </div>
     <form class="form">
@@ -23,6 +23,12 @@
         <div>
             <label for="password">Password</label>
             <input type="password" class="form-control" placeholder="Enter your password..." id="password" #password>
+        </div>
+        <br/>
+        <div>
+            <strong>
+                <a style="color: aquamarine;" href="/#/auth/forgot">Forgot Password</a>
+            </strong>
         </div>
         <br/>
         <button type="button" class="btn btn-primary center" (click)="login()">Submit</button>
