@@ -3264,9 +3264,9 @@ func (s *Ship) doAutopilotSalvage() {
 	// get registry
 	targetTypeReg := models.SharedTargetTypeRegistry
 
-	if s.AutopilotMine.Type == targetTypeReg.Wreck {
+	if s.AutopilotSalvage.Type == targetTypeReg.Wreck {
 		// find wreck
-		targetWreck := s.CurrentSystem.wrecks[s.AutopilotMine.TargetID.String()]
+		targetWreck := s.CurrentSystem.wrecks[s.AutopilotSalvage.TargetID.String()]
 
 		if targetWreck == nil {
 			s.CmdAbort(false)
