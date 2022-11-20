@@ -3082,7 +3082,7 @@ func (s *Ship) doAutopilotFight() {
 
 				// special check for burst fusion reactors
 				if v.ItemTypeFamily == "burst_reactor" {
-					// make sure enough energy is below 15% for this to be worth it
+					// make sure energy is below 15% for this to be worth it
 					if s.Energy/s.GetRealMaxEnergy(false) >= 0.15 {
 						// deactivate and continue
 						s.Fitting.BRack[i].WillRepeat = false
