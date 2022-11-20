@@ -96,7 +96,7 @@ example: /devhax ship Robin
 
 Creates a new ship of a given type at the station you are currently docked at. Ignores limits on maximum parked ships at the same station!
 
-## ship
+## tonpc
 syntax:  /devhax tonpc [behaviourtype]
 example: /devhax tonpc 3
 
