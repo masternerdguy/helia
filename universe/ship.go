@@ -235,6 +235,7 @@ type Ship struct {
 	AggressionLog          map[string]*shared.AggressionLog         // details of aggression between any ships (human or otherwise)
 	aiIncompatibleOreFault bool                                     // true when mining autopilot failed due to incompatible ore (for patch miners)
 	aiNoOrePulledFault     bool                                     // true when mining autopilot failed due to pulling no ore (for patch miners)
+	aiNoWreckFault         bool                                     // true when salvaging autopilot failed due to wreck disappearing (for patch salvagers)
 	WreckReady             bool                                     // true when a dead ship has been saved to the db and the wreck can be looted
 	InLimbo                bool                                     // true when ship is being migrated between systems
 	Lock                   sync.Mutex
@@ -1318,6 +1319,8 @@ func (s *Ship) CmdSalvage(targetID uuid.UUID, targetType int, lock bool) {
 		Type:     targetType,
 	}
 
+	s.aiNoWreckFault = false
+
 	s.AutopilotMode = registry.Salvage
 }
 
@@ -2386,25 +2389,12 @@ func (s *Ship) behaviourPatchSalvage() {
 	// get registry
 	autoReg := SharedAutopilotRegistry
 
-	// check for faults
-	if s.aiIncompatibleOreFault {
+	if s.aiNoWreckFault {
 		// stop autopilot
 		s.CmdAbort(false)
 
 		// clear flag
-		s.aiIncompatibleOreFault = false
-
-		// wander
-		s.gotoNextWanderDestination(15)
-		return
-	}
-
-	if s.aiNoOrePulledFault {
-		// stop autopilot
-		s.CmdAbort(false)
-
-		// clear flag
-		s.aiNoOrePulledFault = false
+		s.aiNoWreckFault = false
 
 		// wander
 		s.gotoNextWanderDestination(95)
@@ -6567,6 +6557,9 @@ func (m *FittedSlot) activateAsSalvager() bool {
 			m.TargetID = nil
 			m.TargetType = nil
 			m.WillRepeat = false
+
+			// raise missing wreck fault
+			m.shipMountedOn.aiNoWreckFault = true
 
 			return false
 		}
