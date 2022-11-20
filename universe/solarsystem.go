@@ -3893,6 +3893,33 @@ func (s *SolarSystem) handleDevHax(q string, c *shared.GameClient) {
 
 		// all done!
 		return
+	} else if verb == "tonpc" {
+		// convert noun to integer
+		i, err := strconv.Atoi(noun)
+
+		// verify parsed
+		if err != nil {
+			c.WriteErrorMessage("not an integer.")
+			return
+		}
+
+		// set isNPC flag
+		if i < 0 {
+			// stop treating ship like an npc
+			sh.IsNPC = false
+
+			// use None for new behaviour
+			i = SharedBehaviourRegistry.None
+		} else {
+			// start treating ship like an npc
+			sh.IsNPC = true
+		}
+
+		// store behaviour mode
+		sh.BehaviourMode = &i
+
+		// all done!
+		return
 	}
 
 	// fallback

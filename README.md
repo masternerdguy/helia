@@ -95,3 +95,18 @@ syntax:  /devhax ship [itemtypename]
 example: /devhax ship Robin
 
 Creates a new ship of a given type at the station you are currently docked at. Ignores limits on maximum parked ships at the same station!
+
+## ship
+syntax:  /devhax tonpc [behaviourtype]
+example: /devhax tonpc 3
+
+Sets your current ship up as an "NPC" following a given behaviour mode number.
+
+* None:         0
+* Wander:       1
+* Patrol:       2
+* PatchTrade:   3
+* PatchMine:    4
+* PatchSalvage: 5
+
+Sending a negative number will undo this effect.
