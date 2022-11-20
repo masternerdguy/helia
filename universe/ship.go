@@ -3335,8 +3335,8 @@ func (s *Ship) doAutopilotSalvage() {
 
 				if roll >= hit {
 					// activate module
-					s.Fitting.ARack[i].TargetID = &s.AutopilotMine.TargetID
-					s.Fitting.ARack[i].TargetType = &s.AutopilotMine.Type
+					s.Fitting.ARack[i].TargetID = &s.AutopilotSalvage.TargetID
+					s.Fitting.ARack[i].TargetType = &s.AutopilotSalvage.Type
 					s.Fitting.ARack[i].WillRepeat = true
 
 					// track heat
