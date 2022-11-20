@@ -2347,6 +2347,9 @@ func (s *Ship) behaviourPatchMine() {
 
 				// verify there are candidates
 				if count == 0 {
+					// no asteroids here? wander
+					s.gotoNextWanderDestination(15)
+
 					return
 				}
 
@@ -2478,6 +2481,9 @@ func (s *Ship) behaviourPatchSalvage() {
 
 				// verify there are candidates
 				if count == 0 {
+					// no wrecks here? wander
+					s.gotoNextWanderDestination(15)
+
 					return
 				}
 
@@ -6657,6 +6663,28 @@ func (m *FittedSlot) activateAsSalvager() bool {
 				// escalate to core for saving
 				i.CoreDirty = true
 				m.shipMountedOn.CurrentSystem.MovedItems = append(m.shipMountedOn.CurrentSystem.MovedItems, i)
+
+				// log salvage to console if player
+				if !m.shipMountedOn.IsNPC {
+					bm := 0
+
+					if m.shipMountedOn.BehaviourMode != nil {
+						bm = *m.shipMountedOn.BehaviourMode
+					}
+
+					shared.TeeLog(
+						fmt.Sprintf(
+							"[%v] %v (%v::%v) salvaged %v %v from %v",
+							m.shipMountedOn.CurrentSystem.SystemName,
+							m.shipMountedOn.CharacterName,
+							m.shipMountedOn.Texture,
+							bm,
+							i.Quantity,
+							i.ItemTypeName,
+							c.WreckName,
+						),
+					)
+				}
 			}
 		}
 	} else {
