@@ -2507,7 +2507,7 @@ func (s *Ship) behaviourPatchSalvage() {
 
 				if tgtWre != nil {
 					// go salvage it
-					s.CmdMine(tgtWre.ID, models.SharedTargetTypeRegistry.Wreck, false)
+					s.CmdSalvage(tgtWre.ID, models.SharedTargetTypeRegistry.Wreck, false)
 				} else {
 					// no wrecks here? wander
 					s.gotoNextWanderDestination(15)
