@@ -92,3 +92,18 @@ func itemMetaIsMutable(key string) bool {
 
 	return false
 }
+
+// Structure mirroring the SQL ItemType structure - should not be used outside of the universe caches and loader
+type ItemTypeRaw struct {
+	ID     uuid.UUID
+	Family string
+	Name   string
+	Meta   Meta `json:"meta"`
+}
+
+// Structure mirroring the SQL ItemFamily structure - should not be used outside of the universe caches and loader
+type ItemFamilyRaw struct {
+	ID           string
+	FriendlyName string
+	Meta         Meta `json:"meta"`
+}

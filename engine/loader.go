@@ -503,6 +503,37 @@ func LoadUniverse() (*universe.Universe, error) {
 	// link regions into universe
 	u.Regions = regions
 
+	// convert item type cache to universe type
+	universeItemTypes := make(map[string]*universe.ItemTypeRaw)
+
+	for _, t := range allItemTypes {
+		raw := universe.ItemTypeRaw{
+			ID:     t.ID,
+			Family: t.Family,
+			Name:   t.Name,
+			Meta:   universe.Meta(t.Meta),
+		}
+
+		universeItemTypes[t.ID.String()] = &raw
+	}
+
+	// convert item family cache to universe type
+	universeItemFamilies := make(map[string]*universe.ItemFamilyRaw)
+
+	for _, t := range allItemFamilies {
+		raw := universe.ItemFamilyRaw{
+			ID:           t.ID,
+			FriendlyName: t.FriendlyName,
+			Meta:         universe.Meta(t.Meta),
+		}
+
+		universeItemFamilies[t.ID] = &raw
+	}
+
+	// store item type and family caches in universe
+	u.CachedItemTypes = universeItemTypes
+	u.CachedItemFamilies = universeItemFamilies
+
 	// return universe
 	return &u, nil
 }

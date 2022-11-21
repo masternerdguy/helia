@@ -6,7 +6,6 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"helia/sql"
 	"math"
 	"math/rand"
 	"sync"
@@ -43,12 +42,14 @@ const MaxAsteroidMass = 75000
 
 // Structure representing the current game universe
 type Universe struct {
-	Regions       map[string]*Region
-	Factions      map[string]*Faction
-	FactionsLock  sync.RWMutex // lock for Factions field
-	AllSystems    []*SolarSystem
-	MapData       MapData
-	CachedMapData string // cached MapData to avoid overhead of extracting and stringifying over and over again
+	Regions            map[string]*Region
+	Factions           map[string]*Faction
+	FactionsLock       sync.RWMutex // lock for Factions field
+	AllSystems         []*SolarSystem
+	MapData            MapData
+	CachedMapData      string                    // cached MapData to avoid overhead of extracting and stringifying over and over again
+	CachedItemTypes    map[string]*ItemTypeRaw   // cached raw item types from the database
+	CachedItemFamilies map[string]*ItemFamilyRaw // cached raw item families from the database
 }
 
 // Structure representing a region in a starmap
@@ -157,11 +158,14 @@ func (u *Universe) BuildTransientCelestials() {
 	}
 
 	// generate transient jumpholes
-	generateTransientJumpholes(allSystems)
+	u.generateTransientJumpholes(allSystems)
+
+	// generate transient asteroids
+	u.generateTransientAsteroids(allSystems)
 }
 
 // Helper function to generate transient jumphole connections
-func generateTransientJumpholes(allSystems []*SolarSystem) {
+func (u *Universe) generateTransientJumpholes(allSystems []*SolarSystem) {
 	// determine number of pairs
 	edgeCount := physics.RandInRange(MinTransientEdges, MaxTransientEdges)
 
@@ -228,39 +232,18 @@ func generateTransientJumpholes(allSystems []*SolarSystem) {
 }
 
 // Helper function to generate transient asteroids
-func generateTransientAsteroids(allSystems []*SolarSystem) {
-	// get all item types
-	itemTypeSvc := sql.GetItemTypeService()
-	itemFamilySvc := sql.GetItemFamilyService()
+func (u *Universe) generateTransientAsteroids(allSystems []*SolarSystem) {
+	// get minable families from cache
+	oreFamily := u.CachedItemFamilies["ore"]
+	iceFamily := u.CachedItemFamilies["ice"]
 
-	allItemTypes, err := itemTypeSvc.GetAllItemTypes()
+	// select only minable types from cache
+	minableTypes := make([]ItemTypeRaw, 0)
 
-	if err != nil {
-		shared.TeeLog("Failed to get item types for generateTransientAsteroids()")
-		panic(err)
-	}
-
-	oreFamily, err := itemFamilySvc.GetItemFamilyByID("ore")
-
-	if err != nil {
-		shared.TeeLog("Failed to get ore family for generateTransientAsteroids()")
-		panic(err)
-	}
-
-	iceFamily, err := itemFamilySvc.GetItemFamilyByID("ice")
-
-	if err != nil {
-		shared.TeeLog("Failed to get ice family for generateTransientAsteroids()")
-		panic(err)
-	}
-
-	// select only minable types
-	minableTypes := make([]sql.ItemType, 0)
-
-	for _, t := range allItemTypes {
-		if t.Family == "ore" || t.Family == "ice" {
+	for _, t := range u.CachedItemTypes {
+		if t.Family == oreFamily.ID || t.Family == iceFamily.ID {
 			// store type
-			minableTypes = append(minableTypes, t)
+			minableTypes = append(minableTypes, *t)
 		}
 	}
 
