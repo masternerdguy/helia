@@ -6,6 +6,7 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"math"
 	"math/rand"
 	"sync"
@@ -233,6 +234,22 @@ func (u *Universe) generateTransientJumpholes(allSystems []*SolarSystem) {
 
 // Helper function to generate transient asteroids
 func (u *Universe) generateTransientAsteroids(allSystems []*SolarSystem) {
+	// transient asteroid texture pool
+	textures := [...]string{
+		"Mini/01",
+		"Mini/02",
+		"Mini/03",
+		"Mini/04",
+		"Mini/05",
+		"Mini/06",
+		"Mini/07",
+		"Mini/08",
+		"Mini/09",
+		"Mini/10",
+		"Mini/11",
+		"Mini/12",
+	}
+
 	// get minable families from cache
 	oreFamily := u.CachedItemFamilies["ore"]
 	iceFamily := u.CachedItemFamilies["ice"]
@@ -273,6 +290,10 @@ func (u *Universe) generateTransientAsteroids(allSystems []*SolarSystem) {
 			panic("unknown minable family")
 		}
 
+		// pick random texture from pool
+		texIDX := physics.RandInRange(0, len(textures))
+		tex := textures[texIDX]
+
 		// create transient asteroid
 		nid := uuid.New()
 
@@ -282,9 +303,9 @@ func (u *Universe) generateTransientAsteroids(allSystems []*SolarSystem) {
 			Name:           fmt.Sprintf("⚠ C%v%v%v-%v", nid[0], nid[1], nid[2], physics.RandInRange(1000, 9999)),
 			PosX:           float64(physics.RandInRange(-2500000, 2500000)),
 			PosY:           float64(physics.RandInRange(-2500000, 2500000)),
-			Texture:        "Jumphole-Transient",
-			Radius:         float64(physics.RandInRange(MinAsteroidRadius/4, MaxAsteroidRadius/4)),
-			Mass:           float64(physics.RandInRange(MinAsteroidMass/4, MaxAsteroidMass/4)),
+			Texture:        tex,
+			Radius:         float64(physics.RandInRange(MinAsteroidRadius/2, MaxAsteroidRadius/2)),
+			Mass:           float64(physics.RandInRange(MinAsteroidMass/2, MaxAsteroidMass/2)),
 			Theta:          float64(physics.RandInRange(0, 360)),
 			Transient:      true,
 			ItemTypeID:     aType.ID,
@@ -295,6 +316,8 @@ func (u *Universe) generateTransientAsteroids(allSystems []*SolarSystem) {
 			Yield:          y,
 			Lock:           sync.Mutex{},
 		}
+
+		log.Printf("%v", ast)
 
 		// inject into universe
 		sys.asteroids[ast.ID.String()] = &ast
