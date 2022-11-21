@@ -138,6 +138,13 @@ func (u *Universe) BuildTransientCelestials() {
 		}
 	}
 
+	// generate transient jumpholes
+	generateTransientJumpholes(allSystems)
+}
+
+// Helper function to generate transient jumphole connections
+func generateTransientJumpholes(allSystems []*SolarSystem) {
+
 	// build transient jumpholes
 	edgeCount := physics.RandInRange(MinTransientEdges, MaxTransientEdges)
 
