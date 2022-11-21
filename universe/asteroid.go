@@ -27,7 +27,8 @@ type Asteroid struct {
 	ItemFamilyName string
 	ItemTypeMeta   Meta
 	// in-memory only
-	Lock sync.Mutex
+	Transient bool
+	Lock      sync.Mutex
 }
 
 // Returns a new physics dummy structure representing this station

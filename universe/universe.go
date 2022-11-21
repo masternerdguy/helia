@@ -6,6 +6,9 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"helia/sql"
+	"math"
+	"math/rand"
 	"sync"
 
 	"github.com/google/uuid"
@@ -22,6 +25,21 @@ const MinTransientEdges = 5
 
 // Maximum transient jumphole pairs at startup
 const MaxTransientEdges = 35
+
+// Minimum transient asteroids at startup
+const MinTransientAsteroids = 5
+
+// Maximum transient asteroids at startup
+const MaxTransientAsterois = 125
+
+/* Asteroid constants copied from worldmaker for consistency */
+
+const MinAsteroidYield = 0.1
+const MaxAsteroidYield = 5.0
+const MinAsteroidRadius = 120
+const MaxAsteroidRadius = 315
+const MinAsteroidMass = 6000
+const MaxAsteroidMass = 75000
 
 // Structure representing the current game universe
 type Universe struct {
@@ -144,8 +162,7 @@ func (u *Universe) BuildTransientCelestials() {
 
 // Helper function to generate transient jumphole connections
 func generateTransientJumpholes(allSystems []*SolarSystem) {
-
-	// build transient jumpholes
+	// determine number of pairs
 	edgeCount := physics.RandInRange(MinTransientEdges, MaxTransientEdges)
 
 	for i := 0; i < edgeCount; i++ {
@@ -207,6 +224,97 @@ func generateTransientJumpholes(allSystems []*SolarSystem) {
 		// inject into universe
 		sysA.jumpholes[jhA.ID.String()] = &jhA
 		sysB.jumpholes[jhB.ID.String()] = &jhB
+	}
+}
+
+// Helper function to generate transient asteroids
+func generateTransientAsteroids(allSystems []*SolarSystem) {
+	// get all item types
+	itemTypeSvc := sql.GetItemTypeService()
+	itemFamilySvc := sql.GetItemFamilyService()
+
+	allItemTypes, err := itemTypeSvc.GetAllItemTypes()
+
+	if err != nil {
+		shared.TeeLog("Failed to get item types for generateTransientAsteroids()")
+		panic(err)
+	}
+
+	oreFamily, err := itemFamilySvc.GetItemFamilyByID("ore")
+
+	if err != nil {
+		shared.TeeLog("Failed to get ore family for generateTransientAsteroids()")
+		panic(err)
+	}
+
+	iceFamily, err := itemFamilySvc.GetItemFamilyByID("ice")
+
+	if err != nil {
+		shared.TeeLog("Failed to get ice family for generateTransientAsteroids()")
+		panic(err)
+	}
+
+	// select only minable types
+	minableTypes := make([]sql.ItemType, 0)
+
+	for _, t := range allItemTypes {
+		if t.Family == "ore" || t.Family == "ice" {
+			// store type
+			minableTypes = append(minableTypes, t)
+		}
+	}
+
+	// determine asteroid count
+	astCount := physics.RandInRange(MinTransientAsteroids, MaxTransientAsterois)
+
+	for i := 0; i < astCount; i++ {
+		// pick random system
+		sysIDX := physics.RandInRange(0, len(allSystems))
+		sys := allSystems[sysIDX]
+
+		// pick random minable type
+		typeIDX := physics.RandInRange(0, len(minableTypes))
+		aType := minableTypes[typeIDX]
+
+		// determine yield (up to double normal)
+		y := math.Max(rand.Float64()*MaxAsteroidYield, MinAsteroidYield) * (rand.Float64() + 1)
+
+		// determine family name
+		familyName := ""
+
+		if aType.Family == oreFamily.ID {
+			familyName = oreFamily.FriendlyName
+		} else if aType.Family == iceFamily.ID {
+			familyName = iceFamily.FriendlyName
+		} else {
+			panic("unknown minable family")
+		}
+
+		// create transient asteroid
+		nid := uuid.New()
+
+		ast := Asteroid{
+			ID:             nid,
+			SystemID:       sys.ID,
+			Name:           fmt.Sprintf("⚠ C%v%v%v-%v", nid[0], nid[1], nid[2], physics.RandInRange(1000, 9999)),
+			PosX:           float64(physics.RandInRange(-2500000, 2500000)),
+			PosY:           float64(physics.RandInRange(-2500000, 2500000)),
+			Texture:        "Jumphole-Transient",
+			Radius:         float64(physics.RandInRange(MinAsteroidRadius/4, MaxAsteroidRadius/4)),
+			Mass:           float64(physics.RandInRange(MinAsteroidMass/4, MaxAsteroidMass/4)),
+			Theta:          float64(physics.RandInRange(0, 360)),
+			Transient:      true,
+			ItemTypeID:     aType.ID,
+			ItemTypeName:   aType.Name,
+			ItemFamilyID:   aType.Family,
+			ItemFamilyName: familyName,
+			ItemTypeMeta:   Meta(aType.Meta),
+			Yield:          y,
+			Lock:           sync.Mutex{},
+		}
+
+		// inject into universe
+		sys.asteroids[ast.ID.String()] = &ast
 	}
 }
 
