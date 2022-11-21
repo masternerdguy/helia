@@ -6,7 +6,6 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"math"
 	"math/rand"
 	"sync"
@@ -316,8 +315,6 @@ func (u *Universe) generateTransientAsteroids(allSystems []*SolarSystem) {
 			Yield:          y,
 			Lock:           sync.Mutex{},
 		}
-
-		log.Printf("%v", ast)
 
 		// inject into universe
 		sys.asteroids[ast.ID.String()] = &ast
