@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"helia/engine"
 	"helia/physics"
 	"helia/shared"
 	"helia/sql"
@@ -27,7 +26,7 @@ func main() {
 		printLogger,
 	)
 
-	// load universe from database
+	/*// load universe from database
 	shared.TeeLog("Loading universe from database...")
 	universe, err := engine.LoadUniverse()
 
@@ -35,28 +34,28 @@ func main() {
 		panic(err)
 	}
 
-	shared.TeeLog("Loaded universe!")
+	shared.TeeLog("Loaded universe!")*/
 
 	/*
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	var toInject = [...]string{
+	/*var toInject = [...]string{
 		"ea20caa5-1d32-40b7-8cdb-4948815c55a6",
 		"f96c31f6-77e0-410e-8380-3fab636b3404",
 		"59a906a9-5159-4f40-8335-0a6a36ec087c",
 		"dcfdae71-052f-4adb-a8c4-4162ff65fa94",
-	}
+	}*/
 
 	// dropAsteroids(universe)
 	//dropSanctuaryStations(universe)
 
-	for i, e := range toInject {
+	/*for i, e := range toInject {
 		log.Printf("injecting process %v", e)
 		injectProcess(universe, e, i)
-	}
+	}*/
 
-	//stubModuleSchematicsAndProcesses()
+	stubModuleSchematicsAndProcesses()
 }
 
 /* Parameters for asteroid generation */
@@ -267,19 +266,22 @@ func stubModuleSchematicsAndProcesses() {
 			repairKits = append(repairKits, i)
 		}
 
-		if i.Family == "power_cell" {
-			// todo: deal with more than one of these in the future
+		if i.Name == "10 kWH Cell" {
 			smallPowerCell = i
 		}
 
-		if i.Family == "depleted_cell" {
-			// todo: deal with more than one of these in the future
+		if i.Name == "Depleted 10 kWH Cell" {
 			smallDepletedPowerCell = i
 		}
 	}
 
 	// iterate over item types to stub for
 	for _, i := range needSchematics {
+		// only look at medium
+		if !strings.Contains(i.Name, "Medium") {
+			continue
+		}
+
 		var industrial *sql.VwItemTypeIndustrial
 		var fairProcess = sql.Process{
 			ID:   uuid.New(),
