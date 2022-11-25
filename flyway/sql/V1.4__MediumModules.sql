@@ -53,10 +53,6 @@ INSERT INTO public.processes (id, name, meta, "time") VALUES ('7afec0a1-f693-424
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('76459a93-25b2-4412-9a11-a90ffac66316', 'Medium Ice Miner Sink [wm]', '{}', 591);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('885deb02-7718-49f0-b005-baac5eb35daf', 'Medium Ice Miner Schematic Faucet [wm]', '{}', 2032);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('8190069d-21e1-4b49-82f7-3d634662422c', 'Medium Ice Miner Schematic Sink [wm]', '{}', 4020);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('490a5bd5-5699-46d0-98a9-2152227945ee', 'Make Medium Laser Tool', '{}', 5879);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('32c20278-d928-4aa7-bec0-6ca56ce4a279', 'Medium Laser Tool Sink [wm]', '{}', 11528);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('2a463812-c4fc-453e-b263-dea1d123ffbb', 'Medium Laser Tool Schematic Faucet [wm]', '{}', 42353);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('d7982114-b81b-4531-b55e-7cc0b7104a20', 'Medium Laser Tool Schematic Sink [wm]', '{}', 23943);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('12bc294b-8a1a-4751-838c-ea266a357878', 'Make Medium Heat Sink', '{}', 292);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('4aa734c2-d6cb-4e59-8a8f-e11a303dca6e', 'Medium Heat Sink Sink [wm]', '{}', 368);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('fd6c5b88-fb4d-4040-9ebc-33643c116302', 'Medium Heat Sink Schematic Faucet [wm]', '{}', 1805);
