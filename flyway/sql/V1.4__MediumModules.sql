@@ -57,10 +57,6 @@ INSERT INTO public.processes (id, name, meta, "time") VALUES ('490a5bd5-5699-46d
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('32c20278-d928-4aa7-bec0-6ca56ce4a279', 'Medium Laser Tool Sink [wm]', '{}', 11528);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('2a463812-c4fc-453e-b263-dea1d123ffbb', 'Medium Laser Tool Schematic Faucet [wm]', '{}', 42353);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('d7982114-b81b-4531-b55e-7cc0b7104a20', 'Medium Laser Tool Schematic Sink [wm]', '{}', 23943);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('d1919b0b-f0b0-44b9-bf21-5f2247b8da97', 'Make Medium Ore Harvester', '{}', 9826);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('3d9407c9-b3a4-4d70-ad76-d056945f686d', 'Medium Ore Harvester Sink [wm]', '{}', 17089);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('ffcde3fb-b610-420a-9ee2-cb30684e3c13', 'Medium Ore Harvester Schematic Faucet [wm]', '{}', 39684);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('3409e15e-ebc8-4599-9f04-f8b1dc378fbf', 'Medium Ore Harvester Schematic Sink [wm]', '{}', 39630);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('12bc294b-8a1a-4751-838c-ea266a357878', 'Make Medium Heat Sink', '{}', 292);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('4aa734c2-d6cb-4e59-8a8f-e11a303dca6e', 'Medium Heat Sink Sink [wm]', '{}', 368);
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('fd6c5b88-fb4d-4040-9ebc-33643c116302', 'Medium Heat Sink Schematic Faucet [wm]', '{}', 1805);
@@ -149,7 +145,6 @@ INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VAL
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('2ff3df6e-8d10-49dc-83af-780919d8dc9d', '39b8eedf-ef80-4c29-a4bf-99abc4d84fa6', 4, '{}', '7afec0a1-f693-424d-b0ba-e19093451db0');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('1e94d51c-10c1-4cd6-a1bd-e9edc83a9f4c', '1d0d344b-ef28-43c8-a7a6-3275936b2dea', 5, '{}', '7afec0a1-f693-424d-b0ba-e19093451db0');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('97abc151-db1e-4907-a315-657e7ff52b41', 'dd522f03-2f52-4e82-b2f8-d7e0029cb82f', 19, '{}', '7afec0a1-f693-424d-b0ba-e19093451db0');
-INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('0a6de855-ea16-41cb-af0d-3c2e5819d88b', '7b2b4569-9416-4121-83cd-a9d71d298e80', 2, '{}', 'd7982114-b81b-4531-b55e-7cc0b7104a20');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('3dc948ae-0ae2-48e8-99eb-f515a93cc008', 'beee1d44-6818-48a0-b7c2-7bd123f989d5', 80, '{}', '32c20278-d928-4aa7-bec0-6ca56ce4a279');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('102cbb67-96ff-433a-b06d-82141e719988', '24800206-2c58-45b0-8238-81974d0ebb3b', 2066, '{}', '490a5bd5-5699-46d0-98a9-2152227945ee');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('2a7f7214-430c-4eb5-b154-bcdf53f2f75e', 'dd0c9b0a-279e-418e-b3b6-2f569fda0186', 22, '{}', '490a5bd5-5699-46d0-98a9-2152227945ee');
@@ -158,7 +153,6 @@ INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VAL
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('b8e3c367-534b-4662-8c3e-610b35515247', '2ce48bef-f06b-4550-b20c-0e64864db051', 16, '{}', '490a5bd5-5699-46d0-98a9-2152227945ee');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('1dda3fc9-a05a-4549-b46b-ec661842a64f', '7dcd5138-d7e0-419f-867a-6f0f23b99b5b', 14, '{}', '490a5bd5-5699-46d0-98a9-2152227945ee');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('ef71ad88-96ab-47ec-ae5a-de6e475331d5', 'dd522f03-2f52-4e82-b2f8-d7e0029cb82f', 63, '{}', '490a5bd5-5699-46d0-98a9-2152227945ee');
-INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('083057f6-60d7-4287-9395-248936a06408', '3f8b6b48-b350-4bc3-8b8d-ad8415f46183', 6, '{}', '3409e15e-ebc8-4599-9f04-f8b1dc378fbf');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('89642148-0fda-447c-9d59-2863bdd98eec', '69d2ff19-70eb-4919-9579-2aa0f1ee2bc2', 77, '{}', '3d9407c9-b3a4-4d70-ad76-d056945f686d');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('9b5103ed-7431-4d17-ba8a-c21115bd04d2', 'dd0c9b0a-279e-418e-b3b6-2f569fda0186', 101, '{}', 'd1919b0b-f0b0-44b9-bf21-5f2247b8da97');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('50aceab7-d94d-4b2b-9ef1-87924dc535bf', '39b8eedf-ef80-4c29-a4bf-99abc4d84fa6', 116, '{}', 'd1919b0b-f0b0-44b9-bf21-5f2247b8da97');
@@ -281,10 +275,8 @@ INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VA
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('daae0e0c-41b2-4257-8b43-622353af7f83', '5b5c9ea9-a643-4a3b-9400-53875c60b151', 9, '{}', '885deb02-7718-49f0-b005-baac5eb35daf');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('e79c63ba-3f7d-488d-a53a-e05ad1856276', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 222, '{}', '7afec0a1-f693-424d-b0ba-e19093451db0');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('575cd1aa-6e26-479f-b5e6-3a2c06410446', 'dd5c00b9-be4f-4802-8a34-1da41118b3e0', 9, '{}', '7afec0a1-f693-424d-b0ba-e19093451db0');
-INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('1abe5d77-a000-4f83-bf4d-bda39399f452', '7b2b4569-9416-4121-83cd-a9d71d298e80', 3, '{}', '2a463812-c4fc-453e-b263-dea1d123ffbb');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('26d5b09e-a2d1-435e-a066-de80b3a12b16', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 2066, '{}', '490a5bd5-5699-46d0-98a9-2152227945ee');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('d366fd4f-d456-4915-8290-b4fca333e8d0', 'beee1d44-6818-48a0-b7c2-7bd123f989d5', 75, '{}', '490a5bd5-5699-46d0-98a9-2152227945ee');
-INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('7e5b08d6-922b-430f-8935-08c8ed45991a', '3f8b6b48-b350-4bc3-8b8d-ad8415f46183', 2, '{}', 'ffcde3fb-b610-420a-9ee2-cb30684e3c13');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('e57f31aa-a19f-4cfc-aaa7-77a5eb2555ea', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 5124, '{}', 'd1919b0b-f0b0-44b9-bf21-5f2247b8da97');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('cfbba315-441f-42ed-b01f-32816cf93cd9', '69d2ff19-70eb-4919-9579-2aa0f1ee2bc2', 70, '{}', 'd1919b0b-f0b0-44b9-bf21-5f2247b8da97');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('1d20a493-e727-43d2-ba03-aeaa6d2420b9', 'df96b2e7-1a5f-4f59-b8a8-4c920c452517', 7, '{}', 'fd6c5b88-fb4d-4040-9ebc-33643c116302');
