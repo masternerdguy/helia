@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"helia/engine"
 	"helia/physics"
 	"helia/shared"
 	"helia/sql"
@@ -26,7 +27,7 @@ func main() {
 		printLogger,
 	)
 
-	/*// load universe from database
+	// load universe from database
 	shared.TeeLog("Loading universe from database...")
 	universe, err := engine.LoadUniverse()
 
@@ -34,28 +35,104 @@ func main() {
 		panic(err)
 	}
 
-	shared.TeeLog("Loaded universe!")*/
+	shared.TeeLog("Loaded universe!")
 
 	/*
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	/*var toInject = [...]string{
-		"ea20caa5-1d32-40b7-8cdb-4948815c55a6",
-		"f96c31f6-77e0-410e-8380-3fab636b3404",
-		"59a906a9-5159-4f40-8335-0a6a36ec087c",
-		"dcfdae71-052f-4adb-a8c4-4162ff65fa94",
-	}*/
+	var toInject = [...]string{
+		"5b558608-de22-4f11-b7c0-709132fac132",
+		"3d0df0ee-ed10-4b10-a13c-857352c41fd9",
+		"9d3c6e89-6adb-4417-9b4c-8a02da0817ca",
+		"85aff9fe-404b-412a-bda0-63bdc8cdbba0",
+		"de17c2c2-cf21-42ab-92ad-9d909c3b17c5",
+		"6bc24e15-b0f4-4eef-b29e-2a667253de99",
+		"6d23d3f3-60fb-434a-85e5-e6a5062bf9a3",
+		"29271d74-6ee6-47a0-9dab-516a5fd9d2cb",
+		"5caecb43-1d50-4f45-80bf-1c12c56ad271",
+		"5e5feb5d-7650-4a74-b087-522a4a3778f2",
+		"6627976a-d37c-4ed6-b3d5-8bfa778937fe",
+		"8f185f30-0a09-4f69-811b-d2703bfd278e",
+		"cd38717c-6cf1-4cf4-b65e-d36feab4a4d7",
+		"c7c214a2-afbc-4164-b7c9-4b6f20c78211",
+		"5176216b-899b-40a1-a588-5067bca11be7",
+		"35f306c7-53fa-4a66-a4e6-ace4219e9fe6",
+		"5e68fb33-d183-4f55-ba23-371488a5f9ec",
+		"92f7af89-ba41-443a-97ef-306921de0e50",
+		"f75e397e-9d64-411e-a656-9eb8474c1115",
+		"9560b295-fafa-4090-97f4-ffd7ea28f677",
+		"46c6452e-8925-457d-868c-68e346879615",
+		"3e19329c-049d-4882-95bd-48d0a23cb3ca",
+		"fd3c667f-1a3b-4994-a68d-e9c49ca536a6",
+		"f79503cb-6e1d-464d-941b-0d633f7641bc",
+		"0fdfa185-6c03-4e86-9170-5e3006272dcb",
+		"9bfc1ed5-46ca-43d2-9bb8-addab03a9aa1",
+		"f6d3389a-e23f-440a-bcfc-96316aefe8e6",
+		"f4edd146-80db-478e-905f-d09a3658b7e0",
+		"8d3d7c77-0492-4e9a-b626-efb8440fe726",
+		"ea31918d-3035-41b8-a963-dd8a95160763",
+		"46126ae4-0e00-4b34-b64a-cbd6ab9d9496",
+		"02d03aa7-8ce9-4b07-bc4a-9dc2aab84d1f",
+		"7dc9212b-70cb-429d-9ff7-38a73495f7a4",
+		"a6fc8ba8-9cfc-4305-8067-90797f34e3eb",
+		"6b55e9d0-fd82-48f6-891c-584e308308ba",
+		"9b0eb4e1-c87b-4a62-8777-ea5103aab6a6",
+		"89bf5762-d48e-4734-891d-d3ba92e166b5",
+		"226829a8-bcbd-4735-bcc5-fab5b81f709e",
+		"b49a0b00-411b-4036-9d48-2dc36f75b5fd",
+		"a80dd315-7630-4f21-9001-2d97f6d1c9da",
+		"0e788c69-3349-4f49-8856-cc15dc2254ed",
+		"2ac1dd22-e3fa-4bac-ab8b-f5b073a3d4d4",
+		"864d0633-d5dc-443d-a2d0-4691058b4441",
+		"7c903711-02ef-495c-b91b-042bd7a1b1dd",
+		"06d84459-6c9e-4989-afb0-6eddc4c8d99e",
+		"f207b43c-d393-43bc-8dd6-6abd50820991",
+		"6fe2613c-7613-4ae0-a99a-8b5cf7c99a28",
+		"397d1381-b201-4392-a47f-bc3849d228d2",
+		"dfab7d0b-0dac-4410-b8c8-d67bab40e76b",
+		"3dd3e6d4-328e-4067-872b-1bb1f028f24a",
+		"af92a733-4a36-4349-8f97-d66f4a9cf5cc",
+		"2828a3b4-8e50-4ae8-b37b-fceb51bb919b",
+		"e4f4f28f-0111-41f5-8197-47680ac830bb",
+		"73b0c59f-4318-4c9e-a689-52ef02ccdce9",
+		"00f7108c-eb2c-44f8-9766-8c384de7b3c6",
+		"ae9d2ac3-92dc-4b55-9764-9a4f0483b1db",
+		"45986a3d-bc22-4bb7-b224-dce4c480063f",
+		"33c23426-cc47-44ac-81b4-64a7a31ec5b6",
+		"520a5e98-589c-43fd-9072-5a78efad7f60",
+		"8de2cabb-025f-436b-a5b3-3e73440660a9",
+		"8f37b706-ea0f-4b20-a4ec-1927f8f9db3f",
+		"926854c9-6d86-4bf9-bf62-8913c5acaf62",
+		"35a8320b-bb19-4568-b978-e2e6ab68c2ed",
+		"5c0cdc5b-160d-498d-b208-721ad5fc84fe",
+		"f46020a1-8c36-40f3-bc2e-79cf1b6e8402",
+		"8e2560fe-4dda-4a9b-b509-4725eac42bb7",
+		"562e058e-f292-47e0-8830-320986ff7564",
+		"d2dd762e-c6bb-4fe1-b7d5-a9a8801a43e9",
+		"80d2acff-f30a-4749-b77b-02bc234ec0aa",
+		"4187e378-1e97-470b-9f88-0383262a48ac",
+		"86a9f126-9cc7-4035-84c1-2d21bf7e99cb",
+		"32b041ba-59f9-4244-bbdb-cd40e810b8f8",
+		"96649f3c-80b4-448e-9c20-0d32e8444b01",
+		"c420bc97-a8cb-4423-8746-7e830f8ba770",
+		"76b2d8f8-2601-479c-a7ec-ca233452a617",
+		"75bebf4c-aa57-480f-b2f7-529b9fd86b02",
+		"7ca07f05-4fae-4641-8c70-750316b08b2b",
+		"1b06080e-bd9b-43a1-8fc3-3a4a0e1985f0",
+		"3c8a12ac-a03e-43c8-9cbe-e363c6521a34",
+		"baa44692-b252-43e6-b97b-6f4b25eca429",
+	}
 
 	// dropAsteroids(universe)
 	//dropSanctuaryStations(universe)
 
-	/*for i, e := range toInject {
+	for i, e := range toInject {
 		log.Printf("injecting process %v", e)
 		injectProcess(universe, e, i)
-	}*/
+	}
 
-	stubModuleSchematicsAndProcesses()
+	//stubModuleSchematicsAndProcesses()
 }
 
 /* Parameters for asteroid generation */
@@ -646,7 +723,7 @@ func stubModuleSchematicsAndProcesses() {
 
 func injectProcess(u *universe.Universe, pid string, offset int) {
 	pID, err := uuid.Parse(pid)
-	prob := 5
+	prob := 1
 
 	stationProcessSvc := sql.GetStationProcessService()
 
@@ -655,15 +732,14 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 
 	var textures = [...]string{
-		"accord-5",
-		"accord-1",
+		"sanctuary-",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 77279852 + int64(offset))
+			rand.Seed(int64(calculateSystemSeed(s)) - 9036794582 + int64(offset))
 
 			/*if r.ID.ID()%2 != 0 {
 				continue
@@ -677,7 +753,7 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 
 			for _, st := range stations {
 				for _, t := range textures {
-					if strings.Contains(st.Texture, t) {
+					if !strings.Contains(st.Texture, t) {
 						roll := physics.RandInRange(0, 100)
 
 						if roll <= prob {
