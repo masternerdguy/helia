@@ -29,6 +29,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  mediumLaserTool(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 1808,
+      color: 'red',
+      filter: 'blur(2.1px)', // "feather"
+      thickness: 1.2,
+    };
+  }
+
   xlLaserTool(): ModuleActivationEffectData {
     return {
       type: 'laser',
@@ -56,6 +66,16 @@ export class ModuleActivationEffectRepository {
       color: 'limegreen',
       filter: 'blur(1.2px)', // "feather"
       thickness: 0.7,
+    };
+  }
+
+  mediumShieldLaser(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 1711,
+      color: 'limegreen',
+      filter: 'blur(2.2px)', // "feather"
+      thickness: 1.3,
     };
   }
 
@@ -89,6 +109,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  mediumHullLaser(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 1653,
+      color: 'goldenrod',
+      filter: 'blur(1.7px)', // "feather"
+      thickness: 1.3,
+    };
+  }
+
   xlHullLaser(): ModuleActivationEffectData {
     return {
       type: 'laser',
@@ -116,6 +146,16 @@ export class ModuleActivationEffectRepository {
       color: 'wheat',
       filter: 'blur(1.3px)', // "feather"
       thickness: 0.9,
+    };
+  }
+
+  mediumGeneralLaser(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 1618,
+      color: 'wheat',
+      filter: 'blur(2.5px)', // "feather"
+      thickness: 1.7,
     };
   }
 
@@ -169,6 +209,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  mediumIceMiner(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 1725,
+      color: 'blue',
+      filter: 'blur(3.1px)', // "feather"
+      thickness: 1.02,
+    };
+  }
+
   xlIceMiner(): ModuleActivationEffectData {
     return {
       type: 'laser',
@@ -199,10 +249,20 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  mediumIceHarvester(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 3464,
+      color: 'darkblue',
+      filter: 'blur(3.1px)', // "feather"
+      thickness: 1.75,
+    };
+  }
+
   xlIceHarvester(): ModuleActivationEffectData {
     return {
       type: 'laser',
-      duration: 3250,
+      duration: 3650,
       color: 'darkblue',
       filter: 'blur(17.2px)', // "feather"
       thickness: 7.2,
@@ -226,6 +286,16 @@ export class ModuleActivationEffectRepository {
       color: 'darkred',
       filter: 'blur(2.2px)', // "feather"
       thickness: 1.05,
+    };
+  }
+
+  mediumOreHarvester(): ModuleActivationEffectData {
+    return {
+      type: 'laser',
+      duration: 3177,
+      color: 'darkred',
+      filter: 'blur(4.4px)', // "feather"
+      thickness: 2.3,
     };
   }
 
@@ -279,6 +349,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  mediumShieldBooster(): ModuleActivationEffectData {
+    return {
+      type: 'bubble_shield_boost',
+      duration: 475,
+      color: '#A1FA61',
+      filter: 'blur(7.9px)', // "feather"
+      thickness: 5.8,
+    };
+  }
+
   xlShieldBooster(): ModuleActivationEffectData {
     return {
       type: 'bubble_shield_boost',
@@ -309,6 +389,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  mediumAetherDragger(): ModuleActivationEffectData {
+    return {
+      type: 'aether_drag',
+      duration: 40000,
+      color: '#dbf4ff',
+      filter: 'blur(7.5px)', // "feather"
+      thickness: 6.4,
+    };
+  }
+  
   xlAetherDragger(): ModuleActivationEffectData {
     return {
       type: 'aether_drag',
@@ -379,10 +469,20 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  mediumUtilitySiphon(): ModuleActivationEffectData {
+    return {
+      type: 'siphon',
+      duration: 4479,
+      color: 'orange',
+      filter: 'blur(17.4px)', // "feather"
+      thickness: 3.8,
+    };
+  }
+
   xlUtilitySiphon(): ModuleActivationEffectData {
     return {
       type: 'siphon',
-      duration: 2397,
+      duration: 6397,
       color: 'orange',
       filter: 'blur(45.16px)', // "feather"
       thickness: 15.3,
