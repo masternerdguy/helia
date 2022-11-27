@@ -4365,3 +4365,5 @@ INSERT INTO public.stationprocesses (id, universe_stationid, processid, progress
 INSERT INTO public.stationprocesses (id, universe_stationid, processid, progress, installed, internalstate, meta) VALUES ('cd45a6cf-13ab-4b19-9648-dd4043c9d26e', '2c335b60-0e2e-4834-b66e-269010155bc0', 'baa44692-b252-43e6-b97b-6f4b25eca429', 0, false, '{"inputs": null, "outputs": null, "isRunning": false}', 'null');
 INSERT INTO public.stationprocesses (id, universe_stationid, processid, progress, installed, internalstate, meta) VALUES ('e8977bcc-3037-4869-987a-f59e19081853', '935671da-8f8c-4a03-91c4-4f962cea2144', 'baa44692-b252-43e6-b97b-6f4b25eca429', 0, false, '{"inputs": null, "outputs": null, "isRunning": false}', 'null');
 INSERT INTO public.stationprocesses (id, universe_stationid, processid, progress, installed, internalstate, meta) VALUES ('51905aea-7664-448a-a174-fefa379c7f37', 'd616d184-b255-4267-9de6-2aac5c6e2cb1', 'baa44692-b252-43e6-b97b-6f4b25eca429', 0, false, '{"inputs": null, "outputs": null, "isRunning": false}', 'null');
+
+-- nation modules
