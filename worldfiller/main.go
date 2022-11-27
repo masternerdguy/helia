@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"helia/engine"
 	"helia/physics"
 	"helia/shared"
 	"helia/sql"
@@ -26,7 +27,7 @@ func main() {
 		printLogger,
 	)
 
-	/*// load universe from database
+	// load universe from database
 	shared.TeeLog("Loading universe from database...")
 	universe, err := engine.LoadUniverse()
 
@@ -34,25 +35,32 @@ func main() {
 		panic(err)
 	}
 
-	shared.TeeLog("Loaded universe!")*/
+	shared.TeeLog("Loaded universe!")
 
 	/*
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	/*var toInject = [...]string{
-
-	}*/
+	var toInject = [...]string{
+		"ceec8d05-03fd-48f3-9118-e78b6758a158",
+		"b3a46fb4-eff0-45d6-9a4f-10089fa943a7",
+		"793a761c-b342-4c92-90d9-e44a859e5ae6",
+		"82fdca33-ca2e-4bcd-87bc-5f2aa8f155fe",
+		"360cbe02-419c-4e6e-bb63-192eeb69d0ef",
+		"781fa434-e6d0-489f-9f91-381fe9197e66",
+		"593cff59-5771-4c03-80e0-f40d23fdd11d",
+		"e0a539e5-8af4-422b-ab8b-c319835826ca",
+	}
 
 	// dropAsteroids(universe)
 	//dropSanctuaryStations(universe)
 
-	/*for i, e := range toInject {
+	for i, e := range toInject {
 		log.Printf("injecting process %v", e)
 		injectProcess(universe, e, i)
-	}*/
+	}
 
-	stubModuleSchematicsAndProcesses()
+	//stubModuleSchematicsAndProcesses()
 }
 
 /* Parameters for asteroid generation */
@@ -638,7 +646,7 @@ func stubModuleSchematicsAndProcesses() {
 
 func injectProcess(u *universe.Universe, pid string, offset int) {
 	pID, err := uuid.Parse(pid)
-	prob := 1
+	prob := 3
 
 	stationProcessSvc := sql.GetStationProcessService()
 
@@ -647,14 +655,15 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 
 	var textures = [...]string{
-		"sanctuary-",
+		"kingdom-3",
+		"kingdom-4",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 9036794582 + int64(offset))
+			rand.Seed(int64(calculateSystemSeed(s)) - 903679458 + int64(offset))
 
 			/*if r.ID.ID()%2 != 0 {
 				continue
@@ -668,7 +677,7 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 
 			for _, st := range stations {
 				for _, t := range textures {
-					if !strings.Contains(st.Texture, t) {
+					if strings.Contains(st.Texture, t) {
 						roll := physics.RandInRange(0, 100)
 
 						if roll <= prob {
