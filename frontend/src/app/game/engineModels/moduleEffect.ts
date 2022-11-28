@@ -72,6 +72,8 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.mediumLaserTool();
     } else if (b.gfxEffect === 'small_gauss_rifle') {
       this.vfxData = repo.smallGaussRifle();
+    } else if (b.gfxEffect === 'medium_gauss_rifle') {
+      this.vfxData = repo.mediumGaussRifle();
     } else if (b.gfxEffect === 'small_ice_miner') {
       this.vfxData = repo.smallIceMiner();
     } else if (b.gfxEffect === 'medium_ice_miner') {
@@ -82,6 +84,8 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.mediumShieldBooster();
     } else if (b.gfxEffect === 'small_auto-5_cannon') {
       this.vfxData = repo.smallAuto5Cannon();
+    } else if (b.gfxEffect === 'medium_auto-11_cannon') {
+      this.vfxData = repo.mediumAuto11Cannon();
     } else if (b.gfxEffect === 'small_aether_dragger') {
       this.vfxData = repo.smallAetherDragger();
     } else if (b.gfxEffect === 'medium_aether_dragger') {
