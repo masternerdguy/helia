@@ -42,10 +42,10 @@ func main() {
 	 */
 
 	var toInject = [...]string{
-		"b07f1407-0b62-4ae3-a740-7975604735be",
-		"94f2d7fd-58a4-431a-897d-19a84546841c",
-		"f4d573e9-80c4-48e7-ba37-605ad4f44452",
-		"34bad554-5d10-4709-ac36-d0d0b386ecdf",
+		"3289de85-e26f-4003-bc1d-01052e7c6a5a",
+		"976f23da-3db7-4ede-92f6-9e786ff67a4e",
+		"34979160-1415-470c-85ec-e4d00ea03f6d",
+		"f665c2b6-0817-4658-be1d-f41e66638877",
 	}
 
 	// dropAsteroids(universe)
@@ -651,8 +651,8 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 
 	var textures = [...]string{
-		"kingdom-3",
-		"kingdom-4",
+		"accord-4",
+		"accord-5",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
