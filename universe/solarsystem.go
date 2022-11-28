@@ -3862,6 +3862,59 @@ func (s *SolarSystem) handleDevHax(q string, c *shared.GameClient) {
 
 		// all done!
 		return
+	} else if verb == "yankfact" {
+		// stash target system
+		targetSys := sh.CurrentSystem
+
+		// iterate over all ships in all systems
+		go func(u *Universe) {
+			for _, s := range u.AllSystems {
+				go func(s *SolarSystem) {
+					// obtain lock
+					s.Lock.Lock()
+					defer s.Lock.Unlock()
+
+					for _, v := range s.ships {
+						// don't yank docked ships - its too dangerous
+						if !v.IsDocked {
+							// check ticker
+							if v.Faction.Ticker != noun {
+								continue
+							}
+
+							if v.IsNPC {
+								// defer yank
+								go func(v *Ship) {
+									s.RemoveShip(v, true)
+									targetSys.AddShip(v, true)
+								}(v)
+							} else {
+								// find client
+								for _, c := range s.clients {
+									uid := *c.UID
+
+									if uid == v.UserID {
+										// defer yank
+										go func(v *Ship, c *shared.GameClient) {
+											s.RemoveShip(v, true)
+											s.RemoveClient(c, true)
+											targetSys.AddShip(v, true)
+											targetSys.AddClient(c, true)
+										}(v, c)
+
+										// stop search
+										break
+									}
+								}
+							}
+						}
+					}
+				}(s)
+			}
+		}(s.Universe)
+
+		// all done!
+		return
 	} else if verb == "wallet" {
 		// parse noun
 		wallet, err := strconv.ParseInt(noun, 10, 32)
