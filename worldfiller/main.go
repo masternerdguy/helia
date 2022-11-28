@@ -42,30 +42,10 @@ func main() {
 	 */
 
 	var toInject = [...]string{
-		"bdc8ad56-5dc3-41f4-8086-c2becab0d01b",
-		"1a64f9b4-f90b-4910-ae89-c555453070b6",
-		"30877c6c-a25e-46fc-af72-683c2f085cb2",
-		"dd4e746d-d1de-42eb-a091-5f77442929ef",
-		"292a418c-4f87-471c-9019-66814ebd60b2",
-		"90bbdcc5-2e4c-4098-a665-78b0586661f9",
-		"3ae1dbdd-57dc-4d2b-9739-6b2e6a9dd7c5",
-		"ede51805-42e6-4d9d-95c9-d55a700a988c",
-		"c275d7c8-b075-46ee-a8e4-6e5d3fc36119",
-		"7f136726-d9e6-4294-b753-6656c59e357f",
-		"13e0c981-4829-4c5f-b6fd-7713f721b24c",
-		"b845832a-5c1a-4a5d-a3ae-07308ac0c4ae",
-		"618dfa20-287e-419c-b884-e29d183fecab",
-		"5d2dbca2-6771-40cf-b54b-fb845f340e20",
-		"84314afe-0f43-4586-b6a4-f3176c46e964",
-		"39de1d0c-dbef-41ee-90db-1bb1063b15eb",
-		"40484155-bd47-4806-8ffc-a9a1bb9a8870",
-		"ada90bfe-5e30-4bce-8856-42687da7aba1",
-		"292bf381-7862-4b8c-bfce-e71c74d9ac53",
-		"b4b30c48-5488-4824-a9a1-8b94becdae57",
-		"49e4b535-ec10-4f00-b8c3-24450dc43587",
-		"9a5984d1-177b-4127-b32c-a57ba2657064",
-		"68665646-8358-4616-a748-68d00cf306b8",
-		"a79fd3f7-35da-4e8d-a536-150e62c7526b",
+		"b07f1407-0b62-4ae3-a740-7975604735be",
+		"94f2d7fd-58a4-431a-897d-19a84546841c",
+		"f4d573e9-80c4-48e7-ba37-605ad4f44452",
+		"34bad554-5d10-4709-ac36-d0d0b386ecdf",
 	}
 
 	// dropAsteroids(universe)
@@ -662,7 +642,7 @@ func stubModuleSchematicsAndProcesses() {
 
 func injectProcess(u *universe.Universe, pid string, offset int) {
 	pID, err := uuid.Parse(pid)
-	prob := 2
+	prob := 3
 
 	stationProcessSvc := sql.GetStationProcessService()
 
@@ -671,16 +651,15 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 
 	var textures = [...]string{
-		"coalition-4",
-		"federation-1",
-		"interstar-",
+		"kingdom-3",
+		"kingdom-4",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 903679458 + int64(offset))
+			rand.Seed(int64(calculateSystemSeed(s)) - 90367945 + int64(offset))
 
 			/*if r.ID.ID()%2 != 0 {
 				continue
