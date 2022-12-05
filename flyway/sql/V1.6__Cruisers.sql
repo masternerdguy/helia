@@ -70,3 +70,25 @@ INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('bbce456f-9c77-4e3
 INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('c99c7eb9-e870-413e-9440-fb071f3eb601', 'schematic', 'Skink Schematic', '{"industrialmarket": {"maxprice": 2035627, "minprice": 895097, "silosize": 100, "process_id": "cd580f36-8b1e-48d2-8544-984f4354e1d3"}}');
 INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('f61bcec3-7228-4a89-9d3f-361de9d82519', 'schematic', 'Kudu Schematic', '{"industrialmarket": {"maxprice": 2332915, "minprice": 565279, "silosize": 100, "process_id": "9208d647-d724-40cf-9357-5ffdb657f0e0"}}');
 INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('bb5c7ba1-f294-4e19-94f2-633cbded5bb4', 'schematic', 'Spook Schematic', '{"industrialmarket": {"maxprice": 20408756, "minprice": 1009733, "silosize": 100, "process_id": "b3cbf272-b651-4925-93f1-13615a77117f"}}');
+
+-- processes
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('3501cc67-3103-4703-bde4-fd4ed05686e0', 'Kea Schematic Faucet', '{}', 66687);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('f2f6d554-4783-4ee4-a9f3-e83f3c37f514', 'Kea Schematic Sink', '{}', 175214);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('413260af-dd59-431e-ba78-de77c48325ba', 'Skink Schematic Faucet', '{}', 84448);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('15da5c6f-d1ab-4225-a3a3-eabda61aa6c6', 'Skink Schematic Sink', '{}', 93018);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('780377c4-cfcd-4df1-bd86-ec36135a460c', 'Kudu Schematic Faucet', '{}', 22392);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('53ff6f5f-bd8a-49eb-bdb1-c84e3f9dab96', 'Kudu Schematic Sink', '{}', 49554);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('3ac67246-e0fe-414f-bb3f-3bc4a8d37173', 'Spook Schematic Faucet', '{}', 227485);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('9aef6a8d-9d02-4cf4-9cc1-3f81f97b410a', 'Spook Schematic Sink', '{}', 250700);
+
+-- process inputs
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('f8f7881d-b736-482b-809f-604518301ea3', 'bbce456f-9c77-4e34-8fbb-836de0874445', 2, '{}', 'f2f6d554-4783-4ee4-a9f3-e83f3c37f514');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('7c739399-c2c8-4a4e-8b3a-9ce1ec535345', 'c99c7eb9-e870-413e-9440-fb071f3eb601', 5, '{}', '15da5c6f-d1ab-4225-a3a3-eabda61aa6c6');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('6c8f368e-ab31-4965-b5d2-f9d4c176f257', 'f61bcec3-7228-4a89-9d3f-361de9d82519', 8, '{}', '53ff6f5f-bd8a-49eb-bdb1-c84e3f9dab96');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('c42c1a14-7eb7-401a-8df5-3482dca7e9c4', 'bb5c7ba1-f294-4e19-94f2-633cbded5bb4', 4, '{}', '9aef6a8d-9d02-4cf4-9cc1-3f81f97b410a');
+
+-- process outputs
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('b29779c0-1792-4ae2-8b18-c732d2a74283', 'bbce456f-9c77-4e34-8fbb-836de0874445', 1, '{}', '3501cc67-3103-4703-bde4-fd4ed05686e0');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('a701375b-d775-46d5-86ad-a56eefbcc9ce', 'c99c7eb9-e870-413e-9440-fb071f3eb601', 3, '{}', '413260af-dd59-431e-ba78-de77c48325ba');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('f335939b-25ff-4165-a9e1-21285bd20398', 'f61bcec3-7228-4a89-9d3f-361de9d82519', 2, '{}', '780377c4-cfcd-4df1-bd86-ec36135a460c');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('164bc84b-727f-402d-8a15-a1f2a5dd2b39', 'bb5c7ba1-f294-4e19-94f2-633cbded5bb4', 5, '{}', '3ac67246-e0fe-414f-bb3f-3bc4a8d37173');
