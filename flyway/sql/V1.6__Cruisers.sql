@@ -64,3 +64,9 @@ INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VA
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('a11fd1a5-c162-457f-b51a-94e5ec69a24a', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 6934, '{}', '9208d647-d724-40cf-9357-5ffdb657f0e0');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('7e6984cc-6198-438e-8905-407280e6bc40', '5ea74809-8fad-4544-86b7-a3cfc98f924c', 1, '{}', 'b3cbf272-b651-4925-93f1-13615a77117f');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('60aee3cd-0dd1-4d20-a73b-9c8bd28b3f0e', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 12655, '{}', 'b3cbf272-b651-4925-93f1-13615a77117f');
+
+-- schematic item types
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('bbce456f-9c77-4e34-8fbb-836de0874445', 'schematic', 'Kea Schematic', '{"industrialmarket": {"maxprice": 2260447, "minprice": 744541, "silosize": 100, "process_id": "bf8b9fc9-d97c-428c-b505-0ea8e8ce0fbd"}}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('c99c7eb9-e870-413e-9440-fb071f3eb601', 'schematic', 'Skink Schematic', '{"industrialmarket": {"maxprice": 2035627, "minprice": 895097, "silosize": 100, "process_id": "cd580f36-8b1e-48d2-8544-984f4354e1d3"}}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('f61bcec3-7228-4a89-9d3f-361de9d82519', 'schematic', 'Kudu Schematic', '{"industrialmarket": {"maxprice": 2332915, "minprice": 565279, "silosize": 100, "process_id": "9208d647-d724-40cf-9357-5ffdb657f0e0"}}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('bb5c7ba1-f294-4e19-94f2-633cbded5bb4', 'schematic', 'Spook Schematic', '{"industrialmarket": {"maxprice": 20408756, "minprice": 1009733, "silosize": 100, "process_id": "b3cbf272-b651-4925-93f1-13615a77117f"}}');
