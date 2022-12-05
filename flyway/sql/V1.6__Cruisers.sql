@@ -72,23 +72,23 @@ INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('f61bcec3-7228-4a8
 INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('bb5c7ba1-f294-4e19-94f2-633cbded5bb4', 'schematic', 'Spook Schematic', '{"industrialmarket": {"maxprice": 20408756, "minprice": 1009733, "silosize": 100, "process_id": "b3cbf272-b651-4925-93f1-13615a77117f"}}');
 
 -- processes
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('3501cc67-3103-4703-bde4-fd4ed05686e0', 'Kea Schematic Faucet', '{}', 66687);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('f2f6d554-4783-4ee4-a9f3-e83f3c37f514', 'Kea Schematic Sink', '{}', 175214);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('413260af-dd59-431e-ba78-de77c48325ba', 'Skink Schematic Faucet', '{}', 84448);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('15da5c6f-d1ab-4225-a3a3-eabda61aa6c6', 'Skink Schematic Sink', '{}', 93018);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('780377c4-cfcd-4df1-bd86-ec36135a460c', 'Kudu Schematic Faucet', '{}', 22392);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('53ff6f5f-bd8a-49eb-bdb1-c84e3f9dab96', 'Kudu Schematic Sink', '{}', 49554);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('3ac67246-e0fe-414f-bb3f-3bc4a8d37173', 'Spook Schematic Faucet', '{}', 227485);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('9aef6a8d-9d02-4cf4-9cc1-3f81f97b410a', 'Spook Schematic Sink', '{}', 250700);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('eb93240f-3e54-42fd-b162-cc084e5a98af', 'Kea Schematic Faucet', '{}', 66687);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('4620f86c-c838-4f1a-93f7-f347ba42203e', 'Kea Schematic Sink', '{}', 175214);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('8630e188-05e0-4d18-9031-69a0b2792ecb', 'Skink Schematic Faucet', '{}', 84448);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('92e24991-e033-470f-aae5-f4e2f0d7d404', 'Skink Schematic Sink', '{}', 93018);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('78ba4051-dd86-4713-ab1c-4b5bd6633a5b', 'Kudu Schematic Faucet', '{}', 22392);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('dbbfee1e-47a5-478e-ad8c-ead3f3c0db11', 'Kudu Schematic Sink', '{}', 49554);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('e16d1fa6-20be-4df9-b5b3-64c993181257', 'Spook Schematic Faucet', '{}', 227485);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('f94c6fbb-25e7-443c-b2ba-db5199487558', 'Spook Schematic Sink', '{}', 250700);
 
 -- process inputs
-INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('66168ade-60bb-40f0-9dbe-dbd201aecb7e', 'bbce456f-9c77-4e34-8fbb-836de0874445', 2, '{}', 'f2f6d554-4783-4ee4-a9f3-e83f3c37f514');
-INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('8812fa08-eece-45b7-b8ff-c4e15558917c', 'c99c7eb9-e870-413e-9440-fb071f3eb601', 5, '{}', '15da5c6f-d1ab-4225-a3a3-eabda61aa6c6');
-INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('45ff24e6-6a6a-4d9d-87a0-5738bc7124f2', 'f61bcec3-7228-4a89-9d3f-361de9d82519', 8, '{}', '53ff6f5f-bd8a-49eb-bdb1-c84e3f9dab96');
-INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('e35b31c6-1013-484d-8665-68d0f5975e75', 'bb5c7ba1-f294-4e19-94f2-633cbded5bb4', 4, '{}', '9aef6a8d-9d02-4cf4-9cc1-3f81f97b410a');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('66168ade-60bb-40f0-9dbe-dbd201aecb7e', 'bbce456f-9c77-4e34-8fbb-836de0874445', 2, '{}', '4620f86c-c838-4f1a-93f7-f347ba42203e');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('8812fa08-eece-45b7-b8ff-c4e15558917c', 'c99c7eb9-e870-413e-9440-fb071f3eb601', 5, '{}', '92e24991-e033-470f-aae5-f4e2f0d7d404');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('45ff24e6-6a6a-4d9d-87a0-5738bc7124f2', 'f61bcec3-7228-4a89-9d3f-361de9d82519', 8, '{}', 'dbbfee1e-47a5-478e-ad8c-ead3f3c0db11');
+INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('e35b31c6-1013-484d-8665-68d0f5975e75', 'bb5c7ba1-f294-4e19-94f2-633cbded5bb4', 4, '{}', 'f94c6fbb-25e7-443c-b2ba-db5199487558');
 
 -- process outputs
-INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('2f105e15-6181-4f42-872b-57573dbd267a', 'bbce456f-9c77-4e34-8fbb-836de0874445', 1, '{}', '3501cc67-3103-4703-bde4-fd4ed05686e0');
-INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('84db27f2-13b1-4289-93f5-26a2907cedf0', 'c99c7eb9-e870-413e-9440-fb071f3eb601', 3, '{}', '413260af-dd59-431e-ba78-de77c48325ba');
-INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('637d3098-67a9-4f7e-9580-9e2eeba777c4', 'f61bcec3-7228-4a89-9d3f-361de9d82519', 2, '{}', '780377c4-cfcd-4df1-bd86-ec36135a460c');
-INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('96d2decf-d6d2-4070-81a0-16e2cf9cfecd', 'bb5c7ba1-f294-4e19-94f2-633cbded5bb4', 5, '{}', '3ac67246-e0fe-414f-bb3f-3bc4a8d37173');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('2f105e15-6181-4f42-872b-57573dbd267a', 'bbce456f-9c77-4e34-8fbb-836de0874445', 1, '{}', 'eb93240f-3e54-42fd-b162-cc084e5a98af');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('84db27f2-13b1-4289-93f5-26a2907cedf0', 'c99c7eb9-e870-413e-9440-fb071f3eb601', 3, '{}', '8630e188-05e0-4d18-9031-69a0b2792ecb');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('637d3098-67a9-4f7e-9580-9e2eeba777c4', 'f61bcec3-7228-4a89-9d3f-361de9d82519', 2, '{}', '78ba4051-dd86-4713-ab1c-4b5bd6633a5b');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('96d2decf-d6d2-4070-81a0-16e2cf9cfecd', 'bb5c7ba1-f294-4e19-94f2-633cbded5bb4', 5, '{}', 'e16d1fa6-20be-4df9-b5b3-64c993181257');
