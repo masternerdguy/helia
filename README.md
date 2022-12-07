@@ -84,6 +84,13 @@ example: /devhax yankall users
 
 Pulls *ALL* undocked ships of a given controller type to your current system. Bots will yank only NPCs, humans will yank only human players, and users will yank everyone. This may lead to users being in unexpected places upon system restart, and is also very rude!
 
+## yankfact
+syntax:  /devhax yankfact [ticker]
+example: /devhax yankfact TVC
+
+Pulls *ALL* undocked ships of a given faction to your current system. The faction is specified using the short ticker.
+This may lead to users being in unexpected places upon system restart, and is also very rude!
+
 ## wallet
 syntax:  /devhax wallet [integer]
 example: /devhax wallet 9000
@@ -95,3 +102,18 @@ syntax:  /devhax ship [itemtypename]
 example: /devhax ship Robin
 
 Creates a new ship of a given type at the station you are currently docked at. Ignores limits on maximum parked ships at the same station!
+
+## tonpc
+syntax:  /devhax tonpc [behaviourtype]
+example: /devhax tonpc 3
+
+Sets your current ship up as an "NPC" following a given behaviour mode number.
+
+* None:         0
+* Wander:       1
+* Patrol:       2
+* PatchTrade:   3
+* PatchMine:    4
+* PatchSalvage: 5
+
+Sending a negative number will undo this effect.

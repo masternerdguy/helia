@@ -122,6 +122,7 @@ export class TargetInteractionWindow extends GDIWindow {
 
     this.lookBtn.setFont(FontSize.giant);
     this.lookBtn.setText('☆');
+    this.lookBtn.setEnabled(false);
 
     this.lookBtn.setOnClick((x, y) => {
       if (!this.cameraLook) {
@@ -199,6 +200,9 @@ export class TargetInteractionWindow extends GDIWindow {
 
     // check dock state
     if (!this.host.dockedAtStationID) {
+      // enable look button
+      this.lookBtn.setEnabled(true);
+
       // player is in space
       if (this.target !== undefined) {
         // global buttons
@@ -228,6 +232,11 @@ export class TargetInteractionWindow extends GDIWindow {
 
       // use undock icon
       this.dockBtn.setText('⬰');
+
+      // disable look button and camera look
+      this.lookBtn.setEnabled(false);
+      this.cameraLook = undefined;
+      this.cameraLookType = undefined;
     }
 
     // update health bars

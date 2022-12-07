@@ -6,6 +6,8 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"math"
+	"math/rand"
 	"sync"
 
 	"github.com/google/uuid"
@@ -23,14 +25,31 @@ const MinTransientEdges = 5
 // Maximum transient jumphole pairs at startup
 const MaxTransientEdges = 35
 
+// Minimum transient asteroids at startup
+const MinTransientAsteroids = 5
+
+// Maximum transient asteroids at startup
+const MaxTransientAsterois = 125
+
+/* Asteroid constants copied from worldmaker for consistency */
+
+const MinAsteroidYield = 0.1
+const MaxAsteroidYield = 5.0
+const MinAsteroidRadius = 120
+const MaxAsteroidRadius = 315
+const MinAsteroidMass = 6000
+const MaxAsteroidMass = 75000
+
 // Structure representing the current game universe
 type Universe struct {
-	Regions       map[string]*Region
-	Factions      map[string]*Faction
-	FactionsLock  sync.RWMutex // lock for Factions field
-	AllSystems    []*SolarSystem
-	MapData       MapData
-	CachedMapData string // cached MapData to avoid overhead of extracting and stringifying over and over again
+	Regions            map[string]*Region
+	Factions           map[string]*Faction
+	FactionsLock       sync.RWMutex // lock for Factions field
+	AllSystems         []*SolarSystem
+	MapData            MapData
+	CachedMapData      string                    // cached MapData to avoid overhead of extracting and stringifying over and over again
+	CachedItemTypes    map[string]*ItemTypeRaw   // cached raw item types from the database
+	CachedItemFamilies map[string]*ItemFamilyRaw // cached raw item families from the database
 }
 
 // Structure representing a region in a starmap
@@ -138,7 +157,16 @@ func (u *Universe) BuildTransientCelestials() {
 		}
 	}
 
-	// build transient jumpholes
+	// generate transient jumpholes
+	u.generateTransientJumpholes(allSystems)
+
+	// generate transient asteroids
+	u.generateTransientAsteroids(allSystems)
+}
+
+// Helper function to generate transient jumphole connections
+func (u *Universe) generateTransientJumpholes(allSystems []*SolarSystem) {
+	// determine number of pairs
 	edgeCount := physics.RandInRange(MinTransientEdges, MaxTransientEdges)
 
 	for i := 0; i < edgeCount; i++ {
@@ -200,6 +228,96 @@ func (u *Universe) BuildTransientCelestials() {
 		// inject into universe
 		sysA.jumpholes[jhA.ID.String()] = &jhA
 		sysB.jumpholes[jhB.ID.String()] = &jhB
+	}
+}
+
+// Helper function to generate transient asteroids
+func (u *Universe) generateTransientAsteroids(allSystems []*SolarSystem) {
+	// transient asteroid texture pool
+	textures := [...]string{
+		"Mini/01",
+		"Mini/02",
+		"Mini/03",
+		"Mini/04",
+		"Mini/05",
+		"Mini/06",
+		"Mini/07",
+		"Mini/08",
+		"Mini/09",
+		"Mini/10",
+		"Mini/11",
+		"Mini/12",
+	}
+
+	// get minable families from cache
+	oreFamily := u.CachedItemFamilies["ore"]
+	iceFamily := u.CachedItemFamilies["ice"]
+
+	// select only minable types from cache
+	minableTypes := make([]ItemTypeRaw, 0)
+
+	for _, t := range u.CachedItemTypes {
+		if t.Family == oreFamily.ID || t.Family == iceFamily.ID {
+			// store type
+			minableTypes = append(minableTypes, *t)
+		}
+	}
+
+	// determine asteroid count
+	astCount := physics.RandInRange(MinTransientAsteroids, MaxTransientAsterois)
+
+	for i := 0; i < astCount; i++ {
+		// pick random system
+		sysIDX := physics.RandInRange(0, len(allSystems))
+		sys := allSystems[sysIDX]
+
+		// pick random minable type
+		typeIDX := physics.RandInRange(0, len(minableTypes))
+		aType := minableTypes[typeIDX]
+
+		// determine yield (up to double normal)
+		y := math.Max(rand.Float64()*MaxAsteroidYield, MinAsteroidYield) * (rand.Float64() + 1)
+
+		// determine family name
+		familyName := ""
+
+		if aType.Family == oreFamily.ID {
+			familyName = oreFamily.FriendlyName
+		} else if aType.Family == iceFamily.ID {
+			familyName = iceFamily.FriendlyName
+		} else {
+			panic("unknown minable family")
+		}
+
+		// pick random texture from pool
+		texIDX := physics.RandInRange(0, len(textures))
+		tex := textures[texIDX]
+
+		// create transient asteroid
+		nid := uuid.New()
+
+		ast := Asteroid{
+			ID:             nid,
+			SystemID:       sys.ID,
+			Name:           fmt.Sprintf("⚠ C%v%v%v-%v", nid[0], nid[1], nid[2], physics.RandInRange(1000, 9999)),
+			PosX:           float64(physics.RandInRange(-2500000, 2500000)),
+			PosY:           float64(physics.RandInRange(-2500000, 2500000)),
+			Texture:        tex,
+			Radius:         float64(physics.RandInRange(MinAsteroidRadius/3, MinAsteroidRadius)),
+			Mass:           float64(physics.RandInRange(MinAsteroidMass/3, MinAsteroidMass)),
+			Theta:          float64(physics.RandInRange(0, 360)),
+			Transient:      true,
+			ItemTypeID:     aType.ID,
+			ItemTypeName:   aType.Name,
+			ItemFamilyID:   aType.Family,
+			ItemFamilyName: familyName,
+			ItemTypeMeta:   Meta(aType.Meta),
+			Yield:          y,
+			Lock:           sync.Mutex{},
+		}
+
+		// inject into universe
+		sys.asteroids[ast.ID.String()] = &ast
 	}
 }
 

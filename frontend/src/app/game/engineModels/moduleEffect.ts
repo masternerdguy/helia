@@ -68,30 +68,54 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicGeneralLaser();
     } else if (b.gfxEffect === 'small_laser_tool') {
       this.vfxData = repo.smallLaserTool();
+    } else if (b.gfxEffect === 'medium_laser_tool') {
+      this.vfxData = repo.mediumLaserTool();
     } else if (b.gfxEffect === 'small_gauss_rifle') {
       this.vfxData = repo.smallGaussRifle();
+    } else if (b.gfxEffect === 'medium_gauss_rifle') {
+      this.vfxData = repo.mediumGaussRifle();
     } else if (b.gfxEffect === 'small_ice_miner') {
       this.vfxData = repo.smallIceMiner();
+    } else if (b.gfxEffect === 'medium_ice_miner') {
+      this.vfxData = repo.mediumIceMiner();
     } else if (b.gfxEffect === 'small_shield_booster') {
       this.vfxData = repo.smallShieldBooster();
+    } else if (b.gfxEffect === 'medium_shield_booster') {
+      this.vfxData = repo.mediumShieldBooster();
     } else if (b.gfxEffect === 'small_auto-5_cannon') {
       this.vfxData = repo.smallAuto5Cannon();
+    } else if (b.gfxEffect === 'medium_auto-11_cannon') {
+      this.vfxData = repo.mediumAuto11Cannon();
     } else if (b.gfxEffect === 'small_aether_dragger') {
       this.vfxData = repo.smallAetherDragger();
+    } else if (b.gfxEffect === 'medium_aether_dragger') {
+      this.vfxData = repo.mediumAetherDragger();
     } else if (b.gfxEffect === 'small_ice_harvester') {
       this.vfxData = repo.smallIceHarvester();
+    } else if (b.gfxEffect === 'medium_ice_harvester') {
+      this.vfxData = repo.mediumIceHarvester();
     } else if (b.gfxEffect === 'small_ore_harvester') {
       this.vfxData = repo.smallOreHarvester();
+    } else if (b.gfxEffect === 'medium_ore_harvester') {
+      this.vfxData = repo.mediumOreHarvester();
     } else if (b.gfxEffect === 'small_energy_siphon') {
       this.vfxData = repo.smallUtilitySiphon();
+    } else if (b.gfxEffect === 'medium_energy_siphon') {
+      this.vfxData = repo.mediumUtilitySiphon();
     } else if (b.gfxEffect === 'small_salvager') {
       this.vfxData = repo.smallSalvager();
     } else if (b.gfxEffect === 'small_shield_laser') {
       this.vfxData = repo.smallShieldLaser();
+    } else if (b.gfxEffect === 'medium_shield_laser') {
+      this.vfxData = repo.mediumShieldLaser();
     } else if (b.gfxEffect === 'small_hull_laser') {
       this.vfxData = repo.smallHullLaser();
+    } else if (b.gfxEffect === 'medium_hull_laser') {
+      this.vfxData = repo.mediumHullLaser();
     } else if (b.gfxEffect === 'small_general_laser') {
       this.vfxData = repo.smallGeneralLaser();
+    } else if (b.gfxEffect === 'medium_general_laser') {
+      this.vfxData = repo.mediumGeneralLaser();
     } else if (b.gfxEffect === 'xl_energy_siphon') {
       this.vfxData = repo.xlUtilitySiphon();
     } else if (b.gfxEffect === 'xl_shield_booster') {

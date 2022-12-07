@@ -65,6 +65,7 @@ type AutopilotRegistry struct {
 	Undock    int
 	Fight     int
 	Mine      int
+	Salvage   int
 }
 
 // Returns a populated AutopilotRegistry struct for use as an enum
@@ -78,26 +79,29 @@ func NewAutopilotRegistry() *AutopilotRegistry {
 		Undock:    5,
 		Fight:     6,
 		Mine:      7,
+		Salvage:   8,
 	}
 }
 
 // Autopilot states for ships
 type BehaviourRegistry struct {
-	None       int
-	Wander     int
-	Patrol     int
-	PatchTrade int
-	PatchMine  int
+	None         int
+	Wander       int
+	Patrol       int
+	PatchTrade   int
+	PatchMine    int
+	PatchSalvage int
 }
 
 // Returns a populated AutopilotRegistry struct for use as an enum
 func NewBehaviourRegistry() *BehaviourRegistry {
 	return &BehaviourRegistry{
-		None:       0,
-		Wander:     1,
-		Patrol:     2,
-		PatchTrade: 3,
-		PatchMine:  4,
+		None:         0,
+		Wander:       1,
+		Patrol:       2,
+		PatchTrade:   3,
+		PatchMine:    4,
+		PatchSalvage: 5,
 	}
 }
 
@@ -140,6 +144,12 @@ type FightData struct {
 
 // Container structure for arguments of the Mine autopilot mode
 type MineData struct {
+	TargetID uuid.UUID
+	Type     int
+}
+
+// Container structure for arguments of the Salvage autopilot mode
+type SalvageData struct {
 	TargetID uuid.UUID
 	Type     int
 }
@@ -192,6 +202,7 @@ type Ship struct {
 	AutopilotUndock        UndockData
 	AutopilotFight         FightData
 	AutopilotMine          MineData
+	AutopilotSalvage       SalvageData
 	BehaviourMode          *int
 	CurrentSystem          *SolarSystem
 	DockedAtStation        *Station
@@ -224,6 +235,7 @@ type Ship struct {
 	AggressionLog          map[string]*shared.AggressionLog         // details of aggression between any ships (human or otherwise)
 	aiIncompatibleOreFault bool                                     // true when mining autopilot failed due to incompatible ore (for patch miners)
 	aiNoOrePulledFault     bool                                     // true when mining autopilot failed due to pulling no ore (for patch miners)
+	aiNoWreckFault         bool                                     // true when salvaging autopilot failed due to wreck disappearing (for patch salvagers)
 	WreckReady             bool                                     // true when a dead ship has been saved to the db and the wreck can be looted
 	InLimbo                bool                                     // true when ship is being migrated between systems
 	Lock                   sync.Mutex
@@ -544,6 +556,8 @@ func (s *Ship) CopyShip(lock bool) *Ship {
 		AutopilotDock:      s.AutopilotDock,
 		AutopilotUndock:    s.AutopilotUndock,
 		AutopilotFight:     s.AutopilotFight,
+		AutopilotMine:      s.AutopilotMine,
+		AutopilotSalvage:   s.AutopilotSalvage,
 		EscrowContainerID:  s.EscrowContainerID,
 		BeingFlownByPlayer: s.BeingFlownByPlayer,
 		BehaviourMode:      s.BehaviourMode,
@@ -1116,6 +1130,7 @@ func (s *Ship) CmdAbort(lock bool) {
 	s.AutopilotUndock = UndockData{}
 	s.AutopilotFight = FightData{}
 	s.AutopilotMine = MineData{}
+	s.AutopilotSalvage = SalvageData{}
 
 	for i := range s.Fitting.ARack {
 		s.Fitting.ARack[i].WillRepeat = false
@@ -1285,6 +1300,28 @@ func (s *Ship) CmdMine(targetID uuid.UUID, targetType int, lock bool) {
 	s.aiNoOrePulledFault = false
 
 	s.AutopilotMode = registry.Mine
+}
+
+// Invokes salvage autopilot on the ship
+func (s *Ship) CmdSalvage(targetID uuid.UUID, targetType int, lock bool) {
+	// get registry
+	registry := SharedAutopilotRegistry
+
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// stash salvage and activate autopilot
+	s.AutopilotSalvage = SalvageData{
+		TargetID: targetID,
+		Type:     targetType,
+	}
+
+	s.aiNoWreckFault = false
+
+	s.AutopilotMode = registry.Salvage
 }
 
 // Returns a new physics dummy structure representing this ship
@@ -1927,6 +1964,8 @@ func (s *Ship) behave() {
 				s.behaviourPatchTrade()
 			case registry.PatchMine:
 				s.behaviourPatchMine()
+			case registry.PatchSalvage:
+				s.behaviourPatchSalvage()
 			}
 		}
 	}
@@ -2308,6 +2347,9 @@ func (s *Ship) behaviourPatchMine() {
 
 				// verify there are candidates
 				if count == 0 {
+					// no asteroids here? wander
+					s.gotoNextWanderDestination(15)
+
 					return
 				}
 
@@ -2330,6 +2372,140 @@ func (s *Ship) behaviourPatchMine() {
 					s.CmdMine(tgtAst.ID, models.SharedTargetTypeRegistry.Asteroid, false)
 				} else {
 					// no asteroids here? wander
+					s.gotoNextWanderDestination(15)
+				}
+			}
+		}
+	}
+}
+
+// wanders around the universe randomly salaving wrecks and selling what it salvaged to patch the economy
+func (s *Ship) behaviourPatchSalvage() {
+	// pause if heat too high
+	maxHeat := s.GetRealMaxHeat(false)
+	heatLevel := s.Heat / maxHeat
+
+	if heatLevel > 0.95 {
+		s.CmdAbort(false)
+	}
+
+	// get registry
+	autoReg := SharedAutopilotRegistry
+
+	if s.aiNoWreckFault {
+		// stop autopilot
+		s.CmdAbort(false)
+
+		// clear flag
+		s.aiNoWreckFault = false
+
+		// wander
+		s.gotoNextWanderDestination(95)
+		return
+	}
+
+	// check if idle
+	if s.AutopilotMode == autoReg.None {
+		// allow time to cool off :)
+		if heatLevel > 0.25 {
+			return
+		}
+
+		// check if docked
+		if s.DockedAtStationID != nil && s.DockedAtStation != nil {
+			// 1% chance of undocking per tick
+			roll := physics.RandInRange(0, 100)
+
+			if roll == 1 {
+				// undock
+				s.CmdUndock(false)
+				return
+			}
+
+			// check if wallet should be randomized
+			if roll%22 == 0 {
+				// randomize wallet
+				s.Wallet = float64(physics.RandInRange(0, math.MaxInt32/64))
+			}
+
+			// check if sell attempts should be made
+			if roll%33 == 0 {
+				// attempt to sell items in cargo bay on the industrial market
+				for _, i := range s.CargoBay.Items {
+					st := s.DockedAtStation
+
+					// skip if unpackaged or 0 quantity
+					if !i.IsPackaged || i.Quantity == 0 {
+						continue
+					}
+
+					// skip if dirty
+					if i.CoreDirty {
+						continue
+					}
+
+					// iterate over processes
+					for _, p := range st.Processes {
+						for _, pi := range p.Process.Inputs {
+							// skip if not buying this item type
+							if pi.ItemTypeID != i.ItemTypeID {
+								continue
+							}
+
+							// roll for sell chance
+							sellRoll := physics.RandInRange(0, 100)
+
+							if sellRoll%3 == 0 {
+								// get random quantity
+								q := physics.RandInRange(1, i.Quantity+2)
+
+								// try to sell item to silo
+								s.SellItemToSilo(p.ID, i.ID, q, false)
+							}
+						}
+					}
+				}
+			}
+		} else {
+			// check if cargo bay is almost full (>80%)
+			max := s.GetRealCargoBayVolume(false)
+			used := s.TotalCargoBayVolumeUsed(false)
+
+			if used/max > 0.8 {
+				// go somewhere to try and sell it
+				s.gotoNextWanderDestination(85)
+			} else {
+				// get and count wrecks in system
+				wrecks := s.CurrentSystem.wrecks
+				count := len(wrecks)
+
+				// verify there are candidates
+				if count == 0 {
+					// no wrecks here? wander
+					s.gotoNextWanderDestination(15)
+
+					return
+				}
+
+				// pick random asteroid to mine
+				tgt := physics.RandInRange(0, count)
+				var tgtWre *Wreck = nil
+
+				idx := 0
+				for _, v := range wrecks {
+					if idx == tgt {
+						tgtWre = v
+						break
+					}
+
+					idx++
+				}
+
+				if tgtWre != nil {
+					// go salvage it
+					s.CmdSalvage(tgtWre.ID, models.SharedTargetTypeRegistry.Wreck, false)
+				} else {
+					// no wrecks here? wander
 					s.gotoNextWanderDestination(15)
 				}
 			}
@@ -2426,6 +2602,8 @@ func (s *Ship) doUndockedAutopilot() {
 		s.doAutopilotFight()
 	case registry.Mine:
 		s.doAutopilotMine()
+	case registry.Salvage:
+		s.doAutopilotSalvage()
 	}
 }
 
@@ -2902,6 +3080,16 @@ func (s *Ship) doAutopilotFight() {
 					}
 				}
 
+				// special check for burst fusion reactors
+				if v.ItemTypeFamily == "burst_reactor" {
+					// make sure energy is below 15% for this to be worth it
+					if s.Energy/s.GetRealMaxEnergy(false) >= 0.15 {
+						// deactivate and continue
+						s.Fitting.BRack[i].WillRepeat = false
+						continue
+					}
+				}
+
 				// get heat
 				h, _ := v.ItemMeta.GetFloat64("activation_heat")
 
@@ -3068,6 +3256,111 @@ func (s *Ship) doAutopilotMine() {
 
 			if used/max > 0.8 {
 				// stop mining
+				s.CmdAbort(false)
+			}
+		}
+	} else {
+		s.CmdAbort(false)
+		return
+	}
+}
+
+// Causes ship to salvage a target
+func (s *Ship) doAutopilotSalvage() {
+	// get registry
+	targetTypeReg := models.SharedTargetTypeRegistry
+
+	if s.AutopilotSalvage.Type == targetTypeReg.Wreck {
+		// find wreck
+		targetWreck := s.CurrentSystem.wrecks[s.AutopilotSalvage.TargetID.String()]
+
+		if targetWreck == nil {
+			s.CmdAbort(false)
+			return
+		}
+
+		// use average salvage range to determine stand-off distance (this can be improved a lot with more specific salvaging routines)
+		totalRange := 0.0
+		rangedMods := 0
+
+		for _, m := range s.Fitting.ARack {
+			// only take appropriate equipment into account
+			if m.ItemTypeFamily != "salvager" {
+				continue
+			}
+
+			// accumulate range
+			r, f := m.ItemMeta.GetFloat64("range")
+
+			if f {
+				totalRange += r
+				rangedMods += 1
+			}
+		}
+
+		if rangedMods == 0 {
+			// can't salvage
+			s.CmdAbort(false)
+
+			return
+		}
+
+		avgRange := totalRange / (float64(rangedMods) + Epsilon)
+		standOff := int(avgRange / 2.0)
+
+		// fill autopilot data
+		s.AutopilotGoto = GotoData{
+			TargetID: s.AutopilotSalvage.TargetID,
+			Type:     s.AutopilotSalvage.Type,
+			Hold:     &standOff,
+		}
+
+		// reuse orbit autopilot routine to keep distance with target
+		s.doAutopilotGoto()
+
+		if s.CurrentSystem.tickCounter%45 == 0 {
+			// try to activate rack A salvagers
+			maxHeat := s.GetRealMaxHeat(false)
+			heatAdd := 0.0
+
+			for i, v := range s.Fitting.ARack {
+				// only take appropriate equipment into account
+				if v.ItemTypeFamily != "salvager" {
+					continue
+				}
+
+				// get heat
+				h, _ := v.ItemMeta.GetFloat64("activation_heat")
+
+				// get heat ratio
+				hr := (s.Heat + heatAdd) / maxHeat
+
+				// determine whether to activate
+				roll := physics.RandInRange(0, 100)
+				hit := int(hr * 100)
+
+				if roll >= hit {
+					// activate module
+					s.Fitting.ARack[i].TargetID = &s.AutopilotSalvage.TargetID
+					s.Fitting.ARack[i].TargetType = &s.AutopilotSalvage.Type
+					s.Fitting.ARack[i].WillRepeat = true
+
+					// track heat
+					heatAdd += h
+				} else {
+					// deactivate module
+					s.Fitting.ARack[i].TargetID = nil
+					s.Fitting.ARack[i].TargetType = nil
+					s.Fitting.ARack[i].WillRepeat = false
+				}
+			}
+		} else if s.CurrentSystem.tickCounter%37 == 0 {
+			// check if cargo bay is almost full (>80%)
+			max := s.GetRealCargoBayVolume(false)
+			used := s.TotalCargoBayVolumeUsed(false)
+
+			if used/max > 0.8 {
+				// stop salvaging
 				s.CmdAbort(false)
 			}
 		}
@@ -6281,6 +6574,9 @@ func (m *FittedSlot) activateAsSalvager() bool {
 			m.TargetType = nil
 			m.WillRepeat = false
 
+			// raise missing wreck fault
+			m.shipMountedOn.aiNoWreckFault = true
+
 			return false
 		}
 
@@ -6377,6 +6673,28 @@ func (m *FittedSlot) activateAsSalvager() bool {
 				// escalate to core for saving
 				i.CoreDirty = true
 				m.shipMountedOn.CurrentSystem.MovedItems = append(m.shipMountedOn.CurrentSystem.MovedItems, i)
+
+				// log salvage to console if player
+				if !m.shipMountedOn.IsNPC {
+					bm := 0
+
+					if m.shipMountedOn.BehaviourMode != nil {
+						bm = *m.shipMountedOn.BehaviourMode
+					}
+
+					shared.TeeLog(
+						fmt.Sprintf(
+							"[%v] %v (%v::%v) salvaged %v %v from %v",
+							m.shipMountedOn.CurrentSystem.SystemName,
+							m.shipMountedOn.CharacterName,
+							m.shipMountedOn.Texture,
+							bm,
+							i.Quantity,
+							i.ItemTypeName,
+							c.WreckName,
+						),
+					)
+				}
 			}
 		}
 	} else {
