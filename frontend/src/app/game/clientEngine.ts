@@ -1373,9 +1373,9 @@ function clientRender() {
   engineSack.alternateFrame = !engineSack.alternateFrame;
 
   // get camera look from interaction window
-  const look = engineSack.targetInteractionWindow.getCameraLook()
+  const look = engineSack.targetInteractionWindow.getCameraLook();
 
-  if(look[0]) {
+  if (look[0]) {
     // center camera on look
     engineSack.camera.x = look[0].x;
     engineSack.camera.y = look[0].y;
@@ -1385,10 +1385,10 @@ function clientRender() {
       if (sh.id == engineSack.player.currentShip.id) {
         engineSack.camera.x = sh.x;
         engineSack.camera.y = sh.y;
-  
+
         break;
       }
-    }  
+    }
   }
 
   // blank screen

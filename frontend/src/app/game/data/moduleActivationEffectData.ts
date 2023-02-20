@@ -408,7 +408,7 @@ export class ModuleActivationEffectRepository {
       thickness: 6.4,
     };
   }
-  
+
   xlAetherDragger(): ModuleActivationEffectData {
     return {
       type: 'aether_drag',
