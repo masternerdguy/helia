@@ -10,7 +10,7 @@ The database configuration is in `db-configuration.json`.
 Flyway is used for db migrations, which are stored in `flyway/sql`. Migrations can be applied to the local database by running `npm run flyway-migrate:dev` in the frontend directory. `npm run flyway-info:dev` can be used to get the migration status. Note that SQL files are ignored in this repo, so you will need to use force when attempting to add them using git add.
 
 # Starting the backend (local development)
-Helia's backend is written in go (1.18). Since it makes heavy use of goroutines, it should be run in an environment with at least 4 cores - more is better, and core count is far more important than clock speed in determining overall performance.
+Helia's backend is written in go (1.20). Since it makes heavy use of goroutines, it should be run in an environment with at least 4 cores - more is better, and core count is far more important than clock speed in determining overall performance.
 
 To start the go backend, run `go run main.go` in the root of the project.
 
