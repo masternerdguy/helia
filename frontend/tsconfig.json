@@ -11,13 +11,8 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "ES2022",
-    "lib": [
-      "ES2022",
-      "dom"
-    ],
-    "types": [
-      "offscreencanvas"
-    ],
+    "lib": ["ES2022", "dom"],
+    "types": ["offscreencanvas"],
     "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
