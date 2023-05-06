@@ -75,3 +75,37 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.outposts
     OWNER to heliaagent;
 
+
+
+
+-- Table: public.outpostprocesses
+
+-- DROP TABLE IF EXISTS public.outpostprocesses;
+
+CREATE TABLE IF NOT EXISTS public.outpostprocesses
+(
+    id uuid NOT NULL,
+    outpostid uuid NOT NULL,
+    processid uuid NOT NULL,
+    progress integer NOT NULL DEFAULT 0,
+    installed boolean NOT NULL DEFAULT false,
+    internalstate jsonb NOT NULL DEFAULT '{}'::jsonb,
+    meta jsonb NOT NULL DEFAULT '{}'::jsonb,
+    CONSTRAINT pk_outpostprocess_uq PRIMARY KEY (id),
+    CONSTRAINT fk_outpostprocess_process FOREIGN KEY (processid)
+        REFERENCES public.processes (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fk_outpost_process FOREIGN KEY (outpostid)
+        REFERENCES public.outposts (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.outpostprocesses
+    OWNER to heliaagent;
+
+COMMENT ON COLUMN public.outpostprocesses.progress
+    IS 'Progress of manufacturing job in seconds.';
