@@ -62,6 +62,7 @@ import { ActionReportsWindow } from './gdi/windows/actionReportsWindow';
 import { ServerActionReportsPage } from './wsModels/bodies/viewActionReportsPage';
 import * as ClipboardJS from 'clipboard';
 import { ServerDockedUsersUpdate } from './wsModels/bodies/dockedUsersUpdate';
+import { Outpost } from './engineModels/outpost';
 
 class EngineSack {
   constructor() {}
@@ -497,6 +498,10 @@ function handleGlobalUpdate(d: GameMessage) {
       msg.stations = [];
     }
 
+    if (!msg.outposts || msg.outposts == null) {
+      msg.outposts = [];
+    }
+
     if (!msg.ships || msg.ships == null) {
       msg.ships = [];
     }
@@ -735,7 +740,32 @@ function handleGlobalUpdate(d: GameMessage) {
         engineSack.player.currentSystem.stations.push(new Station(p));
       }
 
-      // note: npc stations are indestructible for gameplay reasons, but the player owned equivalent "outposts" will not be!
+      // note: npc stations are indestructible for gameplay reasons, but the player owned equivalent "outposts" are not!
+    }
+
+    // update outposts
+    for (const sh of msg.outposts) {
+      let match = false;
+
+      // find outpost in memory
+      for (const sm of engineSack.player.currentSystem.outposts) {
+        if (sh.id === sm.id) {
+          match = true;
+
+          sm.isTargeted = false;
+
+          // sync outpost in memory
+          sm.sync(sh);
+
+          // exit loop
+          break;
+        }
+      }
+
+      if (!match) {
+        // add outpost to memory
+        engineSack.player.currentSystem.outposts.push(new Outpost(sh));
+      }
     }
 
     // start new module effects
@@ -1417,6 +1447,16 @@ function clientRender() {
     st.render(engineSack.ctx, engineSack.camera);
   }
 
+  // draw player-owned stations
+  const keepOutposts: Outpost[] = [];
+  for (const st of engineSack.player.currentSystem.outposts) {
+    // only draw outposts we've recently seen
+    if (st.lastSeen > engineSack.lastSyncTime - (engineSack.tpf - 2)) {
+      st.render(engineSack.ctx, engineSack.camera);
+      keepOutposts.push(st);
+    }
+  }
+
   // draw asteroids
   for (const p of engineSack.player.currentSystem.asteroids) {
     p.render(engineSack.ctx, engineSack.camera);
@@ -1462,10 +1502,11 @@ function clientRender() {
     ef.render(engineSack.ctx, engineSack.camera);
   }
 
-  // keep only ships / missiles / wrecks that were drawable in-memory
+  // keep only ships / missiles / wrecks / outposts that were drawable in-memory
   engineSack.player.currentSystem.ships = keepShips;
   engineSack.player.currentSystem.missiles = keepMissiles;
   engineSack.player.currentSystem.wrecks = keepWrecks;
+  engineSack.player.currentSystem.outposts = keepOutposts;
 
   // draw overlay if docked
   if (!!engineSack.player.currentShip.dockedAtStationID) {
