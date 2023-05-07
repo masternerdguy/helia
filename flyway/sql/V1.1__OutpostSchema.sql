@@ -109,3 +109,8 @@ ALTER TABLE IF EXISTS public.outpostprocesses
 
 COMMENT ON COLUMN public.outpostprocesses.progress
     IS 'Progress of manufacturing job in seconds.';
+
+INSERT INTO public.itemfamilies(
+	id, friendlyname, meta)
+	VALUES ('outpost_kit', 'Outpost Construction Kit', '{}'::jsonb);
+
