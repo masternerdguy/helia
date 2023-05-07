@@ -3564,6 +3564,27 @@ func (s *SolarSystem) CopyStations(lock bool) map[string]*Station {
 	return copy
 }
 
+// Returns a copy of the outposts in the system
+func (s *SolarSystem) CopyOutposts(lock bool) map[string]*Outpost {
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// make map for copies
+	copy := make(map[string]*Outpost)
+
+	// copy outposts into copy map
+	for k, v := range s.outposts {
+		c := v.CopyOutpost()
+		copy[k] = &c
+	}
+
+	// return copy map
+	return copy
+}
+
 // Returns a new map containing pointers to the stations in the system - use with care!
 func (s *SolarSystem) MirrorStationMap(lock bool) map[string]*Station {
 	if lock {
