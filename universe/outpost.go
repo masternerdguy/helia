@@ -132,6 +132,24 @@ func (s *Outpost) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float6
 	// todo: not yet implemented
 }
 
+// Returns the real max shield of the ship after modifiers
+func (s *Outpost) GetRealMaxShield() float64 {
+	// no modifiers yet
+	return s.TemplateData.BaseShield
+}
+
+// Returns the real max armor of the ship after modifiers
+func (s *Outpost) GetRealMaxArmor() float64 {
+	// no modifiers yet
+	return s.TemplateData.BaseArmor
+}
+
+// Returns the real max hull of the ship after modifiers
+func (s *Outpost) GetRealMaxHull() float64 {
+	// no modifiers yet
+	return s.TemplateData.BaseHull
+}
+
 // Recalculates the prices of production factors based on a linear demand curve
 func (s *Outpost) calculateIndustrialMarketPrices() {
 	for i := range s.Processes {

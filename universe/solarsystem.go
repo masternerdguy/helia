@@ -32,6 +32,7 @@ type SolarSystem struct {
 	planets               map[string]*Planet
 	jumpholes             map[string]*Jumphole
 	stations              map[string]*Station
+	outposts              map[string]*Outpost
 	asteroids             map[string]*Asteroid
 	clients               map[string]*shared.GameClient       // clients in this system
 	missiles              map[string]*Missile                 // missiles in flight in this system
@@ -87,6 +88,7 @@ func (s *SolarSystem) Initialize() {
 	s.planets = make(map[string]*Planet)
 	s.jumpholes = make(map[string]*Jumphole)
 	s.stations = make(map[string]*Station)
+	s.outposts = make(map[string]*Outpost)
 	s.asteroids = make(map[string]*Asteroid)
 	s.DeadShips = make([]*Ship, 0)
 	s.PlayerNeedRespawn = make([]*shared.GameClient, 0)
@@ -2930,6 +2932,25 @@ func (s *SolarSystem) sendClientUpdates() {
 				Texture:     d.Texture,
 				Radius:      d.Radius,
 				Mass:        d.Mass,
+				Theta:       d.Theta,
+				FactionID:   d.FactionID,
+			})
+		}
+
+		// outposts
+		for _, d := range s.outposts {
+			gu.Outposts = append(gu.Outposts, models.GlobalOutpostInfo{
+				ID:          d.ID,
+				SystemID:    d.SystemID,
+				OutpostName: d.OutpostName,
+				PosX:        d.PosX,
+				PosY:        d.PosY,
+				ShieldP:     ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
+				ArmorP:      ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
+				HullP:       ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
+				Texture:     d.TemplateData.Texture,
+				Radius:      d.TemplateData.Radius,
+				Mass:        d.TemplateData.BaseMass,
 				Theta:       d.Theta,
 				FactionID:   d.FactionID,
 			})

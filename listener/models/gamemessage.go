@@ -327,6 +327,23 @@ type GlobalStationInfo struct {
 	FactionID   uuid.UUID `json:"factionId"`
 }
 
+// Structure for passing non-secret information about a player-owned station
+type GlobalOutpostInfo struct {
+	ID          uuid.UUID `json:"id"`
+	SystemID    uuid.UUID `json:"systemId"`
+	OutpostName string    `json:"outpostName"`
+	PosX        float64   `json:"x"`
+	PosY        float64   `json:"y"`
+	ShieldP     float64   `json:"shieldP"`
+	ArmorP      float64   `json:"armorP"`
+	HullP       float64   `json:"hullP"`
+	Texture     string    `json:"texture"`
+	Radius      float64   `json:"radius"`
+	Mass        float64   `json:"mass"`
+	Theta       float64   `json:"theta"`
+	FactionID   uuid.UUID `json:"factionId"`
+}
+
 // CurrentSystemInfo Information about the user's current location
 type CurrentSystemInfo struct {
 	ID         uuid.UUID `json:"id"`
@@ -360,6 +377,7 @@ type ServerGlobalUpdateBody struct {
 	Planets           []GlobalPlanetInfo           `json:"planets"`
 	Jumpholes         []GlobalJumpholeInfo         `json:"jumpholes"`
 	Stations          []GlobalStationInfo          `json:"stations"`
+	Outposts          []GlobalOutpostInfo          `json:"outposts"`
 	Asteroids         []GlobalAsteroidInfo         `json:"asteroids"`
 	NewModuleEffects  []GlobalPushModuleEffectBody `json:"newModuleEffects"`
 	NewPointEffects   []GlobalPushPointEffectBody  `json:"newPointEffects"`
