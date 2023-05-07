@@ -114,3 +114,7 @@ INSERT INTO public.itemfamilies(
 	id, friendlyname, meta)
 	VALUES ('outpost_kit', 'Outpost Construction Kit', '{}'::jsonb);
 
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('59851ea9-5f78-41c9-9cc2-2a7b1bbc6e72', 'outpost_kit', 'Test Outpost Please Ignore', '{"volume": 350775, "outposttemplateid": "188a3e34-0662-480a-8df8-d4b038e8a8c3"}');
+
+INSERT INTO public.outposttemplates (id, created, outposttemplatename, texture, radius, basemass, baseshield, baseshieldregen, basearmor, basehull, itemtypeid, wrecktexture, explosiontexture) VALUES ('188a3e34-0662-480a-8df8-d4b038e8a8c3', '2023-05-06 20:41:21.336072-04', 'Test Template Please Ignore', 'kingdom-7', 588, 47283, 113293, 328, 782171, 588924, '59851ea9-5f78-41c9-9cc2-2a7b1bbc6e72', 'basic-wreck', 'basic_explosion');
+
