@@ -50,7 +50,8 @@ func (s OutpostTemplateService) GetOutpostTemplateByID(outpostTemplateID uuid.UU
 			SELECT 
 				id, created, outposttemplatename, texture, radius, basemass, baseshield, baseshieldregen, 
 				basearmor, basehull, itemtypeid, wrecktexture, explosiontexture
-			FROM public.outposttemplates;
+			FROM public.outposttemplates
+			WHERE id = $1;
 		`
 
 	row := db.QueryRow(sqlStatement, outpostTemplateID)
