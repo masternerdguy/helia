@@ -31,7 +31,7 @@ import { ClientUseModKit } from '../../wsModels/bodies/useModKit';
 import { ClientViewDockedUsers } from '../../wsModels/bodies/viewDockedUsers';
 import { ClientGiveItem } from '../../wsModels/bodies/giveItem';
 import { ServerDockedUsersUpdate } from '../../wsModels/bodies/dockedUsersUpdate';
-import { ClientConsumeOutpostKit } from '../../wsModels/bodies/consumeOutpostKit copy';
+import { ClientConsumeOutpostKit } from '../../wsModels/bodies/consumeOutpostKit';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
