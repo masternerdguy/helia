@@ -2,6 +2,7 @@ package universe
 
 import (
 	"helia/physics"
+	"helia/shared"
 	"sync"
 	"time"
 
@@ -20,6 +21,10 @@ type Outpost struct {
 	Armor       float64
 	Hull        float64
 	UserID      uuid.UUID
+	Wallet      float64
+	Created     time.Time
+	Destroyed   bool
+	DestroyedAt *time.Time
 	// cache of base template
 	TemplateData OutpostTemplate
 	// cache from controlling user
@@ -29,8 +34,20 @@ type Outpost struct {
 	CurrentSystem          *SolarSystem
 	OpenSellOrders         map[string]*SellOrder
 	Processes              map[string]*OutpostProcess
+	CharacterName          string
 	Faction                *Faction
 	lastPeriodicUpdateTime time.Time
+}
+
+// Structure representing a newly deployed outpost, not yet materialized
+type NewOutpostTicket struct {
+	ID                uuid.UUID
+	OutpostTemplateID uuid.UUID
+	UserID            uuid.UUID
+	PosX              float64
+	PosY              float64
+	Theta             float64
+	Client            *shared.GameClient
 }
 
 // Initializes internal aspects of an outpost

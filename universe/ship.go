@@ -5140,11 +5140,21 @@ func (s *Ship) ConsumeOutpostKitFromCargo(itemID uuid.UUID, lock bool) error {
 		return errors.New("only unpackaged outpost kits can be consumed")
 	}
 
+	// get outpost template id
+	otIDStr, isOutpost := item.ItemTypeMeta.GetString("outposttemplateid")
+
+	if !isOutpost {
+		return errors.New("unable to find linked outpost template id")
+	}
+
+	// parse template id
+	otID, err := uuid.Parse(otIDStr)
+
+	if err != nil {
+		return err
+	}
+
 	// todo: check for obstacles
-
-	// todo: deploy outpost
-
-	// todo: save new outpost to database
 
 	// reduce quantity of item to 0 (always unpackaged)
 	item.Quantity = 0
@@ -5152,6 +5162,24 @@ func (s *Ship) ConsumeOutpostKitFromCargo(itemID uuid.UUID, lock bool) error {
 
 	// escalate to core for saving in db
 	s.CurrentSystem.ChangedQuantityItems = append(s.CurrentSystem.ChangedQuantityItems, item)
+
+	// generate new outpost ticket
+	nt := NewOutpostTicket{
+		OutpostTemplateID: otID,
+		UserID:            s.UserID,
+		PosX:              s.PosX,
+		PosY:              s.PosY,
+		Theta:             s.Theta,
+	}
+
+	c, ok := s.CurrentSystem.clients[s.UserID.String()]
+
+	if ok {
+		nt.Client = c
+	}
+
+	// escalate to core for spawning new outpost
+	s.CurrentSystem.NewOutpostTickets = append(s.CurrentSystem.NewOutpostTickets, &nt)
 
 	return nil
 }

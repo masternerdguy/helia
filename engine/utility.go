@@ -14,6 +14,65 @@ func makeTimestamp() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
+// Creates an outpost for a player (from deploying an outpost kit)
+func CreateOutpostForPlayer(
+	ownerID uuid.UUID, templateID uuid.UUID, systemID uuid.UUID,
+	posX float64, posY float64, theta float64) (*sql.Outpost, error,
+) {
+	// get services
+	userSvc := sql.GetUserService()
+	outpostSvc := sql.GetOutpostService()
+	outpostTmpSvc := sql.GetOutpostTemplateService()
+
+	// get user by id
+	u, err := userSvc.GetUserByID(ownerID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// get outpost template
+	temp, err := outpostTmpSvc.GetOutpostTemplateByID(templateID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// create outpost
+	t := sql.Outpost{
+		SystemID:          systemID,
+		UserID:            u.ID,
+		OutpostName:       fmt.Sprintf("%s's %s", u.CharacterName, temp.Texture),
+		Shield:            temp.BaseShield,
+		Armor:             temp.BaseArmor,
+		Hull:              temp.BaseHull,
+		OutpostTemplateId: temp.ID,
+		Destroyed:         false,
+		Wallet:            0,
+		PosX:              posX,
+		PosY:              posY,
+		Theta:             theta,
+	}
+
+	// truncate outpost name if needed
+	if len(t.OutpostName) > 24 {
+		shared.TeeLog(
+			fmt.Sprintf("! Truncating outpost name for %v", u.ID),
+		)
+
+		t.OutpostName = t.OutpostName[0:24]
+	}
+
+	newOutpost, err := outpostSvc.NewOutpost(t)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// success!
+	return newOutpost, nil
+}
+
 // Creates a ship for a player (from industrial market purchase or schematic run output)
 func CreateShipForPlayer(ownerID uuid.UUID, templateID uuid.UUID, stationID uuid.UUID, systemID uuid.UUID) (*sql.Ship, error) {
 	// get services
@@ -29,7 +88,7 @@ func CreateShipForPlayer(ownerID uuid.UUID, templateID uuid.UUID, stationID uuid
 		return nil, err
 	}
 
-	// get ship template from start
+	// get ship template
 	temp, err := shipTmpSvc.GetShipTemplateByID(templateID)
 
 	if err != nil {
@@ -107,7 +166,7 @@ func CreateShipForPlayer(ownerID uuid.UUID, templateID uuid.UUID, stationID uuid
 		FlightExperienceModifier: 1,
 	}
 
-	// tuncate ship name if needed
+	// truncate ship name if needed
 	if len(t.ShipName) > 32 {
 		shared.TeeLog(
 			fmt.Sprintf("! Truncating ship name for %v", u.ID),

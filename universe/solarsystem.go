@@ -69,6 +69,7 @@ type SolarSystem struct {
 	ChangedMetaItems     []*Item                                // items with changed metadata in need of saving
 	ActionReportPages    []*shared.ViewActionReportPageTicket   // requests for an action report summary page
 	ActionReportDetails  []*shared.ViewActionReportDetailTicket // requests for an action report
+	NewOutpostTickets    []*NewOutpostTicket                    // newly deployed outposts that need to be generated and saved by core
 	NewItemsDevHax       []*NewItemFromNameTicketDevHax         // requests to create an item for devhax
 	NewShipsDevHax       []*NewShipFromNameTicketDevHax         // requests to create a ship for devhax
 }
@@ -115,6 +116,7 @@ func (s *SolarSystem) Initialize() {
 	s.ChangedMetaItems = make([]*Item, 0)
 	s.ActionReportPages = make([]*shared.ViewActionReportPageTicket, 0)
 	s.ActionReportDetails = make([]*shared.ViewActionReportDetailTicket, 0)
+	s.NewOutpostTickets = make([]*NewOutpostTicket, 0)
 	s.NewItemsDevHax = make([]*NewItemFromNameTicketDevHax, 0)
 	s.NewShipsDevHax = make([]*NewShipFromNameTicketDevHax, 0)
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -3316,6 +3318,26 @@ func (s *SolarSystem) RemoveShip(c *Ship, lock bool) {
 
 	// remove ship
 	delete(s.ships, c.ID.String())
+}
+
+// Adds an outpost to the system
+func (s *SolarSystem) AddOutpost(c *Outpost, lock bool) {
+	// safety check
+	if c == nil {
+		return
+	}
+
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// store pointer to system
+	c.CurrentSystem = s
+
+	// add outpost
+	s.outposts[c.ID.String()] = c
 }
 
 // Adds a star to the system

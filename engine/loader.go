@@ -1581,6 +1581,72 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 	return sp, nil
 }
 
+// Takes a SQL Outpost and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
+func LoadOutpost(sh *sql.Outpost, u *universe.Universe) (*universe.Outpost, error) {
+	// get template
+	temp, err := outpostTemplateSvc.GetOutpostTemplateByID(sh.OutpostTemplateId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// get owner info
+	owner, err := userSvc.GetUserByID((sh.UserID))
+
+	if err != nil {
+		return nil, err
+	}
+
+	// build in-memory outpost
+	es := universe.Outpost{
+		ID:            sh.ID,
+		UserID:        sh.UserID,
+		Created:       sh.Created,
+		OutpostName:   sh.OutpostName,
+		CharacterName: owner.CharacterName,
+		PosX:          sh.PosX,
+		PosY:          sh.PosY,
+		SystemID:      sh.SystemID,
+		Theta:         sh.Theta,
+		Shield:        sh.Shield,
+		Armor:         sh.Armor,
+		Hull:          sh.Hull,
+		Destroyed:     sh.Destroyed,
+		DestroyedAt:   sh.DestroyedAt,
+		Wallet:        sh.Wallet,
+		TemplateData: universe.OutpostTemplate{
+			ID:                  temp.ID,
+			Created:             temp.Created,
+			OutpostTemplateName: temp.OutpostTemplateName,
+			WreckTexture:        temp.WreckTexture,
+			ExplosionTexture:    temp.ExplosionTexture,
+			Texture:             temp.Texture,
+			Radius:              temp.Radius,
+			BaseMass:            temp.BaseMass,
+			BaseShield:          temp.BaseShield,
+			BaseShieldRegen:     temp.BaseShieldRegen,
+			BaseArmor:           temp.BaseArmor,
+			BaseHull:            temp.BaseHull,
+			ItemTypeID:          temp.ItemTypeID,
+		},
+		FactionID: owner.CurrentFactionID,
+		Lock:      sync.Mutex{},
+	}
+
+	// obtain factions read lock
+	u.FactionsLock.RLock()
+	defer u.FactionsLock.RUnlock()
+
+	// inject faction
+	es.Faction = u.Factions[owner.CurrentFactionID.String()]
+
+	// get pointer to outpost
+	sp := &es
+
+	// return pointer to ship
+	return sp, nil
+}
+
 // Hooks pointers needed if a schematic is currently running
 func hookSchematics(sp *universe.Ship) {
 	// get schematic runs for ship owner

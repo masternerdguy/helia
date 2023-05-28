@@ -42,6 +42,8 @@ var processInputSvc = sql.GetProcessInputService()
 var processOutputSvc = sql.GetProcessOutputService()
 var shipTemplateSvc = sql.GetShipTemplateService()
 var containerSvc = sql.GetContainerService()
+var outpostSvc = sql.GetOutpostService()
+var outpostTemplateSvc = sql.GetOutpostTemplateService()
 
 // Will cause all region goroutines to stop when true
 var shutdownSignal = false
@@ -1178,6 +1180,44 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 	// clear new ship tickets
 	sol.NewShipTickets = make([]*universe.NewShipTicket, 0)
+
+	// iterate over new outpost tickets
+	for _, rs := range sol.NewOutpostTickets {
+		// handle escalation on another goroutine
+		go func(rs *universe.NewOutpostTicket, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
+			// create new outpost for player
+			ps, err := CreateOutpostForPlayer(
+				rs.UserID,
+				rs.OutpostTemplateID,
+				sol.ID,
+				rs.PosX,
+				rs.PosY,
+				rs.Theta,
+			)
+
+			if err != nil || ps == nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to complete outpost deployment for %v - failure saving (%v)!", rs.UserID, err))
+				return
+			}
+
+			// load into universe
+			es, err := LoadOutpost(ps, sol.Universe)
+
+			if err != nil || es == nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to complete outpost deployment for %v - failure loading (%v)!", rs.UserID, err))
+				return
+			}
+
+			// put outpost in system
+			sol.AddOutpost(es, true)
+		}(rs, sol)
+	}
+
+	// clear new ship tickets
+	sol.NewOutpostTickets = make([]*universe.NewOutpostTicket, 0)
 
 	// iterate over ship switches
 	for _, rs := range sol.ShipSwitches {
