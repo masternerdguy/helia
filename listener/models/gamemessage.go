@@ -81,6 +81,7 @@ type MessageRegistry struct {
 	GiveItem               int
 	ViewDockedUsers        int
 	DockedUsersUpdate      int
+	ConsumeOutpostKit      int
 }
 
 // Registry of target types
@@ -166,6 +167,7 @@ func NewMessageRegistry() *MessageRegistry {
 		GiveItem:               64,
 		ViewDockedUsers:        65,
 		DockedUsersUpdate:      66,
+		ConsumeOutpostKit:      67,
 	}
 }
 
@@ -754,6 +756,12 @@ type ClientSelfDestructBody struct {
 
 // Body containing a request to consume a repair kit and convert it into health for the current ship
 type ClientConsumeRepairKitBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	ItemID    uuid.UUID `json:"itemId"`
+}
+
+// Body containing a request to consume an outpost kit and convert it into a new outpost
+type ClientConsumeOutpostKitBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemId"`
 }

@@ -14,11 +14,19 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{
+var _ = websocket.Upgrader{
+	HandshakeTimeout: 0,
+	ReadBufferSize:   0,
+	WriteBufferSize:  0,
+	WriteBufferPool:  nil,
+	Subprotocols:     []string{},
+	Error: func(w http.ResponseWriter, r *http.Request, status int, reason error) {
+		// todo: should probably do something here :)
+	},
 	CheckOrigin: func(r *http.Request) bool {
-		// todo: lock this down when frontend domains are known
 		return true
 	},
+	EnableCompression: false,
 } // use default options
 
 // Listener for handling and dispatching incoming websocket messages
@@ -476,6 +484,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientViewDockedUsers(&client, &b)
+		} else if m.MessageType == msgRegistry.ConsumeOutpostKit {
+			// decode body as ClientConsumeOutpostKitBody
+			b := models.ClientConsumeOutpostKitBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientConsumeOutpostKit(&client, &b)
 		}
 	}
 }
@@ -1949,6 +1964,29 @@ func (l *SocketListener) handleClientViewDockedUsers(client *shared.GameClient, 
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.ViewDockedUsers, false)
+	}
+}
+
+func (l *SocketListener) handleClientConsumeOutpostKit(client *shared.GameClient, body *models.ClientConsumeOutpostKitBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		shared.TeeLog(fmt.Sprintf("handleClientConsumeOutpostKit: unexpected id: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.SharedMessageRegistry
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.ConsumeOutpostKit, false)
 	}
 }
 

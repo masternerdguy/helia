@@ -5101,6 +5101,61 @@ func (s *Ship) ConsumeRepairKitFromCargo(itemID uuid.UUID, lock bool) error {
 	return nil
 }
 
+// Attempts to consume an outpost kit from cargo and spawn a new outpost
+func (s *Ship) ConsumeOutpostKitFromCargo(itemID uuid.UUID, lock bool) error {
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// lock cargo bay
+	s.CargoBay.Lock.Lock()
+	defer s.CargoBay.Lock.Unlock()
+
+	// make sure ship is undocked
+	if s.DockedAtStationID != nil {
+		return errors.New("you must be undocked to consume an outpost kit")
+	}
+
+	// find item in cargo bay
+	item := s.FindItemInCargo(itemID)
+
+	if item == nil {
+		return errors.New("item not found in cargo bay")
+	}
+
+	// make sure item is clean
+	if item.CoreDirty {
+		return errors.New("item is dirty and waiting on an escalation to save its state")
+	}
+
+	// make sure item is an outpost kit
+	if item.ItemFamilyID != "outpost_kit" {
+		return errors.New("item is not an outpost kit")
+	}
+
+	// make sure item is unpackaged
+	if item.IsPackaged {
+		return errors.New("only unpackaged outpost kits can be consumed")
+	}
+
+	// todo: check for obstacles
+
+	// todo: deploy outpost
+
+	// todo: save new outpost to database
+
+	// reduce quantity of item to 0 (always unpackaged)
+	item.Quantity = 0
+	item.CoreDirty = true
+
+	// escalate to core for saving in db
+	s.CurrentSystem.ChangedQuantityItems = append(s.CurrentSystem.ChangedQuantityItems, item)
+
+	return nil
+}
+
 // Updates a fitted slot on a ship
 func (m *FittedSlot) PeriodicUpdate() {
 	if m.IsCycling {

@@ -31,6 +31,7 @@ import { ClientUseModKit } from '../../wsModels/bodies/useModKit';
 import { ClientViewDockedUsers } from '../../wsModels/bodies/viewDockedUsers';
 import { ClientGiveItem } from '../../wsModels/bodies/giveItem';
 import { ServerDockedUsersUpdate } from '../../wsModels/bodies/dockedUsersUpdate';
+import { ClientConsumeOutpostKit } from '../../wsModels/bodies/consumeOutpostKit copy';
 
 export class ShipFittingWindow extends GDIWindow {
   // lists
@@ -427,6 +428,23 @@ export class ShipFittingWindow extends GDIWindow {
         };
 
         this.wsSvc.sendMessage(MessageTypes.ConsumeRepairKit, tiMsg);
+
+        // request cargo bay refresh
+        this.refreshCargoBay();
+
+        // reset views
+        this.resetViews();
+      } else if (a === 'Deploy Kit') {
+        // get selected item
+        const i: ShipViewRow = this.shipView.getSelectedItem();
+
+        // send consume request
+        const tiMsg: ClientConsumeOutpostKit = {
+          sid: this.wsSvc.sid,
+          itemId: (i.object as WSContainerItem).id,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.ConsumeOutpostKit, tiMsg);
 
         // request cargo bay refresh
         this.refreshCargoBay();
@@ -1357,6 +1375,18 @@ function getCargoRowActions(m: WSContainerItem, isDocked: boolean) {
 
     // danger zone
     actions.push('Trash');
+  } else {
+    if (m.isPackaged) {
+      // nothing here yet
+    } else {
+      // determine whether or not this is a construction kit
+      const isOutpostKit = m.itemFamilyID === 'outpost_kit';
+
+      if (isOutpostKit) {
+        // offer deploy kit action
+        actions.push('Deploy Kit');
+      }
+    }
   }
 
   return actions;
