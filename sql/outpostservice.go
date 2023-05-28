@@ -90,7 +90,7 @@ func (s OutpostService) NewOutpost(e Outpost) (*Outpost, error) {
 					id, universe_systemid, outpostname, pos_x, pos_y, theta, userid, shield, armor, hull, wallet, 
 					destroyed, destroyedat, outposttemplateid, created
 				)
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);
 			`
 
 	uid := uuid.New()
