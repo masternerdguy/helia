@@ -3,4 +3,4 @@ helia
 *.prof
 main
 __debug_bin
-
+*.env
