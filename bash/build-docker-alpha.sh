@@ -22,7 +22,7 @@ mv ~/go/src/helia/.git ~/tmpgit
 rm -rfv ~/go/src/helia/*.sql
 
 # build docker image
-docker build -t heliaalpha . -f Dockerfile.single
+docker build -t heliaalpha . -f Dockerfile.prodengine
 
 # move .git back into repo
 mv ~/tmpgit ~/go/src/helia/.git
