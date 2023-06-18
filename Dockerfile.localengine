@@ -10,7 +10,7 @@ RUN CGO_ENABLED=0 go install -ldflags "-s -w -extldflags '-static'" github.com/g
 
 # stage 3
 FROM delve as copy
-COPY marker /dev/null
+COPY mission_patch.png /dev/null
 COPY . .
 
 # stage 4
