@@ -1,0 +1,9 @@
+services:
+  engine:
+    build:
+      dockerfile: Dockerfile.localengine
+    ports:
+      - 8000:8000
+      - 4000:4000
+    env_file:
+      - .env

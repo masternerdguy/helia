@@ -1,0 +1,19 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+*.docker
+*.dockerignore
+
+# Angular frontend code directory
+frontend
+
+# Other code files and directories
+bash
+flyway
+.env
+*.prof
+README.md
+.vscode
