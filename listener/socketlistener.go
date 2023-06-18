@@ -14,7 +14,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{
+var _ = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		// todo: lock this down when frontend domains are known
 		return true

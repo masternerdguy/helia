@@ -1,33 +1,25 @@
 package listener
 
 import (
-	"encoding/json"
-	"errors"
 	"os"
+	"strconv"
 )
 
 type listenerConfig struct {
-	ShutdownToken string `json:"shutdownToken"`
-	Port          int    `json:"port"`
+	ShutdownToken string
+	Port          int
 }
 
 func loadConfiguration() (listenerConfig, error) {
-	var config listenerConfig
+	// get environment variables
+	shutdownToken := os.Getenv("shutdownToken")
+	port := os.Getenv("port")
 
-	configFile, err := os.Open("listener-configuration.json")
+	// parse port number
+	portInt, err := strconv.ParseInt(port, 10, 32)
 
-	if err != nil {
-		return config, errors.New("unable to load listener configuration")
-	}
-
-	defer configFile.Close()
-
-	if err != nil {
-		return listenerConfig{}, err
-	}
-
-	jsonParser := json.NewDecoder(configFile)
-	jsonParser.Decode(&config)
-
-	return config, nil
+	return listenerConfig{
+		ShutdownToken: shutdownToken,
+		Port:          int(portInt),
+	}, err
 }
