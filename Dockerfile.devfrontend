@@ -2,7 +2,7 @@
 FROM node:alpine as base
 
 EXPOSE 4200
-WORKDIR /src/helia
+WORKDIR /src/helia/frontend
 
 # stage 2
 FROM base as deps

@@ -4,18 +4,18 @@ Helia is going to be a harsh, massively multiplayer, single world space game wit
 # Restoring the database
 Helia ideally would use PostgreSQL 14 as its database, but note that Azure is quite out of date at 11. However, things are close enough that development between 11 and 14 shouldn't be an issue since very basic postgres features are being used. As of the open alpha, a backup of the `helia` database within the `helia-alpha` Azure Postgres Server should be grabbed for local development.
 
-The database configuration is in `db-configuration.json`.
+The database configuration is in `.env`.
 
 # Flyway
-Flyway is used for db migrations, which are stored in `flyway/sql`. Migrations can be applied to the local database by running `npm run flyway-migrate:dev` in the frontend directory. `npm run flyway-info:dev` can be used to get the migration status. Note that SQL files are ignored in this repo, so you will need to use force when attempting to add them using git add.
+Flyway is used for db migrations, which are stored in `flyway/sql`. Migrations can be applied to the local database by running `flyway-migrate-db-dev.sh` in the database container. `flyway-info-db-dev.sh` can be used to get the migration status. Note that SQL files are ignored in this repo, so you will need to use force when attempting to add them using git add.
 
 # Starting the backend (local development)
 Helia's backend is written in go (1.18). Since it makes heavy use of goroutines, it should be run in an environment with at least 4 cores - more is better, and core count is far more important than clock speed in determining overall performance.
 
-To start the go backend, run `go run main.go` in the root of the project.
+To start the go backend, run `go run main.go` in the engine container.
 
 # Starting the frontend (local development)
-To start the angular frontend, run `npm start` in the frontend directory (one level below the root of the project). Note that obfuscation is applied as part of the build, so it may take a few minutes to start and also to apply any changes. This can be temporarily disabled by commenting out the obfuscator in `custom-webpack.config.json`, but under no circumstances should such a change be checked into source control (nor should unobfuscated code ever be exposed to the internet). Obfuscation of the client is an important part of Helia's security!
+To start the angular frontend, run `npm start` in the frontend container. Note that obfuscation is applied as part of the build, so it may take a few minutes to start and also to apply any changes. This can be temporarily disabled by commenting out the obfuscator in `custom-webpack.config.json`, but under no circumstances should such a change be checked into source control (nor should unobfuscated code ever be exposed to the internet). Obfuscation of the client is an important part of Helia's security!
 
 # Deployment Process (alpha, frontend)
 Helia's open alpha is currently hosted on an Azure storage accout as a static website. This should allow hosting for pennies on the dollar compared to a traditional app service. The easiest way to deploy is to
@@ -55,7 +55,7 @@ Helia is designed for all players to play within the same world and server - any
 * Login: http://localhost:4200/#/auth/signin
 * Save and Shutdown: http://localhost:8000/api/shutdown?key=shutdownToken
 
-The shutdown token is in `listener-configuration.json`. Note that ports and protocols (http vs https) will differ between environments.
+The shutdown token is in `.env`. Note that ports and protocols (http vs https) will differ between environments.
 
 # Devhax
 Various cheats are provided that can be used to more easily test helia or just generally show off to plebs. These are executed using the system chat window. Only a user who's record in the users table has isdev set to true can run these commands. Note that these are HACKS, and things may not respond totally as expected in all cases!
