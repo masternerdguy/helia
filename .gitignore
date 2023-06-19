@@ -5,3 +5,5 @@ main
 __debug_bin
 *.env
 postgres-data
+flyway/report.html
+flyway/report.json
