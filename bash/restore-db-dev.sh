@@ -1,5 +1,6 @@
 #!/bin/bash
 
-export PGPASSWORD='fdb01db4749748cfbdb21e4766570561!' 
-echo 'drop owned by heliaagent;' | psql -h 127.0.0.1 -d helia -U heliaagent 
-psql -h 127.0.0.1 -d helia -U heliaagent < ../devdb.sql
+export PGPASSWORD="$POSTGRES_PASSWORD"
+echo 'drop schema public cascade;' | psql -h 127.0.0.1 -d $POSTGRES_DB -U $POSTGRES_USER 
+echo 'create schema public;' | psql -h 127.0.0.1 -d $POSTGRES_DB -U $POSTGRES_USER 
+psql -h 127.0.0.1 -d $POSTGRES_DB -U $POSTGRES_USER < /src/helia/devdb.sql

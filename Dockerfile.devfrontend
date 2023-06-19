@@ -1,0 +1,15 @@
+# stage 1
+FROM node:alpine as base
+
+EXPOSE 4200
+WORKDIR /src/helia
+
+# stage 2
+FROM base as deps
+RUN npm install -g pretty
+
+# stage 3
+FROM deps as tail
+
+# don't die
+CMD tail -f /dev/null

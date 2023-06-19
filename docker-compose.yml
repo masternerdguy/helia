@@ -1,16 +1,31 @@
 services:
   engine:
     build:
-      dockerfile: Dockerfile.localengine
+      dockerfile: Dockerfile.devengine
     ports:
       - 8000:8000
       - 4000:4000
     env_file:
       - .env
+    volumes:
+      - .:/src/helia
+  frontend:
+    build:
+      dockerfile: Dockerfile.devfrontend
+    ports:
+      - 4200:4200
+    env_file:
+      - .env
+    volumes:
+      - .:/src/helia
   db:
-    image: postgres
-    restart: always
+    build:
+      dockerfile: Dockerfile.devdb
     ports:
       - 5432:5432
     env_file:
       - .env
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+      - .:/src/helia
+    working_dir: /src/helia

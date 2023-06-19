@@ -4,3 +4,4 @@ helia
 main
 __debug_bin
 *.env
+postgres-data
