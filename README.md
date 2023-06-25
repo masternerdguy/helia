@@ -1,6 +1,17 @@
 # Helia
 Helia is going to be a harsh, massively multiplayer, single world space game with nonconsensual PVP everywhere.
 
+# Docker
+Helia supports local development using docker containers. There are three containers defined:
+
+* `helia-db`: A postgres server that also contains flyway. This provides your local database during development.
+* `helia-engine`: A golang environment which allows you to build and run the backend game engine server.
+* `helia-frontend`: An angular environment that allows you to build and run the frontend web client.
+
+To start these containers, simply run `docker compose up`. From there, you can connect to and use these containers as you see fit. Note that both your repository and your database files are mapped as volumes within these containers to easily propagate changes and persist the local database.
+
+Be aware that docker on Windows has extremely poor filesystem performance when using volumes - a good workaround is to install docker within WSL instead of directly on Windows. Visual Studio Code provides excellent tooling for working with both docker containers and WSL.
+
 # Restoring the database
 This repo contains a sample local development database within `db.sample.7z`. Note that, due to its size, Git LFS is required to retrieve this file. Once extracted, the database can be restored by running `restore-db.sh` within the database container.
 
