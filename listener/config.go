@@ -13,7 +13,7 @@ type listenerConfig struct {
 func loadConfiguration() (listenerConfig, error) {
 	// get environment variables
 	shutdownToken := os.Getenv("shutdownToken")
-	port := os.Getenv("port")
+	port := os.Getenv("listenerPort")
 
 	// parse port number
 	portInt, err := strconv.ParseInt(port, 10, 32)
