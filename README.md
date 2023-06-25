@@ -71,7 +71,7 @@ Helia is designed for all players to play within the same world and server - any
 The shutdown token is in `.env`. Note that ports and protocols (http vs https) will differ between environments.
 
 # Devhax
-Various cheats are provided that can be used to more easily test helia or just generally show off to plebs. These are executed using the system chat window. Only a user who's record in the users table has isdev set to true can run these commands. Note that these are HACKS, and things may not respond totally as expected in all cases!
+Various cheats are provided that can be used to more easily test helia or just generally show off to plebs. These are executed using the system chat window. Only a user who's record in the users table has `isdev` set to `true` can run these commands. Note that these are HACKS, and things may not respond totally as expected in all cases!
 
 ## teleport
 syntax:  /devhax teleport [systemname]
