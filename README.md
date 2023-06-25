@@ -2,12 +2,12 @@
 Helia is going to be a harsh, massively multiplayer, single world space game with nonconsensual PVP everywhere.
 
 # Restoring the database
-Helia ideally would use PostgreSQL 14 as its database, but note that Azure is quite out of date at 11. However, things are close enough that development between 11 and 14 shouldn't be an issue since very basic postgres features are being used. As of the open alpha, a backup of the `helia` database within the `helia-alpha` Azure Postgres Server should be grabbed for local development.
+This repo contains a sample local development database within `db.sample.7z`. Note that, due to its size, Git LFS is required to retrieve this file. Once extracted, the database can be restored by running `restore-db.sh` within the database container.
 
 The database configuration is in `.env`.
 
 # Flyway
-Flyway is used for db migrations, which are stored in `flyway/sql`. Migrations can be applied to the local database by running `flyway-migrate-db-dev.sh` in the database container. `flyway-info-db-dev.sh` can be used to get the migration status. Note that SQL files are ignored in this repo, so you will need to use force when attempting to add them using git add.
+Flyway is used for db migrations, which are stored in `flyway/sql`. Migrations can be applied to the local database by running `flyway-migrate.sh` in the database container. `flyway-info.sh` can be used to get the migration status. Note that SQL files are ignored in this repo, so you will need to use force when attempting to add them using git add.
 
 # Starting the backend (local development)
 Helia's backend is written in go (1.18). Since it makes heavy use of goroutines, it should be run in an environment with at least 4 cores - more is better, and core count is far more important than clock speed in determining overall performance.
