@@ -31,22 +31,23 @@ To start the go backend, run `go run main.go` in the engine container.
 To start the angular frontend, run `npm start` in the frontend container. Note that obfuscation is applied as part of the build, so it may take a few minutes to start and also to apply any changes. This can be temporarily disabled by commenting out the obfuscator in `custom-webpack.config.json`, but under no circumstances should such a change be checked into source control (nor should unobfuscated code ever be exposed to the internet). Obfuscation of the client is an important part of Helia's security!
 
 # Deployment Process (alpha, frontend)
-Helia's open alpha is currently hosted on an Azure storage accout as a static website. This should allow hosting for pennies on the dollar compared to a traditional app service. The easiest way to deploy is to
+Helia's open alpha client is currently hosted on an Azure storage account as a static website. This should allow hosting for pennies on the dollar compared to a traditional app service. The easiest way to deploy is to:
 
-1. Run `npm run build:alpha` in the frontend directory.
+1. Run `npm run build:alpha` in the frontend container.
 2. Replace the files in the `$web` container of the `heliaalphafrontend` storage account with the new files under the `dist` folder - the easiest way is to just use Azure Storage Explorer which takes ~1 minute.
 
 # Deployment Process (alpha, backend)
 Deploying the backend is less trivial than the frontend. Currently, the only way to run go code in an Azure app service is to use a docker container hosted in some kind of docker registry. For privacy reasons, the `helia-backend-engine` app service is configured to pull from the `heliaalpharegistry` Azure Container Registry automatically. Whenever a new docker image is pushed, a deployment occurs. Be aware that this will result in a sudden restart, so it is critical to perform a clean shutdown using the `Save and Shutdown` endpoint, allow it to complete, and then manually stop the app service before the deployment. Otherwise, players will lose progress and players don't tend to like that.
 
-Given the above, performing a backend deployment can be done by
+Given the above, performing a backend deployment can be done by:
 
 0. Perform a clean shutdown, wait for it to complete, and then manually stop the app service.
-1. `cd` into the frontend directory - npm is being used as a helper here, at least for now. This isn't ideal as you will see.
-2. Run `npm run build-docker:alpha` to build the docker image. To reduce image size significantly (large images are unreliable on Azure) some interesting tricks are done before building the container.
-3. Run `cd .. && cd frontend` to get into the restored frontend folder again - one of the interesting tricks done by the build script is deleting that folder and then letting git restore it after the image is built. As a result, you lose your path reference.
-4. Run `npm run deploy-docker:alpha` to push the image to Azure.
-5. Start the app service.
+1. Take a backup of the production database, just in case.
+2. Run `build-docker-alpha.sh` to build the docker image.
+3. Run `deploy-docker-alpha.sh` to push the image to Azure. Note that you will require the appropriate and correct secrets exported for this to work!
+4. Start the app service.
+
+It is probably best to do this outside of a container.
 
 # Shutting down the server properly (aka not making players very angry)
 A server shutdown can be initiated using the `Save and Shutdown` endpoint (see `Useful Links`). This will save key aspects of the current state of the simulation and shut down the server. It is critical to always perform a clean shutdown - whether before a backend deployment or otherwise. If a clean shutdown is not performed, players will lose progress.
