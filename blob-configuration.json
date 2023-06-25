@@ -1,6 +1,0 @@
-{
-    "AzureKey": "zuA+Wk8y829CZCrGF5JBtJNxwPNj8IOqk7g32V4V9DzehYbefGnxOlnjBbBz6OYBPkr7NYqermv1+AStA8CGYw==",
-    "AzureBlobAccountName": "heliaalphafrontend",
-    "AzurePrimaryBlobServiceEndpoint": "https://heliaalphafrontend.blob.core.windows.net/",
-    "AzureBlobContainer": "private-storage"
-}

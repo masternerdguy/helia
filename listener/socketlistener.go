@@ -15,14 +15,6 @@ import (
 )
 
 var _ = websocket.Upgrader{
-	HandshakeTimeout: 0,
-	ReadBufferSize:   0,
-	WriteBufferSize:  0,
-	WriteBufferPool:  nil,
-	Subprotocols:     []string{},
-	Error: func(w http.ResponseWriter, r *http.Request, status int, reason error) {
-		// todo: should probably do something here :)
-	},
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},

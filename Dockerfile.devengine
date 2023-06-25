@@ -1,0 +1,11 @@
+# stage 1
+FROM golang:alpine as base
+
+EXPOSE 8000 4000
+WORKDIR /src/helia
+
+# stage 2
+FROM base as tail
+
+# don't die
+CMD tail -f /dev/null

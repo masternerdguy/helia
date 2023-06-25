@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cd ~/go/src/helia/flyway
+cd /src/helia/flyway
 flyway info
