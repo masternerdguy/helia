@@ -7,3 +7,4 @@ __debug_bin
 postgres-data
 flyway/report.html
 flyway/report.json
+.localsecrets
