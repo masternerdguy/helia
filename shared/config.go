@@ -1,13 +1,10 @@
 package shared
 
-import (
-	"encoding/json"
-	"errors"
-	"os"
-)
+import "os"
 
 var config *sharedConfig
 
+// Invokes loadConfiguration() to cache the shared configuration
 func InitializeConfiguration() {
 	// load shared configuration
 	c, err := loadConfiguration()
@@ -19,28 +16,21 @@ func InitializeConfiguration() {
 	config = &c
 }
 
+// Structure representing the shared configuration
 type sharedConfig struct {
-	SendgridKey string `json:"sendgridKey"`
-	FromEmail   string `json:"fromEmail"`
+	SendgridKey string
+	FromEmail   string
 }
 
+// Reads the shared configuration from environment variables
 func loadConfiguration() (sharedConfig, error) {
-	var config sharedConfig
+	// read environment variables
+	sendgridKey := os.Getenv("sendgridKey")
+	fromEmail := os.Getenv("fromEmail")
 
-	configFile, err := os.Open("shared-configuration.json")
-
-	if err != nil {
-		return config, errors.New("unable to load shared configuration")
-	}
-
-	defer configFile.Close()
-
-	if err != nil {
-		return sharedConfig{}, err
-	}
-
-	jsonParser := json.NewDecoder(configFile)
-	jsonParser.Decode(&config)
-
-	return config, nil
+	// return configuration
+	return sharedConfig{
+		SendgridKey: sendgridKey,
+		FromEmail:   fromEmail,
+	}, nil
 }
