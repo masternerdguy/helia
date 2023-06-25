@@ -1,7 +1,6 @@
 package shared
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"runtime/debug"
@@ -16,15 +15,11 @@ type TaggedMutex struct {
 }
 
 func (m *TaggedMutex) Lock() {
-	log.Println(
-		fmt.Sprintf("trying to get lock at %v", string(debug.Stack())),
-	)
+	log.Printf("trying to get lock at %v", string(debug.Stack()))
 
 	m.mutex.Lock()
 
-	log.Println(
-		fmt.Sprintf("lock obtained at %v", string(debug.Stack())),
-	)
+	log.Printf("lock obtained at %v", string(debug.Stack()))
 }
 
 func (m *TaggedMutex) Unlock() {

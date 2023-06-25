@@ -2,7 +2,6 @@ package shared
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
@@ -12,10 +11,10 @@ import (
 
 // Structure for interacting with an Azure Blob Storage account
 type AzureBlobStorage struct {
-	AzureKey                        string `json:"AzureKey"`
-	AzureBlobAccountName            string `json:"AzureBlobAccountName"`
-	AzurePrimaryBlobServiceEndpoint string `json:"AzurePrimaryBlobServiceEndpoint"`
-	AzureBlobContainer              string `json:"AzureBlobContainer"`
+	AzureKey                        string
+	AzureBlobAccountName            string
+	AzurePrimaryBlobServiceEndpoint string
+	AzureBlobContainer              string
 }
 
 // Uploads bytes to blob storage with a given name and content type
@@ -40,26 +39,19 @@ func (a *AzureBlobStorage) UploadBytesToBlob(b []byte, n string, ct string) (str
 	return blockBlobUrl.String(), errU
 }
 
-// Reads the configuration file for Azure Blob Storage and returns a structure to utilize it
+// Reads the environment variables for Azure Blob Storage and returns a structure to utilize it
 func LoadBlobStorageConfiguration() (AzureBlobStorage, error) {
-	var config AzureBlobStorage
+	// read environment variables
+	azureKey := os.Getenv("AzureKey")
+	azureBlobAccountName := os.Getenv("AzureBlobAccountName")
+	azurePrimaryBlobServiceEndpoint := os.Getenv("AzurePrimaryBlobServiceEndpoint")
+	azureBlobContainer := os.Getenv("AzureBlobContainer")
 
-	// try to load under main.go position
-	configFile, err := os.Open("blob-configuration.json")
-
-	if err != nil {
-		// try to load under a child position
-		configFile, err = os.Open("../blob-configuration.json")
-	}
-
-	if err != nil {
-		return AzureBlobStorage{}, err
-	}
-
-	defer configFile.Close()
-
-	jsonParser := json.NewDecoder(configFile)
-	jsonParser.Decode(&config)
-
-	return config, nil
+	// return configuration
+	return AzureBlobStorage{
+		AzureKey:                        azureKey,
+		AzureBlobAccountName:            azureBlobAccountName,
+		AzurePrimaryBlobServiceEndpoint: azurePrimaryBlobServiceEndpoint,
+		AzureBlobContainer:              azureBlobContainer,
+	}, nil
 }

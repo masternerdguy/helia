@@ -1,0 +1,21 @@
+# extra code, etc
+frontend
+flyway
+bash
+.vscode
+*.prof
+*.json
+*.7z
+*.sql
+*.env
+
+# git
+.git
+.gitignore
+.gitattributes
+
+# docker
+.docker
+.dockerignore
+docker-compose.yml
+Dockerfile.*

@@ -2,9 +2,9 @@ package sql
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -18,15 +18,17 @@ var poolExpires time.Time
 // Shared mutex for connection with db
 var sharedPoolLock sync.Mutex = sync.Mutex{}
 
+// Structure representing the configuration needed to connect to the database
 type dbConfig struct {
-	DbName  string `json:"dbname"`
-	DbHost  string `json:"dbhost"`
-	DbUser  string `json:"dbuser"`
-	DbPass  string `json:"dbpass"`
-	DbPort  int    `json:"dbport"`
-	SSLMode string `json:"sslmode"`
+	DbName  string
+	DbHost  string
+	DbUser  string
+	DbPass  string
+	DbPort  int
+	SSLMode string
 }
 
+// Establishes a connection to the database or reuses an existing one
 func connect() (*sql.DB, error) {
 	// lock connect to handle excessive clients
 	sharedPoolLock.Lock()
@@ -71,25 +73,26 @@ func connect() (*sql.DB, error) {
 	return db, err
 }
 
+// Reads the application database configuration from environment variables
 func loadConfiguration() (dbConfig, error) {
-	var config dbConfig
+	// read environment variables
+	dbHost := os.Getenv("dbhost")
+	dbUser := os.Getenv("dbuser")
+	dbPass := os.Getenv("dbpass")
+	dbPort := os.Getenv("dbport")
+	dbName := os.Getenv("dbname")
+	sslMode := os.Getenv("sslmode")
 
-	// try to load under main.go position
-	configFile, err := os.Open("db-configuration.json")
+	// parse port id
+	dbPortInt, err := strconv.ParseInt(dbPort, 10, 32)
 
-	if err != nil {
-		// try to load under a child position
-		configFile, err = os.Open("../db-configuration.json")
-	}
-
-	if err != nil {
-		return dbConfig{}, err
-	}
-
-	defer configFile.Close()
-
-	jsonParser := json.NewDecoder(configFile)
-	jsonParser.Decode(&config)
-
-	return config, nil
+	// return configuration
+	return dbConfig{
+		DbHost:  dbHost,
+		DbUser:  dbUser,
+		DbPass:  dbPass,
+		DbPort:  int(dbPortInt),
+		DbName:  dbName,
+		SSLMode: sslMode,
+	}, err
 }

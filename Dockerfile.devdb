@@ -1,0 +1,20 @@
+# stage 1
+FROM ubuntu/postgres as base
+
+EXPOSE 5432
+WORKDIR /
+
+# stage 2
+FROM base as path
+
+RUN apt update
+RUN apt install wget -y
+ENV PATH="${PATH}:/src/helia/bash:/flyway-9.19.4/jre/bin:/flyway-9.19.4"
+
+# stage 3
+FROM path as flyway
+RUN wget -qO- https://download.red-gate.com/maven/release/org/flywaydb/enterprise/flyway-commandline/9.19.4/flyway-commandline-9.19.4-linux-x64.tar.gz | tar -xvz
+
+# stage 4
+FROM flyway as db
+WORKDIR /src/helia
