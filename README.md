@@ -12,6 +12,8 @@ To start these containers, simply run `docker compose up`. From there, you can c
 
 Be aware that docker on Windows has extremely poor filesystem performance when using volumes - a good workaround is to install docker within WSL instead of directly on Windows. Visual Studio Code provides excellent tooling for working with both docker containers and WSL.
 
+The environment variables shared by these containers are defined in `.env`.
+
 # Restoring the database
 This repo contains a sample local development database within `db.sample.7z`. Note that, due to its size, Git LFS is required to retrieve this file. Once extracted, the database can be restored by running `restore-db.sh` within the database container.
 
