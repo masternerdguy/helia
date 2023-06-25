@@ -48,8 +48,6 @@ Given the above, performing a backend deployment can be done by
 4. Run `npm run deploy-docker:alpha` to push the image to Azure.
 5. Start the app service.
 
-Note that you will also need a local docker instance for this to work - otherwise you can't build the image locally for deployment. This is very easy to set up using `WSL` and `Docker Desktop` on Windows - WSL works as a dev environment for Helia quite well!
-
 # Shutting down the server properly (aka not making players very angry)
 A server shutdown can be initiated using the `Save and Shutdown` endpoint (see `Useful Links`). This will save key aspects of the current state of the simulation and shut down the server. It is critical to always perform a clean shutdown - whether before a backend deployment or otherwise. If a clean shutdown is not performed, players will lose progress.
 
