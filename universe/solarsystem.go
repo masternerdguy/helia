@@ -2828,6 +2828,24 @@ func (s *SolarSystem) sendClientUpdates() {
 		})
 	}
 
+	for _, d := range s.outposts {
+		gu.Outposts = append(gu.Outposts, models.GlobalOutpostInfo{
+			ID:          d.ID,
+			SystemID:    d.SystemID,
+			OutpostName: d.OutpostName,
+			PosX:        d.PosX,
+			PosY:        d.PosY,
+			ShieldP:     ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
+			ArmorP:      ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
+			HullP:       ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
+			Texture:     d.TemplateData.Texture,
+			Radius:      d.TemplateData.Radius,
+			Mass:        d.TemplateData.BaseMass,
+			Theta:       d.Theta,
+			FactionID:   d.FactionID,
+		})
+	}
+
 	for _, d := range s.missiles {
 		if d.TicksRemaining <= 0 {
 			continue
@@ -2948,25 +2966,6 @@ func (s *SolarSystem) sendClientUpdates() {
 				Texture:     d.Texture,
 				Radius:      d.Radius,
 				Mass:        d.Mass,
-				Theta:       d.Theta,
-				FactionID:   d.FactionID,
-			})
-		}
-
-		// outposts
-		for _, d := range s.outposts {
-			gu.Outposts = append(gu.Outposts, models.GlobalOutpostInfo{
-				ID:          d.ID,
-				SystemID:    d.SystemID,
-				OutpostName: d.OutpostName,
-				PosX:        d.PosX,
-				PosY:        d.PosY,
-				ShieldP:     ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
-				ArmorP:      ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
-				HullP:       ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
-				Texture:     d.TemplateData.Texture,
-				Radius:      d.TemplateData.Radius,
-				Mass:        d.TemplateData.BaseMass,
 				Theta:       d.Theta,
 				FactionID:   d.FactionID,
 			})
