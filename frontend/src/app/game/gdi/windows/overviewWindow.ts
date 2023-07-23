@@ -131,8 +131,8 @@ export class OverviewWindow extends GDIWindow {
     );
 
     const sortedOutposts = player.currentSystem.outposts.sort((a, b) =>
-    (a.outpostName ?? '').localeCompare(b.outpostName ?? ''),
-  );
+      (a.outpostName ?? '').localeCompare(b.outpostName ?? ''),
+    );
 
     const sortedShips = player.currentSystem.ships.sort((a, b) =>
       compareShipString(a).localeCompare(compareShipString(b)),

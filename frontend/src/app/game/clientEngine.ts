@@ -1382,6 +1382,24 @@ function updateTargetSelection() {
     }
   }
 
+  // outposts
+  for (const sm of engineSack.player.currentSystem.outposts) {
+    // current ship target check if undocked
+    if (!engineSack.player.currentShip.dockedAtStationID) {
+      if (
+        sm.id === engineSack.player.currentTargetID &&
+        engineSack.player.currentTargetType === TargetType.Outpost
+      ) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Outpost);
+      } else {
+        // mark as untargeted
+        sm.isTargeted = false;
+      }
+    }
+  }
+
   // stars
   for (const sm of engineSack.player.currentSystem.ships) {
     // current ship target check if undocked
