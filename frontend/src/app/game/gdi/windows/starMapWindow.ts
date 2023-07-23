@@ -146,7 +146,7 @@ export class StarMapWindow extends GDIWindow {
             GDIStyle.starMapSystemWidth * 2,
             0,
             2 * Math.PI,
-            false
+            false,
           );
           ctx.lineWidth = 2;
           ctx.stroke();
@@ -177,7 +177,7 @@ export class StarMapWindow extends GDIWindow {
 
     // center map camera on player's current system
     const currentSystemEntry = map.findRawSystemByID(
-      this.player.currentSystem.id
+      this.player.currentSystem.id,
     );
 
     this.camera.x = currentSystemEntry.x;

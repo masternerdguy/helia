@@ -37,7 +37,7 @@ export class GDIInput extends GDIBase {
     this.ctx.fillText(
       this.getText() + '┊',
       GDIStyle.inputBorderSize,
-      this.getHeight() / 2
+      this.getHeight() / 2,
     );
 
     if (GDIStyle.inputBorderSize > 0) {

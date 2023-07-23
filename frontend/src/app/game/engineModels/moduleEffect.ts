@@ -269,7 +269,7 @@ export class ModuleEffect extends WsPushModuleEffect {
       const src = getTargetCoordinatesAndRadius(
         this.objStart,
         this.objStartType,
-        this.objStartHPOffset
+        this.objStartHPOffset,
       );
       const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
 
@@ -325,7 +325,7 @@ export class ModuleEffect extends WsPushModuleEffect {
       const src = getTargetCoordinatesAndRadius(
         this.objStart,
         this.objStartType,
-        this.objStartHPOffset
+        this.objStartHPOffset,
       );
       const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
 
@@ -419,7 +419,7 @@ export class ModuleEffect extends WsPushModuleEffect {
     const src = getTargetCoordinatesAndRadius(
       this.objStart,
       this.objStartType,
-      this.objStartHPOffset
+      this.objStartHPOffset,
     );
 
     // project to screen
@@ -455,7 +455,7 @@ export class ModuleEffect extends WsPushModuleEffect {
     const src = getTargetCoordinatesAndRadius(
       this.objStart,
       this.objStartType,
-      this.objStartHPOffset
+      this.objStartHPOffset,
     );
 
     // project to screen
@@ -497,7 +497,7 @@ export class ModuleEffect extends WsPushModuleEffect {
       const src = getTargetCoordinatesAndRadius(
         this.objStart,
         this.objStartType,
-        this.objStartHPOffset
+        this.objStartHPOffset,
       );
       const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
 
@@ -562,7 +562,7 @@ export class ModuleEffect extends WsPushModuleEffect {
       const src = getTargetCoordinatesAndRadius(
         this.objStart,
         this.objStartType,
-        this.objStartHPOffset
+        this.objStartHPOffset,
       );
       const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
 
@@ -619,7 +619,7 @@ export class ModuleEffect extends WsPushModuleEffect {
       const src = getTargetCoordinatesAndRadius(
         this.objStart,
         this.objStartType,
-        this.objStartHPOffset
+        this.objStartHPOffset,
       );
       const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
 
@@ -709,7 +709,7 @@ export class ModuleEffect extends WsPushModuleEffect {
 function getTargetCoordinatesAndRadius(
   tgt: any,
   tgtType: TargetType,
-  hpPos?: number[]
+  hpPos?: number[],
 ): [number, number, number] {
   if (tgtType === TargetType.Station) {
     const st = tgt as Station;

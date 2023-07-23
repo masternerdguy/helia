@@ -476,7 +476,7 @@ export class ShipFittingWindow extends GDIWindow {
     this.modalInput.setHeight(Math.round(fontSize + 0.5));
     this.modalInput.setX(this.getWidth() / 2 - this.modalInput.getWidth() / 2);
     this.modalInput.setY(
-      this.getHeight() / 2 - this.modalInput.getHeight() / 2
+      this.getHeight() / 2 - this.modalInput.getHeight() / 2,
     );
     this.modalInput.setFont(FontSize.large);
     this.modalInput.initialize();
@@ -485,10 +485,10 @@ export class ShipFittingWindow extends GDIWindow {
     this.modalPropertyView.setHeight(300);
     this.modalPropertyView.initialize();
     this.modalPropertyView.setX(
-      this.getWidth() / 2 - this.modalPropertyView.getWidth() / 2
+      this.getWidth() / 2 - this.modalPropertyView.getWidth() / 2,
     );
     this.modalPropertyView.setY(
-      this.getHeight() / 2 - this.modalPropertyView.getHeight() / 2
+      this.getHeight() / 2 - this.modalPropertyView.getHeight() / 2,
     );
 
     this.modalPropertyView.setFont(FontSize.normal);
@@ -498,10 +498,10 @@ export class ShipFittingWindow extends GDIWindow {
     this.modalModulesInCargoView.setHeight(300);
     this.modalModulesInCargoView.initialize();
     this.modalModulesInCargoView.setX(
-      this.getWidth() / 2 - this.modalModulesInCargoView.getWidth() / 2
+      this.getWidth() / 2 - this.modalModulesInCargoView.getWidth() / 2,
     );
     this.modalModulesInCargoView.setY(
-      this.getHeight() / 2 - this.modalModulesInCargoView.getHeight() / 2
+      this.getHeight() / 2 - this.modalModulesInCargoView.getHeight() / 2,
     );
 
     this.modalModulesInCargoView.setFont(FontSize.normal);
@@ -511,10 +511,10 @@ export class ShipFittingWindow extends GDIWindow {
     this.modalUsersView.setHeight(300);
     this.modalUsersView.initialize();
     this.modalUsersView.setX(
-      this.getWidth() / 2 - this.modalUsersView.getWidth() / 2
+      this.getWidth() / 2 - this.modalUsersView.getWidth() / 2,
     );
     this.modalUsersView.setY(
-      this.getHeight() / 2 - this.modalUsersView.getHeight() / 2
+      this.getHeight() / 2 - this.modalUsersView.getHeight() / 2,
     );
 
     this.modalUsersView.setFont(FontSize.normal);
@@ -702,7 +702,7 @@ export class ShipFittingWindow extends GDIWindow {
 
     if (this.player.currentCargoView) {
       for (const ci of this.player.currentCargoView.items.sort((a, b) =>
-        getItemSortString(a).localeCompare(getItemSortString(b))
+        getItemSortString(a).localeCompare(getItemSortString(b)),
       )) {
         const r = buildCargoRowFromContainerItem(ci, this.isDocked);
         cargo.push(r);
@@ -806,135 +806,135 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Heat Capacity',
-          `${parseFloat(this.player.currentShip.cMaxHeat?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.cMaxHeat?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Heat Dissipation',
-          `${parseFloat(this.player.currentShip.cHeatSink?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.cHeatSink?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Acceleration',
-          `${parseFloat(this.player.currentShip.accel?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.accel?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Turning',
-          `${parseFloat(this.player.currentShip.turn?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.turn?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Aether Drag',
-          `${parseFloat(this.player.currentShip.cRealDrag?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.cRealDrag?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Fuel Capacity',
-          `${parseFloat(this.player.currentShip.cMaxFuel?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.cMaxFuel?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Energy Capacity',
-          `${parseFloat(this.player.currentShip.cMaxEnergy?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.cMaxEnergy?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Energy Output',
-          `${parseFloat(this.player.currentShip.cEnergyRegen?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.cEnergyRegen?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Shield Capacity',
-          `${parseFloat(this.player.currentShip.cMaxShield?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.cMaxShield?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Shield Output',
-          `${parseFloat(this.player.currentShip.cShieldRegen?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.cShieldRegen?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Armor Strength',
-          `${parseFloat(this.player.currentShip.cMaxArmor?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.cMaxArmor?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Hull Strength',
-          `${parseFloat(this.player.currentShip.cMaxHull?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.cMaxHull?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Cargo Capacity',
-          `${parseFloat(this.player.currentShip.cCargoBayVolume?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.cCargoBayVolume?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Cloak Coverage',
-          `${parseFloat(this.player.currentShip.sumCloak?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.sumCloak?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
       buildShipViewRowText(
         infoKeyValueString(
           'Veil Absorption',
-          `${parseFloat(this.player.currentShip.sumVeil?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.sumVeil?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(buildShipViewRowSpacer());
@@ -946,7 +946,7 @@ export class ShipFittingWindow extends GDIWindow {
       0,
       0,
       this.player.currentShip.velX,
-      this.player.currentShip.velY
+      this.player.currentShip.velY,
     );
 
     rows.push(buildShipViewRowText(infoKeyValueString('Speed', `${vel}`)));
@@ -955,9 +955,9 @@ export class ShipFittingWindow extends GDIWindow {
       buildShipViewRowText(
         infoKeyValueString(
           'Angle',
-          `${parseFloat(this.player.currentShip.theta?.toFixed(2))}`
-        )
-      )
+          `${parseFloat(this.player.currentShip.theta?.toFixed(2))}`,
+        ),
+      ),
     );
 
     rows.push(
@@ -965,10 +965,10 @@ export class ShipFittingWindow extends GDIWindow {
         infoKeyValueString(
           'Position',
           `<${parseFloat(
-            this.player.currentShip.x?.toFixed(2)
-          )}> by <${parseFloat(this.player.currentShip.y?.toFixed(2))}>`
-        )
-      )
+            this.player.currentShip.x?.toFixed(2),
+          )}> by <${parseFloat(this.player.currentShip.y?.toFixed(2))}>`,
+        ),
+      ),
     );
 
     rows.push(buildShipViewRowSpacer());
@@ -1021,7 +1021,7 @@ export class ShipFittingWindow extends GDIWindow {
             listString: () =>
               `${fixedString(e.name, 32)} ${fixedString(
                 shortWallet(e.wallet),
-                11
+                11,
               )}`,
           });
         }
@@ -1053,7 +1053,7 @@ export class ShipFittingWindow extends GDIWindow {
 
       // sort list
       const sortedRows = rows.sort((a, b) =>
-        a.listString().localeCompare(b.listString())
+        a.listString().localeCompare(b.listString()),
       );
 
       // update docked users modal list
@@ -1108,7 +1108,7 @@ function buildShipViewRowText(s: string): ShipViewRow {
 
 function buildCargoRowFromContainerItem(
   m: WSContainerItem,
-  isDocked: boolean
+  isDocked: boolean,
 ): ShipViewRow {
   const r: ShipViewRow = {
     object: m,
@@ -1130,15 +1130,15 @@ function buildInfoRowsFromContainerItem(m: WSContainerItem): ShipViewRow[] {
   const type = buildShipViewRowText(infoKeyValueString('Type', m.itemTypeName));
 
   const family = buildShipViewRowText(
-    infoKeyValueString('Family', m.itemFamilyName)
+    infoKeyValueString('Family', m.itemFamilyName),
   );
 
   const quantity = buildShipViewRowText(
-    infoKeyValueString('Quantity', m.quantity.toString())
+    infoKeyValueString('Quantity', m.quantity.toString()),
   );
 
   const packaged = buildShipViewRowText(
-    infoKeyValueString('Packaged', m.isPackaged.toString())
+    infoKeyValueString('Packaged', m.isPackaged.toString()),
   );
 
   // store basic info
@@ -1169,7 +1169,7 @@ function buildInfoRowsFromContainerItem(m: WSContainerItem): ShipViewRow[] {
       // exclude industrial market which is handled separately
       if (prop !== 'industrialmarket') {
         const v = buildShipViewRowText(
-          infoKeyValueString(prop, `${meta[prop]}`)
+          infoKeyValueString(prop, `${meta[prop]}`),
         );
 
         rows.push(v);
@@ -1191,7 +1191,7 @@ function buildInfoRowsFromContainerItem(m: WSContainerItem): ShipViewRow[] {
         const addCBN = key === 'maxprice' || key === 'minprice';
 
         const v = buildShipViewRowText(
-          infoKeyValueString(key, `${value}${addCBN ? ' CBN' : ''}`)
+          infoKeyValueString(key, `${value}${addCBN ? ' CBN' : ''}`),
         );
 
         rows.push(v);
@@ -1207,7 +1207,7 @@ function buildInfoRowsFromContainerItem(m: WSContainerItem): ShipViewRow[] {
     rows.push(buildShipViewRowText('Schematic Properties'));
 
     const v = buildShipViewRowText(
-      infoKeyValueString('Job Time', `${m.schematic.time} seconds`)
+      infoKeyValueString('Job Time', `${m.schematic.time} seconds`),
     );
 
     rows.push(v);
@@ -1217,7 +1217,7 @@ function buildInfoRowsFromContainerItem(m: WSContainerItem): ShipViewRow[] {
 
     for (const f of m.schematic.inputs) {
       const v = buildShipViewRowText(
-        infoKeyValueString(f.itemTypeName, `${f.quantity}`)
+        infoKeyValueString(f.itemTypeName, `${f.quantity}`),
       );
 
       rows.push(v);
@@ -1228,7 +1228,7 @@ function buildInfoRowsFromContainerItem(m: WSContainerItem): ShipViewRow[] {
 
     for (const f of m.schematic.outputs) {
       const v = buildShipViewRowText(
-        infoKeyValueString(f.itemTypeName, `${f.quantity}`)
+        infoKeyValueString(f.itemTypeName, `${f.quantity}`),
       );
 
       rows.push(v);
@@ -1250,7 +1250,7 @@ function buildInfoRowsFromModule(m: WSModule): ShipViewRow[] {
   const type = buildShipViewRowText(infoKeyValueString('Type', m.type));
 
   const family = buildShipViewRowText(
-    infoKeyValueString('Family', m.familyName)
+    infoKeyValueString('Family', m.familyName),
   );
 
   // store basic info
@@ -1275,7 +1275,7 @@ function buildInfoRowsFromModule(m: WSModule): ShipViewRow[] {
       // exclude industrial market which isn't shown on fitted modules
       if (prop !== 'industrialmarket') {
         const v = buildShipViewRowText(
-          infoKeyValueString(prop, `${meta[prop]}`)
+          infoKeyValueString(prop, `${meta[prop]}`),
         );
 
         rows.push(v);
@@ -1289,10 +1289,10 @@ function buildInfoRowsFromModule(m: WSModule): ShipViewRow[] {
   rows.push(buildShipViewRowText('Slot Info'));
 
   const slotFamily = buildShipViewRowText(
-    infoKeyValueString('Compatibility', m.hpFamily)
+    infoKeyValueString('Compatibility', m.hpFamily),
   );
   const slotVolume = buildShipViewRowText(
-    infoKeyValueString('Volume', m.hpVolume?.toString())
+    infoKeyValueString('Volume', m.hpVolume?.toString()),
   );
 
   rows.push(slotFamily);
@@ -1424,7 +1424,7 @@ function checkIfModule(m: WSContainerItem) {
 
 function buildFittingRowFromModule(
   m: WSModule,
-  isDocked: boolean
+  isDocked: boolean,
 ): ShipViewRow {
   const r: ShipViewRow = {
     object: m,
@@ -1475,7 +1475,7 @@ function moduleStatusString(m: WSModule) {
   // build status string
   return `${fixedString(m.willRepeat ? '*' : '', 1)} ${fixedString(
     m.itemID !== '00000000-0000-0000-0000-000000000000' ? m.type : '[EMPTY]',
-    24
+    24,
   )} ${pc}`;
 }
 
@@ -1484,7 +1484,7 @@ function itemStatusString(m: WSContainerItem) {
   const q = cargoQuantity(m.quantity);
   return `${fixedString(m.isPackaged ? '◰' : '', 1)} ${fixedString(
     m.itemTypeName,
-    40
+    40,
   )} ${fixedString(m.itemFamilyName, 16)} ${fixedString(q, 8)}`;
 }
 
@@ -1492,7 +1492,7 @@ function infoKeyValueString(key: string, value: string) {
   // build string
   return `${fixedString('', 1)} ${fixedString(key, 32)} ${fixedString(
     value,
-    32
+    32,
   )}`;
 }
 
@@ -1544,7 +1544,7 @@ function overviewDistance(
   px: number,
   py: number,
   x: number,
-  y: number
+  y: number,
 ): string {
   // get distance
   const d = Math.round(Math.sqrt((px - x) * (px - x) + (py - y) * (py - y)));

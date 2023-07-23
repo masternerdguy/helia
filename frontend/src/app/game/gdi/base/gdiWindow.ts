@@ -31,7 +31,7 @@ export class GDIWindow extends GDIBase {
     // initialize offscreen canvas
     this.canvas = new OffscreenCanvas(
       this.getWidth(),
-      this.getHeight() + GDIStyle.windowHandleHeight
+      this.getHeight() + GDIStyle.windowHandleHeight,
     );
 
     this.ctx = this.canvas.getContext('2d');
@@ -57,7 +57,7 @@ export class GDIWindow extends GDIBase {
       this.getX(),
       this.getY(),
       this.getWidth(),
-      this.getHeight() + GDIStyle.windowHandleHeight
+      this.getHeight() + GDIStyle.windowHandleHeight,
     );
     return rect.containsPoint(x, y);
   }
@@ -69,7 +69,7 @@ export class GDIWindow extends GDIBase {
       0,
       GDIStyle.windowHandleHeight,
       this.getWidth(),
-      this.getHeight()
+      this.getHeight(),
     );
 
     // render components
@@ -99,7 +99,7 @@ export class GDIWindow extends GDIBase {
     this.ctx.fillText(
       this.title,
       GDIStyle.windowBorderSize + 2,
-      GDIStyle.windowHandleHeight / 2
+      GDIStyle.windowHandleHeight / 2,
     );
 
     // render close icon
@@ -107,7 +107,7 @@ export class GDIWindow extends GDIBase {
     this.ctx.fillText(
       '☒',
       this.getWidth() - GDIStyle.windowHandleHeight,
-      GDIStyle.windowHandleHeight / 2
+      GDIStyle.windowHandleHeight / 2,
     );
 
     if (!this.borderless) {
@@ -118,7 +118,7 @@ export class GDIWindow extends GDIBase {
         0,
         0,
         this.getWidth(),
-        this.getHeight() + GDIStyle.windowHandleHeight
+        this.getHeight() + GDIStyle.windowHandleHeight,
       );
     }
 

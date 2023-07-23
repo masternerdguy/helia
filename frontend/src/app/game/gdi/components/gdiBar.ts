@@ -33,7 +33,7 @@ export class GDIBar extends GDIBase {
       0,
       0,
       this.getWidth() * (this.percentage / 100),
-      this.getHeight()
+      this.getHeight(),
     );
 
     // style text
@@ -49,7 +49,7 @@ export class GDIBar extends GDIBase {
       this.getText() +
         (this.showPercentage ? ` (${Math.round(this.percentage)}%)` : ''),
       this.getWidth() / 2,
-      this.getHeight() / 2
+      this.getHeight() / 2,
     );
 
     if (GDIStyle.barBorderSize > 0) {

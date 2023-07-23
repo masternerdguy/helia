@@ -52,7 +52,7 @@ export class GDITabPane extends GDIBase {
       this.ctx.fillText(
         tv[0],
         handleWidth * handleI + 2,
-        GDIStyle.tabHandleHeight / 2
+        GDIStyle.tabHandleHeight / 2,
       );
       handleI++;
     }
@@ -114,7 +114,7 @@ export class GDITabPane extends GDIBase {
           handleWidth * i,
           0,
           handleWidth,
-          GDIStyle.tabHandleHeight
+          GDIStyle.tabHandleHeight,
         );
         if (rect.containsPoint(hX, hY)) {
           let u = 0;

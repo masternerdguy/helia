@@ -13,7 +13,7 @@ export class ResetPasswordComponent implements OnInit {
 
   constructor(
     private accountService: AccountService,
-    private router: ActivatedRoute
+    private router: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {}

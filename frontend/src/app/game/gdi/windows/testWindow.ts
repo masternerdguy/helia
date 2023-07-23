@@ -35,7 +35,7 @@ export class TestWindow extends GDIWindow {
 
     testBtn.setOnClick((x, y) => {
       console.log(
-        'click! ' + (x - testBtn.getX()) + ' ' + (y - testBtn.getY())
+        'click! ' + (x - testBtn.getX()) + ' ' + (y - testBtn.getY()),
       );
     });
 

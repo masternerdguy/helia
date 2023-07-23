@@ -87,7 +87,7 @@ export class SchematicRunsWindow extends GDIWindow {
           ' ' +
           fixedString(e.solarSystemName, 16) +
           ' ' +
-          fixedString(`(${percentageComplete}%)`, 10)
+          fixedString(`(${percentageComplete}%)`, 10),
       );
     }
 
@@ -96,7 +96,7 @@ export class SchematicRunsWindow extends GDIWindow {
         return {
           listString: () => `${r}`,
         };
-      })
+      }),
     );
 
     // restore scroll position

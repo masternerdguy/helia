@@ -277,7 +277,7 @@ export class ShipStatusWindow extends GDIWindow {
     // build status string
     return `${fixedString(m.willRepeat ? '*' : '', 1)} ${fixedString(
       m.type,
-      24
+      24,
     )} ${pc}`;
   }
 

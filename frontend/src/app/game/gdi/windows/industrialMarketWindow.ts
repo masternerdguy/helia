@@ -323,7 +323,7 @@ export class IndustrialMarketWindow extends GDIWindow {
       if (i.actions) {
         // map action strings for use in view
         const actions = i.actions.map((s: string) =>
-          buildOrderViewRowText(s, undefined)
+          buildOrderViewRowText(s, undefined),
         );
 
         // list actions on action view
@@ -345,7 +345,7 @@ export class IndustrialMarketWindow extends GDIWindow {
     this.modalInput.setHeight(Math.round(fontSize + 0.5));
     this.modalInput.setX(this.getWidth() / 2 - this.modalInput.getWidth() / 2);
     this.modalInput.setY(
-      this.getHeight() / 2 - this.modalInput.getHeight() / 2
+      this.getHeight() / 2 - this.modalInput.getHeight() / 2,
     );
     this.modalInput.setFont(FontSize.large);
     this.modalInput.initialize();
@@ -467,12 +467,12 @@ export class IndustrialMarketWindow extends GDIWindow {
         `${a.itemTypeName}::${a.quantity}::${a.id}` >
         `${b.itemTypeName}::${b.quantity}::${b.id}`
           ? 1
-          : -1
+          : -1,
       )) {
         const r = buildCargoRowFromContainerItem(
           ci,
           this.isDocked,
-          this.depthStack
+          this.depthStack,
         );
         cargo.push(r);
       }
@@ -523,7 +523,7 @@ export class IndustrialMarketWindow extends GDIWindow {
 
           // add row to browse a specific item type
           for (const g of this.industrialOrdersTree.families.get(
-            this.depthStack[0]
+            this.depthStack[0],
           ).groups) {
             oRows.push(buildOrderViewRowText(g[1].name, g[0]));
           }
@@ -572,14 +572,14 @@ export class IndustrialMarketWindow extends GDIWindow {
           oRows.push(
             buildOrderViewRowText(
               infoKeyValueString('Item Type', shimItem.itemTypeName),
-              undefined
-            )
+              undefined,
+            ),
           );
           oRows.push(
             buildOrderViewRowText(
               infoKeyValueString('Item Family', shimItem.itemFamilyName),
-              undefined
-            )
+              undefined,
+            ),
           );
 
           // add spacer
@@ -591,22 +591,22 @@ export class IndustrialMarketWindow extends GDIWindow {
             buildOrderViewRowText(
               infoKeyValueString(
                 order.isSelling ? 'Ask Price' : 'Bid Price',
-                `${order.price} CBN`
+                `${order.price} CBN`,
               ),
-              undefined
-            )
+              undefined,
+            ),
           );
           oRows.push(
             buildOrderViewRowText(
               infoKeyValueString('Unit Price', `${order.price} CBN`),
-              undefined
-            )
+              undefined,
+            ),
           );
           oRows.push(
             buildOrderViewRowText(
               infoKeyValueString('Unit Volume', `${volume}`),
-              undefined
-            )
+              undefined,
+            ),
           );
 
           // add spacer
@@ -627,8 +627,8 @@ export class IndustrialMarketWindow extends GDIWindow {
                 oRows.push(
                   buildOrderViewRowText(
                     infoKeyValueString(key, `${value}`),
-                    undefined
-                  )
+                    undefined,
+                  ),
                 );
               }
             }
@@ -650,8 +650,8 @@ export class IndustrialMarketWindow extends GDIWindow {
                 oRows.push(
                   buildOrderViewRowText(
                     infoKeyValueString(key, `${value}${addCBN ? ' CBN' : ''}`),
-                    undefined
-                  )
+                    undefined,
+                  ),
                 );
               }
             }
@@ -760,7 +760,7 @@ export class IndustrialMarketWindow extends GDIWindow {
 
     // sort trunk alphabetically
     const trunkArr = Array.from(safeTree.families).sort((a, b) =>
-      a[1].name > b[1].name ? 1 : -1
+      a[1].name > b[1].name ? 1 : -1,
     );
 
     safeTree.families.clear();
@@ -768,7 +768,7 @@ export class IndustrialMarketWindow extends GDIWindow {
     for (const f of trunkArr) {
       // sort groups alphabetically
       const groupArr = Array.from(f[1].groups).sort((a, b) =>
-        a[1].name > b[1].name ? 1 : -1
+        a[1].name > b[1].name ? 1 : -1,
       );
 
       f[1].groups.clear();
@@ -776,7 +776,7 @@ export class IndustrialMarketWindow extends GDIWindow {
       for (const g of groupArr) {
         // sort orders by their price per unit
         const orderArr = Array.from(g[1].orders).sort((a, b) =>
-          a[1].price / a[1].available > b[1].price / b[1].available ? 1 : -1
+          a[1].price / a[1].available > b[1].price / b[1].available ? 1 : -1,
         );
 
         g[1].orders.clear();
@@ -860,7 +860,7 @@ function buildShipViewRowText(s: string): ShipViewRow {
 function buildCargoRowFromContainerItem(
   m: WSContainerItem,
   isDocked: boolean,
-  depthStack: string[]
+  depthStack: string[],
 ): ShipViewRow {
   const r: ShipViewRow = {
     object: m,
@@ -876,7 +876,7 @@ function buildCargoRowFromContainerItem(
 function getCargoRowActions(
   m: WSContainerItem,
   isDocked: boolean,
-  depthStack: string[]
+  depthStack: string[],
 ) {
   const actions: string[] = [];
 
@@ -976,7 +976,7 @@ function makeShimItem(silo: WSIndustrialSilo): WSContainerItem {
 
 function buildOrderViewDetailRow(
   order: WSIndustrialSilo,
-  depthStack: string[]
+  depthStack: string[],
 ): OrderViewRow {
   // make a shim item to reuse the cargo info function
   const shimItem = makeShimItem(order);
@@ -985,7 +985,7 @@ function buildOrderViewDetailRow(
   let cargoString = buildCargoRowFromContainerItem(
     shimItem,
     true,
-    depthStack
+    depthStack,
   ).listString();
 
   // calculate volume
@@ -1014,7 +1014,7 @@ function buildOrderViewDetailRow(
     listString: () => {
       return `${cargoString} ${fixedString(
         order.price.toString() + ' CBN',
-        14
+        14,
       )}`;
     },
   };
@@ -1026,7 +1026,7 @@ function infoKeyValueString(key: string, value: string) {
   // build string
   return `${fixedString('', 1)} ${fixedString(key, 32)} ${fixedString(
     value,
-    32
+    32,
   )}`;
 }
 
@@ -1043,7 +1043,7 @@ function itemStatusString(m: WSContainerItem) {
   const q = cargoQuantity(m.quantity);
   return `${fixedString(m.isPackaged ? '◰' : '', 1)} ${fixedString(
     m.itemTypeName,
-    40
+    40,
   )} ${fixedString(m.itemFamilyName, 16)} ${fixedString(q, 8)}`;
 }
 

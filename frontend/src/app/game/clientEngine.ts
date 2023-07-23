@@ -128,7 +128,7 @@ export function clientStart(
   wsService: WsService,
   gameCanvas: HTMLCanvasElement,
   backCanvas: HTMLCanvasElement,
-  sid: string
+  sid: string,
 ) {
   // set canvases to initial width
   const clientWidth = document.documentElement.clientWidth;
@@ -168,20 +168,20 @@ export function clientStart(
   engineSack.pushErrorWindow.initialize();
   engineSack.pushErrorWindow.pack();
   engineSack.pushErrorWindow.setX(
-    gameCanvas.width / 2 - engineSack.pushErrorWindow.getWidth() / 2
+    gameCanvas.width / 2 - engineSack.pushErrorWindow.getWidth() / 2,
   );
   engineSack.pushErrorWindow.setY(
-    gameCanvas.height / 2 - engineSack.pushErrorWindow.getHeight() / 2
+    gameCanvas.height / 2 - engineSack.pushErrorWindow.getHeight() / 2,
   );
 
   engineSack.pushInfoWindow = new PushInfoWindow();
   engineSack.pushInfoWindow.initialize();
   engineSack.pushInfoWindow.pack();
   engineSack.pushInfoWindow.setX(
-    gameCanvas.width / 2 - engineSack.pushInfoWindow.getWidth() / 2
+    gameCanvas.width / 2 - engineSack.pushInfoWindow.getWidth() / 2,
   );
   engineSack.pushInfoWindow.setY(
-    gameCanvas.height / 2 - engineSack.pushInfoWindow.getHeight() / 2
+    gameCanvas.height / 2 - engineSack.pushInfoWindow.getHeight() / 2,
   );
 
   engineSack.shipStatusWindow = new ShipStatusWindow();
@@ -220,7 +220,7 @@ export function clientStart(
   engineSack.targetInteractionWindow.initialize();
   engineSack.targetInteractionWindow.setWsSvc(wsService);
   engineSack.targetInteractionWindow.setX(
-    gameCanvas.width - engineSack.targetInteractionWindow.getWidth()
+    gameCanvas.width - engineSack.targetInteractionWindow.getWidth(),
   );
   engineSack.targetInteractionWindow.setY(0);
   engineSack.targetInteractionWindow.pack();
@@ -229,12 +229,12 @@ export function clientStart(
   engineSack.overviewWindow.setHeight(gameCanvas.height / 2);
   engineSack.overviewWindow.initialize();
   engineSack.overviewWindow.setX(
-    gameCanvas.width - engineSack.overviewWindow.getWidth()
+    gameCanvas.width - engineSack.overviewWindow.getWidth(),
   );
   engineSack.overviewWindow.setY(
     engineSack.targetInteractionWindow.getY() +
       engineSack.targetInteractionWindow.getHeight() +
-      GDIStyle.windowHandleHeight
+      GDIStyle.windowHandleHeight,
   );
   engineSack.overviewWindow.pack();
 
@@ -266,7 +266,7 @@ export function clientStart(
     gameCanvas.height -
       engineSack.systemChatWindow.getHeight() -
       GDIStyle.windowHandleHeight -
-      1
+      1,
   );
   engineSack.systemChatWindow.pack();
 
@@ -296,11 +296,14 @@ export function clientStart(
   engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☍');
   engineSack.windowManager.manageWindow(
     engineSack.targetInteractionWindow,
-    '☉'
+    '☉',
   );
   engineSack.windowManager.manageWindow(engineSack.shipFittingWindow, 'Ʌ');
   engineSack.windowManager.manageWindow(engineSack.ordersMarketWindow, '₪');
-  engineSack.windowManager.manageWindow(engineSack.industrialMarketWindow, '⚙');
+  engineSack.windowManager.manageWindow(
+    engineSack.industrialMarketWindow,
+    '⚙',
+  );
   engineSack.windowManager.manageWindow(engineSack.starMapWindow, '⊞');
   engineSack.windowManager.manageWindow(engineSack.reputationSheetWindow, '❉');
   engineSack.windowManager.manageWindow(engineSack.propertySheetWindow, '⬢');
@@ -868,7 +871,7 @@ function handleStarMapUpdate(d: GameMessage) {
   if (msg.cachedMapData) {
     // update starmap cache
     engineSack.player.currentStarMap = new UnwrappedStarMapData(
-      msg.cachedMapData
+      msg.cachedMapData,
     );
   }
 }
@@ -1115,7 +1118,7 @@ function gfxDockOverlay() {
     engineSack.gfx.width / 2 - 100,
     engineSack.gfx.height / 2 - 25,
     200,
-    50
+    50,
   );
 
   // draw docked text
@@ -1124,7 +1127,7 @@ function gfxDockOverlay() {
   engineSack.ctx.fillText(
     'Docked',
     engineSack.gfx.width / 2 - 100,
-    engineSack.gfx.height / 2
+    engineSack.gfx.height / 2,
   );
 }
 
@@ -1604,7 +1607,7 @@ function handleClick(x: number, y: number) {
       engineSack.gfx.width / 2,
       engineSack.gfx.height / 2,
       x,
-      y
+      y,
     );
     b.m =
       magnitude(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y) /
@@ -1635,7 +1638,7 @@ function handleMouseMove(x: number, y: number) {
         engineSack.gfx.height
       ) {
         w.setY(
-          engineSack.gfx.height - (w.getHeight() + GDIStyle.windowHandleHeight)
+          engineSack.gfx.height - (w.getHeight() + GDIStyle.windowHandleHeight),
         );
       }
 

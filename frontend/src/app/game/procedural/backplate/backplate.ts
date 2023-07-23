@@ -77,7 +77,7 @@ export class Backplate {
         height,
         0.05,
         0.125,
-        rand.random.bind(rand)
+        rand.random.bind(rand),
       );
       this.pointStarTexture({
         format: 'rgb',
@@ -121,7 +121,7 @@ export class Backplate {
           height,
           viewport,
         });
-      }
+      },
     );
 
     rand = random.rand(props.seed, 2000);
@@ -147,7 +147,7 @@ export class Backplate {
           destination,
           viewport,
         });
-      }
+      },
     );
 
     rand = random.rand(props.seed, 3000);

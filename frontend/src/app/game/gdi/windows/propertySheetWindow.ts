@@ -246,7 +246,7 @@ export class PropertySheetWindow extends GDIWindow {
     this.modalInput.setHeight(Math.round(fontSize + 0.5));
     this.modalInput.setX(this.getWidth() / 2 - this.modalInput.getWidth() / 2);
     this.modalInput.setY(
-      this.getHeight() / 2 - this.modalInput.getHeight() / 2
+      this.getHeight() / 2 - this.modalInput.getHeight() / 2,
     );
     this.modalInput.setFont(FontSize.large);
     this.modalInput.initialize();
@@ -307,7 +307,7 @@ export class PropertySheetWindow extends GDIWindow {
 
     // sort cache by system name, then station name, then ship name
     const sorted = cache.ships.sort((a, b) =>
-      this.getShipSortKey(a).localeCompare(this.getShipSortKey(b))
+      this.getShipSortKey(a).localeCompare(this.getShipSortKey(b)),
     );
 
     // build ship entries
@@ -362,7 +362,7 @@ class PropertySheetActionRow {
 
 function propertySheetViewRowStringFromShip(
   s: ServerPropertyShipCacheEntry,
-  p: Player
+  p: Player,
 ): string {
   if (s == null) {
     return;
