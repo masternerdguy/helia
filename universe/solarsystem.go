@@ -308,7 +308,10 @@ func (s *SolarSystem) processClientEventQueues() {
 				// get registry
 				targetTypeReg := models.SharedTargetTypeRegistry
 
-				if data.Type == targetTypeReg.Station {
+				// check if dockable
+				isDockable := data.Type == targetTypeReg.Station || data.Type == targetTypeReg.Outpost
+
+				if isDockable {
 					// find station
 					station := s.stations[string(data.TargetID.String())]
 
@@ -2957,6 +2960,11 @@ func (s *SolarSystem) sendClientUpdates() {
 
 		// stations
 		for _, d := range s.stations {
+			// skip outpost shims
+			if d.isOutpostShim {
+				continue
+			}
+
 			gu.Stations = append(gu.Stations, models.GlobalStationInfo{
 				ID:          d.ID,
 				SystemID:    d.SystemID,
@@ -3335,6 +3343,37 @@ func (s *SolarSystem) AddOutpost(c *Outpost, lock bool) {
 	// store pointer to system
 	c.CurrentSystem = s
 
+	// verify no station with this id exists that would cause shim issues
+	_, stv := s.stations[c.ID.String()]
+
+	if stv {
+		return
+	}
+
+	// create shim station for outpost
+	osm := Station{
+		ID:          c.ID,
+		SystemID:    c.SystemID,
+		StationName: c.OutpostName,
+		PosX:        c.PosX,
+		PosY:        c.PosY,
+		Texture:     c.TemplateData.Texture,
+		Radius:      c.TemplateData.Radius,
+		Mass:        0,
+		Theta:       c.Theta,
+		FactionID:   c.FactionID,
+		// in-memory only
+		Lock:           sync.Mutex{},
+		CurrentSystem:  s,
+		OpenSellOrders: make(map[string]*SellOrder),
+		Processes:      make(map[string]*StationProcess),
+		Faction:        c.Faction,
+		isOutpostShim:  true,
+	}
+
+	// add shim
+	s.stations[c.ID.String()] = &osm
+
 	// add outpost
 	s.outposts[c.ID.String()] = c
 }
@@ -3591,6 +3630,12 @@ func (s *SolarSystem) CopyStations(lock bool) map[string]*Station {
 
 	// copy stations into copy map
 	for k, v := range s.stations {
+		// skip outpost shims
+		if v.isOutpostShim {
+			continue
+		}
+
+		// copy station
 		c := v.CopyStation()
 		copy[k] = &c
 	}

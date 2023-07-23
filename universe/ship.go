@@ -2951,7 +2951,10 @@ func (s *Ship) doAutopilotDock() {
 	// get registry
 	targetTypeReg := models.SharedTargetTypeRegistry
 
-	if s.AutopilotDock.Type == targetTypeReg.Station {
+	// check if dockable
+	isDockable := s.AutopilotDock.Type == targetTypeReg.Station || s.AutopilotDock.Type == targetTypeReg.Outpost
+
+	if isDockable {
 		// find station
 		station := s.CurrentSystem.stations[s.AutopilotDock.TargetID.String()]
 

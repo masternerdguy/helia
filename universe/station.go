@@ -27,6 +27,7 @@ type Station struct {
 	Processes              map[string]*StationProcess
 	Faction                *Faction
 	lastPeriodicUpdateTime time.Time
+	isOutpostShim          bool
 }
 
 // Initializes internal aspects of Station
