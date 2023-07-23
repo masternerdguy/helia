@@ -12,10 +12,10 @@ require (
 
 require (
 	github.com/Azure/azure-pipeline-go v0.2.3 // indirect
-	github.com/mattn/go-ieproxy v0.0.10 // indirect
+	github.com/mattn/go-ieproxy v0.0.11 // indirect
 	github.com/sendgrid/rest v2.6.9+incompatible // indirect
-	github.com/stretchr/testify v1.8.2 // indirect
-	golang.org/x/net v0.9.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
+	golang.org/x/net v0.12.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/text v0.11.0 // indirect
 )
