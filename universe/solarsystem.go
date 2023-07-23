@@ -2971,10 +2971,6 @@ func (s *SolarSystem) sendClientUpdates() {
 				FactionID:   d.FactionID,
 			})
 		}
-
-		if s.SystemName == "ABZ-0563" {
-			shared.TeeLog(fmt.Sprintf("count: %v", len(s.outposts)))
-		}
 	}
 
 	gu.NewModuleEffects = append(gu.NewModuleEffects, s.pushModuleEffects...)
