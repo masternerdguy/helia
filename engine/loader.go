@@ -456,6 +456,28 @@ func LoadUniverse() (*universe.Universe, error) {
 				s.AddStation(&station)
 			}
 
+			// load player outposts
+			outposts, err := outpostSvc.GetOutpostsBySolarSystem(s.ID, false)
+
+			if err != nil {
+				return nil, err
+			}
+
+			for _, currOutpost := range outposts {
+				// load outpost
+				outpost, err := LoadOutpost(&currOutpost, &u)
+
+				if err != nil {
+					return nil, err
+				}
+
+				// initialize outpost
+				outpost.Initialize()
+
+				// add to solar system
+				s.AddOutpost(outpost, false)
+			}
+
 			// load ships
 			ships, err := shipSvc.GetShipsBySolarSystem(s.ID, false)
 
