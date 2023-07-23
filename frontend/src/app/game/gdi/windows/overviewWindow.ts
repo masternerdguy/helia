@@ -130,6 +130,10 @@ export class OverviewWindow extends GDIWindow {
       (a.stationName ?? '').localeCompare(b.stationName ?? ''),
     );
 
+    const sortedOutposts = player.currentSystem.outposts.sort((a, b) =>
+    (a.outpostName ?? '').localeCompare(b.outpostName ?? ''),
+  );
+
     const sortedShips = player.currentSystem.ships.sort((a, b) =>
       compareShipString(a).localeCompare(compareShipString(b)),
     );
@@ -201,6 +205,33 @@ export class OverviewWindow extends GDIWindow {
             '[' + faction?.ticker + ']',
             6,
           )}${fixedString(i.stationName, 26)} ${fixedString(od, 8)}`;
+        },
+        listColor: () => i.getStandingColor(),
+      };
+
+      objects.push(d);
+      stations.push(d);
+    }
+
+    // include outposts
+    for (const i of sortedOutposts) {
+      const od = overviewDistance(
+        player.currentShip.x,
+        player.currentShip.y,
+        i.x,
+        i.y,
+      );
+
+      const d: OverviewRow = {
+        object: i,
+        type: TargetType.Outpost,
+        listString: () => {
+          const faction = i.getFaction();
+
+          return `${fixedString('OUTPOST', 9)}${fixedString(
+            '[' + faction?.ticker + ']',
+            6,
+          )}${fixedString(i.outpostName, 26)} ${fixedString(od, 8)}`;
         },
         listColor: () => i.getStandingColor(),
       };
