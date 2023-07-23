@@ -2701,6 +2701,19 @@ func (s *Ship) doAutopilotGoto() {
 		tX = tgt.PosX
 		tY = tgt.PosY
 		tR = tgt.Radius
+	} else if s.AutopilotGoto.Type == targetTypeReg.Outpost {
+		// find outpost with id
+		tgt := s.CurrentSystem.outposts[s.AutopilotGoto.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort(false)
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+		tR = tgt.TemplateData.Radius
 	} else if s.AutopilotGoto.Type == targetTypeReg.Star {
 		// find star with id
 		tgt := s.CurrentSystem.stars[s.AutopilotGoto.TargetID.String()]
@@ -2825,6 +2838,18 @@ func (s *Ship) doAutopilotOrbit() {
 	} else if s.AutopilotOrbit.Type == targetTypeReg.Station {
 		// find station with id
 		tgt := s.CurrentSystem.stations[s.AutopilotOrbit.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort(false)
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+	} else if s.AutopilotOrbit.Type == targetTypeReg.Outpost {
+		// find outpost with id
+		tgt := s.CurrentSystem.outposts[s.AutopilotOrbit.TargetID.String()]
 
 		if tgt == nil {
 			s.CmdAbort(false)

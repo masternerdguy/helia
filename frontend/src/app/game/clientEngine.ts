@@ -1400,7 +1400,7 @@ function updateTargetSelection() {
     }
   }
 
-  // stars
+  // ships
   for (const sm of engineSack.player.currentSystem.ships) {
     // current ship target check if undocked
     if (!engineSack.player.currentShip.dockedAtStationID) {
