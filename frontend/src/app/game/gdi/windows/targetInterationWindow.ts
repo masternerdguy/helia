@@ -210,7 +210,7 @@ export class TargetInteractionWindow extends GDIWindow {
         this.gotoBtn.setEnabled(true);
         this.orbitBtn.setEnabled(true);
 
-        // station-specific buttons
+        // dockable-object buttons
         if (
           this.targetType === TargetType.Station ||
           this.targetType === TargetType.Outpost
