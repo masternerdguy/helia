@@ -149,7 +149,7 @@ func (s *PlayerReputationSheet) applyStandingChange(factionID uuid.UUID, amount 
 
 	if amount > 0 {
 		// penalize standings gains more harshly
-		fP /= STANDING_GAIN_MODIFIER
+		fP *= STANDING_GAIN_MODIFIER
 	}
 
 	// bound pole near 0
