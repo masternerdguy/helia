@@ -231,8 +231,8 @@ type Ship struct {
 	LeaveFactionArmed      bool
 	TemporaryModifiers     []TemporaryShipModifier
 	IsCloaked              bool
-	PlayerAggressors       map[string]*shared.PlayerReputationSheet // reputation sheets for human players who have attacked this ship
-	AggressionLog          map[string]*shared.AggressionLog         // details of aggression between any ships (human or otherwise)
+	Aggressors             map[string]*shared.PlayerReputationSheet // reputation sheets for players who have attacked this ship
+	AggressionLog          map[string]*shared.AggressionLog         // details of aggression
 	aiIncompatibleOreFault bool                                     // true when mining autopilot failed due to incompatible ore (for patch miners)
 	aiNoOrePulledFault     bool                                     // true when mining autopilot failed due to pulling no ore (for patch miners)
 	aiNoWreckFault         bool                                     // true when salvaging autopilot failed due to wreck disappearing (for patch salvagers)
@@ -7955,13 +7955,13 @@ func (s *Ship) updateAggressionTables(
 	attackerRS *shared.PlayerReputationSheet,
 	attackerModule *FittedSlot,
 ) {
-	// update player aggression table
+	// update aggression table
 	if attackerRS != nil {
 		// obtain lock
 		attackerRS.Lock.Lock()
 		defer attackerRS.Lock.Unlock()
 
-		// get attacking player's reputation sheet entry for this ship's faction
+		// get attacker's reputation sheet entry for this ship's faction
 		f, ok := attackerRS.FactionEntries[s.FactionID.String()]
 
 		if !ok {
@@ -7983,7 +7983,7 @@ func (s *Ship) updateAggressionTables(
 		}
 
 		// store entry
-		s.PlayerAggressors[attackerRS.UserID.String()] = attackerRS
+		s.Aggressors[attackerRS.UserID.String()] = attackerRS
 	}
 
 	// update aggression table

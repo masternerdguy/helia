@@ -847,7 +847,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			}
 
 			// apply standings change for kill
-			for _, v := range ds.PlayerAggressors {
+			for _, v := range ds.Aggressors {
 				if v != nil {
 					// combat adjustment
 					if ds.Faction.IsNPC {

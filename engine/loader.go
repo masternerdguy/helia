@@ -471,11 +471,43 @@ func LoadUniverse() (*universe.Universe, error) {
 					return nil, err
 				}
 
-				// initialize outpost
-				outpost.Initialize()
-
 				// add to solar system
-				s.AddOutpost(outpost, false)
+				osm := s.AddOutpost(outpost, false)
+
+				// load open sell orders
+				sos, err := sellOrderSvc.GetOpenSellOrdersByStation(osm.ID)
+
+				if err != nil {
+					return nil, err
+				}
+
+				for _, o := range sos {
+					// convert to engine type
+					so := SellOrderFromSQL(&o)
+
+					if so == nil {
+						return nil, errors.New("unable to load sell order")
+					}
+
+					// load item for sale
+					it, err := itemSvc.GetItemByID(so.ItemID)
+
+					if err != nil {
+						return nil, err
+					}
+
+					item, err := LoadItem(it)
+
+					if err != nil {
+						return nil, err
+					}
+
+					// link item into order
+					so.Item = item
+
+					// store on station
+					osm.OpenSellOrders[so.ID.String()] = so
+				}
 			}
 
 			// load ships
@@ -1552,12 +1584,12 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 			ItemTypeID:         temp.ItemTypeID,
 			CanUndock:          temp.CanUndock,
 		},
-		FactionID:        owner.CurrentFactionID,
-		IsNPC:            owner.IsNPC,
-		BehaviourMode:    owner.BehaviourMode,
-		PlayerAggressors: make(map[string]*shared.PlayerReputationSheet),
-		AggressionLog:    make(map[string]*shared.AggressionLog),
-		Lock:             sync.Mutex{},
+		FactionID:     owner.CurrentFactionID,
+		IsNPC:         owner.IsNPC,
+		BehaviourMode: owner.BehaviourMode,
+		Aggressors:    make(map[string]*shared.PlayerReputationSheet),
+		AggressionLog: make(map[string]*shared.AggressionLog),
+		Lock:          sync.Mutex{},
 	}
 
 	// obtain factions read lock

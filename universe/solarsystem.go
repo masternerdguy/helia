@@ -2449,6 +2449,14 @@ func (s *SolarSystem) updateShips() {
 				bm = *e.BehaviourMode
 			}
 
+			aggro := ""
+
+			if e.Aggressors != nil {
+				for _, u := range e.Aggressors {
+					aggro = fmt.Sprintf("%v|{%v %v}", aggro, u.CharacterName, u.UserID)
+				}
+			}
+
 			shared.TeeLog(
 				fmt.Sprintf(
 					"[%v] %v was destroyed (%v::%v>>%v)",
@@ -2456,7 +2464,7 @@ func (s *SolarSystem) updateShips() {
 					e.CharacterName,
 					e.Texture,
 					bm,
-					e.PlayerAggressors,
+					aggro,
 				),
 			)
 		} else {
@@ -3328,10 +3336,10 @@ func (s *SolarSystem) RemoveShip(c *Ship, lock bool) {
 }
 
 // Adds an outpost to the system
-func (s *SolarSystem) AddOutpost(c *Outpost, lock bool) {
+func (s *SolarSystem) AddOutpost(c *Outpost, lock bool) *Station {
 	// safety check
 	if c == nil {
-		return
+		return nil
 	}
 
 	if lock {
@@ -3347,7 +3355,7 @@ func (s *SolarSystem) AddOutpost(c *Outpost, lock bool) {
 	_, stv := s.stations[c.ID.String()]
 
 	if stv {
-		return
+		return nil
 	}
 
 	// create shim station for outpost
@@ -3376,6 +3384,9 @@ func (s *SolarSystem) AddOutpost(c *Outpost, lock bool) {
 
 	// add outpost
 	s.outposts[c.ID.String()] = c
+
+	// return pointer to shim
+	return &osm
 }
 
 // Adds a star to the system
