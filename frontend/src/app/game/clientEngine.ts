@@ -1199,6 +1199,15 @@ function periodicUpdate() {
 
   // update position if docked
   if (!!engineSack.player.currentShip.dockedAtStationID) {
+    // check outposts
+    for (const st of engineSack.player.currentSystem.outposts) {
+      if (st.id == engineSack.player.currentShip.dockedAtStationID) {
+        engineSack.camera.x = st.x;
+        engineSack.camera.y = st.y;
+      }
+    }
+
+    // check stations
     for (const st of engineSack.player.currentSystem.stations) {
       if (st.id == engineSack.player.currentShip.dockedAtStationID) {
         engineSack.camera.x = st.x;
