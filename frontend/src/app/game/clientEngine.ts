@@ -755,8 +755,6 @@ function handleGlobalUpdate(d: GameMessage) {
         if (sh.id === sm.id) {
           match = true;
 
-          sm.isTargeted = false;
-
           // sync outpost in memory
           sm.sync(sh);
 
@@ -936,13 +934,30 @@ function handleCurrentShipUpdate(d: GameMessage) {
 
   // dock check
   if (!!msg.currentShipInfo.dockedAtStationID) {
+    // store docked at id as target
     engineSack.player.currentTargetID = msg.currentShipInfo.dockedAtStationID;
-    engineSack.player.currentTargetType = TargetType.Station;
+
+    // check if docked at station
+    if (
+      engineSack.player.currentSystem.stations.filter(
+        (x) => x.id == msg.currentShipInfo.dockedAtStationID,
+      ).length == 1
+    ) {
+      engineSack.player.currentTargetType = TargetType.Station;
+    }
+
+    // check if docked at outpost
+    if (
+      engineSack.player.currentSystem.outposts.filter(
+        (x) => x.id == msg.currentShipInfo.dockedAtStationID,
+      ).length == 1
+    ) {
+      engineSack.player.currentTargetType = TargetType.Outpost;
+    }
 
     // store target on overview window as well
-    engineSack.overviewWindow.selectedItemID =
-      msg.currentShipInfo.dockedAtStationID;
-    engineSack.overviewWindow.selectedItemType = TargetType.Station;
+    engineSack.overviewWindow.selectedItemID = engineSack.player.currentTargetID;
+    engineSack.overviewWindow.selectedItemType = engineSack.player.currentTargetType;
   }
 
   // update status window
@@ -1388,6 +1403,12 @@ function updateTargetSelection() {
         // mark as untargeted
         sm.isTargeted = false;
       }
+    } else {
+      if (engineSack.player.currentShip.dockedAtStationID == sm.id) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Station);
+      }
     }
   }
 
@@ -1405,6 +1426,12 @@ function updateTargetSelection() {
       } else {
         // mark as untargeted
         sm.isTargeted = false;
+      }
+    } else {
+      if (engineSack.player.currentShip.dockedAtStationID == sm.id) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Outpost);
       }
     }
   }
@@ -1621,6 +1648,28 @@ function handleClick(x: number, y: number) {
         // store target on overview window as well
         engineSack.overviewWindow.selectedItemID = st.id;
         engineSack.overviewWindow.selectedItemType = TargetType.Station;
+
+        return;
+      }
+    }
+
+    // check to see if we're clicking on any outposts
+    for (const st of engineSack.player.currentSystem.outposts) {
+      // project coordinates to screen
+      const sX = engineSack.camera.projectX(st.x);
+      const sY = engineSack.camera.projectY(st.y);
+      const sR = engineSack.camera.projectR(st.radius);
+
+      // check for intersection
+      const m = magnitude(x, y, sX, sY);
+      if (m < sR) {
+        // set as target on client
+        engineSack.player.currentTargetID = st.id;
+        engineSack.player.currentTargetType = TargetType.Outpost;
+
+        // store target on overview window as well
+        engineSack.overviewWindow.selectedItemID = st.id;
+        engineSack.overviewWindow.selectedItemType = TargetType.Outpost;
 
         return;
       }
