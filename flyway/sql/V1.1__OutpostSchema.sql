@@ -37,8 +37,6 @@ CREATE INDEX IF NOT EXISTS fki_fk_outposttemplates_itemtypes
     (itemtypeid ASC NULLS LAST)
     TABLESPACE pg_default;
 
-
-
 -- Table: public.outposts
 
 -- DROP TABLE IF EXISTS public.outposts;
@@ -47,6 +45,7 @@ CREATE TABLE IF NOT EXISTS public.outposts
 (
     id uuid NOT NULL,
     universe_systemid uuid NOT NULL,
+    universe_stationid uuid NOT NULL,
     outpostname character varying(24) COLLATE pg_catalog."default" NOT NULL,
     pos_x double precision NOT NULL,
     pos_y double precision NOT NULL,
@@ -59,9 +58,14 @@ CREATE TABLE IF NOT EXISTS public.outposts
     destroyed boolean NOT NULL DEFAULT false,
     destroyedat timestamp with time zone,
     outposttemplateid uuid NOT NULL,
+    created timestamp with time zone NOT NULL,
     CONSTRAINT outpost_pk PRIMARY KEY (id),
     CONSTRAINT fk_outpost_users FOREIGN KEY (userid)
         REFERENCES public.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fk_outposts_stations FOREIGN KEY (universe_stationid)
+        REFERENCES public.universe_stations (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT outpost_system_fk FOREIGN KEY (universe_systemid)
@@ -75,41 +79,6 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.outposts
     OWNER to heliaagent;
 
-
-
-
--- Table: public.outpostprocesses
-
--- DROP TABLE IF EXISTS public.outpostprocesses;
-
-CREATE TABLE IF NOT EXISTS public.outpostprocesses
-(
-    id uuid NOT NULL,
-    outpostid uuid NOT NULL,
-    processid uuid NOT NULL,
-    progress integer NOT NULL DEFAULT 0,
-    installed boolean NOT NULL DEFAULT false,
-    internalstate jsonb NOT NULL DEFAULT '{}'::jsonb,
-    meta jsonb NOT NULL DEFAULT '{}'::jsonb,
-    CONSTRAINT pk_outpostprocess_uq PRIMARY KEY (id),
-    CONSTRAINT fk_outpostprocess_process FOREIGN KEY (processid)
-        REFERENCES public.processes (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT fk_outpost_process FOREIGN KEY (outpostid)
-        REFERENCES public.outposts (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.outpostprocesses
-    OWNER to heliaagent;
-
-COMMENT ON COLUMN public.outpostprocesses.progress
-    IS 'Progress of manufacturing job in seconds.';
-
 INSERT INTO public.itemfamilies(
 	id, friendlyname, meta)
 	VALUES ('outpost_kit', 'Outpost Construction Kit', '{}'::jsonb);
@@ -118,5 +87,9 @@ INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('59851ea9-5f78-41c
 
 INSERT INTO public.outposttemplates (id, created, outposttemplatename, texture, radius, basemass, baseshield, baseshieldregen, basearmor, basehull, itemtypeid, wrecktexture, explosiontexture) VALUES ('188a3e34-0662-480a-8df8-d4b038e8a8c3', '2023-05-06 20:41:21.336072-04', 'Test Template Please Ignore', 'kingdom-7', 588, 47283, 113293, 328, 782171, 588924, '59851ea9-5f78-41c9-9cc2-2a7b1bbc6e72', 'basic-wreck', 'basic_explosion');
 
-ALTER TABLE IF EXISTS public.outposts
-    ADD COLUMN "created" timestamp with time zone NOT NULL;
+-- Column: public.universe_stations.isoutpostshim
+
+-- ALTER TABLE IF EXISTS public.universe_stations DROP COLUMN IF EXISTS isoutpostshim;
+
+ALTER TABLE IF EXISTS public.universe_stations
+    ADD COLUMN isoutpostshim boolean NOT NULL DEFAULT false;

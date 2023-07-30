@@ -23,101 +23,8 @@ type StationProcess struct {
 	MSCounter       int64
 }
 
-// Structure representing the status of a manufacturing process in a specific outpost
-type OutpostProcess struct {
-	ID            uuid.UUID
-	OutpostID     uuid.UUID
-	ProcessID     uuid.UUID
-	Progress      int
-	Installed     bool
-	InternalState StationProcessInternalState
-	Meta          Meta
-	// in-memory only
-	Lock            sync.Mutex
-	Process         Process
-	OutpostName     string
-	SolarSystemName string
-	MSCounter       int64
-}
-
 // Updates a station manufacturing process for a tick
 func (p *StationProcess) PeriodicUpdate(dT int64) {
-	// obtain lock
-	p.Lock.Lock()
-	defer p.Lock.Unlock()
-
-	// check process status
-	if p.InternalState.IsRunning {
-		if p.Progress >= p.Process.Time {
-			p.InternalState.IsRunning = false
-
-			// make sure there is enough room to deliver outputs
-			for k := range p.InternalState.Outputs {
-				o := p.InternalState.Outputs[k]
-				s := p.Process.Outputs[k]
-				m := s.GetIndustrialMetadata()
-
-				if s.Quantity+o.Quantity > m.SiloSize {
-					// no room - can't deliver
-					return
-				}
-			}
-
-			// deliver results
-			for k := range p.InternalState.Outputs {
-				o := p.InternalState.Outputs[k]
-				s := p.Process.Outputs[k]
-
-				// store updated factor
-				o.Quantity += s.Quantity
-				p.InternalState.Outputs[k] = o
-			}
-
-			// reset process
-			p.Progress = 0
-			p.MSCounter = 0
-		} else {
-			// advance clock
-			p.MSCounter += dT
-
-			// check for second tick
-			if p.MSCounter >= 1000 {
-				// add 1 second to clock
-				p.Progress += 1
-
-				// roll back ms counter
-				p.MSCounter -= 1000
-			}
-		}
-	} else {
-		// check for all available inputs
-		for k := range p.InternalState.Inputs {
-			i := p.InternalState.Inputs[k]
-			s := p.Process.Inputs[k]
-
-			if i.Quantity-s.Quantity < 0 {
-				// insufficient input resources - can't start
-				return
-			}
-		}
-
-		// collect input resources from silos
-		for k := range p.InternalState.Inputs {
-			i := p.InternalState.Inputs[k]
-			s := p.Process.Inputs[k]
-
-			// store updated factor
-			i.Quantity -= s.Quantity
-			p.InternalState.Inputs[k] = i
-		}
-
-		// start process
-		p.InternalState.IsRunning = true
-	}
-}
-
-// Updates an outpost manufacturing process for a tick
-func (p *OutpostProcess) PeriodicUpdate(dT int64) {
 	// obtain lock
 	p.Lock.Lock()
 	defer p.Lock.Unlock()
@@ -316,26 +223,6 @@ func (p *StationProcess) CopyStationProcess() *StationProcess {
 		Process:         p.Process,
 		MSCounter:       p.MSCounter,
 		StationName:     p.StationName,
-		SolarSystemName: p.SolarSystemName,
-	}
-
-	return &copy
-}
-
-// Returns a copy of an outpost process
-func (p *OutpostProcess) CopyOutpostProcess() *OutpostProcess {
-	copy := OutpostProcess{
-		ID:              p.ID,
-		OutpostID:       p.OutpostID,
-		ProcessID:       p.ProcessID,
-		Progress:        p.Progress,
-		Installed:       p.Installed,
-		InternalState:   p.InternalState,
-		Meta:            p.Meta,
-		Lock:            sync.Mutex{},
-		Process:         p.Process,
-		MSCounter:       p.MSCounter,
-		OutpostName:     p.OutpostName,
 		SolarSystemName: p.SolarSystemName,
 	}
 

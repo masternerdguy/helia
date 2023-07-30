@@ -88,15 +88,13 @@ func (s OutpostService) NewOutpost(e Outpost) (*Outpost, error) {
 	sql := `
 				INSERT INTO public.outposts(
 					id, universe_systemid, outpostname, pos_x, pos_y, theta, userid, shield, armor, hull, wallet, 
-					destroyed, destroyedat, outposttemplateid, created
+					destroyed, destroyedat, outposttemplateid, created, universe_stationid
 				)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $1);
 			`
-
-	uid := uuid.New()
 	createdAt := time.Now()
 
-	q, err := db.Query(sql, uid, e.SystemID, e.OutpostName, e.PosX, e.PosY, e.Theta, e.UserID, e.Shield, e.Armor, e.Hull, e.Wallet,
+	q, err := db.Query(sql, e.ID, e.SystemID, e.OutpostName, e.PosX, e.PosY, e.Theta, e.UserID, e.Shield, e.Armor, e.Hull, e.Wallet,
 		false, nil, e.OutpostTemplateId, createdAt)
 
 	if err != nil {
@@ -105,10 +103,9 @@ func (s OutpostService) NewOutpost(e Outpost) (*Outpost, error) {
 
 	defer q.Close()
 
-	// update id in model
-	e.ID = uid
+	// update in model
 	e.Created = createdAt
 
-	// return pointer to inserted ship model
+	// return pointer to inserted outpost model
 	return &e, nil
 }

@@ -23,6 +23,7 @@ func CreateOutpostForPlayer(
 	userSvc := sql.GetUserService()
 	outpostSvc := sql.GetOutpostService()
 	outpostTmpSvc := sql.GetOutpostTemplateService()
+	stationSvc := sql.GetStationService()
 
 	// get user by id
 	u, err := userSvc.GetUserByID(ownerID)
@@ -38,8 +39,30 @@ func CreateOutpostForPlayer(
 		return nil, err
 	}
 
-	// create outpost
+	// generate shared id
+	uid := uuid.New()
+
+	// create shim station
+	err = stationSvc.NewStationForOutpost(&sql.Station{
+		ID:          uid,
+		SystemID:    systemID,
+		StationName: "<outpost-shim>",
+		PosX:        posX,
+		PosY:        posY,
+		Texture:     temp.Texture,
+		Radius:      temp.Radius,
+		Mass:        temp.BaseMass,
+		Theta:       theta,
+		FactionID:   uuid.MustParse("42b937ad-0000-46e9-9af9-fc7dbf878e6a"),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// create outpost using shim
 	t := sql.Outpost{
+		ID:                uid,
 		SystemID:          systemID,
 		UserID:            u.ID,
 		OutpostName:       fmt.Sprintf("%s's %s", u.CharacterName, temp.Texture),

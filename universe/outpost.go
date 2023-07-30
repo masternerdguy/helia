@@ -33,7 +33,7 @@ type Outpost struct {
 	Lock                   sync.Mutex
 	CurrentSystem          *SolarSystem
 	OpenSellOrders         map[string]*SellOrder
-	Processes              map[string]*OutpostProcess
+	Processes              map[string]*StationProcess
 	CharacterName          string
 	Faction                *Faction
 	lastPeriodicUpdateTime time.Time
@@ -107,10 +107,10 @@ func (s *Outpost) CopyOutpost() Outpost {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	copiedProcesses := make(map[string]*OutpostProcess)
+	copiedProcesses := make(map[string]*StationProcess)
 
 	for i, p := range s.Processes {
-		copy := p.CopyOutpostProcess()
+		copy := p.CopyStationProcess()
 		copiedProcesses[i] = copy
 	}
 
