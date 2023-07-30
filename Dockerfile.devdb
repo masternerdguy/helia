@@ -9,6 +9,8 @@ FROM base as path
 
 RUN apt update
 RUN apt install wget -y
+RUN apt install p7zip-full -y
+
 ENV PATH="${PATH}:/src/helia/bash:/flyway-9.19.4/jre/bin:/flyway-9.19.4"
 
 # stage 3
