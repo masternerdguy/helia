@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"math"
 	"sync"
 	"time"
 
@@ -127,8 +128,25 @@ func (s *PlayerReputationSheet) applyStandingChange(factionID uuid.UUID, amount 
 		f = s.FactionEntries[factionID.String()]
 	}
 
+	// get absolute standing value
+	aV := math.Abs(f.StandingValue)
+
+	// get absolute difference from pole
+	aP := (10.0 - aV)
+
+	if aP > 10 {
+		aP = 10
+	}
+
+	if aP < 0 {
+		aP = 0
+	}
+
+	// divide absolute pole value by 10
+	fP := (aP / 10.0)
+
 	// adjust standing
-	f.StandingValue += amount
+	f.StandingValue += (amount * fP)
 
 	// check new amount
 	if f.StandingValue >= CLEAR_OPENLY_HOSTILE {
