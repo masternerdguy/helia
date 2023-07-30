@@ -14,7 +14,8 @@ const MIN_DOCK_STANDING = -1.999
 const BECOME_OPENLY_HOSTILE = -6
 const CLEAR_OPENLY_HOSTILE = 6
 const INDIRECT_ADJUSTMENT_MODIFIER = 0.37
-const APPLICATION_ADJUSTMENT_MODIFIER = 0.1
+const STANDING_GAIN_MODIFIER = 0.15
+const POLE_ZERO_BOUND = 0.00001
 
 // Structure representing a relationship this faction has to another faction
 type FactionReputationSheetEntry struct {
@@ -129,34 +130,35 @@ func (s *PlayerReputationSheet) applyStandingChange(factionID uuid.UUID, amount 
 		f = s.FactionEntries[factionID.String()]
 	}
 
-	// apply scale factor
-	amount *= APPLICATION_ADJUSTMENT_MODIFIER
+	// get absolute standing value
+	aV := math.Abs(f.StandingValue)
 
-	// penalize positive gains
-	if amount > 0 {
-		// get absolute standing value
-		aV := math.Abs(f.StandingValue)
+	// get absolute difference from pole
+	aP := (10.0 - aV)
 
-		// get absolute difference from pole
-		aP := (10.0 - aV)
-
-		if aP > 10 {
-			aP = 10
-		}
-
-		if aP < 0 {
-			aP = 0
-		}
-
-		// normalize pole value
-		fP := (aP / 10.0)
-
-		// adjust standing
-		f.StandingValue += (amount * fP)
-	} else {
-		// adjust standing
-		f.StandingValue += amount
+	if aP > 10 {
+		aP = 10
 	}
+
+	if aP < 0 {
+		aP = 0
+	}
+
+	// divide absolute pole value by 10
+	fP := (aP / 10.0)
+
+	if amount > 0 {
+		// penalize standings gains more harshly
+		fP /= STANDING_GAIN_MODIFIER
+	}
+
+	// bound pole near 0
+	if fP < POLE_ZERO_BOUND {
+		fP = POLE_ZERO_BOUND
+	}
+
+	// adjust standing
+	f.StandingValue += (amount * fP)
 
 	// check new amount
 	if f.StandingValue >= CLEAR_OPENLY_HOSTILE {
