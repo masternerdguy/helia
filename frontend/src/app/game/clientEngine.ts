@@ -956,8 +956,10 @@ function handleCurrentShipUpdate(d: GameMessage) {
     }
 
     // store target on overview window as well
-    engineSack.overviewWindow.selectedItemID = engineSack.player.currentTargetID;
-    engineSack.overviewWindow.selectedItemType = engineSack.player.currentTargetType;
+    engineSack.overviewWindow.selectedItemID =
+      engineSack.player.currentTargetID;
+    engineSack.overviewWindow.selectedItemType =
+      engineSack.player.currentTargetType;
   }
 
   // update status window
