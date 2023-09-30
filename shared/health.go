@@ -2,6 +2,10 @@ package shared
 
 import "sync"
 
+const PHASE_STARTUP = "Starting up"
+const PHASE_RUNNING = "System ready"
+const PHASE_SHUTDOWN = "Shutting down"
+
 var serverHealthMessage string
 var serverHealthPhase string
 var serverHealthLock sync.Mutex
@@ -11,6 +15,12 @@ func SetServerHealth(phase string, msg string) {
 	// obtain lock
 	serverHealthLock.Lock()
 	defer serverHealthLock.Unlock()
+
+	// check for running phase
+	if serverHealthPhase == PHASE_RUNNING {
+		// overwrite whatever may be there
+		msg = "Helia is running!"
+	}
 
 	// update message
 	serverHealthPhase = phase
@@ -22,6 +32,12 @@ func GetServerHealth() (string, string) {
 	// obtain lock
 	serverHealthLock.Lock()
 	defer serverHealthLock.Unlock()
+
+	// check for running phase
+	if serverHealthPhase == PHASE_RUNNING {
+		// overwrite whatever may be there
+		serverHealthMessage = "Helia is running!"
+	}
 
 	// return message
 	return serverHealthPhase, serverHealthMessage

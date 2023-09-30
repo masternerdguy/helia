@@ -19,12 +19,8 @@ const PROFILE_CPU = true
 const PROFILE_HEAP = true
 const GC_PERCENT = 500
 
-const PHASE_STARTUP = "Starting up"
-const PHASE_RUNNING = "System ready"
-const PHASE_SHUTDOWN = "Shutting down"
-
-// current server health phase
-var phase = PHASE_STARTUP
+// current server health loggerPhase
+var loggerPhase = shared.PHASE_STARTUP
 
 // whether to blackhole health logging
 var dropHealthLogger = false
@@ -123,14 +119,6 @@ func main() {
 	shared.TeeLog("Starting engine...")
 	engine.Start()
 
-	// listen and serve api requests
-	shared.TeeLog("Wiring up API HTTP handlers...")
-	http.HandleFunc("/api/register", httpListener.HandleRegister)
-	http.HandleFunc("/api/login", httpListener.HandleLogin)
-	http.HandleFunc("/api/forgot", httpListener.HandleForgot)
-	http.HandleFunc("/api/reset", httpListener.HandleReset)
-	http.HandleFunc("/api/shutdown", httpListener.HandleShutdown)
-
 	// give the user a chance to accept the self signed cert
 	http.HandleFunc("/dev/accept-cert", httpListener.HandleAcceptCert)
 
@@ -150,31 +138,50 @@ func main() {
 		}
 	}()
 
-	// stop tee logging to public
-	dropHealthLogger = true
-
 	// up and running!
 	shared.TeeLog("Helia is running!")
+
+	// stop tee logging to public to prevent sensitive information disclosure
+	loggerPhase = shared.PHASE_RUNNING
+	dropHealthLogger = true
+
+	// sync health logger
+	shared.SetServerHealth(loggerPhase, "")
+
+	// listen and serve api requests
+	shared.TeeLog("Wiring up API HTTP handlers...")
+	http.HandleFunc("/api/register", httpListener.HandleRegister)
+	http.HandleFunc("/api/login", httpListener.HandleLogin)
+	http.HandleFunc("/api/forgot", httpListener.HandleForgot)
+	http.HandleFunc("/api/reset", httpListener.HandleReset)
+	http.HandleFunc("/api/shutdown", httpListener.HandleShutdown)
+
+	// listeners are ready
+	shared.TeeLog("Helia is listening!")
+
+	// logger safety check
+	if loggerPhase != shared.PHASE_RUNNING || !dropHealthLogger {
+		panic("Incorrect tee logger state")
+	}
 
 	// watch for shutdown signal to re-enable tee logging to public
 	go func(l *listener.HTTPListener) {
 		// exit notification
-		defer shared.TeeLog("! Health shutdown watcher has halted")
+		defer shared.TeeLog("! Entered public shutdown phase - please wait...")
 
 		// loop while not shutting down
 		for !httpListener.Engine.IsShuttingDown() {
 			// don't peg cpu
-			time.Sleep(1 * time.Second)
-
-			// update health message
-			shared.SetServerHealth(PHASE_RUNNING, "Helia is running!")
+			time.Sleep(5 * time.Second)
 		}
 
-		// entered shutdown
-		phase = PHASE_SHUTDOWN
+		// brief sleep
+		time.Sleep(1 * time.Second)
+
+		// entered public shutdown
+		loggerPhase = shared.PHASE_SHUTDOWN
 
 		// disable health blackholing
-		shared.SetServerHealth(PHASE_SHUTDOWN, "Disabling blackholing...")
 		dropHealthLogger = false
 	}(httpListener)
 
@@ -221,5 +228,5 @@ func healthLogger(s string, t time.Time) {
 	u := fmt.Sprintf("[%v] %v", tx, s)
 
 	// update health message
-	shared.SetServerHealth(phase, u)
+	shared.SetServerHealth(loggerPhase, u)
 }
