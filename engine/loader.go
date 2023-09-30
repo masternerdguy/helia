@@ -594,8 +594,18 @@ func LoadUniverse() (*universe.Universe, error) {
 
 // Saves the current state of dynamic entities in the simulation to the database
 func saveUniverse(u *universe.Universe) {
-	// iterate over systems
+	// region counter
+	rIDX := 0
+
+	// region count
+	rC := len(u.Regions)
+
+	// iterate over regions
 	for _, r := range u.Regions {
+		// progress output
+		shared.TeeLog(fmt.Sprintf("saving region %v of %v", rIDX+1, rC))
+
+		// iterate over systems
 		for _, s := range r.Systems {
 			// get ships in system
 			ships := s.CopyShips(false)
@@ -678,7 +688,13 @@ func saveUniverse(u *universe.Universe) {
 				}
 			}
 		}
+
+		// increment counter
+		rIDX++
 	}
+
+	// save schematic runs
+	shared.TeeLog("Saving schematic runs...")
 
 	for _, sre := range schematicRunMap {
 		for _, sr := range sre {
