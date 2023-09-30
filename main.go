@@ -170,10 +170,12 @@ func main() {
 			shared.SetServerHealth(phase_running, "Helia is running!")
 		}
 
+		// entered shutdown
+		phase = phase_shutdown
+
 		// disable health blackholing
 		shared.SetServerHealth(phase_shutdown, "Disabling blackholing...")
 		dropHealthLogger = false
-
 	}(httpListener)
 
 	// don't exit
