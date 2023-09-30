@@ -15,9 +15,9 @@ import (
 	"time"
 )
 
-const profileCpu = true
-const profileHeap = true
-const gcPercent = 500
+const PROFILE_CPU = true
+const PROFILE_HEAP = true
+const GC_PERCENT = 500
 
 const PHASE_STARTUP = "Starting up"
 const PHASE_RUNNING = "System ready"
@@ -55,7 +55,7 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	// start profiling if requested
-	if profileCpu {
+	if PROFILE_CPU {
 		shared.TeeLog("Starting CPU profiling...")
 		shared.CpuProfileFile, err = os.Create("cpu.prof")
 
@@ -68,7 +68,7 @@ func main() {
 		}
 	}
 
-	if profileHeap {
+	if PROFILE_HEAP {
 		shared.TeeLog("Enabling shutdown heap profiling...")
 		shared.HeapProfileFile, err = os.Create("heap.prof")
 
@@ -191,7 +191,7 @@ func main() {
 		debug.FreeOSMemory()
 
 		// restore gc settings
-		debug.SetGCPercent(gcPercent)
+		debug.SetGCPercent(GC_PERCENT)
 		time.Sleep(time.Microsecond * 5)
 	}
 }
