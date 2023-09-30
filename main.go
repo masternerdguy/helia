@@ -19,11 +19,26 @@ const profileCpu = true
 const profileHeap = true
 const gcPercent = 500
 
+const phase_startup = "Starting up"
+const phase_running = "System ready"
+const phase_shutdown = "Shutting down"
+
+// current server health phase
+var phase = phase_startup
+
+// whether to blackhole health logging
+var dropHealthLogger = false
+
+// get log service
+var logSvc = sql.GetLogService()
+
+// program entry point
 func main() {
 	// configure global tee logging
 	shared.InitializeTeeLog(
 		printLogger,
 		dbLogger,
+		healthLogger,
 	)
 
 	// purge old logs
@@ -72,6 +87,7 @@ func main() {
 
 	// listen for pings early
 	go func() {
+		// hook listener
 		shared.TeeLog("Hooking early ping listener...")
 		http.HandleFunc("/", httpListener.HandlePing)
 
@@ -134,8 +150,31 @@ func main() {
 		}
 	}()
 
+	// stop tee logging to public
+	dropHealthLogger = true
+
 	// up and running!
 	shared.TeeLog("Helia is running!")
+
+	// watch for shutdown signal to re-enable tee logging to public
+	go func(l *listener.HTTPListener) {
+		// exit notification
+		defer shared.TeeLog("! Health shutdown watcher has halted")
+
+		// loop while not shutting down
+		for !httpListener.Engine.IsShuttingDown() {
+			// don't peg cpu
+			time.Sleep(1 * time.Second)
+
+			// update health message
+			shared.SetServerHealth(phase_running, "Helia is running!")
+		}
+
+		// disable health blackholing
+		shared.SetServerHealth(phase_shutdown, "Disabling blackholing...")
+		dropHealthLogger = false
+
+	}(httpListener)
 
 	// don't exit
 	for {
@@ -155,14 +194,24 @@ func main() {
 	}
 }
 
+// logger function to write to the database
+func dbLogger(s string, t time.Time) {
+	// write log
+	logSvc.WriteLog(s, t)
+}
+
+// logger function to write to the console
 func printLogger(s string, t time.Time) {
 	log.Println(s) // t is intentionally discarded because Println already provides a timestamp
 }
 
-// get log service
-var logSvc = sql.GetLogService()
+// logger function to write to public health ping
+func healthLogger(s string, t time.Time) {
+	// check for blackholing
+	if dropHealthLogger {
+		return
+	}
 
-func dbLogger(s string, t time.Time) {
-	// write log
-	logSvc.WriteLog(s, t)
+	// update health message
+	shared.SetServerHealth(phase, s) // t is intentionally discarded because it doesn't matter for the client
 }

@@ -398,6 +398,11 @@ func (e *HeliaEngine) Shutdown() {
 	}()
 }
 
+// Returns the shutdown signal flag
+func (e *HeliaEngine) IsShuttingDown() bool {
+	return shutdownSignal
+}
+
 // Helper function to handle panics caused by escalation goroutines
 func escalationRecover(sol *universe.SolarSystem, e *HeliaEngine) {
 	if r := recover(); r != nil {
