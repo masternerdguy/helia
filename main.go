@@ -19,12 +19,12 @@ const profileCpu = true
 const profileHeap = true
 const gcPercent = 500
 
-const phase_startup = "Starting up"
-const phase_running = "System ready"
-const phase_shutdown = "Shutting down"
+const PHASE_STARTUP = "Starting up"
+const PHASE_RUNNING = "System ready"
+const PHASE_SHUTDOWN = "Shutting down"
 
 // current server health phase
-var phase = phase_startup
+var phase = PHASE_STARTUP
 
 // whether to blackhole health logging
 var dropHealthLogger = false
@@ -167,14 +167,14 @@ func main() {
 			time.Sleep(1 * time.Second)
 
 			// update health message
-			shared.SetServerHealth(phase_running, "Helia is running!")
+			shared.SetServerHealth(PHASE_RUNNING, "Helia is running!")
 		}
 
 		// entered shutdown
-		phase = phase_shutdown
+		phase = PHASE_SHUTDOWN
 
 		// disable health blackholing
-		shared.SetServerHealth(phase_shutdown, "Disabling blackholing...")
+		shared.SetServerHealth(PHASE_SHUTDOWN, "Disabling blackholing...")
 		dropHealthLogger = false
 	}(httpListener)
 
