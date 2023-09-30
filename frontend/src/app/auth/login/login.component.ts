@@ -43,6 +43,7 @@ export class LoginComponent implements OnInit {
 
         $('#site-header').remove();
         $('#site-container').removeAttr('id');
+        $('#site-footer').remove();
         $('router-outlet').remove();
         $('br').remove();
 
