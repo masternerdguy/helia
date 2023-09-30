@@ -214,6 +214,9 @@ func healthLogger(s string, t time.Time) {
 		return
 	}
 
+	// build message
+	u := fmt.Sprintf("[%v] %v", t, s)
+
 	// update health message
-	shared.SetServerHealth(phase, s) // t is intentionally discarded because it doesn't matter for the client
+	shared.SetServerHealth(phase, u)
 }
