@@ -214,8 +214,11 @@ func healthLogger(s string, t time.Time) {
 		return
 	}
 
+	// make timestamp
+	tx := t.UnixNano() / int64(time.Millisecond)
+
 	// build message
-	u := fmt.Sprintf("[%v] %v", t, s)
+	u := fmt.Sprintf("[%v] %v", tx, s)
 
 	// update health message
 	shared.SetServerHealth(phase, u)
