@@ -181,6 +181,9 @@ func main() {
 		// entered public shutdown
 		loggerPhase = shared.PHASE_SHUTDOWN
 
+		// sync logger
+		shared.SetServerHealth(loggerPhase, "")
+
 		// disable health blackholing
 		dropHealthLogger = false
 	}(httpListener)

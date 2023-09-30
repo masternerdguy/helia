@@ -2,7 +2,7 @@ const WebpackObfuscator = require("webpack-obfuscator");
 
 module.exports = {
   plugins: [
-    new WebpackObfuscator(
+    /*new WebpackObfuscator(
       {
         compact: true,
         controlFlowFlattening: true,
@@ -31,6 +31,6 @@ module.exports = {
         target: "browser",
       },
       [],
-    ),
+    ),*/
   ],
 };

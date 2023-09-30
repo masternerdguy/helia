@@ -9,8 +9,8 @@ const PHASE_STARTUP = "Starting up"
 const PHASE_RUNNING = "System ready"
 const PHASE_SHUTDOWN = "Shutting down"
 
-var serverHealthMessage string
-var serverHealthPhase string
+var serverHealthMessage string = "<no message>"
+var serverHealthPhase string = PHASE_STARTUP
 var serverHealthLock sync.Mutex
 
 // Updates the global server health message returned on ping
