@@ -154,6 +154,30 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicXferEnergy();
     } else if (b.gfxEffect === 'basic_shield_xfer') {
       this.vfxData = repo.basicXferShield();
+    } else if (b.gfxEffect === 'small_heat_xfer') {
+      this.vfxData = repo.smallXferHeat();
+    } else if (b.gfxEffect === 'small_energy_xfer') {
+      this.vfxData = repo.smallXferEnergy();
+    } else if (b.gfxEffect === 'small_shield_xfer') {
+      this.vfxData = repo.smallXferShield();
+    } else if (b.gfxEffect === 'medium_heat_xfer') {
+      this.vfxData = repo.mediumXferHeat();
+    } else if (b.gfxEffect === 'medium_energy_xfer') {
+      this.vfxData = repo.mediumXferEnergy();
+    } else if (b.gfxEffect === 'medium_shield_xfer') {
+      this.vfxData = repo.mediumXferShield();
+    } else if (b.gfxEffect === 'heavy_heat_xfer') {
+      this.vfxData = repo.heavyXferHeat();
+    } else if (b.gfxEffect === 'heavy_energy_xfer') {
+      this.vfxData = repo.heavyXferEnergy();
+    } else if (b.gfxEffect === 'heavy_shield_xfer') {
+      this.vfxData = repo.heavyXferShield();
+    } else if (b.gfxEffect === 'xl_heat_xfer') {
+      this.vfxData = repo.xlXferHeat();
+    } else if (b.gfxEffect === 'xl_energy_xfer') {
+      this.vfxData = repo.xlXferEnergy();
+    } else if (b.gfxEffect === 'xl_shield_xfer') {
+      this.vfxData = repo.xlXferShield();
     } else {
       // log broken effect
       console.log(`gfx effect not found: ${b.gfxEffect}`);
