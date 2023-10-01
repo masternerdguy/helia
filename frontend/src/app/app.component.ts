@@ -10,9 +10,7 @@ import * as $ from 'jquery';
 export class AppComponent {
   title = 'Project Helia';
 
-  constructor(
-    private appService: AppService
-  ) {}
+  constructor(private appService: AppService) {}
 
   public ngOnInit() {
     // capture service reference
@@ -25,7 +23,7 @@ export class AppComponent {
       // local function to check server health
       async function checkHealth(appService: AppService) {
         // get status display area
-        const statusArea = $("#server-status-display");
+        const statusArea = $('#server-status-display');
 
         try {
           // skip if display area is gone
@@ -43,7 +41,7 @@ export class AppComponent {
           statusArea.text(o);
         } catch {
           // server is likely down
-          statusArea.text("Server offline");
+          statusArea.text('Server offline');
         }
       }
 
@@ -62,11 +60,11 @@ export class AppComponent {
 
       // do initial health check
       checkHealth(appService);
-      
+
       // do regular health checks
       pid = setInterval(() => {
         checkHealth(appService);
-      }, 1000)
+      }, 1000);
     });
   }
 }

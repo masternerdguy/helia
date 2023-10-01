@@ -9,7 +9,7 @@ export class AppService {
   constructor(private http: HttpClient) {}
 
   async health(): Promise<string> {
-    let response = await fetch(environment.apiUrl + "health");
+    let response = await fetch(environment.apiUrl + 'health');
     return response.text();
   }
 }
