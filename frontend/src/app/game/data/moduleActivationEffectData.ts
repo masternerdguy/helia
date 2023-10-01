@@ -568,6 +568,36 @@ export class ModuleActivationEffectRepository {
       thickness: 3.5,
     };
   }
+
+  basicXferHeat(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 977,
+      color: 'orange',
+      filter: 'blur(7.45px)', // "feather"
+      thickness: 1.1,
+    };
+  }
+
+  basicXferEnergy(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 964,
+      color: 'red',
+      filter: 'blur(7.56px)', // "feather"
+      thickness: 1.0,
+    };
+  }
+
+  basicXferShield(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 954,
+      color: 'limegreen',
+      filter: 'blur(7.38px)', // "feather"
+      thickness: 1.2,
+    };
+  }
 }
 
 export class ModuleActivationEffectData {
