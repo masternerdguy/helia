@@ -35,6 +35,7 @@ INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('658ee98a-5e4b-402
 INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('25c7ea51-5c2a-4964-8556-82a29fd3621f', 'schematic', 'Small Remote Shield Bridge Schematic', '{"industrialmarket": {"maxprice": 100700, "minprice": 49287, "silosize": 100, "process_id": "08b70d06-5861-495b-bccb-4daad5b11519"}}');
 INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('d591bd91-571e-4906-8aba-6b9b7ca002b5', 'schematic', 'Medium Remote Thermal Bridge Schematic', '{"industrialmarket": {"maxprice": 163413, "minprice": 78323, "silosize": 100, "process_id": "67d15f39-9861-4f90-b2ba-75de6cd1cfa1"}}');
 INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('379af163-18f9-40b1-9ceb-c5d69132e14d', 'schematic', 'Heavy Remote Shield Bridge Schematic', '{"industrialmarket": {"maxprice": 842215, "minprice": 176327, "silosize": 100, "process_id": "9808b8e0-0f63-4f4a-9f31-d1ed940fc030"}}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('3ae485b4-3cd3-43bc-bc92-03333fcf7bc6', 'schematic', 'Small Remote Thermal Bridge Schematic', '{"industrialmarket": {"maxprice": 209431, "minprice": 92677, "silosize": 100, "process_id": "3f03b17d-821c-4350-af28-8ad49ea01e98"}}');
 
 -- processes
 INSERT INTO public.processes (id, name, meta, "time") VALUES ('21deccaa-c9b0-414e-a898-3ab9230d4528', 'Make Basic Remote Thermal Bridge', '{}', 279);
