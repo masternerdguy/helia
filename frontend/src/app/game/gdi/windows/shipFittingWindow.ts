@@ -1418,7 +1418,10 @@ function checkIfModule(m: WSContainerItem) {
     m.itemFamilyID === 'ewar_r_mask' ||
     m.itemFamilyID === 'ewar_d_mask' ||
     m.itemFamilyID === 'therm_cap' ||
-    m.itemFamilyID === 'burst_reactor'
+    m.itemFamilyID === 'burst_reactor' ||
+    m.itemFamilyID === 'xfer_heat' ||
+    m.itemFamilyID === 'xfer_energy' ||
+    m.itemFamilyID === 'xfer_shield'
   );
 }
 

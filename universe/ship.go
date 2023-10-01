@@ -482,6 +482,12 @@ func getModuleFamily(itemFamilyID string) string {
 		modFamily = "heat"
 	} else if itemFamilyID == "burst_reactor" {
 		modFamily = "power"
+	} else if itemFamilyID == "xfer_heat" {
+		modFamily = "utility"
+	} else if itemFamilyID == "xfer_energy" {
+		modFamily = "utility"
+	} else if itemFamilyID == "xfer_shield" {
+		modFamily = "utility"
 	}
 
 	return modFamily
