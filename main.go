@@ -86,6 +86,7 @@ func main() {
 		// hook listener
 		shared.TeeLog("Hooking early ping listener...")
 		http.HandleFunc("/", httpListener.HandlePing)
+		http.HandleFunc("/api/health", httpListener.HandlePing)
 
 		http.ListenAndServe(fmt.Sprintf(":%v", httpListener.GetPort()), nil)
 	}()
