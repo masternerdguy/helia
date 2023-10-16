@@ -174,7 +174,7 @@ func (m *FittedSlot) activateAsGunTurret() bool {
 	// apply damage (or ore / ice pulled if asteroid) to target
 	if *m.TargetType == tgtReg.Ship {
 		c := tgtI.(*Ship)
-		c.DealDamage(shieldDmg, armorDmg, hullDmg, m.shipMountedOn.ReputationSheet, m)
+		c.dealDamage(shieldDmg, armorDmg, hullDmg, m.shipMountedOn.ReputationSheet, m)
 	} else if *m.TargetType == tgtReg.Station {
 		c := tgtI.(*Station)
 		c.DealDamage(shieldDmg, armorDmg, hullDmg)
@@ -531,7 +531,7 @@ func (m *FittedSlot) activateAsShieldBooster() bool {
 	shieldBoost *= m.usageExperienceModifier
 
 	// apply boost to mounting ship
-	m.shipMountedOn.DealDamage(-shieldBoost, 0, 0, nil, nil)
+	m.shipMountedOn.dealDamage(-shieldBoost, 0, 0, nil, nil)
 
 	// include visual effect if present
 	activationPGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
@@ -1098,7 +1098,7 @@ func (m *FittedSlot) activateAsUtilitySiphon() bool {
 	if *m.TargetType == tgtReg.Ship {
 		c := tgtI.(*Ship)
 
-		actualSiphon := c.SiphonEnergy(
+		actualSiphon := c.siphonEnergy(
 			maxSiphonAmt,
 			m.shipMountedOn.ReputationSheet,
 			m,
@@ -1623,7 +1623,7 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 			}
 
 			// deal damage
-			ts.DealDamage(
+			ts.dealDamage(
 				shieldDmg*rangeRatio,
 				armorDmg*rangeRatio,
 				hullDmg*rangeRatio,
@@ -1632,7 +1632,7 @@ func (m *FittedSlot) activateAsAreaDenialDevice() bool {
 			)
 
 			// apply siphon
-			actualSiphon := ts.SiphonEnergy(
+			actualSiphon := ts.siphonEnergy(
 				eSiph*rangeRatio,
 				m.shipMountedOn.ReputationSheet,
 				m,
@@ -2687,7 +2687,7 @@ func (m *FittedSlot) activateAsHeatXfer() bool {
 		}
 
 		// reduce heat on target
-		actualXfer := c.SiphonHeat(maxXferAmt, m)
+		actualXfer := c.siphonHeat(maxXferAmt, m)
 
 		// increase local heat
 		m.shipMountedOn.Heat += actualXfer

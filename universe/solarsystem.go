@@ -321,7 +321,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 
 					// check standings
-					v, oh := sh.CheckStandings(station.FactionID)
+					v, oh := sh.checkStandings(station.FactionID)
 
 					if oh {
 						c.WriteErrorMessage("docking denied - openly hostile")
@@ -2512,7 +2512,7 @@ func (s *SolarSystem) updateMissiles() {
 					hullDmg, _ := m.ItemMeta.GetFloat64("hull_damage")
 
 					// apply damage to ship
-					sB.DealDamage(
+					sB.dealDamage(
 						shieldDmg,
 						armorDmg,
 						hullDmg,

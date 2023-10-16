@@ -1794,7 +1794,7 @@ func (s *Ship) TotalCargoBayVolumeUsed(lock bool) float64 {
 }
 
 // Deals damage to the ship
-func (s *Ship) DealDamage(
+func (s *Ship) dealDamage(
 	shieldDmg float64,
 	armorDmg float64,
 	hullDmg float64,
@@ -1854,7 +1854,7 @@ func (s *Ship) DealDamage(
 }
 
 // Siphons energy from the ship, returns the actual amount siphoned
-func (s *Ship) SiphonEnergy(
+func (s *Ship) siphonEnergy(
 	maxSiphonAmount float64,
 	attackerRS *shared.PlayerReputationSheet,
 	attackerModule *FittedSlot,
@@ -1890,7 +1890,7 @@ func (s *Ship) SiphonEnergy(
 }
 
 // Siphons heat from the ship, returns the actual amount siphoned
-func (s *Ship) SiphonHeat(
+func (s *Ship) siphonHeat(
 	maxSiphonAmount float64,
 	assisterModule *FittedSlot,
 ) float64 {
@@ -1916,7 +1916,7 @@ func (s *Ship) SiphonHeat(
 }
 
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities
-func (s *Ship) CheckStandings(factionID uuid.UUID) (float64, bool) {
+func (s *Ship) checkStandings(factionID uuid.UUID) (float64, bool) {
 	// handle NPC case first
 	if s.IsNPC {
 		// null check
@@ -2099,7 +2099,7 @@ func (s *Ship) behaviourPatrol() {
 				distance := physics.Distance(sA, sB)
 
 				// check standings
-				standing, openlyHostile := sx.CheckStandings(s.FactionID)
+				standing, openlyHostile := sx.checkStandings(s.FactionID)
 
 				// skip if self
 				if sx.ID == s.ID {
@@ -2570,7 +2570,7 @@ func (s *Ship) gotoNextWanderDestination(stationDockChance int) {
 		for _, e := range stations {
 			if idx == tgt {
 				// check standings
-				v, oh := s.CheckStandings(e.FactionID)
+				v, oh := s.checkStandings(e.FactionID)
 
 				if v > shared.MIN_DOCK_STANDING && !oh {
 					// dock at it
@@ -5028,7 +5028,7 @@ func (s *Ship) SelfDestruct(lock bool) error {
 	}
 
 	// blow it up
-	s.DealDamage(s.GetRealMaxShield(false)+1, s.GetRealMaxArmor(false)+1, s.GetRealMaxHull(false)+1, nil, nil)
+	s.dealDamage(s.GetRealMaxShield(false)+1, s.GetRealMaxArmor(false)+1, s.GetRealMaxHull(false)+1, nil, nil)
 
 	return nil
 }
