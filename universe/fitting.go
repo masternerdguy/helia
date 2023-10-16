@@ -1073,7 +1073,7 @@ func (m *FittedSlot) activateAsUtilitySiphon() bool {
 	// account for falloff if present
 	falloff, found := m.ItemMeta.GetString("falloff")
 
-	rangeRatio := 1.0 // default to 100% damage (or ore pull if asteroid)
+	rangeRatio := 1.0 // default to 100% effect
 
 	if found {
 		// adjust based on falloff style
@@ -1283,7 +1283,7 @@ func (m *FittedSlot) activateAsSalvager() bool {
 	// account for falloff if present
 	falloff, found := m.ItemMeta.GetString("falloff")
 
-	rangeRatio := 1.0 // default to 100% damage (or ore pull if asteroid)
+	rangeRatio := 1.0 // default to 100% effect
 
 	if found {
 		// adjust based on falloff style
