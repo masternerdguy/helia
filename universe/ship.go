@@ -1889,6 +1889,32 @@ func (s *Ship) SiphonEnergy(
 	return actualSiphon
 }
 
+// Siphons heat from the ship, returns the actual amount siphoned
+func (s *Ship) SiphonHeat(
+	maxSiphonAmount float64,
+	assisterModule *FittedSlot,
+) float64 {
+	// limit amount to siphon so that the remaining amount is positive
+	actualSiphon := 0.0
+
+	if s.Heat-maxSiphonAmount >= 0 {
+		actualSiphon = maxSiphonAmount
+	} else {
+		actualSiphon = maxSiphonAmount - s.Heat
+	}
+
+	// apply siphon
+	s.Heat -= actualSiphon
+
+	// clamp heat
+	if s.Heat < 0 {
+		s.Heat = 0
+	}
+
+	// return amount siphoned
+	return actualSiphon
+}
+
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities
 func (s *Ship) CheckStandings(factionID uuid.UUID) (float64, bool) {
 	// handle NPC case first
@@ -5462,6 +5488,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsDissipationMask()
 			} else if m.ItemTypeFamily == "burst_reactor" {
 				canActivate = m.activateAsBurstReactor()
+			} else if m.ItemTypeFamily == "xfer_heat" {
+				canActivate = m.activateAsHeatXfer()
 			}
 
 			if canActivate {
