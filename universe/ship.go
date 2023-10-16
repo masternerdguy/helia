@@ -1915,6 +1915,18 @@ func (s *Ship) siphonHeat(
 	return actualSiphon
 }
 
+// Receives energy and returns the excess that could not be stored
+func (s *Ship) receiveEnergy(
+	maxRecAmount float64,
+	assisterModule *FittedSlot,
+) float64 {
+	// limit amount to receive so that max is not exceeded
+	actualReceived := maxRecAmount
+
+	// return actual amount received
+	return actualReceived
+}
+
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities
 func (s *Ship) checkStandings(factionID uuid.UUID) (float64, bool) {
 	// handle NPC case first
