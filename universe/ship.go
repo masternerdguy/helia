@@ -1921,7 +1921,16 @@ func (s *Ship) receiveEnergy(
 	assisterModule *FittedSlot,
 ) float64 {
 	// limit amount to receive so that max is not exceeded
-	actualReceived := maxRecAmount
+	actualReceived := 0.0
+
+	if s.Energy+maxRecAmount <= s.CachedMaxEnergy {
+		actualReceived = maxRecAmount
+	} else {
+		actualReceived = s.CachedMaxEnergy - s.Energy
+	}
+
+	// apply transfer
+	s.Energy += actualReceived
 
 	// return actual amount received
 	return actualReceived
@@ -5502,6 +5511,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsBurstReactor()
 			} else if m.ItemTypeFamily == "xfer_heat" {
 				canActivate = m.activateAsHeatXfer()
+			} else if m.ItemTypeFamily == "xfer_energy" {
+				canActivate = m.activateAsEnergyXfer()
 			}
 
 			if canActivate {

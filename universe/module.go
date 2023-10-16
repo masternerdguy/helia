@@ -2729,3 +2729,152 @@ func (m *FittedSlot) activateAsHeatXfer() bool {
 	// module activates!
 	return true
 }
+
+func (m *FittedSlot) activateAsEnergyXfer() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// get target
+	tgtReg := models.SharedTargetTypeRegistry
+
+	// target details
+	var tgtDummy physics.Dummy = physics.Dummy{}
+	var tgtI Any
+
+	if *m.TargetType == tgtReg.Ship {
+		// find ship
+		tgt, f := m.shipMountedOn.CurrentSystem.ships[m.TargetID.String()]
+
+		if !f {
+			// target doesn't exist - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+
+			return false
+		}
+
+		// store target details
+		tgtDummy = tgt.ToPhysicsDummy()
+		tgtI = tgt
+	} else {
+		// unsupported target type - can't activate
+		m.TargetID = nil
+		m.TargetType = nil
+		m.WillRepeat = false
+		m.IsCycling = false
+
+		return false
+	}
+
+	// check for max range
+	modRange, found := m.ItemMeta.GetFloat64("range")
+	var d float64 = 0
+
+	if found {
+		// get distance to target
+		d = physics.Distance(tgtDummy, m.shipMountedOn.ToPhysicsDummy())
+
+		// verify target is in range
+		if d > modRange {
+			// out of range - can't activate
+			m.TargetID = nil
+			m.TargetType = nil
+			m.WillRepeat = false
+			m.IsCycling = false
+
+			return false
+		}
+	}
+
+	// get max transfer amount
+	maxXferAmt, _ := m.ItemMeta.GetFloat64("energy_xfer_amount")
+
+	// apply usage experience modifier
+	maxXferAmt *= m.usageExperienceModifier
+
+	// calculate tracking ratio
+	trackingRatio := m.calculateTrackingRatioWithTarget(tgtDummy)
+
+	// adjust transfer amount based on tracking
+	maxXferAmt *= trackingRatio
+
+	// account for falloff if present
+	falloff, found := m.ItemMeta.GetString("falloff")
+
+	rangeRatio := 1.0 // default to 100% effect
+
+	if found {
+		// adjust based on falloff style
+		if falloff == "linear" {
+			// max amount transfered is a proportion of the distance to target over max range (closer is higher)
+			rangeRatio = 1 - (d / modRange)
+
+			maxXferAmt *= rangeRatio
+		} else if falloff == "reverse_linear" {
+			//  max amount transfered is a proportion of the distance to target over max range (further is higher)
+			rangeRatio = (d / modRange)
+
+			if d > modRange {
+				rangeRatio = 0 // sharp cutoff if out of range to avoid sillinesss
+			}
+
+			maxXferAmt *= rangeRatio
+		}
+	}
+
+	// transfer energy to target ship
+	if *m.TargetType == tgtReg.Ship {
+		c := tgtI.(*Ship)
+
+		// verify both ships are in the same faction
+		if m.shipMountedOn.FactionID != c.FactionID {
+			return false
+		}
+
+		// increase energy on target
+		actualXfer := c.receiveEnergy(maxXferAmt, m)
+
+		// decrease local energy
+		m.shipMountedOn.Energy -= actualXfer
+	} else {
+		return false
+	}
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+			ObjEndID:     m.TargetID,
+			ObjEndType:   m.TargetType,
+		}
+
+		gfxEffect.ObjStartHardpointOffset = [...]float64{
+			0,
+			0,
+		}
+
+		if m.SlotIndex != nil {
+			rack := m.Rack
+			idx := *m.SlotIndex
+
+			if rack == "A" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
+			}
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
+	// module activates!
+	return true
+}
