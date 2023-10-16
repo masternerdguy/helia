@@ -1936,6 +1936,27 @@ func (s *Ship) receiveEnergy(
 	return actualReceived
 }
 
+// Receives shield and returns the excess that could not be stored
+func (s *Ship) receiveShield(
+	maxRecAmount float64,
+	assisterModule *FittedSlot,
+) float64 {
+	// limit amount to receive so that max is not exceeded
+	actualReceived := 0.0
+
+	if s.Shield+maxRecAmount <= s.CachedMaxShield {
+		actualReceived = maxRecAmount
+	} else {
+		actualReceived = s.CachedMaxShield - s.Shield
+	}
+
+	// apply transfer
+	s.Shield += actualReceived
+
+	// return actual amount received
+	return actualReceived
+}
+
 // Given a faction to compare against, returns the standing and whether they have declared open hostilities
 func (s *Ship) checkStandings(factionID uuid.UUID) (float64, bool) {
 	// handle NPC case first
@@ -5513,6 +5534,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsHeatXfer()
 			} else if m.ItemTypeFamily == "xfer_energy" {
 				canActivate = m.activateAsEnergyXfer()
+			} else if m.ItemTypeFamily == "xfer_shield" {
+				canActivate = m.activateAsShieldXfer()
 			}
 
 			if canActivate {
