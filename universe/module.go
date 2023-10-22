@@ -2826,6 +2826,11 @@ func (m *FittedSlot) activateAsEnergyXfer() bool {
 		}
 	}
 
+	// clamp at current energy amount
+	if maxXferAmt > m.shipMountedOn.Energy {
+		maxXferAmt = m.shipMountedOn.Energy
+	}
+
 	// transfer energy to target ship
 	if *m.TargetType == tgtReg.Ship {
 		c := tgtI.(*Ship)
@@ -2973,6 +2978,11 @@ func (m *FittedSlot) activateAsShieldXfer() bool {
 
 			maxXferAmt *= rangeRatio
 		}
+	}
+
+	// clamp at current shield amount
+	if maxXferAmt > m.shipMountedOn.Shield {
+		maxXferAmt = m.shipMountedOn.Shield
 	}
 
 	// transfer shield to target ship
