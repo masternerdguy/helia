@@ -20,7 +20,7 @@ export class WsService {
 
   connect(
     sid: string,
-    handler: (data: GameMessage, s: WebSocketSubject<GameMessage>) => void
+    handler: (data: GameMessage, s: WebSocketSubject<GameMessage>) => void,
   ) {
     this.ws = webSocket({
       url: environment.wsUrl + 'connect',

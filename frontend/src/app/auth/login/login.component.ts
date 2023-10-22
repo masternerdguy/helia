@@ -17,7 +17,7 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private accountService: AccountService,
-    private wsService: WsService
+    private wsService: WsService,
   ) {}
 
   ngOnInit(): void {}
@@ -36,13 +36,14 @@ export class LoginComponent implements OnInit {
       setTimeout(() => {
         // remove extra stuff from page to avoid interference with main canvas
         const layoutContainer = document.getElementsByClassName(
-          'helia-game-top'
+          'helia-game-top',
         )[0].parentNode.parentNode as any;
 
         layoutContainer.removeAttribute('class');
 
         $('#site-header').remove();
         $('#site-container').removeAttr('id');
+        $('#site-footer').remove();
         $('router-outlet').remove();
         $('br').remove();
 
@@ -54,12 +55,12 @@ export class LoginComponent implements OnInit {
         setTimeout(() => {
           // get back canvas
           const backCanvas = document.getElementsByClassName(
-            'backCanvas'
+            'backCanvas',
           )[0] as any;
 
           // get main canvas
           const gameCanvas = document.getElementsByClassName(
-            'gameCanvas'
+            'gameCanvas',
           )[0] as any;
 
           setTimeout(() => {

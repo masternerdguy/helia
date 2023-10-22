@@ -34,4 +34,5 @@ export enum TargetType {
   Jumphole = 5,
   Asteroid = 6,
   Wreck = 7,
+  Outpost = 8,
 }

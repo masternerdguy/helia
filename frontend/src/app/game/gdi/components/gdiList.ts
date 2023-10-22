@@ -77,7 +77,7 @@ export class GDIList extends GDIBase {
           bx,
           px * r + bx,
           this.getWidth() - GDIStyle.listScrollWidth,
-          px
+          px,
         );
       }
 
@@ -136,7 +136,7 @@ export class GDIList extends GDIBase {
         this.getWidth() - sw,
         percent * this.getHeight(),
         sw,
-        scale * this.getHeight() + 2
+        scale * this.getHeight() + 2,
       );
     }
 
@@ -228,7 +228,7 @@ export class GDIList extends GDIBase {
           bx,
           px * r + bx,
           this.getWidth() - GDIStyle.listScrollWidth,
-          px
+          px,
         );
         const item = this.items[i];
 
@@ -273,14 +273,14 @@ export class GDIList extends GDIBase {
     // first break by row width
     const fontWidth = getCharWidth(
       ' ',
-      GDIStyle.getUnderlyingFont(this.getFont())
+      GDIStyle.getUnderlyingFont(this.getFont()),
     );
 
     const breakCol = Math.round(
       (this.getWidth() -
         (GDIStyle.listScrollWidth + 2 * (GDIStyle.listBorderSize + 3))) /
         fontWidth -
-        0.5
+        0.5,
     );
 
     let accIdx = 0;

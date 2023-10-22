@@ -76,7 +76,7 @@ export class ExperienceSheetWindow extends GDIWindow {
       // sort entries by level, then name, then id
       const sorted = cache.ships
         .sort((a, b) =>
-          this.getShipSortKey(a).localeCompare(this.getShipSortKey(b))
+          this.getShipSortKey(a).localeCompare(this.getShipSortKey(b)),
         )
         .reverse();
 
@@ -105,7 +105,7 @@ export class ExperienceSheetWindow extends GDIWindow {
       // sort entries by level, then name, then id
       const sorted = cache.modules
         .sort((a, b) =>
-          this.getModuleSortKey(a).localeCompare(this.getModuleSortKey(b))
+          this.getModuleSortKey(a).localeCompare(this.getModuleSortKey(b)),
         )
         .reverse();
 
@@ -177,7 +177,7 @@ function makeSectionHeader(title: string): ExperienceSheetViewRow[] {
 }
 
 function experienceSheetViewRowStringFromShip(
-  s: ServerExperienceShipEntry
+  s: ServerExperienceShipEntry,
 ): string {
   if (s == null) {
     return;
@@ -192,7 +192,7 @@ function experienceSheetViewRowStringFromShip(
 }
 
 function experienceSheetViewRowStringFromModule(
-  s: ServerExperienceModuleEntry
+  s: ServerExperienceModuleEntry,
 ): string {
   if (s == null) {
     return;

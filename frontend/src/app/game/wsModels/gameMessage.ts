@@ -73,4 +73,5 @@ export enum MessageTypes {
   GiveItem = 64,
   ViewDockedUsers = 65,
   DockedUsersUpdate = 66,
+  ConsumeOutpostKit = 67,
 }

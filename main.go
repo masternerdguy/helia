@@ -15,15 +15,26 @@ import (
 	"time"
 )
 
-const profileCpu = true
-const profileHeap = true
-const gcPercent = 500
+const PROFILE_CPU = true
+const PROFILE_HEAP = true
+const GC_PERCENT = 500
 
+// current server health loggerPhase
+var loggerPhase = shared.PHASE_STARTUP
+
+// whether to blackhole health logging
+var dropHealthLogger = false
+
+// get log service
+var logSvc = sql.GetLogService()
+
+// program entry point
 func main() {
 	// configure global tee logging
 	shared.InitializeTeeLog(
 		printLogger,
 		dbLogger,
+		healthLogger,
 	)
 
 	// purge old logs
@@ -40,7 +51,7 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	// start profiling if requested
-	if profileCpu {
+	if PROFILE_CPU {
 		shared.TeeLog("Starting CPU profiling...")
 		shared.CpuProfileFile, err = os.Create("cpu.prof")
 
@@ -53,7 +64,7 @@ func main() {
 		}
 	}
 
-	if profileHeap {
+	if PROFILE_HEAP {
 		shared.TeeLog("Enabling shutdown heap profiling...")
 		shared.HeapProfileFile, err = os.Create("heap.prof")
 
@@ -72,8 +83,10 @@ func main() {
 
 	// listen for pings early
 	go func() {
+		// hook listener
 		shared.TeeLog("Hooking early ping listener...")
 		http.HandleFunc("/", httpListener.HandlePing)
+		http.HandleFunc("/api/health", httpListener.HandlePing)
 
 		http.ListenAndServe(fmt.Sprintf(":%v", httpListener.GetPort()), nil)
 	}()
@@ -107,14 +120,6 @@ func main() {
 	shared.TeeLog("Starting engine...")
 	engine.Start()
 
-	// listen and serve api requests
-	shared.TeeLog("Wiring up API HTTP handlers...")
-	http.HandleFunc("/api/register", httpListener.HandleRegister)
-	http.HandleFunc("/api/login", httpListener.HandleLogin)
-	http.HandleFunc("/api/forgot", httpListener.HandleForgot)
-	http.HandleFunc("/api/reset", httpListener.HandleReset)
-	http.HandleFunc("/api/shutdown", httpListener.HandleShutdown)
-
 	// give the user a chance to accept the self signed cert
 	http.HandleFunc("/dev/accept-cert", httpListener.HandleAcceptCert)
 
@@ -137,6 +142,53 @@ func main() {
 	// up and running!
 	shared.TeeLog("Helia is running!")
 
+	// stop tee logging to public to prevent sensitive information disclosure
+	loggerPhase = shared.PHASE_RUNNING
+	dropHealthLogger = true
+
+	// sync health logger
+	shared.SetServerHealth(loggerPhase, "")
+
+	// listen and serve api requests
+	shared.TeeLog("Wiring up API HTTP handlers...")
+	http.HandleFunc("/api/register", httpListener.HandleRegister)
+	http.HandleFunc("/api/login", httpListener.HandleLogin)
+	http.HandleFunc("/api/forgot", httpListener.HandleForgot)
+	http.HandleFunc("/api/reset", httpListener.HandleReset)
+	http.HandleFunc("/api/shutdown", httpListener.HandleShutdown)
+
+	// listeners are ready
+	shared.TeeLog("Helia is listening!")
+
+	// logger safety check
+	if loggerPhase != shared.PHASE_RUNNING || !dropHealthLogger {
+		panic("Incorrect tee logger state")
+	}
+
+	// watch for shutdown signal to re-enable tee logging to public
+	go func(l *listener.HTTPListener) {
+		// exit notification
+		defer shared.TeeLog("! Entered public shutdown phase - please wait...")
+
+		// loop while not shutting down
+		for !httpListener.Engine.IsShuttingDown() {
+			// don't peg cpu
+			time.Sleep(5 * time.Second)
+		}
+
+		// brief sleep
+		time.Sleep(1 * time.Second)
+
+		// entered public shutdown
+		loggerPhase = shared.PHASE_SHUTDOWN
+
+		// sync logger
+		shared.SetServerHealth(loggerPhase, "")
+
+		// disable health blackholing
+		dropHealthLogger = false
+	}(httpListener)
+
 	// don't exit
 	for {
 		// don't peg cpu
@@ -150,19 +202,35 @@ func main() {
 		debug.FreeOSMemory()
 
 		// restore gc settings
-		debug.SetGCPercent(gcPercent)
+		debug.SetGCPercent(GC_PERCENT)
 		time.Sleep(time.Microsecond * 5)
 	}
 }
 
+// logger function to write to the database
+func dbLogger(s string, t time.Time) {
+	// write log
+	logSvc.WriteLog(s, t)
+}
+
+// logger function to write to the console
 func printLogger(s string, t time.Time) {
 	log.Println(s) // t is intentionally discarded because Println already provides a timestamp
 }
 
-// get log service
-var logSvc = sql.GetLogService()
+// logger function to write to public health ping
+func healthLogger(s string, t time.Time) {
+	// check for blackholing
+	if dropHealthLogger {
+		return
+	}
 
-func dbLogger(s string, t time.Time) {
-	// write log
-	logSvc.WriteLog(s, t)
+	// make timestamp
+	tx := t.UnixNano() / int64(time.Millisecond)
+
+	// build message
+	u := fmt.Sprintf("[%v] %v", tx, s)
+
+	// update health message
+	shared.SetServerHealth(loggerPhase, u)
 }

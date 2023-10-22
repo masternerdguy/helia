@@ -121,7 +121,7 @@ export class ReputationSheetWindow extends GDIWindow {
     this.modalInput.setHeight(Math.round(fontSize + 0.5));
     this.modalInput.setX(this.getWidth() / 2 - this.modalInput.getWidth() / 2);
     this.modalInput.setY(
-      this.getHeight() / 2 - this.modalInput.getHeight() / 2
+      this.getHeight() / 2 - this.modalInput.getHeight() / 2,
     );
 
     this.modalInput.setFont(FontSize.large);
@@ -221,7 +221,7 @@ export class ReputationSheetWindow extends GDIWindow {
     // close button
     this.viewMembersCloseButton.setWidth(this.getWidth() * 0.5);
     this.viewMembersCloseButton.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2),
     );
     this.viewMembersCloseButton.initialize();
 
@@ -337,7 +337,7 @@ export class ReputationSheetWindow extends GDIWindow {
     // close button
     this.viewApplicantCloseButton.setWidth(this.getWidth() * 0.5);
     this.viewApplicantCloseButton.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2),
     );
     this.viewApplicantCloseButton.initialize();
 
@@ -359,7 +359,7 @@ export class ReputationSheetWindow extends GDIWindow {
     // new faction name label
     this.newFactionNameLabel.setWidth(this.getWidth());
     this.newFactionNameLabel.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2),
     );
     this.newFactionNameLabel.initialize();
 
@@ -380,13 +380,13 @@ export class ReputationSheetWindow extends GDIWindow {
     this.newFactionNameInput.setY(
       this.newFactionNameLabel.getY() +
         this.newFactionNameLabel.getHeight() +
-        10
+        10,
     );
 
     // new faction description label
     this.newFactionDescriptionLabel.setWidth(this.getWidth());
     this.newFactionDescriptionLabel.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2),
     );
     this.newFactionDescriptionLabel.initialize();
 
@@ -397,7 +397,7 @@ export class ReputationSheetWindow extends GDIWindow {
     this.newFactionDescriptionLabel.setY(
       this.newFactionNameInput.getY() +
         this.newFactionNameInput.getHeight() +
-        10
+        10,
     );
 
     // new faction description input
@@ -411,13 +411,13 @@ export class ReputationSheetWindow extends GDIWindow {
     this.newFactionDescriptionInput.setY(
       this.newFactionDescriptionLabel.getY() +
         this.newFactionDescriptionLabel.getHeight() +
-        10
+        10,
     );
 
     // new faction ticker label
     this.newFactionTickerLabel.setWidth(this.getWidth());
     this.newFactionTickerLabel.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2),
     );
     this.newFactionTickerLabel.initialize();
 
@@ -428,7 +428,7 @@ export class ReputationSheetWindow extends GDIWindow {
     this.newFactionTickerLabel.setY(
       this.newFactionDescriptionInput.getY() +
         this.newFactionDescriptionInput.getHeight() +
-        10
+        10,
     );
 
     // new faction ticker input
@@ -442,13 +442,13 @@ export class ReputationSheetWindow extends GDIWindow {
     this.newFactionTickerInput.setY(
       this.newFactionTickerLabel.getY() +
         this.newFactionTickerLabel.getHeight() +
-        10
+        10,
     );
 
     // submit button
     this.newFactionSubmitButton.setWidth(this.getWidth() * 0.5);
     this.newFactionSubmitButton.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2),
     );
     this.newFactionSubmitButton.initialize();
 
@@ -479,7 +479,7 @@ export class ReputationSheetWindow extends GDIWindow {
     // cancel button
     this.newFactionCancelButton.setWidth(this.getWidth() * 0.5);
     this.newFactionCancelButton.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2),
     );
     this.newFactionCancelButton.initialize();
 
@@ -499,12 +499,12 @@ export class ReputationSheetWindow extends GDIWindow {
     // npc faction indicator label
     this.npcFactionLabel.setWidth(this.getWidth());
     this.npcFactionLabel.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2),
     );
     this.npcFactionLabel.initialize();
 
     this.npcFactionLabel.setText(
-      'You are currently a member of an NPC faction.'
+      'You are currently a member of an NPC faction.',
     );
     this.npcFactionLabel.setFont(FontSize.normal);
 
@@ -514,12 +514,12 @@ export class ReputationSheetWindow extends GDIWindow {
     // player faction indicator label
     this.playerFactionLabel.setWidth(this.getWidth());
     this.playerFactionLabel.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2),
     );
     this.playerFactionLabel.initialize();
 
     this.playerFactionLabel.setText(
-      'You are currently a member of a player faction.'
+      'You are currently a member of a player faction.',
     );
     this.playerFactionLabel.setFont(FontSize.normal);
 
@@ -529,7 +529,7 @@ export class ReputationSheetWindow extends GDIWindow {
     // create faction button
     this.createFactionButton.setWidth(this.getWidth() * 0.5);
     this.createFactionButton.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2),
     );
     this.createFactionButton.initialize();
 
@@ -550,7 +550,7 @@ export class ReputationSheetWindow extends GDIWindow {
     // leave faction button
     this.leaveFactionButton.setWidth(this.getWidth() * 0.5);
     this.leaveFactionButton.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2),
     );
 
     this.leaveFactionButton.initialize();
@@ -576,7 +576,7 @@ export class ReputationSheetWindow extends GDIWindow {
     // view applicants button
     this.viewApplicantsButton.setWidth(this.getWidth() * 0.5);
     this.viewApplicantsButton.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2),
     );
 
     this.viewApplicantsButton.initialize();
@@ -586,7 +586,7 @@ export class ReputationSheetWindow extends GDIWindow {
 
     this.viewApplicantsButton.setX(this.getWidth() * 0.25);
     this.viewApplicantsButton.setY(
-      this.leaveFactionButton.getY() + this.leaveFactionButton.getHeight() + 10
+      this.leaveFactionButton.getY() + this.leaveFactionButton.getHeight() + 10,
     );
 
     this.viewApplicantsButton.setOnClick(() => {
@@ -597,7 +597,7 @@ export class ReputationSheetWindow extends GDIWindow {
     // view members button
     this.viewMembersButton.setWidth(this.getWidth() * 0.5);
     this.viewMembersButton.setHeight(
-      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2)
+      Math.round(GDIStyle.getUnderlyingFontSize(FontSize.normal) * 2),
     );
 
     this.viewMembersButton.initialize();
@@ -609,7 +609,7 @@ export class ReputationSheetWindow extends GDIWindow {
     this.viewMembersButton.setY(
       this.viewApplicantsButton.getY() +
         this.viewApplicantsButton.getHeight() +
-        10
+        10,
     );
 
     this.viewMembersButton.setOnClick(() => {
@@ -688,7 +688,7 @@ export class ReputationSheetWindow extends GDIWindow {
 
   private buildDetails(r: FactionRepViewRow): FactionInfoViewRow[] {
     const relationships = r.faction.relationships.sort(
-      (a, b) => a.standingValue - b.standingValue
+      (a, b) => a.standingValue - b.standingValue,
     );
 
     const factions = GetFactionCache().sort((a, b) => {
@@ -746,8 +746,8 @@ export class ReputationSheetWindow extends GDIWindow {
               rows.push(
                 infoKeyValueString(
                   f.name,
-                  `[${rel.standingValue.toFixed(2)}] ` + openHostileFlag
-                )
+                  `[${rel.standingValue.toFixed(2)}] ` + openHostileFlag,
+                ),
               );
             }
           }
@@ -780,8 +780,8 @@ export class ReputationSheetWindow extends GDIWindow {
               rows.push(
                 infoKeyValueString(
                   f.name,
-                  `[${rel.standingValue.toFixed(2)}] ` + openHostileFlag
-                )
+                  `[${rel.standingValue.toFixed(2)}] ` + openHostileFlag,
+                ),
               );
             }
           }
@@ -804,8 +804,8 @@ export class ReputationSheetWindow extends GDIWindow {
             rows.push(
               infoKeyValueString(
                 fc.name,
-                `[${f.standingValue.toFixed(2)}] ` + openHostileFlag
-              )
+                `[${f.standingValue.toFixed(2)}] ` + openHostileFlag,
+              ),
             );
           }
         }
@@ -828,8 +828,8 @@ export class ReputationSheetWindow extends GDIWindow {
             rows.push(
               infoKeyValueString(
                 fc.name,
-                `[${f.standingValue.toFixed(2)}] ` + openHostileFlag
-              )
+                `[${f.standingValue.toFixed(2)}] ` + openHostileFlag,
+              ),
             );
           }
         }
@@ -848,7 +848,7 @@ export class ReputationSheetWindow extends GDIWindow {
     rows.push('');
 
     const displayDescription = this.infoList.breakText(
-      r.faction.description ?? ''
+      r.faction.description ?? '',
     );
 
     for (const i of displayDescription) {
@@ -955,11 +955,11 @@ export class ReputationSheetWindow extends GDIWindow {
       const factions = GetFactionCache().sort((a, b) => {
         // get standing entries
         const aStanding = playerFactionRelationships.filter(
-          (x) => x.factionId == a.id
+          (x) => x.factionId == a.id,
         );
 
         const bStanding = playerFactionRelationships.filter(
-          (x) => x.factionId == b.id
+          (x) => x.factionId == b.id,
         );
 
         // extract values
@@ -982,7 +982,7 @@ export class ReputationSheetWindow extends GDIWindow {
       const factionRows: FactionRepViewRow[] = [];
 
       for (const f of factions.filter(
-        (f) => f.isNPC && f.id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a'
+        (f) => f.isNPC && f.id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a',
       )) {
         let playerRel: WSPlayerFactionRelationship = null;
 
@@ -1028,7 +1028,7 @@ export class ReputationSheetWindow extends GDIWindow {
 
       // build rows (player factions)
       for (const f of factions.filter(
-        (f) => !f.isNPC && f.id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a'
+        (f) => !f.isNPC && f.id != '42b937ad-0000-46e9-9af9-fc7dbf878e6a',
       )) {
         let playerRel: WSPlayerFactionRelationship = null;
 
@@ -1316,7 +1316,7 @@ class MemberInfoViewRow {
 
 function factionListRowString(
   rel: WSPlayerFactionRelationship,
-  faction: Faction
+  faction: Faction,
 ): string {
   if (rel == null || faction == null) {
     return;
@@ -1339,7 +1339,7 @@ function factionListRowString(
   // build string
   return `${fixedString(faction.name, 24)} ${fixedString(
     `[${rel.standingValue.toFixed(2)}] `,
-    10
+    10,
   )} ${fixedString(memberFlag, 1)}${fixedString(openHostileFlag, 1)}`;
 }
 
@@ -1347,7 +1347,7 @@ function infoKeyValueString(key: string, value: string) {
   // build string
   return `${fixedString('', 1)} ${fixedString(key, 24)} ${fixedString(
     value,
-    24
+    24,
   )}`;
 }
 

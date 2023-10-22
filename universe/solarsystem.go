@@ -32,6 +32,7 @@ type SolarSystem struct {
 	planets               map[string]*Planet
 	jumpholes             map[string]*Jumphole
 	stations              map[string]*Station
+	outposts              map[string]*Outpost
 	asteroids             map[string]*Asteroid
 	clients               map[string]*shared.GameClient       // clients in this system
 	missiles              map[string]*Missile                 // missiles in flight in this system
@@ -68,6 +69,7 @@ type SolarSystem struct {
 	ChangedMetaItems     []*Item                                // items with changed metadata in need of saving
 	ActionReportPages    []*shared.ViewActionReportPageTicket   // requests for an action report summary page
 	ActionReportDetails  []*shared.ViewActionReportDetailTicket // requests for an action report
+	NewOutpostTickets    []*NewOutpostTicket                    // newly deployed outposts that need to be generated and saved by core
 	NewItemsDevHax       []*NewItemFromNameTicketDevHax         // requests to create an item for devhax
 	NewShipsDevHax       []*NewShipFromNameTicketDevHax         // requests to create a ship for devhax
 }
@@ -87,6 +89,7 @@ func (s *SolarSystem) Initialize() {
 	s.planets = make(map[string]*Planet)
 	s.jumpholes = make(map[string]*Jumphole)
 	s.stations = make(map[string]*Station)
+	s.outposts = make(map[string]*Outpost)
 	s.asteroids = make(map[string]*Asteroid)
 	s.DeadShips = make([]*Ship, 0)
 	s.PlayerNeedRespawn = make([]*shared.GameClient, 0)
@@ -113,6 +116,7 @@ func (s *SolarSystem) Initialize() {
 	s.ChangedMetaItems = make([]*Item, 0)
 	s.ActionReportPages = make([]*shared.ViewActionReportPageTicket, 0)
 	s.ActionReportDetails = make([]*shared.ViewActionReportDetailTicket, 0)
+	s.NewOutpostTickets = make([]*NewOutpostTicket, 0)
 	s.NewItemsDevHax = make([]*NewItemFromNameTicketDevHax, 0)
 	s.NewShipsDevHax = make([]*NewShipFromNameTicketDevHax, 0)
 	s.pushModuleEffects = make([]models.GlobalPushModuleEffectBody, 0)
@@ -304,7 +308,10 @@ func (s *SolarSystem) processClientEventQueues() {
 				// get registry
 				targetTypeReg := models.SharedTargetTypeRegistry
 
-				if data.Type == targetTypeReg.Station {
+				// check if dockable
+				isDockable := data.Type == targetTypeReg.Station || data.Type == targetTypeReg.Outpost
+
+				if isDockable {
 					// find station
 					station := s.stations[string(data.TargetID.String())]
 
@@ -314,7 +321,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					}
 
 					// check standings
-					v, oh := sh.CheckStandings(station.FactionID)
+					v, oh := sh.checkStandings(station.FactionID)
 
 					if oh {
 						c.WriteErrorMessage("docking denied - openly hostile")
@@ -2285,6 +2292,20 @@ func (s *SolarSystem) processClientEventQueues() {
 				// write response to client
 				c.WriteMessage(&cu)
 			}
+		} else if evt.Type == msgRegistry.ConsumeOutpostKit {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientConsumeOutpostKitBody)
+
+				// consume outpost kit
+				err := sh.ConsumeOutpostKitFromCargo(data.ItemID, false)
+
+				// there is a reason this could fail the player will need to know about
+				if err != nil {
+					// send error message to client
+					c.WriteErrorMessage(err.Error())
+				}
+			}
 		}
 	}
 }
@@ -2428,6 +2449,14 @@ func (s *SolarSystem) updateShips() {
 				bm = *e.BehaviourMode
 			}
 
+			aggro := ""
+
+			if e.Aggressors != nil {
+				for _, u := range e.Aggressors {
+					aggro = fmt.Sprintf("%v|{%v %v}", aggro, u.CharacterName, u.UserID)
+				}
+			}
+
 			shared.TeeLog(
 				fmt.Sprintf(
 					"[%v] %v was destroyed (%v::%v>>%v)",
@@ -2435,7 +2464,7 @@ func (s *SolarSystem) updateShips() {
 					e.CharacterName,
 					e.Texture,
 					bm,
-					e.PlayerAggressors,
+					aggro,
 				),
 			)
 		} else {
@@ -2483,7 +2512,7 @@ func (s *SolarSystem) updateMissiles() {
 					hullDmg, _ := m.ItemMeta.GetFloat64("hull_damage")
 
 					// apply damage to ship
-					sB.DealDamage(
+					sB.dealDamage(
 						shieldDmg,
 						armorDmg,
 						hullDmg,
@@ -2810,6 +2839,24 @@ func (s *SolarSystem) sendClientUpdates() {
 		})
 	}
 
+	for _, d := range s.outposts {
+		gu.Outposts = append(gu.Outposts, models.GlobalOutpostInfo{
+			ID:          d.ID,
+			SystemID:    d.SystemID,
+			OutpostName: d.OutpostName,
+			PosX:        d.PosX,
+			PosY:        d.PosY,
+			ShieldP:     ((d.Shield / d.GetRealMaxShield()) * 100) + Epsilon,
+			ArmorP:      ((d.Armor / d.GetRealMaxArmor()) * 100) + Epsilon,
+			HullP:       ((d.Hull / d.GetRealMaxHull()) * 100) + Epsilon,
+			Texture:     d.TemplateData.Texture,
+			Radius:      d.TemplateData.Radius,
+			Mass:        d.TemplateData.BaseMass,
+			Theta:       d.Theta,
+			FactionID:   d.FactionID,
+		})
+	}
+
 	for _, d := range s.missiles {
 		if d.TicksRemaining <= 0 {
 			continue
@@ -2921,6 +2968,11 @@ func (s *SolarSystem) sendClientUpdates() {
 
 		// stations
 		for _, d := range s.stations {
+			// skip outpost shims
+			if d.isOutpostShim {
+				continue
+			}
+
 			gu.Stations = append(gu.Stations, models.GlobalStationInfo{
 				ID:          d.ID,
 				SystemID:    d.SystemID,
@@ -3283,6 +3335,60 @@ func (s *SolarSystem) RemoveShip(c *Ship, lock bool) {
 	delete(s.ships, c.ID.String())
 }
 
+// Adds an outpost to the system
+func (s *SolarSystem) AddOutpost(c *Outpost, lock bool) *Station {
+	// safety check
+	if c == nil {
+		return nil
+	}
+
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// store pointer to system
+	c.CurrentSystem = s
+
+	// verify no station with this id exists that would cause shim issues
+	_, stv := s.stations[c.ID.String()]
+
+	if stv {
+		return nil
+	}
+
+	// create shim station for outpost
+	osm := Station{
+		ID:          c.ID,
+		SystemID:    c.SystemID,
+		StationName: c.OutpostName,
+		PosX:        c.PosX,
+		PosY:        c.PosY,
+		Texture:     c.TemplateData.Texture,
+		Radius:      c.TemplateData.Radius,
+		Mass:        0,
+		Theta:       c.Theta,
+		FactionID:   c.FactionID,
+		// in-memory only
+		Lock:           sync.Mutex{},
+		CurrentSystem:  s,
+		OpenSellOrders: make(map[string]*SellOrder),
+		Processes:      make(map[string]*StationProcess),
+		Faction:        c.Faction,
+		isOutpostShim:  true,
+	}
+
+	// add shim
+	s.stations[c.ID.String()] = &osm
+
+	// add outpost
+	s.outposts[c.ID.String()] = c
+
+	// return pointer to shim
+	return &osm
+}
+
 // Adds a star to the system
 func (s *SolarSystem) AddStar(c *Star) {
 	// safety check
@@ -3535,7 +3641,34 @@ func (s *SolarSystem) CopyStations(lock bool) map[string]*Station {
 
 	// copy stations into copy map
 	for k, v := range s.stations {
+		// skip outpost shims
+		if v.isOutpostShim {
+			continue
+		}
+
+		// copy station
 		c := v.CopyStation()
+		copy[k] = &c
+	}
+
+	// return copy map
+	return copy
+}
+
+// Returns a copy of the outposts in the system
+func (s *SolarSystem) CopyOutposts(lock bool) map[string]*Outpost {
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// make map for copies
+	copy := make(map[string]*Outpost)
+
+	// copy outposts into copy map
+	for k, v := range s.outposts {
+		c := v.CopyOutpost()
 		copy[k] = &c
 	}
 

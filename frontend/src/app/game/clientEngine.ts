@@ -62,6 +62,7 @@ import { ActionReportsWindow } from './gdi/windows/actionReportsWindow';
 import { ServerActionReportsPage } from './wsModels/bodies/viewActionReportsPage';
 import * as ClipboardJS from 'clipboard';
 import { ServerDockedUsersUpdate } from './wsModels/bodies/dockedUsersUpdate';
+import { Outpost } from './engineModels/outpost';
 
 class EngineSack {
   constructor() {}
@@ -127,7 +128,7 @@ export function clientStart(
   wsService: WsService,
   gameCanvas: HTMLCanvasElement,
   backCanvas: HTMLCanvasElement,
-  sid: string
+  sid: string,
 ) {
   // set canvases to initial width
   const clientWidth = document.documentElement.clientWidth;
@@ -167,20 +168,20 @@ export function clientStart(
   engineSack.pushErrorWindow.initialize();
   engineSack.pushErrorWindow.pack();
   engineSack.pushErrorWindow.setX(
-    gameCanvas.width / 2 - engineSack.pushErrorWindow.getWidth() / 2
+    gameCanvas.width / 2 - engineSack.pushErrorWindow.getWidth() / 2,
   );
   engineSack.pushErrorWindow.setY(
-    gameCanvas.height / 2 - engineSack.pushErrorWindow.getHeight() / 2
+    gameCanvas.height / 2 - engineSack.pushErrorWindow.getHeight() / 2,
   );
 
   engineSack.pushInfoWindow = new PushInfoWindow();
   engineSack.pushInfoWindow.initialize();
   engineSack.pushInfoWindow.pack();
   engineSack.pushInfoWindow.setX(
-    gameCanvas.width / 2 - engineSack.pushInfoWindow.getWidth() / 2
+    gameCanvas.width / 2 - engineSack.pushInfoWindow.getWidth() / 2,
   );
   engineSack.pushInfoWindow.setY(
-    gameCanvas.height / 2 - engineSack.pushInfoWindow.getHeight() / 2
+    gameCanvas.height / 2 - engineSack.pushInfoWindow.getHeight() / 2,
   );
 
   engineSack.shipStatusWindow = new ShipStatusWindow();
@@ -219,7 +220,7 @@ export function clientStart(
   engineSack.targetInteractionWindow.initialize();
   engineSack.targetInteractionWindow.setWsSvc(wsService);
   engineSack.targetInteractionWindow.setX(
-    gameCanvas.width - engineSack.targetInteractionWindow.getWidth()
+    gameCanvas.width - engineSack.targetInteractionWindow.getWidth(),
   );
   engineSack.targetInteractionWindow.setY(0);
   engineSack.targetInteractionWindow.pack();
@@ -228,12 +229,12 @@ export function clientStart(
   engineSack.overviewWindow.setHeight(gameCanvas.height / 2);
   engineSack.overviewWindow.initialize();
   engineSack.overviewWindow.setX(
-    gameCanvas.width - engineSack.overviewWindow.getWidth()
+    gameCanvas.width - engineSack.overviewWindow.getWidth(),
   );
   engineSack.overviewWindow.setY(
     engineSack.targetInteractionWindow.getY() +
       engineSack.targetInteractionWindow.getHeight() +
-      GDIStyle.windowHandleHeight
+      GDIStyle.windowHandleHeight,
   );
   engineSack.overviewWindow.pack();
 
@@ -265,7 +266,7 @@ export function clientStart(
     gameCanvas.height -
       engineSack.systemChatWindow.getHeight() -
       GDIStyle.windowHandleHeight -
-      1
+      1,
   );
   engineSack.systemChatWindow.pack();
 
@@ -295,11 +296,14 @@ export function clientStart(
   engineSack.windowManager.manageWindow(engineSack.shipStatusWindow, '☍');
   engineSack.windowManager.manageWindow(
     engineSack.targetInteractionWindow,
-    '☉'
+    '☉',
   );
   engineSack.windowManager.manageWindow(engineSack.shipFittingWindow, 'Ʌ');
   engineSack.windowManager.manageWindow(engineSack.ordersMarketWindow, '₪');
-  engineSack.windowManager.manageWindow(engineSack.industrialMarketWindow, '⚙');
+  engineSack.windowManager.manageWindow(
+    engineSack.industrialMarketWindow,
+    '⚙',
+  );
   engineSack.windowManager.manageWindow(engineSack.starMapWindow, '⊞');
   engineSack.windowManager.manageWindow(engineSack.reputationSheetWindow, '❉');
   engineSack.windowManager.manageWindow(engineSack.propertySheetWindow, '⬢');
@@ -495,6 +499,10 @@ function handleGlobalUpdate(d: GameMessage) {
 
     if (!msg.stations || msg.stations == null) {
       msg.stations = [];
+    }
+
+    if (!msg.outposts || msg.outposts == null) {
+      msg.outposts = [];
     }
 
     if (!msg.ships || msg.ships == null) {
@@ -735,7 +743,30 @@ function handleGlobalUpdate(d: GameMessage) {
         engineSack.player.currentSystem.stations.push(new Station(p));
       }
 
-      // note: npc stations are indestructible for gameplay reasons, but the player owned equivalent "outposts" will not be!
+      // note: npc stations are indestructible for gameplay reasons, but the player owned equivalent "outposts" are not!
+    }
+
+    // update outposts
+    for (const sh of msg.outposts) {
+      let match = false;
+
+      // find outpost in memory
+      for (const sm of engineSack.player.currentSystem.outposts) {
+        if (sh.id === sm.id) {
+          match = true;
+
+          // sync outpost in memory
+          sm.sync(sh);
+
+          // exit loop
+          break;
+        }
+      }
+
+      if (!match) {
+        // add outpost to memory
+        engineSack.player.currentSystem.outposts.push(new Outpost(sh));
+      }
     }
 
     // start new module effects
@@ -838,7 +869,7 @@ function handleStarMapUpdate(d: GameMessage) {
   if (msg.cachedMapData) {
     // update starmap cache
     engineSack.player.currentStarMap = new UnwrappedStarMapData(
-      msg.cachedMapData
+      msg.cachedMapData,
     );
   }
 }
@@ -903,13 +934,32 @@ function handleCurrentShipUpdate(d: GameMessage) {
 
   // dock check
   if (!!msg.currentShipInfo.dockedAtStationID) {
+    // store docked at id as target
     engineSack.player.currentTargetID = msg.currentShipInfo.dockedAtStationID;
-    engineSack.player.currentTargetType = TargetType.Station;
+
+    // check if docked at station
+    if (
+      engineSack.player.currentSystem.stations.filter(
+        (x) => x.id == msg.currentShipInfo.dockedAtStationID,
+      ).length == 1
+    ) {
+      engineSack.player.currentTargetType = TargetType.Station;
+    }
+
+    // check if docked at outpost
+    if (
+      engineSack.player.currentSystem.outposts.filter(
+        (x) => x.id == msg.currentShipInfo.dockedAtStationID,
+      ).length == 1
+    ) {
+      engineSack.player.currentTargetType = TargetType.Outpost;
+    }
 
     // store target on overview window as well
     engineSack.overviewWindow.selectedItemID =
-      msg.currentShipInfo.dockedAtStationID;
-    engineSack.overviewWindow.selectedItemType = TargetType.Station;
+      engineSack.player.currentTargetID;
+    engineSack.overviewWindow.selectedItemType =
+      engineSack.player.currentTargetType;
   }
 
   // update status window
@@ -1085,7 +1135,7 @@ function gfxDockOverlay() {
     engineSack.gfx.width / 2 - 100,
     engineSack.gfx.height / 2 - 25,
     200,
-    50
+    50,
   );
 
   // draw docked text
@@ -1094,7 +1144,7 @@ function gfxDockOverlay() {
   engineSack.ctx.fillText(
     'Docked',
     engineSack.gfx.width / 2 - 100,
-    engineSack.gfx.height / 2
+    engineSack.gfx.height / 2,
   );
 }
 
@@ -1166,6 +1216,15 @@ function periodicUpdate() {
 
   // update position if docked
   if (!!engineSack.player.currentShip.dockedAtStationID) {
+    // check outposts
+    for (const st of engineSack.player.currentSystem.outposts) {
+      if (st.id == engineSack.player.currentShip.dockedAtStationID) {
+        engineSack.camera.x = st.x;
+        engineSack.camera.y = st.y;
+      }
+    }
+
+    // check stations
     for (const st of engineSack.player.currentSystem.stations) {
       if (st.id == engineSack.player.currentShip.dockedAtStationID) {
         engineSack.camera.x = st.x;
@@ -1346,10 +1405,40 @@ function updateTargetSelection() {
         // mark as untargeted
         sm.isTargeted = false;
       }
+    } else {
+      if (engineSack.player.currentShip.dockedAtStationID == sm.id) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Station);
+      }
     }
   }
 
-  // stars
+  // outposts
+  for (const sm of engineSack.player.currentSystem.outposts) {
+    // current ship target check if undocked
+    if (!engineSack.player.currentShip.dockedAtStationID) {
+      if (
+        sm.id === engineSack.player.currentTargetID &&
+        engineSack.player.currentTargetType === TargetType.Outpost
+      ) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Outpost);
+      } else {
+        // mark as untargeted
+        sm.isTargeted = false;
+      }
+    } else {
+      if (engineSack.player.currentShip.dockedAtStationID == sm.id) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Outpost);
+      }
+    }
+  }
+
+  // ships
   for (const sm of engineSack.player.currentSystem.ships) {
     // current ship target check if undocked
     if (!engineSack.player.currentShip.dockedAtStationID) {
@@ -1373,9 +1462,9 @@ function clientRender() {
   engineSack.alternateFrame = !engineSack.alternateFrame;
 
   // get camera look from interaction window
-  const look = engineSack.targetInteractionWindow.getCameraLook()
+  const look = engineSack.targetInteractionWindow.getCameraLook();
 
-  if(look[0]) {
+  if (look[0]) {
     // center camera on look
     engineSack.camera.x = look[0].x;
     engineSack.camera.y = look[0].y;
@@ -1385,10 +1474,10 @@ function clientRender() {
       if (sh.id == engineSack.player.currentShip.id) {
         engineSack.camera.x = sh.x;
         engineSack.camera.y = sh.y;
-  
+
         break;
       }
-    }  
+    }
   }
 
   // blank screen
@@ -1415,6 +1504,16 @@ function clientRender() {
   // draw npc stations
   for (const st of engineSack.player.currentSystem.stations) {
     st.render(engineSack.ctx, engineSack.camera);
+  }
+
+  // draw player-owned stations
+  const keepOutposts: Outpost[] = [];
+  for (const st of engineSack.player.currentSystem.outposts) {
+    // only draw outposts we've recently seen
+    if (st.lastSeen > engineSack.lastSyncTime - (engineSack.tpf - 2)) {
+      st.render(engineSack.ctx, engineSack.camera);
+      keepOutposts.push(st);
+    }
   }
 
   // draw asteroids
@@ -1462,10 +1561,11 @@ function clientRender() {
     ef.render(engineSack.ctx, engineSack.camera);
   }
 
-  // keep only ships / missiles / wrecks that were drawable in-memory
+  // keep only ships / missiles / wrecks / outposts that were drawable in-memory
   engineSack.player.currentSystem.ships = keepShips;
   engineSack.player.currentSystem.missiles = keepMissiles;
   engineSack.player.currentSystem.wrecks = keepWrecks;
+  engineSack.player.currentSystem.outposts = keepOutposts;
 
   // draw overlay if docked
   if (!!engineSack.player.currentShip.dockedAtStationID) {
@@ -1554,6 +1654,28 @@ function handleClick(x: number, y: number) {
         return;
       }
     }
+
+    // check to see if we're clicking on any outposts
+    for (const st of engineSack.player.currentSystem.outposts) {
+      // project coordinates to screen
+      const sX = engineSack.camera.projectX(st.x);
+      const sY = engineSack.camera.projectY(st.y);
+      const sR = engineSack.camera.projectR(st.radius);
+
+      // check for intersection
+      const m = magnitude(x, y, sX, sY);
+      if (m < sR) {
+        // set as target on client
+        engineSack.player.currentTargetID = st.id;
+        engineSack.player.currentTargetType = TargetType.Outpost;
+
+        // store target on overview window as well
+        engineSack.overviewWindow.selectedItemID = st.id;
+        engineSack.overviewWindow.selectedItemType = TargetType.Outpost;
+
+        return;
+      }
+    }
   } else {
     // issue a nav order for that location in space
     const b = new ClientNavClick();
@@ -1563,7 +1685,7 @@ function handleClick(x: number, y: number) {
       engineSack.gfx.width / 2,
       engineSack.gfx.height / 2,
       x,
-      y
+      y,
     );
     b.m =
       magnitude(engineSack.gfx.width / 2, engineSack.gfx.height / 2, x, y) /
@@ -1594,7 +1716,7 @@ function handleMouseMove(x: number, y: number) {
         engineSack.gfx.height
       ) {
         w.setY(
-          engineSack.gfx.height - (w.getHeight() + GDIStyle.windowHandleHeight)
+          engineSack.gfx.height - (w.getHeight() + GDIStyle.windowHandleHeight),
         );
       }
 

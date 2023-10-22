@@ -56,7 +56,7 @@ export class GDIBase implements GDIComponent {
       this.getX(),
       this.getY(),
       this.getWidth(),
-      this.getHeight()
+      this.getHeight(),
     );
     return rect.containsPoint(x, y);
   }

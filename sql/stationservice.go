@@ -39,7 +39,8 @@ func (s StationService) GetAllStations() ([]Station, error) {
 	sql := `
 				SELECT id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta,
 				factionid
-				FROM public.universe_stations;
+				FROM public.universe_stations
+				WHERE isoutpostshim = 'f';
 			`
 
 	rows, err := db.Query(sql)
@@ -80,7 +81,7 @@ func (s StationService) GetStationsBySolarSystem(systemID uuid.UUID) ([]Station,
 				SELECT id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta,
 				factionid
 				FROM public.universe_stations
-				WHERE universe_systemid = $1;
+				WHERE universe_systemid = $1 and isoutpostshim = 'f';
 			`
 
 	rows, err := db.Query(sql, systemID)
@@ -129,6 +130,35 @@ func (s StationService) UpdateStation(station Station) error {
 	return err
 }
 
+// Creates a new shim station for an outpost in the database
+func (s StationService) NewStationForOutpost(r *Station) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// insert station
+	sql := `
+				INSERT INTO public.universe_stations
+				(
+					id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta, factionid, isoutpostshim
+				)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 't');
+			`
+
+	q, err := db.Query(sql, r.ID, r.SystemID, r.StationName, r.PosX, r.PosY, r.Texture, r.Radius, r.Mass, r.Theta, r.FactionID)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}
+
 // Creates a new station in the database (for worldfiller)
 func (s StationService) NewStationWorldFiller(r *Station) error {
 	// get db handle
@@ -140,8 +170,10 @@ func (s StationService) NewStationWorldFiller(r *Station) error {
 
 	// insert station
 	sql := `
-			INSERT INTO public.universe_stations(
-				id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta, factionid)
+				INSERT INTO public.universe_stations
+				(
+					id, universe_systemid, stationname, pos_x, pos_y, texture, radius, mass, theta, factionid
+				)
 				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
 			`
 

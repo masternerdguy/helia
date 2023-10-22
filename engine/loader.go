@@ -456,6 +456,60 @@ func LoadUniverse() (*universe.Universe, error) {
 				s.AddStation(&station)
 			}
 
+			// load player outposts
+			outposts, err := outpostSvc.GetOutpostsBySolarSystem(s.ID, false)
+
+			if err != nil {
+				return nil, err
+			}
+
+			for _, currOutpost := range outposts {
+				// load outpost
+				outpost, err := LoadOutpost(&currOutpost, &u)
+
+				if err != nil {
+					return nil, err
+				}
+
+				// add to solar system
+				osm := s.AddOutpost(outpost, false)
+
+				// load open sell orders
+				sos, err := sellOrderSvc.GetOpenSellOrdersByStation(osm.ID)
+
+				if err != nil {
+					return nil, err
+				}
+
+				for _, o := range sos {
+					// convert to engine type
+					so := SellOrderFromSQL(&o)
+
+					if so == nil {
+						return nil, errors.New("unable to load sell order")
+					}
+
+					// load item for sale
+					it, err := itemSvc.GetItemByID(so.ItemID)
+
+					if err != nil {
+						return nil, err
+					}
+
+					item, err := LoadItem(it)
+
+					if err != nil {
+						return nil, err
+					}
+
+					// link item into order
+					so.Item = item
+
+					// store on station
+					osm.OpenSellOrders[so.ID.String()] = so
+				}
+			}
+
 			// load ships
 			ships, err := shipSvc.GetShipsBySolarSystem(s.ID, false)
 
@@ -540,8 +594,18 @@ func LoadUniverse() (*universe.Universe, error) {
 
 // Saves the current state of dynamic entities in the simulation to the database
 func saveUniverse(u *universe.Universe) {
-	// iterate over systems
+	// region counter
+	rIDX := 0
+
+	// region count
+	rC := len(u.Regions)
+
+	// iterate over regions
 	for _, r := range u.Regions {
+		// progress output
+		shared.TeeLog(fmt.Sprintf("saving region %v of %v", rIDX+1, rC))
+
+		// iterate over systems
 		for _, s := range r.Systems {
 			// get ships in system
 			ships := s.CopyShips(false)
@@ -624,7 +688,13 @@ func saveUniverse(u *universe.Universe) {
 				}
 			}
 		}
+
+		// increment counter
+		rIDX++
 	}
+
+	// save schematic runs
+	shared.TeeLog("Saving schematic runs...")
 
 	for _, sre := range schematicRunMap {
 		for _, sr := range sre {
@@ -1530,12 +1600,12 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 			ItemTypeID:         temp.ItemTypeID,
 			CanUndock:          temp.CanUndock,
 		},
-		FactionID:        owner.CurrentFactionID,
-		IsNPC:            owner.IsNPC,
-		BehaviourMode:    owner.BehaviourMode,
-		PlayerAggressors: make(map[string]*shared.PlayerReputationSheet),
-		AggressionLog:    make(map[string]*shared.AggressionLog),
-		Lock:             sync.Mutex{},
+		FactionID:     owner.CurrentFactionID,
+		IsNPC:         owner.IsNPC,
+		BehaviourMode: owner.BehaviourMode,
+		Aggressors:    make(map[string]*shared.PlayerReputationSheet),
+		AggressionLog: make(map[string]*shared.AggressionLog),
+		Lock:          sync.Mutex{},
 	}
 
 	// obtain factions read lock
@@ -1576,6 +1646,72 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 
 	// calculate initial stat caches
 	universe.RecalcAllStatCaches(sp)
+
+	// return pointer to ship
+	return sp, nil
+}
+
+// Takes a SQL Outpost and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
+func LoadOutpost(sh *sql.Outpost, u *universe.Universe) (*universe.Outpost, error) {
+	// get template
+	temp, err := outpostTemplateSvc.GetOutpostTemplateByID(sh.OutpostTemplateId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// get owner info
+	owner, err := userSvc.GetUserByID((sh.UserID))
+
+	if err != nil {
+		return nil, err
+	}
+
+	// build in-memory outpost
+	es := universe.Outpost{
+		ID:            sh.ID,
+		UserID:        sh.UserID,
+		Created:       sh.Created,
+		OutpostName:   sh.OutpostName,
+		CharacterName: owner.CharacterName,
+		PosX:          sh.PosX,
+		PosY:          sh.PosY,
+		SystemID:      sh.SystemID,
+		Theta:         sh.Theta,
+		Shield:        sh.Shield,
+		Armor:         sh.Armor,
+		Hull:          sh.Hull,
+		Destroyed:     sh.Destroyed,
+		DestroyedAt:   sh.DestroyedAt,
+		Wallet:        sh.Wallet,
+		TemplateData: universe.OutpostTemplate{
+			ID:                  temp.ID,
+			Created:             temp.Created,
+			OutpostTemplateName: temp.OutpostTemplateName,
+			WreckTexture:        temp.WreckTexture,
+			ExplosionTexture:    temp.ExplosionTexture,
+			Texture:             temp.Texture,
+			Radius:              temp.Radius,
+			BaseMass:            temp.BaseMass,
+			BaseShield:          temp.BaseShield,
+			BaseShieldRegen:     temp.BaseShieldRegen,
+			BaseArmor:           temp.BaseArmor,
+			BaseHull:            temp.BaseHull,
+			ItemTypeID:          temp.ItemTypeID,
+		},
+		FactionID: owner.CurrentFactionID,
+		Lock:      sync.Mutex{},
+	}
+
+	// obtain factions read lock
+	u.FactionsLock.RLock()
+	defer u.FactionsLock.RUnlock()
+
+	// inject faction
+	es.Faction = u.Factions[owner.CurrentFactionID.String()]
+
+	// get pointer to outpost
+	sp := &es
 
 	// return pointer to ship
 	return sp, nil

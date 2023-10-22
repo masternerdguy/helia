@@ -81,6 +81,7 @@ type MessageRegistry struct {
 	GiveItem               int
 	ViewDockedUsers        int
 	DockedUsersUpdate      int
+	ConsumeOutpostKit      int
 }
 
 // Registry of target types
@@ -92,6 +93,7 @@ type TargetTypeRegistry struct {
 	Jumphole int
 	Asteroid int
 	Wreck    int
+	Outpost  int
 }
 
 // Returns a MessageRegistry with correct enum values
@@ -166,6 +168,7 @@ func NewMessageRegistry() *MessageRegistry {
 		GiveItem:               64,
 		ViewDockedUsers:        65,
 		DockedUsersUpdate:      66,
+		ConsumeOutpostKit:      67,
 	}
 }
 
@@ -179,6 +182,7 @@ func NewTargetTypeRegistry() *TargetTypeRegistry {
 		Jumphole: 5,
 		Asteroid: 6,
 		Wreck:    7,
+		Outpost:  8,
 	}
 }
 
@@ -327,6 +331,23 @@ type GlobalStationInfo struct {
 	FactionID   uuid.UUID `json:"factionId"`
 }
 
+// Structure for passing non-secret information about a player-owned station
+type GlobalOutpostInfo struct {
+	ID          uuid.UUID `json:"id"`
+	SystemID    uuid.UUID `json:"systemId"`
+	OutpostName string    `json:"outpostName"`
+	PosX        float64   `json:"x"`
+	PosY        float64   `json:"y"`
+	ShieldP     float64   `json:"shieldP"`
+	ArmorP      float64   `json:"armorP"`
+	HullP       float64   `json:"hullP"`
+	Texture     string    `json:"texture"`
+	Radius      float64   `json:"radius"`
+	Mass        float64   `json:"mass"`
+	Theta       float64   `json:"theta"`
+	FactionID   uuid.UUID `json:"factionId"`
+}
+
 // CurrentSystemInfo Information about the user's current location
 type CurrentSystemInfo struct {
 	ID         uuid.UUID `json:"id"`
@@ -360,6 +381,7 @@ type ServerGlobalUpdateBody struct {
 	Planets           []GlobalPlanetInfo           `json:"planets"`
 	Jumpholes         []GlobalJumpholeInfo         `json:"jumpholes"`
 	Stations          []GlobalStationInfo          `json:"stations"`
+	Outposts          []GlobalOutpostInfo          `json:"outposts"`
 	Asteroids         []GlobalAsteroidInfo         `json:"asteroids"`
 	NewModuleEffects  []GlobalPushModuleEffectBody `json:"newModuleEffects"`
 	NewPointEffects   []GlobalPushPointEffectBody  `json:"newPointEffects"`
@@ -736,6 +758,12 @@ type ClientSelfDestructBody struct {
 
 // Body containing a request to consume a repair kit and convert it into health for the current ship
 type ClientConsumeRepairKitBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	ItemID    uuid.UUID `json:"itemId"`
+}
+
+// Body containing a request to consume an outpost kit and convert it into a new outpost
+type ClientConsumeOutpostKitBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ItemID    uuid.UUID `json:"itemId"`
 }

@@ -10,6 +10,7 @@ import { ClientDock } from '../../wsModels/bodies/dock';
 import { Ship } from '../../engineModels/ship';
 import { ClientUndock } from '../../wsModels/bodies/undock';
 import { GDIBar } from '../components/gdiBar';
+import { Outpost } from '../../engineModels/outpost';
 
 export class TargetInteractionWindow extends GDIWindow {
   private target: any;
@@ -209,8 +210,11 @@ export class TargetInteractionWindow extends GDIWindow {
         this.gotoBtn.setEnabled(true);
         this.orbitBtn.setEnabled(true);
 
-        // station-specific buttons
-        if (this.targetType === TargetType.Station) {
+        // dockable-object buttons
+        if (
+          this.targetType === TargetType.Station ||
+          this.targetType === TargetType.Outpost
+        ) {
           this.dockBtn.setEnabled(true);
 
           // use dock icon
@@ -242,6 +246,9 @@ export class TargetInteractionWindow extends GDIWindow {
     // update health bars
     if (this.targetType === TargetType.Ship) {
       const ct = this.target as Ship;
+      this.showHealthBarInfo(ct?.shieldP, ct?.armorP, ct?.hullP);
+    } else if (this.targetType == TargetType.Outpost) {
+      const ct = this.target as Outpost;
       this.showHealthBarInfo(ct?.shieldP, ct?.armorP, ct?.hullP);
     } else {
       this.hideHealthBarInfo();

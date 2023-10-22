@@ -209,7 +209,7 @@ export class Ship extends WSShip {
             shr,
             0,
             2 * Math.PI * (hp.cyclePercent / 100),
-            false
+            false,
           );
         } else {
           if (hpi >= 5) {

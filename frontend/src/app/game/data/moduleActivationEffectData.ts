@@ -408,7 +408,7 @@ export class ModuleActivationEffectRepository {
       thickness: 6.4,
     };
   }
-  
+
   xlAetherDragger(): ModuleActivationEffectData {
     return {
       type: 'aether_drag',
@@ -566,6 +566,156 @@ export class ModuleActivationEffectRepository {
       color: '#e6ccb3',
       filter: 'blur(6.5px)', // "feather"
       thickness: 3.5,
+    };
+  }
+
+  basicXferHeat(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 977,
+      color: 'orange',
+      filter: 'blur(7.45px)', // "feather"
+      thickness: 1.1,
+    };
+  }
+
+  basicXferEnergy(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 964,
+      color: 'red',
+      filter: 'blur(7.56px)', // "feather"
+      thickness: 1.0,
+    };
+  }
+
+  basicXferShield(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 954,
+      color: 'limegreen',
+      filter: 'blur(7.38px)', // "feather"
+      thickness: 1.2,
+    };
+  }
+
+  smallXferHeat(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 1001,
+      color: 'orange',
+      filter: 'blur(6.43px)', // "feather"
+      thickness: 1.2,
+    };
+  }
+
+  smallXferEnergy(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 995,
+      color: 'red',
+      filter: 'blur(6.57px)', // "feather"
+      thickness: 1.1,
+    };
+  }
+
+  smallXferShield(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 987,
+      color: 'limegreen',
+      filter: 'blur(6.39px)', // "feather"
+      thickness: 1.3,
+    };
+  }
+
+  mediumXferHeat(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 1123,
+      color: 'orange',
+      filter: 'blur(5.45px)', // "feather"
+      thickness: 1.3,
+    };
+  }
+
+  mediumXferEnergy(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 1009,
+      color: 'red',
+      filter: 'blur(5.53px)', // "feather"
+      thickness: 1.2,
+    };
+  }
+
+  mediumXferShield(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 993,
+      color: 'limegreen',
+      filter: 'blur(5.32px)', // "feather"
+      thickness: 1.4,
+    };
+  }
+
+  heavyXferHeat(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 1350,
+      color: 'orange',
+      filter: 'blur(4.41px)', // "feather"
+      thickness: 1.4,
+    };
+  }
+
+  heavyXferEnergy(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 1175,
+      color: 'red',
+      filter: 'blur(4.59px)', // "feather"
+      thickness: 1.3,
+    };
+  }
+
+  heavyXferShield(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 1010,
+      color: 'limegreen',
+      filter: 'blur(4.36px)', // "feather"
+      thickness: 1.5,
+    };
+  }
+
+  xlXferHeat(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 1562,
+      color: 'orange',
+      filter: 'blur(3.43px)', // "feather"
+      thickness: 1.5,
+    };
+  }
+
+  xlXferEnergy(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 1378,
+      color: 'red',
+      filter: 'blur(3.55px)', // "feather"
+      thickness: 1.4,
+    };
+  }
+
+  xlXferShield(): ModuleActivationEffectData {
+    return {
+      type: 'xfer',
+      duration: 1224,
+      color: 'limegreen',
+      filter: 'blur(3.36px)', // "feather"
+      thickness: 1.6,
     };
   }
 }

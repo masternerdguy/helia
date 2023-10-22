@@ -148,6 +148,36 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.basicRegenMask();
     } else if (b.gfxEffect === 'basic_dissip_mask') {
       this.vfxData = repo.basicDissipMask();
+    } else if (b.gfxEffect === 'basic_heat_xfer') {
+      this.vfxData = repo.basicXferHeat();
+    } else if (b.gfxEffect === 'basic_energy_xfer') {
+      this.vfxData = repo.basicXferEnergy();
+    } else if (b.gfxEffect === 'basic_shield_xfer') {
+      this.vfxData = repo.basicXferShield();
+    } else if (b.gfxEffect === 'small_heat_xfer') {
+      this.vfxData = repo.smallXferHeat();
+    } else if (b.gfxEffect === 'small_energy_xfer') {
+      this.vfxData = repo.smallXferEnergy();
+    } else if (b.gfxEffect === 'small_shield_xfer') {
+      this.vfxData = repo.smallXferShield();
+    } else if (b.gfxEffect === 'medium_heat_xfer') {
+      this.vfxData = repo.mediumXferHeat();
+    } else if (b.gfxEffect === 'medium_energy_xfer') {
+      this.vfxData = repo.mediumXferEnergy();
+    } else if (b.gfxEffect === 'medium_shield_xfer') {
+      this.vfxData = repo.mediumXferShield();
+    } else if (b.gfxEffect === 'heavy_heat_xfer') {
+      this.vfxData = repo.heavyXferHeat();
+    } else if (b.gfxEffect === 'heavy_energy_xfer') {
+      this.vfxData = repo.heavyXferEnergy();
+    } else if (b.gfxEffect === 'heavy_shield_xfer') {
+      this.vfxData = repo.heavyXferShield();
+    } else if (b.gfxEffect === 'xl_heat_xfer') {
+      this.vfxData = repo.xlXferHeat();
+    } else if (b.gfxEffect === 'xl_energy_xfer') {
+      this.vfxData = repo.xlXferEnergy();
+    } else if (b.gfxEffect === 'xl_shield_xfer') {
+      this.vfxData = repo.xlXferShield();
     } else {
       // log broken effect
       console.log(`gfx effect not found: ${b.gfxEffect}`);
@@ -259,6 +289,8 @@ export class ModuleEffect extends WsPushModuleEffect {
         this.renderAsAreaDenialDeviceEffect(camera, ctx);
       } else if (this.vfxData.type === 'ewar_mask') {
         this.renderAsEwarMaskEffect(camera, ctx);
+      } else if (this.vfxData.type === 'xfer') {
+        this.renderAsXferEffect(camera, ctx);
       }
     }
   }
@@ -269,7 +301,7 @@ export class ModuleEffect extends WsPushModuleEffect {
       const src = getTargetCoordinatesAndRadius(
         this.objStart,
         this.objStartType,
-        this.objStartHPOffset
+        this.objStartHPOffset,
       );
       const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
 
@@ -325,7 +357,7 @@ export class ModuleEffect extends WsPushModuleEffect {
       const src = getTargetCoordinatesAndRadius(
         this.objStart,
         this.objStartType,
-        this.objStartHPOffset
+        this.objStartHPOffset,
       );
       const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
 
@@ -419,7 +451,7 @@ export class ModuleEffect extends WsPushModuleEffect {
     const src = getTargetCoordinatesAndRadius(
       this.objStart,
       this.objStartType,
-      this.objStartHPOffset
+      this.objStartHPOffset,
     );
 
     // project to screen
@@ -455,7 +487,7 @@ export class ModuleEffect extends WsPushModuleEffect {
     const src = getTargetCoordinatesAndRadius(
       this.objStart,
       this.objStartType,
-      this.objStartHPOffset
+      this.objStartHPOffset,
     );
 
     // project to screen
@@ -497,7 +529,7 @@ export class ModuleEffect extends WsPushModuleEffect {
       const src = getTargetCoordinatesAndRadius(
         this.objStart,
         this.objStartType,
-        this.objStartHPOffset
+        this.objStartHPOffset,
       );
       const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
 
@@ -562,7 +594,7 @@ export class ModuleEffect extends WsPushModuleEffect {
       const src = getTargetCoordinatesAndRadius(
         this.objStart,
         this.objStartType,
-        this.objStartHPOffset
+        this.objStartHPOffset,
       );
       const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
 
@@ -619,7 +651,7 @@ export class ModuleEffect extends WsPushModuleEffect {
       const src = getTargetCoordinatesAndRadius(
         this.objStart,
         this.objStartType,
-        this.objStartHPOffset
+        this.objStartHPOffset,
       );
       const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
 
@@ -704,12 +736,75 @@ export class ModuleEffect extends WsPushModuleEffect {
     // restore filter
     ctx.filter = oldFilter;
   }
+
+  private renderAsXferEffect(camera: Camera, ctx: any) {
+    if (this.objStart && this.objEnd) {
+      // get end-point coordinates
+      const src = getTargetCoordinatesAndRadius(
+        this.objStart,
+        this.objStartType,
+        this.objStartHPOffset,
+      );
+      const dest = getTargetCoordinatesAndRadius(this.objEnd, this.objEndType);
+
+      // apply offset to destination coordinates for cooler effect
+      if (!this.endPosOffset) {
+        // get a random point within the radius of the target
+        const bR = dest[2] / 3;
+
+        const ox = randomIntFromInterval(-bR, bR);
+        const oy = randomIntFromInterval(-bR, bR);
+
+        // store offset
+        this.endPosOffset = [ox, oy];
+      }
+
+      dest[0] += this.endPosOffset[0];
+      dest[1] += this.endPosOffset[1];
+
+      // project to screen
+      const sx = camera.projectX(src[0]);
+      const sy = camera.projectY(src[1]);
+
+      const tx = camera.projectX(dest[0]);
+      const ty = camera.projectY(dest[1]);
+
+      // project xfer curve thickness
+      const lt = camera.projectR(this.vfxData.thickness);
+
+      // style curve
+      ctx.strokeStyle = this.vfxData.color;
+
+      const oldFilter = ctx.filter;
+
+      if (this.vfxData.filter) {
+        ctx.filter = this.vfxData.filter;
+      }
+
+      // animate curve effect
+      const d = magnitude(sx, sy, tx, ty);
+      const p = 1 - Math.pow(this.lifeElapsed / this.maxLifeTime, 2);
+
+      const ox = p * d;
+      const oy = p * d;
+
+      // draw curve
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.quadraticCurveTo(sx + ox, sy + oy, tx, ty);
+      ctx.lineWidth = lt;
+      ctx.stroke();
+
+      // revert filter
+      ctx.filter = oldFilter;
+    }
+  }
 }
 
 function getTargetCoordinatesAndRadius(
   tgt: any,
   tgtType: TargetType,
-  hpPos?: number[]
+  hpPos?: number[],
 ): [number, number, number] {
   if (tgtType === TargetType.Station) {
     const st = tgt as Station;

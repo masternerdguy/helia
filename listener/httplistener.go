@@ -9,6 +9,7 @@ import (
 	"helia/shared"
 	"helia/sql"
 	"io"
+	"math/rand"
 	"net/http"
 	"net/mail"
 	"runtime/pprof"
@@ -16,6 +17,18 @@ import (
 
 	"github.com/google/uuid"
 )
+
+// Lookup table of braille cells
+var BRAILLE_CELLS = [...]string{
+	"⠮", "⠐", "⠼", "⠫", "⠩", "⠯", "⠄", "⠷",
+	"⠾", "⠡", "⠬", "⠠", "⠤", "⠨", "⠌", "⠴",
+	"⠂", "⠆", "⠒", "⠲", "⠢", "⠖", "⠶", "⠦",
+	"⠔", "⠱", "⠰", "⠣", "⠿", "⠜", "⠹", "⠈",
+	"⠁", "⠃", "⠉", "⠙", "⠑", "⠋", "⠛", "⠓",
+	"⠊", "⠚", "⠅", "⠇", "⠍", "⠝", "⠕", "⠏",
+	"⠟", "⠗", "⠎", "⠞", "⠥", "⠧", "⠺", "⠭",
+	"⠽", "⠵", "⠪", "⠳", "⠻", "⠘", "⠸",
+}
 
 // Listener for handling and dispatching incoming http requests
 type HTTPListener struct {
@@ -50,8 +63,18 @@ func (l *HTTPListener) HandlePing(w http.ResponseWriter, r *http.Request) {
 	// enable cors
 	enableCors(&w)
 
+	// get health
+	ph, hm := shared.GetServerHealth()
+
+	// get 2 random braille cells because it looks cool
+	q1 := randomBraille()
+	q2 := randomBraille()
+
+	// build pingback
+	pb := fmt.Sprintf("%v %v %v %v", q1, ph, q2, hm)
+
 	// write pingback
-	fmt.Fprintf(w, "alive!")
+	fmt.Fprint(w, pb)
 }
 
 // Handles a user registering
@@ -541,4 +564,14 @@ func readUserIP(r *http.Request) string {
 	}
 
 	return IPAddress
+}
+
+// Helper function to return a random 6-dot braille cell
+func randomBraille() string {
+	// get random cell
+	i := rand.Intn(len(BRAILLE_CELLS))
+	c := BRAILLE_CELLS[i]
+
+	// return result
+	return c
 }

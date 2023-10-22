@@ -10,6 +10,7 @@ import { WSAsteroid } from '../entities/wsAsteroid';
 import { WSMissile } from '../entities/wsMissile';
 import { WSSystemChatMessage } from '../entities/wsSystemChatMessage';
 import { WSWreck } from '../entities/wsWreck';
+import { WSOutpost } from '../entities/wsOutpost';
 
 export class ServerGlobalUpdateBody {
   currentSystemInfo: WSSystem;
@@ -18,6 +19,7 @@ export class ServerGlobalUpdateBody {
   planets: WSPlanet[];
   jumpholes: WSJumphole[];
   stations: WSStation[];
+  outposts: WSOutpost[];
   asteroids: WSAsteroid[];
   newModuleEffects: WsPushModuleEffect[];
   newPointEffects: WsPushPointEffect[];

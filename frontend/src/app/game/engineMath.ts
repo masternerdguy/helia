@@ -4,7 +4,7 @@ export function angleBetween(
   cx: number,
   cy: number,
   ex: number,
-  ey: number
+  ey: number,
 ): number {
   const dy = ey - cy;
   const dx = ex - cx;
@@ -22,7 +22,7 @@ export function magnitude(
   ax: number,
   ay: number,
   bx: number,
-  by: number
+  by: number,
 ): number {
   return Math.sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
 }
@@ -55,7 +55,7 @@ function convertDateToUTC(date: Date): Date {
     date.getUTCDate(),
     date.getUTCHours(),
     date.getUTCMinutes(),
-    date.getUTCSeconds()
+    date.getUTCSeconds(),
   );
 }
 

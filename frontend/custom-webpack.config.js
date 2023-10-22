@@ -30,7 +30,7 @@ module.exports = {
         stringArrayThreshold: 1,
         target: "browser",
       },
-      []
+      [],
     ),
   ],
 };

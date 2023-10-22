@@ -115,27 +115,31 @@ export class OverviewWindow extends GDIWindow {
 
     // sort entities
     const sortedJumpholes = player.currentSystem.jumpholes.sort((a, b) =>
-      (a.jumpholeName ?? '').localeCompare(b.jumpholeName ?? '')
+      (a.jumpholeName ?? '').localeCompare(b.jumpholeName ?? ''),
     );
 
     const sortedAsteroids = player.currentSystem.asteroids.sort((a, b) =>
-      (a.name ?? '').localeCompare(b.name ?? '')
+      (a.name ?? '').localeCompare(b.name ?? ''),
     );
 
     const sortedPlanets = player.currentSystem.planets.sort((a, b) =>
-      (a.planetName ?? '').localeCompare(b.planetName ?? '')
+      (a.planetName ?? '').localeCompare(b.planetName ?? ''),
     );
 
     const sortedStations = player.currentSystem.stations.sort((a, b) =>
-      (a.stationName ?? '').localeCompare(b.stationName ?? '')
+      (a.stationName ?? '').localeCompare(b.stationName ?? ''),
+    );
+
+    const sortedOutposts = player.currentSystem.outposts.sort((a, b) =>
+      (a.outpostName ?? '').localeCompare(b.outpostName ?? ''),
     );
 
     const sortedShips = player.currentSystem.ships.sort((a, b) =>
-      compareShipString(a).localeCompare(compareShipString(b))
+      compareShipString(a).localeCompare(compareShipString(b)),
     );
 
     const sortedWrecks = player.currentSystem.wrecks.sort((a, b) =>
-      (a.wreckName ?? '').localeCompare(b.wreckName ?? '')
+      (a.wreckName ?? '').localeCompare(b.wreckName ?? ''),
     );
 
     // include stars
@@ -144,7 +148,7 @@ export class OverviewWindow extends GDIWindow {
         player.currentShip.x,
         player.currentShip.y,
         i.x,
-        i.y
+        i.y,
       );
 
       objects.push({
@@ -153,7 +157,7 @@ export class OverviewWindow extends GDIWindow {
         listString: () => {
           return `${fixedString('STAR', 9)}${fixedString(
             player.currentSystem.systemName,
-            32
+            32,
           )} ${fixedString(od, 8)}`;
         },
         listColor: () => GDIStyle.listTextColor,
@@ -166,7 +170,7 @@ export class OverviewWindow extends GDIWindow {
         player.currentShip.x,
         player.currentShip.y,
         i.x,
-        i.y
+        i.y,
       );
 
       objects.push({
@@ -175,7 +179,7 @@ export class OverviewWindow extends GDIWindow {
         listString: () => {
           return `${fixedString('PLANET', 9)}${fixedString(
             i.planetName,
-            32
+            32,
           )} ${fixedString(od, 8)}`;
         },
         listColor: () => GDIStyle.listTextColor,
@@ -188,7 +192,7 @@ export class OverviewWindow extends GDIWindow {
         player.currentShip.x,
         player.currentShip.y,
         i.x,
-        i.y
+        i.y,
       );
 
       const d: OverviewRow = {
@@ -199,8 +203,35 @@ export class OverviewWindow extends GDIWindow {
 
           return `${fixedString('STATION', 9)}${fixedString(
             '[' + faction?.ticker + ']',
-            6
+            6,
           )}${fixedString(i.stationName, 26)} ${fixedString(od, 8)}`;
+        },
+        listColor: () => i.getStandingColor(),
+      };
+
+      objects.push(d);
+      stations.push(d);
+    }
+
+    // include outposts
+    for (const i of sortedOutposts) {
+      const od = overviewDistance(
+        player.currentShip.x,
+        player.currentShip.y,
+        i.x,
+        i.y,
+      );
+
+      const d: OverviewRow = {
+        object: i,
+        type: TargetType.Outpost,
+        listString: () => {
+          const faction = i.getFaction();
+
+          return `${fixedString('OUTPOST', 9)}${fixedString(
+            '[' + faction?.ticker + ']',
+            6,
+          )}${fixedString(i.outpostName, 26)} ${fixedString(od, 8)}`;
         },
         listColor: () => i.getStandingColor(),
       };
@@ -220,7 +251,7 @@ export class OverviewWindow extends GDIWindow {
         player.currentShip.x,
         player.currentShip.y,
         i.x,
-        i.y
+        i.y,
       );
 
       const d: OverviewRow = {
@@ -231,10 +262,10 @@ export class OverviewWindow extends GDIWindow {
 
           return `${fixedString('SHIP', 9)}${fixedString(
             '[' + faction?.ticker + ']',
-            6
+            6,
           )}${fixedString(i.ownerName, 18)} ${fixedString(
             i.texture,
-            7
+            7,
           )} ${fixedString(od, 8)}`;
         },
         listColor: () => i.getStandingColor(),
@@ -250,7 +281,7 @@ export class OverviewWindow extends GDIWindow {
         player.currentShip.x,
         player.currentShip.y,
         i.x,
-        i.y
+        i.y,
       );
 
       const d: OverviewRow = {
@@ -259,7 +290,7 @@ export class OverviewWindow extends GDIWindow {
         listString: () => {
           return `${fixedString('JUMPHOLE', 9)}${fixedString(
             i.jumpholeName,
-            32
+            32,
           )} ${fixedString(od, 8)}`;
         },
         listColor: () => GDIStyle.listTextColor,
@@ -275,7 +306,7 @@ export class OverviewWindow extends GDIWindow {
         player.currentShip.x,
         player.currentShip.y,
         i.x,
-        i.y
+        i.y,
       );
 
       const d = {
@@ -284,7 +315,7 @@ export class OverviewWindow extends GDIWindow {
         listString: () => {
           return `${fixedString('ASTEROID', 9)}${fixedString(
             i.name,
-            32
+            32,
           )} ${fixedString(od, 8)}`;
         },
         listColor: () => GDIStyle.listTextColor,
@@ -299,7 +330,7 @@ export class OverviewWindow extends GDIWindow {
         player.currentShip.x,
         player.currentShip.y,
         i.x,
-        i.y
+        i.y,
       );
 
       const d = {
@@ -308,7 +339,7 @@ export class OverviewWindow extends GDIWindow {
         listString: () => {
           return `${fixedString('WRECK', 9)}${fixedString(
             i.wreckName,
-            32
+            32,
           )} ${fixedString(od, 8)}`;
         },
         listColor: () => GDIStyle.listTextColor,
@@ -399,7 +430,7 @@ function overviewDistance(
   px: number,
   py: number,
   x: number,
-  y: number
+  y: number,
 ): string {
   // get distance
   const d = Math.round(Math.sqrt((px - x) * (px - x) + (py - y) * (py - y)));

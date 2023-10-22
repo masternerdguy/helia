@@ -19,7 +19,7 @@ export function UpdateFactionCache(factions: Faction[]) {
 
   for (const f of factions) {
     f.relationships = f.relationships.sort(
-      (a, b) => b.standingValue - a.standingValue
+      (a, b) => b.standingValue - a.standingValue,
     );
     (window as any).factionDictionary[f.id] = new Faction(f);
   }
@@ -53,7 +53,7 @@ export function GetFactionCacheEntry(id: string): Faction {
 }
 
 export function UpdatePlayerFactionRelationshipCache(
-  playerFactions: WSPlayerFactionRelationship[]
+  playerFactions: WSPlayerFactionRelationship[],
 ) {
   if (!(window as any).playerFactionDictionary) {
     (window as any).playerFactionDictionary = {};
@@ -75,7 +75,7 @@ export function GetPlayerFactionRelationshipCache(): WSPlayerFactionRelationship
     if (
       Object.prototype.hasOwnProperty.call(
         (window as any).playerFactionDictionary,
-        f
+        f,
       )
     ) {
       const e = (window as any).playerFactionDictionary[
@@ -89,7 +89,7 @@ export function GetPlayerFactionRelationshipCache(): WSPlayerFactionRelationship
 }
 
 export function GetPlayerFactionRelationshipCacheEntry(
-  id: string
+  id: string,
 ): WSPlayerFactionRelationship {
   if (!(window as any).playerFactionDictionary) {
     return null;

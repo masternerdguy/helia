@@ -55,7 +55,7 @@ export class GDIButton extends GDIBase {
       this.ctx.fillText(
         this.getText(),
         this.getWidth() / 2,
-        this.getHeight() / 2
+        this.getHeight() / 2,
       );
 
       if (GDIStyle.buttonBorderSize > 0) {

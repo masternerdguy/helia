@@ -42,14 +42,66 @@ func main() {
 	 */
 
 	var toInject = [...]string{
-		"54933edb-7b78-4d81-b3a9-05b1bb0e905e",
-		"3c265087-fe41-4560-9f60-b9a63ec6517a",
-		"2fe67151-4524-45ec-896c-ace646bf4423",
-		"1d80c758-b5b1-4cc0-b2c2-5fa4da1cd15f",
-		"a3b12c8f-415a-4b89-a907-9db3ebf69e70",
-		"d63e0070-c63c-4a7d-baa2-65153fa9c872",
-		"a105fe63-89cc-4f53-8f1d-025c5a564d74",
-		"7aed3d73-f615-4489-ace7-43844b6776f2",
+		"21deccaa-c9b0-414e-a898-3ab9230d4528",
+		"f0cf1d7a-c1c6-41d9-a7c2-00ce1a7b0cce",
+		"b47202fc-34cf-4117-a63a-eff63c62febd",
+		"c40ad708-724f-40a9-b99d-29eec2049e98",
+		"ee66bd1c-4ac4-4ad6-9ff2-834e13580921",
+		"f4b40184-803f-4387-bfb2-439d444c29b2",
+		"76c9b909-3f15-41f4-ac77-cc13dc96ee29",
+		"7737b828-4ef0-4344-bc53-923f27a885e1",
+		"b0177b10-2b91-40a4-b695-b19681249c2b",
+		"b01122d1-3c82-49ce-ba3d-bc47de0741c1",
+		"0b5700d7-e787-43ad-84c8-c1442deff38b",
+		"c81ee20b-0466-42f6-9962-24b195fdc913",
+		"b46679ae-33c6-4392-b535-6797d3152de7",
+		"350c8d81-e6dc-457b-922e-bcf4ba3da585",
+		"215eabca-9cc5-4b94-84ee-df4be3a7888b",
+		"7723775b-24c7-4cd9-85bd-f2c943cbc2b6",
+		"7228a4d1-0cf8-4f6b-a8dd-0a84f4fa892b",
+		"88a99a46-937e-406e-a357-50d18a2e1184",
+		"85aed9df-db0b-42e7-9cbb-a5874f7dba43",
+		"26541a60-0606-464e-a86b-6745ba74c08c",
+		"198f524d-b707-49da-aa6c-17296915b231",
+		"defb2d6f-8d22-4e98-96c0-ae71eee6abf0",
+		"ce90d325-6a78-44e9-a964-df39b839a1ee",
+		"351f52bb-c581-462d-9a7d-c102942f71ca",
+		"c075da8e-efe5-4f0f-88bc-129544d545c0",
+		"2061a44b-c0ec-4d97-beec-6ad9b30011eb",
+		"0b33103e-7e46-4b6f-ae8f-8a7096ba7d4e",
+		"f4fac632-9248-459f-8309-30015c60f72f",
+		"03390735-4a97-4c70-9ab2-dd58384c962f",
+		"de7c37e5-92a0-46bb-93e2-b74d3b123a2b",
+		"622c7b71-1e76-44ca-8ce5-474fbac77245",
+		"c64f0b49-7d0f-4214-a668-803ff824ca38",
+		"374db251-abcd-466f-9b4c-a8268570c01a",
+		"4c463a82-69ca-4be2-a46a-209bd106a1fe",
+		"944b329c-5c70-4bee-b8af-ca3aa5143906",
+		"3cedf939-829d-4ceb-823f-5a6b6bdacc0c",
+		"5385eb4b-2046-46f2-901c-8555bfaeda50",
+		"ae36fea3-c8f4-47e3-9f8f-8f30d2084a83",
+		"657e02d7-b32b-4b9b-b6be-0e2fa5cc1709",
+		"6a24faa9-5b35-4339-bbf6-3a942247fe06",
+		"8a51aeca-74ff-48f0-9907-56c6008e3279",
+		"c72cc388-026b-4e0e-a8c1-2341757a80e8",
+		"947c290c-4983-4057-87e2-77ec8f1c2e73",
+		"aca8755d-e0e2-44e6-9b70-7ec09523874e",
+		"3f03b17d-821c-4350-af28-8ad49ea01e98",
+		"2256a571-4cd6-4fa1-964c-7217b26ac6fc",
+		"ce38bcee-625a-4eb7-b6cd-b48477a12854",
+		"5e5973ae-9217-4c76-999f-e60549462a1f",
+		"08b70d06-5861-495b-bccb-4daad5b11519",
+		"ba762629-2664-4331-b74a-0134360e695f",
+		"764aef65-10c4-4811-86a2-cd3fa019f935",
+		"5d8fdcc5-3116-4bdd-849c-f93838234acc",
+		"67d15f39-9861-4f90-b2ba-75de6cd1cfa1",
+		"0b7c5ed8-a114-4929-bd54-2f3d5372d3a6",
+		"a9702e63-9fb9-4f95-b81d-b5582605e4da",
+		"247ddad5-03f4-4363-a78e-2c54ecfc6e87",
+		"9808b8e0-0f63-4f4a-9f31-d1ed940fc030",
+		"c04d38e2-8c89-4775-9f27-1793a20d70fe",
+		"956a96c1-a6fa-40bc-8871-417c246f99a3",
+		"fb62983a-b1cf-4693-a87e-b31ba7867222",
 	}
 
 	// dropAsteroids(universe)
@@ -655,16 +707,17 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 
 	var textures = [...]string{
-		"coalition-4",
-		"federation-1",
+		"bad-",
+		"sanctuary-",
 		"interstar-",
+		"alvaca-",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 90367945 + int64(offset))
+			rand.Seed(int64(calculateSystemSeed(s)) - 903827450 + int64(offset))
 
 			/*if r.ID.ID()%2 != 0 {
 				continue
