@@ -31,7 +31,7 @@ To start the go backend, run `go run main.go` in the engine container.
 To start the angular frontend, run `npm start` in the frontend container. Note that obfuscation is applied as part of the build, so it may take a few minutes to start and also to apply any changes. This can be temporarily disabled by commenting out the obfuscator in `custom-webpack.config.json`, but under no circumstances should such a change be checked into source control (nor should unobfuscated code ever be exposed to the internet). Obfuscation of the client is an important part of Helia's security!
 
 # Deployment Process (alpha, frontend)
-Helia's open alpha client is was hosted on an Azure storage account as a static website, which allowed hosting for pennies on the dollar compared to a traditional app service. The easiest way to deploy is to:
+Helia's open alpha client was hosted on an Azure storage account as a static website, which allowed hosting for pennies on the dollar compared to a traditional app service. The easiest way to deploy is to:
 
 1. Run `npm run build:alpha` in the frontend container.
 2. Replace the files in the `$web` container of the `heliaalphafrontend` storage account with the new files under the `dist` folder - the easiest way is to just use Azure Storage Explorer which takes ~1 minute.
