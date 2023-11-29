@@ -1,5 +1,5 @@
 # Helia
-Helia is going to be a harsh, massively multiplayer, single world space game with nonconsensual PVP everywhere.
+Helia was intended to be a harsh, massively multiplayer, single world space game with nonconsensual PVP everywhere.
 
 # Docker
 Helia supports local development using docker containers. There are three containers defined:
