@@ -1,5 +1,5 @@
 # Helia
-Helia is going to be a harsh, massively multiplayer, single world space game with nonconsensual PVP everywhere.
+Helia was intended to be a harsh, massively multiplayer, single world space game with nonconsensual PVP everywhere.
 
 # Docker
 Helia supports local development using docker containers. There are three containers defined:
@@ -23,7 +23,7 @@ The database configuration is in `.env`.
 Flyway is used for db migrations, which are stored in `flyway/sql`. Migrations can be applied to the local database by running `flyway-migrate.sh` in the database container. `flyway-info.sh` can be used to get the migration status. Note that SQL files are ignored in this repo, so you will need to use force when attempting to add them using git add.
 
 # Starting the backend (local development)
-Helia's backend is written in go (1.20). Since it makes heavy use of goroutines, it should be run in an environment with at least 4 cores - more is better, and core count is far more important than clock speed in determining overall performance.
+Helia's backend is written in golang. Since it makes heavy use of goroutines, it should be run in an environment with at least 4 cores - more is better, and core count is far more important than clock speed in determining overall performance.
 
 To start the go backend, run `go run main.go` in the engine container.
 
@@ -31,15 +31,15 @@ To start the go backend, run `go run main.go` in the engine container.
 To start the angular frontend, run `npm start` in the frontend container. Note that obfuscation is applied as part of the build, so it may take a few minutes to start and also to apply any changes. This can be temporarily disabled by commenting out the obfuscator in `custom-webpack.config.json`, but under no circumstances should such a change be checked into source control (nor should unobfuscated code ever be exposed to the internet). Obfuscation of the client is an important part of Helia's security!
 
 # Deployment Process (alpha, frontend)
-Helia's open alpha client is currently hosted on an Azure storage account as a static website. This should allow hosting for pennies on the dollar compared to a traditional app service. The easiest way to deploy is to:
+Helia's open alpha client is was hosted on an Azure storage account as a static website, which allowed hosting for pennies on the dollar compared to a traditional app service. The easiest way to deploy is to:
 
 1. Run `npm run build:alpha` in the frontend container.
 2. Replace the files in the `$web` container of the `heliaalphafrontend` storage account with the new files under the `dist` folder - the easiest way is to just use Azure Storage Explorer which takes ~1 minute.
 
 # Deployment Process (alpha, backend)
-Deploying the backend is less trivial than the frontend. Currently, the only way to run go code in an Azure app service is to use a docker container hosted in some kind of docker registry. For privacy reasons, the `helia-backend-engine` app service is configured to pull from the `heliaalpharegistry` Azure Container Registry automatically. Whenever a new docker image is pushed, a deployment occurs. Be aware that this will result in a sudden restart, so it is critical to perform a clean shutdown using the `Save and Shutdown` endpoint, allow it to complete, and then manually stop the app service before the deployment. Otherwise, players will lose progress and players don't tend to like that.
+Deploying the backend is less trivial than the frontend. Currently, the only way to run go code in an Azure app service is to use a docker container hosted in some kind of docker registry. For privacy reasons, the `helia-backend-engine` app service was configured to pull from the `heliaalpharegistry` Azure Container Registry automatically. Whenever a new docker image is pushed, a deployment occured. Be aware that this would result in a sudden restart, so it was critical to perform a clean shutdown using the `Save and Shutdown` endpoint, allow it to complete, and then manually stop the app service before the deployment. Otherwise, players would lose progress and players don't tend to like that.
 
-Given the above, performing a backend deployment can be done by:
+Given the above, performing a backend deployment could be done by:
 
 0. Perform a clean shutdown, wait for it to complete, and then manually stop the app service.
 1. Take a backup of the production database, just in case.
@@ -52,7 +52,7 @@ It is probably best to do this outside of a container.
 # Shutting down the server properly (aka not making players very angry)
 A server shutdown can be initiated using the `Save and Shutdown` endpoint (see `Useful Links`). This will save key aspects of the current state of the simulation and shut down the server. It is critical to always perform a clean shutdown - whether before a backend deployment or otherwise. If a clean shutdown is not performed, players will lose progress.
 
-Also note that the app service will try to restart automatically a few minutes after the shutdown because it detects an "unhealthy resource" - it is important to monitor the logs table for the `shutdown complete` message and then manually stop the app service. Note that Helia does take ~10 minutes to boot within this particular Azure app service, and it is completely safe to stop the app service during startup. However, if the simulation is allowed to fully start a clean shutdown must be performed again.
+Also note that the app service would try to restart automatically a few minutes after the shutdown because it detects an "unhealthy resource" - it was important to monitor the logs table for the `shutdown complete` message and then manually stop the app service. Note that it is completely safe to stop the app service during startup. However, if the simulation is allowed to fully start a clean shutdown must be performed again.
 
 # Daily Downtime
 Helia is intended to be cleanly shut down and restarted once a day. If this doesn't happen, some gameplay aspects (such as transient jumphole connections) will become stale and won't be regenerated. Automatic restarts are scheduled to occur at noon EDT and are handled by a core goroutine.
