@@ -145,8 +145,8 @@ func (a *PlayerReputationSheet) Scan(value interface{}) error {
 
 // Hashes a user's password using their email address and an internal constant as the salt
 func (s UserService) Hashpass(emailaddress string, pwd string) (hash *string, err error) {
-	const salt = "_4ppl3j4ck!_"
-	token := []byte(fmt.Sprintf("%s-xiwmg-%s-dnjij-%s", emailaddress, pwd, salt))
+	const salt = "~SaGe|_rHubarB!_()"
+	token := []byte(fmt.Sprintf("%s-znl4q*%s-xcvd0-%s", emailaddress, pwd, salt))
 
 	hp := fmt.Sprintf("%x", sha256.Sum256(token))
 
