@@ -7,7 +7,6 @@ import (
 	"helia/shared"
 	"helia/sql"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"runtime/debug"
@@ -45,10 +44,6 @@ func main() {
 		shared.TeeLog(err.Error())
 		panic(err)
 	}
-
-	// initialize RNG
-	shared.TeeLog("Initializing RNG...")
-	rand.Seed(time.Now().UnixNano())
 
 	// start profiling if requested
 	if PROFILE_CPU {
