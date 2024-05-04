@@ -148,10 +148,6 @@ func (s UserService) Hashpass(emailaddress string, pwd string) (hash *string, er
 	const salt = "_4ppl3j4ck!_"
 	token := []byte(fmt.Sprintf("%s-xiwmg-%s-dnjij-%s", emailaddress, pwd, salt))
 
-	if err != nil {
-		return nil, err
-	}
-
 	hp := fmt.Sprintf("%x", sha256.Sum256(token))
 
 	return &hp, nil

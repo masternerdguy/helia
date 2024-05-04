@@ -31,10 +31,6 @@ func (s SessionService) NewSession(userid uuid.UUID, remoteIP string) (*Session,
 		return nil, err
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
 	// insert Session
 	sql := `
 				INSERT INTO sessions(id, userid, remoteip)
@@ -63,10 +59,6 @@ func (s SessionService) NewSession(userid uuid.UUID, remoteIP string) (*Session,
 func (s SessionService) GetSessionByID(sessionid uuid.UUID) (*Session, error) {
 	// get db handle
 	db, err := connect()
-
-	if err != nil {
-		return nil, err
-	}
 
 	if err != nil {
 		return nil, err
