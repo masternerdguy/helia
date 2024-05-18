@@ -1892,7 +1892,6 @@ func (s *Ship) siphonEnergy(
 // Siphons heat from the ship, returns the actual amount siphoned
 func (s *Ship) siphonHeat(
 	maxSiphonAmount float64,
-	assisterModule *FittedSlot,
 ) float64 {
 	// limit amount to siphon so that the remaining amount is positive
 	actualSiphon := 0.0
@@ -1918,7 +1917,6 @@ func (s *Ship) siphonHeat(
 // Receives energy and returns the excess that could not be stored
 func (s *Ship) receiveEnergy(
 	maxRecAmount float64,
-	assisterModule *FittedSlot,
 ) float64 {
 	// limit amount to receive so that max is not exceeded
 	actualReceived := 0.0
@@ -1939,7 +1937,6 @@ func (s *Ship) receiveEnergy(
 // Receives shield and returns the excess that could not be stored
 func (s *Ship) receiveShield(
 	maxRecAmount float64,
-	assisterModule *FittedSlot,
 ) float64 {
 	// limit amount to receive so that max is not exceeded
 	actualReceived := 0.0

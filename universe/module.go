@@ -2687,7 +2687,7 @@ func (m *FittedSlot) activateAsHeatXfer() bool {
 		}
 
 		// reduce heat on target
-		actualXfer := c.siphonHeat(maxXferAmt, m)
+		actualXfer := c.siphonHeat(maxXferAmt)
 
 		// increase local heat
 		m.shipMountedOn.Heat += actualXfer
@@ -2841,7 +2841,7 @@ func (m *FittedSlot) activateAsEnergyXfer() bool {
 		}
 
 		// increase energy on target
-		actualXfer := c.receiveEnergy(maxXferAmt, m)
+		actualXfer := c.receiveEnergy(maxXferAmt)
 
 		// decrease local energy
 		m.shipMountedOn.Energy -= actualXfer
@@ -2995,7 +2995,7 @@ func (m *FittedSlot) activateAsShieldXfer() bool {
 		}
 
 		// increase shield on target
-		actualXfer := c.receiveShield(maxXferAmt, m)
+		actualXfer := c.receiveShield(maxXferAmt)
 
 		// decrease local shield
 		m.shipMountedOn.Shield -= actualXfer
