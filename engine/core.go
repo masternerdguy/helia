@@ -214,9 +214,9 @@ func (e *HeliaEngine) Start() {
 					shared.TeeLog("Automatic scheduled reboot will occur soon!")
 
 					// message explaining situation to players
-					sm := "Helia reboots once a day at noon EDT for scheduled maintainence." +
+					sm := "Helia reboots once a day at noon EDT for scheduled maintainence. " +
 						"A reboot will occur in ~10 minutes - please ensure you have gotten to a safe place " +
-						"before then. The server is expected to take ~30 minutes to reboot."
+						"before then. The server is expected to take ~60 minutes to reboot."
 
 					// send message to connected clients informing them of shutdown
 					b, _ := json.Marshal(models.ServerPushInfoMessage{
