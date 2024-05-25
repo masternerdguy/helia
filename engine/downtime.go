@@ -15,7 +15,6 @@ type DownTimeRunner struct {
 	userSvc    sql.UserService
 	factionSvc sql.FactionService
 	startSvc   sql.StartService
-	shipSvc    sql.ShipService
 }
 
 // Initializes downtime job structure
@@ -30,7 +29,6 @@ func (d *DownTimeRunner) Initialize() {
 	d.userSvc = sql.GetUserService()
 	d.factionSvc = *sql.GetFactionService()
 	d.startSvc = *sql.GetStartService()
-	d.shipSvc = sql.GetShipService()
 
 	// mark as ready
 	DownTimeInitialized = true
