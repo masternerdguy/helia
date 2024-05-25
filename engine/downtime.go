@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"helia/shared"
 	"helia/sql"
 	"time"
@@ -282,6 +283,8 @@ func (d *DownTimeRunner) respawnStrandedNPCs() error {
 
 	// iterate over stranded NPCs
 	for _, m := range l {
+		shared.TeeLog(fmt.Sprintf("Attempting to respawn stranded NPC %v", m.ID))
+
 		// get start
 		s, err := startSvc.GetStartByID(m.StartID)
 
