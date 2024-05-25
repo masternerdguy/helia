@@ -539,3 +539,46 @@ func (s UserService) GetUsersByFactionID(factionID uuid.UUID) ([]User, error) {
 
 	return users, err
 }
+
+// Retrieves all NPC users who do not have a live ship
+func (s UserService) GetStrandedNPCs() ([]User, error) {
+	users := make([]User, 0)
+
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// load users
+	sql := `SELECT id, charactername, hashpass, registered, banned, current_shipid, escrow_containerid, current_factionid, reputationsheet,
+				   isnpc, behaviourmode, emailaddress, experiencesheet, startid, isdev
+			FROM users
+			WHERE isnpc = 't' and id NOT IN
+			(
+				SELECT userid FROM ships where destroyedat is null
+			)`
+
+	rows, err := db.Query(sql)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		s := User{}
+
+		// scan into user structure
+		rows.Scan(&s.ID, &s.CharacterName, &s.Hashpass, &s.Registered, &s.Banned, &s.CurrentShipID,
+			&s.EscrowContainerID, &s.CurrentFactionID, &s.ReputationSheet, &s.IsNPC, &s.BehaviourMode, &s.EmailAddress,
+			&s.ExperienceSheet, &s.StartID, &s.IsDev)
+
+		// append to user slice
+		users = append(users, s)
+	}
+
+	return users, err
+}

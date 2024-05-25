@@ -15,6 +15,7 @@ type DownTimeRunner struct {
 	userSvc    sql.UserService
 	factionSvc sql.FactionService
 	startSvc   sql.StartService
+	shipSvc    sql.ShipService
 }
 
 // Initializes downtime job structure
@@ -29,6 +30,7 @@ func (d *DownTimeRunner) Initialize() {
 	d.userSvc = sql.GetUserService()
 	d.factionSvc = *sql.GetFactionService()
 	d.startSvc = *sql.GetStartService()
+	d.shipSvc = sql.GetShipService()
 
 	// mark as ready
 	DownTimeInitialized = true
@@ -71,6 +73,13 @@ func (d *DownTimeRunner) RunDownTimeTasks() {
 
 	// average player faction standings from members
 	err = d.averagePlayerFactionStandings()
+
+	if err != nil {
+		panic(err)
+	}
+
+	// respawn stranded NPCs
+	err = d.respawnStrandedNPCs()
 
 	if err != nil {
 		panic(err)
@@ -260,4 +269,35 @@ func (d *DownTimeRunner) disbandLeaderlessPlayerFactions() error {
 	}
 
 	return nil
+}
+
+// Detects NPCs that failed to respawn and respawns them
+func (d *DownTimeRunner) respawnStrandedNPCs() error {
+	shared.TeeLog("  - respawnStrandedNPCs()")
+
+	// get stranded NPCs
+	l, err := userSvc.GetStrandedNPCs()
+
+	if err != nil || l == nil {
+		panic("! unable to list stranded NPCs!")
+	}
+
+	// iterate over stranded NPCs
+	for _, m := range l {
+		// get start
+		s, err := startSvc.GetStartByID(m.StartID)
+
+		if err != nil || s == nil {
+			panic("! unable to get start for stranded NPC!")
+		}
+
+		// respawn ship
+		u, err := CreateNoobShipForPlayer(s, m.ID)
+
+		if err != nil || u == nil {
+			panic("! unable to respawn stranded NPC!")
+		}
+	}
+
+	return err
 }
