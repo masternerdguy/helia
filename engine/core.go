@@ -601,12 +601,12 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				// load new item
 				ni, err := itemSvc.GetItemByID(*id)
 
-				if err != nil {
+				if err != nil || ni == nil {
 					shared.TeeLog(fmt.Sprintf("Unable to load new item %v: %v", mi.ID, err))
 				} else {
 					fi, err := LoadItem(ni)
 
-					if err != nil {
+					if err != nil || fi == nil {
 						shared.TeeLog(fmt.Sprintf("Unable to integrate new item %v: %v", mi.ID, err))
 					} else {
 						// copy loaded values
@@ -670,12 +670,12 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 					// load new item
 					ni, err := itemSvc.GetItemByID(*id)
 
-					if err != nil {
+					if err != nil || ni == nil {
 						shared.TeeLog(fmt.Sprintf("Unable to load new item [devhax] %v: %v", mi.ID, err))
 					} else {
 						fi, err := LoadItem(ni)
 
-						if err != nil {
+						if err != nil || fi == nil {
 							shared.TeeLog(fmt.Sprintf("Unable to integrate new item [devhax] %v: %v", mi.ID, err))
 						} else {
 							// copy loaded values
