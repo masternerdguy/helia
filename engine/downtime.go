@@ -283,6 +283,7 @@ func (d *DownTimeRunner) respawnStrandedNPCs() error {
 
 	// iterate over stranded NPCs
 	for _, m := range l {
+		// debug out
 		shared.TeeLog(fmt.Sprintf("Attempting to respawn stranded NPC %v", m.ID))
 
 		// get start
@@ -298,6 +299,9 @@ func (d *DownTimeRunner) respawnStrandedNPCs() error {
 		if err != nil || u == nil {
 			panic("! unable to respawn stranded NPC!")
 		}
+
+		// debug out
+		shared.TeeLog(fmt.Sprintf("Stranded NPC %v respawned with %v", m.ID, u.CurrentShipID))
 	}
 
 	return err
