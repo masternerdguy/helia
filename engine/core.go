@@ -601,12 +601,12 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				// load new item
 				ni, err := itemSvc.GetItemByID(*id)
 
-				if err != nil || id == nil {
+				if err != nil {
 					shared.TeeLog(fmt.Sprintf("Unable to load new item %v: %v", mi.ID, err))
 				} else {
 					fi, err := LoadItem(ni)
 
-					if err != nil || id == nil {
+					if err != nil {
 						shared.TeeLog(fmt.Sprintf("Unable to integrate new item %v: %v", mi.ID, err))
 					} else {
 						// copy loaded values
@@ -670,12 +670,12 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 					// load new item
 					ni, err := itemSvc.GetItemByID(*id)
 
-					if err != nil || id == nil {
+					if err != nil {
 						shared.TeeLog(fmt.Sprintf("Unable to load new item [devhax] %v: %v", mi.ID, err))
 					} else {
 						fi, err := LoadItem(ni)
 
-						if err != nil || id == nil {
+						if err != nil {
 							shared.TeeLog(fmt.Sprintf("Unable to integrate new item [devhax] %v: %v", mi.ID, err))
 						} else {
 							// copy loaded values
@@ -961,7 +961,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			// save ship
 			err = shipSvc.UpdateShip(*ns)
 
-			if home == nil {
+			if err != nil {
 				shared.TeeLog(fmt.Sprintf("! Unable to respawn NPC %v - couldn't save noob ship changes (%v)!", rs.UserID, err))
 				return
 			}
@@ -1088,7 +1088,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			// save noob ship
 			err = shipSvc.UpdateShip(*ns)
 
-			if home == nil {
+			if err != nil {
 				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - couldn't save noob ship changes (%v)!", rs.UID, err))
 				return
 			}
