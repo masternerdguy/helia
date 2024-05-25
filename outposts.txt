@@ -1,0 +1,67 @@
+* Outposts are player-built stations
+* Outposts are destructible - when their hull reaches 0 they are destroyed with the following effects:
+	- All docked players and NPCs are immediately undocked in their current ship
+	- All ships docked at the outpost that are not currently flown are destroyed
+	- A wreck is created for the outpost that can contain anything that was on a ship destroyed within
+	- If the player cannot be undocked, they are killed and respawn at their faction home station
+	- Destroying an outpost does NOT result in a standings adjustment (although blowing up the ejected players will adjust as usual)
+* Building an outpost requires an outpost construction kit of the appropriate type
+	- Kits range in size from 200k to 600k cargo units and therefore require a superfreighter to carry
+	- Deploying a kit is instant
+	- A kit may not be deployed too close to another of the following:
+		- NPC Station				175k
+		- Outpost				325k
+		- Asteroid				 75k
+		- Jumphole				125k
+* Once deployed, a kit immediately becomes a rudimentary outpost
+	- The player deploying the kit becomes the outpost owner
+		- The outpost shows up similar to a ship in their property window, which allows them to manage it
+	- Players and NPCs may dock according to their standings much like an NPC station
+		- The outpost owner will always be able to dock regardless of standings
+		- Players in the same faction as the outpost owner will always be able to dock regardless of standings
+		- If the outpost owner changes factions, so does the outpost
+	- The orders market is available and fully functional
+	- The industrial market is empty and therefore not functional
+	- It is possible to do typical docked-at-station things in your cargo bay such as using repair kits
+	- It is possible to store and switch between multiple owned ships as usual
+	- Factions may not be founded at an outpost
+* An outpost may be upgraded in the following ways
+	- by transferring a schematic into the outpost's schematic bay using the property window
+		- this will add a station process for the given schematic based on its inputs and outputs
+		- silos will be available to trade with in the industrial window just like an NPC station
+		- an outpost has a wallet that will be used for transactions
+			- money can be moved in and out of this wallet using the property window just like a ship
+		- once installed, a schematic cannot be removed
+		- depending on the kit used to construct the outpost, an outpost can run ~10-100 schematics
+		- only one schematic may be installed per day
+	- by transferring an outpost subsystem into the outpost's subsystem bay using the property window
+		- subsystems include:
+			- Archival Subsystem: Allows players of the controlling faction to respawn at the outpost (players may opt-in when docked there)
+			- Industrial Subsystem: Makes station workshops available at the outpost
+			- Logistical Subsystem: Provides a cargo bay for the outpost that can be used by the outpost owner
+			- Structural Subsystem: Massively increases the armor and hull strength of the outpost
+			- Maintainence Subsystem: Allows the outpost's armor and hull to regenerate, albeit very slowly
+			- Regenerative Subsystem: Massively increases the shield regeneration rate of the outpost
+			- Hanger Subsystem: Increases the number of ships an individual player may have docked at the outpost
+			- Scuttle Subsystem: Prevents any loot from dropping when the outpost is destroyed
+			- Tapoff Subsystem: Allows docked players to recharge depleted power cells in their cargo bay from the outpost's reactor
+			- Survey Subsystem: Significantly increases asteroid yields throughout the entire solar system
+			- Tactical Subsystem: Provides significant bonuses to ship and module performance for members of the owner's faction throughout the entire solar system
+			- Veiling Subsystem: Provides the outpost with its own hardening veil, significantly reducing incoming damage
+		- subsystems range in volume from 100k to 400k
+		- depending on the kit used to construct the outpost, an outpost subsystem bay has a volume from 300k to 900k
+		- once installed, a subsystem cannot be removed
+		- duplicate subsystems cannot be installed
+		- only one subsystem may be installed per week
+		- newly installed subsystems take effect after the next downtime
+* Outposts require enormous resources to construct and upgrade
+	- Construction kits range in price (summing the raw materials) from ~7b to 53b and are not available on the market
+		- schematics for these kits are available on the market at some NPC stations but CANNOT be installed in an outpost's schematic bay
+	- Subsystems range in price from ~2b to 17b and are not available on the market
+		- schematics for these subsystems are available on the market at some NPC stations but CANNOT be installed in an outpost's schematic bay
+* Outposts are tough and require a coordinated, extended, effort to bring down
+	- An unupgraded outpost should require a couple dozen cruisers about an hour to bring down
+	- The right kit with the right subsystems may very well be impossible to destroy
+* The outpost owner may choose to destruct the outpost resulting in the same effects as it being destroyed in combat
+* Outposts have no offensive capabilities and must be defended by players
+
