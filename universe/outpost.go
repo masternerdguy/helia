@@ -9,6 +9,11 @@ import (
 	"github.com/google/uuid"
 )
 
+const OUTPOST_STATION_DEPLOY_MARGIN = 175000
+const OUTPOST_OUTPOST_DEPLOY_MARGIN = 325000
+const OUTPOST_ASTEROID_DEPLOY_MARGIN = 75000
+const OUTPOST_JUMPHOLE_DEPLOY_MARGIN = 125000
+
 // Structure representing an player-owned space station
 type Outpost struct {
 	ID          uuid.UUID

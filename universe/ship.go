@@ -5255,6 +5255,34 @@ func (s *Ship) ConsumeOutpostKitFromCargo(itemID uuid.UUID, lock bool) error {
 
 	// todo: check for obstacles
 
+	/*
+		* Building an outpost requires an outpost construction kit of the appropriate type
+		- Kits range in size from 200k to 600k cargo units and therefore require a superfreighter to carry
+		- Deploying a kit is instant
+		- A kit may not be deployed too close to another of the following:
+			- NPC Station				175k
+			- Outpost				325k
+			- Asteroid				 75k
+			- Jumphole				125k
+	*/
+
+	// verify minimum distance from npc stations
+	for _, st := range s.CurrentSystem.stations {
+		// null check
+		if st == nil {
+			continue
+		}
+
+		// get distance
+		d := physics.Distance(s.ToPhysicsDummy(), st.ToPhysicsDummy())
+
+		// margin check
+		if d < OUTPOST_STATION_DEPLOY_MARGIN {
+			// too close to station
+			return fmt.Errorf("outpost must be deployed at least %vk from any stations", OUTPOST_STATION_DEPLOY_MARGIN/1000)
+		}
+	}
+
 	// reduce quantity of item to 0 (always unpackaged)
 	item.Quantity = 0
 	item.CoreDirty = true
