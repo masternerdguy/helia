@@ -9,9 +9,16 @@ import (
 	"github.com/google/uuid"
 )
 
+// Minimum deployment distance between an outpost and the nearest station
 const OUTPOST_STATION_DEPLOY_MARGIN = 175000
+
+// Minimum deployment distance between an outpost and the nearest outpost
 const OUTPOST_OUTPOST_DEPLOY_MARGIN = 325000
+
+// Minimum deployment distance between an outpost and the nearest asteroid
 const OUTPOST_ASTEROID_DEPLOY_MARGIN = 75000
+
+// Minimum deployment distance between an outpost and the nearest jumphole
 const OUTPOST_JUMPHOLE_DEPLOY_MARGIN = 125000
 
 // Structure representing an player-owned space station
