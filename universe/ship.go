@@ -5283,6 +5283,23 @@ func (s *Ship) ConsumeOutpostKitFromCargo(itemID uuid.UUID, lock bool) error {
 		}
 	}
 
+	// verify minimum distance from player outposts
+	for _, op := range s.CurrentSystem.outposts {
+		// null check
+		if op == nil {
+			continue
+		}
+
+		// get distance
+		d := physics.Distance(s.ToPhysicsDummy(), op.ToPhysicsDummy())
+
+		// margin check
+		if d < OUTPOST_OUTPOST_DEPLOY_MARGIN {
+			// too close to outpost
+			return fmt.Errorf("outpost must be deployed at least %vk from any outposts", OUTPOST_OUTPOST_DEPLOY_MARGIN/1000)
+		}
+	}
+
 	// reduce quantity of item to 0 (always unpackaged)
 	item.Quantity = 0
 	item.CoreDirty = true
