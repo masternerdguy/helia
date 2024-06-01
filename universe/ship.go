@@ -5300,6 +5300,23 @@ func (s *Ship) ConsumeOutpostKitFromCargo(itemID uuid.UUID, lock bool) error {
 		}
 	}
 
+	// verify minimum distance from asteroids
+	for _, ast := range s.CurrentSystem.asteroids {
+		// null check
+		if ast == nil {
+			continue
+		}
+
+		// get distance
+		d := physics.Distance(s.ToPhysicsDummy(), ast.ToPhysicsDummy())
+
+		// margin check
+		if d < OUTPOST_ASTEROID_DEPLOY_MARGIN {
+			// too close to asteroid
+			return fmt.Errorf("outpost must be deployed at least %vk from any asteroids", OUTPOST_ASTEROID_DEPLOY_MARGIN/1000)
+		}
+	}
+
 	// reduce quantity of item to 0 (always unpackaged)
 	item.Quantity = 0
 	item.CoreDirty = true
