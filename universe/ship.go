@@ -5317,6 +5317,23 @@ func (s *Ship) ConsumeOutpostKitFromCargo(itemID uuid.UUID, lock bool) error {
 		}
 	}
 
+	// verify minimum distance from jumpholes
+	for _, jh := range s.CurrentSystem.jumpholes {
+		// null check
+		if jh == nil {
+			continue
+		}
+
+		// get distance
+		d := physics.Distance(s.ToPhysicsDummy(), jh.ToPhysicsDummy())
+
+		// margin check
+		if d < OUTPOST_JUMPHOLE_DEPLOY_MARGIN {
+			// too close to jumphole
+			return fmt.Errorf("outpost must be deployed at least %vk from any jumpholes", OUTPOST_JUMPHOLE_DEPLOY_MARGIN/1000)
+		}
+	}
+
 	// reduce quantity of item to 0 (always unpackaged)
 	item.Quantity = 0
 	item.CoreDirty = true
