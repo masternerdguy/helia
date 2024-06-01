@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --host 0.0.0.0 --disable-host-check --no-live-reload",
+    "start": "ng serve --host 0.0.0.0 --disable-host-check --watch=false",
     "build": "ng build",
     "build:alpha": "ng build --configuration=alpha",
     "ncu": "ncu -u",
