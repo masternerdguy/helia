@@ -1024,7 +1024,7 @@ function handlePropertyUpdate(d: GameMessage) {
   }
 
   if (!msg.outposts) {
-    msg.outposts
+    msg.outposts = [];
   }
 
   // update property sheet window
