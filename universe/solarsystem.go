@@ -59,7 +59,7 @@ type SolarSystem struct {
 	SetNoLoad            []*ShipNoLoadSet                       // updates to the no load flag in need of saving by core
 	UsedShipPurchases    []*UsedShipPurchase                    // purchased used ships that need to be hooked in and saved by core
 	ShipRenames          []*ShipRename                          // renamed ships that need to be saved by core
-	OutpostRename        []*OutpostRename                       // renamed outposts that need to be saved by core
+	OutpostRenames       []*OutpostRename                       // renamed outposts that need to be saved by core
 	SchematicRunViews    []*shared.GameClient                   // requests for a schematic run summary
 	NewSchematicRuns     []*NewSchematicRunTicket               // newly invoked schematics that need to be started
 	NewFactions          []*NewFactionTicket                    // partially approved requests to create a new faction and automatically join it
@@ -107,7 +107,7 @@ func (s *SolarSystem) Initialize() {
 	s.SetNoLoad = make([]*ShipNoLoadSet, 0)
 	s.UsedShipPurchases = make([]*UsedShipPurchase, 0)
 	s.ShipRenames = make([]*ShipRename, 0)
-	s.OutpostRename = make([]*OutpostRename, 0)
+	s.OutpostRenames = make([]*OutpostRename, 0)
 	s.SchematicRunViews = make([]*shared.GameClient, 0)
 	s.NewSchematicRuns = make([]*NewSchematicRunTicket, 0)
 	s.NewFactions = make([]*NewFactionTicket, 0)
@@ -1374,7 +1374,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					Name:      data.Name,
 				}
 
-				s.OutpostRename = append(s.OutpostRename, &rn)
+				s.OutpostRenames = append(s.OutpostRenames, &rn)
 
 				// update renamed outpost in property cache (so it changes immediately instead of as part of the periodic rebuild)
 				pc := c.GetPropertyCache()

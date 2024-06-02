@@ -1360,7 +1360,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 	sol.ShipRenames = make([]*universe.ShipRename, 0)
 
 	// iterate over outpost renames
-	for _, ro := range sol.OutpostRename {
+	for _, ro := range sol.OutpostRenames {
 		// handle escalation on another goroutine
 		go func(ro *universe.OutpostRename, sol *universe.SolarSystem) {
 			// handle escalation failure
@@ -1377,7 +1377,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 	}
 
 	// clear outpost renames
-	sol.OutpostRename = make([]*universe.OutpostRename, 0)
+	sol.OutpostRenames = make([]*universe.OutpostRename, 0)
 
 	// iterate over clients in need of a schematic runs update
 	for id := range sol.SchematicRunViews {
