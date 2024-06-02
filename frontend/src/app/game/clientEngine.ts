@@ -1018,6 +1018,15 @@ function handlePropertyUpdate(d: GameMessage) {
   // parse body
   const msg = JSON.parse(d.body) as ServerPropertyUpdate;
 
+  // fix missing lists
+  if (!msg.ships) {
+    msg.ships = [];
+  }
+
+  if (!msg.outposts) {
+    msg.outposts
+  }
+
   // update property sheet window
   engineSack.propertySheetWindow.sync(msg);
 

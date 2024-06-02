@@ -44,6 +44,7 @@ type Outpost struct {
 	// in-memory only
 	Lock                   sync.Mutex
 	CurrentSystem          *SolarSystem
+	SystemName             string
 	CharacterName          string
 	Faction                *Faction
 	lastPeriodicUpdateTime time.Time

@@ -5,6 +5,7 @@ import { ClientViewProperty } from '../../wsModels/bodies/viewProperty';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { WsService } from '../../ws.service';
 import {
+  ServerPropertyOutpostCacheEntry,
   ServerPropertyShipCacheEntry,
   ServerPropertyUpdate,
 } from '../../wsModels/bodies/propertyUpdate';
@@ -61,53 +62,16 @@ export class PropertySheetWindow extends GDIWindow {
     this.propertyList.setOnClick((item) => {
       const row = item as PropertySheetViewRow;
       const ship = row.ship;
+      const outpost = row.outpost;
 
       const actions: PropertySheetActionRow[] = [];
 
-      // actions only possible when player is docked
-      if (this.player.currentShip.dockedAtStationID) {
-        // actions only possible if both ships are also docked at the same station
-        if (this.player.currentShip.dockedAtStationID == ship.dockedAtId) {
-          actions.push({
-            listString: () => 'Rename',
-            ship: ship,
-          });
-
-          // spacer
-          actions.push({
-            listString: () => '',
-            ship: null,
-          });
-
-          // actions only possible when player has also selected a different ship than the one they are flying
-          if (this.player.currentShip.id != ship.id) {
-            actions.push({
-              listString: () => 'Board',
-              ship: ship,
-            });
-
-            actions.push({
-              listString: () => 'Move CBN',
-              ship: ship,
-            });
-
-            // spacer
-            actions.push({
-              listString: () => '',
-              ship: null,
-            });
-
-            actions.push({
-              listString: () => 'Sell',
-              ship: ship,
-            });
-
-            actions.push({
-              listString: () => 'Trash',
-              ship: ship,
-            });
-          }
-        }
+      // ship actions
+      if (ship) {
+        this.syncShipActions(ship, actions);
+      } // outpost actions
+      else if (outpost) {
+        this.syncOutpostActions(outpost, actions);
       }
 
       this.actionList.setItems(actions);
@@ -252,6 +216,64 @@ export class PropertySheetWindow extends GDIWindow {
     this.modalInput.initialize();
   }
 
+  private syncShipActions(
+    ship: ServerPropertyShipCacheEntry,
+    actions: PropertySheetActionRow[],
+  ) {
+    // actions only possible when player is docked
+    if (this.player.currentShip.dockedAtStationID) {
+      // actions only possible if both ships are also docked at the same station
+      if (this.player.currentShip.dockedAtStationID == ship.dockedAtId) {
+        actions.push({
+          listString: () => 'Rename',
+          ship: ship,
+        });
+
+        // spacer
+        actions.push({
+          listString: () => '',
+          ship: null,
+        });
+
+        // actions only possible when player has also selected a different ship than the one they are flying
+        if (this.player.currentShip.id != ship.id) {
+          actions.push({
+            listString: () => 'Board',
+            ship: ship,
+          });
+
+          actions.push({
+            listString: () => 'Move CBN',
+            ship: ship,
+          });
+
+          // spacer
+          actions.push({
+            listString: () => '',
+            ship: null,
+          });
+
+          actions.push({
+            listString: () => 'Sell',
+            ship: ship,
+          });
+
+          actions.push({
+            listString: () => 'Trash',
+            ship: ship,
+          });
+        }
+      }
+    }
+  }
+
+  private syncOutpostActions(
+    outpost: ServerPropertyOutpostCacheEntry,
+    actions: PropertySheetActionRow[],
+  ) {
+    // todo
+  }
+
   private showModalInput() {
     this.removeComponent(this.propertyList);
     this.removeComponent(this.actionList);
@@ -305,13 +327,29 @@ export class PropertySheetWindow extends GDIWindow {
 
     const rows: PropertySheetViewRow[] = [];
 
-    // sort cache by system name, then station name, then ship name
-    const sorted = cache.ships.sort((a, b) =>
+    // sort ship cache by system name, then station name, then ship name
+    const sortedShips = cache.ships.sort((a, b) =>
       this.getShipSortKey(a).localeCompare(this.getShipSortKey(b)),
     );
 
+    // sort outpost cache by system name, then ship name
+    const sortedOutposts = cache.outposts.sort((a, b) =>
+      this.getOutpostSortKey(a).localeCompare(this.getOutpostSortKey(b)),
+    );
+
+    // build outpost entries
+    for (const o of sortedOutposts) {
+      const r = new PropertySheetViewRow();
+      const ls = propertySheetViewRowStringFromOutpost(o, this.player);
+
+      r.listString = () => ls;
+      r.outpost = o;
+
+      rows.push(r);
+    }
+
     // build ship entries
-    for (const s of sorted) {
+    for (const s of sortedShips) {
       const r = new PropertySheetViewRow();
       const ls = propertySheetViewRowStringFromShip(s, this.player);
 
@@ -330,6 +368,10 @@ export class PropertySheetWindow extends GDIWindow {
 
   private getShipSortKey(a: ServerPropertyShipCacheEntry): string {
     return `${a.systemName}::${a.dockedAtName}::${a.name}::${a.id}`;
+  }
+
+  private getOutpostSortKey(a: ServerPropertyOutpostCacheEntry): string {
+    return `${a.systemName}::${a.name}::${a.id}`;
   }
 
   private refreshPropertySummary() {
@@ -353,6 +395,7 @@ export class PropertySheetWindow extends GDIWindow {
 class PropertySheetViewRow {
   listString: () => string;
   ship: ServerPropertyShipCacheEntry;
+  outpost: ServerPropertyOutpostCacheEntry;
 }
 
 class PropertySheetActionRow {
@@ -382,6 +425,32 @@ function propertySheetViewRowStringFromShip(
     `${fixedString(s.texture, 12)} ` +
     `${fixedString(s.systemName, 12)} ` +
     `${fixedString(s.dockedAtName, 24)} ` +
+    `${fixedString(shortWallet(s.wallet), 11)}`
+  );
+}
+
+function propertySheetViewRowStringFromOutpost(
+  s: ServerPropertyOutpostCacheEntry,
+  p: Player,
+): string {
+  if (s == null) {
+    return;
+  }
+
+  // marker if docked at
+  let dockedAtMarker = '';
+
+  if (s.id == p.currentShip.dockedAtStationID) {
+    dockedAtMarker = '@>';
+  }
+
+  // build string
+  return (
+    `${fixedString(dockedAtMarker, 2)} ` +
+    `${fixedString(s.name, 32)} ` +
+    `${fixedString(s.texture, 12)} ` +
+    `${fixedString(s.systemName, 12)} ` +
+    `${fixedString('', 24)} ` + // never docked
     `${fixedString(shortWallet(s.wallet), 11)}`
   );
 }

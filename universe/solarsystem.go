@@ -933,6 +933,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// build update for client
 				cu := models.ServerPropertyUpdateBody{}
 
+				// include ships
 				for _, x := range ps.ShipCaches {
 					cu.Ships = append(cu.Ships, models.ServerShipPropertyCacheEntry{
 						Name:                x.Name,
@@ -943,6 +944,18 @@ func (s *SolarSystem) processClientEventQueues() {
 						DockedAtStationID:   x.DockedAtStationID,
 						DockedAtStationName: x.DockedAtStationName,
 						Wallet:              x.Wallet,
+					})
+				}
+
+				// include outposts
+				for _, x := range ps.OutpostCaches {
+					cu.Outposts = append(cu.Outposts, models.ServerOutpostPropertyCacheEntry{
+						Name:            x.Name,
+						Texture:         x.Texture,
+						OutpostID:       x.OutpostID,
+						SolarSystemID:   x.SolarSystemID,
+						SolarSystemName: x.SolarSystemName,
+						Wallet:          x.Wallet,
 					})
 				}
 
@@ -3351,6 +3364,9 @@ func (s *SolarSystem) AddOutpost(c *Outpost, lock bool) *Station {
 	// store pointer to system
 	c.CurrentSystem = s
 
+	// cache system name
+	c.SystemName = s.SystemName
+
 	// verify no station with this id exists that would cause shim issues
 	_, stv := s.stations[c.ID.String()]
 
@@ -3590,7 +3606,6 @@ func (s *SolarSystem) CopyShips(lock bool) map[string]*Ship {
 
 // Returns a new map containing pointers to the ships in the system - use with care!
 func (s *SolarSystem) MirrorShipMap(lock bool) map[string]*Ship {
-
 	if lock {
 		// obtain lock
 		s.Lock.Lock()
@@ -3610,7 +3625,6 @@ func (s *SolarSystem) MirrorShipMap(lock bool) map[string]*Ship {
 
 // Returns a new map containing pointers to the clients in the system - use with care!
 func (s *SolarSystem) MirrorClientMap(lock bool) map[string]*shared.GameClient {
-
 	if lock {
 		// obtain lock
 		s.Lock.Lock()
@@ -3621,6 +3635,25 @@ func (s *SolarSystem) MirrorClientMap(lock bool) map[string]*shared.GameClient {
 	m := make(map[string]*shared.GameClient)
 
 	for k, v := range s.clients {
+		m[k] = v
+	}
+
+	// return new map
+	return m
+}
+
+// Returns a new map containing pointers to the outposts in the system - use with care!
+func (s *SolarSystem) MirrorOutpostMap(lock bool) map[string]*Outpost {
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// copy pointers into new map
+	m := make(map[string]*Outpost)
+
+	for k, v := range s.outposts {
 		m[k] = v
 	}
 

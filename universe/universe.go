@@ -346,7 +346,7 @@ func (u *Universe) FindShip(shipID uuid.UUID, noLockSystemID *uuid.UUID) *Ship {
 	return nil
 }
 
-// Finds the ship with the specified ID in the running game simulation
+// Finds ships owned by a given user in the running game simulation
 func (u *Universe) FindShipsByUserID(userID uuid.UUID, noLockSystemID *uuid.UUID) []*Ship {
 	o := make([]*Ship, 0)
 
@@ -364,6 +364,34 @@ func (u *Universe) FindShipsByUserID(userID uuid.UUID, noLockSystemID *uuid.UUID
 
 		// look for ships in system owned by this user
 		for _, u := range ships {
+			if u.UserID == userID {
+				// store reference
+				o = append(o, u)
+			}
+		}
+	}
+
+	return o
+}
+
+// Finds outposts owned by a given user in the running game simulation
+func (u *Universe) FindOutpostsByUserID(userID uuid.UUID, noLockSystemID *uuid.UUID) []*Outpost {
+	o := make([]*Outpost, 0)
+
+	// iterate over all systems in all regions
+	for _, s := range u.AllSystems {
+		// do lock not if system is exempted
+		var lock = true
+
+		if noLockSystemID != nil {
+			lock = s.ID != *noLockSystemID
+		}
+
+		// get raw pointers to outposts in system
+		outposts := s.MirrorOutpostMap(lock)
+
+		// look for outposts in system owned by this user
+		for _, u := range outposts {
 			if u.UserID == userID {
 				// store reference
 				o = append(o, u)

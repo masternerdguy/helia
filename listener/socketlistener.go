@@ -1996,8 +1996,11 @@ func (l *SocketListener) addClient(c *shared.GameClient) {
 				continue
 			}
 
-			// lookup all ships belonging to this player
+			// find all ships belonging to this player
 			ownedShips := l.Engine.Universe.FindShipsByUserID(*c.UID, nil)
+
+			// find all outposts belonging to this player
+			ownedOutposts := l.Engine.Universe.FindOutpostsByUserID(*c.UID, nil)
 
 			// build property cache
 			pc := shared.PropertyCache{}
@@ -2008,14 +2011,13 @@ func (l *SocketListener) addClient(c *shared.GameClient) {
 
 				// copy guaranteed fields
 				z := shared.ShipPropertyCacheEntry{
-					Name:    osc.ShipName,
-					Texture: osc.Texture,
-					ShipID:  osc.ID,
-					Wallet:  osc.Wallet,
+					Name:            osc.ShipName,
+					Texture:         osc.Texture,
+					ShipID:          osc.ID,
+					Wallet:          osc.Wallet,
+					SolarSystemID:   osc.SystemID,
+					SolarSystemName: osc.SystemName,
 				}
-
-				z.SolarSystemID = osc.SystemID
-				z.SolarSystemName = osc.SystemName
 
 				// copy possibly null fields
 				if osc.DockedAtStationID != nil {
@@ -2027,7 +2029,26 @@ func (l *SocketListener) addClient(c *shared.GameClient) {
 					}
 				}
 
+				// store in cache
 				pc.ShipCaches = append(pc.ShipCaches, z)
+			}
+
+			for _, oo := range ownedOutposts {
+				// copy entry
+				osc := oo.CopyOutpost()
+
+				// copy guaranteed fields
+				z := shared.OutpostPropertyCacheEntry{
+					Name:            osc.OutpostName,
+					Texture:         osc.TemplateData.Texture,
+					OutpostID:       osc.ID,
+					Wallet:          osc.Wallet,
+					SolarSystemID:   osc.SystemID,
+					SolarSystemName: osc.SystemName,
+				}
+
+				// store in cache
+				pc.OutpostCaches = append(pc.OutpostCaches, z)
 			}
 
 			// update property cache

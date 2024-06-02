@@ -775,7 +775,8 @@ type ClientViewPropertyBody struct {
 
 // Body containing a summary of the property owned by a player
 type ServerPropertyUpdateBody struct {
-	Ships []ServerShipPropertyCacheEntry `json:"ships"`
+	Ships    []ServerShipPropertyCacheEntry    `json:"ships"`
+	Outposts []ServerOutpostPropertyCacheEntry `json:"outposts"`
 }
 
 type ServerShipPropertyCacheEntry struct {
@@ -787,6 +788,15 @@ type ServerShipPropertyCacheEntry struct {
 	DockedAtStationID   *uuid.UUID `json:"dockedAtId"`
 	DockedAtStationName *string    `json:"dockedAtName"`
 	Wallet              float64    `json:"wallet"`
+}
+
+type ServerOutpostPropertyCacheEntry struct {
+	Name            string    `json:"name"`
+	Texture         string    `json:"texture"`
+	OutpostID       uuid.UUID `json:"id"`
+	SolarSystemID   uuid.UUID `json:"systemId"`
+	SolarSystemName string    `json:"systemName"`
+	Wallet          float64   `json:"wallet"`
 }
 
 // Body containing a request to board a ship owned by the player in the player's current station
