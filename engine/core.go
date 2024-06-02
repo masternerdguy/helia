@@ -1350,7 +1350,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			err := shipSvc.Rename(rs.ShipID, rs.Name)
 
 			if err != nil {
-				shared.TeeLog(fmt.Sprintf("! Unable to rename ship %v - failure saving (%v)!", rs.ShipID.ID(), err))
+				shared.TeeLog(fmt.Sprintf("! Unable to rename ship %v - failure saving (%v)!", rs.ShipID, err))
 				return
 			}
 		}(rs, sol)
@@ -1358,6 +1358,26 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 	// clear ship renames
 	sol.ShipRenames = make([]*universe.ShipRename, 0)
+
+	// iterate over outpost renames
+	for _, ro := range sol.OutpostRename {
+		// handle escalation on another goroutine
+		go func(ro *universe.OutpostRename, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
+			// update name in database
+			err := outpostSvc.Rename(ro.OutpostID, ro.Name)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to rename outpost %v - failure saving (%v)!", ro.OutpostID, err))
+				return
+			}
+		}(ro, sol)
+	}
+
+	// clear outpost renames
+	sol.OutpostRename = make([]*universe.OutpostRename, 0)
 
 	// iterate over clients in need of a schematic runs update
 	for id := range sol.SchematicRunViews {

@@ -483,6 +483,13 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientConsumeOutpostKit(&client, &b)
+		} else if m.MessageType == msgRegistry.RenameOutpost {
+			// decode body as ClientRenameOutpostBody
+			b := models.ClientRenameOutpostBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientRenameOutpost(&client, &b)
 		}
 	}
 }
@@ -1542,6 +1549,29 @@ func (l *SocketListener) handleClientRenameShip(client *shared.GameClient, body 
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.RenameShip, true)
+	}
+}
+
+func (l *SocketListener) handleClientRenameOutpost(client *shared.GameClient, body *models.ClientRenameOutpostBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		shared.TeeLog(fmt.Sprintf("handleClientRenameOutpost: unexpected id: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.SharedMessageRegistry
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.RenameOutpost, true)
 	}
 }
 

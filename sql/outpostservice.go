@@ -109,3 +109,25 @@ func (s OutpostService) NewOutpost(e Outpost) (*Outpost, error) {
 	// return pointer to inserted outpost model
 	return &e, nil
 }
+
+// Updates the name of an outpost in the database
+func (s OutpostService) Rename(id uuid.UUID, name string) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update outpost in database
+	sqlStatement :=
+		`
+			UPDATE public.outposts
+			SET outpostname = $2
+			WHERE id = $1
+		`
+
+	_, err = db.Exec(sqlStatement, id, name)
+
+	return err
+}

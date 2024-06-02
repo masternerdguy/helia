@@ -82,6 +82,7 @@ type MessageRegistry struct {
 	ViewDockedUsers        int
 	DockedUsersUpdate      int
 	ConsumeOutpostKit      int
+	RenameOutpost          int
 }
 
 // Registry of target types
@@ -169,6 +170,7 @@ func NewMessageRegistry() *MessageRegistry {
 		ViewDockedUsers:        65,
 		DockedUsersUpdate:      66,
 		ConsumeOutpostKit:      67,
+		RenameOutpost:          68,
 	}
 }
 
@@ -829,6 +831,13 @@ type ClientTrashShipBody struct {
 type ClientRenameShipBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ShipID    uuid.UUID `json:"shipId"`
+	Name      string    `json:"name"`
+}
+
+// Body containing a request to rename an ouitpost owned by the player which the player is docked at
+type ClientRenameOutpostBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	OutpostID uuid.UUID `json:"outpostID"`
 	Name      string    `json:"name"`
 }
 

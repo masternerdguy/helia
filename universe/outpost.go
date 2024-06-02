@@ -62,6 +62,12 @@ type NewOutpostTicket struct {
 	Client            *shared.GameClient
 }
 
+// Structure representing a renamed outpost, not yet materialized
+type OutpostRename struct {
+	OutpostID uuid.UUID
+	Name      string
+}
+
 // Processes the outpost for a tick
 func (s *Outpost) PeriodicUpdate() {
 	s.Lock.Lock()

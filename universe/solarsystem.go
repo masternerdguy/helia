@@ -59,6 +59,7 @@ type SolarSystem struct {
 	SetNoLoad            []*ShipNoLoadSet                       // updates to the no load flag in need of saving by core
 	UsedShipPurchases    []*UsedShipPurchase                    // purchased used ships that need to be hooked in and saved by core
 	ShipRenames          []*ShipRename                          // renamed ships that need to be saved by core
+	OutpostRename        []*OutpostRename                       // renamed outposts that need to be saved by core
 	SchematicRunViews    []*shared.GameClient                   // requests for a schematic run summary
 	NewSchematicRuns     []*NewSchematicRunTicket               // newly invoked schematics that need to be started
 	NewFactions          []*NewFactionTicket                    // partially approved requests to create a new faction and automatically join it
@@ -106,6 +107,7 @@ func (s *SolarSystem) Initialize() {
 	s.SetNoLoad = make([]*ShipNoLoadSet, 0)
 	s.UsedShipPurchases = make([]*UsedShipPurchase, 0)
 	s.ShipRenames = make([]*ShipRename, 0)
+	s.OutpostRename = make([]*OutpostRename, 0)
 	s.SchematicRunViews = make([]*shared.GameClient, 0)
 	s.NewSchematicRuns = make([]*NewSchematicRunTicket, 0)
 	s.NewFactions = make([]*NewFactionTicket, 0)
@@ -1188,7 +1190,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					continue
 				}
 
-				// get ship to sell and verify it is owned by the player
+				// get ship to trash and verify it is owned by the player
 				toTrash := s.ships[data.ShipID.String()]
 
 				if toTrash == nil {
@@ -1271,7 +1273,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					continue
 				}
 
-				// get ship to sell and verify it is owned by the player
+				// get ship to rename and verify it is owned by the player
 				toRename := s.ships[data.ShipID.String()]
 
 				if toRename == nil {
@@ -1325,6 +1327,68 @@ func (s *SolarSystem) processClientEventQueues() {
 				}
 
 				pc.ShipCaches = no
+				c.SetPropertyCache(pc)
+			}
+		} else if evt.Type == msgRegistry.RenameOutpost {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientRenameOutpostBody)
+
+				// verify player is docked
+				if sh.DockedAtStation == nil {
+					c.WriteErrorMessage("you must be docked to rename an outpost")
+					continue
+				}
+
+				// get outpost to rename and verify it is owned by the player
+				toRename := s.outposts[data.OutpostID.String()]
+
+				if toRename == nil {
+					c.WriteErrorMessage("outpost not available to rename")
+					continue
+				}
+
+				if toRename.UserID != sh.UserID {
+					c.WriteErrorMessage("outpost not available to rename")
+					continue
+				}
+
+				// verify player is docked at the outpost to be renamed
+				if toRename.ID != sh.DockedAtStation.ID {
+					c.WriteErrorMessage("you must be docked at the outpost being renamed")
+					continue
+				}
+
+				// verify length constraint on new name
+				if len(data.Name) > 24 {
+					c.WriteErrorMessage("outpost names must be 24 characters or less")
+					continue
+				}
+
+				// update name in memory
+				toRename.OutpostName = data.Name
+
+				// escalate rename save request
+				rn := OutpostRename{
+					OutpostID: toRename.ID,
+					Name:      data.Name,
+				}
+
+				s.OutpostRename = append(s.OutpostRename, &rn)
+
+				// update renamed outpost in property cache (so it changes immediately instead of as part of the periodic rebuild)
+				pc := c.GetPropertyCache()
+				no := make([]shared.OutpostPropertyCacheEntry, 0)
+
+				for _, e := range pc.OutpostCaches {
+					if e.OutpostID == toRename.ID {
+						e.Name = data.Name
+					}
+
+					no = append(no, e)
+				}
+
+				pc.OutpostCaches = no
 				c.SetPropertyCache(pc)
 			}
 		} else if evt.Type == msgRegistry.PostSystemChatMessage {
