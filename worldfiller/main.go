@@ -1193,7 +1193,7 @@ func loadNewWares() {
 			Meta:   sql.Meta{},
 		}
 
-		meta := universe.IndustrialMetadata{
+		meta := universe.IndustrialMetadataNoProcessId{
 			SiloSize: w.SiloSize,
 			MaxPrice: w.MaxPrice,
 			MinPrice: w.MinPrice,
