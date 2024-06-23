@@ -1143,6 +1143,7 @@ type WareCsvRecord struct {
 func loadNewWares() {
 	// open file
 	f, err := os.Open("newwares.csv")
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1153,16 +1154,77 @@ func loadNewWares() {
 	// read csv values using csv.Reader
 	csvReader := csv.NewReader(f)
 	data, err := csvReader.ReadAll()
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// convert records to array of structs
-	shoppingList := parseWareCsv(data)
+	wares := parseWareCsv(data)
 
 	// print the array
-	fmt.Printf("%+v\n", shoppingList)
+	fmt.Printf("%+v\n", wares)
+
+	// get services
+	itemTypeSvc := sql.GetItemTypeService()
+
+	// to store item types to be saved
+	newTypes := make([]sql.ItemType, 0)
+
+	// iterate over parsed wares
+	for _, w := range wares {
+		// verify this ware doesn't already exist
+		existing, err := itemTypeSvc.GetItemTypeByName(w.Name)
+
+		if err != nil {
+			log.Panicf("Ware already exists! %v", existing)
+		}
+
+		// create new item type for ware
+		it := sql.ItemType{
+			ID:     uuid.New(),
+			Family: "trade_good",
+			Name:   w.Name,
+			Meta:   sql.Meta{},
+		}
+
+		meta := universe.IndustrialMetadata{
+			SiloSize: w.SiloSize,
+			MaxPrice: w.MaxPrice,
+			MinPrice: w.MinPrice,
+		}
+
+		it.Meta["hp"] = 1
+		it.Meta["volume"] = w.Volume
+		it.Meta["industrialmarket"] = meta
+
+		// append for later
+		newTypes = append(newTypes, it)
+	}
+
+	// save new wares
+	for _, it := range newTypes {
+		_, err := itemTypeSvc.NewItemTypeForWorldFiller(it)
+
+		if err != nil {
+			log.Panicf("Error saving new item type %v", err)
+		}
+	}
 }
+
+/*
+
+{
+  "hp": 1,
+  "volume": 2,
+  "industrialmarket": {
+    "maxprice": 47,
+    "minprice": 32,
+    "silosize": 150000000
+  }
+}
+
+*/
 
 func parseWareCsv(data [][]string) []WareCsvRecord {
 	var wareList []WareCsvRecord
