@@ -262,6 +262,7 @@ func calculateSystemSeed(s *universe.SolarSystem) int {
 	return seed
 }
 
+// Represents a schematic with inputs and outputs to be saved by worldfiller
 type schematicStubWorldmaker struct {
 	// item type
 	ItemType sql.VwItemTypeIndustrial
@@ -282,6 +283,7 @@ type schematicStubWorldmaker struct {
 	SchematicSinkProcessInput sql.ProcessInput
 }
 
+// Generates schematics and processes for modules
 func stubModuleSchematicsAndProcesses() {
 	rand.Seed(time.Now().Unix())
 	generated := make([]schematicStubWorldmaker, 0)
@@ -499,7 +501,7 @@ func stubModuleSchematicsAndProcesses() {
 			}
 
 			if resets > 100 {
-				log.Println(fmt.Sprintf("Skipping %v - not solvable with input materials given.", industrial.Name))
+				log.Printf("Skipping %v - not solvable with input materials given.", industrial.Name)
 				break
 			}
 		}
@@ -633,7 +635,7 @@ func stubModuleSchematicsAndProcesses() {
 		})
 
 		// success :)
-		log.Println(fmt.Sprintf(":) %v", industrial.Name))
+		log.Printf(":) %v", industrial.Name)
 	}
 
 	// save everything
@@ -700,6 +702,7 @@ func stubModuleSchematicsAndProcesses() {
 	}
 }
 
+// Creates station processes for a given process
 func injectProcess(u *universe.Universe, pid string, offset int) {
 	pID, err := uuid.Parse(pid)
 	prob := 3
@@ -762,6 +765,7 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 }
 
+// Creates stations owned by the sanctuary systems
 func dropSanctuaryStations(u *universe.Universe) {
 	fID, err := uuid.Parse("b3d3fa9c-b21e-490f-b39e-128b3af12128")
 
