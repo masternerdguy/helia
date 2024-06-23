@@ -1169,6 +1169,9 @@ func loadNewWares() {
 
 	// get services
 	itemTypeSvc := sql.GetItemTypeService()
+	processSvc := sql.GetProcessService()
+	inputSvc := sql.GetProcessInputService()
+	outputSvc := sql.GetProcessOutputService()
 
 	// to store item types to be saved
 	newTypes := make([]sql.ItemType, 0)
@@ -1206,10 +1209,73 @@ func loadNewWares() {
 
 	// save new wares
 	for _, it := range newTypes {
+		// save core ware
 		_, err := itemTypeSvc.NewItemTypeForWorldFiller(it)
 
 		if err != nil {
 			log.Panicf("Error saving new item type %v", err)
+		}
+
+		// calculate runtimes
+		rtf := physics.RandInRange(5, 1000)
+		rts := physics.RandInRange(7, 1100)
+
+		// make ware faucet process
+		wareFaucet := sql.Process{
+			ID:   uuid.New(),
+			Name: fmt.Sprintf("%v Faucet [wm]", it.Name),
+			Time: physics.RandInRange(rtf, rtf*8),
+			Meta: sql.Meta{},
+		}
+
+		wareFaucetOutput := sql.ProcessOutput{
+			ID:         uuid.New(),
+			ItemTypeID: it.ID,
+			Quantity:   physics.RandInRange(1, 1000),
+			Meta:       sql.Meta{},
+			ProcessID:  wareFaucet.ID,
+		}
+
+		// make ware sink process
+		wareSink := sql.Process{
+			ID:   uuid.New(),
+			Name: fmt.Sprintf("%v Sink [wm]", it.Name),
+			Time: physics.RandInRange(rts, rts*8),
+			Meta: sql.Meta{},
+		}
+
+		wareSinkInput := sql.ProcessInput{
+			ID:         uuid.New(),
+			ItemTypeID: it.ID,
+			Quantity:   physics.RandInRange(1, 1000),
+			Meta:       sql.Meta{},
+			ProcessID:  wareSink.ID,
+		}
+
+		// save faucet process
+		_, err = processSvc.NewProcessForWorldFiller(wareFaucet)
+
+		if err != nil {
+			log.Panicf("Error saving faucet process %v", err)
+		}
+
+		_, err = outputSvc.NewProcessOutputForWorldFiller(wareFaucetOutput)
+
+		if err != nil {
+			log.Panicf("Error saving faucet process (output) %v", err)
+		}
+
+		// save sink process
+		_, err = processSvc.NewProcessForWorldFiller(wareSink)
+
+		if err != nil {
+			log.Panicf("Error saving sink process %v", err)
+		}
+
+		_, err = inputSvc.NewProcessInputForWorldFiller(wareSinkInput)
+
+		if err != nil {
+			log.Panicf("Error saving faucet process (input) %v", err)
 		}
 	}
 }
