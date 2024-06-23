@@ -1181,7 +1181,7 @@ func loadNewWares() {
 		// verify this ware doesn't already exist
 		existing, err := itemTypeSvc.GetItemTypeByName(w.Name)
 
-		if err != nil {
+		if err == nil || existing != nil {
 			log.Panicf("Ware already exists! %v", existing)
 		}
 
