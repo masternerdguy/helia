@@ -1209,6 +1209,8 @@ func loadNewWares() {
 
 	// save new wares
 	for _, it := range newTypes {
+		log.Printf("Saving %v", it)
+
 		// save core ware
 		_, err := itemTypeSvc.NewItemTypeForWorldFiller(it)
 
