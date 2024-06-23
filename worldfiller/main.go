@@ -1132,6 +1132,7 @@ func printLogger(s string, t time.Time) {
 	log.Println(s) // t is intentionally discarded because Println already provides a timestamp
 }
 
+// Structure representing a scaffold for a trade good for worldfiller
 type WareCsvRecord struct {
 	Name     string
 	MinPrice int
@@ -1140,6 +1141,7 @@ type WareCsvRecord struct {
 	Volume   int
 }
 
+// Imports new trade goods from a CSV into the database for worldfiller
 func loadNewWares() {
 	// open file
 	f, err := os.Open("newwares.csv")
@@ -1212,20 +1214,7 @@ func loadNewWares() {
 	}
 }
 
-/*
-
-{
-  "hp": 1,
-  "volume": 2,
-  "industrialmarket": {
-    "maxprice": 47,
-    "minprice": 32,
-    "silosize": 150000000
-  }
-}
-
-*/
-
+// Parses new ware CSV for worldfiller
 func parseWareCsv(data [][]string) []WareCsvRecord {
 	var wareList []WareCsvRecord
 	for i, line := range data {
