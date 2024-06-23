@@ -1,8 +1,8 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
-	"helia/engine"
 	"helia/physics"
 	"helia/shared"
 	"helia/sql"
@@ -10,6 +10,8 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -26,22 +28,22 @@ func main() {
 	shared.InitializeTeeLog(
 		printLogger,
 	)
+	/*
+		// load universe from database
+		shared.TeeLog("Loading universe from database...")
+		universe, err := engine.LoadUniverse()
 
-	// load universe from database
-	shared.TeeLog("Loading universe from database...")
-	universe, err := engine.LoadUniverse()
+		if err != nil {
+			panic(err)
+		}
 
-	if err != nil {
-		panic(err)
-	}
-
-	shared.TeeLog("Loaded universe!")
+		shared.TeeLog("Loaded universe!")*/
 
 	/*
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	var toInject = [...]string{
+	/*var toInject = [...]string{
 		"21deccaa-c9b0-414e-a898-3ab9230d4528",
 		"f0cf1d7a-c1c6-41d9-a7c2-00ce1a7b0cce",
 		"b47202fc-34cf-4117-a63a-eff63c62febd",
@@ -102,17 +104,19 @@ func main() {
 		"c04d38e2-8c89-4775-9f27-1793a20d70fe",
 		"956a96c1-a6fa-40bc-8871-417c246f99a3",
 		"fb62983a-b1cf-4693-a87e-b31ba7867222",
-	}
+	}*/
 
 	// dropAsteroids(universe)
 	//dropSanctuaryStations(universe)
 
-	for i, e := range toInject {
+	/*for i, e := range toInject {
 		log.Printf("injecting process %v", e)
 		injectProcess(universe, e, i)
-	}
+	}*/
 
 	//stubModuleSchematicsAndProcesses()
+
+	loadNewWares()
 }
 
 /* Parameters for asteroid generation */
@@ -1126,4 +1130,66 @@ type Astling struct {
 
 func printLogger(s string, t time.Time) {
 	log.Println(s) // t is intentionally discarded because Println already provides a timestamp
+}
+
+type WareCsvRecord struct {
+	Name     string
+	MinPrice int
+	MaxPrice int
+	SiloSize int
+	Volume   int
+}
+
+func loadNewWares() {
+	// open file
+	f, err := os.Open("newwares.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// remember to close the file at the end of the program
+	defer f.Close()
+
+	// read csv values using csv.Reader
+	csvReader := csv.NewReader(f)
+	data, err := csvReader.ReadAll()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// convert records to array of structs
+	shoppingList := parseWareCsv(data)
+
+	// print the array
+	fmt.Printf("%+v\n", shoppingList)
+}
+
+func parseWareCsv(data [][]string) []WareCsvRecord {
+	var wareList []WareCsvRecord
+	for i, line := range data {
+		if i > 0 { // omit header line
+			var rec WareCsvRecord
+
+			for j, field := range line {
+				if j == 0 {
+					rec.Name = field
+				} else if j == 2 {
+					k, _ := strconv.Atoi(field)
+					rec.MinPrice = k
+				} else if j == 3 {
+					k, _ := strconv.Atoi(field)
+					rec.MaxPrice = k
+				} else if j == 4 {
+					k, _ := strconv.Atoi(field)
+					rec.SiloSize = k
+				} else if j == 5 {
+					k, _ := strconv.Atoi(field)
+					rec.Volume = k
+				}
+			}
+
+			wareList = append(wareList, rec)
+		}
+	}
+	return wareList
 }
