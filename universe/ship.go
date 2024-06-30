@@ -238,7 +238,7 @@ type Ship struct {
 	aiNoWreckFault         bool                                     // true when salvaging autopilot failed due to wreck disappearing (for patch salvagers)
 	WreckReady             bool                                     // true when a dead ship has been saved to the db and the wreck can be looted
 	InLimbo                bool                                     // true when ship is being migrated between systems
-	orbitOrientation       bool                                     // determines orbit direction
+	flipOrbitOrientation   bool                                     // determines orbit direction
 	Lock                   sync.Mutex
 }
 
@@ -1209,7 +1209,7 @@ func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int, lock bool) {
 
 	// flip orientation if player
 	if !s.IsNPC {
-		s.orbitOrientation = !s.orbitOrientation
+		s.flipOrbitOrientation = !s.flipOrbitOrientation
 	}
 
 	// stash orbit and activate autopilot
@@ -3015,7 +3015,7 @@ func (s *Ship) doAutopilotOrbit() {
 	pAngle += 5
 
 	// account for orbit orientation
-	if s.orbitOrientation {
+	if s.flipOrbitOrientation {
 		pAngle *= -1
 	}
 
