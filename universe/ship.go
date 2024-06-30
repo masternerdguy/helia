@@ -3,6 +3,7 @@ package universe
 import (
 	"errors"
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"sync"
@@ -50,6 +51,9 @@ const ShipMinShieldRegenPercent = 0.05
 
 // Percentage of energy regen to be applied to a ship at 100% energy
 const ShipMinEnergyRegenPercent = 0.07
+
+// Probability of reversing orbit orientation
+const OrbitReverseChance = 0.000117
 
 // Shared registries - do not modify at runtime!
 var SharedAutopilotRegistry = NewAutopilotRegistry()
@@ -2045,6 +2049,19 @@ func (s *Ship) behave() {
 				s.behaviourPatchSalvage()
 			}
 		}
+
+		// check if time to roll for orbit reversal
+		if s.CurrentSystem.tickCounter%17 == 0 {
+			// roll for orbit reveral
+			roll := rand.Float64()
+
+			if roll <= OrbitReverseChance {
+				// reverse orbit direction
+				s.flipOrbitOrientation = !s.flipOrbitOrientation
+
+				log.Println(fmt.Sprintf("reversed direction %v", s.CharacterName))
+			}
+		}
 	}
 }
 
@@ -3009,6 +3026,7 @@ func (s *Ship) doAutopilotOrbit() {
 	// get angle between ship and target
 	rX := s.PosX - tX
 	rY := s.PosY - tY
+
 	pAngle := physics.ToDegrees(math.Atan2(rY, rX))
 
 	// account for orbit orientation
