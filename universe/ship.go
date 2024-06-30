@@ -3011,12 +3011,13 @@ func (s *Ship) doAutopilotOrbit() {
 	rY := s.PosY - tY
 	pAngle := physics.ToDegrees(math.Atan2(rY, rX))
 
-	// find point 5 degree ahead
-	pAngle += 5
-
 	// account for orbit orientation
-	if s.flipOrbitOrientation {
-		pAngle *= -1
+	if !s.flipOrbitOrientation {
+		// find point 5 degree ahead
+		pAngle += 5
+	} else {
+		// find point 5 degree behind
+		pAngle -= 5
 	}
 
 	nX := s.AutopilotOrbit.Distance * math.Cos(physics.ToRadians(pAngle))
