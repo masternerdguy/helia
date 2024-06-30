@@ -3,7 +3,6 @@ package universe
 import (
 	"errors"
 	"fmt"
-	"log"
 	"math"
 	"math/rand"
 	"sync"
@@ -2058,8 +2057,6 @@ func (s *Ship) behave() {
 			if roll <= OrbitReverseChance {
 				// reverse orbit direction
 				s.flipOrbitOrientation = !s.flipOrbitOrientation
-
-				log.Println(fmt.Sprintf("reversed direction %v", s.CharacterName))
 			}
 		}
 	}
