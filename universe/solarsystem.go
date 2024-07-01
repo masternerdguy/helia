@@ -3815,18 +3815,18 @@ func (s *SolarSystem) CopyStations(lock bool) map[string]*Station {
 }
 
 // Returns a copy of the outposts in the system
-func (s *SolarSystem) CopyOutposts(lock bool) map[string]*Outpost {
+func (o *SolarSystem) CopyOutposts(lock bool) map[string]*Outpost {
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
-		defer s.Lock.Unlock()
+		o.Lock.Lock()
+		defer o.Lock.Unlock()
 	}
 
 	// make map for copies
 	copy := make(map[string]*Outpost)
 
 	// copy outposts into copy map
-	for k, v := range s.outposts {
+	for k, v := range o.outposts {
 		c := v.CopyOutpost()
 		copy[k] = c
 	}

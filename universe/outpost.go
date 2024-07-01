@@ -69,63 +69,63 @@ type OutpostRename struct {
 }
 
 // Processes the outpost for a tick
-func (s *Outpost) PeriodicUpdate() {
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+func (o *Outpost) PeriodicUpdate() {
+	o.Lock.Lock()
+	defer o.Lock.Unlock()
 
 	// calculate delta and store time
-	s.dt = time.Since(s.lastPeriodicUpdateTime).Milliseconds()
-	s.lastPeriodicUpdateTime = time.Now()
+	o.dt = time.Since(o.lastPeriodicUpdateTime).Milliseconds()
+	o.lastPeriodicUpdateTime = time.Now()
 }
 
 // Returns a copy of the outpost
-func (s *Outpost) CopyOutpost() *Outpost {
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+func (o *Outpost) CopyOutpost() *Outpost {
+	o.Lock.Lock()
+	defer o.Lock.Unlock()
 
 	op := Outpost{
-		ID:          s.ID,
-		SystemID:    s.SystemID,
-		OutpostName: s.OutpostName,
-		PosX:        s.PosX,
-		PosY:        s.PosY,
-		Theta:       s.Theta,
-		Shield:      s.Shield,
-		Armor:       s.Armor,
-		Hull:        s.Hull,
-		UserID:      s.UserID,
-		Wallet:      s.Wallet,
-		Created:     s.Created,
-		Destroyed:   s.Destroyed,
+		ID:          o.ID,
+		SystemID:    o.SystemID,
+		OutpostName: o.OutpostName,
+		PosX:        o.PosX,
+		PosY:        o.PosY,
+		Theta:       o.Theta,
+		Shield:      o.Shield,
+		Armor:       o.Armor,
+		Hull:        o.Hull,
+		UserID:      o.UserID,
+		Wallet:      o.Wallet,
+		Created:     o.Created,
+		Destroyed:   o.Destroyed,
 		// copy base template
 		TemplateData: OutpostTemplate{
-			ID:                  s.TemplateData.ID,
-			Created:             s.TemplateData.Created,
-			OutpostTemplateName: s.TemplateData.OutpostTemplateName,
-			Texture:             s.TemplateData.Texture,
-			WreckTexture:        s.TemplateData.WreckTexture,
-			ExplosionTexture:    s.TemplateData.ExplosionTexture,
-			Radius:              s.TemplateData.Radius,
-			BaseMass:            s.TemplateData.BaseMass,
-			BaseShield:          s.TemplateData.BaseShield,
-			BaseShieldRegen:     s.TemplateData.BaseShieldRegen,
-			BaseArmor:           s.TemplateData.BaseArmor,
-			BaseHull:            s.TemplateData.BaseHull,
-			ItemTypeID:          s.TemplateData.ItemTypeID,
+			ID:                  o.TemplateData.ID,
+			Created:             o.TemplateData.Created,
+			OutpostTemplateName: o.TemplateData.OutpostTemplateName,
+			Texture:             o.TemplateData.Texture,
+			WreckTexture:        o.TemplateData.WreckTexture,
+			ExplosionTexture:    o.TemplateData.ExplosionTexture,
+			Radius:              o.TemplateData.Radius,
+			BaseMass:            o.TemplateData.BaseMass,
+			BaseShield:          o.TemplateData.BaseShield,
+			BaseShieldRegen:     o.TemplateData.BaseShieldRegen,
+			BaseArmor:           o.TemplateData.BaseArmor,
+			BaseHull:            o.TemplateData.BaseHull,
+			ItemTypeID:          o.TemplateData.ItemTypeID,
 		},
 		// cache from controlling user
-		FactionID: s.FactionID,
+		FactionID: o.FactionID,
 		// in-memory only
 		Lock:          sync.Mutex{},
-		CurrentSystem: s.CurrentSystem,
-		SystemName:    s.SystemName,
-		CharacterName: s.CharacterName,
-		Faction:       s.Faction,
+		CurrentSystem: o.CurrentSystem,
+		SystemName:    o.SystemName,
+		CharacterName: o.CharacterName,
+		Faction:       o.Faction,
 	}
 
 	// handle possibility of destruction
-	if s.DestroyedAt != nil {
-		op.DestroyedAt = s.DestroyedAt
+	if o.DestroyedAt != nil {
+		op.DestroyedAt = o.DestroyedAt
 	}
 
 	// return result
@@ -133,35 +133,35 @@ func (s *Outpost) CopyOutpost() *Outpost {
 }
 
 // Returns a new physics dummy structure representing this outpost
-func (s *Outpost) ToPhysicsDummy() physics.Dummy {
+func (o *Outpost) ToPhysicsDummy() physics.Dummy {
 	return physics.Dummy{
 		VelX: 0,
 		VelY: 0,
-		PosX: s.PosX,
-		PosY: s.PosY,
-		Mass: s.TemplateData.BaseMass,
+		PosX: o.PosX,
+		PosY: o.PosY,
+		Mass: o.TemplateData.BaseMass,
 	}
 }
 
 // Stub to absorb damage inflicted on outpost
-func (s *Outpost) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) {
+func (o *Outpost) DealDamage(shieldDmg float64, armorDmg float64, hullDmg float64) {
 	// todo: not yet implemented
 }
 
 // Returns the real max shield of the ship after modifiers
-func (s *Outpost) GetRealMaxShield() float64 {
+func (o *Outpost) GetRealMaxShield() float64 {
 	// no modifiers yet
-	return s.TemplateData.BaseShield
+	return o.TemplateData.BaseShield
 }
 
 // Returns the real max armor of the ship after modifiers
-func (s *Outpost) GetRealMaxArmor() float64 {
+func (o *Outpost) GetRealMaxArmor() float64 {
 	// no modifiers yet
-	return s.TemplateData.BaseArmor
+	return o.TemplateData.BaseArmor
 }
 
 // Returns the real max hull of the ship after modifiers
-func (s *Outpost) GetRealMaxHull() float64 {
+func (o *Outpost) GetRealMaxHull() float64 {
 	// no modifiers yet
-	return s.TemplateData.BaseHull
+	return o.TemplateData.BaseHull
 }

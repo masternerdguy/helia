@@ -1664,16 +1664,16 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 }
 
 // Takes a SQL Outpost and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
-func LoadOutpost(sh *sql.Outpost, u *universe.Universe) (*universe.Outpost, error) {
+func LoadOutpost(o *sql.Outpost, u *universe.Universe) (*universe.Outpost, error) {
 	// get template
-	temp, err := outpostTemplateSvc.GetOutpostTemplateByID(sh.OutpostTemplateId)
+	temp, err := outpostTemplateSvc.GetOutpostTemplateByID(o.OutpostTemplateId)
 
 	if err != nil {
 		return nil, err
 	}
 
 	// get owner info
-	owner, err := userSvc.GetUserByID((sh.UserID))
+	owner, err := userSvc.GetUserByID((o.UserID))
 
 	if err != nil {
 		return nil, err
@@ -1681,21 +1681,21 @@ func LoadOutpost(sh *sql.Outpost, u *universe.Universe) (*universe.Outpost, erro
 
 	// build in-memory outpost
 	es := universe.Outpost{
-		ID:            sh.ID,
-		UserID:        sh.UserID,
-		Created:       sh.Created,
-		OutpostName:   sh.OutpostName,
+		ID:            o.ID,
+		UserID:        o.UserID,
+		Created:       o.Created,
+		OutpostName:   o.OutpostName,
 		CharacterName: owner.CharacterName,
-		PosX:          sh.PosX,
-		PosY:          sh.PosY,
-		SystemID:      sh.SystemID,
-		Theta:         sh.Theta,
-		Shield:        sh.Shield,
-		Armor:         sh.Armor,
-		Hull:          sh.Hull,
-		Destroyed:     sh.Destroyed,
-		DestroyedAt:   sh.DestroyedAt,
-		Wallet:        sh.Wallet,
+		PosX:          o.PosX,
+		PosY:          o.PosY,
+		SystemID:      o.SystemID,
+		Theta:         o.Theta,
+		Shield:        o.Shield,
+		Armor:         o.Armor,
+		Hull:          o.Hull,
+		Destroyed:     o.Destroyed,
+		DestroyedAt:   o.DestroyedAt,
+		Wallet:        o.Wallet,
 		TemplateData: universe.OutpostTemplate{
 			ID:                  temp.ID,
 			Created:             temp.Created,
@@ -1723,10 +1723,10 @@ func LoadOutpost(sh *sql.Outpost, u *universe.Universe) (*universe.Outpost, erro
 	es.Faction = u.Factions[owner.CurrentFactionID.String()]
 
 	// get pointer to outpost
-	sp := &es
+	op := &es
 
 	// return pointer to ship
-	return sp, nil
+	return op, nil
 }
 
 // Hooks pointers needed if a schematic is currently running
