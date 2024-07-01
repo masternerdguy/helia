@@ -260,7 +260,7 @@ export class PropertySheetWindow extends GDIWindow {
           // send credit transfer request
           const tiMsg: ClientTransferOutpostCreditsBody = {
             sid: this.wsSvc.sid,
-            outpostId: action.ship.id,
+            outpostId: action.outpost.id,
             amount: n,
           };
 
