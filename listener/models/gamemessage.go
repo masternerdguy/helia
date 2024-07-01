@@ -83,6 +83,7 @@ type MessageRegistry struct {
 	DockedUsersUpdate      int
 	ConsumeOutpostKit      int
 	RenameOutpost          int
+	TransferOutpostCredits int
 }
 
 // Registry of target types
@@ -171,6 +172,7 @@ func NewMessageRegistry() *MessageRegistry {
 		DockedUsersUpdate:      66,
 		ConsumeOutpostKit:      67,
 		RenameOutpost:          68,
+		TransferOutpostCredits: 69,
 	}
 }
 
@@ -814,6 +816,13 @@ type ClientTransferCreditsBody struct {
 	Amount    int       `json:"amount"`
 }
 
+// Body containing a request to transfer credit between an outpost owned by the player which the player is docked at
+type ClientTransferOutpostCreditsBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	OutpostID uuid.UUID `json:"outpostID"`
+	Amount    int       `json:"amount"`
+}
+
 // Body containing a request to sell a ship owned by a player docked at their current station on the orders market
 type ClientSellShipAsOrderBody struct {
 	SessionID uuid.UUID `json:"sid"`
@@ -834,7 +843,7 @@ type ClientRenameShipBody struct {
 	Name      string    `json:"name"`
 }
 
-// Body containing a request to rename an ouitpost owned by the player which the player is docked at
+// Body containing a request to rename an outpost owned by the player which the player is docked at
 type ClientRenameOutpostBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	OutpostID uuid.UUID `json:"outpostID"`

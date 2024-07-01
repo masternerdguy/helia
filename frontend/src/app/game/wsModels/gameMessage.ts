@@ -75,4 +75,5 @@ export enum MessageTypes {
   DockedUsersUpdate = 66,
   ConsumeOutpostKit = 67,
   RenameOutpost = 68,
+  TransferOutpostCredits = 69,
 }

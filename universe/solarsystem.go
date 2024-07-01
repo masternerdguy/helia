@@ -1095,6 +1095,68 @@ func (s *SolarSystem) processClientEventQueues() {
 
 				c.SetPropertyCache(pc)
 			}
+		} else if evt.Type == msgRegistry.TransferOutpostCredits {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientTransferOutpostCreditsBody)
+
+				// verify player is docked
+				if sh.DockedAtStation == nil {
+					c.WriteErrorMessage("you must be docked to transfer money")
+					continue
+				}
+
+				// get outpost to exchange with and verify it is owned by the player
+				toExchange := s.outposts[data.OutpostID.String()]
+
+				if toExchange == nil {
+					c.WriteErrorMessage("outpost not available to exchange money with")
+					continue
+				}
+
+				if toExchange.UserID != sh.UserID {
+					c.WriteErrorMessage("outpost not available to exchange money with")
+					continue
+				}
+
+				// verify player is docked at the outpost to exchange with
+				if toExchange.ID != sh.DockedAtStation.ID {
+					c.WriteErrorMessage("you must be docked at the outpost you are exchanging with")
+					continue
+				}
+
+				// verify this will not put either's balance below zero
+				newSrcBalance := sh.Wallet - float64(data.Amount)
+				newTgtBalance := toExchange.Wallet + float64(data.Amount)
+
+				if newSrcBalance < 0 || newTgtBalance < 0 {
+					c.WriteErrorMessage("insufficient funds")
+					continue
+				}
+
+				// update balances
+				sh.Wallet = newSrcBalance
+				toExchange.Wallet = newTgtBalance
+
+				// update property cache with new amounts (so it shows up immediately instead of as part of the periodic rebuild)
+				pc := c.GetPropertyCache()
+
+				for i, e := range pc.ShipCaches {
+					if e.ShipID == sh.ID {
+						pc.ShipCaches[i].Wallet = newSrcBalance
+						break
+					}
+				}
+
+				for i, e := range pc.OutpostCaches {
+					if e.OutpostID == toExchange.ID {
+						pc.OutpostCaches[i].Wallet = newTgtBalance
+						break
+					}
+				}
+
+				c.SetPropertyCache(pc)
+			}
 		} else if evt.Type == msgRegistry.SellShipAsOrder {
 			if sh != nil {
 				// extract data
