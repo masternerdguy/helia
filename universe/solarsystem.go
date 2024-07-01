@@ -1737,6 +1737,12 @@ func (s *SolarSystem) processClientEventQueues() {
 					continue
 				}
 
+				// verify ship is not docked at an outpost
+				if sh.DockedAtStation.isOutpostShim {
+					c.WriteErrorMessage("factions may not be founded at outposts")
+					continue
+				}
+
 				if sh.Faction != nil {
 					// verify player is in an NPC faction
 					if !sh.Faction.IsNPC {
