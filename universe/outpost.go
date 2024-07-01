@@ -79,26 +79,57 @@ func (s *Outpost) PeriodicUpdate() {
 }
 
 // Returns a copy of the outpost
-func (s *Outpost) CopyOutpost() Outpost {
+func (s *Outpost) CopyOutpost() *Outpost {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 
-	return Outpost{
-		ID:           s.ID,
-		OutpostName:  s.OutpostName,
-		PosX:         s.PosX,
-		PosY:         s.PosY,
-		SystemID:     s.SystemID,
-		Theta:        s.Theta,
-		Shield:       s.Shield,
-		Armor:        s.Armor,
-		Hull:         s.Hull,
-		TemplateData: s.TemplateData,
-		UserID:       s.UserID,
-		FactionID:    s.FactionID,
+	op := Outpost{
+		ID:          s.ID,
+		SystemID:    s.SystemID,
+		OutpostName: s.OutpostName,
+		PosX:        s.PosX,
+		PosY:        s.PosY,
+		Theta:       s.Theta,
+		Shield:      s.Shield,
+		Armor:       s.Armor,
+		Hull:        s.Hull,
+		UserID:      s.UserID,
+		Wallet:      s.Wallet,
+		Created:     s.Created,
+		Destroyed:   s.Destroyed,
+		// copy base template
+		TemplateData: OutpostTemplate{
+			ID:                  s.TemplateData.ID,
+			Created:             s.TemplateData.Created,
+			OutpostTemplateName: s.TemplateData.OutpostTemplateName,
+			Texture:             s.TemplateData.Texture,
+			WreckTexture:        s.TemplateData.WreckTexture,
+			ExplosionTexture:    s.TemplateData.ExplosionTexture,
+			Radius:              s.TemplateData.Radius,
+			BaseMass:            s.TemplateData.BaseMass,
+			BaseShield:          s.TemplateData.BaseShield,
+			BaseShieldRegen:     s.TemplateData.BaseShieldRegen,
+			BaseArmor:           s.TemplateData.BaseArmor,
+			BaseHull:            s.TemplateData.BaseHull,
+			ItemTypeID:          s.TemplateData.ItemTypeID,
+		},
+		// cache from controlling user
+		FactionID: s.FactionID,
 		// in-memory only
-		Lock: sync.Mutex{},
+		Lock:          sync.Mutex{},
+		CurrentSystem: s.CurrentSystem,
+		SystemName:    s.SystemName,
+		CharacterName: s.CharacterName,
+		Faction:       s.Faction,
 	}
+
+	// handle possibility of destruction
+	if s.DestroyedAt != nil {
+		op.DestroyedAt = s.DestroyedAt
+	}
+
+	// return result
+	return &op
 }
 
 // Returns a new physics dummy structure representing this outpost

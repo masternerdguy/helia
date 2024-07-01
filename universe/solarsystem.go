@@ -3828,7 +3828,7 @@ func (s *SolarSystem) CopyOutposts(lock bool) map[string]*Outpost {
 	// copy outposts into copy map
 	for k, v := range s.outposts {
 		c := v.CopyOutpost()
-		copy[k] = &c
+		copy[k] = c
 	}
 
 	// return copy map
