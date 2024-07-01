@@ -1194,7 +1194,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			defer escalationRecover(sol, e)
 
 			// create new outpost for player
-			ps, err := CreateOutpostForPlayer(
+			po, err := CreateOutpostForPlayer(
 				rs.UserID,
 				rs.OutpostTemplateID,
 				sol.ID,
@@ -1203,21 +1203,21 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				rs.Theta,
 			)
 
-			if err != nil || ps == nil {
+			if err != nil || po == nil {
 				shared.TeeLog(fmt.Sprintf("! Unable to complete outpost deployment for %v - failure saving (%v)!", rs.UserID, err))
 				return
 			}
 
 			// load into universe
-			es, err := LoadOutpost(ps, sol.Universe)
+			eo, err := LoadOutpost(po, sol.Universe)
 
-			if err != nil || es == nil {
+			if err != nil || eo == nil {
 				shared.TeeLog(fmt.Sprintf("! Unable to complete outpost deployment for %v - failure loading (%v)!", rs.UserID, err))
 				return
 			}
 
 			// put outpost in system
-			sol.AddOutpost(es, true)
+			sol.AddOutpost(eo, true)
 		}(rs, sol)
 	}
 
