@@ -48,7 +48,7 @@ func (s OutpostService) GetOutpostsBySolarSystem(systemID uuid.UUID, isDestroyed
 	sql := `
 				SELECT 
 					id, universe_systemid, outpostname, pos_x, pos_y, theta, userid, 
-					shield, armor, hull, wallet, outposttemplateid
+					shield, armor, hull, wallet, outposttemplateid, created
 				FROM public.outposts
 				WHERE universe_systemid = $1 and destroyed = $2
 			`
@@ -66,7 +66,7 @@ func (s OutpostService) GetOutpostsBySolarSystem(systemID uuid.UUID, isDestroyed
 
 		// scan into outpost structure
 		rows.Scan(&r.ID, &r.SystemID, &r.OutpostName, &r.PosX, &r.PosY, &r.Theta, &r.UserID,
-			&r.Shield, &r.Armor, &r.Hull, &r.Wallet, &r.OutpostTemplateId)
+			&r.Shield, &r.Armor, &r.Hull, &r.Wallet, &r.OutpostTemplateId, &r.Created)
 
 		// append to outpost slice
 		outposts = append(outposts, r)
