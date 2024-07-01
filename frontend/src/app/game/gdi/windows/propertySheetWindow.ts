@@ -18,6 +18,7 @@ import { ClientSellShipAsOrderBody } from '../../wsModels/bodies/sellShipAsOrder
 import { ClientTrashShipBody } from '../../wsModels/bodies/trashShip';
 import { ClientRenameShipBody } from '../../wsModels/bodies/renameShip';
 import { ClientRenameOutpostBody } from '../../wsModels/bodies/renameOutpost';
+import { ClientTransferOutpostCreditsBody } from '../../wsModels/bodies/transferOutpostCredits';
 
 export class PropertySheetWindow extends GDIWindow {
   private propertyList = new GDIList();
@@ -250,6 +251,33 @@ export class PropertySheetWindow extends GDIWindow {
       });
 
       this.showModalInput();
+    } else if (action.listString() == 'Move CBN') {
+      this.modalInput.setOnReturn((txt: string) => {
+        // convert text to an integer
+        const n = Math.round(Number(txt));
+
+        if (!Number.isNaN(n)) {
+          // send credit transfer request
+          const tiMsg: ClientTransferOutpostCreditsBody = {
+            sid: this.wsSvc.sid,
+            outpostId: action.ship.id,
+            amount: n,
+          };
+
+          this.wsSvc.sendMessage(MessageTypes.TransferOutpostCredits, tiMsg);
+
+          // request refresh
+          this.refreshPropertySummary();
+
+          // reset views
+          this.resetViews();
+        }
+
+        // hide modal overlay
+        this.hideModalInput();
+      });
+
+      this.showModalInput();
     }
   }
 
@@ -320,6 +348,12 @@ export class PropertySheetWindow extends GDIWindow {
       if (this.player.currentShip.dockedAtStationID == outpost.id) {
         actions.push({
           listString: () => 'Rename',
+          outpost: outpost,
+          ship: null,
+        });
+
+        actions.push({
+          listString: () => 'Move CBN',
           outpost: outpost,
           ship: null,
         });
