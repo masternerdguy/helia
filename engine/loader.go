@@ -619,6 +619,18 @@ func saveUniverse(u *universe.Universe) {
 				}
 			}
 
+			// get player outposts in system
+			outposts := s.CopyOutposts(false)
+
+			// save player outposts to database
+			for _, outpost := range outposts {
+				err := saveOutpost(outpost)
+
+				if err != nil {
+					shared.TeeLog(fmt.Sprintf("Error saving outpost: %v | %v", outpost, err))
+				}
+			}
+
 			// get npc stations in system
 			stations := s.CopyStations(false)
 
@@ -1940,6 +1952,39 @@ func saveShip(ship *universe.Ship) error {
 
 	if err != nil {
 		shared.TeeLog(fmt.Sprintf("Error saving ship: %v | %v", dbShip, err))
+	}
+
+	return err
+}
+
+// Updates an outpost in the database
+func saveOutpost(outpost *universe.Outpost) error {
+	// obtain lock on copy
+	outpost.Lock.Lock()
+	defer outpost.Lock.Unlock()
+
+	dbOutpost := sql.Outpost{
+		ID:                outpost.ID,
+		SystemID:          outpost.SystemID,
+		OutpostName:       outpost.OutpostName,
+		PosX:              outpost.PosX,
+		PosY:              outpost.PosY,
+		Theta:             outpost.Theta,
+		Shield:            outpost.Shield,
+		Armor:             outpost.Armor,
+		Hull:              outpost.Hull,
+		Wallet:            outpost.Wallet,
+		UserID:            outpost.UserID,
+		OutpostTemplateId: outpost.TemplateData.ID,
+		Created:           outpost.Created,
+		Destroyed:         outpost.Destroyed,
+		DestroyedAt:       outpost.DestroyedAt,
+	}
+
+	err := outpostSvc.UpdateOutpost(dbOutpost)
+
+	if err != nil {
+		shared.TeeLog(fmt.Sprintf("Error saving outpost: %v | %v", dbOutpost, err))
 	}
 
 	return err

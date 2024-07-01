@@ -110,6 +110,33 @@ func (s OutpostService) NewOutpost(e Outpost) (*Outpost, error) {
 	return &e, nil
 }
 
+// Updates an outpost in the database
+func (s OutpostService) UpdateOutpost(o Outpost) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update outpost in database
+	sqlStatement :=
+		`
+			UPDATE public.outposts
+			SET universe_systemid=$2, outpostname=$3, pos_x=$4, pos_y=$5, 
+				theta=$6, userid=$7, shield=$8, armor=$9, hull=$10, wallet=$11, 
+				destroyed=$12, destroyedat=$13, outposttemplateid=$14, created=$15
+			WHERE id=$1;
+		`
+
+	_, err = db.Exec(sqlStatement, o.ID,
+		o.SystemID, o.OutpostName, o.PosX, o.PosY,
+		o.Theta, o.UserID, o.Shield, o.Armor, o.Hull, o.Wallet,
+		o.Destroyed, o.DestroyedAt, o.OutpostTemplateId, o.Created)
+
+	return err
+}
+
 // Updates the name of an outpost in the database
 func (s OutpostService) Rename(id uuid.UUID, name string) error {
 	// get db handle
