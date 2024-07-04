@@ -1286,9 +1286,19 @@ func fillGasMiningYields(u *universe.Universe) {
 		"d8e1ead1-055b-4cd0-b1ec-f88dd0f7ff31",
 	}
 
+	/* star gas meta */
+	const starHasGasProb = 85
+
+	var strGases = [...]string{
+		"f4947ebe-4d4c-457b-aeb6-b4dd5b66e62b",
+		"0c429117-e7fa-4e00-97f9-ab67c639cae7",
+		"479e8dd7-06e8-479c-b07f-382b407b832f",
+	}
+
 	// get services
 	asteroidSvc := sql.GetAsteroidService()
 	planetSvc := sql.GetPlanetService()
+	starSvc := sql.GetStarService()
 
 	// iterate over regions
 	for _, r := range u.Regions {
@@ -1385,6 +1395,48 @@ func fillGasMiningYields(u *universe.Universe) {
 				meta["gasmining"] = gmm
 
 				planetSvc.UpdateMetaWorldfiller(p.ID, (*sql.Meta)(&meta))
+			}
+
+			// iterate over stars
+			stars := s.CopyStars(false)
+
+			for _, st := range stars {
+				// roll scarcity
+				aScarcity := rand.Float64()
+
+				// empty gas mining meta
+				gmm := universe.GasMiningMetadata{
+					Yields: make(map[string]universe.GasMiningYield),
+				}
+
+				// roll for gas presence
+				hasGasRoll := physics.RandInRange(0, 100)
+
+				if hasGasRoll <= starHasGasProb {
+					// iterate over star gases
+					for _, gid := range strGases {
+						// roll for yield
+						yld := physics.RandInRange(0, int(st.Mass)/int(st.Radius))
+
+						// apply scarcity
+						scarcity := rScarcity * sScarcity * aScarcity
+						yld = int(float64(yld) * scarcity)
+
+						if yld > 0 {
+							// add entry
+							gmm.Yields[gid] = universe.GasMiningYield{
+								ItemTypeId: uuid.MustParse(gid),
+								Yield:      yld,
+							}
+						}
+					}
+				}
+
+				// save metadata
+				meta := st.Meta
+				meta["gasmining"] = gmm
+
+				starSvc.UpdateMetaWorldfiller(st.ID, (*sql.Meta)(&meta))
 			}
 		}
 	}
