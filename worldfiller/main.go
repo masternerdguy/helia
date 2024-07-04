@@ -1282,6 +1282,9 @@ func fillGasMiningYields(u *universe.Universe) {
 
 	// iterate over regions
 	for _, r := range u.Regions {
+		// progress
+		log.Printf("seeding region %v", r.RegionName)
+
 		// roll scarcity
 		rScarcity := rand.Float64()
 
@@ -1328,8 +1331,6 @@ func fillGasMiningYields(u *universe.Universe) {
 				// save metadata
 				meta := universe.Meta{}
 				meta["gasmining"] = gmm
-
-				log.Printf("meta: %v", meta)
 
 				asteroidSvc.UpdateMetaWorldfiller(a.ID, (*sql.Meta)(&meta))
 			}
