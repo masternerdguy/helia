@@ -5,7 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SignupComponent } from './auth/signup/signup.component';
 
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { LoginComponent } from './auth/login/login.component';
 import { HomeComponent } from './home/home.component';
 import { LoreComponent } from './lore/lore.component';
@@ -13,19 +13,15 @@ import { UnifiedPolicyComponent } from './unified-policy/unified-policy.componen
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    SignupComponent,
-    LoginComponent,
-    ForgotPasswordComponent,
-    ResetPasswordComponent,
-    HomeComponent,
-    LoreComponent,
-    UnifiedPolicyComponent,
-  ],
-  imports: [BrowserModule, AppRoutingModule, HttpClientModule],
-  providers: [],
-  bootstrap: [AppComponent],
-})
+@NgModule({ declarations: [
+        AppComponent,
+        SignupComponent,
+        LoginComponent,
+        ForgotPasswordComponent,
+        ResetPasswordComponent,
+        HomeComponent,
+        LoreComponent,
+        UnifiedPolicyComponent,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule, AppRoutingModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {}
