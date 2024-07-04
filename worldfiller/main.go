@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
+	"helia/engine"
 	"helia/physics"
 	"helia/shared"
 	"helia/sql"
@@ -29,7 +30,7 @@ func main() {
 		printLogger,
 	)
 
-	/*// load universe from database
+	// load universe from database
 	shared.TeeLog("Loading universe from database...")
 	universe, err := engine.LoadUniverse()
 
@@ -38,220 +39,33 @@ func main() {
 	}
 
 	shared.TeeLog("Loaded universe!")
-	*/
+
 	/*
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
-	/*
-		var toInject = [...]string{
-			"582fff52-332a-4c9c-814f-f70b3db0d361",
-			"6b2490f3-d274-4a49-9a11-315f6964ba5a",
-			"5972c81e-aabd-4a74-ae79-19aee544f568",
-			"a07d4ad0-1be1-4e33-8ed1-c1391942b3be",
-			"4433e336-0969-49d1-98a7-135ec025dfb4",
-			"b18afe73-7de1-4f42-9e23-c15b9047558e",
-			"92b0f6c5-7a1c-4a8b-a6a9-3ec0faad9626",
-			"18b4ec68-86bf-43be-b16d-89c74da81794",
-			"cc72c386-f4a9-4d6d-b772-6e52b8025065",
-			"5d4e46a6-5b4c-4a42-b5f7-1f8ebea75157",
-			"f659e665-c0f4-4390-801c-ebb0bead5c53",
-			"9614167a-e4d3-4581-a5cf-a603a06429bf",
-			"e49a2920-5e84-47e8-9233-f8fbe9b7549e",
-			"b7ac86bc-6e37-4519-aa55-326af2374f34",
-			"c44f265b-4cd2-4694-894a-9956b94a76fb",
-			"3f3039f8-6f87-485b-9e5c-ddb9eed47acf",
-			"64d480d8-45ec-46a9-8f45-4943b7015372",
-			"0ce85f9b-2933-4f46-9684-efa261956d4e",
-			"bd86fbc8-6c2d-4a8c-b4f8-aa04c9814415",
-			"e69a83a8-3e8b-4bca-ad46-951ff118b423",
-			"84942262-e00f-48b4-baeb-3e6c38aa77f1",
-			"41d6a990-1b15-40fe-a56d-46a9be56201d",
-			"e4f62fc2-e70c-421d-a4a1-10f38b006d55",
-			"16d2fb12-f69b-4f50-bbab-39f43de250f6",
-			"7b2402f7-97ca-4889-8b8a-d74cd7839623",
-			"a7f2e536-ecc4-4e40-ac76-0dde649203e2",
-			"28687a8a-834f-4395-92dc-2a1993f5e8f2",
-			"5755a002-7820-47e4-aa57-72a56a8ddc3d",
-			"5502f886-5a5d-4a9a-8251-c97b82b56ebd",
-			"811feeb2-1647-436b-96c2-74f868b21fe8",
-			"f2fd6193-3592-4d48-aa30-3f62d6eb3c2c",
-			"2b0e62b7-b344-4b4a-9f7c-be9f928589ce",
-			"30bdef7e-07cf-4ddf-a3c3-f0ad9d03773c",
-			"7db4c707-8d8b-42de-af55-16e13b992e91",
-			"08c8dfdd-2679-49f7-a371-64057a8b6dd9",
-			"b2f48189-e44d-4629-9213-ff612ca5230b",
-			"37670065-b364-45e6-a3f0-c5bdb9f80e74",
-			"aa354e12-2535-4a39-ab77-4302520bc4d4",
-			"13ba35d6-67cf-4ea4-ae89-19c86f188a12",
-			"557fa68c-a88c-4d4b-ae76-9ddfe55d3d43",
-			"2a12bb7f-8f71-406a-bb65-c839d97a64e4",
-			"06e95f1c-0652-4d44-bef2-7fae08df8772",
-			"795d9c9d-0cef-47c3-afd2-1e47118bfc3a",
-			"72bef950-8f04-4175-acbc-49778ccc7f90",
-			"2b3677fe-5fed-4af1-a500-ad1291813d7e",
-			"0f3d0718-ede0-4701-a191-d7e6c44e35ce",
-			"bace7d32-1bf6-4d18-acee-3e4ed86cb451",
-			"996dbb36-a33b-4f79-bf87-8190f0d0def2",
-			"ddf890ab-7d42-4cf2-a110-fed0a6bd4ad5",
-			"a61858aa-40a8-470f-93dd-d2b803f12b4e",
-			"a9e7244b-2ce1-4336-b5db-21978d8b434c",
-			"5c89c2d3-e258-4c05-840c-90e2cc5a590d",
-			"71baf14d-49fb-46fb-aae3-003e5b39fd19",
-			"927680ff-5a0f-4982-b07c-935457cb48bc",
-			"f521294d-d881-4804-8396-9e1f195f2526",
-			"ec19248b-0132-409a-81ff-956aa04980d5",
-			"08c625e5-ff68-436f-aea4-d9ef0bc8cd33",
-			"9e48337d-eea1-4f3b-b667-3d3b39d6681e",
-			"94a1780b-f137-431e-b655-da3d8da1290b",
-			"3347ddf4-71de-4051-a93a-cfa6be10f0cf",
-			"08456917-debf-4950-9361-1f47b7298337",
-			"b08ca0ce-7201-46cb-bcda-76bc922bd25a",
-			"dcd00169-33ce-42a0-b9d7-4d7276a6daf6",
-			"da8241e5-9f95-4f16-99fd-2c6a49208450",
-			"12bbb205-51fd-44e9-adc9-e849b8542410",
-			"16077bb6-911b-4852-8247-24e561b17364",
-			"b5309636-5352-4759-981d-bc31b92567b6",
-			"19ac42b2-65b1-43f3-b85a-8c6b375affa4",
-			"986ebe82-4219-46c4-a057-02c3694b1e07",
-			"a0f67820-a3fb-45ce-b0c8-45e117e25126",
-			"6a7fc1b6-c331-461d-9839-2f855beb1259",
-			"ef08d1fc-4660-4edd-aa47-1fa72a6ea730",
-			"a9b761e2-96fb-4f64-84cf-e6b069fcd516",
-			"c6e69ed3-0cb0-44b7-87aa-52d657d3ef2c",
-			"1eeb2a8f-1ce4-4ccf-abb7-19f12aa9bbcc",
-			"b5938172-3ec4-4b34-92e0-cdac33b15c52",
-			"bf25d1c2-5bce-4261-9bf7-e93b527f96d1",
-			"892c9822-38f8-4e5a-a78e-07bb150daf7b",
-			"99f147ba-741d-4495-b40f-a9e318e47962",
-			"38df3baa-64b0-483c-bb7f-7155d57f708a",
-			"57fc41d9-7919-40e4-b9b0-44cb58c6d6ee",
-			"5481487f-212c-4bfa-839c-575caa510f9a",
-			"7f239a88-9da2-4a47-81bf-d5168ef1894d",
-			"96ca2647-a68c-4eec-aae3-8b368f53c5ef",
-			"b02b72e8-fa3e-46ed-9ae3-438183fe1c8b",
-			"6dc20625-d3c6-42c6-ac77-017b4f4aa9c8",
-			"925b4d12-fbf4-442d-bb7c-b301063e1072",
-			"f7e3f476-a038-4095-bb3a-941d239282b4",
-			"062301b8-c647-4998-93be-d9b94690c167",
-			"e4da1804-8500-4150-aaae-55f32bdd3b16",
-			"6229c660-4de0-4095-bd0d-8b6ca29eaf4c",
-			"05444e33-02d6-4f8a-9261-324a8bafb75d",
-			"e48bbd32-44fb-4ebb-8a9c-83e48c1334e2",
-			"91fe1440-6cea-4b44-b488-02fcf916d45f",
-			"bb22aedd-5ce3-4184-aa02-65c9f2d73ee4",
-			"65afee21-290c-4627-989d-920b4c2b8b72",
-			"9721c28a-8539-4f5d-92b6-ecab36fc4d73",
-			"a389fea4-da61-4f63-b25f-d403060d532f",
-			"ee1b7245-5404-470f-a5da-f0f44e024ca4",
-			"22b329a6-d612-41b7-9cdd-78204d2304fd",
-			"42950c84-48a5-49e8-a0c6-7614994630c8",
-			"788a5389-db4d-4f77-b838-d3caace35ed5",
-			"04a421da-a218-4ca0-8324-28c481923f25",
-			"01c0dfc7-3670-4bd6-9a3c-e263f5652f50",
-			"1e09eff9-d52e-41a3-86f1-803ab97f93a7",
-			"9cdf16ed-dd7e-4c35-9f03-e102e5884cb0",
-			"30e0c788-0f5f-425a-bbc7-b239e9ef6313",
-			"6043530e-5e75-43f8-a85d-84556a20ea88",
-			"1ab7e519-d41b-494d-b1c1-f92e8c3068df",
-			"2520372d-2b32-4879-8aea-8fe07cc2f4d9",
-			"3fe252ed-0932-4017-92b0-ee8988dc28c6",
-			"c5413194-fe43-4ef8-a62b-828d2b1d7e51",
-			"5051eb13-d3ff-4df0-b77c-938d325b0ed0",
-			"ecab61ab-75a9-492c-8145-03a8e3075bcd",
-			"209d6e90-2263-4448-a1dc-06d6b8d0db11",
-			"23df5e75-7b3a-4e75-b6a9-ad89f726fee7",
-			"564fee33-bf23-4861-93ba-b45302d17c96",
-			"f0826569-b124-4c75-92af-eef339d4c1d2",
-			"c28340ec-cd77-4e78-8cd6-ce753c9cc806",
-			"fe51093a-d690-48ac-a156-0142a635e69a",
-			"6bbd9ff7-8d23-48c3-b298-19b8d443f1ea",
-			"5e346a8e-db8f-4436-8b6b-6aed558af7b7",
-			"5773b753-d56a-47b6-acce-cd00489b5e68",
-			"f6c62bba-2ae2-4052-a48e-667559882dca",
-			"c40be21c-2d12-4ae2-99a8-12ab1ae8138b",
-			"c771b022-36a5-4fb8-b219-e99626299dff",
-			"a8881a01-1622-4d32-beca-c56c387d1d37",
-			"9a7407ca-b048-4fd0-8548-443e387199ba",
-			"da43dbf3-0c9d-4f0e-9106-4a396b2e78ec",
-			"4d3be032-56e5-42d3-8f96-b73baac77c90",
-			"83ebf580-d49f-4c7f-beb9-12e56e0bc5f3",
-			"0aabdabf-591e-4f98-b27b-723335b7be21",
-			"9ea682fa-5427-4261-a48d-8e4efcc97906",
-			"3526f1db-8960-4456-91d5-b6274ae78ea6",
-			"ab129bb8-91cb-496e-93e2-1520e3c79e56",
-			"4cd4bced-c1bb-4cb9-986e-54f11c22734c",
-			"348117e6-fda7-4996-b9ad-f0bafe908f67",
-			"3fa3164f-05bf-4ef3-a278-e0f093fc8371",
-			"479a16fb-2817-43f6-bb0c-c49dc8916b08",
-			"a64c76cb-ec31-4b8a-90da-039dcd130e27",
-			"81c3e70d-4427-4748-a1a3-d2fee81624b1",
-			"b48b208e-04bf-4659-a1cc-45e329d03cdd",
-			"431db2b2-4b7e-4bfd-8126-3a0b1f303c1c",
-			"55fc726b-d2a0-4b21-9f80-3f8a9d663b5e",
-			"131db682-7327-4f3f-8bac-722eb284d7a1",
-			"5595c065-5817-4563-8bda-7f577911d275",
-			"90a8c8ad-faf5-4f73-895b-dfd85c22b93a",
-			"d136f899-abe5-4bce-9ab9-f13367301a3f",
-			"180da7d1-a195-447f-a2a3-68b49672cc6a",
-			"cf49d8e2-554e-4f06-b665-70990aac1863",
-			"d4a0b3b9-cd1d-4519-96f1-cd299ea19fc9",
-			"a6e21565-31f0-4461-9e5f-de492471550f",
-			"c59651ee-4ef7-45c0-8939-9f52d452baff",
-			"db2dde41-aadd-4fc2-a021-af6c48d92b09",
-			"1d3d3d84-b3e3-4fcc-ae38-9ded57c9a369",
-			"7c2eef1f-a877-4881-ac0b-a626ba1c9acd",
-			"ac92be47-d076-43a0-aad1-56c877bb32f6",
-			"8fc4fec7-c3de-4802-b75a-6d3cad6241dd",
-			"ae4d3480-6be0-471a-82f0-3143d87d0d03",
-			"79ff91d3-d575-44c0-b10a-5d240fa5a1b6",
-			"3751b85e-3947-4785-9992-567097f9f268",
-			"edc2531e-4f91-4492-9b5d-c5fe56fd73dc",
-			"df3477e8-3638-449f-8f37-cd622d00b71f",
-			"a5ddee77-8013-48db-9386-3f2483773a66",
-			"0067fcdb-7d37-495d-83a2-97663b212e76",
-			"cfd4d951-ceaa-4054-a856-06404167c63f",
-			"9b7ce331-cf3d-4e2d-893f-ea354edda498",
-			"3e59e211-7a79-49f3-af0f-8d3e5f5a94b3",
-			"426dd27b-2741-4aad-9c98-fdfffa593e8d",
-			"f6dddc27-8cf0-46d5-9744-268dafebda27",
-			"08564a4c-b14f-4e83-b8bc-fe09a97fedc7",
-			"c4858a85-ef9d-4a1c-9da5-db1d4d4e57fd",
-			"5a5b917e-ba8e-4824-afe5-eacbfcb25ebd",
-			"2a031272-389e-4f44-b53f-5dbcec945463",
-			"26bb1a9a-ca38-459e-882c-d88b944674e8",
-			"39479049-8094-4adf-b27d-dec3350ef9f6",
-			"7674bf29-148a-4de8-aaae-f3dce3064000",
-			"d2208d6c-a01e-47cc-99fb-7d40cdd196c1",
-			"7bbe912d-046e-47dc-9307-1f541a112a86",
-			"e3203031-4dd9-40a4-b15f-777e38375c1f",
-			"b6beeb96-2730-4124-912b-c8d812811392",
-			"e807f2a3-ba11-44af-9e09-2a4add5e46c3",
-			"bf0adb0e-9102-40a9-b766-c49bb1b388a2",
-			"de773eee-19cf-4ef0-96a8-1fd88b4fa6db",
-			"2b2f9f8f-9811-4d64-a808-3178d6a6994a",
-			"f1560623-403e-452b-883b-6548ceb7b546",
-			"2d2e0658-c423-4b63-b7d1-aa37c0bd7cdd",
-			"2883312d-8d23-4c7a-826f-e4cc7160a53d",
-			"aa79aed2-d763-479c-9fc4-27b592ff9123",
-			"e42a1595-7e9b-4ba2-bec7-e2017afb0582",
-			"a48a7979-a54e-4501-9132-fbb409f0cd65",
-			"e5432683-ad9b-4e7d-856e-c68145d6d4d4",
-			"0d3dda63-69b0-46b5-8e5b-53d2353e367e",
-			"bdb31099-f3e8-4c85-bd6a-936c673ec1fb",
-			"34d76bcb-b023-4867-a533-3f54a77f434b",
-			"d99072ef-2e90-4c2d-84d5-573944ff2dbd",
-		}*/
+
+	var toInject = [...]string{
+		"6b9b499d-1426-4aa5-ae58-69f6516d4a9b",
+		"5e64e9d3-bf33-4552-8d09-1f70d7d2d4a4",
+		"e77eee22-24f7-44c7-846a-09819808a8bf",
+		"eab6ce76-bee0-4ab7-bc1d-87e7b90af831",
+		"bdab0eaf-3f9d-40a8-b60f-4770e05f4a06",
+		"c4dde5ab-b782-4d69-9582-7bfd02cd7d1c",
+		"4075709e-d2c0-4d20-8698-d504938c22f5",
+		"f120d11b-e0ad-4a17-bedc-25bb2bb7a06d",
+		"e1e95a63-32f1-4f92-8052-b2ac7a92ec6b",
+	}
 
 	// dropAsteroids(universe)
 	//dropSanctuaryStations(universe)
 
-	/*for i, e := range toInject {
+	for i, e := range toInject {
 		log.Printf("injecting process %v", e)
 		injectProcess(universe, e, i)
-	}*/
+	}
 
 	//stubModuleSchematicsAndProcesses()
-	loadNewWares()
+	//loadNewWares()
 }
 
 /* Parameters for asteroid generation */
@@ -848,18 +662,16 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 		panic(err)
 	}
 
-	/*var textures = [...]string{
-		"bad-",
+	var textures = [...]string{
 		"sanctuary-",
 		"interstar-",
-		"alvaca-",
-	}*/
+	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 178046782389 + int64(offset))
+			rand.Seed(int64(calculateSystemSeed(s)) - 178046782372 + int64(offset))
 
 			/*if r.ID.ID()%2 != 0 {
 				continue
@@ -872,21 +684,21 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 			stations := s.CopyStations(true)
 
 			for _, st := range stations {
-				/*for _, t := range textures {
-				if strings.Contains(st.Texture, t) {*/
-				roll := physics.RandInRange(0, 100)
+				for _, t := range textures {
+					if !strings.Contains(st.Texture, t) {
+						roll := physics.RandInRange(0, 100)
 
-				if roll <= prob {
-					sp := sql.StationProcess{
-						StationID: st.ID,
-						ProcessID: pID,
-						ID:        uuid.New(),
+						if roll <= prob {
+							sp := sql.StationProcess{
+								StationID: st.ID,
+								ProcessID: pID,
+								ID:        uuid.New(),
+							}
+
+							toSave = append(toSave, sp)
+						}
 					}
-
-					toSave = append(toSave, sp)
 				}
-				/*	}
-					}*/
 			}
 		}
 	}
@@ -1327,7 +1139,7 @@ func loadNewWares() {
 		// create new item type for ware
 		it := sql.ItemType{
 			ID:     uuid.New(),
-			Family: "trade_good",
+			Family: "gas",
 			Name:   w.Name,
 			Meta:   sql.Meta{},
 		}
