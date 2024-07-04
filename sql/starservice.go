@@ -20,6 +20,7 @@ type Star struct {
 	Radius   float64
 	Mass     float64
 	Theta    float64
+	Meta     Meta
 }
 
 // Retrieves all stars from the database
@@ -35,7 +36,7 @@ func (s StarService) GetAllStars() ([]Star, error) {
 
 	// load stars
 	sql := `
-				SELECT id, universe_systemid, pos_x, pos_y, texture, radius, mass, theta
+				SELECT id, universe_systemid, pos_x, pos_y, texture, radius, mass, theta, meta
 				FROM public.universe_stars;
 			`
 
@@ -51,7 +52,7 @@ func (s StarService) GetAllStars() ([]Star, error) {
 		r := Star{}
 
 		// scan into star structure
-		rows.Scan(&r.ID, &r.SystemID, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta)
+		rows.Scan(&r.ID, &r.SystemID, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta, &r.Meta)
 
 		// append to star slice
 		stars = append(stars, r)
@@ -73,7 +74,7 @@ func (s StarService) GetStarsBySolarSystem(systemID uuid.UUID) ([]Star, error) {
 
 	// load stars
 	sql := `
-				SELECT id, universe_systemid, pos_x, pos_y, texture, radius, mass, theta
+				SELECT id, universe_systemid, pos_x, pos_y, texture, radius, mass, theta, meta
 				FROM public.universe_stars
 				WHERE universe_systemid = $1;
 			`
@@ -90,7 +91,7 @@ func (s StarService) GetStarsBySolarSystem(systemID uuid.UUID) ([]Star, error) {
 		r := Star{}
 
 		// scan into star structure
-		rows.Scan(&r.ID, &r.SystemID, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta)
+		rows.Scan(&r.ID, &r.SystemID, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta, &r.Meta)
 
 		// append to star slice
 		stars = append(stars, r)

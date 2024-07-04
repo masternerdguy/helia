@@ -7,6 +7,10 @@ import (
 	"github.com/google/uuid"
 )
 
+type AsteroidMeta struct {
+	GasMining GasMiningMeta
+}
+
 // Structure representing an asteroid
 type Asteroid struct {
 	ID       uuid.UUID
@@ -18,6 +22,7 @@ type Asteroid struct {
 	PosX     float64
 	PosY     float64
 	Mass     float64
+	Meta     Meta
 	// secret, do not expose to player in global update
 	Yield float64
 	// secret (ore details)

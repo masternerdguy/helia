@@ -21,6 +21,7 @@ type Planet struct {
 	Radius     float64
 	Mass       float64
 	Theta      float64
+	Meta       Meta
 }
 
 // Retrieves all planets from the database
@@ -36,7 +37,7 @@ func (s PlanetService) GetAllPlanets() ([]Planet, error) {
 
 	// load planets
 	sql := `
-				SELECT id, universe_systemid, planetname, pos_x, pos_y, texture, radius, mass, theta
+				SELECT id, universe_systemid, planetname, pos_x, pos_y, texture, radius, mass, theta, meta
 				FROM public.universe_planets;
 			`
 
@@ -52,7 +53,7 @@ func (s PlanetService) GetAllPlanets() ([]Planet, error) {
 		r := Planet{}
 
 		// scan into planet structure
-		rows.Scan(&r.ID, &r.SystemID, &r.PlanetName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta)
+		rows.Scan(&r.ID, &r.SystemID, &r.PlanetName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta, &r.Meta)
 
 		// append to planet slice
 		planets = append(planets, r)
@@ -74,7 +75,7 @@ func (s PlanetService) GetPlanetsBySolarSystem(systemID uuid.UUID) ([]Planet, er
 
 	// load planets
 	sql := `
-				SELECT id, universe_systemid, planetname, pos_x, pos_y, texture, radius, mass, theta
+				SELECT id, universe_systemid, planetname, pos_x, pos_y, texture, radius, mass, theta, meta
 				FROM public.universe_planets
 				WHERE universe_systemid = $1;
 			`
@@ -91,7 +92,7 @@ func (s PlanetService) GetPlanetsBySolarSystem(systemID uuid.UUID) ([]Planet, er
 		r := Planet{}
 
 		// scan into planet structure
-		rows.Scan(&r.ID, &r.SystemID, &r.PlanetName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta)
+		rows.Scan(&r.ID, &r.SystemID, &r.PlanetName, &r.PosX, &r.PosY, &r.Texture, &r.Radius, &r.Mass, &r.Theta, &r.Meta)
 
 		// append to planet slice
 		planets = append(planets, r)

@@ -2,6 +2,10 @@ package universe
 
 import "github.com/google/uuid"
 
+type PlanetMeta struct {
+	GasMining GasMiningMeta
+}
+
 // Structure representing a planet
 type Planet struct {
 	ID         uuid.UUID
@@ -13,6 +17,7 @@ type Planet struct {
 	Radius     float64
 	Mass       float64
 	Theta      float64
+	Meta       Meta
 }
 
 // Returns a copy of the planet

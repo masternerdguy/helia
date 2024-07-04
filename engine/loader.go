@@ -271,6 +271,7 @@ func LoadUniverse() (*universe.Universe, error) {
 					Radius:   st.Radius,
 					Mass:     st.Mass,
 					Theta:    st.Theta,
+					Meta:     universe.Meta(st.Meta),
 				}
 
 				s.AddStar(&star)
@@ -294,6 +295,7 @@ func LoadUniverse() (*universe.Universe, error) {
 					Radius:     p.Radius,
 					Mass:       p.Mass,
 					Theta:      p.Theta,
+					Meta:       universe.Meta(p.Meta),
 				}
 
 				s.AddPlanet(&planet)
@@ -306,25 +308,26 @@ func LoadUniverse() (*universe.Universe, error) {
 				return nil, err
 			}
 
-			for _, p := range asteroids {
+			for _, a := range asteroids {
 				// get ore item type
-				oi := itemTypeCache[p.ItemTypeID.String()]
+				oi := itemTypeCache[a.ItemTypeID.String()]
 
 				// get ore item family
 				of := itemFamilyCache[oi.Family]
 
 				// build asteroid
 				asteroid := universe.Asteroid{
-					ID:             p.ID,
-					SystemID:       p.SystemID,
-					Name:           p.Name,
-					Texture:        p.Texture,
-					Radius:         p.Radius,
-					Theta:          p.Theta,
-					PosX:           p.PosX,
-					PosY:           p.PosY,
-					Yield:          p.Yield,
-					Mass:           p.Mass,
+					ID:             a.ID,
+					SystemID:       a.SystemID,
+					Name:           a.Name,
+					Texture:        a.Texture,
+					Radius:         a.Radius,
+					Theta:          a.Theta,
+					PosX:           a.PosX,
+					PosY:           a.PosY,
+					Meta:           universe.Meta(a.Meta),
+					Yield:          a.Yield,
+					Mass:           a.Mass,
 					ItemTypeName:   oi.Name,
 					ItemTypeID:     oi.ID,
 					ItemFamilyName: of.FriendlyName,
@@ -372,9 +375,9 @@ func LoadUniverse() (*universe.Universe, error) {
 				return nil, err
 			}
 
-			for _, currStation := range stations {
+			for _, st := range stations {
 				// get station processes for this station from cache
-				sqlProcesses := stationProcessCache[currStation.ID.String()]
+				sqlProcesses := stationProcessCache[st.ID.String()]
 
 				// process collected station processes
 				processes := make(map[string]*universe.StationProcess)
@@ -390,28 +393,28 @@ func LoadUniverse() (*universe.Universe, error) {
 						return nil, err
 					}
 
-					spx.StationName = currStation.StationName
+					spx.StationName = st.StationName
 					spx.SolarSystemName = s.SystemName
 					processes[spx.ID.String()] = spx
 				}
 
 				// build station
 				station := universe.Station{
-					ID:          currStation.ID,
-					SystemID:    currStation.SystemID,
-					StationName: currStation.StationName,
-					PosX:        currStation.PosX,
-					PosY:        currStation.PosY,
-					Texture:     currStation.Texture,
-					Radius:      currStation.Radius,
-					Mass:        currStation.Mass,
-					Theta:       currStation.Theta,
-					FactionID:   currStation.FactionID,
+					ID:          st.ID,
+					SystemID:    st.SystemID,
+					StationName: st.StationName,
+					PosX:        st.PosX,
+					PosY:        st.PosY,
+					Texture:     st.Texture,
+					Radius:      st.Radius,
+					Mass:        st.Mass,
+					Theta:       st.Theta,
+					FactionID:   st.FactionID,
 					Lock:        sync.Mutex{},
 					// link solar system into station
 					CurrentSystem: &s,
 					Processes:     processes,
-					Faction:       u.Factions[currStation.FactionID.String()],
+					Faction:       u.Factions[st.FactionID.String()],
 				}
 
 				// initialize station

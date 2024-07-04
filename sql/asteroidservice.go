@@ -23,6 +23,7 @@ type Asteroid struct {
 	PosY       float64
 	Yield      float64
 	Mass       float64
+	Meta       Meta
 }
 
 // Retrieves all asteroids in a given solar system from the database
@@ -38,7 +39,7 @@ func (s AsteroidService) GetAsteroidsBySolarSystem(systemID uuid.UUID) ([]Astero
 
 	// load asteroids
 	sql := `
-				SELECT id, universe_systemid, ore_itemtypeid, name, texture, radius, theta, pos_x, pos_y, yield, mass
+				SELECT id, universe_systemid, ore_itemtypeid, name, texture, radius, theta, pos_x, pos_y, yield, mass, meta
 				FROM public.universe_asteroids
 				WHERE universe_systemid = $1;
 			`
@@ -55,7 +56,7 @@ func (s AsteroidService) GetAsteroidsBySolarSystem(systemID uuid.UUID) ([]Astero
 		r := Asteroid{}
 
 		// scan into asteroid structure
-		rows.Scan(&r.ID, &r.SystemID, &r.ItemTypeID, &r.Name, &r.Texture, &r.Radius, &r.Theta, &r.PosX, &r.PosY, &r.Yield, &r.Mass)
+		rows.Scan(&r.ID, &r.SystemID, &r.ItemTypeID, &r.Name, &r.Texture, &r.Radius, &r.Theta, &r.PosX, &r.PosY, &r.Yield, &r.Mass, &r.Meta)
 
 		// append to asteroid slice
 		asteroids = append(asteroids, r)
