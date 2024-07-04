@@ -26,5 +26,6 @@ func (s *Star) CopyStar() Star {
 		Theta:    s.Theta,
 		Radius:   s.Radius,
 		Mass:     s.Mass,
+		Meta:     s.Meta,
 	}
 }

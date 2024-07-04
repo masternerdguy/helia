@@ -58,6 +58,7 @@ func (s *Asteroid) CopyAsteroid() Asteroid {
 		PosX:     s.PosX,
 		PosY:     s.PosY,
 		Mass:     s.Mass,
+		Meta:     s.Meta,
 		// secret, do not expose to player in global update
 		Yield: s.Yield,
 		// secret (ore details)

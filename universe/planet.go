@@ -27,5 +27,6 @@ func (s *Planet) CopyPlanet() Planet {
 		Theta:    s.Theta,
 		Radius:   s.Radius,
 		Mass:     s.Mass,
+		Meta:     s.Meta,
 	}
 }

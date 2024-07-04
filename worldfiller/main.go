@@ -1269,7 +1269,7 @@ func parseWareCsv(data [][]string) []WareCsvRecord {
 // Initializes gas mining yields on celestials
 func fillGasMiningYields(u *universe.Universe) {
 	/* asteroid gas meta */
-	const astHasGasProb = 500
+	const astHasGasProb = 15
 
 	var astGases = [...]string{
 		"22fb3cda-c949-41ae-bcf5-ee0a60d497fc",
@@ -1277,8 +1277,18 @@ func fillGasMiningYields(u *universe.Universe) {
 		"42179f25-b473-46d1-9592-08e1d23807bd",
 	}
 
+	/* planet gas meta */
+	const plnHasGasProb = 66
+
+	var plnGases = [...]string{
+		"3f903eca-8bd3-4f54-a9ce-2b22627db94a",
+		"04f16f34-497f-465e-a9a6-368dd62a5328",
+		"d8e1ead1-055b-4cd0-b1ec-f88dd0f7ff31",
+	}
+
 	// get services
 	asteroidSvc := sql.GetAsteroidService()
+	planetSvc := sql.GetPlanetService()
 
 	// iterate over regions
 	for _, r := range u.Regions {
@@ -1329,10 +1339,52 @@ func fillGasMiningYields(u *universe.Universe) {
 				}
 
 				// save metadata
-				meta := universe.Meta{}
+				meta := a.Meta
 				meta["gasmining"] = gmm
 
 				asteroidSvc.UpdateMetaWorldfiller(a.ID, (*sql.Meta)(&meta))
+			}
+
+			// iterate over planets
+			pls := s.CopyPlanets(false)
+
+			for _, p := range pls {
+				// roll scarcity
+				aScarcity := rand.Float64()
+
+				// empty gas mining meta
+				gmm := universe.GasMiningMetadata{
+					Yields: make(map[string]universe.GasMiningYield),
+				}
+
+				// roll for gas presence
+				hasGasRoll := physics.RandInRange(0, 100)
+
+				if hasGasRoll <= plnHasGasProb {
+					// iterate over planet gases
+					for _, gid := range plnGases {
+						// roll for yield
+						yld := physics.RandInRange(0, int(p.Mass)/int(p.Radius))
+
+						// apply scarcity
+						scarcity := rScarcity * sScarcity * aScarcity
+						yld = int(float64(yld) * scarcity)
+
+						if yld > 0 {
+							// add entry
+							gmm.Yields[gid] = universe.GasMiningYield{
+								ItemTypeId: uuid.MustParse(gid),
+								Yield:      yld,
+							}
+						}
+					}
+				}
+
+				// save metadata
+				meta := p.Meta
+				meta["gasmining"] = gmm
+
+				planetSvc.UpdateMetaWorldfiller(p.ID, (*sql.Meta)(&meta))
 			}
 		}
 	}

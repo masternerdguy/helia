@@ -127,3 +127,30 @@ func (s PlanetService) NewPlanetWorldMaker(r *Planet) error {
 
 	return nil
 }
+
+// Updates meta on a planet in the database (for worldfiller)
+func (s PlanetService) UpdateMetaWorldfiller(id uuid.UUID, m *Meta) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update planet
+	sql := `
+				UPDATE public.universe_planets
+					SET meta=$2
+					WHERE id=$1;
+			`
+
+	q, err := db.Query(sql, id, m)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}
