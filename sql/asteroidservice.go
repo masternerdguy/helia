@@ -91,3 +91,30 @@ func (s AsteroidService) NewAsteroidWorldFiller(r *Asteroid) error {
 
 	return nil
 }
+
+// Updates meta on an asteroid in the database (for worldfiller)
+func (s AsteroidService) UpdateMetaWorldfiller(id uuid.UUID, m *Meta) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update asteroid
+	sql := `
+				UPDATE public.universe_asteroids
+					SET meta=$2
+					WHERE id=$1;
+			`
+
+	q, err := db.Query(sql, id, m)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}

@@ -7,10 +7,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type AsteroidMeta struct {
-	GasMining GasMiningMeta
-}
-
 // Structure representing an asteroid
 type Asteroid struct {
 	ID       uuid.UUID

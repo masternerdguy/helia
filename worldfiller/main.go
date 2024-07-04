@@ -44,7 +44,7 @@ func main() {
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	var toInject = [...]string{
+	/*var toInject = [...]string{
 		"6b9b499d-1426-4aa5-ae58-69f6516d4a9b",
 		"5e64e9d3-bf33-4552-8d09-1f70d7d2d4a4",
 		"e77eee22-24f7-44c7-846a-09819808a8bf",
@@ -56,13 +56,15 @@ func main() {
 		"e1e95a63-32f1-4f92-8052-b2ac7a92ec6b",
 	}
 
-	// dropAsteroids(universe)
-	//dropSanctuaryStations(universe)
-
 	for i, e := range toInject {
 		log.Printf("injecting process %v", e)
 		injectProcess(universe, e, i)
-	}
+	}*/
+
+	fillGasMiningYields(universe)
+
+	// dropAsteroids(universe)
+	//dropSanctuaryStations(universe)
 
 	//stubModuleSchematicsAndProcesses()
 	//loadNewWares()
@@ -1262,4 +1264,75 @@ func parseWareCsv(data [][]string) []WareCsvRecord {
 		}
 	}
 	return wareList
+}
+
+// Initializes gas mining yields on celestials
+func fillGasMiningYields(u *universe.Universe) {
+	/* asteroid gas meta */
+	const astHasGasProb = 500
+
+	var astGases = [...]string{
+		"22fb3cda-c949-41ae-bcf5-ee0a60d497fc",
+		"5f84addf-d05b-407a-8dcd-fecd3af4c69d",
+		"42179f25-b473-46d1-9592-08e1d23807bd",
+	}
+
+	// get services
+	asteroidSvc := sql.GetAsteroidService()
+
+	// iterate over regions
+	for _, r := range u.Regions {
+		// roll scarcity
+		rScarcity := rand.Float64()
+
+		// iterate over solar systems
+		for _, s := range r.Systems {
+			// roll scarcity
+			sScarcity := rand.Float64()
+
+			// iterate over asteroids
+			asts := s.CopyAsteroids(false)
+
+			for _, a := range asts {
+				// roll scarcity
+				aScarcity := rand.Float64()
+
+				// empty gas mining meta
+				gmm := universe.GasMiningMetadata{
+					Yields: make(map[string]universe.GasMiningYield),
+				}
+
+				// roll for gas presence
+				hasGasRoll := physics.RandInRange(0, 100)
+
+				if hasGasRoll <= astHasGasProb {
+					// iterate over asteroid gases
+					for _, gid := range astGases {
+						// roll for yield
+						yld := physics.RandInRange(0, int(a.Mass)/int(a.Radius))
+
+						// apply scarcity
+						scarcity := rScarcity * sScarcity * aScarcity
+						yld = int(float64(yld) * scarcity)
+
+						if yld > 0 {
+							// add entry
+							gmm.Yields[gid] = universe.GasMiningYield{
+								ItemTypeId: uuid.MustParse(gid),
+								Yield:      yld,
+							}
+						}
+					}
+				}
+
+				// save metadata
+				meta := universe.Meta{}
+				meta["gasmining"] = gmm
+
+				log.Printf("meta: %v", meta)
+
+				asteroidSvc.UpdateMetaWorldfiller(a.ID, (*sql.Meta)(&meta))
+			}
+		}
+	}
 }

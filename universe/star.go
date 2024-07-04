@@ -2,10 +2,6 @@ package universe
 
 import "github.com/google/uuid"
 
-type StarMeta struct {
-	GasMining GasMiningMeta
-}
-
 // Structure representing a star
 type Star struct {
 	ID       uuid.UUID
