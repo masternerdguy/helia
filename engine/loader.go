@@ -573,7 +573,7 @@ func loadStar(st sql.Star) *universe.Star {
 	gm := GetGasMiningMetadata(star.Meta)
 
 	// load gas yields
-	loadGasMiningYields(gm)
+	linkGasMiningYields(gm)
 
 	// store gas mining metadata
 	star.GasMiningMetadata = gm
@@ -583,7 +583,7 @@ func loadStar(st sql.Star) *universe.Star {
 }
 
 // Parses gas mining yields and links them to their gas item type
-func loadGasMiningYields(gm universe.GasMiningMetadata) {
+func linkGasMiningYields(gm universe.GasMiningMetadata) {
 	// iterate over yields
 	for k, v := range gm.Yields {
 		// get gas item type
@@ -623,7 +623,7 @@ func loadPlanet(p sql.Planet) *universe.Planet {
 	gm := GetGasMiningMetadata(planet.Meta)
 
 	// load gas yields
-	loadGasMiningYields(gm)
+	linkGasMiningYields(gm)
 
 	// store gas mining metadata
 	planet.GasMiningMetadata = gm
@@ -665,7 +665,7 @@ func loadAsteroid(a sql.Asteroid) *universe.Asteroid {
 	gm := GetGasMiningMetadata(asteroid.Meta)
 
 	// load gas yields
-	loadGasMiningYields(gm)
+	linkGasMiningYields(gm)
 
 	// store gas mining metadata
 	asteroid.GasMiningMetadata = gm
