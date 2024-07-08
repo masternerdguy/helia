@@ -262,19 +262,11 @@ func LoadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, st := range stars {
-				star := universe.Star{
-					ID:       st.ID,
-					SystemID: st.SystemID,
-					PosX:     st.PosX,
-					PosY:     st.PosY,
-					Texture:  st.Texture,
-					Radius:   st.Radius,
-					Mass:     st.Mass,
-					Theta:    st.Theta,
-					Meta:     universe.Meta(st.Meta),
-				}
+				// load star
+				star := loadStar(st)
 
-				s.AddStar(&star)
+				// store in universe
+				s.AddStar(star)
 			}
 
 			// load planets
@@ -285,20 +277,11 @@ func LoadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, p := range planets {
-				planet := universe.Planet{
-					ID:         p.ID,
-					SystemID:   p.SystemID,
-					PlanetName: p.PlanetName,
-					PosX:       p.PosX,
-					PosY:       p.PosY,
-					Texture:    p.Texture,
-					Radius:     p.Radius,
-					Mass:       p.Mass,
-					Theta:      p.Theta,
-					Meta:       universe.Meta(p.Meta),
-				}
+				// load planet
+				planet := loadPlanet(p)
 
-				s.AddPlanet(&planet)
+				// store in universe
+				s.AddPlanet(planet)
 			}
 
 			// load asteroids
@@ -309,35 +292,11 @@ func LoadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, a := range asteroids {
-				// get ore item type
-				oi := itemTypeCache[a.ItemTypeID.String()]
-
-				// get ore item family
-				of := itemFamilyCache[oi.Family]
-
-				// build asteroid
-				asteroid := universe.Asteroid{
-					ID:             a.ID,
-					SystemID:       a.SystemID,
-					Name:           a.Name,
-					Texture:        a.Texture,
-					Radius:         a.Radius,
-					Theta:          a.Theta,
-					PosX:           a.PosX,
-					PosY:           a.PosY,
-					Meta:           universe.Meta(a.Meta),
-					Yield:          a.Yield,
-					Mass:           a.Mass,
-					ItemTypeName:   oi.Name,
-					ItemTypeID:     oi.ID,
-					ItemFamilyName: of.FriendlyName,
-					ItemFamilyID:   oi.Family,
-					ItemTypeMeta:   universe.Meta(oi.Meta),
-					Lock:           sync.Mutex{},
-				}
+				// load asteroid
+				asteroid := loadAsteroid(a)
 
 				// store in universe
-				s.AddAsteroid(&asteroid)
+				s.AddAsteroid(asteroid)
 			}
 
 			// load jumpholes
@@ -593,6 +552,75 @@ func LoadUniverse() (*universe.Universe, error) {
 
 	// return universe
 	return &u, nil
+}
+
+func loadStar(st sql.Star) *universe.Star {
+	// build star
+	star := universe.Star{
+		ID:       st.ID,
+		SystemID: st.SystemID,
+		PosX:     st.PosX,
+		PosY:     st.PosY,
+		Texture:  st.Texture,
+		Radius:   st.Radius,
+		Mass:     st.Mass,
+		Theta:    st.Theta,
+		Meta:     universe.Meta(st.Meta),
+	}
+
+	// return result
+	return &star
+}
+
+func loadPlanet(p sql.Planet) *universe.Planet {
+	// build planet
+	planet := universe.Planet{
+		ID:         p.ID,
+		SystemID:   p.SystemID,
+		PlanetName: p.PlanetName,
+		PosX:       p.PosX,
+		PosY:       p.PosY,
+		Texture:    p.Texture,
+		Radius:     p.Radius,
+		Mass:       p.Mass,
+		Theta:      p.Theta,
+		Meta:       universe.Meta(p.Meta),
+	}
+
+	// return result
+	return &planet
+}
+
+func loadAsteroid(a sql.Asteroid) *universe.Asteroid {
+	// get ore item type
+	oi := itemTypeCache[a.ItemTypeID.String()]
+
+	// get ore item family
+	of := itemFamilyCache[oi.Family]
+
+	// build asteroid
+	asteroid := universe.Asteroid{
+		ID:             a.ID,
+		SystemID:       a.SystemID,
+		Name:           a.Name,
+		Texture:        a.Texture,
+		Radius:         a.Radius,
+		Theta:          a.Theta,
+		PosX:           a.PosX,
+		PosY:           a.PosY,
+		Meta:           universe.Meta(a.Meta),
+		Yield:          a.Yield,
+		Mass:           a.Mass,
+		ItemTypeName:   oi.Name,
+		ItemTypeID:     oi.ID,
+		ItemFamilyName: of.FriendlyName,
+		ItemFamilyID:   oi.Family,
+		ItemTypeMeta:   universe.Meta(oi.Meta),
+		Lock:           sync.Mutex{},
+	}
+
+	// return result
+	return &asteroid
 }
 
 // Saves the current state of dynamic entities in the simulation to the database
