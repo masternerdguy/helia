@@ -14,19 +14,22 @@ type Planet struct {
 	Mass       float64
 	Theta      float64
 	Meta       Meta
+	// in-memory only
+	GasMiningMetadata GasMiningMetadata
 }
 
 // Returns a copy of the planet
-func (s *Planet) CopyPlanet() Planet {
+func (p *Planet) CopyPlanet() Planet {
 	return Planet{
-		ID:       s.ID,
-		PosX:     s.PosX,
-		PosY:     s.PosY,
-		SystemID: s.SystemID,
-		Texture:  s.Texture,
-		Theta:    s.Theta,
-		Radius:   s.Radius,
-		Mass:     s.Mass,
-		Meta:     s.Meta,
+		ID:                p.ID,
+		PosX:              p.PosX,
+		PosY:              p.PosY,
+		SystemID:          p.SystemID,
+		Texture:           p.Texture,
+		Theta:             p.Theta,
+		Radius:            p.Radius,
+		Mass:              p.Mass,
+		Meta:              p.Meta,
+		GasMiningMetadata: p.GasMiningMetadata,
 	}
 }

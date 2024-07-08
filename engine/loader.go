@@ -612,6 +612,29 @@ func loadPlanet(p sql.Planet) *universe.Planet {
 		Meta:       universe.Meta(p.Meta),
 	}
 
+	// get gas mining metadata
+	gm := GetGasMiningMetadata(planet.Meta)
+
+	// link item types
+	for k, v := range gm.Yields {
+		// get gas item type
+		it := itemTypeCache[k]
+
+		// get gas item family
+		fam := itemFamilyCache[it.Family]
+
+		// cache on yield
+		v.ItemFamilyName = fam.FriendlyName
+		v.ItemFamilyID = fam.ID
+		v.ItemTypeName = it.Name
+		v.ItemTypeMeta = universe.Meta(it.Meta)
+
+		gm.Yields[k] = v
+	}
+
+	// store gas mining metadata
+	planet.GasMiningMetadata = gm
+
 	// return result
 	return &planet
 }
@@ -644,6 +667,29 @@ func loadAsteroid(a sql.Asteroid) *universe.Asteroid {
 		ItemTypeMeta:   universe.Meta(oi.Meta),
 		Lock:           sync.Mutex{},
 	}
+
+	// get gas mining metadata
+	gm := GetGasMiningMetadata(asteroid.Meta)
+
+	// link item types
+	for k, v := range gm.Yields {
+		// get gas item type
+		it := itemTypeCache[k]
+
+		// get gas item family
+		fam := itemFamilyCache[it.Family]
+
+		// cache on yield
+		v.ItemFamilyName = fam.FriendlyName
+		v.ItemFamilyID = fam.ID
+		v.ItemTypeName = it.Name
+		v.ItemTypeMeta = universe.Meta(it.Meta)
+
+		gm.Yields[k] = v
+	}
+
+	// store gas mining metadata
+	asteroid.GasMiningMetadata = gm
 
 	// return result
 	return &asteroid
