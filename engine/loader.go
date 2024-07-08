@@ -572,7 +572,18 @@ func loadStar(st sql.Star) *universe.Star {
 	// get gas mining metadata
 	gm := GetGasMiningMetadata(star.Meta)
 
-	// link item types
+	// load gas yields
+	extractGasMiningYields(gm)
+
+	// store gas mining metadata
+	star.GasMiningMetadata = gm
+
+	// return result
+	return &star
+}
+
+func extractGasMiningYields(gm universe.GasMiningMetadata) {
+	// iterate over yields
 	for k, v := range gm.Yields {
 		// get gas item type
 		it := itemTypeCache[k]
@@ -586,14 +597,9 @@ func loadStar(st sql.Star) *universe.Star {
 		v.ItemTypeName = it.Name
 		v.ItemTypeMeta = universe.Meta(it.Meta)
 
+		// store result
 		gm.Yields[k] = v
 	}
-
-	// store gas mining metadata
-	star.GasMiningMetadata = gm
-
-	// return result
-	return &star
 }
 
 // Takes a SQL planet and converts it for loading into the running universe
@@ -615,22 +621,8 @@ func loadPlanet(p sql.Planet) *universe.Planet {
 	// get gas mining metadata
 	gm := GetGasMiningMetadata(planet.Meta)
 
-	// link item types
-	for k, v := range gm.Yields {
-		// get gas item type
-		it := itemTypeCache[k]
-
-		// get gas item family
-		fam := itemFamilyCache[it.Family]
-
-		// cache on yield
-		v.ItemFamilyName = fam.FriendlyName
-		v.ItemFamilyID = fam.ID
-		v.ItemTypeName = it.Name
-		v.ItemTypeMeta = universe.Meta(it.Meta)
-
-		gm.Yields[k] = v
-	}
+	// load gas yields
+	extractGasMiningYields(gm)
 
 	// store gas mining metadata
 	planet.GasMiningMetadata = gm
@@ -671,22 +663,8 @@ func loadAsteroid(a sql.Asteroid) *universe.Asteroid {
 	// get gas mining metadata
 	gm := GetGasMiningMetadata(asteroid.Meta)
 
-	// link item types
-	for k, v := range gm.Yields {
-		// get gas item type
-		it := itemTypeCache[k]
-
-		// get gas item family
-		fam := itemFamilyCache[it.Family]
-
-		// cache on yield
-		v.ItemFamilyName = fam.FriendlyName
-		v.ItemFamilyID = fam.ID
-		v.ItemTypeName = it.Name
-		v.ItemTypeMeta = universe.Meta(it.Meta)
-
-		gm.Yields[k] = v
-	}
+	// load gas yields
+	extractGasMiningYields(gm)
 
 	// store gas mining metadata
 	asteroid.GasMiningMetadata = gm
