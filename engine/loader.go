@@ -6,7 +6,6 @@ import (
 	"helia/shared"
 	"helia/sql"
 	"helia/universe"
-	"log"
 	"sync"
 
 	"github.com/google/uuid"
@@ -571,7 +570,27 @@ func loadStar(st sql.Star) *universe.Star {
 	}
 
 	// get gas mining metadata
-	GetGasMiningMetadata(star.Meta)
+	gm := GetGasMiningMetadata(star.Meta)
+
+	// link item types
+	for k, v := range gm.Yields {
+		// get gas item type
+		it := itemTypeCache[k]
+
+		// get gas item family
+		fam := itemFamilyCache[it.Family]
+
+		// cache on yield
+		v.ItemFamilyName = fam.FriendlyName
+		v.ItemFamilyID = fam.ID
+		v.ItemTypeName = it.Name
+		v.ItemTypeMeta = universe.Meta(it.Meta)
+
+		gm.Yields[k] = v
+	}
+
+	// store gas mining metadata
+	star.GasMiningMetadata = gm
 
 	// return result
 	return &star
@@ -2133,15 +2152,13 @@ func GetGasMiningMetadata(m universe.Meta) universe.GasMiningMetadata {
 						y.Yield = int(yv.(float64))
 					} else if k == "itemTypeId" {
 						// store item type id
-						y.ItemTypeId = uuid.MustParse(yv.(string))
+						y.ItemTypeID = uuid.MustParse(yv.(string))
 					}
 				}
 
 				// store result
 				d.Yields[k] = y
 			}
-
-			log.Printf("d: %v", d)
 		}
 	}
 

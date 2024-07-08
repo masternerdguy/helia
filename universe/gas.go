@@ -6,9 +6,13 @@ import (
 
 // Structure representing a gas and its yield for gas mining
 type GasMiningYield struct {
-	ItemTypeId uuid.UUID `json:"itemTypeId"`
+	ItemTypeID uuid.UUID `json:"itemTypeId"`
 	Yield      int       `json:"yield"`
 	// in-memory only
+	ItemTypeName   string
+	ItemFamilyName string
+	ItemFamilyID   string
+	ItemTypeMeta   Meta
 }
 
 // Structure representing gases ("medium wisps") that can be mined around a celestial
