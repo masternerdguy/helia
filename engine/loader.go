@@ -554,6 +554,7 @@ func LoadUniverse() (*universe.Universe, error) {
 	return &u, nil
 }
 
+// Takes a SQL star and converts it for loading into the running universe
 func loadStar(st sql.Star) *universe.Star {
 	// build star
 	star := universe.Star{
@@ -572,6 +573,7 @@ func loadStar(st sql.Star) *universe.Star {
 	return &star
 }
 
+// Takes a SQL planet and converts it for loading into the running universe
 func loadPlanet(p sql.Planet) *universe.Planet {
 	// build planet
 	planet := universe.Planet{
@@ -591,6 +593,7 @@ func loadPlanet(p sql.Planet) *universe.Planet {
 	return &planet
 }
 
+// Takes a SQL asteroid and converts it for loading into the running universe
 func loadAsteroid(a sql.Asteroid) *universe.Asteroid {
 	// get ore item type
 	oi := itemTypeCache[a.ItemTypeID.String()]
