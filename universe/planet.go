@@ -21,15 +21,16 @@ type Planet struct {
 // Returns a copy of the planet
 func (p *Planet) CopyPlanet() Planet {
 	return Planet{
-		ID:                p.ID,
-		PosX:              p.PosX,
-		PosY:              p.PosY,
-		SystemID:          p.SystemID,
-		Texture:           p.Texture,
-		Theta:             p.Theta,
-		Radius:            p.Radius,
-		Mass:              p.Mass,
-		Meta:              p.Meta,
+		ID:       p.ID,
+		PosX:     p.PosX,
+		PosY:     p.PosY,
+		SystemID: p.SystemID,
+		Texture:  p.Texture,
+		Theta:    p.Theta,
+		Radius:   p.Radius,
+		Mass:     p.Mass,
+		Meta:     p.Meta,
+		// in-memory only
 		GasMiningMetadata: p.GasMiningMetadata,
 	}
 }
