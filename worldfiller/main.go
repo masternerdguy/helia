@@ -1341,7 +1341,7 @@ func fillGasMiningYields(u *universe.Universe) {
 						if yld > 0 {
 							// add entry
 							gmm.Yields[gid] = universe.GasMiningYield{
-								ItemTypeId: uuid.MustParse(gid),
+								ItemTypeID: uuid.MustParse(gid),
 								Yield:      yld,
 							}
 						}
@@ -1383,7 +1383,7 @@ func fillGasMiningYields(u *universe.Universe) {
 						if yld > 0 {
 							// add entry
 							gmm.Yields[gid] = universe.GasMiningYield{
-								ItemTypeId: uuid.MustParse(gid),
+								ItemTypeID: uuid.MustParse(gid),
 								Yield:      yld,
 							}
 						}
@@ -1425,7 +1425,7 @@ func fillGasMiningYields(u *universe.Universe) {
 						if yld > 0 {
 							// add entry
 							gmm.Yields[gid] = universe.GasMiningYield{
-								ItemTypeId: uuid.MustParse(gid),
+								ItemTypeID: uuid.MustParse(gid),
 								Yield:      yld,
 							}
 						}
