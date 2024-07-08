@@ -6,6 +6,7 @@ import (
 	"helia/shared"
 	"helia/sql"
 	"helia/universe"
+	"log"
 	"sync"
 
 	"github.com/google/uuid"
@@ -568,6 +569,9 @@ func loadStar(st sql.Star) *universe.Star {
 		Theta:    st.Theta,
 		Meta:     universe.Meta(st.Meta),
 	}
+
+	// get gas mining metadata
+	GetGasMiningMetadata(star.Meta)
 
 	// return result
 	return &star
@@ -2100,4 +2104,47 @@ func markSellOrderAsBought(sellOrder *universe.SellOrder) error {
 	err := sellOrderSvc.MarkSellOrderAsBought(*sql)
 
 	return err
+}
+
+// Fetches gas mining metadata
+func GetGasMiningMetadata(m universe.Meta) universe.GasMiningMetadata {
+	// empty metadata
+	d := universe.GasMiningMetadata{
+		Yields: make(map[string]universe.GasMiningYield),
+	}
+
+	// attempt to fetch from metadata
+	l, f := m.GetMap("gasmining")
+
+	if f {
+		// get yields from metadata
+		ys, f := l.GetMap("yields")
+
+		if f {
+			// iterate over yields
+			for k, iv := range ys {
+				// empty yield
+				y := universe.GasMiningYield{}
+
+				// read properties
+				for k, yv := range iv.(map[string]interface{}) {
+					if k == "yield" {
+						// store yield
+						y.Yield = int(yv.(float64))
+					} else if k == "itemTypeId" {
+						// store item type id
+						y.ItemTypeId = uuid.MustParse(yv.(string))
+					}
+				}
+
+				// store result
+				d.Yields[k] = y
+			}
+
+			log.Printf("d: %v", d)
+		}
+	}
+
+	// return result
+	return d
 }
