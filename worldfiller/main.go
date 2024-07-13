@@ -252,6 +252,7 @@ func stubModuleSchematicsAndProcesses() {
 	// group industrials
 	ores := make([]sql.VwItemTypeIndustrial, 0)
 	ices := make([]sql.VwItemTypeIndustrial, 0)
+	gases := make([]sql.VwItemTypeIndustrial, 0)
 	wastes := make([]sql.VwItemTypeIndustrial, 0)
 	repairKits := make([]sql.VwItemTypeIndustrial, 0)
 
@@ -270,6 +271,10 @@ func stubModuleSchematicsAndProcesses() {
 
 		if i.Family == "ice" {
 			ices = append(ices, i)
+		}
+
+		if i.Family == "gas" {
+			gases = append(gases, i)
 		}
 
 		if i.Family == "trade_good" && strings.Contains(i.Name, "Waste") {
@@ -337,6 +342,10 @@ func stubModuleSchematicsAndProcesses() {
 
 			if roll <= 4 {
 				inputMaterials = append(inputMaterials, ices[physics.RandInRange(0, len(ices))])
+			}
+
+			if roll <= 2 {
+				inputMaterials = append(inputMaterials, gases[physics.RandInRange(0, len(gases))])
 			}
 
 			roll = physics.RandInRange(0, 100)
