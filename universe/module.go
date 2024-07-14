@@ -5,6 +5,7 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
+	"log"
 	"math"
 	"math/rand"
 	"sync"
@@ -3052,7 +3053,59 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 		return false
 	}
 
-	// consolidate yield contributors
+	// get ship dummy
+	dA := m.shipMountedOn.ToPhysicsDummy()
+
+	// effective yields table
+	eyt := make(map[string]*float64)
+
+	// check stars
+	for _, s := range m.shipMountedOn.CurrentSystem.stars {
+		// null check
+		if s == nil {
+			continue
+		}
+
+		// get distance to player
+		dB := s.ToPhysicsDummy()
+		d := physics.Distance(dA, dB)
+
+		// radius check
+		if d < s.Radius/2 {
+			d = s.Radius / 2
+		}
+
+		// zero check
+		if d <= 0 {
+			d = Epsilon
+		}
+
+		// iterate over minable gases
+		for _, g := range s.GasMiningMetadata.Yields {
+			// create table entry if missing
+			if eyt[g.ItemTypeID.String()] == nil {
+				// zero for reference
+				z := 0.0
+
+				// create entry for gas
+				eyt[g.ItemTypeID.String()] = &z
+			}
+
+			// get current entry for gas
+			ey := *eyt[g.ItemTypeID.String()]
+
+			// add contribution
+			ey += (float64(g.Yield) / d)
+
+			// store result
+			eyt[g.ItemTypeID.String()] = &ey
+		}
+	}
+
+	// debug out
+	for k, v := range eyt {
+		log.Printf("??? %v :: %v", k, *v)
+	}
 
 	// include visual effect if present
 	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")

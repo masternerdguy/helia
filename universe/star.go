@@ -1,6 +1,10 @@
 package universe
 
-import "github.com/google/uuid"
+import (
+	"helia/physics"
+
+	"github.com/google/uuid"
+)
 
 // Structure representing a star
 type Star struct {
@@ -31,5 +35,16 @@ func (s *Star) CopyStar() Star {
 		Meta:     s.Meta,
 		// in-memory only
 		GasMiningMetadata: s.GasMiningMetadata,
+	}
+}
+
+// Returns a new physics dummy structure representing this star
+func (s *Star) ToPhysicsDummy() physics.Dummy {
+	return physics.Dummy{
+		VelX: 0,
+		VelY: 0,
+		PosX: s.PosX,
+		PosY: s.PosY,
+		Mass: s.Mass,
 	}
 }
