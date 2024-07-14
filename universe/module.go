@@ -3225,6 +3225,9 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 		aperture = Epsilon
 	}
 
+	// flag as to whether anything was pulled
+	pulledSomething := false
+
 	// attempt to pull and store in cargo
 	for k, ey := range eyt {
 		// get yield meta
@@ -3248,9 +3251,9 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 			// quantity to be placed in cargo bay
 			q := int(pulled / unitVol)
 
-			if q <= 0 && m.shipMountedOn.IsNPC {
-				// raise fault
-				m.shipMountedOn.aiNoGasPulledFault = true
+			// skip if none
+			if q <= 0 {
+				continue
 			}
 
 			// is there already packaged gas of this type in the hold?
@@ -3319,9 +3322,18 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 					),
 				)
 			}
+
+			// we pulled something!
+			pulledSomething = true
 		} else {
 			return false
 		}
+	}
+
+	// check if nothing was pulled
+	if m.shipMountedOn.IsNPC && !pulledSomething {
+		// raise fault
+		m.shipMountedOn.aiNoGasPulledFault = true
 	}
 
 	// include visual effect if present
