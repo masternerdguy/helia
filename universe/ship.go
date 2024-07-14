@@ -2966,7 +2966,7 @@ func (s *Ship) doUndockedAutopilot() {
 		s.doAutopilotMine()
 	case registry.Salvage:
 		s.doAutopilotSalvage()
-	case registry.Salvage:
+	case registry.Harvest:
 		s.doAutopilotHarvest()
 	}
 }
