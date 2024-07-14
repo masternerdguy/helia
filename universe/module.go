@@ -3199,6 +3199,26 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 		}
 	}
 
+	// get intake area
+	aperture, found := m.ItemMeta.GetFloat64("intake_area")
+
+	if found {
+		// apply intake area modifier
+		for k, v := range eyt {
+			// get yield
+			ey := *v
+
+			// multiply by square root of intake area
+			ey *= math.Sqrt(aperture)
+
+			// store result
+			eyt[k] = &ey
+		}
+	} else {
+		// bound to epsilon
+		aperture = Epsilon
+	}
+
 	// debug out
 	for k, v := range eyt {
 		log.Printf("??? %v :: %v", k, *v)
