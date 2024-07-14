@@ -5,7 +5,6 @@ import (
 	"helia/listener/models"
 	"helia/physics"
 	"helia/shared"
-	"log"
 	"math"
 	"math/rand"
 	"sync"
@@ -3052,6 +3051,7 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 
 	// effective yields table
 	eyt := make(map[string]*float64)
+	itm := make(map[string]GasMiningYield)
 
 	// check stars
 	for _, s := range m.shipMountedOn.CurrentSystem.stars {
@@ -3093,6 +3093,7 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 
 			// store result
 			eyt[g.ItemTypeID.String()] = &ey
+			itm[g.ItemTypeID.String()] = g
 		}
 	}
 
@@ -3136,6 +3137,7 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 
 			// store result
 			eyt[g.ItemTypeID.String()] = &ey
+			itm[g.ItemTypeID.String()] = g
 		}
 	}
 
@@ -3179,6 +3181,7 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 
 			// store result
 			eyt[g.ItemTypeID.String()] = &ey
+			itm[g.ItemTypeID.String()] = g
 		}
 	}
 
@@ -3222,9 +3225,106 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 		aperture = Epsilon
 	}
 
-	// debug out
-	for k, v := range eyt {
-		log.Printf("??? %v :: %v", k, *v)
+	// attempt to pull and store in cargo
+	for k, ey := range eyt {
+		// get mining volume
+		miningVolume := aperture
+
+		// get yield meta
+		ym := itm[k]
+		eyy := *ey
+
+		// get type and volume gas being collected
+		unitType := ym.ItemTypeID
+		unitVol, _ := ym.ItemTypeMeta.GetFloat64("volume")
+
+		// get available space in cargo hold
+		free := m.shipMountedOn.GetRealCargoBayVolume(false) - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
+
+		// calculate effective volume pulled
+		pulled := math.Min(miningVolume, eyy)
+
+		// make sure there is sufficient room to deposit the gas
+		if free-pulled >= 0 {
+			found := false
+
+			// quantity to be placed in cargo bay
+			q := int(pulled / unitVol)
+
+			if q <= 0 && m.shipMountedOn.IsNPC {
+				// raise fault
+				m.shipMountedOn.aiNoGasPulledFault = true
+			}
+
+			// is there already packaged gas of this type in the hold?
+			for idx := range m.shipMountedOn.CargoBay.Items {
+				itm := m.shipMountedOn.CargoBay.Items[idx]
+
+				if itm.ItemTypeID == unitType && itm.IsPackaged && !itm.CoreDirty {
+					// increase the size of this stack
+					itm.Quantity += q
+
+					// escalate for saving
+					m.shipMountedOn.CurrentSystem.ChangedQuantityItems = append(m.shipMountedOn.CurrentSystem.ChangedQuantityItems, itm)
+
+					// mark as found
+					found = true
+					break
+				}
+			}
+
+			if !found && q > 0 {
+				// create a new stack of gas
+				nid := uuid.New()
+
+				newItem := Item{
+					ID:             nid,
+					ItemTypeID:     unitType,
+					Meta:           ym.ItemTypeMeta,
+					Created:        time.Now(),
+					CreatedBy:      &m.shipMountedOn.UserID,
+					CreatedReason:  fmt.Sprintf("Harvested %v", ym.ItemFamilyID),
+					ContainerID:    m.shipMountedOn.CargoBayContainerID,
+					Quantity:       q,
+					IsPackaged:     true,
+					Lock:           sync.Mutex{},
+					ItemTypeName:   ym.ItemTypeName,
+					ItemFamilyID:   ym.ItemFamilyID,
+					ItemFamilyName: ym.ItemFamilyName,
+					ItemTypeMeta:   ym.ItemTypeMeta,
+					CoreDirty:      true,
+				}
+
+				// escalate to core for saving in db
+				m.shipMountedOn.CurrentSystem.NewItems = append(m.shipMountedOn.CurrentSystem.NewItems, &newItem)
+
+				// add new item to cargo hold
+				m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, &newItem)
+			}
+
+			// log harvest to console if player
+			if !m.shipMountedOn.IsNPC {
+				bm := 0
+
+				if m.shipMountedOn.BehaviourMode != nil {
+					bm = *m.shipMountedOn.BehaviourMode
+				}
+
+				shared.TeeLog(
+					fmt.Sprintf(
+						"[%v] %v (%v::%v) havrested %v %v",
+						m.shipMountedOn.CurrentSystem.SystemName,
+						m.shipMountedOn.CharacterName,
+						m.shipMountedOn.Texture,
+						bm,
+						q,
+						ym.ItemTypeName,
+					),
+				)
+			}
+		} else {
+			return false
+		}
 	}
 
 	// include visual effect if present

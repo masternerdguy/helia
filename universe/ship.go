@@ -238,6 +238,7 @@ type Ship struct {
 	AggressionLog          map[string]*shared.AggressionLog         // details of aggression
 	aiIncompatibleOreFault bool                                     // true when mining autopilot failed due to incompatible ore (for patch miners)
 	aiNoOrePulledFault     bool                                     // true when mining autopilot failed due to pulling no ore (for patch miners)
+	aiNoGasPulledFault     bool                                     // true when mining autopilot failed due to pulling no gas (for patch harvesters)
 	aiNoWreckFault         bool                                     // true when salvaging autopilot failed due to wreck disappearing (for patch salvagers)
 	WreckReady             bool                                     // true when a dead ship has been saved to the db and the wreck can be looted
 	InLimbo                bool                                     // true when ship is being migrated between systems
