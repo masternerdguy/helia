@@ -2618,7 +2618,7 @@ func (s *Ship) behaviourPatchSalvage() {
 					return
 				}
 
-				// pick random asteroid to mine
+				// pick random wreck to mine
 				tgt := physics.RandInRange(0, count)
 				var tgtWre *Wreck = nil
 
