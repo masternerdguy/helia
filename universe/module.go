@@ -3037,3 +3037,55 @@ func (m *FittedSlot) activateAsShieldXfer() bool {
 	// module activates!
 	return true
 }
+
+func (m *FittedSlot) activateAsUtilityWisper() bool {
+	// safety check targeting pointers
+	if m.TargetID == nil || m.TargetType == nil {
+		m.WillRepeat = false
+		return false
+	}
+
+	// verify this can harvest gas
+	canMineGas, _ := m.ItemTypeMeta.GetBool("can_mine_gas")
+
+	if !canMineGas {
+		return false
+	}
+
+	// consolidate yield contributors
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// get registry
+		tgtReg := models.SharedTargetTypeRegistry
+
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
+		}
+
+		gfxEffect.ObjStartHardpointOffset = [...]float64{
+			0,
+			0,
+		}
+
+		if m.SlotIndex != nil {
+			rack := m.Rack
+			idx := *m.SlotIndex
+
+			if rack == "A" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
+			}
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
+	// module activates!
+	return true
+}

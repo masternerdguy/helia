@@ -492,6 +492,8 @@ func getModuleFamily(itemFamilyID string) string {
 		modFamily = "utility"
 	} else if itemFamilyID == "xfer_shield" {
 		modFamily = "utility"
+	} else if itemFamilyID == "utility_wisper" {
+		modFamily = "utility"
 	}
 
 	return modFamily
@@ -5635,6 +5637,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsEnergyXfer()
 			} else if m.ItemTypeFamily == "xfer_shield" {
 				canActivate = m.activateAsShieldXfer()
+			} else if m.ItemTypeFamily == "utility_wisper" {
+				canActivate = m.activateAsUtilityWisper()
 			}
 
 			if canActivate {
