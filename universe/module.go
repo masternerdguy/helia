@@ -3139,6 +3139,49 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 		}
 	}
 
+	// check asteroids
+	for _, a := range m.shipMountedOn.CurrentSystem.asteroids {
+		// null check
+		if a == nil {
+			continue
+		}
+
+		// get distance to player
+		dB := a.ToPhysicsDummy()
+		d := physics.Distance(dA, dB)
+
+		// radius check
+		if d < a.Radius/2 {
+			d = a.Radius / 2
+		}
+
+		// zero check
+		if d <= 0 {
+			d = Epsilon
+		}
+
+		// iterate over minable gases
+		for _, g := range a.GasMiningMetadata.Yields {
+			// create table entry if missing
+			if eyt[g.ItemTypeID.String()] == nil {
+				// zero for reference
+				z := 0.0
+
+				// create entry for gas
+				eyt[g.ItemTypeID.String()] = &z
+			}
+
+			// get current entry for gas
+			ey := *eyt[g.ItemTypeID.String()]
+
+			// add contribution
+			ey += (float64(g.Yield) / d)
+
+			// store result
+			eyt[g.ItemTypeID.String()] = &ey
+		}
+	}
+
 	// debug out
 	for k, v := range eyt {
 		log.Printf("??? %v :: %v", k, *v)
