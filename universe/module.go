@@ -3182,6 +3182,23 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 		}
 	}
 
+	// get cooldown
+	cooldown, found := m.ItemMeta.GetFloat64("cooldown")
+
+	if found {
+		// apply cooldown time modifier
+		for k, v := range eyt {
+			// get yield
+			ey := *v
+
+			// multiply by cycle time
+			ey *= cooldown
+
+			// store result
+			eyt[k] = &ey
+		}
+	}
+
 	// debug out
 	for k, v := range eyt {
 		log.Printf("??? %v :: %v", k, *v)
