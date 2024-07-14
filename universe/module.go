@@ -3312,7 +3312,7 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 
 				shared.TeeLog(
 					fmt.Sprintf(
-						"[%v] %v (%v::%v) havrested %v %v",
+						"[%v] %v (%v::%v) harvested %v %v",
 						m.shipMountedOn.CurrentSystem.SystemName,
 						m.shipMountedOn.CharacterName,
 						m.shipMountedOn.Texture,
