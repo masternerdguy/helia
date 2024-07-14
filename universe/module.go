@@ -3211,6 +3211,9 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 			// multiply by square root of intake area
 			ey *= math.Sqrt(aperture)
 
+			// apply experience modifier
+			ey *= math.Sqrt(m.usageExperienceModifier)
+
 			// store result
 			eyt[k] = &ey
 		}
