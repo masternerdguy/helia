@@ -3212,7 +3212,7 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 			ey *= math.Sqrt(aperture)
 
 			// apply experience modifier
-			ey *= math.Sqrt(m.usageExperienceModifier)
+			ey *= m.usageExperienceModifier
 
 			// store result
 			eyt[k] = &ey
