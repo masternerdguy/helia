@@ -1180,7 +1180,7 @@ function gfxBackplate() {
 
     // force refresh of backplate canvas
     const w = engineSack.backplateCanvas.width;
-    const h = engineSack.backplateCanvas.width;
+    const h = engineSack.backplateCanvas.height;
 
     engineSack.backplateCanvas.width = 0;
     engineSack.backplateCanvas.height = 0;
