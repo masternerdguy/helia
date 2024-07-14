@@ -3040,12 +3040,6 @@ func (m *FittedSlot) activateAsShieldXfer() bool {
 }
 
 func (m *FittedSlot) activateAsUtilityWisper() bool {
-	// safety check targeting pointers
-	if m.TargetID == nil || m.TargetType == nil {
-		m.WillRepeat = false
-		return false
-	}
-
 	// verify this can harvest gas
 	canMineGas, _ := m.ItemTypeMeta.GetBool("can_mine_gas")
 
@@ -3082,6 +3076,49 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 
 		// iterate over minable gases
 		for _, g := range s.GasMiningMetadata.Yields {
+			// create table entry if missing
+			if eyt[g.ItemTypeID.String()] == nil {
+				// zero for reference
+				z := 0.0
+
+				// create entry for gas
+				eyt[g.ItemTypeID.String()] = &z
+			}
+
+			// get current entry for gas
+			ey := *eyt[g.ItemTypeID.String()]
+
+			// add contribution
+			ey += (float64(g.Yield) / d)
+
+			// store result
+			eyt[g.ItemTypeID.String()] = &ey
+		}
+	}
+
+	// check planets
+	for _, p := range m.shipMountedOn.CurrentSystem.planets {
+		// null check
+		if p == nil {
+			continue
+		}
+
+		// get distance to player
+		dB := p.ToPhysicsDummy()
+		d := physics.Distance(dA, dB)
+
+		// radius check
+		if d < p.Radius/2 {
+			d = p.Radius / 2
+		}
+
+		// zero check
+		if d <= 0 {
+			d = Epsilon
+		}
+
+		// iterate over minable gases
+		for _, g := range p.GasMiningMetadata.Yields {
 			// create table entry if missing
 			if eyt[g.ItemTypeID.String()] == nil {
 				// zero for reference
