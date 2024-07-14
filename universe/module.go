@@ -3227,9 +3227,6 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 
 	// attempt to pull and store in cargo
 	for k, ey := range eyt {
-		// get mining volume
-		miningVolume := aperture
-
 		// get yield meta
 		ym := itm[k]
 		eyy := *ey
@@ -3242,7 +3239,7 @@ func (m *FittedSlot) activateAsUtilityWisper() bool {
 		free := m.shipMountedOn.GetRealCargoBayVolume(false) - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
 
 		// calculate effective volume pulled
-		pulled := math.Min(miningVolume, eyy)
+		pulled := math.Min(aperture, eyy)
 
 		// make sure there is sufficient room to deposit the gas
 		if free-pulled >= 0 {
