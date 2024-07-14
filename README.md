@@ -127,5 +127,6 @@ Sets your current ship up as an "NPC" following a given behaviour mode number.
 * PatchTrade:   3
 * PatchMine:    4
 * PatchSalvage: 5
+* PatchHarvest: 6
 
 Sending a negative number will undo this effect.
