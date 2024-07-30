@@ -1018,6 +1018,15 @@ function handlePropertyUpdate(d: GameMessage) {
   // parse body
   const msg = JSON.parse(d.body) as ServerPropertyUpdate;
 
+  // fix missing lists
+  if (!msg.ships) {
+    msg.ships = [];
+  }
+
+  if (!msg.outposts) {
+    msg.outposts = [];
+  }
+
   // update property sheet window
   engineSack.propertySheetWindow.sync(msg);
 
@@ -1168,6 +1177,18 @@ function gfxBackplate() {
     engineSack.player.currentSystem.backplateImg = new Image();
     engineSack.player.currentSystem.backplateImg.src =
       engineSack.backplateCanvas.toDataURL('image/png');
+
+    // force refresh of backplate canvas
+    const w = engineSack.backplateCanvas.width;
+    const h = engineSack.backplateCanvas.height;
+
+    engineSack.backplateCanvas.width = 0;
+    engineSack.backplateCanvas.height = 0;
+
+    setTimeout(() => {
+      engineSack.backplateCanvas.width = w;
+      engineSack.backplateCanvas.height = h;
+    }, 0);
 
     // mark as valid
     engineSack.player.currentSystem.backplateValid = true;

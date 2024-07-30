@@ -5,6 +5,7 @@ import { ClientViewProperty } from '../../wsModels/bodies/viewProperty';
 import { MessageTypes } from '../../wsModels/gameMessage';
 import { WsService } from '../../ws.service';
 import {
+  ServerPropertyOutpostCacheEntry,
   ServerPropertyShipCacheEntry,
   ServerPropertyUpdate,
 } from '../../wsModels/bodies/propertyUpdate';
@@ -16,6 +17,8 @@ import { ClientTransferCreditsBody } from '../../wsModels/bodies/transferCredits
 import { ClientSellShipAsOrderBody } from '../../wsModels/bodies/sellShipAsOrder';
 import { ClientTrashShipBody } from '../../wsModels/bodies/trashShip';
 import { ClientRenameShipBody } from '../../wsModels/bodies/renameShip';
+import { ClientRenameOutpostBody } from '../../wsModels/bodies/renameOutpost';
+import { ClientTransferOutpostCreditsBody } from '../../wsModels/bodies/transferOutpostCredits';
 
 export class PropertySheetWindow extends GDIWindow {
   private propertyList = new GDIList();
@@ -61,53 +64,16 @@ export class PropertySheetWindow extends GDIWindow {
     this.propertyList.setOnClick((item) => {
       const row = item as PropertySheetViewRow;
       const ship = row.ship;
+      const outpost = row.outpost;
 
       const actions: PropertySheetActionRow[] = [];
 
-      // actions only possible when player is docked
-      if (this.player.currentShip.dockedAtStationID) {
-        // actions only possible if both ships are also docked at the same station
-        if (this.player.currentShip.dockedAtStationID == ship.dockedAtId) {
-          actions.push({
-            listString: () => 'Rename',
-            ship: ship,
-          });
-
-          // spacer
-          actions.push({
-            listString: () => '',
-            ship: null,
-          });
-
-          // actions only possible when player has also selected a different ship than the one they are flying
-          if (this.player.currentShip.id != ship.id) {
-            actions.push({
-              listString: () => 'Board',
-              ship: ship,
-            });
-
-            actions.push({
-              listString: () => 'Move CBN',
-              ship: ship,
-            });
-
-            // spacer
-            actions.push({
-              listString: () => '',
-              ship: null,
-            });
-
-            actions.push({
-              listString: () => 'Sell',
-              ship: ship,
-            });
-
-            actions.push({
-              listString: () => 'Trash',
-              ship: ship,
-            });
-          }
-        }
+      // ship actions
+      if (ship) {
+        this.buildShipActions(ship, actions);
+      } // outpost actions
+      else if (outpost) {
+        this.buildOutpostActions(outpost, actions);
       }
 
       this.actionList.setItems(actions);
@@ -127,108 +93,12 @@ export class PropertySheetWindow extends GDIWindow {
     this.actionList.setOnClick((item) => {
       const action = item as PropertySheetActionRow;
 
-      if (action.listString() == 'Board') {
-        // issue request to board owned ship
-        const b = new ClientBoardBody();
-        b.sid = this.wsSvc.sid;
-        b.shipId = action.ship.id;
-
-        this.wsSvc.sendMessage(MessageTypes.Board, b);
-
-        // request refresh
-        this.refreshPropertySummary();
-
-        // reset views
-        this.resetViews();
-      } else if (action.listString() == 'Move CBN') {
-        this.modalInput.setOnReturn((txt: string) => {
-          // convert text to an integer
-          const n = Math.round(Number(txt));
-
-          if (!Number.isNaN(n)) {
-            // send credit transfer request
-            const tiMsg: ClientTransferCreditsBody = {
-              sid: this.wsSvc.sid,
-              shipId: action.ship.id,
-              amount: n,
-            };
-
-            this.wsSvc.sendMessage(MessageTypes.TransferCredits, tiMsg);
-
-            // request refresh
-            this.refreshPropertySummary();
-
-            // reset views
-            this.resetViews();
-          }
-
-          // hide modal overlay
-          this.hideModalInput();
-        });
-
-        this.showModalInput();
-      } else if (action.listString() == 'Sell') {
-        this.modalInput.setOnReturn((txt: string) => {
-          // convert text to an integer
-          const n = Math.round(Number(txt));
-
-          if (!Number.isNaN(n)) {
-            // send sell as order request
-            const tiMsg: ClientSellShipAsOrderBody = {
-              sid: this.wsSvc.sid,
-              shipId: action.ship.id,
-              price: n,
-            };
-
-            this.wsSvc.sendMessage(MessageTypes.SellShipAsOrder, tiMsg);
-
-            // request refresh
-            this.refreshPropertySummary();
-
-            // reset views
-            this.resetViews();
-          }
-
-          // hide modal overlay
-          this.hideModalInput();
-        });
-
-        this.showModalInput();
-      } else if (action.listString() == 'Trash') {
-        // issue request to trash owned ship
-        const b = new ClientTrashShipBody();
-        b.sid = this.wsSvc.sid;
-        b.shipId = action.ship.id;
-
-        this.wsSvc.sendMessage(MessageTypes.TrashShip, b);
-
-        // request refresh
-        this.refreshPropertySummary();
-
-        // reset views
-        this.resetViews();
-      } else if (action.listString() == 'Rename') {
-        this.modalInput.setOnReturn((txt: string) => {
-          // send rename request
-          const tiMsg: ClientRenameShipBody = {
-            sid: this.wsSvc.sid,
-            shipId: action.ship.id,
-            name: txt,
-          };
-
-          this.wsSvc.sendMessage(MessageTypes.RenameShip, tiMsg);
-
-          // request refresh
-          this.refreshPropertySummary();
-
-          // reset views
-          this.resetViews();
-
-          // hide modal overlay
-          this.hideModalInput();
-        });
-
-        this.showModalInput();
+      // ship actions
+      if (action.ship) {
+        this.handleShipActions(action);
+      } // outpost actions
+      if (action.outpost) {
+        this.handleOutpostActions(action);
       }
     });
 
@@ -250,6 +120,245 @@ export class PropertySheetWindow extends GDIWindow {
     );
     this.modalInput.setFont(FontSize.large);
     this.modalInput.initialize();
+  }
+
+  private handleShipActions(action: PropertySheetActionRow) {
+    if (action.listString() == 'Board') {
+      // issue request to board owned ship
+      const b = new ClientBoardBody();
+      b.sid = this.wsSvc.sid;
+      b.shipId = action.ship.id;
+
+      this.wsSvc.sendMessage(MessageTypes.Board, b);
+
+      // request refresh
+      this.refreshPropertySummary();
+
+      // reset views
+      this.resetViews();
+    } else if (action.listString() == 'Move CBN') {
+      this.modalInput.setOnReturn((txt: string) => {
+        // convert text to an integer
+        const n = Math.round(Number(txt));
+
+        if (!Number.isNaN(n)) {
+          // send credit transfer request
+          const tiMsg: ClientTransferCreditsBody = {
+            sid: this.wsSvc.sid,
+            shipId: action.ship.id,
+            amount: n,
+          };
+
+          this.wsSvc.sendMessage(MessageTypes.TransferCredits, tiMsg);
+
+          // request refresh
+          this.refreshPropertySummary();
+
+          // reset views
+          this.resetViews();
+        }
+
+        // hide modal overlay
+        this.hideModalInput();
+      });
+
+      this.showModalInput();
+    } else if (action.listString() == 'Sell') {
+      this.modalInput.setOnReturn((txt: string) => {
+        // convert text to an integer
+        const n = Math.round(Number(txt));
+
+        if (!Number.isNaN(n)) {
+          // send sell as order request
+          const tiMsg: ClientSellShipAsOrderBody = {
+            sid: this.wsSvc.sid,
+            shipId: action.ship.id,
+            price: n,
+          };
+
+          this.wsSvc.sendMessage(MessageTypes.SellShipAsOrder, tiMsg);
+
+          // request refresh
+          this.refreshPropertySummary();
+
+          // reset views
+          this.resetViews();
+        }
+
+        // hide modal overlay
+        this.hideModalInput();
+      });
+
+      this.showModalInput();
+    } else if (action.listString() == 'Trash') {
+      // issue request to trash owned ship
+      const b = new ClientTrashShipBody();
+      b.sid = this.wsSvc.sid;
+      b.shipId = action.ship.id;
+
+      this.wsSvc.sendMessage(MessageTypes.TrashShip, b);
+
+      // request refresh
+      this.refreshPropertySummary();
+
+      // reset views
+      this.resetViews();
+    } else if (action.listString() == 'Rename') {
+      this.modalInput.setOnReturn((txt: string) => {
+        // send rename request
+        const tiMsg: ClientRenameShipBody = {
+          sid: this.wsSvc.sid,
+          shipId: action.ship.id,
+          name: txt,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.RenameShip, tiMsg);
+
+        // request refresh
+        this.refreshPropertySummary();
+
+        // reset views
+        this.resetViews();
+
+        // hide modal overlay
+        this.hideModalInput();
+      });
+
+      this.showModalInput();
+    }
+  }
+
+  private handleOutpostActions(action: PropertySheetActionRow) {
+    if (action.listString() == 'Rename') {
+      this.modalInput.setOnReturn((txt: string) => {
+        // send rename request
+        const tiMsg: ClientRenameOutpostBody = {
+          sid: this.wsSvc.sid,
+          outpostId: action.outpost.id,
+          name: txt,
+        };
+
+        this.wsSvc.sendMessage(MessageTypes.RenameOutpost, tiMsg);
+
+        // request refresh
+        this.refreshPropertySummary();
+
+        // reset views
+        this.resetViews();
+
+        // hide modal overlay
+        this.hideModalInput();
+      });
+
+      this.showModalInput();
+    } else if (action.listString() == 'Move CBN') {
+      this.modalInput.setOnReturn((txt: string) => {
+        // convert text to an integer
+        const n = Math.round(Number(txt));
+
+        if (!Number.isNaN(n)) {
+          // send credit transfer request
+          const tiMsg: ClientTransferOutpostCreditsBody = {
+            sid: this.wsSvc.sid,
+            outpostId: action.outpost.id,
+            amount: n,
+          };
+
+          this.wsSvc.sendMessage(MessageTypes.TransferOutpostCredits, tiMsg);
+
+          // request refresh
+          this.refreshPropertySummary();
+
+          // reset views
+          this.resetViews();
+        }
+
+        // hide modal overlay
+        this.hideModalInput();
+      });
+
+      this.showModalInput();
+    }
+  }
+
+  private buildShipActions(
+    ship: ServerPropertyShipCacheEntry,
+    actions: PropertySheetActionRow[],
+  ) {
+    // actions only possible when player is docked
+    if (this.player.currentShip.dockedAtStationID) {
+      // actions only possible if both ships are also docked at the same station
+      if (this.player.currentShip.dockedAtStationID == ship.dockedAtId) {
+        actions.push({
+          listString: () => 'Rename',
+          ship: ship,
+          outpost: null,
+        });
+
+        // spacer
+        actions.push({
+          listString: () => '',
+          ship: null,
+          outpost: null,
+        });
+
+        // actions only possible when player has also selected a different ship than the one they are flying
+        if (this.player.currentShip.id != ship.id) {
+          actions.push({
+            listString: () => 'Board',
+            ship: ship,
+            outpost: null,
+          });
+
+          actions.push({
+            listString: () => 'Move CBN',
+            ship: ship,
+            outpost: null,
+          });
+
+          // spacer
+          actions.push({
+            listString: () => '',
+            ship: null,
+            outpost: null,
+          });
+
+          actions.push({
+            listString: () => 'Sell',
+            ship: ship,
+            outpost: null,
+          });
+
+          actions.push({
+            listString: () => 'Trash',
+            ship: ship,
+            outpost: null,
+          });
+        }
+      }
+    }
+  }
+
+  private buildOutpostActions(
+    outpost: ServerPropertyOutpostCacheEntry,
+    actions: PropertySheetActionRow[],
+  ) {
+    if (this.player.currentShip.dockedAtStationID) {
+      // actions only possible if docked at the outpost being affected
+      if (this.player.currentShip.dockedAtStationID == outpost.id) {
+        actions.push({
+          listString: () => 'Rename',
+          outpost: outpost,
+          ship: null,
+        });
+
+        actions.push({
+          listString: () => 'Move CBN',
+          outpost: outpost,
+          ship: null,
+        });
+      }
+    }
   }
 
   private showModalInput() {
@@ -305,13 +414,29 @@ export class PropertySheetWindow extends GDIWindow {
 
     const rows: PropertySheetViewRow[] = [];
 
-    // sort cache by system name, then station name, then ship name
-    const sorted = cache.ships.sort((a, b) =>
+    // sort ship cache by system name, then station name, then ship name
+    const sortedShips = cache.ships.sort((a, b) =>
       this.getShipSortKey(a).localeCompare(this.getShipSortKey(b)),
     );
 
+    // sort outpost cache by system name, then ship name
+    const sortedOutposts = cache.outposts.sort((a, b) =>
+      this.getOutpostSortKey(a).localeCompare(this.getOutpostSortKey(b)),
+    );
+
+    // build outpost entries
+    for (const o of sortedOutposts) {
+      const r = new PropertySheetViewRow();
+      const ls = propertySheetViewRowStringFromOutpost(o, this.player);
+
+      r.listString = () => ls;
+      r.outpost = o;
+
+      rows.push(r);
+    }
+
     // build ship entries
-    for (const s of sorted) {
+    for (const s of sortedShips) {
       const r = new PropertySheetViewRow();
       const ls = propertySheetViewRowStringFromShip(s, this.player);
 
@@ -330,6 +455,10 @@ export class PropertySheetWindow extends GDIWindow {
 
   private getShipSortKey(a: ServerPropertyShipCacheEntry): string {
     return `${a.systemName}::${a.dockedAtName}::${a.name}::${a.id}`;
+  }
+
+  private getOutpostSortKey(a: ServerPropertyOutpostCacheEntry): string {
+    return `${a.systemName}::${a.name}::${a.id}`;
   }
 
   private refreshPropertySummary() {
@@ -353,11 +482,13 @@ export class PropertySheetWindow extends GDIWindow {
 class PropertySheetViewRow {
   listString: () => string;
   ship: ServerPropertyShipCacheEntry;
+  outpost: ServerPropertyOutpostCacheEntry;
 }
 
 class PropertySheetActionRow {
   listString: () => string;
   ship: ServerPropertyShipCacheEntry;
+  outpost: ServerPropertyOutpostCacheEntry;
 }
 
 function propertySheetViewRowStringFromShip(
@@ -383,6 +514,32 @@ function propertySheetViewRowStringFromShip(
     `${fixedString(s.systemName, 12)} ` +
     `${fixedString(s.dockedAtName, 24)} ` +
     `${fixedString(shortWallet(s.wallet), 11)}`
+  );
+}
+
+function propertySheetViewRowStringFromOutpost(
+  o: ServerPropertyOutpostCacheEntry,
+  p: Player,
+): string {
+  if (o == null) {
+    return;
+  }
+
+  // marker if docked at
+  let dockedAtMarker = '';
+
+  if (o.id == p.currentShip.dockedAtStationID) {
+    dockedAtMarker = '@>';
+  }
+
+  // build string
+  return (
+    `${fixedString(dockedAtMarker, 2)} ` +
+    `${fixedString(o.name, 32)} ` +
+    `${fixedString(o.texture, 12)} ` +
+    `${fixedString(o.systemName, 12)} ` +
+    `${fixedString('', 24)} ` + // never docked
+    `${fixedString(shortWallet(o.wallet), 11)}`
   );
 }
 

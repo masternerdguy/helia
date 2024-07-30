@@ -1,9 +1,6 @@
 # Helia
 Helia was intended to be a harsh, massively multiplayer, single world space game with nonconsensual PVP everywhere.
 
-# MIT License
-Helia's source code is available under an MIT license unless otherwise specified. The open-alpha server no longer exists, nor do its Azure resources, however the README below should be useful in getting Helia up-and-running again locally or on a new server.
-
 # Docker
 Helia supports local development using docker containers. There are three containers defined:
 
@@ -130,5 +127,6 @@ Sets your current ship up as an "NPC" following a given behaviour mode number.
 * PatchTrade:   3
 * PatchMine:    4
 * PatchSalvage: 5
+* PatchHarvest: 6
 
 Sending a negative number will undo this effect.

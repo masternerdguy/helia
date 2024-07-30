@@ -59,6 +59,7 @@ type SolarSystem struct {
 	SetNoLoad            []*ShipNoLoadSet                       // updates to the no load flag in need of saving by core
 	UsedShipPurchases    []*UsedShipPurchase                    // purchased used ships that need to be hooked in and saved by core
 	ShipRenames          []*ShipRename                          // renamed ships that need to be saved by core
+	OutpostRenames       []*OutpostRename                       // renamed outposts that need to be saved by core
 	SchematicRunViews    []*shared.GameClient                   // requests for a schematic run summary
 	NewSchematicRuns     []*NewSchematicRunTicket               // newly invoked schematics that need to be started
 	NewFactions          []*NewFactionTicket                    // partially approved requests to create a new faction and automatically join it
@@ -106,6 +107,7 @@ func (s *SolarSystem) Initialize() {
 	s.SetNoLoad = make([]*ShipNoLoadSet, 0)
 	s.UsedShipPurchases = make([]*UsedShipPurchase, 0)
 	s.ShipRenames = make([]*ShipRename, 0)
+	s.OutpostRenames = make([]*OutpostRename, 0)
 	s.SchematicRunViews = make([]*shared.GameClient, 0)
 	s.NewSchematicRuns = make([]*NewSchematicRunTicket, 0)
 	s.NewFactions = make([]*NewFactionTicket, 0)
@@ -933,6 +935,7 @@ func (s *SolarSystem) processClientEventQueues() {
 				// build update for client
 				cu := models.ServerPropertyUpdateBody{}
 
+				// include ships
 				for _, x := range ps.ShipCaches {
 					cu.Ships = append(cu.Ships, models.ServerShipPropertyCacheEntry{
 						Name:                x.Name,
@@ -943,6 +946,18 @@ func (s *SolarSystem) processClientEventQueues() {
 						DockedAtStationID:   x.DockedAtStationID,
 						DockedAtStationName: x.DockedAtStationName,
 						Wallet:              x.Wallet,
+					})
+				}
+
+				// include outposts
+				for _, x := range ps.OutpostCaches {
+					cu.Outposts = append(cu.Outposts, models.ServerOutpostPropertyCacheEntry{
+						Name:            x.Name,
+						Texture:         x.Texture,
+						OutpostID:       x.OutpostID,
+						SolarSystemID:   x.SolarSystemID,
+						SolarSystemName: x.SolarSystemName,
+						Wallet:          x.Wallet,
 					})
 				}
 
@@ -1080,6 +1095,68 @@ func (s *SolarSystem) processClientEventQueues() {
 
 				c.SetPropertyCache(pc)
 			}
+		} else if evt.Type == msgRegistry.TransferOutpostCredits {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientTransferOutpostCreditsBody)
+
+				// verify player is docked
+				if sh.DockedAtStation == nil {
+					c.WriteErrorMessage("you must be docked to transfer money")
+					continue
+				}
+
+				// get outpost to exchange with and verify it is owned by the player
+				toExchange := s.outposts[data.OutpostID.String()]
+
+				if toExchange == nil {
+					c.WriteErrorMessage("outpost not available to exchange money with")
+					continue
+				}
+
+				if toExchange.UserID != sh.UserID {
+					c.WriteErrorMessage("outpost not available to exchange money with")
+					continue
+				}
+
+				// verify player is docked at the outpost to exchange with
+				if toExchange.ID != sh.DockedAtStation.ID {
+					c.WriteErrorMessage("you must be docked at the outpost you are exchanging with")
+					continue
+				}
+
+				// verify this will not put either's balance below zero
+				newSrcBalance := sh.Wallet - float64(data.Amount)
+				newTgtBalance := toExchange.Wallet + float64(data.Amount)
+
+				if newSrcBalance < 0 || newTgtBalance < 0 {
+					c.WriteErrorMessage("insufficient funds")
+					continue
+				}
+
+				// update balances
+				sh.Wallet = newSrcBalance
+				toExchange.Wallet = newTgtBalance
+
+				// update property cache with new amounts (so it shows up immediately instead of as part of the periodic rebuild)
+				pc := c.GetPropertyCache()
+
+				for i, e := range pc.ShipCaches {
+					if e.ShipID == sh.ID {
+						pc.ShipCaches[i].Wallet = newSrcBalance
+						break
+					}
+				}
+
+				for i, e := range pc.OutpostCaches {
+					if e.OutpostID == toExchange.ID {
+						pc.OutpostCaches[i].Wallet = newTgtBalance
+						break
+					}
+				}
+
+				c.SetPropertyCache(pc)
+			}
 		} else if evt.Type == msgRegistry.SellShipAsOrder {
 			if sh != nil {
 				// extract data
@@ -1175,7 +1252,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					continue
 				}
 
-				// get ship to sell and verify it is owned by the player
+				// get ship to trash and verify it is owned by the player
 				toTrash := s.ships[data.ShipID.String()]
 
 				if toTrash == nil {
@@ -1258,7 +1335,7 @@ func (s *SolarSystem) processClientEventQueues() {
 					continue
 				}
 
-				// get ship to sell and verify it is owned by the player
+				// get ship to rename and verify it is owned by the player
 				toRename := s.ships[data.ShipID.String()]
 
 				if toRename == nil {
@@ -1312,6 +1389,68 @@ func (s *SolarSystem) processClientEventQueues() {
 				}
 
 				pc.ShipCaches = no
+				c.SetPropertyCache(pc)
+			}
+		} else if evt.Type == msgRegistry.RenameOutpost {
+			if sh != nil {
+				// extract data
+				data := evt.Body.(models.ClientRenameOutpostBody)
+
+				// verify player is docked
+				if sh.DockedAtStation == nil {
+					c.WriteErrorMessage("you must be docked to rename an outpost")
+					continue
+				}
+
+				// get outpost to rename and verify it is owned by the player
+				toRename := s.outposts[data.OutpostID.String()]
+
+				if toRename == nil {
+					c.WriteErrorMessage("outpost not available to rename")
+					continue
+				}
+
+				if toRename.UserID != sh.UserID {
+					c.WriteErrorMessage("outpost not available to rename")
+					continue
+				}
+
+				// verify player is docked at the outpost to be renamed
+				if toRename.ID != sh.DockedAtStation.ID {
+					c.WriteErrorMessage("you must be docked at the outpost being renamed")
+					continue
+				}
+
+				// verify length constraint on new name
+				if len(data.Name) > 24 {
+					c.WriteErrorMessage("outpost names must be 24 characters or less")
+					continue
+				}
+
+				// update name in memory
+				toRename.OutpostName = data.Name
+
+				// escalate rename save request
+				rn := OutpostRename{
+					OutpostID: toRename.ID,
+					Name:      data.Name,
+				}
+
+				s.OutpostRenames = append(s.OutpostRenames, &rn)
+
+				// update renamed outpost in property cache (so it changes immediately instead of as part of the periodic rebuild)
+				pc := c.GetPropertyCache()
+				no := make([]shared.OutpostPropertyCacheEntry, 0)
+
+				for _, e := range pc.OutpostCaches {
+					if e.OutpostID == toRename.ID {
+						e.Name = data.Name
+					}
+
+					no = append(no, e)
+				}
+
+				pc.OutpostCaches = no
 				c.SetPropertyCache(pc)
 			}
 		} else if evt.Type == msgRegistry.PostSystemChatMessage {
@@ -1595,6 +1734,12 @@ func (s *SolarSystem) processClientEventQueues() {
 				// verify ship is docked
 				if sh.DockedAtStation == nil || sh.DockedAtStationID == nil {
 					c.WriteErrorMessage("you must be docked to create a faction")
+					continue
+				}
+
+				// verify ship is not docked at an outpost
+				if sh.DockedAtStation.isOutpostShim {
+					c.WriteErrorMessage("factions may not be founded at outposts")
 					continue
 				}
 
@@ -3351,6 +3496,9 @@ func (s *SolarSystem) AddOutpost(c *Outpost, lock bool) *Station {
 	// store pointer to system
 	c.CurrentSystem = s
 
+	// cache system name
+	c.SystemName = s.SystemName
+
 	// verify no station with this id exists that would cause shim issues
 	_, stv := s.stations[c.ID.String()]
 
@@ -3590,7 +3738,6 @@ func (s *SolarSystem) CopyShips(lock bool) map[string]*Ship {
 
 // Returns a new map containing pointers to the ships in the system - use with care!
 func (s *SolarSystem) MirrorShipMap(lock bool) map[string]*Ship {
-
 	if lock {
 		// obtain lock
 		s.Lock.Lock()
@@ -3610,7 +3757,6 @@ func (s *SolarSystem) MirrorShipMap(lock bool) map[string]*Ship {
 
 // Returns a new map containing pointers to the clients in the system - use with care!
 func (s *SolarSystem) MirrorClientMap(lock bool) map[string]*shared.GameClient {
-
 	if lock {
 		// obtain lock
 		s.Lock.Lock()
@@ -3621,6 +3767,25 @@ func (s *SolarSystem) MirrorClientMap(lock bool) map[string]*shared.GameClient {
 	m := make(map[string]*shared.GameClient)
 
 	for k, v := range s.clients {
+		m[k] = v
+	}
+
+	// return new map
+	return m
+}
+
+// Returns a new map containing pointers to the outposts in the system - use with care!
+func (s *SolarSystem) MirrorOutpostMap(lock bool) map[string]*Outpost {
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// copy pointers into new map
+	m := make(map[string]*Outpost)
+
+	for k, v := range s.outposts {
 		m[k] = v
 	}
 
@@ -3656,20 +3821,20 @@ func (s *SolarSystem) CopyStations(lock bool) map[string]*Station {
 }
 
 // Returns a copy of the outposts in the system
-func (s *SolarSystem) CopyOutposts(lock bool) map[string]*Outpost {
+func (o *SolarSystem) CopyOutposts(lock bool) map[string]*Outpost {
 	if lock {
 		// obtain lock
-		s.Lock.Lock()
-		defer s.Lock.Unlock()
+		o.Lock.Lock()
+		defer o.Lock.Unlock()
 	}
 
 	// make map for copies
 	copy := make(map[string]*Outpost)
 
 	// copy outposts into copy map
-	for k, v := range s.outposts {
+	for k, v := range o.outposts {
 		c := v.CopyOutpost()
-		copy[k] = &c
+		copy[k] = c
 	}
 
 	// return copy map

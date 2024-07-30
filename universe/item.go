@@ -80,6 +80,7 @@ var MutableModuleAttributes = [...]string{
 	"tracking_drift",
 	"mask_radius",
 	"heat_cap_max_add",
+	"intake_area",
 }
 
 // Helper function to determine whether or not a given item meta attribute can be mutated by a mod kit

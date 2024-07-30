@@ -48,7 +48,7 @@ func (s OutpostService) GetOutpostsBySolarSystem(systemID uuid.UUID, isDestroyed
 	sql := `
 				SELECT 
 					id, universe_systemid, outpostname, pos_x, pos_y, theta, userid, 
-					shield, armor, hull, wallet, outposttemplateid
+					shield, armor, hull, wallet, outposttemplateid, created
 				FROM public.outposts
 				WHERE universe_systemid = $1 and destroyed = $2
 			`
@@ -66,7 +66,7 @@ func (s OutpostService) GetOutpostsBySolarSystem(systemID uuid.UUID, isDestroyed
 
 		// scan into outpost structure
 		rows.Scan(&r.ID, &r.SystemID, &r.OutpostName, &r.PosX, &r.PosY, &r.Theta, &r.UserID,
-			&r.Shield, &r.Armor, &r.Hull, &r.Wallet, &r.OutpostTemplateId)
+			&r.Shield, &r.Armor, &r.Hull, &r.Wallet, &r.OutpostTemplateId, &r.Created)
 
 		// append to outpost slice
 		outposts = append(outposts, r)
@@ -108,4 +108,53 @@ func (s OutpostService) NewOutpost(e Outpost) (*Outpost, error) {
 
 	// return pointer to inserted outpost model
 	return &e, nil
+}
+
+// Updates an outpost in the database
+func (s OutpostService) UpdateOutpost(o Outpost) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update outpost in database
+	sqlStatement :=
+		`
+			UPDATE public.outposts
+			SET universe_systemid=$2, outpostname=$3, pos_x=$4, pos_y=$5, 
+				theta=$6, userid=$7, shield=$8, armor=$9, hull=$10, wallet=$11, 
+				destroyed=$12, destroyedat=$13, outposttemplateid=$14, created=$15
+			WHERE id=$1;
+		`
+
+	_, err = db.Exec(sqlStatement, o.ID,
+		o.SystemID, o.OutpostName, o.PosX, o.PosY,
+		o.Theta, o.UserID, o.Shield, o.Armor, o.Hull, o.Wallet,
+		o.Destroyed, o.DestroyedAt, o.OutpostTemplateId, o.Created)
+
+	return err
+}
+
+// Updates the name of an outpost in the database
+func (s OutpostService) Rename(id uuid.UUID, name string) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// update outpost in database
+	sqlStatement :=
+		`
+			UPDATE public.outposts
+			SET outpostname = $2
+			WHERE id = $1
+		`
+
+	_, err = db.Exec(sqlStatement, id, name)
+
+	return err
 }

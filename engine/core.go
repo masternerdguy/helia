@@ -214,9 +214,9 @@ func (e *HeliaEngine) Start() {
 					shared.TeeLog("Automatic scheduled reboot will occur soon!")
 
 					// message explaining situation to players
-					sm := "Helia reboots once a day at noon EDT for scheduled maintainence." +
+					sm := "Helia reboots once a day at noon EDT for scheduled maintainence. " +
 						"A reboot will occur in ~10 minutes - please ensure you have gotten to a safe place " +
-						"before then. The server is expected to take ~30 minutes to reboot."
+						"before then. The server is expected to take ~60 minutes to reboot."
 
 					// send message to connected clients informing them of shutdown
 					b, _ := json.Marshal(models.ServerPushInfoMessage{
@@ -601,12 +601,12 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				// load new item
 				ni, err := itemSvc.GetItemByID(*id)
 
-				if err != nil || id == nil {
+				if err != nil || ni == nil {
 					shared.TeeLog(fmt.Sprintf("Unable to load new item %v: %v", mi.ID, err))
 				} else {
 					fi, err := LoadItem(ni)
 
-					if err != nil || id == nil {
+					if err != nil || fi == nil {
 						shared.TeeLog(fmt.Sprintf("Unable to integrate new item %v: %v", mi.ID, err))
 					} else {
 						// copy loaded values
@@ -670,12 +670,12 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 					// load new item
 					ni, err := itemSvc.GetItemByID(*id)
 
-					if err != nil || id == nil {
+					if err != nil || ni == nil {
 						shared.TeeLog(fmt.Sprintf("Unable to load new item [devhax] %v: %v", mi.ID, err))
 					} else {
 						fi, err := LoadItem(ni)
 
-						if err != nil || id == nil {
+						if err != nil || fi == nil {
 							shared.TeeLog(fmt.Sprintf("Unable to integrate new item [devhax] %v: %v", mi.ID, err))
 						} else {
 							// copy loaded values
@@ -961,7 +961,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			// save ship
 			err = shipSvc.UpdateShip(*ns)
 
-			if home == nil {
+			if err != nil {
 				shared.TeeLog(fmt.Sprintf("! Unable to respawn NPC %v - couldn't save noob ship changes (%v)!", rs.UserID, err))
 				return
 			}
@@ -1088,7 +1088,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			// save noob ship
 			err = shipSvc.UpdateShip(*ns)
 
-			if home == nil {
+			if err != nil {
 				shared.TeeLog(fmt.Sprintf("! Unable to respawn player %v - couldn't save noob ship changes (%v)!", rs.UID, err))
 				return
 			}
@@ -1194,7 +1194,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			defer escalationRecover(sol, e)
 
 			// create new outpost for player
-			ps, err := CreateOutpostForPlayer(
+			po, err := CreateOutpostForPlayer(
 				rs.UserID,
 				rs.OutpostTemplateID,
 				sol.ID,
@@ -1203,21 +1203,21 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 				rs.Theta,
 			)
 
-			if err != nil || ps == nil {
+			if err != nil || po == nil {
 				shared.TeeLog(fmt.Sprintf("! Unable to complete outpost deployment for %v - failure saving (%v)!", rs.UserID, err))
 				return
 			}
 
 			// load into universe
-			es, err := LoadOutpost(ps, sol.Universe)
+			eo, err := LoadOutpost(po, sol.Universe)
 
-			if err != nil || es == nil {
+			if err != nil || eo == nil {
 				shared.TeeLog(fmt.Sprintf("! Unable to complete outpost deployment for %v - failure loading (%v)!", rs.UserID, err))
 				return
 			}
 
 			// put outpost in system
-			sol.AddOutpost(es, true)
+			sol.AddOutpost(eo, true)
 		}(rs, sol)
 	}
 
@@ -1350,7 +1350,7 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 			err := shipSvc.Rename(rs.ShipID, rs.Name)
 
 			if err != nil {
-				shared.TeeLog(fmt.Sprintf("! Unable to rename ship %v - failure saving (%v)!", rs.ShipID.ID(), err))
+				shared.TeeLog(fmt.Sprintf("! Unable to rename ship %v - failure saving (%v)!", rs.ShipID, err))
 				return
 			}
 		}(rs, sol)
@@ -1358,6 +1358,26 @@ func handleEscalations(sol *universe.SolarSystem, e *HeliaEngine) {
 
 	// clear ship renames
 	sol.ShipRenames = make([]*universe.ShipRename, 0)
+
+	// iterate over outpost renames
+	for _, ro := range sol.OutpostRenames {
+		// handle escalation on another goroutine
+		go func(ro *universe.OutpostRename, sol *universe.SolarSystem) {
+			// handle escalation failure
+			defer escalationRecover(sol, e)
+
+			// update name in database
+			err := outpostSvc.Rename(ro.OutpostID, ro.Name)
+
+			if err != nil {
+				shared.TeeLog(fmt.Sprintf("! Unable to rename outpost %v - failure saving (%v)!", ro.OutpostID, err))
+				return
+			}
+		}(ro, sol)
+	}
+
+	// clear outpost renames
+	sol.OutpostRenames = make([]*universe.OutpostRename, 0)
 
 	// iterate over clients in need of a schematic runs update
 	for id := range sol.SchematicRunViews {

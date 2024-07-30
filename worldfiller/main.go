@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"helia/engine"
 	"helia/physics"
@@ -10,6 +11,8 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -41,78 +44,30 @@ func main() {
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	var toInject = [...]string{
-		"21deccaa-c9b0-414e-a898-3ab9230d4528",
-		"f0cf1d7a-c1c6-41d9-a7c2-00ce1a7b0cce",
-		"b47202fc-34cf-4117-a63a-eff63c62febd",
-		"c40ad708-724f-40a9-b99d-29eec2049e98",
-		"ee66bd1c-4ac4-4ad6-9ff2-834e13580921",
-		"f4b40184-803f-4387-bfb2-439d444c29b2",
-		"76c9b909-3f15-41f4-ac77-cc13dc96ee29",
-		"7737b828-4ef0-4344-bc53-923f27a885e1",
-		"b0177b10-2b91-40a4-b695-b19681249c2b",
-		"b01122d1-3c82-49ce-ba3d-bc47de0741c1",
-		"0b5700d7-e787-43ad-84c8-c1442deff38b",
-		"c81ee20b-0466-42f6-9962-24b195fdc913",
-		"b46679ae-33c6-4392-b535-6797d3152de7",
-		"350c8d81-e6dc-457b-922e-bcf4ba3da585",
-		"215eabca-9cc5-4b94-84ee-df4be3a7888b",
-		"7723775b-24c7-4cd9-85bd-f2c943cbc2b6",
-		"7228a4d1-0cf8-4f6b-a8dd-0a84f4fa892b",
-		"88a99a46-937e-406e-a357-50d18a2e1184",
-		"85aed9df-db0b-42e7-9cbb-a5874f7dba43",
-		"26541a60-0606-464e-a86b-6745ba74c08c",
-		"198f524d-b707-49da-aa6c-17296915b231",
-		"defb2d6f-8d22-4e98-96c0-ae71eee6abf0",
-		"ce90d325-6a78-44e9-a964-df39b839a1ee",
-		"351f52bb-c581-462d-9a7d-c102942f71ca",
-		"c075da8e-efe5-4f0f-88bc-129544d545c0",
-		"2061a44b-c0ec-4d97-beec-6ad9b30011eb",
-		"0b33103e-7e46-4b6f-ae8f-8a7096ba7d4e",
-		"f4fac632-9248-459f-8309-30015c60f72f",
-		"03390735-4a97-4c70-9ab2-dd58384c962f",
-		"de7c37e5-92a0-46bb-93e2-b74d3b123a2b",
-		"622c7b71-1e76-44ca-8ce5-474fbac77245",
-		"c64f0b49-7d0f-4214-a668-803ff824ca38",
-		"374db251-abcd-466f-9b4c-a8268570c01a",
-		"4c463a82-69ca-4be2-a46a-209bd106a1fe",
-		"944b329c-5c70-4bee-b8af-ca3aa5143906",
-		"3cedf939-829d-4ceb-823f-5a6b6bdacc0c",
-		"5385eb4b-2046-46f2-901c-8555bfaeda50",
-		"ae36fea3-c8f4-47e3-9f8f-8f30d2084a83",
-		"657e02d7-b32b-4b9b-b6be-0e2fa5cc1709",
-		"6a24faa9-5b35-4339-bbf6-3a942247fe06",
-		"8a51aeca-74ff-48f0-9907-56c6008e3279",
-		"c72cc388-026b-4e0e-a8c1-2341757a80e8",
-		"947c290c-4983-4057-87e2-77ec8f1c2e73",
-		"aca8755d-e0e2-44e6-9b70-7ec09523874e",
-		"3f03b17d-821c-4350-af28-8ad49ea01e98",
-		"2256a571-4cd6-4fa1-964c-7217b26ac6fc",
-		"ce38bcee-625a-4eb7-b6cd-b48477a12854",
-		"5e5973ae-9217-4c76-999f-e60549462a1f",
-		"08b70d06-5861-495b-bccb-4daad5b11519",
-		"ba762629-2664-4331-b74a-0134360e695f",
-		"764aef65-10c4-4811-86a2-cd3fa019f935",
-		"5d8fdcc5-3116-4bdd-849c-f93838234acc",
-		"67d15f39-9861-4f90-b2ba-75de6cd1cfa1",
-		"0b7c5ed8-a114-4929-bd54-2f3d5372d3a6",
-		"a9702e63-9fb9-4f95-b81d-b5582605e4da",
-		"247ddad5-03f4-4363-a78e-2c54ecfc6e87",
-		"9808b8e0-0f63-4f4a-9f31-d1ed940fc030",
-		"c04d38e2-8c89-4775-9f27-1793a20d70fe",
-		"956a96c1-a6fa-40bc-8871-417c246f99a3",
-		"fb62983a-b1cf-4693-a87e-b31ba7867222",
+	/*var toInject = [...]string{
+		"6b9b499d-1426-4aa5-ae58-69f6516d4a9b",
+		"5e64e9d3-bf33-4552-8d09-1f70d7d2d4a4",
+		"e77eee22-24f7-44c7-846a-09819808a8bf",
+		"eab6ce76-bee0-4ab7-bc1d-87e7b90af831",
+		"bdab0eaf-3f9d-40a8-b60f-4770e05f4a06",
+		"c4dde5ab-b782-4d69-9582-7bfd02cd7d1c",
+		"4075709e-d2c0-4d20-8698-d504938c22f5",
+		"f120d11b-e0ad-4a17-bedc-25bb2bb7a06d",
+		"e1e95a63-32f1-4f92-8052-b2ac7a92ec6b",
 	}
-
-	// dropAsteroids(universe)
-	//dropSanctuaryStations(universe)
 
 	for i, e := range toInject {
 		log.Printf("injecting process %v", e)
 		injectProcess(universe, e, i)
-	}
+	}*/
+
+	fillGasMiningYields(universe)
+
+	// dropAsteroids(universe)
+	//dropSanctuaryStations(universe)
 
 	//stubModuleSchematicsAndProcesses()
+	//loadNewWares()
 }
 
 /* Parameters for asteroid generation */
@@ -258,6 +213,7 @@ func calculateSystemSeed(s *universe.SolarSystem) int {
 	return seed
 }
 
+// Represents a schematic with inputs and outputs to be saved by worldfiller
 type schematicStubWorldmaker struct {
 	// item type
 	ItemType sql.VwItemTypeIndustrial
@@ -278,6 +234,7 @@ type schematicStubWorldmaker struct {
 	SchematicSinkProcessInput sql.ProcessInput
 }
 
+// Generates schematics and processes for modules
 func stubModuleSchematicsAndProcesses() {
 	rand.Seed(time.Now().Unix())
 	generated := make([]schematicStubWorldmaker, 0)
@@ -295,6 +252,7 @@ func stubModuleSchematicsAndProcesses() {
 	// group industrials
 	ores := make([]sql.VwItemTypeIndustrial, 0)
 	ices := make([]sql.VwItemTypeIndustrial, 0)
+	gases := make([]sql.VwItemTypeIndustrial, 0)
 	wastes := make([]sql.VwItemTypeIndustrial, 0)
 	repairKits := make([]sql.VwItemTypeIndustrial, 0)
 
@@ -313,6 +271,10 @@ func stubModuleSchematicsAndProcesses() {
 
 		if i.Family == "ice" {
 			ices = append(ices, i)
+		}
+
+		if i.Family == "gas" {
+			gases = append(gases, i)
 		}
 
 		if i.Family == "trade_good" && strings.Contains(i.Name, "Waste") {
@@ -380,6 +342,10 @@ func stubModuleSchematicsAndProcesses() {
 
 			if roll <= 4 {
 				inputMaterials = append(inputMaterials, ices[physics.RandInRange(0, len(ices))])
+			}
+
+			if roll <= 2 {
+				inputMaterials = append(inputMaterials, gases[physics.RandInRange(0, len(gases))])
 			}
 
 			roll = physics.RandInRange(0, 100)
@@ -495,7 +461,7 @@ func stubModuleSchematicsAndProcesses() {
 			}
 
 			if resets > 100 {
-				log.Println(fmt.Sprintf("Skipping %v - not solvable with input materials given.", industrial.Name))
+				log.Printf("Skipping %v - not solvable with input materials given.", industrial.Name)
 				break
 			}
 		}
@@ -629,7 +595,7 @@ func stubModuleSchematicsAndProcesses() {
 		})
 
 		// success :)
-		log.Println(fmt.Sprintf(":) %v", industrial.Name))
+		log.Printf(":) %v", industrial.Name)
 	}
 
 	// save everything
@@ -696,6 +662,7 @@ func stubModuleSchematicsAndProcesses() {
 	}
 }
 
+// Creates station processes for a given process
 func injectProcess(u *universe.Universe, pid string, offset int) {
 	pID, err := uuid.Parse(pid)
 	prob := 3
@@ -707,17 +674,15 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 
 	var textures = [...]string{
-		"bad-",
 		"sanctuary-",
 		"interstar-",
-		"alvaca-",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 903827450 + int64(offset))
+			rand.Seed(int64(calculateSystemSeed(s)) - 178046782372 + int64(offset))
 
 			/*if r.ID.ID()%2 != 0 {
 				continue
@@ -731,7 +696,7 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 
 			for _, st := range stations {
 				for _, t := range textures {
-					if strings.Contains(st.Texture, t) {
+					if !strings.Contains(st.Texture, t) {
 						roll := physics.RandInRange(0, 100)
 
 						if roll <= prob {
@@ -758,6 +723,7 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 }
 
+// Creates stations owned by the sanctuary systems
 func dropSanctuaryStations(u *universe.Universe) {
 	fID, err := uuid.Parse("b3d3fa9c-b21e-490f-b39e-128b3af12128")
 
@@ -1126,4 +1092,361 @@ type Astling struct {
 
 func printLogger(s string, t time.Time) {
 	log.Println(s) // t is intentionally discarded because Println already provides a timestamp
+}
+
+// Structure representing a scaffold for a trade good for worldfiller
+type WareCsvRecord struct {
+	Name     string
+	MinPrice int
+	MaxPrice int
+	SiloSize int
+	Volume   int
+}
+
+// Imports new trade goods from a CSV into the database for worldfiller
+func loadNewWares() {
+	// open file
+	f, err := os.Open("newwares.csv")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// remember to close the file at the end of the program
+	defer f.Close()
+
+	// read csv values using csv.Reader
+	csvReader := csv.NewReader(f)
+	data, err := csvReader.ReadAll()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// convert records to array of structs
+	wares := parseWareCsv(data)
+
+	// print the array
+	fmt.Printf("%+v\n", wares)
+
+	// get services
+	itemTypeSvc := sql.GetItemTypeService()
+	processSvc := sql.GetProcessService()
+	inputSvc := sql.GetProcessInputService()
+	outputSvc := sql.GetProcessOutputService()
+
+	// to store item types to be saved
+	newTypes := make([]sql.ItemType, 0)
+
+	// iterate over parsed wares
+	for _, w := range wares {
+		// verify this ware doesn't already exist
+		existing, err := itemTypeSvc.GetItemTypeByName(w.Name)
+
+		if err == nil || existing != nil {
+			log.Panicf("Ware already exists! %v", existing)
+		}
+
+		// create new item type for ware
+		it := sql.ItemType{
+			ID:     uuid.New(),
+			Family: "gas",
+			Name:   w.Name,
+			Meta:   sql.Meta{},
+		}
+
+		meta := universe.IndustrialMetadataNoProcessId{
+			SiloSize: w.SiloSize,
+			MaxPrice: w.MaxPrice,
+			MinPrice: w.MinPrice,
+		}
+
+		it.Meta["hp"] = 1
+		it.Meta["volume"] = w.Volume
+		it.Meta["industrialmarket"] = meta
+
+		// append for later
+		newTypes = append(newTypes, it)
+	}
+
+	// save new wares
+	for _, it := range newTypes {
+		log.Printf("Saving %v", it)
+
+		// save core ware
+		_, err := itemTypeSvc.NewItemTypeForWorldFiller(it)
+
+		if err != nil {
+			log.Panicf("Error saving new item type %v", err)
+		}
+
+		// calculate runtimes
+		rtf := physics.RandInRange(5, 1000)
+		rts := physics.RandInRange(7, 1100)
+
+		// make ware faucet process
+		wareFaucet := sql.Process{
+			ID:   uuid.New(),
+			Name: fmt.Sprintf("%v Faucet [wm]", it.Name),
+			Time: physics.RandInRange(rtf, rtf*8),
+			Meta: sql.Meta{},
+		}
+
+		wareFaucetOutput := sql.ProcessOutput{
+			ID:         uuid.New(),
+			ItemTypeID: it.ID,
+			Quantity:   physics.RandInRange(1, 1000),
+			Meta:       sql.Meta{},
+			ProcessID:  wareFaucet.ID,
+		}
+
+		// make ware sink process
+		wareSink := sql.Process{
+			ID:   uuid.New(),
+			Name: fmt.Sprintf("%v Sink [wm]", it.Name),
+			Time: physics.RandInRange(rts, rts*8),
+			Meta: sql.Meta{},
+		}
+
+		wareSinkInput := sql.ProcessInput{
+			ID:         uuid.New(),
+			ItemTypeID: it.ID,
+			Quantity:   physics.RandInRange(1, 1000),
+			Meta:       sql.Meta{},
+			ProcessID:  wareSink.ID,
+		}
+
+		// save faucet process
+		_, err = processSvc.NewProcessForWorldFiller(wareFaucet)
+
+		if err != nil {
+			log.Panicf("Error saving faucet process %v", err)
+		}
+
+		_, err = outputSvc.NewProcessOutputForWorldFiller(wareFaucetOutput)
+
+		if err != nil {
+			log.Panicf("Error saving faucet process (output) %v", err)
+		}
+
+		// save sink process
+		_, err = processSvc.NewProcessForWorldFiller(wareSink)
+
+		if err != nil {
+			log.Panicf("Error saving sink process %v", err)
+		}
+
+		_, err = inputSvc.NewProcessInputForWorldFiller(wareSinkInput)
+
+		if err != nil {
+			log.Panicf("Error saving faucet process (input) %v", err)
+		}
+	}
+}
+
+// Parses new ware CSV for worldfiller
+func parseWareCsv(data [][]string) []WareCsvRecord {
+	var wareList []WareCsvRecord
+	for i, line := range data {
+		if i > 0 { // omit header line
+			var rec WareCsvRecord
+
+			for j, field := range line {
+				if j == 0 {
+					rec.Name = field
+				} else if j == 2 {
+					k, _ := strconv.Atoi(field)
+					rec.MinPrice = k
+				} else if j == 3 {
+					k, _ := strconv.Atoi(field)
+					rec.MaxPrice = k
+				} else if j == 4 {
+					k, _ := strconv.Atoi(field)
+					rec.SiloSize = k
+				} else if j == 5 {
+					k, _ := strconv.Atoi(field)
+					rec.Volume = k
+				}
+			}
+
+			wareList = append(wareList, rec)
+		}
+	}
+	return wareList
+}
+
+// Initializes gas mining yields on celestials
+func fillGasMiningYields(u *universe.Universe) {
+	/* asteroid gas meta */
+	const astHasGasProb = 15
+
+	var astGases = [...]string{
+		"22fb3cda-c949-41ae-bcf5-ee0a60d497fc",
+		"5f84addf-d05b-407a-8dcd-fecd3af4c69d",
+		"42179f25-b473-46d1-9592-08e1d23807bd",
+	}
+
+	/* planet gas meta */
+	const plnHasGasProb = 66
+
+	var plnGases = [...]string{
+		"3f903eca-8bd3-4f54-a9ce-2b22627db94a",
+		"04f16f34-497f-465e-a9a6-368dd62a5328",
+		"d8e1ead1-055b-4cd0-b1ec-f88dd0f7ff31",
+	}
+
+	/* star gas meta */
+	const starHasGasProb = 85
+
+	var strGases = [...]string{
+		"f4947ebe-4d4c-457b-aeb6-b4dd5b66e62b",
+		"0c429117-e7fa-4e00-97f9-ab67c639cae7",
+		"479e8dd7-06e8-479c-b07f-382b407b832f",
+	}
+
+	// get services
+	asteroidSvc := sql.GetAsteroidService()
+	planetSvc := sql.GetPlanetService()
+	starSvc := sql.GetStarService()
+
+	// iterate over regions
+	for _, r := range u.Regions {
+		// progress
+		log.Printf("seeding region %v", r.RegionName)
+
+		// roll scarcity
+		rScarcity := rand.Float64()
+
+		// iterate over solar systems
+		for _, s := range r.Systems {
+			// roll scarcity
+			sScarcity := rand.Float64()
+
+			// iterate over asteroids
+			asts := s.CopyAsteroids(false)
+
+			for _, a := range asts {
+				// roll scarcity
+				aScarcity := rand.Float64()
+
+				// empty gas mining meta
+				gmm := universe.GasMiningMetadata{
+					Yields: make(map[string]universe.GasMiningYield),
+				}
+
+				// roll for gas presence
+				hasGasRoll := physics.RandInRange(0, 100)
+
+				if hasGasRoll <= astHasGasProb {
+					// iterate over asteroid gases
+					for _, gid := range astGases {
+						// roll for yield
+						yld := physics.RandInRange(0, int(a.Mass)/int(a.Radius))
+
+						// apply scarcity
+						scarcity := rScarcity * sScarcity * aScarcity
+						yld = int(float64(yld) * scarcity)
+
+						if yld > 0 {
+							// add entry
+							gmm.Yields[gid] = universe.GasMiningYield{
+								ItemTypeID: uuid.MustParse(gid),
+								Yield:      yld,
+							}
+						}
+					}
+				}
+
+				// save metadata
+				meta := a.Meta
+				meta["gasmining"] = gmm
+
+				asteroidSvc.UpdateMetaWorldfiller(a.ID, (*sql.Meta)(&meta))
+			}
+
+			// iterate over planets
+			pls := s.CopyPlanets(false)
+
+			for _, p := range pls {
+				// roll scarcity
+				aScarcity := rand.Float64()
+
+				// empty gas mining meta
+				gmm := universe.GasMiningMetadata{
+					Yields: make(map[string]universe.GasMiningYield),
+				}
+
+				// roll for gas presence
+				hasGasRoll := physics.RandInRange(0, 100)
+
+				if hasGasRoll <= plnHasGasProb {
+					// iterate over planet gases
+					for _, gid := range plnGases {
+						// roll for yield
+						yld := physics.RandInRange(0, int(p.Mass)/int(p.Radius))
+
+						// apply scarcity
+						scarcity := rScarcity * sScarcity * aScarcity
+						yld = int(float64(yld) * scarcity)
+
+						if yld > 0 {
+							// add entry
+							gmm.Yields[gid] = universe.GasMiningYield{
+								ItemTypeID: uuid.MustParse(gid),
+								Yield:      yld,
+							}
+						}
+					}
+				}
+
+				// save metadata
+				meta := p.Meta
+				meta["gasmining"] = gmm
+
+				planetSvc.UpdateMetaWorldfiller(p.ID, (*sql.Meta)(&meta))
+			}
+
+			// iterate over stars
+			stars := s.CopyStars(false)
+
+			for _, st := range stars {
+				// roll scarcity
+				aScarcity := rand.Float64()
+
+				// empty gas mining meta
+				gmm := universe.GasMiningMetadata{
+					Yields: make(map[string]universe.GasMiningYield),
+				}
+
+				// roll for gas presence
+				hasGasRoll := physics.RandInRange(0, 100)
+
+				if hasGasRoll <= starHasGasProb {
+					// iterate over star gases
+					for _, gid := range strGases {
+						// roll for yield
+						yld := physics.RandInRange(0, int(st.Mass)/int(st.Radius))
+
+						// apply scarcity
+						scarcity := rScarcity * sScarcity * aScarcity
+						yld = int(float64(yld) * scarcity)
+
+						if yld > 0 {
+							// add entry
+							gmm.Yields[gid] = universe.GasMiningYield{
+								ItemTypeID: uuid.MustParse(gid),
+								Yield:      yld,
+							}
+						}
+					}
+				}
+
+				// save metadata
+				meta := st.Meta
+				meta["gasmining"] = gmm
+
+				starSvc.UpdateMetaWorldfiller(st.ID, (*sql.Meta)(&meta))
+			}
+		}
+	}
 }

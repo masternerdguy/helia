@@ -1421,7 +1421,8 @@ function checkIfModule(m: WSContainerItem) {
     m.itemFamilyID === 'burst_reactor' ||
     m.itemFamilyID === 'xfer_heat' ||
     m.itemFamilyID === 'xfer_energy' ||
-    m.itemFamilyID === 'xfer_shield'
+    m.itemFamilyID === 'xfer_shield' ||
+    m.itemFamilyID === 'utility_wisper'
   );
 }
 

@@ -82,6 +82,8 @@ type MessageRegistry struct {
 	ViewDockedUsers        int
 	DockedUsersUpdate      int
 	ConsumeOutpostKit      int
+	RenameOutpost          int
+	TransferOutpostCredits int
 }
 
 // Registry of target types
@@ -169,6 +171,8 @@ func NewMessageRegistry() *MessageRegistry {
 		ViewDockedUsers:        65,
 		DockedUsersUpdate:      66,
 		ConsumeOutpostKit:      67,
+		RenameOutpost:          68,
+		TransferOutpostCredits: 69,
 	}
 }
 
@@ -775,7 +779,8 @@ type ClientViewPropertyBody struct {
 
 // Body containing a summary of the property owned by a player
 type ServerPropertyUpdateBody struct {
-	Ships []ServerShipPropertyCacheEntry `json:"ships"`
+	Ships    []ServerShipPropertyCacheEntry    `json:"ships"`
+	Outposts []ServerOutpostPropertyCacheEntry `json:"outposts"`
 }
 
 type ServerShipPropertyCacheEntry struct {
@@ -789,6 +794,15 @@ type ServerShipPropertyCacheEntry struct {
 	Wallet              float64    `json:"wallet"`
 }
 
+type ServerOutpostPropertyCacheEntry struct {
+	Name            string    `json:"name"`
+	Texture         string    `json:"texture"`
+	OutpostID       uuid.UUID `json:"id"`
+	SolarSystemID   uuid.UUID `json:"systemId"`
+	SolarSystemName string    `json:"systemName"`
+	Wallet          float64   `json:"wallet"`
+}
+
 // Body containing a request to board a ship owned by the player in the player's current station
 type ClientBoardBody struct {
 	SessionID uuid.UUID `json:"sid"`
@@ -799,6 +813,13 @@ type ClientBoardBody struct {
 type ClientTransferCreditsBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ShipID    uuid.UUID `json:"shipId"`
+	Amount    int       `json:"amount"`
+}
+
+// Body containing a request to transfer credit between an outpost owned by the player which the player is docked at
+type ClientTransferOutpostCreditsBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	OutpostID uuid.UUID `json:"outpostID"`
 	Amount    int       `json:"amount"`
 }
 
@@ -819,6 +840,13 @@ type ClientTrashShipBody struct {
 type ClientRenameShipBody struct {
 	SessionID uuid.UUID `json:"sid"`
 	ShipID    uuid.UUID `json:"shipId"`
+	Name      string    `json:"name"`
+}
+
+// Body containing a request to rename an outpost owned by the player which the player is docked at
+type ClientRenameOutpostBody struct {
+	SessionID uuid.UUID `json:"sid"`
+	OutpostID uuid.UUID `json:"outpostID"`
 	Name      string    `json:"name"`
 }
 

@@ -51,6 +51,9 @@ const ShipMinShieldRegenPercent = 0.05
 // Percentage of energy regen to be applied to a ship at 100% energy
 const ShipMinEnergyRegenPercent = 0.07
 
+// Probability of reversing orbit orientation
+const OrbitReverseChance = 0.000117
+
 // Shared registries - do not modify at runtime!
 var SharedAutopilotRegistry = NewAutopilotRegistry()
 var SharedBehaviourRegistry = NewBehaviourRegistry()
@@ -66,6 +69,7 @@ type AutopilotRegistry struct {
 	Fight     int
 	Mine      int
 	Salvage   int
+	Harvest   int
 }
 
 // Returns a populated AutopilotRegistry struct for use as an enum
@@ -80,6 +84,7 @@ func NewAutopilotRegistry() *AutopilotRegistry {
 		Fight:     6,
 		Mine:      7,
 		Salvage:   8,
+		Harvest:   9,
 	}
 }
 
@@ -91,6 +96,7 @@ type BehaviourRegistry struct {
 	PatchTrade   int
 	PatchMine    int
 	PatchSalvage int
+	PatchHarvest int
 }
 
 // Returns a populated AutopilotRegistry struct for use as an enum
@@ -102,6 +108,7 @@ func NewBehaviourRegistry() *BehaviourRegistry {
 		PatchTrade:   3,
 		PatchMine:    4,
 		PatchSalvage: 5,
+		PatchHarvest: 6,
 	}
 }
 
@@ -154,6 +161,12 @@ type SalvageData struct {
 	Type     int
 }
 
+// Container structure for arguments of the Harvest autopilot mode
+type HarvestData struct {
+	PosX float64
+	PosY float64
+}
+
 // Structure representing a player ship in the game universe
 type Ship struct {
 	ID                       uuid.UUID
@@ -203,6 +216,7 @@ type Ship struct {
 	AutopilotFight         FightData
 	AutopilotMine          MineData
 	AutopilotSalvage       SalvageData
+	AutopilotHarvest       HarvestData
 	BehaviourMode          *int
 	CurrentSystem          *SolarSystem
 	DockedAtStation        *Station
@@ -235,9 +249,11 @@ type Ship struct {
 	AggressionLog          map[string]*shared.AggressionLog         // details of aggression
 	aiIncompatibleOreFault bool                                     // true when mining autopilot failed due to incompatible ore (for patch miners)
 	aiNoOrePulledFault     bool                                     // true when mining autopilot failed due to pulling no ore (for patch miners)
+	aiNoGasPulledFault     bool                                     // true when mining autopilot failed due to pulling no gas (for patch harvesters)
 	aiNoWreckFault         bool                                     // true when salvaging autopilot failed due to wreck disappearing (for patch salvagers)
 	WreckReady             bool                                     // true when a dead ship has been saved to the db and the wreck can be looted
 	InLimbo                bool                                     // true when ship is being migrated between systems
+	flipOrbitOrientation   bool                                     // determines orbit direction
 	Lock                   sync.Mutex
 }
 
@@ -488,6 +504,8 @@ func getModuleFamily(itemFamilyID string) string {
 		modFamily = "utility"
 	} else if itemFamilyID == "xfer_shield" {
 		modFamily = "utility"
+	} else if itemFamilyID == "utility_wisper" {
+		modFamily = "utility"
 	}
 
 	return modFamily
@@ -564,6 +582,7 @@ func (s *Ship) CopyShip(lock bool) *Ship {
 		AutopilotFight:     s.AutopilotFight,
 		AutopilotMine:      s.AutopilotMine,
 		AutopilotSalvage:   s.AutopilotSalvage,
+		AutopilotHarvest:   s.AutopilotHarvest,
 		EscrowContainerID:  s.EscrowContainerID,
 		BeingFlownByPlayer: s.BeingFlownByPlayer,
 		BehaviourMode:      s.BehaviourMode,
@@ -1137,6 +1156,7 @@ func (s *Ship) CmdAbort(lock bool) {
 	s.AutopilotFight = FightData{}
 	s.AutopilotMine = MineData{}
 	s.AutopilotSalvage = SalvageData{}
+	s.AutopilotHarvest = HarvestData{}
 
 	for i := range s.Fitting.ARack {
 		s.Fitting.ARack[i].WillRepeat = false
@@ -1204,6 +1224,11 @@ func (s *Ship) CmdOrbit(targetID uuid.UUID, targetType int, lock bool) {
 		// lock entity
 		s.Lock.Lock()
 		defer s.Lock.Unlock()
+	}
+
+	// flip orientation if player
+	if !s.IsNPC {
+		s.flipOrbitOrientation = !s.flipOrbitOrientation
 	}
 
 	// stash orbit and activate autopilot
@@ -1328,6 +1353,28 @@ func (s *Ship) CmdSalvage(targetID uuid.UUID, targetType int, lock bool) {
 	s.aiNoWreckFault = false
 
 	s.AutopilotMode = registry.Salvage
+}
+
+// Invokes harvest autopilot on the ship
+func (s *Ship) CmdHarvest(tX float64, tY float64, lock bool) {
+	// get registry
+	registry := SharedAutopilotRegistry
+
+	if lock {
+		// lock entity
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// stash harvest and activate autopilot
+	s.AutopilotHarvest = HarvestData{
+		PosX: tX,
+		PosY: tY,
+	}
+
+	s.aiNoGasPulledFault = false
+
+	s.AutopilotMode = registry.Harvest
 }
 
 // Returns a new physics dummy structure representing this ship
@@ -1892,7 +1939,6 @@ func (s *Ship) siphonEnergy(
 // Siphons heat from the ship, returns the actual amount siphoned
 func (s *Ship) siphonHeat(
 	maxSiphonAmount float64,
-	assisterModule *FittedSlot,
 ) float64 {
 	// limit amount to siphon so that the remaining amount is positive
 	actualSiphon := 0.0
@@ -1918,7 +1964,6 @@ func (s *Ship) siphonHeat(
 // Receives energy and returns the excess that could not be stored
 func (s *Ship) receiveEnergy(
 	maxRecAmount float64,
-	assisterModule *FittedSlot,
 ) float64 {
 	// limit amount to receive so that max is not exceeded
 	actualReceived := 0.0
@@ -1939,7 +1984,6 @@ func (s *Ship) receiveEnergy(
 // Receives shield and returns the excess that could not be stored
 func (s *Ship) receiveShield(
 	maxRecAmount float64,
-	assisterModule *FittedSlot,
 ) float64 {
 	// limit amount to receive so that max is not exceeded
 	actualReceived := 0.0
@@ -2040,6 +2084,19 @@ func (s *Ship) behave() {
 				s.behaviourPatchMine()
 			case registry.PatchSalvage:
 				s.behaviourPatchSalvage()
+			case registry.PatchHarvest:
+				s.behaviourPatchHarvest()
+			}
+		}
+
+		// check if time to roll for orbit reversal
+		if s.CurrentSystem.tickCounter%17 == 0 {
+			// roll for orbit reveral
+			roll := rand.Float64()
+
+			if roll <= OrbitReverseChance {
+				// reverse orbit direction
+				s.flipOrbitOrientation = !s.flipOrbitOrientation
 			}
 		}
 	}
@@ -2561,7 +2618,7 @@ func (s *Ship) behaviourPatchSalvage() {
 					return
 				}
 
-				// pick random asteroid to mine
+				// pick random wreck to salvage
 				tgt := physics.RandInRange(0, count)
 				var tgtWre *Wreck = nil
 
@@ -2580,6 +2637,237 @@ func (s *Ship) behaviourPatchSalvage() {
 					s.CmdSalvage(tgtWre.ID, models.SharedTargetTypeRegistry.Wreck, false)
 				} else {
 					// no wrecks here? wander
+					s.gotoNextWanderDestination(15)
+				}
+			}
+		}
+	}
+}
+
+// wanders around the universe randomly harvesting gas and selling what it mined to patch the economy
+func (s *Ship) behaviourPatchHarvest() {
+	// pause if heat too high
+	maxHeat := s.GetRealMaxHeat(false)
+	heatLevel := s.Heat / maxHeat
+
+	if heatLevel > 0.95 {
+		s.CmdAbort(false)
+	}
+
+	// get registry
+	autoReg := SharedAutopilotRegistry
+
+	if s.aiNoGasPulledFault {
+		// stop autopilot
+		s.CmdAbort(false)
+
+		// clear flag
+		s.aiNoGasPulledFault = false
+
+		// wander
+		s.gotoNextWanderDestination(95)
+		return
+	}
+
+	// check if idle
+	if s.AutopilotMode == autoReg.None {
+		// allow time to cool off :)
+		if heatLevel > 0.25 {
+			return
+		}
+
+		// check if docked
+		if s.DockedAtStationID != nil && s.DockedAtStation != nil {
+			// 1% chance of undocking per tick
+			roll := physics.RandInRange(0, 100)
+
+			if roll == 1 {
+				// undock
+				s.CmdUndock(false)
+				return
+			}
+
+			// check if wallet should be randomized
+			if roll%22 == 0 {
+				// randomize wallet
+				s.Wallet = float64(physics.RandInRange(0, math.MaxInt32/64))
+			}
+
+			// check if sell attempts should be made
+			if roll%33 == 0 {
+				// attempt to sell items in cargo bay on the industrial market
+				for _, i := range s.CargoBay.Items {
+					st := s.DockedAtStation
+
+					// skip if unpackaged or 0 quantity
+					if !i.IsPackaged || i.Quantity == 0 {
+						continue
+					}
+
+					// skip if dirty
+					if i.CoreDirty {
+						continue
+					}
+
+					// iterate over processes
+					for _, p := range st.Processes {
+						for _, pi := range p.Process.Inputs {
+							// skip if not buying this item type
+							if pi.ItemTypeID != i.ItemTypeID {
+								continue
+							}
+
+							// roll for sell chance
+							sellRoll := physics.RandInRange(0, 100)
+
+							if sellRoll%3 == 0 {
+								// get random quantity
+								q := physics.RandInRange(1, i.Quantity+2)
+
+								// try to sell item to silo
+								s.SellItemToSilo(p.ID, i.ID, q, false)
+							}
+						}
+					}
+				}
+			}
+		} else {
+			// check if cargo bay is almost full (>80%)
+			max := s.GetRealCargoBayVolume(false)
+			used := s.TotalCargoBayVolumeUsed(false)
+
+			if used/max > 0.8 {
+				// go somewhere to try and sell it
+				s.gotoNextWanderDestination(85)
+			} else {
+				// get and count potential gas sources in system
+				asteroids := s.CurrentSystem.asteroids
+				planets := s.CurrentSystem.planets
+				stars := s.CurrentSystem.stars
+
+				count := len(asteroids) + len(planets) + len(stars)
+
+				// verify there are candidates
+				if count == 0 {
+					// none here? wander
+					s.gotoNextWanderDestination(15)
+
+					return
+				}
+
+				// to store target coordinates
+				tX := 0.0
+				tY := 0.0
+				tR := 0.0
+				doMine := false
+
+				roll := rand.Float64()
+
+				if roll < 0.15 {
+					if len(asteroids) == 0 {
+						// no asteroids - move on
+						s.gotoNextWanderDestination(85)
+						return
+					}
+
+					// pick random asteroid to harvest
+					count := len(asteroids)
+					tgt := physics.RandInRange(0, count)
+
+					idx := 0
+					for _, v := range asteroids {
+						if idx == tgt {
+							// null check
+							if v == nil {
+								continue
+							}
+
+							// store coordinates
+							tX = v.PosX
+							tY = v.PosY
+							tR = v.Radius
+							doMine = true
+
+							break
+						}
+
+						idx++
+					}
+				} else if roll < 0.35 {
+					if len(planets) == 0 {
+						// no planets - move on
+						s.gotoNextWanderDestination(85)
+						return
+					}
+
+					// pick random planet to harvest
+					count := len(planets)
+					tgt := physics.RandInRange(0, count)
+
+					idx := 0
+					for _, v := range planets {
+						if idx == tgt {
+							// null check
+							if v == nil {
+								continue
+							}
+
+							// store coordinates
+							tX = v.PosX
+							tY = v.PosY
+							tR = v.Radius
+							doMine = true
+
+							break
+						}
+
+						idx++
+					}
+				} else {
+					if len(stars) == 0 {
+						// no stars - move on
+						s.gotoNextWanderDestination(85)
+						return
+					}
+
+					// pick random star to harvest
+					count := len(stars)
+					tgt := physics.RandInRange(0, count)
+
+					idx := 0
+					for _, v := range stars {
+						if idx == tgt {
+							// null check
+							if v == nil {
+								continue
+							}
+
+							// store coordinates
+							tX = v.PosX
+							tY = v.PosY
+							tR = v.Radius
+							doMine = true
+
+							break
+						}
+
+						idx++
+					}
+				}
+
+				// fuzz destination coordinates
+				gainX := rand.Float64() + 1.0
+				gainY := rand.Float64() + 1.0
+
+				tX = tX + (tR * (rand.Float64() - 0.5) * gainX)
+				tY = tY + (tR * (rand.Float64() - 0.5) * gainY)
+
+				// verify target found
+				if doMine {
+					// go harvest it
+					s.CmdHarvest(tX, tY, false)
+				} else {
+					// nothing here? wander
 					s.gotoNextWanderDestination(15)
 				}
 			}
@@ -2678,6 +2966,8 @@ func (s *Ship) doUndockedAutopilot() {
 		s.doAutopilotMine()
 	case registry.Salvage:
 		s.doAutopilotSalvage()
+	case registry.Harvest:
+		s.doAutopilotHarvest()
 	}
 }
 
@@ -3006,10 +3296,18 @@ func (s *Ship) doAutopilotOrbit() {
 	// get angle between ship and target
 	rX := s.PosX - tX
 	rY := s.PosY - tY
+
 	pAngle := physics.ToDegrees(math.Atan2(rY, rX))
 
-	// find point 5 degree ahead
-	pAngle += 5
+	// account for orbit orientation
+	if !s.flipOrbitOrientation {
+		// find point 5 degree ahead
+		pAngle += 5
+	} else {
+		// find point 5 degree behind
+		pAngle -= 5
+	}
+
 	nX := s.AutopilotOrbit.Distance * math.Cos(physics.ToRadians(pAngle))
 	nY := s.AutopilotOrbit.Distance * math.Sin(physics.ToRadians(pAngle))
 
@@ -3469,6 +3767,95 @@ func (s *Ship) doAutopilotSalvage() {
 	} else {
 		s.CmdAbort(false)
 		return
+	}
+}
+
+// Causes ship to harvest a target
+func (s *Ship) doAutopilotHarvest() {
+	// make sure we can harvest gas
+	mods := 0
+
+	for _, m := range s.Fitting.ARack {
+		// only take appropriate equipment into account
+		f, c := m.ItemMeta.GetBool("can_mine_gas")
+
+		if !f || !c {
+			continue
+		}
+
+		if f {
+			mods += 1
+		}
+	}
+
+	if mods == 0 {
+		// can't harvest gas
+		s.CmdAbort(false)
+
+		return
+	}
+
+	// get distance to point
+	d := physics.Distance(s.ToPhysicsDummy(), physics.Dummy{
+		PosX: s.AutopilotHarvest.PosX,
+		PosY: s.AutopilotHarvest.PosY,
+	})
+
+	hold := 1.0 + Epsilon
+
+	if d > hold {
+		// get closer
+		s.flyToPoint(s.AutopilotHarvest.PosX, s.AutopilotHarvest.PosY, hold, 20)
+
+		return
+	}
+
+	if s.CurrentSystem.tickCounter%51 == 0 {
+		// try to activate rack A gas harvesting modules
+		maxHeat := s.GetRealMaxHeat(false)
+		heatAdd := 0.0
+
+		for i, v := range s.Fitting.ARack {
+			f, c := v.ItemMeta.GetBool("can_mine_gas")
+
+			if !f || !c {
+				continue
+			}
+
+			// get heat
+			h, _ := v.ItemMeta.GetFloat64("activation_heat")
+
+			// get heat ratio
+			hr := (s.Heat + heatAdd) / maxHeat
+
+			// determine whether to activate
+			roll := physics.RandInRange(0, 100)
+			hit := int(hr * 100)
+
+			if roll >= hit {
+				// activate module
+				s.Fitting.ARack[i].TargetID = &s.AutopilotMine.TargetID
+				s.Fitting.ARack[i].TargetType = &s.AutopilotMine.Type
+				s.Fitting.ARack[i].WillRepeat = true
+
+				// track heat
+				heatAdd += h
+			} else {
+				// deactivate module
+				s.Fitting.ARack[i].TargetID = nil
+				s.Fitting.ARack[i].TargetType = nil
+				s.Fitting.ARack[i].WillRepeat = false
+			}
+		}
+	} else if s.CurrentSystem.tickCounter%39 == 0 {
+		// check if cargo bay is almost full (>80%)
+		max := s.GetRealCargoBayVolume(false)
+		used := s.TotalCargoBayVolumeUsed(false)
+
+		if used/max > 0.8 {
+			// stop mining
+			s.CmdAbort(false)
+		}
 	}
 }
 
@@ -5256,7 +5643,73 @@ func (s *Ship) ConsumeOutpostKitFromCargo(itemID uuid.UUID, lock bool) error {
 		return err
 	}
 
-	// todo: check for obstacles
+	// verify minimum distance from npc stations
+	for _, st := range s.CurrentSystem.stations {
+		// null check
+		if st == nil {
+			continue
+		}
+
+		// get distance
+		d := physics.Distance(s.ToPhysicsDummy(), st.ToPhysicsDummy())
+
+		// margin check
+		if d < OUTPOST_STATION_DEPLOY_MARGIN {
+			// too close to station
+			return fmt.Errorf("outpost must be deployed at least %vk from any stations", OUTPOST_STATION_DEPLOY_MARGIN/1000)
+		}
+	}
+
+	// verify minimum distance from player outposts
+	for _, op := range s.CurrentSystem.outposts {
+		// null check
+		if op == nil {
+			continue
+		}
+
+		// get distance
+		d := physics.Distance(s.ToPhysicsDummy(), op.ToPhysicsDummy())
+
+		// margin check
+		if d < OUTPOST_OUTPOST_DEPLOY_MARGIN {
+			// too close to outpost
+			return fmt.Errorf("outpost must be deployed at least %vk from any outposts", OUTPOST_OUTPOST_DEPLOY_MARGIN/1000)
+		}
+	}
+
+	// verify minimum distance from asteroids
+	for _, ast := range s.CurrentSystem.asteroids {
+		// null check
+		if ast == nil {
+			continue
+		}
+
+		// get distance
+		d := physics.Distance(s.ToPhysicsDummy(), ast.ToPhysicsDummy())
+
+		// margin check
+		if d < OUTPOST_ASTEROID_DEPLOY_MARGIN {
+			// too close to asteroid
+			return fmt.Errorf("outpost must be deployed at least %vk from any asteroids", OUTPOST_ASTEROID_DEPLOY_MARGIN/1000)
+		}
+	}
+
+	// verify minimum distance from jumpholes
+	for _, jh := range s.CurrentSystem.jumpholes {
+		// null check
+		if jh == nil {
+			continue
+		}
+
+		// get distance
+		d := physics.Distance(s.ToPhysicsDummy(), jh.ToPhysicsDummy())
+
+		// margin check
+		if d < OUTPOST_JUMPHOLE_DEPLOY_MARGIN {
+			// too close to jumphole
+			return fmt.Errorf("outpost must be deployed at least %vk from any jumpholes", OUTPOST_JUMPHOLE_DEPLOY_MARGIN/1000)
+		}
+	}
 
 	// reduce quantity of item to 0 (always unpackaged)
 	item.Quantity = 0
@@ -5544,6 +5997,8 @@ func (m *FittedSlot) PeriodicUpdate() {
 				canActivate = m.activateAsEnergyXfer()
 			} else if m.ItemTypeFamily == "xfer_shield" {
 				canActivate = m.activateAsShieldXfer()
+			} else if m.ItemTypeFamily == "utility_wisper" {
+				canActivate = m.activateAsUtilityWisper()
 			}
 
 			if canActivate {

@@ -1,15 +1,15 @@
 # stage 1
-FROM node:alpine as base
+FROM node:alpine AS base
 
 EXPOSE 4200
 WORKDIR /src/helia/frontend
 
 # stage 2
-FROM base as deps
+FROM base AS deps
 RUN npm install -g pretty
 
 # stage 3
-FROM deps as tail
+FROM deps AS tail
 
 # don't die
 CMD tail -f /dev/null

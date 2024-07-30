@@ -159,6 +159,13 @@ type IndustrialMetadata struct {
 	ProcessID *uuid.UUID `json:"process_id"`
 }
 
+// Structure representing metadata for item types on the industrial market minus process id
+type IndustrialMetadataNoProcessId struct {
+	MinPrice int `json:"minprice"`
+	MaxPrice int `json:"maxprice"`
+	SiloSize int `json:"silosize"`
+}
+
 // Fetches industrial market limits from item type metadata
 func (p *ProcessInput) GetIndustrialMetadata() IndustrialMetadata {
 	// make empty metadata

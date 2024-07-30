@@ -262,18 +262,11 @@ func LoadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, st := range stars {
-				star := universe.Star{
-					ID:       st.ID,
-					SystemID: st.SystemID,
-					PosX:     st.PosX,
-					PosY:     st.PosY,
-					Texture:  st.Texture,
-					Radius:   st.Radius,
-					Mass:     st.Mass,
-					Theta:    st.Theta,
-				}
+				// load star
+				star := loadStar(st)
 
-				s.AddStar(&star)
+				// store in universe
+				s.AddStar(star)
 			}
 
 			// load planets
@@ -284,19 +277,11 @@ func LoadUniverse() (*universe.Universe, error) {
 			}
 
 			for _, p := range planets {
-				planet := universe.Planet{
-					ID:         p.ID,
-					SystemID:   p.SystemID,
-					PlanetName: p.PlanetName,
-					PosX:       p.PosX,
-					PosY:       p.PosY,
-					Texture:    p.Texture,
-					Radius:     p.Radius,
-					Mass:       p.Mass,
-					Theta:      p.Theta,
-				}
+				// load planet
+				planet := loadPlanet(p)
 
-				s.AddPlanet(&planet)
+				// store in universe
+				s.AddPlanet(planet)
 			}
 
 			// load asteroids
@@ -306,35 +291,12 @@ func LoadUniverse() (*universe.Universe, error) {
 				return nil, err
 			}
 
-			for _, p := range asteroids {
-				// get ore item type
-				oi := itemTypeCache[p.ItemTypeID.String()]
-
-				// get ore item family
-				of := itemFamilyCache[oi.Family]
-
-				// build asteroid
-				asteroid := universe.Asteroid{
-					ID:             p.ID,
-					SystemID:       p.SystemID,
-					Name:           p.Name,
-					Texture:        p.Texture,
-					Radius:         p.Radius,
-					Theta:          p.Theta,
-					PosX:           p.PosX,
-					PosY:           p.PosY,
-					Yield:          p.Yield,
-					Mass:           p.Mass,
-					ItemTypeName:   oi.Name,
-					ItemTypeID:     oi.ID,
-					ItemFamilyName: of.FriendlyName,
-					ItemFamilyID:   oi.Family,
-					ItemTypeMeta:   universe.Meta(oi.Meta),
-					Lock:           sync.Mutex{},
-				}
+			for _, a := range asteroids {
+				// load asteroid
+				asteroid := loadAsteroid(a)
 
 				// store in universe
-				s.AddAsteroid(&asteroid)
+				s.AddAsteroid(asteroid)
 			}
 
 			// load jumpholes
@@ -372,9 +334,9 @@ func LoadUniverse() (*universe.Universe, error) {
 				return nil, err
 			}
 
-			for _, currStation := range stations {
+			for _, st := range stations {
 				// get station processes for this station from cache
-				sqlProcesses := stationProcessCache[currStation.ID.String()]
+				sqlProcesses := stationProcessCache[st.ID.String()]
 
 				// process collected station processes
 				processes := make(map[string]*universe.StationProcess)
@@ -390,28 +352,28 @@ func LoadUniverse() (*universe.Universe, error) {
 						return nil, err
 					}
 
-					spx.StationName = currStation.StationName
+					spx.StationName = st.StationName
 					spx.SolarSystemName = s.SystemName
 					processes[spx.ID.String()] = spx
 				}
 
 				// build station
 				station := universe.Station{
-					ID:          currStation.ID,
-					SystemID:    currStation.SystemID,
-					StationName: currStation.StationName,
-					PosX:        currStation.PosX,
-					PosY:        currStation.PosY,
-					Texture:     currStation.Texture,
-					Radius:      currStation.Radius,
-					Mass:        currStation.Mass,
-					Theta:       currStation.Theta,
-					FactionID:   currStation.FactionID,
+					ID:          st.ID,
+					SystemID:    st.SystemID,
+					StationName: st.StationName,
+					PosX:        st.PosX,
+					PosY:        st.PosY,
+					Texture:     st.Texture,
+					Radius:      st.Radius,
+					Mass:        st.Mass,
+					Theta:       st.Theta,
+					FactionID:   st.FactionID,
 					Lock:        sync.Mutex{},
 					// link solar system into station
 					CurrentSystem: &s,
 					Processes:     processes,
-					Faction:       u.Factions[currStation.FactionID.String()],
+					Faction:       u.Factions[st.FactionID.String()],
 				}
 
 				// initialize station
@@ -592,6 +554,126 @@ func LoadUniverse() (*universe.Universe, error) {
 	return &u, nil
 }
 
+// Takes a SQL star and converts it for loading into the running universe
+func loadStar(st sql.Star) *universe.Star {
+	// build star
+	star := universe.Star{
+		ID:       st.ID,
+		SystemID: st.SystemID,
+		PosX:     st.PosX,
+		PosY:     st.PosY,
+		Texture:  st.Texture,
+		Radius:   st.Radius,
+		Mass:     st.Mass,
+		Theta:    st.Theta,
+		Meta:     universe.Meta(st.Meta),
+	}
+
+	// get gas mining metadata
+	gm := GetGasMiningMetadata(star.Meta)
+
+	// load gas yields
+	linkGasMiningYields(gm)
+
+	// store gas mining metadata
+	star.GasMiningMetadata = gm
+
+	// return result
+	return &star
+}
+
+// Parses gas mining yields and links them to their gas item type
+func linkGasMiningYields(gm universe.GasMiningMetadata) {
+	// iterate over yields
+	for k, v := range gm.Yields {
+		// get gas item type
+		it := itemTypeCache[k]
+
+		// get gas item family
+		fam := itemFamilyCache[it.Family]
+
+		// cache on yield
+		v.ItemFamilyName = fam.FriendlyName
+		v.ItemFamilyID = fam.ID
+		v.ItemTypeName = it.Name
+		v.ItemTypeMeta = universe.Meta(it.Meta)
+
+		// store result
+		gm.Yields[k] = v
+	}
+}
+
+// Takes a SQL planet and converts it for loading into the running universe
+func loadPlanet(p sql.Planet) *universe.Planet {
+	// build planet
+	planet := universe.Planet{
+		ID:         p.ID,
+		SystemID:   p.SystemID,
+		PlanetName: p.PlanetName,
+		PosX:       p.PosX,
+		PosY:       p.PosY,
+		Texture:    p.Texture,
+		Radius:     p.Radius,
+		Mass:       p.Mass,
+		Theta:      p.Theta,
+		Meta:       universe.Meta(p.Meta),
+	}
+
+	// get gas mining metadata
+	gm := GetGasMiningMetadata(planet.Meta)
+
+	// load gas yields
+	linkGasMiningYields(gm)
+
+	// store gas mining metadata
+	planet.GasMiningMetadata = gm
+
+	// return result
+	return &planet
+}
+
+// Takes a SQL asteroid and converts it for loading into the running universe
+func loadAsteroid(a sql.Asteroid) *universe.Asteroid {
+	// get ore item type
+	oi := itemTypeCache[a.ItemTypeID.String()]
+
+	// get ore item family
+	of := itemFamilyCache[oi.Family]
+
+	// build asteroid
+	asteroid := universe.Asteroid{
+		ID:             a.ID,
+		SystemID:       a.SystemID,
+		Name:           a.Name,
+		Texture:        a.Texture,
+		Radius:         a.Radius,
+		Theta:          a.Theta,
+		PosX:           a.PosX,
+		PosY:           a.PosY,
+		Meta:           universe.Meta(a.Meta),
+		Yield:          a.Yield,
+		Mass:           a.Mass,
+		ItemTypeName:   oi.Name,
+		ItemTypeID:     oi.ID,
+		ItemFamilyName: of.FriendlyName,
+		ItemFamilyID:   oi.Family,
+		ItemTypeMeta:   universe.Meta(oi.Meta),
+		Lock:           sync.Mutex{},
+	}
+
+	// get gas mining metadata
+	gm := GetGasMiningMetadata(asteroid.Meta)
+
+	// load gas yields
+	linkGasMiningYields(gm)
+
+	// store gas mining metadata
+	asteroid.GasMiningMetadata = gm
+
+	// return result
+	return &asteroid
+}
+
 // Saves the current state of dynamic entities in the simulation to the database
 func saveUniverse(u *universe.Universe) {
 	// region counter
@@ -616,6 +698,18 @@ func saveUniverse(u *universe.Universe) {
 
 				if err != nil {
 					shared.TeeLog(fmt.Sprintf("Error saving ship: %v | %v", ship, err))
+				}
+			}
+
+			// get player outposts in system
+			outposts := s.CopyOutposts(false)
+
+			// save player outposts to database
+			for _, outpost := range outposts {
+				err := saveOutpost(outpost)
+
+				if err != nil {
+					shared.TeeLog(fmt.Sprintf("Error saving outpost: %v | %v", outpost, err))
 				}
 			}
 
@@ -1652,16 +1746,16 @@ func LoadShip(sh *sql.Ship, u *universe.Universe) (*universe.Ship, error) {
 }
 
 // Takes a SQL Outpost and converts it, along with additional loaded data from the database, into the engine type ready for insertion into the universe.
-func LoadOutpost(sh *sql.Outpost, u *universe.Universe) (*universe.Outpost, error) {
+func LoadOutpost(o *sql.Outpost, u *universe.Universe) (*universe.Outpost, error) {
 	// get template
-	temp, err := outpostTemplateSvc.GetOutpostTemplateByID(sh.OutpostTemplateId)
+	temp, err := outpostTemplateSvc.GetOutpostTemplateByID(o.OutpostTemplateId)
 
 	if err != nil {
 		return nil, err
 	}
 
 	// get owner info
-	owner, err := userSvc.GetUserByID((sh.UserID))
+	owner, err := userSvc.GetUserByID((o.UserID))
 
 	if err != nil {
 		return nil, err
@@ -1669,21 +1763,21 @@ func LoadOutpost(sh *sql.Outpost, u *universe.Universe) (*universe.Outpost, erro
 
 	// build in-memory outpost
 	es := universe.Outpost{
-		ID:            sh.ID,
-		UserID:        sh.UserID,
-		Created:       sh.Created,
-		OutpostName:   sh.OutpostName,
+		ID:            o.ID,
+		UserID:        o.UserID,
+		Created:       o.Created,
+		OutpostName:   o.OutpostName,
 		CharacterName: owner.CharacterName,
-		PosX:          sh.PosX,
-		PosY:          sh.PosY,
-		SystemID:      sh.SystemID,
-		Theta:         sh.Theta,
-		Shield:        sh.Shield,
-		Armor:         sh.Armor,
-		Hull:          sh.Hull,
-		Destroyed:     sh.Destroyed,
-		DestroyedAt:   sh.DestroyedAt,
-		Wallet:        sh.Wallet,
+		PosX:          o.PosX,
+		PosY:          o.PosY,
+		SystemID:      o.SystemID,
+		Theta:         o.Theta,
+		Shield:        o.Shield,
+		Armor:         o.Armor,
+		Hull:          o.Hull,
+		Destroyed:     o.Destroyed,
+		DestroyedAt:   o.DestroyedAt,
+		Wallet:        o.Wallet,
 		TemplateData: universe.OutpostTemplate{
 			ID:                  temp.ID,
 			Created:             temp.Created,
@@ -1711,10 +1805,10 @@ func LoadOutpost(sh *sql.Outpost, u *universe.Universe) (*universe.Outpost, erro
 	es.Faction = u.Factions[owner.CurrentFactionID.String()]
 
 	// get pointer to outpost
-	sp := &es
+	op := &es
 
 	// return pointer to ship
-	return sp, nil
+	return op, nil
 }
 
 // Hooks pointers needed if a schematic is currently running
@@ -1945,6 +2039,39 @@ func saveShip(ship *universe.Ship) error {
 	return err
 }
 
+// Updates an outpost in the database
+func saveOutpost(outpost *universe.Outpost) error {
+	// obtain lock on copy
+	outpost.Lock.Lock()
+	defer outpost.Lock.Unlock()
+
+	dbOutpost := sql.Outpost{
+		ID:                outpost.ID,
+		SystemID:          outpost.SystemID,
+		OutpostName:       outpost.OutpostName,
+		PosX:              outpost.PosX,
+		PosY:              outpost.PosY,
+		Theta:             outpost.Theta,
+		Shield:            outpost.Shield,
+		Armor:             outpost.Armor,
+		Hull:              outpost.Hull,
+		Wallet:            outpost.Wallet,
+		UserID:            outpost.UserID,
+		OutpostTemplateId: outpost.TemplateData.ID,
+		Created:           outpost.Created,
+		Destroyed:         outpost.Destroyed,
+		DestroyedAt:       outpost.DestroyedAt,
+	}
+
+	err := outpostSvc.UpdateOutpost(dbOutpost)
+
+	if err != nil {
+		shared.TeeLog(fmt.Sprintf("Error saving outpost: %v | %v", dbOutpost, err))
+	}
+
+	return err
+}
+
 // Moves an item to a different container in the database
 func saveItemLocation(itemID uuid.UUID, containerID uuid.UUID) error {
 	return itemSvc.SetContainerID(itemID, containerID)
@@ -2021,4 +2148,45 @@ func markSellOrderAsBought(sellOrder *universe.SellOrder) error {
 	err := sellOrderSvc.MarkSellOrderAsBought(*sql)
 
 	return err
+}
+
+// Fetches gas mining metadata
+func GetGasMiningMetadata(m universe.Meta) universe.GasMiningMetadata {
+	// empty metadata
+	d := universe.GasMiningMetadata{
+		Yields: make(map[string]universe.GasMiningYield),
+	}
+
+	// attempt to fetch from metadata
+	l, f := m.GetMap("gasmining")
+
+	if f {
+		// get yields from metadata
+		ys, f := l.GetMap("yields")
+
+		if f {
+			// iterate over yields
+			for k, iv := range ys {
+				// empty yield
+				y := universe.GasMiningYield{}
+
+				// read properties
+				for k, yv := range iv.(map[string]interface{}) {
+					if k == "yield" {
+						// store yield
+						y.Yield = int(yv.(float64))
+					} else if k == "itemTypeId" {
+						// store item type id
+						y.ItemTypeID = uuid.MustParse(yv.(string))
+					}
+				}
+
+				// store result
+				d.Yields[k] = y
+			}
+		}
+	}
+
+	// return result
+	return d
 }

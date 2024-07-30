@@ -55,7 +55,8 @@ type GameClient struct {
 }
 
 type PropertyCache struct {
-	ShipCaches []ShipPropertyCacheEntry
+	ShipCaches    []ShipPropertyCacheEntry
+	OutpostCaches []OutpostPropertyCacheEntry
 }
 
 type ShipPropertyCacheEntry struct {
@@ -67,6 +68,15 @@ type ShipPropertyCacheEntry struct {
 	DockedAtStationID   *uuid.UUID
 	DockedAtStationName *string
 	Wallet              float64
+}
+
+type OutpostPropertyCacheEntry struct {
+	Name            string
+	Texture         string
+	OutpostID       uuid.UUID
+	SolarSystemID   uuid.UUID
+	SolarSystemName string
+	Wallet          float64
 }
 
 // Initializes the internals of a GameClient

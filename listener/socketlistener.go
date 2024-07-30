@@ -483,6 +483,20 @@ func (l *SocketListener) HandleConnect(w http.ResponseWriter, r *http.Request) {
 
 			// handle message
 			l.handleClientConsumeOutpostKit(&client, &b)
+		} else if m.MessageType == msgRegistry.RenameOutpost {
+			// decode body as ClientRenameOutpostBody
+			b := models.ClientRenameOutpostBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientRenameOutpost(&client, &b)
+		} else if m.MessageType == msgRegistry.TransferOutpostCredits {
+			// decode body as ClientTransferOutpostCreditsBody
+			b := models.ClientTransferOutpostCreditsBody{}
+			json.Unmarshal([]byte(m.MessageBody), &b)
+
+			// handle message
+			l.handleClientTransferOutpostCredits(&client, &b)
 		}
 	}
 }
@@ -1476,6 +1490,29 @@ func (l *SocketListener) handleClientTransferCredits(client *shared.GameClient, 
 	}
 }
 
+func (l *SocketListener) handleClientTransferOutpostCredits(client *shared.GameClient, body *models.ClientTransferOutpostCreditsBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		shared.TeeLog(fmt.Sprintf("handleClientTransferOutpostCredits: unexpected id: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.SharedMessageRegistry
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.TransferOutpostCredits, true)
+	}
+}
+
 func (l *SocketListener) handleClientSellShipAsOrder(client *shared.GameClient, body *models.ClientSellShipAsOrderBody) {
 	// safety returns
 	if body == nil {
@@ -1542,6 +1579,29 @@ func (l *SocketListener) handleClientRenameShip(client *shared.GameClient, body 
 		// push event onto player's ship queue
 		data := *body
 		client.PushShipEvent(data, msgRegistry.RenameShip, true)
+	}
+}
+
+func (l *SocketListener) handleClientRenameOutpost(client *shared.GameClient, body *models.ClientRenameOutpostBody) {
+	// safety returns
+	if body == nil {
+		return
+	}
+
+	if client == nil {
+		return
+	}
+
+	// verify session id
+	if body.SessionID != *client.SID {
+		shared.TeeLog(fmt.Sprintf("handleClientRenameOutpost: unexpected id: %v vs %v", &body.SessionID, &client.SID))
+	} else {
+		// initialize services
+		msgRegistry := models.SharedMessageRegistry
+
+		// push event onto player's ship queue
+		data := *body
+		client.PushShipEvent(data, msgRegistry.RenameOutpost, true)
 	}
 }
 
@@ -1996,8 +2056,11 @@ func (l *SocketListener) addClient(c *shared.GameClient) {
 				continue
 			}
 
-			// lookup all ships belonging to this player
+			// find all ships belonging to this player
 			ownedShips := l.Engine.Universe.FindShipsByUserID(*c.UID, nil)
+
+			// find all outposts belonging to this player
+			ownedOutposts := l.Engine.Universe.FindOutpostsByUserID(*c.UID, nil)
 
 			// build property cache
 			pc := shared.PropertyCache{}
@@ -2008,14 +2071,13 @@ func (l *SocketListener) addClient(c *shared.GameClient) {
 
 				// copy guaranteed fields
 				z := shared.ShipPropertyCacheEntry{
-					Name:    osc.ShipName,
-					Texture: osc.Texture,
-					ShipID:  osc.ID,
-					Wallet:  osc.Wallet,
+					Name:            osc.ShipName,
+					Texture:         osc.Texture,
+					ShipID:          osc.ID,
+					Wallet:          osc.Wallet,
+					SolarSystemID:   osc.SystemID,
+					SolarSystemName: osc.SystemName,
 				}
-
-				z.SolarSystemID = osc.SystemID
-				z.SolarSystemName = osc.SystemName
 
 				// copy possibly null fields
 				if osc.DockedAtStationID != nil {
@@ -2027,7 +2089,26 @@ func (l *SocketListener) addClient(c *shared.GameClient) {
 					}
 				}
 
+				// store in cache
 				pc.ShipCaches = append(pc.ShipCaches, z)
+			}
+
+			for _, oo := range ownedOutposts {
+				// copy entry
+				osc := oo.CopyOutpost()
+
+				// copy guaranteed fields
+				z := shared.OutpostPropertyCacheEntry{
+					Name:            osc.OutpostName,
+					Texture:         osc.TemplateData.Texture,
+					OutpostID:       osc.ID,
+					Wallet:          osc.Wallet,
+					SolarSystemID:   osc.SystemID,
+					SolarSystemName: osc.SystemName,
+				}
+
+				// store in cache
+				pc.OutpostCaches = append(pc.OutpostCaches, z)
 			}
 
 			// update property cache

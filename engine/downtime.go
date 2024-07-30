@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"helia/shared"
 	"helia/sql"
 	"time"
@@ -71,6 +72,13 @@ func (d *DownTimeRunner) RunDownTimeTasks() {
 
 	// average player faction standings from members
 	err = d.averagePlayerFactionStandings()
+
+	if err != nil {
+		panic(err)
+	}
+
+	// respawn stranded NPCs
+	err = d.respawnStrandedNPCs()
 
 	if err != nil {
 		panic(err)
@@ -260,4 +268,41 @@ func (d *DownTimeRunner) disbandLeaderlessPlayerFactions() error {
 	}
 
 	return nil
+}
+
+// Detects NPCs that failed to respawn and respawns them
+func (d *DownTimeRunner) respawnStrandedNPCs() error {
+	shared.TeeLog("  - respawnStrandedNPCs()")
+
+	// get stranded NPCs
+	l, err := userSvc.GetStrandedNPCs()
+
+	if err != nil || l == nil {
+		panic("! unable to list stranded NPCs!")
+	}
+
+	// iterate over stranded NPCs
+	for _, m := range l {
+		// debug out
+		shared.TeeLog(fmt.Sprintf("Attempting to respawn stranded NPC %v", m.ID))
+
+		// get start
+		s, err := startSvc.GetStartByID(m.StartID)
+
+		if err != nil || s == nil {
+			panic("! unable to get start for stranded NPC!")
+		}
+
+		// respawn ship
+		u, err := CreateNoobShipForPlayer(s, m.ID)
+
+		if err != nil || u == nil {
+			panic("! unable to respawn stranded NPC!")
+		}
+
+		// debug out
+		shared.TeeLog(fmt.Sprintf("Stranded NPC %v respawned with %v", m.ID, u.CurrentShipID))
+	}
+
+	return err
 }

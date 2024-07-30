@@ -2687,7 +2687,7 @@ func (m *FittedSlot) activateAsHeatXfer() bool {
 		}
 
 		// reduce heat on target
-		actualXfer := c.siphonHeat(maxXferAmt, m)
+		actualXfer := c.siphonHeat(maxXferAmt)
 
 		// increase local heat
 		m.shipMountedOn.Heat += actualXfer
@@ -2841,7 +2841,7 @@ func (m *FittedSlot) activateAsEnergyXfer() bool {
 		}
 
 		// increase energy on target
-		actualXfer := c.receiveEnergy(maxXferAmt, m)
+		actualXfer := c.receiveEnergy(maxXferAmt)
 
 		// decrease local energy
 		m.shipMountedOn.Energy -= actualXfer
@@ -2995,7 +2995,7 @@ func (m *FittedSlot) activateAsShieldXfer() bool {
 		}
 
 		// increase shield on target
-		actualXfer := c.receiveShield(maxXferAmt, m)
+		actualXfer := c.receiveShield(maxXferAmt)
 
 		// decrease local shield
 		m.shipMountedOn.Shield -= actualXfer
@@ -3014,6 +3014,340 @@ func (m *FittedSlot) activateAsShieldXfer() bool {
 			ObjStartType: tgtReg.Ship,
 			ObjEndID:     m.TargetID,
 			ObjEndType:   m.TargetType,
+		}
+
+		gfxEffect.ObjStartHardpointOffset = [...]float64{
+			0,
+			0,
+		}
+
+		if m.SlotIndex != nil {
+			rack := m.Rack
+			idx := *m.SlotIndex
+
+			if rack == "A" {
+				gfxEffect.ObjStartHardpointOffset = m.shipMountedOn.TemplateData.SlotLayout.ASlots[idx].TexturePosition
+			}
+		}
+
+		// push to solar system list for next update
+		m.shipMountedOn.CurrentSystem.pushModuleEffects = append(m.shipMountedOn.CurrentSystem.pushModuleEffects, gfxEffect)
+	}
+
+	// module activates!
+	return true
+}
+
+func (m *FittedSlot) activateAsUtilityWisper() bool {
+	// verify this can harvest gas
+	canMineGas, _ := m.ItemTypeMeta.GetBool("can_mine_gas")
+
+	if !canMineGas {
+		return false
+	}
+
+	// get ship dummy
+	dA := m.shipMountedOn.ToPhysicsDummy()
+
+	// effective yields table
+	eyt := make(map[string]*float64)
+	itm := make(map[string]GasMiningYield)
+
+	// check stars
+	for _, s := range m.shipMountedOn.CurrentSystem.stars {
+		// null check
+		if s == nil {
+			continue
+		}
+
+		// get distance to player
+		dB := s.ToPhysicsDummy()
+		d := physics.Distance(dA, dB)
+
+		// radius check
+		if d < s.Radius/2 {
+			d = s.Radius / 2
+		}
+
+		// zero check
+		if d <= 0 {
+			d = Epsilon
+		}
+
+		// iterate over minable gases
+		for _, g := range s.GasMiningMetadata.Yields {
+			// create table entry if missing
+			if eyt[g.ItemTypeID.String()] == nil {
+				// zero for reference
+				z := 0.0
+
+				// create entry for gas
+				eyt[g.ItemTypeID.String()] = &z
+			}
+
+			// get current entry for gas
+			ey := *eyt[g.ItemTypeID.String()]
+
+			// add contribution
+			ey += (float64(g.Yield) / d)
+
+			// store result
+			eyt[g.ItemTypeID.String()] = &ey
+			itm[g.ItemTypeID.String()] = g
+		}
+	}
+
+	// check planets
+	for _, p := range m.shipMountedOn.CurrentSystem.planets {
+		// null check
+		if p == nil {
+			continue
+		}
+
+		// get distance to player
+		dB := p.ToPhysicsDummy()
+		d := physics.Distance(dA, dB)
+
+		// radius check
+		if d < p.Radius/2 {
+			d = p.Radius / 2
+		}
+
+		// zero check
+		if d <= 0 {
+			d = Epsilon
+		}
+
+		// iterate over minable gases
+		for _, g := range p.GasMiningMetadata.Yields {
+			// create table entry if missing
+			if eyt[g.ItemTypeID.String()] == nil {
+				// zero for reference
+				z := 0.0
+
+				// create entry for gas
+				eyt[g.ItemTypeID.String()] = &z
+			}
+
+			// get current entry for gas
+			ey := *eyt[g.ItemTypeID.String()]
+
+			// add contribution
+			ey += (float64(g.Yield) / d)
+
+			// store result
+			eyt[g.ItemTypeID.String()] = &ey
+			itm[g.ItemTypeID.String()] = g
+		}
+	}
+
+	// check asteroids
+	for _, a := range m.shipMountedOn.CurrentSystem.asteroids {
+		// null check
+		if a == nil {
+			continue
+		}
+
+		// get distance to player
+		dB := a.ToPhysicsDummy()
+		d := physics.Distance(dA, dB)
+
+		// radius check
+		if d < a.Radius/2 {
+			d = a.Radius / 2
+		}
+
+		// zero check
+		if d <= 0 {
+			d = Epsilon
+		}
+
+		// iterate over minable gases
+		for _, g := range a.GasMiningMetadata.Yields {
+			// create table entry if missing
+			if eyt[g.ItemTypeID.String()] == nil {
+				// zero for reference
+				z := 0.0
+
+				// create entry for gas
+				eyt[g.ItemTypeID.String()] = &z
+			}
+
+			// get current entry for gas
+			ey := *eyt[g.ItemTypeID.String()]
+
+			// add contribution
+			ey += (float64(g.Yield) / d)
+
+			// store result
+			eyt[g.ItemTypeID.String()] = &ey
+			itm[g.ItemTypeID.String()] = g
+		}
+	}
+
+	// get cooldown
+	cooldown, found := m.ItemMeta.GetFloat64("cooldown")
+
+	if found {
+		// apply cooldown time modifier
+		for k, v := range eyt {
+			// get yield
+			ey := *v
+
+			// multiply by cycle time
+			ey *= cooldown
+
+			// store result
+			eyt[k] = &ey
+		}
+	}
+
+	// get intake area
+	aperture, found := m.ItemMeta.GetFloat64("intake_area")
+
+	if found {
+		// apply intake area modifier
+		for k, v := range eyt {
+			// get yield
+			ey := *v
+
+			// multiply by square root of intake area
+			ey *= math.Sqrt(aperture)
+
+			// apply experience modifier
+			ey *= m.usageExperienceModifier
+
+			// store result
+			eyt[k] = &ey
+		}
+	} else {
+		// bound to epsilon
+		aperture = Epsilon
+	}
+
+	// flag as to whether anything was pulled
+	pulledSomething := false
+
+	// attempt to pull and store in cargo
+	for k, ey := range eyt {
+		// get yield meta
+		ym := itm[k]
+		eyy := *ey
+
+		// get type and volume gas being collected
+		unitType := ym.ItemTypeID
+		unitVol, _ := ym.ItemTypeMeta.GetFloat64("volume")
+
+		// get available space in cargo hold
+		free := m.shipMountedOn.GetRealCargoBayVolume(false) - m.shipMountedOn.TotalCargoBayVolumeUsed(false)
+
+		// calculate effective volume pulled
+		pulled := math.Min(aperture, eyy)
+
+		// make sure there is sufficient room to deposit the gas
+		if free-pulled >= 0 {
+			found := false
+
+			// quantity to be placed in cargo bay
+			q := int(pulled / unitVol)
+
+			// skip if none
+			if q <= 0 {
+				continue
+			}
+
+			// is there already packaged gas of this type in the hold?
+			for idx := range m.shipMountedOn.CargoBay.Items {
+				itm := m.shipMountedOn.CargoBay.Items[idx]
+
+				if itm.ItemTypeID == unitType && itm.IsPackaged && !itm.CoreDirty {
+					// increase the size of this stack
+					itm.Quantity += q
+
+					// escalate for saving
+					m.shipMountedOn.CurrentSystem.ChangedQuantityItems = append(m.shipMountedOn.CurrentSystem.ChangedQuantityItems, itm)
+
+					// mark as found
+					found = true
+					break
+				}
+			}
+
+			if !found && q > 0 {
+				// create a new stack of gas
+				nid := uuid.New()
+
+				newItem := Item{
+					ID:             nid,
+					ItemTypeID:     unitType,
+					Meta:           ym.ItemTypeMeta,
+					Created:        time.Now(),
+					CreatedBy:      &m.shipMountedOn.UserID,
+					CreatedReason:  fmt.Sprintf("Harvested %v", ym.ItemFamilyID),
+					ContainerID:    m.shipMountedOn.CargoBayContainerID,
+					Quantity:       q,
+					IsPackaged:     true,
+					Lock:           sync.Mutex{},
+					ItemTypeName:   ym.ItemTypeName,
+					ItemFamilyID:   ym.ItemFamilyID,
+					ItemFamilyName: ym.ItemFamilyName,
+					ItemTypeMeta:   ym.ItemTypeMeta,
+					CoreDirty:      true,
+				}
+
+				// escalate to core for saving in db
+				m.shipMountedOn.CurrentSystem.NewItems = append(m.shipMountedOn.CurrentSystem.NewItems, &newItem)
+
+				// add new item to cargo hold
+				m.shipMountedOn.CargoBay.Items = append(m.shipMountedOn.CargoBay.Items, &newItem)
+			}
+
+			// log harvest to console if player
+			if !m.shipMountedOn.IsNPC {
+				bm := 0
+
+				if m.shipMountedOn.BehaviourMode != nil {
+					bm = *m.shipMountedOn.BehaviourMode
+				}
+
+				shared.TeeLog(
+					fmt.Sprintf(
+						"[%v] %v (%v::%v) harvested %v %v",
+						m.shipMountedOn.CurrentSystem.SystemName,
+						m.shipMountedOn.CharacterName,
+						m.shipMountedOn.Texture,
+						bm,
+						q,
+						ym.ItemTypeName,
+					),
+				)
+			}
+
+			// we pulled something!
+			pulledSomething = true
+		} else {
+			return false
+		}
+	}
+
+	// check if nothing was pulled
+	if m.shipMountedOn.IsNPC && !pulledSomething {
+		// raise fault
+		m.shipMountedOn.aiNoGasPulledFault = true
+	}
+
+	// include visual effect if present
+	activationGfxEffect, found := m.ItemTypeMeta.GetString("activation_gfx_effect")
+
+	if found {
+		// get registry
+		tgtReg := models.SharedTargetTypeRegistry
+
+		// build effect trigger
+		gfxEffect := models.GlobalPushModuleEffectBody{
+			GfxEffect:    activationGfxEffect,
+			ObjStartID:   m.shipMountedOn.ID,
+			ObjStartType: tgtReg.Ship,
 		}
 
 		gfxEffect.ObjStartHardpointOffset = [...]float64{

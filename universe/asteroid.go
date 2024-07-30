@@ -18,6 +18,7 @@ type Asteroid struct {
 	PosX     float64
 	PosY     float64
 	Mass     float64
+	Meta     Meta
 	// secret, do not expose to player in global update
 	Yield float64
 	// secret (ore details)
@@ -27,11 +28,12 @@ type Asteroid struct {
 	ItemFamilyName string
 	ItemTypeMeta   Meta
 	// in-memory only
-	Transient bool
-	Lock      sync.Mutex
+	GasMiningMetadata GasMiningMetadata
+	Transient         bool
+	Lock              sync.Mutex
 }
 
-// Returns a new physics dummy structure representing this station
+// Returns a new physics dummy structure representing this asteroid
 func (a *Asteroid) ToPhysicsDummy() physics.Dummy {
 	return physics.Dummy{
 		VelX: 0,
@@ -43,29 +45,31 @@ func (a *Asteroid) ToPhysicsDummy() physics.Dummy {
 }
 
 // Returns a copy of the asteroid
-func (s *Asteroid) CopyAsteroid() Asteroid {
-	s.Lock.Lock()
-	defer s.Lock.Unlock()
+func (a *Asteroid) CopyAsteroid() Asteroid {
+	a.Lock.Lock()
+	defer a.Lock.Unlock()
 
 	return Asteroid{
-		ID:       s.ID,
-		SystemID: s.SystemID,
-		Name:     s.Name,
-		Texture:  s.Texture,
-		Radius:   s.Radius,
-		Theta:    s.Theta,
-		PosX:     s.PosX,
-		PosY:     s.PosY,
-		Mass:     s.Mass,
+		ID:       a.ID,
+		SystemID: a.SystemID,
+		Name:     a.Name,
+		Texture:  a.Texture,
+		Radius:   a.Radius,
+		Theta:    a.Theta,
+		PosX:     a.PosX,
+		PosY:     a.PosY,
+		Mass:     a.Mass,
+		Meta:     a.Meta,
 		// secret, do not expose to player in global update
-		Yield: s.Yield,
+		Yield: a.Yield,
 		// secret (ore details)
-		ItemTypeID:     s.ItemTypeID,
-		ItemTypeName:   s.ItemTypeName,
-		ItemFamilyID:   s.ItemFamilyID,
-		ItemFamilyName: s.ItemFamilyName,
-		ItemTypeMeta:   s.ItemTypeMeta,
+		ItemTypeID:     a.ItemTypeID,
+		ItemTypeName:   a.ItemTypeName,
+		ItemFamilyID:   a.ItemFamilyID,
+		ItemFamilyName: a.ItemFamilyName,
+		ItemTypeMeta:   a.ItemTypeMeta,
 		// in-memory only
-		Lock: sync.Mutex{},
+		GasMiningMetadata: a.GasMiningMetadata,
+		Lock:              sync.Mutex{},
 	}
 }

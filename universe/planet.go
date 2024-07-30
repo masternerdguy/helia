@@ -1,6 +1,10 @@
 package universe
 
-import "github.com/google/uuid"
+import (
+	"helia/physics"
+
+	"github.com/google/uuid"
+)
 
 // Structure representing a planet
 type Planet struct {
@@ -13,18 +17,35 @@ type Planet struct {
 	Radius     float64
 	Mass       float64
 	Theta      float64
+	Meta       Meta
+	// in-memory only
+	GasMiningMetadata GasMiningMetadata
 }
 
 // Returns a copy of the planet
-func (s *Planet) CopyPlanet() Planet {
+func (p *Planet) CopyPlanet() Planet {
 	return Planet{
-		ID:       s.ID,
-		PosX:     s.PosX,
-		PosY:     s.PosY,
-		SystemID: s.SystemID,
-		Texture:  s.Texture,
-		Theta:    s.Theta,
-		Radius:   s.Radius,
-		Mass:     s.Mass,
+		ID:       p.ID,
+		PosX:     p.PosX,
+		PosY:     p.PosY,
+		SystemID: p.SystemID,
+		Texture:  p.Texture,
+		Theta:    p.Theta,
+		Radius:   p.Radius,
+		Mass:     p.Mass,
+		Meta:     p.Meta,
+		// in-memory only
+		GasMiningMetadata: p.GasMiningMetadata,
+	}
+}
+
+// Returns a new physics dummy structure representing this planet
+func (p *Planet) ToPhysicsDummy() physics.Dummy {
+	return physics.Dummy{
+		VelX: 0,
+		VelY: 0,
+		PosX: p.PosX,
+		PosY: p.PosY,
+		Mass: p.Mass,
 	}
 }
