@@ -284,6 +284,21 @@ func LoadUniverse() (*universe.Universe, error) {
 				s.AddPlanet(planet)
 			}
 
+			// load artifacts
+			artifacts, err := artifactSvc.GetArtifactsBySolarSystem(s.ID)
+
+			if err != nil {
+				return nil, err
+			}
+
+			for _, p := range artifacts {
+				// load artifact
+				artifact := loadArtifact(p)
+
+				// store in universe
+				s.AddArtifact(artifact)
+			}
+
 			// load asteroids
 			asteroids, err := asteroidSvc.GetAsteroidsBySolarSystem(s.ID)
 
@@ -627,6 +642,26 @@ func loadPlanet(p sql.Planet) *universe.Planet {
 
 	// store gas mining metadata
 	planet.GasMiningMetadata = gm
+
+	// return result
+	return &planet
+}
+
+// Takes a SQL artifact and converts it for loading into the running universe
+func loadArtifact(p sql.Artifact) *universe.Artifact {
+	// build artifact
+	planet := universe.Artifact{
+		ID:           p.ID,
+		SystemID:     p.SystemID,
+		ArtifactName: p.ArtifactName,
+		PosX:         p.PosX,
+		PosY:         p.PosY,
+		Texture:      p.Texture,
+		Radius:       p.Radius,
+		Mass:         p.Mass,
+		Theta:        p.Theta,
+		Meta:         universe.Meta(p.Meta),
+	}
 
 	// return result
 	return &planet

@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Structure representing a artifact
+// Structure representing an artifact
 type Artifact struct {
 	ID           uuid.UUID
 	SystemID     uuid.UUID
