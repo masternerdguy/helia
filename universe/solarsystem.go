@@ -3082,6 +3082,21 @@ func (s *SolarSystem) sendClientUpdates() {
 			})
 		}
 
+		// artifacts
+		for _, d := range s.artifacts {
+			gu.Artifacts = append(gu.Artifacts, models.GlobalArtifactInfo{
+				ID:           d.ID,
+				SystemID:     d.SystemID,
+				ArtifactName: d.ArtifactName,
+				PosX:         d.PosX,
+				PosY:         d.PosY,
+				Texture:      d.Texture,
+				Radius:       d.Radius,
+				Mass:         d.Mass,
+				Theta:        d.Theta,
+			})
+		}
+
 		// asteroids
 		for _, d := range s.asteroids {
 			gu.Asteroids = append(gu.Asteroids, models.GlobalAsteroidInfo{
