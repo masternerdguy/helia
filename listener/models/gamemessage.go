@@ -96,6 +96,7 @@ type TargetTypeRegistry struct {
 	Asteroid int
 	Wreck    int
 	Outpost  int
+	Artifact int
 }
 
 // Returns a MessageRegistry with correct enum values
@@ -187,6 +188,7 @@ func NewTargetTypeRegistry() *TargetTypeRegistry {
 		Asteroid: 6,
 		Wreck:    7,
 		Outpost:  8,
+		Artifact: 9,
 	}
 }
 

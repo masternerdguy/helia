@@ -126,6 +126,10 @@ export class OverviewWindow extends GDIWindow {
       (a.planetName ?? '').localeCompare(b.planetName ?? ''),
     );
 
+    const sortedArtifacts = player.currentSystem.artifacts.sort((a, b) =>
+      (a.artifactName ?? '').localeCompare(b.artifactName ?? ''),
+    );
+
     const sortedStations = player.currentSystem.stations.sort((a, b) =>
       (a.stationName ?? '').localeCompare(b.stationName ?? ''),
     );
@@ -179,6 +183,28 @@ export class OverviewWindow extends GDIWindow {
         listString: () => {
           return `${fixedString('PLANET', 9)}${fixedString(
             i.planetName,
+            32,
+          )} ${fixedString(od, 8)}`;
+        },
+        listColor: () => GDIStyle.listTextColor,
+      });
+    }
+
+    // include artifacts
+    for (const i of sortedArtifacts) {
+      const od = overviewDistance(
+        player.currentShip.x,
+        player.currentShip.y,
+        i.x,
+        i.y,
+      );
+
+      objects.push({
+        object: i,
+        type: TargetType.Artifact,
+        listString: () => {
+          return `${fixedString('ARTIFACT', 9)}${fixedString(
+            i.artifactName,
             32,
           )} ${fixedString(od, 8)}`;
         },

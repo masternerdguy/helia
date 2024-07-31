@@ -63,6 +63,7 @@ import { ServerActionReportsPage } from './wsModels/bodies/viewActionReportsPage
 import * as ClipboardJS from 'clipboard';
 import { ServerDockedUsersUpdate } from './wsModels/bodies/dockedUsersUpdate';
 import { Outpost } from './engineModels/outpost';
+import { Artifact } from './engineModels/artifact';
 
 class EngineSack {
   constructor() {}
@@ -497,6 +498,10 @@ function handleGlobalUpdate(d: GameMessage) {
       msg.planets = [];
     }
 
+    if (!msg.artifacts || msg.artifacts == null) {
+      msg.artifacts = [];
+    }
+
     if (!msg.stations || msg.stations == null) {
       msg.stations = [];
     }
@@ -672,6 +677,29 @@ function handleGlobalUpdate(d: GameMessage) {
       if (!match) {
         // add planet to memory
         engineSack.player.currentSystem.planets.push(new Planet(p));
+      }
+    }
+
+    // update artifacts
+    for (const p of msg.artifacts) {
+      let match = false;
+
+      // find artifact in memory
+      for (const sm of engineSack.player.currentSystem.artifacts) {
+        if (p.id === sm.id) {
+          match = true;
+
+          // sync artifact in memory
+          sm.sync(p);
+
+          // exit loop
+          break;
+        }
+      }
+
+      if (!match) {
+        // add artifact to memory
+        engineSack.player.currentSystem.artifacts.push(new Artifact(p));
       }
     }
 
@@ -1515,6 +1543,11 @@ function clientRender() {
   // draw planets
   for (const p of engineSack.player.currentSystem.planets) {
     p.render(engineSack.ctx, engineSack.camera);
+  }
+
+  // draw artifacts
+  for (const af of engineSack.player.currentSystem.artifacts) {
+    af.render(engineSack.ctx, engineSack.camera);
   }
 
   // draw jumpholes
