@@ -731,23 +731,23 @@ func dropArtifacts(u *universe.Universe) {
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
 			// roll to skip
-			rts := rand.Float64() * rand.Float64() * rand.Float64()
-			rqq := 0.75
+			rts := rand.Float64() * rand.Float64()
+			rqq := 0.55
 
 			if s.HoldingFactionID == uuid.MustParse("bdeffd9a-3cab-408c-9cd7-32fce1124f7a") {
-				rqq -= 0.5
+				rqq -= 0.09
 			}
 
 			if s.HoldingFactionID == uuid.MustParse("a0152cbb-8a78-45a4-ae9b-2ad2b60b583b") {
-				rqq -= 0.8
+				rqq -= 0.18
 			}
 
 			if s.HoldingFactionID == uuid.MustParse("27a53dfc-a321-4c12-bf7c-bb177955c95b") {
-				rqq += 0.5
+				rqq += 0.09
 			}
 
 			if s.HoldingFactionID == uuid.MustParse("5db2bec7-37c3-4f1c-ab88-21024c12d639") {
-				rqq += 0.8
+				rqq += 0.18
 			}
 
 			if rts < rqq {
