@@ -763,7 +763,7 @@ func dropArtifacts(u *universe.Universe) {
 			stations := s.CopyStations(true)
 
 			// build artifact for the system
-			stat := sql.Artifact{
+			art := sql.Artifact{
 				ID:           uuid.New(),
 				SystemID:     s.ID,
 				ArtifactName: fmt.Sprintf("Original Relay %v", randomPlaceholderName()),
@@ -773,20 +773,31 @@ func dropArtifacts(u *universe.Universe) {
 				Theta:        float64(physics.RandInRange(0, 360)),
 			}
 
+			// get star position
+			sx := 0.0
+			sy := 0.0
+
+			for _, q := range stars {
+				sx = q.PosX
+				sy = q.PosY
+
+				break
+			}
+
 			// determine position
 			for {
 				// generate random position in belt
-				dW := float64(physics.RandInRange(10000, 100000))
+				dW := float64(physics.RandInRange(1000, 10000))
 				mag := dW
 				the := 2.0 * math.Pi * rand.Float64()
 
-				stat.PosX = (mag * math.Cos(the))
-				stat.PosY = (mag * math.Sin(the))
+				art.PosX = (mag * math.Cos(the)) + sx
+				art.PosY = (mag * math.Sin(the)) + sy
 
 				// check for overlap with forbidden objects
 				sB := physics.Dummy{
-					PosX: stat.PosX,
-					PosY: stat.PosY,
+					PosX: art.PosX,
+					PosY: art.PosY,
 				}
 
 				for _, v := range stars {
@@ -797,7 +808,7 @@ func dropArtifacts(u *universe.Universe) {
 
 					dst := physics.Distance(sA, sB)
 
-					if dst < (1+rand.Float64())*(v.Radius+stat.Radius) {
+					if dst < (1+rand.Float64())*(v.Radius+art.Radius) {
 						// not safe, try again
 						continue
 					}
@@ -811,7 +822,7 @@ func dropArtifacts(u *universe.Universe) {
 
 					dst := physics.Distance(sA, sB)
 
-					if dst < (1+rand.Float64())*(v.Radius+stat.Radius) {
+					if dst < (1+rand.Float64())*(v.Radius+art.Radius) {
 						// not safe, try again
 						continue
 					}
@@ -825,7 +836,7 @@ func dropArtifacts(u *universe.Universe) {
 
 					dst := physics.Distance(sA, sB)
 
-					if dst < (1+rand.Float64())*(v.Radius+stat.Radius) {
+					if dst < (1+rand.Float64())*(v.Radius+art.Radius) {
 						// not safe, try again
 						continue
 					}
@@ -839,7 +850,7 @@ func dropArtifacts(u *universe.Universe) {
 
 					dst := physics.Distance(sA, sB)
 
-					if dst < (1+rand.Float64())*(v.Radius+stat.Radius) {
+					if dst < (1+rand.Float64())*(v.Radius+art.Radius) {
 						// not safe, try again
 						continue
 					}
@@ -853,7 +864,7 @@ func dropArtifacts(u *universe.Universe) {
 
 					dst := physics.Distance(sA, sB)
 
-					if dst < (1+rand.Float64())*(v.Radius+stat.Radius) {
+					if dst < (1+rand.Float64())*(v.Radius+art.Radius) {
 						// not safe, try again
 						continue
 					}
@@ -863,7 +874,7 @@ func dropArtifacts(u *universe.Universe) {
 				break
 			}
 
-			toSave = append(toSave, stat)
+			toSave = append(toSave, art)
 		}
 	}
 

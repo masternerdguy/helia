@@ -116,7 +116,7 @@ func (s ArtifactService) NewArtifactWorldFiller(r *Artifact) error {
 				(
 					id, universe_systemid, artifactname, pos_x, pos_y, texture, radius, mass, theta
 				)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
 			`
 
 	q, err := db.Query(sql, r.ID, r.SystemID, r.ArtifactName, r.PosX, r.PosY, r.Texture, r.Radius, r.Mass, r.Theta)
