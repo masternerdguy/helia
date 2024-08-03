@@ -32,6 +32,7 @@
               "src/assets/asteroids",
               "src/assets/missiles",
               "src/assets/wrecks",
+              "src/assets/artifacts",
               "src/assets/fonts",
               "src/assets/site"
             ],
