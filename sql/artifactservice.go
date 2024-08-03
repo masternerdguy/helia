@@ -100,3 +100,32 @@ func (s ArtifactService) GetArtifactsBySolarSystem(systemID uuid.UUID) ([]Artifa
 
 	return artifacts, err
 }
+
+// Creates a new artifact in the database (for worldfiller)
+func (s ArtifactService) NewArtifactWorldFiller(r *Artifact) error {
+	// get db handle
+	db, err := connect()
+
+	if err != nil {
+		return err
+	}
+
+	// insert artifact
+	sql := `
+				INSERT INTO public.universe_artifacts
+				(
+					id, universe_systemid, artifactname, pos_x, pos_y, texture, radius, mass, theta
+				)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
+			`
+
+	q, err := db.Query(sql, r.ID, r.SystemID, r.ArtifactName, r.PosX, r.PosY, r.Texture, r.Radius, r.Mass, r.Theta)
+
+	if err != nil {
+		return err
+	}
+
+	defer q.Close()
+
+	return nil
+}
