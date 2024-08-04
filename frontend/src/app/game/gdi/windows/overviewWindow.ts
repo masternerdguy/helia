@@ -4,7 +4,6 @@ import { FontSize, GDIStyle } from '../base/gdiStyle';
 import { Player, TargetType } from '../../engineModels/player';
 import { GDITabPane } from '../components/gdiTabPane';
 import { Ship } from '../../engineModels/ship';
-import { GetPlayerFactionRelationshipCacheEntry } from '../../wsModels/shared';
 
 export class OverviewWindow extends GDIWindow {
   tabs = new GDITabPane();
