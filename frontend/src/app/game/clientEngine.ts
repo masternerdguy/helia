@@ -150,16 +150,6 @@ export function clientStart(
   // initialize backplate
   engineSack.backplateRenderer = new Backplate(backCanvas);
 
-  // hook canvas make for planet generator
-  (window as any).main_pureimage_shim = {
-    make: (w: number, h: number) => {
-      return new OffscreenCanvas(
-        w,
-        h,
-      );
-    }
-  };
-
   // initialize window manager
   engineSack.windowManager = new WindowManager();
   engineSack.windowManager.preinit(gameCanvas.height, (w: GDIWindow) => {
