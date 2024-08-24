@@ -1,9 +1,11 @@
 import { Camera } from './camera';
 import { WSPlanet } from '../wsModels/entities/wsPlanet';
+import '../procedural/planet/main.js';
 
 export class Planet extends WSPlanet {
   texture2d: HTMLImageElement;
   isTargeted: boolean;
+  proceduralBag: any;
 
   constructor(ws: WSPlanet) {
     super();
@@ -18,6 +20,12 @@ export class Planet extends WSPlanet {
     this.mass = ws.mass;
     this.radius = ws.radius;
     this.theta = ws.theta;
+
+    // hook procedural generation functions
+    this.proceduralBag = (window as any).SteffTek_planet_js;
+
+    // debug out
+    console.log(this.proceduralBag);
   }
 
   render(ctx: any, camera: Camera) {
