@@ -1,3 +1,8 @@
+/*
+ * derived from https://github.com/SteffTek/planet.js version 1.0.5
+ * Apache-2.0 license
+ */
+
 !(function () {
   var t = {
       121: function (t, e, n) {
@@ -1218,7 +1223,7 @@
           let D = i(f, h, o, r),
             P = null;
           n.add_detail && (P = u(f, h, r));
-          var A = l.make(f, h),
+          var A = window.main_pureimage_shim.make(f, h),
             O = A.getContext("2d");
           if (C && M > S) {
             let t = M - S,
@@ -1377,7 +1382,7 @@
           let y = i(c, f, o, r),
             b = null;
           n.add_detail && (b = u(c, f, r));
-          var S = l.make(c, f),
+          var S = window.main_pureimage_shim.make(c, f),
             M = S.getContext("2d");
           if (w && p > v) {
             let t = p - v;
@@ -1433,7 +1438,7 @@
             y = e.atmosphere,
             b = null;
           n.add_detail && (b = u(o, a, r));
-          var S = l.make(o, a),
+          var S = window.main_pureimage_shim.make(o, a),
             M = S.getContext("2d");
           if (y && h > f) {
             let t = h - f,
@@ -1539,7 +1544,7 @@
         function O(t, e) {
           let n = t.width,
             r = t.height;
-          var o = l.make(n, r),
+          var o = window.main_pureimage_shim.make(n, r),
             a = o.getContext("2d"),
             i = (e * Math.PI) / 180;
           return (
@@ -1552,7 +1557,7 @@
             o
           );
         }
-        (1==1),
+        1 == 1,
           window.SteffTek_planet_js ||
             ((window.SteffTek_planet_js = {}),
             (window.SteffTek_planet_js.asyncGenerateGasGiant = j),
