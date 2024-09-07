@@ -64,6 +64,7 @@ import * as ClipboardJS from 'clipboard';
 import { ServerDockedUsersUpdate } from './wsModels/bodies/dockedUsersUpdate';
 import { Outpost } from './engineModels/outpost';
 import { Artifact } from './engineModels/artifact';
+import { Jukebox } from './audio/jukebox';
 
 class EngineSack {
   constructor() {}
@@ -81,6 +82,9 @@ class EngineSack {
   // backplate graphics
   backplateCanvas: HTMLCanvasElement;
   backplateRenderer: Backplate;
+
+  // jukebox
+  jukebox: Jukebox;
 
   // ui elements
   pushErrorWindow: PushErrorWindow;
@@ -149,6 +153,10 @@ export function clientStart(
 
   // initialize backplate
   engineSack.backplateRenderer = new Backplate(backCanvas);
+
+  // initialize jukebox
+  engineSack.jukebox = new Jukebox();
+  engineSack.jukebox.begin();
 
   // initialize window manager
   engineSack.windowManager = new WindowManager();
