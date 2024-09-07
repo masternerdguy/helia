@@ -34,6 +34,7 @@
               "src/assets/wrecks",
               "src/assets/artifacts",
               "src/assets/fonts",
+              "src/assets/music",
               "src/assets/site"
             ],
             "styles": [
