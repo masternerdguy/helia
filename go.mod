@@ -1,13 +1,13 @@
 module helia
 
-go 1.22
+go 1.23
 
 require (
 	github.com/Azure/azure-storage-blob-go v0.15.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/lib/pq v1.10.9
-	github.com/sendgrid/sendgrid-go v3.15.0+incompatible
+	github.com/sendgrid/sendgrid-go v3.16.0+incompatible
 )
 
 require (
@@ -15,7 +15,7 @@ require (
 	github.com/mattn/go-ieproxy v0.0.12 // indirect
 	github.com/sendgrid/rest v2.6.9+incompatible // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
-	golang.org/x/net v0.28.0 // indirect
-	golang.org/x/sys v0.24.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/net v0.29.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
+	golang.org/x/text v0.18.0 // indirect
 )
