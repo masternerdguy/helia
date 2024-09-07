@@ -10,34 +10,37 @@
     </div>
     <div style="background: maroon; color: wheat;">
         <p style="font-weight: 300; font-size: 12px;">
-            Helia is designed to work with Chromium-based browsers such as Chrome, Opera, and modern Edge. You may experience issues using
-            non Chromium-based browsers. Scheduled restarts occur at noon EDT. The server takes ~60 minutes to restart - if you can't log 
+            Helia is designed to work with Chromium-based browsers such as Chrome, Opera, and modern Edge. You may
+            experience issues using
+            non Chromium-based browsers. Scheduled restarts occur at noon EDT. The server takes ~60 minutes to restart -
+            if you can't log
             in now, try again later.
         </p>
     </div>
     <form class="form">
         <div>
             <label for="emailaddress">Email Address</label>
-            <input type="emailaddress" class="form-control" placeholder="Enter your email address..." id="emailaddress" #emailaddress>
+            <input type="emailaddress" class="form-control" placeholder="Enter your email address..." id="emailaddress"
+                #emailaddress>
         </div>
         <div>
             <label for="password">Password</label>
             <input type="password" class="form-control" placeholder="Enter your password..." id="password" #password>
         </div>
-        <br/>
+        <br />
         <div>
             <strong>
                 <a style="color: aquamarine;" href="/#/auth/forgot">Forgot Password</a>
             </strong>
         </div>
-        <br/>
+        <br />
         <button type="button" class="btn btn-primary center" (click)="login()">Submit</button>
         <div>
-            <br/>
-                <p class="info-text">
-                    music by zakè (<a style="color: aquamarine;" href="zakedrone.com">zakedrone.com</a>) - the ambient drone master.
-                </p>
-            <br/>
+            <br />
+            <p class="info-text">
+                music by <strong>zakè</strong> (<a style="color: aquamarine;" href="zakedrone.com">zakedrone.com</a>) -
+                the ambient drone master.
+            </p>
             <p class="info-text">
                 Once you've logged in, you can resize your browser to adjust the game window, and enter fullscreen
                 using your browser's native facilities (on Chrome, this is usually F11).
