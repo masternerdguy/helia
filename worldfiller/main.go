@@ -61,10 +61,11 @@ func main() {
 		injectProcess(universe, e, i)
 	}*/
 
-	fillGasMiningYields(universe)
+	//fillGasMiningYields(universe)
 
 	// dropAsteroids(universe)
 	//dropSanctuaryStations(universe)
+	dropArtifacts(universe)
 
 	//stubModuleSchematicsAndProcesses()
 	//loadNewWares()
@@ -716,6 +717,173 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 
 	for _, o := range toSave {
 		err := stationProcessSvc.NewStationProcessWorldMaker(&o)
+
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+// Creates ancient signal relays
+func dropArtifacts(u *universe.Universe) {
+	toSave := make([]sql.Artifact, 0)
+
+	for _, r := range u.Regions {
+		for _, s := range r.Systems {
+			// roll to skip
+			rts := rand.Float64() * rand.Float64()
+			rqq := 0.55
+
+			if s.HoldingFactionID == uuid.MustParse("bdeffd9a-3cab-408c-9cd7-32fce1124f7a") {
+				rqq -= 0.09
+			}
+
+			if s.HoldingFactionID == uuid.MustParse("a0152cbb-8a78-45a4-ae9b-2ad2b60b583b") {
+				rqq -= 0.18
+			}
+
+			if s.HoldingFactionID == uuid.MustParse("27a53dfc-a321-4c12-bf7c-bb177955c95b") {
+				rqq += 0.09
+			}
+
+			if s.HoldingFactionID == uuid.MustParse("5db2bec7-37c3-4f1c-ab88-21024c12d639") {
+				rqq += 0.18
+			}
+
+			if rts < rqq {
+				continue
+			}
+
+			rand.Seed(int64(calculateSystemSeed(s)))
+
+			stars := s.CopyStars(true)
+			planets := s.CopyPlanets(true)
+			jumpholes := s.CopyJumpholes(true)
+			asteroids := s.CopyAsteroids(true)
+			stations := s.CopyStations(true)
+
+			// build artifact for the system
+			art := sql.Artifact{
+				ID:           uuid.New(),
+				SystemID:     s.ID,
+				ArtifactName: fmt.Sprintf("Original Relay %v", randomPlaceholderName()),
+				Texture:      "signalrelay",
+				Radius:       775 - (75 * rand.Float64()),
+				Mass:         89763 - (125 * rand.Float64()),
+				Theta:        float64(physics.RandInRange(0, 360)),
+			}
+
+			// get star position
+			sx := 0.0
+			sy := 0.0
+
+			for _, q := range stars {
+				sx = q.PosX
+				sy = q.PosY
+
+				break
+			}
+
+			// determine position
+			for {
+				// generate random position in belt
+				dW := float64(physics.RandInRange(1000, 10000))
+				mag := dW
+				the := 2.0 * math.Pi * rand.Float64()
+
+				art.PosX = (mag * math.Cos(the)) + sx
+				art.PosY = (mag * math.Sin(the)) + sy
+
+				// check for overlap with forbidden objects
+				sB := physics.Dummy{
+					PosX: art.PosX,
+					PosY: art.PosY,
+				}
+
+				for _, v := range stars {
+					sA := physics.Dummy{
+						PosX: v.PosX,
+						PosY: v.PosY,
+					}
+
+					dst := physics.Distance(sA, sB)
+
+					if dst < (1+rand.Float64())*(v.Radius+art.Radius) {
+						// not safe, try again
+						continue
+					}
+				}
+
+				for _, v := range planets {
+					sA := physics.Dummy{
+						PosX: v.PosX,
+						PosY: v.PosY,
+					}
+
+					dst := physics.Distance(sA, sB)
+
+					if dst < (1+rand.Float64())*(v.Radius+art.Radius) {
+						// not safe, try again
+						continue
+					}
+				}
+
+				for _, v := range stations {
+					sA := physics.Dummy{
+						PosX: v.PosX,
+						PosY: v.PosY,
+					}
+
+					dst := physics.Distance(sA, sB)
+
+					if dst < (1+rand.Float64())*(v.Radius+art.Radius) {
+						// not safe, try again
+						continue
+					}
+				}
+
+				for _, v := range jumpholes {
+					sA := physics.Dummy{
+						PosX: v.PosX,
+						PosY: v.PosY,
+					}
+
+					dst := physics.Distance(sA, sB)
+
+					if dst < (1+rand.Float64())*(v.Radius+art.Radius) {
+						// not safe, try again
+						continue
+					}
+				}
+
+				for _, v := range asteroids {
+					sA := physics.Dummy{
+						PosX: v.PosX,
+						PosY: v.PosY,
+					}
+
+					dst := physics.Distance(sA, sB)
+
+					if dst < (1+rand.Float64())*(v.Radius+art.Radius) {
+						// not safe, try again
+						continue
+					}
+				}
+
+				// safe to store artifact
+				break
+			}
+
+			toSave = append(toSave, art)
+		}
+	}
+
+	// get service
+	artifactSvc := sql.GetArtifactService()
+
+	// save new artifacts
+	for _, st := range toSave {
+		err := artifactSvc.NewArtifactWorldFiller(&st)
 
 		if err != nil {
 			panic(err)
@@ -1449,4 +1617,28 @@ func fillGasMiningYields(u *universe.Universe) {
 			}
 		}
 	}
+}
+
+func randomPlaceholderName() string {
+	letters := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	numbers := []rune("1234567890")
+
+	acc := ""
+
+	firstLength := physics.RandInRange(1, 5)
+	secondLength := physics.RandInRange(1, 5)
+
+	for i := 0; i < firstLength; i++ {
+		idx := physics.RandInRange(0, len(letters))
+		acc = fmt.Sprintf("%v%v", acc, string(letters[idx]))
+	}
+
+	acc = fmt.Sprintf("%v%v", acc, "-")
+
+	for i := 0; i < secondLength; i++ {
+		idx := physics.RandInRange(0, len(numbers))
+		acc = fmt.Sprintf("%v%v", acc, string(numbers[idx]))
+	}
+
+	return acc
 }

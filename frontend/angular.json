@@ -32,7 +32,9 @@
               "src/assets/asteroids",
               "src/assets/missiles",
               "src/assets/wrecks",
+              "src/assets/artifacts",
               "src/assets/fonts",
+              "src/assets/music",
               "src/assets/site"
             ],
             "styles": [
@@ -120,30 +122,6 @@
           "configurations": {
             "production": {
               "buildTarget": "frontend:build:production"
-            }
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/test.ts",
-            "polyfills": "src/polyfills.ts",
-            "tsConfig": "tsconfig.spec.json",
-            "karmaConfig": "karma.conf.js",
-            "assets": ["src/favicon.ico", "src/assets"],
-            "styles": ["src/styles.css"],
-            "scripts": []
-          }
-        },
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "frontend:serve"
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "frontend:serve:production"
             }
           }
         }

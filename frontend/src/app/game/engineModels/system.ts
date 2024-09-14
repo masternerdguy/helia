@@ -12,6 +12,7 @@ import { Faction } from './faction';
 import { Missile } from './missile';
 import { Wreck } from './wreck';
 import { Outpost } from './outpost';
+import { Artifact } from './artifact';
 
 export class System extends WSSystem {
   constructor(ws: WSSystem) {
@@ -26,6 +27,7 @@ export class System extends WSSystem {
     this.ships = [];
     this.stars = [];
     this.planets = [];
+    this.artifacts = [];
     this.jumpholes = [];
     this.stations = [];
     this.outposts = [];
@@ -39,6 +41,7 @@ export class System extends WSSystem {
   ships: Ship[];
   stars: Star[];
   planets: Planet[];
+  artifacts: Artifact[];
   jumpholes: Jumphole[];
   stations: Station[];
   outposts: Outpost[];

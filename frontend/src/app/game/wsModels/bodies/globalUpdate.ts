@@ -11,12 +11,14 @@ import { WSMissile } from '../entities/wsMissile';
 import { WSSystemChatMessage } from '../entities/wsSystemChatMessage';
 import { WSWreck } from '../entities/wsWreck';
 import { WSOutpost } from '../entities/wsOutpost';
+import { WSArtifact } from '../entities/wsArtifact';
 
 export class ServerGlobalUpdateBody {
   currentSystemInfo: WSSystem;
   ships: WSShip[];
   stars: WSStar[];
   planets: WSPlanet[];
+  artifacts: WSArtifact[];
   jumpholes: WSJumphole[];
   stations: WSStation[];
   outposts: WSOutpost[];

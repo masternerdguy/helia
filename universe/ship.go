@@ -3143,6 +3143,19 @@ func (s *Ship) doAutopilotGoto() {
 		tX = tgt.PosX
 		tY = tgt.PosY
 		tR = tgt.Radius
+	} else if s.AutopilotGoto.Type == targetTypeReg.Artifact {
+		// find artifact with id
+		tgt := s.CurrentSystem.artifacts[s.AutopilotGoto.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort(false)
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+		tR = tgt.Radius
 	} else {
 		s.CmdAbort(false)
 		return
@@ -3274,6 +3287,18 @@ func (s *Ship) doAutopilotOrbit() {
 	} else if s.AutopilotOrbit.Type == targetTypeReg.Wreck {
 		// find wreck with id
 		tgt := s.CurrentSystem.wrecks[s.AutopilotOrbit.TargetID.String()]
+
+		if tgt == nil {
+			s.CmdAbort(false)
+			return
+		}
+
+		// store target details
+		tX = tgt.PosX
+		tY = tgt.PosY
+	} else if s.AutopilotOrbit.Type == targetTypeReg.Artifact {
+		// find artifact with id
+		tgt := s.CurrentSystem.artifacts[s.AutopilotOrbit.TargetID.String()]
 
 		if tgt == nil {
 			s.CmdAbort(false)

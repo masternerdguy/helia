@@ -44,6 +44,7 @@ var shipTemplateSvc = sql.GetShipTemplateService()
 var containerSvc = sql.GetContainerService()
 var outpostSvc = sql.GetOutpostService()
 var outpostTemplateSvc = sql.GetOutpostTemplateService()
+var artifactSvc = sql.GetArtifactService()
 
 // Will cause all region goroutines to stop when true
 var shutdownSignal = false

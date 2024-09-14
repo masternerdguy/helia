@@ -63,6 +63,8 @@ import { ServerActionReportsPage } from './wsModels/bodies/viewActionReportsPage
 import * as ClipboardJS from 'clipboard';
 import { ServerDockedUsersUpdate } from './wsModels/bodies/dockedUsersUpdate';
 import { Outpost } from './engineModels/outpost';
+import { Artifact } from './engineModels/artifact';
+import { Jukebox } from './audio/jukebox';
 
 class EngineSack {
   constructor() {}
@@ -80,6 +82,9 @@ class EngineSack {
   // backplate graphics
   backplateCanvas: HTMLCanvasElement;
   backplateRenderer: Backplate;
+
+  // jukebox
+  jukebox: Jukebox;
 
   // ui elements
   pushErrorWindow: PushErrorWindow;
@@ -148,6 +153,10 @@ export function clientStart(
 
   // initialize backplate
   engineSack.backplateRenderer = new Backplate(backCanvas);
+
+  // initialize jukebox
+  engineSack.jukebox = new Jukebox();
+  engineSack.jukebox.begin();
 
   // initialize window manager
   engineSack.windowManager = new WindowManager();
@@ -497,6 +506,10 @@ function handleGlobalUpdate(d: GameMessage) {
       msg.planets = [];
     }
 
+    if (!msg.artifacts || msg.artifacts == null) {
+      msg.artifacts = [];
+    }
+
     if (!msg.stations || msg.stations == null) {
       msg.stations = [];
     }
@@ -672,6 +685,29 @@ function handleGlobalUpdate(d: GameMessage) {
       if (!match) {
         // add planet to memory
         engineSack.player.currentSystem.planets.push(new Planet(p));
+      }
+    }
+
+    // update artifacts
+    for (const p of msg.artifacts) {
+      let match = false;
+
+      // find artifact in memory
+      for (const sm of engineSack.player.currentSystem.artifacts) {
+        if (p.id === sm.id) {
+          match = true;
+
+          // sync artifact in memory
+          sm.sync(p);
+
+          // exit loop
+          break;
+        }
+      }
+
+      if (!match) {
+        // add artifact to memory
+        engineSack.player.currentSystem.artifacts.push(new Artifact(p));
       }
     }
 
@@ -1459,6 +1495,30 @@ function updateTargetSelection() {
     }
   }
 
+  // artifacts
+  for (const sm of engineSack.player.currentSystem.artifacts) {
+    // current ship target check if undocked
+    if (!engineSack.player.currentShip.dockedAtStationID) {
+      if (
+        sm.id === engineSack.player.currentTargetID &&
+        engineSack.player.currentTargetType === TargetType.Artifact
+      ) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Artifact);
+      } else {
+        // mark as untargeted
+        sm.isTargeted = false;
+      }
+    } else {
+      if (engineSack.player.currentShip.dockedAtStationID == sm.id) {
+        // mark as targeted
+        sm.isTargeted = true;
+        engineSack.targetInteractionWindow.setTarget(sm, TargetType.Artifact);
+      }
+    }
+  }
+
   // ships
   for (const sm of engineSack.player.currentSystem.ships) {
     // current ship target check if undocked
@@ -1515,6 +1575,11 @@ function clientRender() {
   // draw planets
   for (const p of engineSack.player.currentSystem.planets) {
     p.render(engineSack.ctx, engineSack.camera);
+  }
+
+  // draw artifacts
+  for (const af of engineSack.player.currentSystem.artifacts) {
+    af.render(engineSack.ctx, engineSack.camera);
   }
 
   // draw jumpholes

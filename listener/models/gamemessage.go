@@ -96,6 +96,7 @@ type TargetTypeRegistry struct {
 	Asteroid int
 	Wreck    int
 	Outpost  int
+	Artifact int
 }
 
 // Returns a MessageRegistry with correct enum values
@@ -187,6 +188,7 @@ func NewTargetTypeRegistry() *TargetTypeRegistry {
 		Asteroid: 6,
 		Wreck:    7,
 		Outpost:  8,
+		Artifact: 9,
 	}
 }
 
@@ -280,6 +282,19 @@ type GlobalPlanetInfo struct {
 	Radius     float64   `json:"radius"`
 	Mass       float64   `json:"mass"`
 	Theta      float64   `json:"theta"`
+}
+
+// Structure for passing non-secret information about an artifact
+type GlobalArtifactInfo struct {
+	ID           uuid.UUID `json:"id"`
+	SystemID     uuid.UUID `json:"systemId"`
+	ArtifactName string    `json:"artifactName"`
+	PosX         float64   `json:"x"`
+	PosY         float64   `json:"y"`
+	Texture      string    `json:"texture"`
+	Radius       float64   `json:"radius"`
+	Mass         float64   `json:"mass"`
+	Theta        float64   `json:"theta"`
 }
 
 // Structure for passing non-secret information about a wreck
@@ -383,6 +398,7 @@ type ServerGlobalUpdateBody struct {
 	Ships             []GlobalShipInfo             `json:"ships"`
 	Stars             []GlobalStarInfo             `json:"stars"`
 	Planets           []GlobalPlanetInfo           `json:"planets"`
+	Artifacts         []GlobalArtifactInfo         `json:"artifacts"`
 	Jumpholes         []GlobalJumpholeInfo         `json:"jumpholes"`
 	Stations          []GlobalStationInfo          `json:"stations"`
 	Outposts          []GlobalOutpostInfo          `json:"outposts"`

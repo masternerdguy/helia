@@ -30,6 +30,7 @@ type SolarSystem struct {
 	ships                 map[string]*Ship
 	stars                 map[string]*Star
 	planets               map[string]*Planet
+	artifacts             map[string]*Artifact
 	jumpholes             map[string]*Jumphole
 	stations              map[string]*Station
 	outposts              map[string]*Outpost
@@ -88,6 +89,7 @@ func (s *SolarSystem) Initialize() {
 	s.ships = make(map[string]*Ship)
 	s.stars = make(map[string]*Star)
 	s.planets = make(map[string]*Planet)
+	s.artifacts = make(map[string]*Artifact)
 	s.jumpholes = make(map[string]*Jumphole)
 	s.stations = make(map[string]*Station)
 	s.outposts = make(map[string]*Outpost)
@@ -3080,6 +3082,21 @@ func (s *SolarSystem) sendClientUpdates() {
 			})
 		}
 
+		// artifacts
+		for _, d := range s.artifacts {
+			gu.Artifacts = append(gu.Artifacts, models.GlobalArtifactInfo{
+				ID:           d.ID,
+				SystemID:     d.SystemID,
+				ArtifactName: d.ArtifactName,
+				PosX:         d.PosX,
+				PosY:         d.PosY,
+				Texture:      d.Texture,
+				Radius:       d.Radius,
+				Mass:         d.Mass,
+				Theta:        d.Theta,
+			})
+		}
+
 		// asteroids
 		for _, d := range s.asteroids {
 			gu.Asteroids = append(gu.Asteroids, models.GlobalAsteroidInfo{
@@ -3567,6 +3584,21 @@ func (s *SolarSystem) AddPlanet(c *Planet) {
 	s.planets[c.ID.String()] = c
 }
 
+// Adds an artifact to the system
+func (s *SolarSystem) AddArtifact(c *Artifact) {
+	// safety check
+	if c == nil {
+		return
+	}
+
+	// obtain lock
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
+	// add artifact
+	s.artifacts[c.ID.String()] = c
+}
+
 // Adds an asteroid to the system
 func (s *SolarSystem) AddAsteroid(c *Asteroid) {
 	// safety check
@@ -3937,6 +3969,27 @@ func (s *SolarSystem) CopyPlanets(lock bool) map[string]*Planet {
 	// copy plant into copy map
 	for k, v := range s.planets {
 		c := v.CopyPlanet()
+		copy[k] = &c
+	}
+
+	// return copy map
+	return copy
+}
+
+// Returns a copy of the artifacts in the system
+func (s *SolarSystem) CopyArtifacts(lock bool) map[string]*Artifact {
+	if lock {
+		// obtain lock
+		s.Lock.Lock()
+		defer s.Lock.Unlock()
+	}
+
+	// make map for copies
+	copy := make(map[string]*Artifact)
+
+	// copy plant into copy map
+	for k, v := range s.artifacts {
+		c := v.CopyArtifact()
 		copy[k] = &c
 	}
 

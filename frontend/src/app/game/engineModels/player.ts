@@ -35,4 +35,5 @@ export enum TargetType {
   Asteroid = 6,
   Wreck = 7,
   Outpost = 8,
+  Artifact = 9,
 }
