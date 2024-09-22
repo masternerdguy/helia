@@ -9,8 +9,8 @@
     "ncu": "ncu -u",
     "pretty": "prettier --write \"./**/*.{ts,js,jsx,json}\"",
     "ngupdate": "ng update @angular/core @angular/cli",
-    "build-docker:alpha": "chmod a+x ../bash/build-docker-alpha.sh && bash ../bash/build-docker-alpha.sh",
-    "deploy-docker:alpha": "chmod a+x ../bash/deploy-docker-alpha.sh && bash ../bash/deploy-docker-alpha.sh"
+    "build-podman:alpha": "chmod a+x ../bash/build-podman-alpha.sh && bash ../bash/build-podman-alpha.sh",
+    "deploy-podman:alpha": "chmod a+x ../bash/deploy-podman-alpha.sh && bash ../bash/deploy-podman-alpha.sh"
   },
   "private": true,
   "dependencies": {
