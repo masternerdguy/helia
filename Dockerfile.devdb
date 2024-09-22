@@ -11,7 +11,6 @@ RUN apt update
 RUN apt upgrade -y
 
 RUN apt install software-properties-common -y
-RUN apt install wget -y
 RUN apt install p7zip-full -y
 
 ENV PATH="${PATH}:/src/helia/bash"
