@@ -26,5 +26,9 @@ RUN apt install golang -y
 RUN go install github.com/peterldowns/pgmigrate/cmd/pgmigrate@latest
 
 # stage 4
-FROM pgmigrate AS db
+FROM pgmigrate as bash
+ln -fs /usr/bin/bash /bin/sh
+
+# stage 5
+FROM bash AS db
 WORKDIR /src/helia
