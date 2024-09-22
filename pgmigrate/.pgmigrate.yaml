@@ -1,0 +1,5 @@
+database: "postgres://heliaagent:thisiswherewefight@helia-x_db_1:5432/helia"
+migrations: "./sql"
+table_name: "public.pgmigrate_migrations"
+schema:
+  name: "public"
