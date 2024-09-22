@@ -1,5 +1,5 @@
 # Helia
-Helia was intended to be a harsh, massively multiplayer, single world space game with nonconsensual PVP everywhere.
+Helia is a harsh, massively multiplayer, single-world MMORPG with nonconsensual PVP everywhere.
 
 # podman
 Helia supports local development using podman containers. There are three containers defined:
@@ -15,12 +15,12 @@ Be aware that podman on Windows has extremely poor filesystem performance when u
 The environment variables shared by these containers are defined in `.env` and are intended to be shared by all developers. Note that some secrets must be defined by you in `.localsecrets` due to their nature. Stubs for these secrets are provided as comments in `.env`, however Helia will mostly function without them. Mostly.
 
 # Restoring the database
-This repo contains a sample local development database within `db.sample.7z`. Note that, due to its size, Git LFS is required to retrieve this file. Once extracted, the database can be restored by running `restore-db.sh` within the database container.
+This repo contains a sample local development database within `db.sample.7z`. Note that, due to its size, Git LFS is required to retrieve this file. Once extracted, the database can be restored by running `db-restore.sh` within the database container.
 
 The database configuration is in `.env`.
 
-# Flyway
-Flyway is used for db migrations, which are stored in `flyway/sql`. Migrations can be applied to the local database by running `flyway-migrate.sh` in the database container. `flyway-info.sh` can be used to get the migration status. Note that SQL files are ignored in this repo, so you will need to use force when attempting to add them using git add.
+# pgmigrate
+pgmigrate is used for db migrations, which are stored in `pgmigrate/sql`. Migrations can be applied to the local database by running `pg-migrate.sh` in the database container. `pg-plan.sh` can be used to get the migrations that would be applied. Note that SQL files are ignored in this repo, so you will need to use force when attempting to add them using git add.
 
 # Starting the backend (local development)
 Helia's backend is written in golang. Since it makes heavy use of goroutines, it should be run in an environment with at least 4 cores - more is better, and core count is far more important than clock speed in determining overall performance.
@@ -42,7 +42,7 @@ Deploying the backend is less trivial than the frontend. Currently, the only way
 Given the above, performing a backend deployment could be done by:
 
 0. Perform a clean shutdown, wait for it to complete, and then manually stop the app service.
-1. Take a backup of the production database, just in case.
+1. Take a backup of the alpha database, just in case.
 2. Run `build-podman-alpha.sh` to build the podman image.
 3. Run `deploy-podman-alpha.sh` to push the image to Azure. Note that you will require the appropriate and correct secrets exported for this to work!
 4. Start the app service.
