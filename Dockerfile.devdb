@@ -11,12 +11,14 @@ RUN apt update
 RUN apt install wget -y
 RUN apt install p7zip-full -y
 
-ENV PATH="${PATH}:/src/helia/bash:/flyway-9.19.4/jre/bin:/flyway-9.19.4"
+ENV PATH="${PATH}:/src/helia/bash"
 
 # stage 3
-FROM path AS flyway
-RUN wget -qO- https://download.red-gate.com/maven/release/org/flywaydb/enterprise/flyway-commandline/9.19.4/flyway-commandline-9.19.4-linux-x64.tar.gz | tar -xvz
+FROM path AS pgmigrate
+
+RUN apt install golang -y
+RUN go install github.com/peterldowns/pgmigrate/cmd/pgmigrate@latest
 
 # stage 4
-FROM flyway AS db
+FROM pgmigrate AS db
 WORKDIR /src/helia
