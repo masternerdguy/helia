@@ -8,6 +8,9 @@ WORKDIR /
 FROM base AS path
 
 RUN apt update
+RUN apt upgrade -y
+
+RUN apt install software-properties-common -y
 RUN apt install wget -y
 RUN apt install p7zip-full -y
 
@@ -15,6 +18,9 @@ ENV PATH="${PATH}:/src/helia/bash"
 
 # stage 3
 FROM path AS pgmigrate
+
+RUN add-apt-repository -y ppa:longsleep/golang-backports
+RUN apt update
 
 RUN apt install golang -y
 RUN go install github.com/peterldowns/pgmigrate/cmd/pgmigrate@latest
