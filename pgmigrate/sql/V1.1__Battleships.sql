@@ -15,24 +15,24 @@ INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('2500f3f2-3aac-4b0
 INSERT INTO public.shiptemplates (id, created, shiptemplatename, texture, radius, baseaccel, basemass, baseturn, baseshield, baseshieldregen, basearmor, basehull, basefuel, baseheatcap, baseheatsink, baseenergy, baseenergyregen, shiptypeid, slotlayout, basecargobayvolume, itemtypeid, canundock, wrecktexture, explosiontexture) VALUES ('50da40a8-6f7f-40b2-be10-4e1350cb614d', '2024-09-28 00:00:00+00', 'Lion', 'Lion', 150, 1.7, 185925, 2.3, 42685, 505, 12105, 7758, 31055, 30528, 435, 8769, 420, 'a7b8e2cf-9e69-480e-a5fa-dc19d8be9a57', '{"a_slots": [{"hp_pos": [10, 45], "volume": 350, "mod_family": "missile"}, {"hp_pos": [10, -45], "volume": 350, "mod_family": "missile"}, {"hp_pos": [-10, 45], "volume": 350, "mod_family": "missile"}, {"hp_pos": [-10, -45], "volume": 350, "mod_family": "missile"}, {"hp_pos": [-15, 0], "volume": 280, "mod_family": "utility"}, {"hp_pos": [15, 0], "volume": 280, "mod_family": "utility"}, {"hp_pos": [-15, -15], "volume": 200, "mod_family": "utility"}, {"hp_pos": [15, 15], "volume": 200, "mod_family": "utility"}], "b_slots": [{"hp_pos": [0, 0], "volume": 400, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 400, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 320, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 320, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 240, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 240, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 240, "mod_family": "any"}], "c_slots": [{"hp_pos": [0, 0], "volume": 215, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 215, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 215, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 215, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 215, "mod_family": "any"}]}', 1839, '2500f3f2-3aac-4b06-9585-81cc74617d09', true, 'basic-wreck', 'basic_explosion');
 
 -- schematic item types (todo make not cruisers)
-INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('bbce456f-9c77-4e34-8fbb-836de0874445', 'schematic', 'Kea Schematic', '{"industrialmarket": {"maxprice": 2260447, "minprice": 744541, "silosize": 100, "process_id": "bf8b9fc9-d97c-428c-b505-0ea8e8ce0fbd"}}');
-INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('bb5c7ba1-f294-4e19-94f2-633cbded5bb4', 'schematic', 'Spook Schematic', '{"industrialmarket": {"maxprice": 20408756, "minprice": 1009733, "silosize": 100, "process_id": "b3cbf272-b651-4925-93f1-13615a77117f"}}');
-INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('c99c7eb9-e870-413e-9440-fb071f3eb601', 'schematic', 'Skink Schematic', '{"industrialmarket": {"maxprice": 2035627, "minprice": 895097, "silosize": 100, "process_id": "cd580f36-8b1e-48d2-8544-984f4354e1d3"}}');
-INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('f61bcec3-7228-4a89-9d3f-361de9d82519', 'schematic', 'Kudu Schematic', '{"industrialmarket": {"maxprice": 2332915, "minprice": 565279, "silosize": 100, "process_id": "9208d647-d724-40cf-9357-5ffdb657f0e0"}}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('bbce456f-9c77-4e34-8fbb-836de0874445', 'schematic', 'Condor Schematic', '{"industrialmarket": {"maxprice": 2260447, "minprice": 744541, "silosize": 100, "process_id": "bf8b9fc9-d97c-428c-b505-0ea8e8ce0fbd"}}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('bb5c7ba1-f294-4e19-94f2-633cbded5bb4', 'schematic', 'Apparition Schematic', '{"industrialmarket": {"maxprice": 20408756, "minprice": 1009733, "silosize": 100, "process_id": "b3cbf272-b651-4925-93f1-13615a77117f"}}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('c99c7eb9-e870-413e-9440-fb071f3eb601', 'schematic', 'Goanna Schematic', '{"industrialmarket": {"maxprice": 2035627, "minprice": 895097, "silosize": 100, "process_id": "cd580f36-8b1e-48d2-8544-984f4354e1d3"}}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('f61bcec3-7228-4a89-9d3f-361de9d82519', 'schematic', 'Lion Schematic', '{"industrialmarket": {"maxprice": 2332915, "minprice": 565279, "silosize": 100, "process_id": "9208d647-d724-40cf-9357-5ffdb657f0e0"}}');
 
 -- processes (todo make not cruisers)
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('bf8b9fc9-d97c-428c-b505-0ea8e8ce0fbd', 'Make Kea', '{}', 52779);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('cd580f36-8b1e-48d2-8544-984f4354e1d3', 'Make Skink', '{}', 42047);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('9208d647-d724-40cf-9357-5ffdb657f0e0', 'Make Kudu', '{}', 60006);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('b3cbf272-b651-4925-93f1-13615a77117f', 'Make Spook', '{}', 65053);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('eb93240f-3e54-42fd-b162-cc084e5a98af', 'Kea Schematic Faucet', '{}', 66687);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('4620f86c-c838-4f1a-93f7-f347ba42203e', 'Kea Schematic Sink', '{}', 175214);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('8630e188-05e0-4d18-9031-69a0b2792ecb', 'Skink Schematic Faucet', '{}', 84448);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('92e24991-e033-470f-aae5-f4e2f0d7d404', 'Skink Schematic Sink', '{}', 93018);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('78ba4051-dd86-4713-ab1c-4b5bd6633a5b', 'Kudu Schematic Faucet', '{}', 22392);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('dbbfee1e-47a5-478e-ad8c-ead3f3c0db11', 'Kudu Schematic Sink', '{}', 49554);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('e16d1fa6-20be-4df9-b5b3-64c993181257', 'Spook Schematic Faucet', '{}', 227485);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('f94c6fbb-25e7-443c-b2ba-db5199487558', 'Spook Schematic Sink', '{}', 250700);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('bf8b9fc9-d97c-428c-b505-0ea8e8ce0fbd', 'Make Condor', '{}', 52779);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('cd580f36-8b1e-48d2-8544-984f4354e1d3', 'Make Goanna', '{}', 42047);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('9208d647-d724-40cf-9357-5ffdb657f0e0', 'Make Lion', '{}', 60006);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('b3cbf272-b651-4925-93f1-13615a77117f', 'Make Apparition', '{}', 65053);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('eb93240f-3e54-42fd-b162-cc084e5a98af', 'Condor Schematic Faucet', '{}', 66687);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('4620f86c-c838-4f1a-93f7-f347ba42203e', 'Condor Schematic Sink', '{}', 175214);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('8630e188-05e0-4d18-9031-69a0b2792ecb', 'Goanna Schematic Faucet', '{}', 84448);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('92e24991-e033-470f-aae5-f4e2f0d7d404', 'Goanna Schematic Sink', '{}', 93018);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('78ba4051-dd86-4713-ab1c-4b5bd6633a5b', 'Lion Schematic Faucet', '{}', 22392);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('dbbfee1e-47a5-478e-ad8c-ead3f3c0db11', 'Lion Schematic Sink', '{}', 49554);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('e16d1fa6-20be-4df9-b5b3-64c993181257', 'Apparition Schematic Faucet', '{}', 227485);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('f94c6fbb-25e7-443c-b2ba-db5199487558', 'Apparition Schematic Sink', '{}', 250700);
 
 -- process inputs (todo make not cruisers)
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('44f5e0ad-48f2-4c9c-a708-26754a373b77', '24800206-2c58-45b0-8238-81974d0ebb3b', 205842, '{}', 'bf8b9fc9-d97c-428c-b505-0ea8e8ce0fbd');
@@ -80,10 +80,10 @@ INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VA
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('a11fd1a5-c162-457f-b51a-94e5ec69a24a', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 201086, '{}', '9208d647-d724-40cf-9357-5ffdb657f0e0');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('60aee3cd-0dd1-4d20-a73b-9c8bd28b3f0e', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 366995, '{}', 'b3cbf272-b651-4925-93f1-13615a77117f');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('84db27f2-13b1-4289-93f5-26a2907cedf0', 'c99c7eb9-e870-413e-9440-fb071f3eb601', 4, '{}', '8630e188-05e0-4d18-9031-69a0b2792ecb');
-INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('fc7b064d-8529-4e34-b67e-33d5901900b0', '04a3b923-3b47-4cad-b93d-57c8831723b9', 1, '{}', 'bf8b9fc9-d97c-428c-b505-0ea8e8ce0fbd');
-INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('32bd20ac-fcaf-4958-9ddd-1cdee1f40f9d', '505d4a75-5bf9-4e33-abda-b39d77aef060', 1, '{}', 'cd580f36-8b1e-48d2-8544-984f4354e1d3');
-INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('7afea269-01ff-46c0-958e-88bc8bd89746', '68f2f340-9d70-486a-8c07-932c6625d1eb', 1, '{}', '9208d647-d724-40cf-9357-5ffdb657f0e0');
-INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('7e6984cc-6198-438e-8905-407280e6bc40', '5ea74809-8fad-4544-86b7-a3cfc98f924c', 1, '{}', 'b3cbf272-b651-4925-93f1-13615a77117f');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('fc7b064d-8529-4e34-b67e-33d5901900b0', 'd450354e-6b87-44a8-a31d-dc1439539e5d', 1, '{}', 'bf8b9fc9-d97c-428c-b505-0ea8e8ce0fbd');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('32bd20ac-fcaf-4958-9ddd-1cdee1f40f9d', '27d601ab-a8fa-4c55-a37b-2b81876db670', 1, '{}', 'cd580f36-8b1e-48d2-8544-984f4354e1d3');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('7afea269-01ff-46c0-958e-88bc8bd89746', '2500f3f2-3aac-4b06-9585-81cc74617d09', 1, '{}', '9208d647-d724-40cf-9357-5ffdb657f0e0');
+INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('7e6984cc-6198-438e-8905-407280e6bc40', 'bf42de0d-91f9-42ae-abf2-a94a5dc88cfb', 1, '{}', 'b3cbf272-b651-4925-93f1-13615a77117f');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('2f105e15-6181-4f42-872b-57573dbd267a', 'bbce456f-9c77-4e34-8fbb-836de0874445', 1, '{}', 'eb93240f-3e54-42fd-b162-cc084e5a98af');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('637d3098-67a9-4f7e-9580-9e2eeba777c4', 'f61bcec3-7228-4a89-9d3f-361de9d82519', 3, '{}', '78ba4051-dd86-4713-ab1c-4b5bd6633a5b');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('96d2decf-d6d2-4070-81a0-16e2cf9cfecd', 'bb5c7ba1-f294-4e19-94f2-633cbded5bb4', 2, '{}', 'e16d1fa6-20be-4df9-b5b3-64c993181257');
