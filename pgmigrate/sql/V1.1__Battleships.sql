@@ -14,27 +14,27 @@ INSERT INTO public.shiptemplates (id, created, shiptemplatename, texture, radius
 INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('2500f3f2-3aac-4b06-9585-81cc74617d09', 'ship', 'Lion', '{"volume": 1220353, "shiptemplateid": "50da40a8-6f7f-40b2-be10-4e1350cb614d", "industrialmarket": {"maxprice": 302634200, "minprice": 100620105, "silosize": 5}}');
 INSERT INTO public.shiptemplates (id, created, shiptemplatename, texture, radius, baseaccel, basemass, baseturn, baseshield, baseshieldregen, basearmor, basehull, basefuel, baseheatcap, baseheatsink, baseenergy, baseenergyregen, shiptypeid, slotlayout, basecargobayvolume, itemtypeid, canundock, wrecktexture, explosiontexture) VALUES ('50da40a8-6f7f-40b2-be10-4e1350cb614d', '2024-09-28 00:00:00+00', 'Lion', 'Lion', 150, 1.7, 185925, 2.3, 42685, 505, 12105, 7758, 31055, 30528, 435, 8769, 420, 'a7b8e2cf-9e69-480e-a5fa-dc19d8be9a57', '{"a_slots": [{"hp_pos": [10, 45], "volume": 350, "mod_family": "missile"}, {"hp_pos": [10, -45], "volume": 350, "mod_family": "missile"}, {"hp_pos": [-10, 45], "volume": 350, "mod_family": "missile"}, {"hp_pos": [-10, -45], "volume": 350, "mod_family": "missile"}, {"hp_pos": [-15, 0], "volume": 280, "mod_family": "utility"}, {"hp_pos": [15, 0], "volume": 280, "mod_family": "utility"}, {"hp_pos": [-15, -15], "volume": 200, "mod_family": "utility"}, {"hp_pos": [15, 15], "volume": 200, "mod_family": "utility"}], "b_slots": [{"hp_pos": [0, 0], "volume": 400, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 400, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 320, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 320, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 240, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 240, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 240, "mod_family": "any"}], "c_slots": [{"hp_pos": [0, 0], "volume": 215, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 215, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 215, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 215, "mod_family": "any"}, {"hp_pos": [0, 0], "volume": 215, "mod_family": "any"}]}', 1839, '2500f3f2-3aac-4b06-9585-81cc74617d09', true, 'basic-wreck', 'basic_explosion');
 
--- schematic item types (todo make not cruisers)
-INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('b1e96825-0462-4062-952f-c7a6ee0da541', 'schematic', 'Condor Schematic', '{"industrialmarket": {"maxprice": 2260447, "minprice": 744541, "silosize": 100, "process_id": "0943b741-2b1e-4cd3-882a-bd5bce8cdd2c"}}');
-INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('fa519c1d-85ea-40b7-a099-8a17b4172172', 'schematic', 'Apparition Schematic', '{"industrialmarket": {"maxprice": 20408756, "minprice": 1009733, "silosize": 100, "process_id": "0a09848d-d3bf-4413-bf12-47fca1d94937"}}');
-INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('6ed79f0d-964e-413a-9f28-d47dbcd3a3fd', 'schematic', 'Goanna Schematic', '{"industrialmarket": {"maxprice": 2035627, "minprice": 895097, "silosize": 100, "process_id": "f525ff17-b1ab-4263-9b97-aa42ac5dca85"}}');
-INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('6a48e73c-550f-418c-bd5a-ac1055f35e65', 'schematic', 'Lion Schematic', '{"industrialmarket": {"maxprice": 2332915, "minprice": 565279, "silosize": 100, "process_id": "45fb6989-42a3-4692-8f9f-00ebc34be8cb"}}');
+-- schematic item types
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('b1e96825-0462-4062-952f-c7a6ee0da541', 'schematic', 'Condor Schematic', '{"industrialmarket": {"maxprice": 12658503, "minprice": 3871613, "silosize": 100, "process_id": "0943b741-2b1e-4cd3-882a-bd5bce8cdd2c"}}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('fa519c1d-85ea-40b7-a099-8a17b4172172', 'schematic', 'Apparition Schematic', '{"industrialmarket": {"maxprice": 97962028, "minprice": 3836985, "silosize": 100, "process_id": "0a09848d-d3bf-4413-bf12-47fca1d94937"}}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('6ed79f0d-964e-413a-9f28-d47dbcd3a3fd', 'schematic', 'Goanna Schematic', '{"industrialmarket": {"maxprice": 9567446, "minprice": 3490878, "silosize": 100, "process_id": "f525ff17-b1ab-4263-9b97-aa42ac5dca85"}}');
+INSERT INTO public.itemtypes (id, family, name, meta) VALUES ('6a48e73c-550f-418c-bd5a-ac1055f35e65', 'schematic', 'Lion Schematic', '{"industrialmarket": {"maxprice": 16097113, "minprice": 2882922, "silosize": 100, "process_id": "45fb6989-42a3-4692-8f9f-00ebc34be8cb"}}');
 
--- processes (todo make not cruisers)
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('0943b741-2b1e-4cd3-882a-bd5bce8cdd2c', 'Make Condor', '{}', 52779);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('f525ff17-b1ab-4263-9b97-aa42ac5dca85', 'Make Goanna', '{}', 42047);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('45fb6989-42a3-4692-8f9f-00ebc34be8cb', 'Make Lion', '{}', 60006);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('0a09848d-d3bf-4413-bf12-47fca1d94937', 'Make Apparition', '{}', 65053);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('7417c585-0a47-42cf-a63a-286c2ff2ad1d', 'Condor Schematic Faucet', '{}', 66687);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('7319ee8a-07d6-4596-9804-18715322b15a', 'Condor Schematic Sink', '{}', 175214);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('6c2231c2-9f7f-43ce-b310-17f408e57f81', 'Goanna Schematic Faucet', '{}', 84448);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('ce32493b-5723-43a7-993f-432b5d649f31', 'Goanna Schematic Sink', '{}', 93018);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('80105c1a-b66f-4383-ba70-6a68d274e746', 'Lion Schematic Faucet', '{}', 22392);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('f1d865f2-a11e-45d5-ab45-dfc5142e1592', 'Lion Schematic Sink', '{}', 49554);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('a3d79b89-1031-455a-a01e-a7b2002a03c3', 'Apparition Schematic Faucet', '{}', 227485);
-INSERT INTO public.processes (id, name, meta, "time") VALUES ('5bc85509-59d5-4978-8ace-94f14b5da425', 'Apparition Schematic Sink', '{}', 250700);
+-- processes
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('0943b741-2b1e-4cd3-882a-bd5bce8cdd2c', 'Make Condor', '{}', 1493645);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('f525ff17-b1ab-4263-9b97-aa42ac5dca85', 'Make Goanna', '{}', 1173111);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('45fb6989-42a3-4692-8f9f-00ebc34be8cb', 'Make Lion', '{}', 1712571);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('0a09848d-d3bf-4413-bf12-47fca1d94937', 'Make Apparition', '{}', 1893042);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('7417c585-0a47-42cf-a63a-286c2ff2ad1d', 'Condor Schematic Faucet', '{}', 300091);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('7319ee8a-07d6-4596-9804-18715322b15a', 'Condor Schematic Sink', '{}', 325563);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('6c2231c2-9f7f-43ce-b310-17f408e57f81', 'Goanna Schematic Faucet', '{}', 320902);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('ce32493b-5723-43a7-993f-432b5d649f31', 'Goanna Schematic Sink', '{}', 288355);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('80105c1a-b66f-4383-ba70-6a68d274e746', 'Lion Schematic Faucet', '{}', 182850);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('f1d865f2-a11e-45d5-ab45-dfc5142e1592', 'Lion Schematic Sink', '{}', 198216);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('a3d79b89-1031-455a-a01e-a7b2002a03c3', 'Apparition Schematic Faucet', '{}', 639411);
+INSERT INTO public.processes (id, name, meta, "time") VALUES ('5bc85509-59d5-4978-8ace-94f14b5da425', 'Apparition Schematic Sink', '{}', 387715);
 
--- process inputs (todo make not cruisers)
+-- process inputs
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('14f5e0ad-48f2-4c9c-a708-26754a373b75', '24800206-2c58-45b0-8238-81974d0ebb3b', 205842, '{}', '0943b741-2b1e-4cd3-882a-bd5bce8cdd2c');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('2e221521-e83d-496c-9198-a3f3bc7120e4', '24800206-2c58-45b0-8238-81974d0ebb3b', 269178, '{}', 'f525ff17-b1ab-4263-9b97-aa42ac5dca85');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('3f0af580-b47e-4976-9478-3b82afb5f573', '24800206-2c58-45b0-8238-81974d0ebb3b', 201086, '{}', '45fb6989-42a3-4692-8f9f-00ebc34be8cb');
@@ -74,7 +74,7 @@ INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VAL
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('15ff24e6-6a6a-4d9d-87a0-5738bc7124f5', 'f61bcec3-7228-4a89-9d3f-361de9d82519', 7, '{}', 'f1d865f2-a11e-45d5-ab45-dfc5142e1592');
 INSERT INTO public.processinputs (id, itemtypeid, quantity, meta, processid) VALUES ('235b31c6-1013-484d-8665-68d0f5975e74', 'fa519c1d-85ea-40b7-a099-8a17b4172172', 5, '{}', '5bc85509-59d5-4978-8ace-94f14b5da425');
 
--- process outputs (todo make not cruisers)
+-- process outputs
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('2892164e-0d12-4a7b-a162-78ba4ca29893', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 205842, '{}', '0943b741-2b1e-4cd3-882a-bd5bce8cdd2c');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('36172132-e46e-420b-9cab-ce97dc45bdd2', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 269178, '{}', 'f525ff17-b1ab-4263-9b97-aa42ac5dca85');
 INSERT INTO public.processoutputs (id, itemtypeid, quantity, meta, processid) VALUES ('411fd1a5-c162-457f-b51a-94e5ec69a241', '5c1049c4-f631-4066-9f2a-b0798b2c4399', 201086, '{}', '45fb6989-42a3-4692-8f9f-00ebc34be8cb');
