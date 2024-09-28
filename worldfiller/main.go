@@ -67,7 +67,7 @@ func main() {
 	//dropSanctuaryStations(universe)
 	dropArtifacts(universe)
 
-	//stubModuleSchematicsAndProcesses()
+	stubModuleSchematicsAndProcesses()
 	//loadNewWares()
 }
 
@@ -237,7 +237,6 @@ type schematicStubWorldmaker struct {
 
 // Generates schematics and processes for modules
 func stubModuleSchematicsAndProcesses() {
-	rand.Seed(time.Now().Unix())
 	generated := make([]schematicStubWorldmaker, 0)
 
 	// get services
