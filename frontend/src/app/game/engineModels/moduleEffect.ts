@@ -76,6 +76,8 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.mediumGaussRifle();
     } else if (b.gfxEffect === 'heavy_gauss_rifle') {
       this.vfxData = repo.heavyGaussRifle();
+    } else if (b.gfxEffect === 'xl_gauss_rifle') {
+      this.vfxData = repo.xlGaussRifle();
     } else if (b.gfxEffect === 'small_ice_miner') {
       this.vfxData = repo.smallIceMiner();
     } else if (b.gfxEffect === 'medium_ice_miner') {

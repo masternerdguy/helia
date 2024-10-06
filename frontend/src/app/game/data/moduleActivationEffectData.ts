@@ -209,6 +209,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  xlGaussRifle(): ModuleActivationEffectData {
+    return {
+      type: 'gauss',
+      duration: 402,
+      color: 'white',
+      filter: 'blur(2.6px)', // "feather"
+      thickness: 2.48,
+    };
+  }
+
   basicIceMiner(): ModuleActivationEffectData {
     return {
       type: 'laser',
