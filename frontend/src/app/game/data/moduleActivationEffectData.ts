@@ -499,6 +499,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  xlAuto23Cannon(): ModuleActivationEffectData {
+    return {
+      type: 'autocannon',
+      duration: 1277,
+      color: 'yellow',
+      filter: 'blur(1.6px)', // "feather"
+      thickness: 3.77,
+    };
+  }
+
   basicUtilitySiphon(): ModuleActivationEffectData {
     return {
       type: 'siphon',

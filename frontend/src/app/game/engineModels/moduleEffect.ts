@@ -92,6 +92,8 @@ export class ModuleEffect extends WsPushModuleEffect {
       this.vfxData = repo.mediumAuto11Cannon();
     } else if (b.gfxEffect === 'heavy_auto-11_cannon') {
       this.vfxData = repo.heavyAuto11Cannon();
+    } else if (b.gfxEffect === 'xl_auto-23_cannon') {
+      this.vfxData = repo.xlAuto23Cannon();
     } else if (b.gfxEffect === 'small_aether_dragger') {
       this.vfxData = repo.smallAetherDragger();
     } else if (b.gfxEffect === 'medium_aether_dragger') {
