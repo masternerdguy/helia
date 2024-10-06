@@ -199,6 +199,16 @@ export class ModuleActivationEffectRepository {
     };
   }
 
+  heavyGaussRifle(): ModuleActivationEffectData {
+    return {
+      type: 'gauss',
+      duration: 391,
+      color: 'white',
+      filter: 'blur(2.3px)', // "feather"
+      thickness: 2.14,
+    };
+  }
+
   basicIceMiner(): ModuleActivationEffectData {
     return {
       type: 'laser',
@@ -466,6 +476,16 @@ export class ModuleActivationEffectRepository {
       color: 'yellow',
       filter: 'blur(0.49px)', // "feather"
       thickness: 1.35,
+    };
+  }
+
+  heavyAuto11Cannon(): ModuleActivationEffectData {
+    return {
+      type: 'autocannon',
+      duration: 1204,
+      color: 'yellow',
+      filter: 'blur(0.86px)', // "feather"
+      thickness: 2.33,
     };
   }
 
