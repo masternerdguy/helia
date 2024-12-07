@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
+	"helia/engine"
 	"helia/physics"
 	"helia/shared"
 	"helia/sql"
@@ -30,12 +31,12 @@ func main() {
 	)
 
 	// load universe from database
-	/*shared.TeeLog("Loading universe from database...")
+	shared.TeeLog("Loading universe from database...")
 	universe, err := engine.LoadUniverse()
 
 	if err != nil {
 		panic(err)
-	}*/
+	}
 
 	shared.TeeLog("Loaded universe!")
 
@@ -43,15 +44,17 @@ func main() {
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	/*var toInject = [...]string{
-		"d692d5d8-aeaa-48b5-af11-bef2f825ade7",
-		"7391e693-6d37-4ecb-8bec-b54798a21857",
+	var toInject = [...]string{
+		"1f6d58d5-4eed-4b8c-a8db-ee261e433d4e",
+		"5bd8db3e-d42b-484f-907a-98ac32e6ad0b",
+		"b51f9a7b-d10d-4703-a395-a9b5e5cc37dd",
+		"21987c7e-ec0a-4508-97f0-b2e46c75f3d5",
 	}
 
 	for i, e := range toInject {
 		log.Printf("injecting process %v", e)
 		injectProcess(universe, e, i)
-	}*/
+	}
 
 	//fillGasMiningYields(universe)
 
@@ -59,7 +62,7 @@ func main() {
 	//dropSanctuaryStations(universe)
 	//dropArtifacts(universe)
 
-	stubModuleSchematicsAndProcesses()
+	//stubModuleSchematicsAndProcesses()
 	//loadNewWares()
 }
 
@@ -666,15 +669,16 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 
 	var textures = [...]string{
-		"kingdom-",
-		"bad-",
+		"coalition-",
+		"federation-",
+		"interstar-",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 178046782375 + int64(offset))
+			rand.Seed(int64(calculateSystemSeed(s)) - 123046782375 + int64(offset))
 
 			/*if r.ID.ID()%2 != 0 {
 				continue
