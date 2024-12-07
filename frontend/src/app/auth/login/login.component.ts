@@ -5,9 +5,10 @@ import { clientStart } from 'src/app/game/clientEngine';
 import * as $ from 'jquery';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
+    selector: 'app-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.css'],
+    standalone: false
 })
 export class LoginComponent implements OnInit {
   @ViewChild('emailaddress') emailaddress: ElementRef;

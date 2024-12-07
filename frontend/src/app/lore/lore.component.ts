@@ -14,9 +14,10 @@ import { BadLoreData } from './factions/bad';
 import { FlyLoreData } from './factions/fly';
 
 @Component({
-  selector: 'app-lore',
-  templateUrl: './lore.component.html',
-  styleUrls: ['./lore.component.css'],
+    selector: 'app-lore',
+    templateUrl: './lore.component.html',
+    styleUrls: ['./lore.component.css'],
+    standalone: false
 })
 export class LoreComponent implements OnInit {
   factionLoreData: IFactionLoreData[] = [
