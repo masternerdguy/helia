@@ -44,30 +44,23 @@ func main() {
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	/*var toInject = [...]string{
-		"6b9b499d-1426-4aa5-ae58-69f6516d4a9b",
-		"5e64e9d3-bf33-4552-8d09-1f70d7d2d4a4",
-		"e77eee22-24f7-44c7-846a-09819808a8bf",
-		"eab6ce76-bee0-4ab7-bc1d-87e7b90af831",
-		"bdab0eaf-3f9d-40a8-b60f-4770e05f4a06",
-		"c4dde5ab-b782-4d69-9582-7bfd02cd7d1c",
-		"4075709e-d2c0-4d20-8698-d504938c22f5",
-		"f120d11b-e0ad-4a17-bedc-25bb2bb7a06d",
-		"e1e95a63-32f1-4f92-8052-b2ac7a92ec6b",
+	var toInject = [...]string{
+		"d692d5d8-aeaa-48b5-af11-bef2f825ade7",
+		"7391e693-6d37-4ecb-8bec-b54798a21857",
 	}
 
 	for i, e := range toInject {
 		log.Printf("injecting process %v", e)
 		injectProcess(universe, e, i)
-	}*/
+	}
 
 	//fillGasMiningYields(universe)
 
 	// dropAsteroids(universe)
 	//dropSanctuaryStations(universe)
-	dropArtifacts(universe)
+	//dropArtifacts(universe)
 
-	stubModuleSchematicsAndProcesses()
+	//stubModuleSchematicsAndProcesses()
 	//loadNewWares()
 }
 
@@ -665,7 +658,7 @@ func stubModuleSchematicsAndProcesses() {
 // Creates station processes for a given process
 func injectProcess(u *universe.Universe, pid string, offset int) {
 	pID, err := uuid.Parse(pid)
-	prob := 3
+	prob := 1
 
 	stationProcessSvc := sql.GetStationProcessService()
 
@@ -674,15 +667,15 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 
 	var textures = [...]string{
-		"sanctuary-",
-		"interstar-",
+		"kingdom-",
+		"bad-",
 	}
 
 	toSave := make([]sql.StationProcess, 0)
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 178046782372 + int64(offset))
+			rand.Seed(int64(calculateSystemSeed(s)) - 178046782375 + int64(offset))
 
 			/*if r.ID.ID()%2 != 0 {
 				continue
@@ -696,7 +689,7 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 
 			for _, st := range stations {
 				for _, t := range textures {
-					if !strings.Contains(st.Texture, t) {
+					if strings.Contains(st.Texture, t) {
 						roll := physics.RandInRange(0, 100)
 
 						if roll <= prob {
