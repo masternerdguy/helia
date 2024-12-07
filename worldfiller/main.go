@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
-	"helia/engine"
 	"helia/physics"
 	"helia/shared"
 	"helia/sql"
@@ -31,12 +30,12 @@ func main() {
 	)
 
 	// load universe from database
-	shared.TeeLog("Loading universe from database...")
+	/*shared.TeeLog("Loading universe from database...")
 	universe, err := engine.LoadUniverse()
 
 	if err != nil {
 		panic(err)
-	}
+	}*/
 
 	shared.TeeLog("Loaded universe!")
 
@@ -44,7 +43,7 @@ func main() {
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	var toInject = [...]string{
+	/*var toInject = [...]string{
 		"d692d5d8-aeaa-48b5-af11-bef2f825ade7",
 		"7391e693-6d37-4ecb-8bec-b54798a21857",
 	}
@@ -52,7 +51,7 @@ func main() {
 	for i, e := range toInject {
 		log.Printf("injecting process %v", e)
 		injectProcess(universe, e, i)
-	}
+	}*/
 
 	//fillGasMiningYields(universe)
 
@@ -60,7 +59,7 @@ func main() {
 	//dropSanctuaryStations(universe)
 	//dropArtifacts(universe)
 
-	//stubModuleSchematicsAndProcesses()
+	stubModuleSchematicsAndProcesses()
 	//loadNewWares()
 }
 
