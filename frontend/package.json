@@ -7,7 +7,7 @@
     "build": "ng build",
     "build:alpha": "ng build --configuration=alpha",
     "ncu": "ncu -u",
-    "pretty": "prettier --write \"./**/*.{ts,js,jsx,json}\"",
+    "pretty": "prettier --write \"./**/*.{ts,js,jsx,json,html}\"",
     "ngupdate": "ng update @angular/core @angular/cli",
     "build-podman:alpha": "chmod a+x ../bash/build-podman-alpha.sh && bash ../bash/build-podman-alpha.sh",
     "deploy-podman:alpha": "chmod a+x ../bash/deploy-podman-alpha.sh && bash ../bash/deploy-podman-alpha.sh"

@@ -2,10 +2,10 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AccountService } from '../account.service';
 
 @Component({
-    selector: 'app-forgot-password',
-    templateUrl: './forgot-password.component.html',
-    styleUrls: ['./forgot-password.component.css'],
-    standalone: false
+  selector: 'app-forgot-password',
+  templateUrl: './forgot-password.component.html',
+  styleUrls: ['./forgot-password.component.css'],
+  standalone: false,
 })
 export class ForgotPasswordComponent implements OnInit {
   @ViewChild('emailaddress') emailaddress: ElementRef;

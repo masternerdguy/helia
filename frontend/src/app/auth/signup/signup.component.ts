@@ -2,10 +2,10 @@ import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
 import { AccountService } from '../account.service';
 
 @Component({
-    selector: 'app-signup',
-    templateUrl: './signup.component.html',
-    styleUrls: ['./signup.component.css'],
-    standalone: false
+  selector: 'app-signup',
+  templateUrl: './signup.component.html',
+  styleUrls: ['./signup.component.css'],
+  standalone: false,
 })
 export class SignupComponent implements OnInit {
   @ViewChild('emailaddress') emailaddress: ElementRef;

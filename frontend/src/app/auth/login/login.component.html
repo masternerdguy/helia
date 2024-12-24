@@ -1,58 +1,76 @@
 <div *ngIf="!loginSuccess">
-    <h2>Login</h2>
-    <div style="background: darkblue; color: whitesmoke; display: none;">
-        <p style="font-weight: 300; font-size: 12px;">
-            The Unified Policy was updated on <strong>2022/05/07</strong>. Please review the new
-            <a style="color: aquamarine;" href="/#/policy"><strong>unified policy</strong></a>.
-            By continuing to use Helia, you are agreeing to the new terms. This notice will expire
-            and be removed on or after <strong>2022/06/07</strong>.
-        </p>
+  <h2>Login</h2>
+  <div style="background: darkblue; color: whitesmoke; display: none">
+    <p style="font-weight: 300; font-size: 12px">
+      The Unified Policy was updated on <strong>2022/05/07</strong>. Please
+      review the new
+      <a style="color: aquamarine" href="/#/policy"
+        ><strong>unified policy</strong></a
+      >. By continuing to use Helia, you are agreeing to the new terms. This
+      notice will expire and be removed on or after <strong>2022/06/07</strong>.
+    </p>
+  </div>
+  <div style="background: maroon; color: wheat">
+    <p style="font-weight: 300; font-size: 12px">
+      Helia is designed to work with Chromium-based browsers such as Chrome,
+      Opera, and modern Edge. You may experience issues using non Chromium-based
+      browsers. Scheduled restarts occur at noon EDT. The server takes ~60
+      minutes to restart - if you can't log in now, try again later.
+    </p>
+  </div>
+  <form class="form">
+    <div>
+      <label for="emailaddress">Email Address</label>
+      <input
+        type="emailaddress"
+        class="form-control"
+        placeholder="Enter your email address..."
+        id="emailaddress"
+        #emailaddress
+      />
     </div>
-    <div style="background: maroon; color: wheat;">
-        <p style="font-weight: 300; font-size: 12px;">
-            Helia is designed to work with Chromium-based browsers such as Chrome, Opera, and modern Edge. You may
-            experience issues using
-            non Chromium-based browsers. Scheduled restarts occur at noon EDT. The server takes ~60 minutes to restart -
-            if you can't log
-            in now, try again later.
-        </p>
+    <div>
+      <label for="password">Password</label>
+      <input
+        type="password"
+        class="form-control"
+        placeholder="Enter your password..."
+        id="password"
+        #password
+      />
     </div>
-    <form class="form">
-        <div>
-            <label for="emailaddress">Email Address</label>
-            <input type="emailaddress" class="form-control" placeholder="Enter your email address..." id="emailaddress"
-                #emailaddress>
-        </div>
-        <div>
-            <label for="password">Password</label>
-            <input type="password" class="form-control" placeholder="Enter your password..." id="password" #password>
-        </div>
-        <br />
-        <div>
-            <strong>
-                <a style="color: aquamarine;" href="/#/auth/forgot">Forgot Password</a>
-            </strong>
-        </div>
-        <br />
-        <button type="button" class="btn btn-primary center" (click)="login()">Submit</button>
-        <div>
-            <br />
-            <p class="info-text">
-                music by <strong>zakè</strong> (<a style="color: aquamarine;" href="https://zakedrone.com">zakedrone.com</a>) -
-                the ambient drone master.
-            </p>
-            <p class="info-text">
-                Once you've logged in, you can resize your browser to adjust the game window, and enter fullscreen
-                using your browser's native facilities (on Chrome, this is usually F11).
-            </p>
-        </div>
-    </form>
+    <br />
+    <div>
+      <strong>
+        <a style="color: aquamarine" href="/#/auth/forgot">Forgot Password</a>
+      </strong>
+    </div>
+    <br />
+    <button type="button" class="btn btn-primary center" (click)="login()">
+      Submit
+    </button>
+    <div>
+      <br />
+      <p class="info-text">
+        music by <strong>zakè</strong> (<a
+          style="color: aquamarine"
+          href="https://zakedrone.com"
+          >zakedrone.com</a
+        >) - the ambient drone master.
+      </p>
+      <p class="info-text">
+        Once you've logged in, you can resize your browser to adjust the game
+        window, and enter fullscreen using your browser's native facilities (on
+        Chrome, this is usually F11).
+      </p>
+    </div>
+  </form>
 </div>
 <div *ngIf="loginSuccess" class="helia-game-top">
-    <canvas class="gameCanvas" width="0" height="0" tabindex='1'>
-        A browser that supports HTML5 canvas is required to play Helia.
-    </canvas>
-    <canvas class="backCanvas" width="0" height="0">
-        A browser that supports HTML5 canvas is required to play Helia.
-    </canvas>
+  <canvas class="gameCanvas" width="0" height="0" tabindex="1">
+    A browser that supports HTML5 canvas is required to play Helia.
+  </canvas>
+  <canvas class="backCanvas" width="0" height="0">
+    A browser that supports HTML5 canvas is required to play Helia.
+  </canvas>
 </div>
