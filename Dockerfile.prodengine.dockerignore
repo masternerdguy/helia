@@ -14,7 +14,7 @@ bash
 .gitignore
 .gitattributes
 
-# docker
+# docker / podman
 .docker
 .dockerignore
 docker-compose.yml

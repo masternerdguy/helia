@@ -1,26 +1,26 @@
 # Helia
-Helia was intended to be a harsh, massively multiplayer, single world space game with nonconsensual PVP everywhere.
+Helia is a harsh, massively multiplayer, single-world MMORPG with nonconsensual PVP everywhere.
 
-# Docker
-Helia supports local development using docker containers. There are three containers defined:
+# podman
+Helia supports local development using podman containers. There are three containers defined:
 
 * `helia-db`: A postgres server that also contains flyway. This provides your local database during development.
 * `helia-engine`: A golang environment which allows you to build and run the backend game engine server.
 * `helia-frontend`: An angular environment that allows you to build and run the frontend web client.
 
-To start these containers, simply run `docker compose up`. From there, you can connect to and use these containers as you see fit. Note that both your repository and your database files are mapped as volumes within these containers to easily propagate changes and persist the local database.
+To start these containers, simply run `podman-compose up`. From there, you can connect to and use these containers as you see fit. Note that both your repository and your database files are mapped as volumes within these containers to easily propagate changes and persist the local database.
 
-Be aware that docker on Windows has extremely poor filesystem performance when using volumes - a good workaround is to install docker within WSL instead of directly on Windows. Visual Studio Code provides excellent tooling for working with both docker containers and WSL.
+Be aware that podman on Windows has extremely poor filesystem performance when using volumes - a good workaround is to install podman within WSL instead of directly on Windows. Visual Studio Code provides excellent tooling for working with both podman containers and WSL.
 
 The environment variables shared by these containers are defined in `.env` and are intended to be shared by all developers. Note that some secrets must be defined by you in `.localsecrets` due to their nature. Stubs for these secrets are provided as comments in `.env`, however Helia will mostly function without them. Mostly.
 
 # Restoring the database
-This repo contains a sample local development database within `db.sample.7z`. Note that, due to its size, Git LFS is required to retrieve this file. Once extracted, the database can be restored by running `restore-db.sh` within the database container.
+This repo contains a sample local development database within `db.sample.7z`. Note that, due to its size, Git LFS is required to retrieve this file. Once extracted, the database can be restored by running `db-restore.sh` within the database container.
 
 The database configuration is in `.env`.
 
-# Flyway
-Flyway is used for db migrations, which are stored in `flyway/sql`. Migrations can be applied to the local database by running `flyway-migrate.sh` in the database container. `flyway-info.sh` can be used to get the migration status. Note that SQL files are ignored in this repo, so you will need to use force when attempting to add them using git add.
+# pgmigrate
+pgmigrate is used for db migrations, which are stored in `pgmigrate/sql`. Migrations can be applied to the local database by running `pg-migrate.sh` in the database container. `pg-plan.sh` can be used to get the migrations that would be applied. Note that SQL files are ignored in this repo, so you will need to use force when attempting to add them using git add.
 
 # Starting the backend (local development)
 Helia's backend is written in golang. Since it makes heavy use of goroutines, it should be run in an environment with at least 4 cores - more is better, and core count is far more important than clock speed in determining overall performance.
@@ -37,14 +37,14 @@ Helia's open alpha client was hosted on an Azure storage account as a static web
 2. Replace the files in the `$web` container of the `heliaalphafrontend` storage account with the new files under the `dist` folder - the easiest way is to just use Azure Storage Explorer which takes ~1 minute.
 
 # Deployment Process (alpha, backend)
-Deploying the backend is less trivial than the frontend. Currently, the only way to run go code in an Azure app service is to use a docker container hosted in some kind of docker registry. For privacy reasons, the `helia-backend-engine` app service was configured to pull from the `heliaalpharegistry` Azure Container Registry automatically. Whenever a new docker image was pushed, a deployment occured. Be aware that this would result in a sudden restart, so it was critical to perform a clean shutdown using the `Save and Shutdown` endpoint, allow it to complete, and then manually stop the app service before the deployment. Otherwise, players would lose progress and players don't tend to like that.
+Deploying the backend is less trivial than the frontend. Currently, the only way to run go code in an Azure app service is to use a podman container hosted in some kind of podman registry. For privacy reasons, the `helia-backend-engine` app service was configured to pull from the `heliaalpharegistry` Azure Container Registry automatically. Whenever a new podman image was pushed, a deployment occured. Be aware that this would result in a sudden restart, so it was critical to perform a clean shutdown using the `Save and Shutdown` endpoint, allow it to complete, and then manually stop the app service before the deployment. Otherwise, players would lose progress and players don't tend to like that.
 
 Given the above, performing a backend deployment could be done by:
 
 0. Perform a clean shutdown, wait for it to complete, and then manually stop the app service.
-1. Take a backup of the production database, just in case.
-2. Run `build-docker-alpha.sh` to build the docker image.
-3. Run `deploy-docker-alpha.sh` to push the image to Azure. Note that you will require the appropriate and correct secrets exported for this to work!
+1. Take a backup of the alpha database, just in case.
+2. Run `build-podman-alpha.sh` to build the podman image.
+3. Run `deploy-podman-alpha.sh` to push the image to Azure. Note that you will require the appropriate and correct secrets exported for this to work!
 4. Start the app service.
 
 It is probably best to do this outside of a container.

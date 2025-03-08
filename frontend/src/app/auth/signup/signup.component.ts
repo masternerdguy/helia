@@ -5,6 +5,7 @@ import { AccountService } from '../account.service';
   selector: 'app-signup',
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.css'],
+  standalone: false,
 })
 export class SignupComponent implements OnInit {
   @ViewChild('emailaddress') emailaddress: ElementRef;

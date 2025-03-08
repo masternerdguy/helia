@@ -44,28 +44,23 @@ func main() {
 	 * COMMENT AND UNCOMMENT THE BELOW ROUTINES AS NEEDED
 	 */
 
-	/*var toInject = [...]string{
-		"6b9b499d-1426-4aa5-ae58-69f6516d4a9b",
-		"5e64e9d3-bf33-4552-8d09-1f70d7d2d4a4",
-		"e77eee22-24f7-44c7-846a-09819808a8bf",
-		"eab6ce76-bee0-4ab7-bc1d-87e7b90af831",
-		"bdab0eaf-3f9d-40a8-b60f-4770e05f4a06",
-		"c4dde5ab-b782-4d69-9582-7bfd02cd7d1c",
-		"4075709e-d2c0-4d20-8698-d504938c22f5",
-		"f120d11b-e0ad-4a17-bedc-25bb2bb7a06d",
-		"e1e95a63-32f1-4f92-8052-b2ac7a92ec6b",
+	var toInject = [...]string{
+		"1f6d58d5-4eed-4b8c-a8db-ee261e433d4e",
+		"5bd8db3e-d42b-484f-907a-98ac32e6ad0b",
+		"b51f9a7b-d10d-4703-a395-a9b5e5cc37dd",
+		"21987c7e-ec0a-4508-97f0-b2e46c75f3d5",
 	}
 
 	for i, e := range toInject {
 		log.Printf("injecting process %v", e)
 		injectProcess(universe, e, i)
-	}*/
+	}
 
 	//fillGasMiningYields(universe)
 
 	// dropAsteroids(universe)
 	//dropSanctuaryStations(universe)
-	dropArtifacts(universe)
+	//dropArtifacts(universe)
 
 	//stubModuleSchematicsAndProcesses()
 	//loadNewWares()
@@ -237,7 +232,6 @@ type schematicStubWorldmaker struct {
 
 // Generates schematics and processes for modules
 func stubModuleSchematicsAndProcesses() {
-	rand.Seed(time.Now().Unix())
 	generated := make([]schematicStubWorldmaker, 0)
 
 	// get services
@@ -666,7 +660,7 @@ func stubModuleSchematicsAndProcesses() {
 // Creates station processes for a given process
 func injectProcess(u *universe.Universe, pid string, offset int) {
 	pID, err := uuid.Parse(pid)
-	prob := 3
+	prob := 1
 
 	stationProcessSvc := sql.GetStationProcessService()
 
@@ -675,7 +669,8 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 	}
 
 	var textures = [...]string{
-		"sanctuary-",
+		"coalition-",
+		"federation-",
 		"interstar-",
 	}
 
@@ -683,7 +678,7 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 
 	for _, r := range u.Regions {
 		for _, s := range r.Systems {
-			rand.Seed(int64(calculateSystemSeed(s)) - 178046782372 + int64(offset))
+			rand.Seed(int64(calculateSystemSeed(s)) - 123046782375 + int64(offset))
 
 			/*if r.ID.ID()%2 != 0 {
 				continue
@@ -697,7 +692,7 @@ func injectProcess(u *universe.Universe, pid string, offset int) {
 
 			for _, st := range stations {
 				for _, t := range textures {
-					if !strings.Contains(st.Texture, t) {
+					if strings.Contains(st.Texture, t) {
 						roll := physics.RandInRange(0, 100)
 
 						if roll <= prob {

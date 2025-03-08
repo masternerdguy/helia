@@ -1,64 +1,112 @@
 <div>
-    <h2>Register</h2>
-    <div style="background: maroon; color: wheat;">
-        <h4>You are about to register for an <strong>OPEN ALPHA MMO!</strong></h4>
-        <p>
-            By definition, alpha quality software is unstable, unpredictable, and unfit for any particular use.
-            By continuing, you assume all risk inherent in using this software. Under no circumstances will the 
-            author be responsible for any damage that may result from your use of this incomplete software. Please 
-            read the <a style="color: aquamarine;" href="/#/policy"><strong>unified policy</strong></a> for more 
-            information about this and other terms that govern your use of Helia. By continuing, you agree to all
-            terms within the unified policy.
-        </p>
+  <h2>Register</h2>
+  <div style="background: maroon; color: wheat">
+    <h4>You are about to register for an <strong>OPEN ALPHA MMO!</strong></h4>
+    <p>
+      By definition, alpha quality software is unstable, unpredictable, and
+      unfit for any particular use. By continuing, you assume all risk inherent
+      in using this software. Under no circumstances will the author be
+      responsible for any damage that may result from your use of this
+      incomplete software. Please read the
+      <a style="color: aquamarine" href="/#/policy"
+        ><strong>unified policy</strong></a
+      >
+      for more information about this and other terms that govern your use of
+      Helia. By continuing, you agree to all terms within the unified policy.
+    </p>
+  </div>
+  <br />
+  <form class="form">
+    <div>
+      <label for="emailaddress">Email Address</label>
+      <input
+        type="emailaddress"
+        class="form-control"
+        placeholder="Enter your email address..."
+        id="emailaddress"
+        #emailaddress
+      />
     </div>
-    <br/>
-    <form class="form">
-        <div>
-            <label for="emailaddress">Email Address</label>
-            <input type="emailaddress" class="form-control" placeholder="Enter your email address..." id="emailaddress" #emailaddress />
-        </div>
-        <div>
-            <label for="charactername">Character Name</label>
-            <input type="charactername" class="form-control" placeholder="Enter your character's name..." id="charactername" #charactername />
-        </div>
-        <br/>
-        <div>
-            <label>Choose your starting faction</label>
-            <div>
-                <input 
-                    type="radio" id="ksr" name="startgroup" value="282b12c9-59e6-412a-8122-6fe07640a0c0" (change)="setStart($event)"/>
-                &nbsp;Kingdom of Antaria
-            </div>
-            <div>
-                <input 
-                    type="radio" id="asr" name="startgroup" value="0317d9ea-6b4c-4345-a52e-785793150f5b" (change)="setStart($event)"/>
-                &nbsp;Ozouka Accord
-            </div>
-            <div>
-                <input 
-                    type="radio" id="fsr" name="startgroup" value="d58ca466-8280-48bb-8c1a-fcdbf6525603" (change)="setStart($event)"/>
-                &nbsp;Vierra Federation
-            </div>
-            <div>
-                <input 
-                    type="radio" id="csr" name="startgroup" value="46a065c5-59b4-4deb-b31b-ceff79b5cffc" (change)="setStart($event)"/>
-                &nbsp;Tenevan Coalition
-            </div>
-        </div>
-        <br/>
-        <div>
-            <label for="password">Password</label>
-            <input type="password" class="form-control" placeholder="Enter a good password..." id="password" #password />
-        </div>
-        <div>
-            <label for="confirmpassword">Confirm Password</label>
-            <input type="password" class="form-control" placeholder="Confirm your good password..." id="confirmpassword" #confirmpassword />
-        </div>
-        <br/>
-        <p>
-            <button type="button" class="btn btn-primary center" (click)="register()">
-                Submit
-            </button>
-        </p>
-    </form>
+    <div>
+      <label for="charactername">Character Name</label>
+      <input
+        type="charactername"
+        class="form-control"
+        placeholder="Enter your character's name..."
+        id="charactername"
+        #charactername
+      />
+    </div>
+    <br />
+    <div>
+      <label>Choose your starting faction</label>
+      <div>
+        <input
+          type="radio"
+          id="ksr"
+          name="startgroup"
+          value="282b12c9-59e6-412a-8122-6fe07640a0c0"
+          (change)="setStart($event)"
+        />
+        &nbsp;Kingdom of Antaria
+      </div>
+      <div>
+        <input
+          type="radio"
+          id="asr"
+          name="startgroup"
+          value="0317d9ea-6b4c-4345-a52e-785793150f5b"
+          (change)="setStart($event)"
+        />
+        &nbsp;Ozouka Accord
+      </div>
+      <div>
+        <input
+          type="radio"
+          id="fsr"
+          name="startgroup"
+          value="d58ca466-8280-48bb-8c1a-fcdbf6525603"
+          (change)="setStart($event)"
+        />
+        &nbsp;Vierra Federation
+      </div>
+      <div>
+        <input
+          type="radio"
+          id="csr"
+          name="startgroup"
+          value="46a065c5-59b4-4deb-b31b-ceff79b5cffc"
+          (change)="setStart($event)"
+        />
+        &nbsp;Tenevan Coalition
+      </div>
+    </div>
+    <br />
+    <div>
+      <label for="password">Password</label>
+      <input
+        type="password"
+        class="form-control"
+        placeholder="Enter a good password..."
+        id="password"
+        #password
+      />
+    </div>
+    <div>
+      <label for="confirmpassword">Confirm Password</label>
+      <input
+        type="password"
+        class="form-control"
+        placeholder="Confirm your good password..."
+        id="confirmpassword"
+        #confirmpassword
+      />
+    </div>
+    <br />
+    <p>
+      <button type="button" class="btn btn-primary center" (click)="register()">
+        Submit
+      </button>
+    </p>
+  </form>
 </div>

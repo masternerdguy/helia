@@ -1,6 +1,18 @@
 # stage 1
 FROM ubuntu/postgres AS base
 
+ENV LANGUAGE=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LC_CTYPE=en_US.UTF-8
+
+RUN echo en_US UTF-8 >> /etc/locale.gen
+RUN locale-gen
+RUN dpkg-reconfigure locales
+
+RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+ENV LANG=en_US.utf8
+
 EXPOSE 5432
 WORKDIR /
 
@@ -8,15 +20,26 @@ WORKDIR /
 FROM base AS path
 
 RUN apt update
-RUN apt install wget -y
+RUN apt upgrade -y
+
+RUN apt install software-properties-common -y
 RUN apt install p7zip-full -y
 
-ENV PATH="${PATH}:/src/helia/bash:/flyway-9.19.4/jre/bin:/flyway-9.19.4"
+ENV PATH="${PATH}:/src/helia/bash"
 
 # stage 3
-FROM path AS flyway
-RUN wget -qO- https://download.red-gate.com/maven/release/org/flywaydb/enterprise/flyway-commandline/9.19.4/flyway-commandline-9.19.4-linux-x64.tar.gz | tar -xvz
+FROM path AS pgmigrate
+
+RUN add-apt-repository -y ppa:longsleep/golang-backports
+RUN apt update
+
+RUN apt install golang -y
+RUN go install github.com/peterldowns/pgmigrate/cmd/pgmigrate@latest
 
 # stage 4
-FROM flyway AS db
+FROM pgmigrate as bash
+RUN ln -fs /usr/bin/bash /bin/sh
+
+# stage 5
+FROM bash AS db
 WORKDIR /src/helia
